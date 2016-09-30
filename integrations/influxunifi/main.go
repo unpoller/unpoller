@@ -17,7 +17,7 @@ import (
 )
 
 var (
-	API   *http.Client
+	unifi *http.Client
 	stats influx.Client
 )
 
@@ -28,9 +28,10 @@ type Response struct {
 	}
 }
 
+// DpiStat is for deep packet inspection stats
 type DpiStat struct {
 	App       int64
-	Cat       int
+	Cat       int64
 	RxBytes   int64
 	RxPackets int64
 	TxBytes   int64
@@ -49,9 +50,9 @@ type Client struct {
 	AssocTime           int64  `json:"assoc_time"`
 	Authorized          bool
 	Bssid               string
-	BytesR              int `json:"bytes-r"`
-	Ccq                 int
-	Channel             int
+	BytesR              int64 `json:"bytes-r"`
+	Ccq                 int64
+	Channel             int64
 	DpiStats            []DpiStat `json:"dpi_stats"`
 	DpiStatsLastUpdated int64     `json:"dpi_stats_last_updated"`
 	Essid               string
@@ -69,28 +70,28 @@ type Client struct {
 	Name                string
 	Network             string
 	NetworkID           string `json:"network_id"`
-	Noise               int
+	Noise               int64
 	Oui                 string
 	PowersaveEnabled    bool `json:"powersave_enabled"`
 	QosPolicyApplied    bool `json:"qos_policy_applied"`
 	Radio               string
 	RadioProto          string `json:"radio_proto"`
-	RoamCount           int    `json:"roam_count"`
-	Rssi                int
+	RoamCount           int64  `json:"roam_count"`
+	Rssi                int64
 	RxBytes             int64 `json:"rx_bytes"`
-	RxBytesR            int   `json:"rx_bytes-r"`
+	RxBytesR            int64 `json:"rx_bytes-r"`
 	RxPackets           int64 `json:"rx_packets"`
 	RxRate              int64 `json:"rx_rate"`
-	Signal              int
+	Signal              int64
 	SiteID              string `json:"site_id"`
 	TxBytes             int64  `json:"tx_bytes"`
-	TxBytesR            int    `json:"tx_bytes-r"`
+	TxBytesR            int64  `json:"tx_bytes-r"`
 	TxPackets           int64  `json:"tx_packets"`
-	TxPower             int    `json:"tx_power"`
+	TxPower             int64  `json:"tx_power"`
 	TxRate              int64  `json:"tx_rate"`
 	Uptime              int64
 	UserID              string `json:"user_id"`
-	Vlan                int
+	Vlan                int64
 }
 
 func (c Client) Point() *influx.Point {
@@ -154,7 +155,7 @@ func main() {
 		panic(err)
 	}
 
-	API, err = login()
+	unifi, err = login()
 	if err != nil {
 		panic(err)
 	}
@@ -200,7 +201,7 @@ func fetch() ([]Client, error) {
 	url := fmt.Sprintf(format, os.Getenv("UNIFI_ADDR"), os.Getenv("UNIFI_PORT"))
 	req, err := http.NewRequest("GET", url, nil)
 	req.Header.Add("Accept", "application/json")
-	resp, err := API.Do(req)
+	resp, err := unifi.Do(req)
 	if err != nil {
 		return nil, err
 	}
