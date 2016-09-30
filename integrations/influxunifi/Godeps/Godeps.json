@@ -1,0 +1,24 @@
+{
+	"ImportPath": "github.com/dewski/unifi",
+	"GoVersion": "go1.7",
+	"Packages": [
+		"./..."
+	],
+	"Deps": [
+		{
+			"ImportPath": "github.com/influxdata/influxdb/client/v2",
+			"Comment": "v0.10.0-565-ga4b00ae",
+			"Rev": "a4b00aeeba630bda96db70bd9fc5eb2d4c0b7580"
+		},
+		{
+			"ImportPath": "github.com/influxdata/influxdb/models",
+			"Comment": "v0.10.0-565-ga4b00ae",
+			"Rev": "a4b00aeeba630bda96db70bd9fc5eb2d4c0b7580"
+		},
+		{
+			"ImportPath": "github.com/influxdata/influxdb/pkg/escape",
+			"Comment": "v0.10.0-565-ga4b00ae",
+			"Rev": "a4b00aeeba630bda96db70bd9fc5eb2d4c0b7580"
+		}
+	]
+}
