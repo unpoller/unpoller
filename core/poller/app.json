@@ -4,8 +4,8 @@
   "keywords": [
     "go",
   ],
-  "image": "heroku/go:1.7",
+  "image": "heroku/go:1.6",
   "mount_dir": "src/github.com/dewski/unifi",
-  "website": "http://github.com/dewski/unifi",
-  "repository": "http://github.com/dewski/unifi"
+  "website": "https://github.com/dewski/unifi",
+  "repository": "https://github.com/dewski/unifi"
 }
