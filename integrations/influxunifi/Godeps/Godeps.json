@@ -1,6 +1,6 @@
 {
 	"ImportPath": "github.com/dewski/unifi",
-	"GoVersion": "go1.7",
+	"GoVersion": "go1.6",
 	"Packages": [
 		"./..."
 	],
