@@ -15,11 +15,6 @@ import (
 	influx "github.com/influxdata/influxdb/client/v2"
 )
 
-var (
-	unifi *http.Client
-	stats influx.Client
-)
-
 // Response marshalls the payload from the controller.
 type Response struct {
 	Data []Client
@@ -154,20 +149,19 @@ func (c Client) Point() *influx.Point {
 }
 
 func main() {
-	var err error
 	tickRate := os.Getenv("TICK_RATE")
 	interval, err := time.ParseDuration(tickRate)
 	if err != nil {
 		panic(err)
 	}
 
-	unifi, err = login()
+	unifi, err := login()
 	if err != nil {
 		panic(err)
 	}
-
+	log.Println("Successfully authenticated to Unifi Controller!")
 	database := os.Getenv("INFLUXDB_DATABASE")
-	stats, err = influx.NewHTTPClient(influx.HTTPConfig{
+	stats, err := influx.NewHTTPClient(influx.HTTPConfig{
 		Addr:     os.Getenv("INFLUXDB_ADDR"),
 		Username: os.Getenv("INFLUXDB_USERNAME"),
 		Password: os.Getenv("INFLUXDB_PASSWORD"),
@@ -176,16 +170,15 @@ func main() {
 		panic(err)
 	}
 
-	log.Printf("Starting to poll Unifi every %+v\n", interval)
+	log.Printf("Polling Unifi Controller, interval: %+v\n", interval)
 	for {
-		devices, err := fetch()
+		devices, err := fetch(unifi)
 		if err != nil {
 			log.Println(err)
 		} else {
 			bp, _ := influx.NewBatchPoints(influx.BatchPointsConfig{
 				Database: database,
 			})
-
 			for _, device := range devices {
 				bp.AddPoint(device.Point())
 			}
@@ -194,14 +187,14 @@ func main() {
 				log.Println(err)
 			}
 
-			log.Println("Logged client state...")
+			log.Printf("Logged client state. Devices: %v", len(devices))
 		}
 
 		time.Sleep(interval)
 	}
 }
 
-func fetch() ([]Client, error) {
+func fetch(unifi *http.Client) ([]Client, error) {
 	url := "https://" + os.Getenv("UNIFI_ADDR") + ":" + os.Getenv("UNIFI_PORT") + "/api/s/default/stat/sta"
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
@@ -215,7 +208,7 @@ func fetch() ([]Client, error) {
 
 	defer func() {
 		if err = resp.Body.Close(); err != nil {
-			log.Println("Error closing http respond body:", err)
+			log.Println("Closing HTTP response:", err)
 		}
 	}()
 	body, _ := ioutil.ReadAll(resp.Body)
