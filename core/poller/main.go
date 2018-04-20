@@ -5,7 +5,6 @@ import (
 	"crypto/tls"
 	"encoding/json"
 	"errors"
-	"fmt"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -21,6 +20,7 @@ var (
 	stats influx.Client
 )
 
+// Response marshalls the payload from the controller.
 type Response struct {
 	Data []Client
 	Meta struct {
@@ -28,7 +28,7 @@ type Response struct {
 	}
 }
 
-// DpiStat is for deep packet inspection stats
+// DpiStat is for deep packet inspection stats.
 type DpiStat struct {
 	App       int64
 	Cat       int64
@@ -38,6 +38,7 @@ type DpiStat struct {
 	TxPackets int64
 }
 
+// Client defines all the data a connected-network client contains.
 type Client struct {
 	ID                  string `json:"_id"`
 	IsGuestByUAP        bool   `json:"_is_guest_by_uap"`
@@ -58,10 +59,10 @@ type Client struct {
 	Essid               string
 	FirstSeen           int64  `json:"first_seen"`
 	FixedIP             string `json:"fixed_ip"`
-	Hostname            string
+	Hostname            string `json:"hostname"`
 	GwMac               string `json:"gw_mac"`
 	IdleTime            int64  `json:"idle_time"`
-	Ip                  string
+	IP                  string
 	IsGuest             bool  `json:"is_guest"`
 	IsWired             bool  `json:"is_wired"`
 	LastSeen            int64 `json:"last_seen"`
@@ -75,6 +76,7 @@ type Client struct {
 	PowersaveEnabled    bool `json:"powersave_enabled"`
 	QosPolicyApplied    bool `json:"qos_policy_applied"`
 	Radio               string
+	RadioName           string `json:"radio_name"`
 	RadioProto          string `json:"radio_proto"`
 	RoamCount           int64  `json:"roam_count"`
 	Rssi                int64
@@ -94,16 +96,19 @@ type Client struct {
 	Vlan                int64
 }
 
+// Point generates a datapoint for InfluxDB.
 func (c Client) Point() *influx.Point {
 	tags := map[string]string{
-		"mac":     c.Mac,
-		"user_id": c.UserID,
-		"site_id": c.SiteID,
-		"ip":      c.Ip,
-		"essid":   c.Essid,
-		"network": c.Network,
-		"ap_mac":  c.ApMac,
-		"name":    c.Name,
+		"mac":        c.Mac,
+		"user_id":    c.UserID,
+		"site_id":    c.SiteID,
+		"ip":         c.IP,
+		"essid":      c.Essid,
+		"network":    c.Network,
+		"ap_mac":     c.ApMac,
+		"name":       c.Name,
+		"hostname":   c.Hostname,
+		"radio_name": c.RadioName,
 	}
 	fields := map[string]interface{}{
 		"is_guest_by_uap":        c.IsGuestByUAP,
@@ -141,6 +146,7 @@ func (c Client) Point() *influx.Point {
 
 	pt, err := influx.NewPoint("client_state", tags, fields, time.Now())
 	if err != nil {
+		log.Println("Error creating point:", err)
 		return nil
 	}
 
@@ -184,8 +190,7 @@ func main() {
 				bp.AddPoint(device.Point())
 			}
 
-			err = stats.Write(bp)
-			if err != nil {
+			if err = stats.Write(bp); err != nil {
 				log.Println(err)
 			}
 
@@ -197,16 +202,22 @@ func main() {
 }
 
 func fetch() ([]Client, error) {
-	format := "https://%s:%s/api/s/default/stat/sta"
-	url := fmt.Sprintf(format, os.Getenv("UNIFI_ADDR"), os.Getenv("UNIFI_PORT"))
+	url := "https://" + os.Getenv("UNIFI_ADDR") + ":" + os.Getenv("UNIFI_PORT") + "/api/s/default/stat/sta"
 	req, err := http.NewRequest("GET", url, nil)
+	if err != nil {
+		return nil, err
+	}
 	req.Header.Add("Accept", "application/json")
 	resp, err := unifi.Do(req)
 	if err != nil {
 		return nil, err
 	}
 
-	defer resp.Body.Close()
+	defer func() {
+		if err = resp.Body.Close(); err != nil {
+			log.Println("Error closing http respond body:", err)
+		}
+	}()
 	body, _ := ioutil.ReadAll(resp.Body)
 	response := &Response{}
 	err = json.Unmarshal(body, response)
@@ -218,7 +229,7 @@ func fetch() ([]Client, error) {
 }
 
 func login() (*http.Client, error) {
-	url := fmt.Sprintf("https://%s:%s/api/login", os.Getenv("UNIFI_ADDR"), os.Getenv("UNIFI_PORT"))
+	url := "https://" + os.Getenv("UNIFI_ADDR") + ":" + os.Getenv("UNIFI_PORT") + "/api/login"
 	auth := map[string]string{
 		"username": os.Getenv("UNIFI_USERNAME"),
 		"password": os.Getenv("UNIFI_PASSWORD"),
@@ -245,7 +256,7 @@ func login() (*http.Client, error) {
 	}
 
 	if resp.StatusCode != http.StatusOK {
-		return nil, errors.New("Not a successful request")
+		return nil, errors.New("Error Authenticating with Controller")
 	}
 
 	return client, nil
