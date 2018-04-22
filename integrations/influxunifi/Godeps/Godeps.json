@@ -1,24 +1,30 @@
 {
-	"ImportPath": "github.com/dewski/unifi",
-	"GoVersion": "go1.6",
+	"ImportPath": "github.com/davidnewhall/unifi",
+	"GoVersion": "go1.10",
+	"GodepVersion": "v79",
 	"Packages": [
 		"./..."
 	],
 	"Deps": [
 		{
 			"ImportPath": "github.com/influxdata/influxdb/client/v2",
-			"Comment": "v0.10.0-565-ga4b00ae",
-			"Rev": "a4b00aeeba630bda96db70bd9fc5eb2d4c0b7580"
+			"Comment": "v1.5.0-149-g14dcc5d",
+			"Rev": "14dcc5d6e7a6b15e17aba7b104b8ad0ca6c91ad2"
 		},
 		{
 			"ImportPath": "github.com/influxdata/influxdb/models",
-			"Comment": "v0.10.0-565-ga4b00ae",
-			"Rev": "a4b00aeeba630bda96db70bd9fc5eb2d4c0b7580"
+			"Comment": "v1.5.0-149-g14dcc5d",
+			"Rev": "14dcc5d6e7a6b15e17aba7b104b8ad0ca6c91ad2"
 		},
 		{
 			"ImportPath": "github.com/influxdata/influxdb/pkg/escape",
-			"Comment": "v0.10.0-565-ga4b00ae",
-			"Rev": "a4b00aeeba630bda96db70bd9fc5eb2d4c0b7580"
+			"Comment": "v1.5.0-149-g14dcc5d",
+			"Rev": "14dcc5d6e7a6b15e17aba7b104b8ad0ca6c91ad2"
+		},
+		{
+			"ImportPath": "github.com/pkg/errors",
+			"Comment": "v0.8.0-6-g2b3a18b",
+			"Rev": "2b3a18b5f0fb6b4f9190549597d3f962c02bc5eb"
 		}
 	]
 }

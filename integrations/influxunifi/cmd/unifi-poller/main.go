@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"crypto/tls"
 	"encoding/json"
-	"errors"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -13,6 +12,7 @@ import (
 	"time"
 
 	influx "github.com/influxdata/influxdb/client/v2"
+	"github.com/pkg/errors"
 )
 
 func main() {
@@ -20,16 +20,17 @@ func main() {
 	if err := config.AuthController(); err != nil {
 		log.Fatal(err)
 	}
-	log.Println("Successfully authenticated to Unifi Controller!")
+	log.Println("Authenticated to Unifi Controller", config.UnifiBase, "as user", config.UnifiUser)
 
 	infdb, err := influx.NewHTTPClient(influx.HTTPConfig{
-		Addr:     config.InfluxAddr,
+		Addr:     config.InfluxURL,
 		Username: config.InfluxUser,
 		Password: config.InfluxPass,
 	})
 	if err != nil {
 		log.Fatal(err)
 	}
+	log.Println("Logging Unifi Metrics to InfluXDB @", config.InfluxURL, "as user", config.InfluxUser)
 	log.Println("Polling Unifi Controller, interval:", config.Interval)
 	config.PollUnifiController(infdb)
 }
@@ -37,21 +38,21 @@ func main() {
 // GetConfig parses and returns our configuration data.
 func GetConfig() Config {
 	// TODO: A real config file.
-	var err error
-	config := Config{
-		InfluxAddr: os.Getenv("INFLUXDB_ADDR"),
+	interval, err := time.ParseDuration(os.Getenv("INTERVAL"))
+	if err != nil {
+		log.Println("Invalid Interval, defaulting to", defaultInterval)
+		interval = time.Duration(defaultInterval)
+	}
+	return Config{
+		InfluxURL:  os.Getenv("INFLUXDB_URL"),
 		InfluxUser: os.Getenv("INFLUXDB_USERNAME"),
 		InfluxPass: os.Getenv("INFLUXDB_PASSWORD"),
 		InfluxDB:   os.Getenv("INFLUXDB_DATABASE"),
 		UnifiUser:  os.Getenv("UNIFI_USERNAME"),
 		UnifiPass:  os.Getenv("UNIFI_PASSWORD"),
 		UnifiBase:  "https://" + os.Getenv("UNIFI_ADDR") + ":" + os.Getenv("UNIFI_PORT"),
+		Interval:   interval,
 	}
-	if config.Interval, err = time.ParseDuration(os.Getenv("INTERVAL")); err != nil {
-		log.Println("Invalid Interval, defaulting to 15 seconds.")
-		config.Interval = time.Duration(time.Second * 15)
-	}
-	return config
 }
 
 // AuthController creates a http.Client with authenticated cookies.
@@ -60,18 +61,19 @@ func (c *Config) AuthController() error {
 	json := `{"username": "` + c.UnifiUser + `","password": "` + c.UnifiPass + `"}`
 	jar, err := cookiejar.New(nil)
 	if err != nil {
-		return err
+		return errors.Wrap(err, "cookiejar.New(nil)")
 	}
 	c.uniClient = &http.Client{
 		Transport: &http.Transport{TLSClientConfig: &tls.Config{InsecureSkipVerify: true}},
 		Jar:       jar,
 	}
 	if req, err := c.uniRequest(LoginPath, json); err != nil {
-		return err
+		return errors.Wrap(err, "c.uniRequest(LoginPath, json)")
 	} else if resp, err := c.uniClient.Do(req); err != nil {
-		return err
+		return errors.Wrap(err, "c.uniClient.Do(req)")
 	} else if resp.StatusCode != http.StatusOK {
-		return errors.New("Error Authenticating with Unifi Controller")
+		return errors.Errorf("authentication failed (%v): %v (status: %v/%v)",
+			c.UnifiUser, c.UnifiBase+LoginPath, resp.StatusCode, resp.Status)
 	}
 	return nil
 }
@@ -94,7 +96,11 @@ func (c *Config) PollUnifiController(infdb influx.Client) {
 		}
 
 		for _, client := range clients {
-			bp.AddPoint(client.Point())
+			if pt, errr := client.Point(); errr != nil {
+				log.Println("client.Point():", errr)
+			} else {
+				bp.AddPoint(pt)
+			}
 		}
 		if err = infdb.Write(bp); err != nil {
 			log.Println("infdb.Write(bp):", err)

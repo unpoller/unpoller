@@ -16,12 +16,20 @@ const (
 	NetworkPath = "/api/s/default/rest/networkconf"
 	// UserGroupPath contains usergroup configurations.
 	UserGroupPath = "/api/s/default/rest/usergroup"
+	// App defaults in case they're missing from the config.
+	defaultInterval = 30 * time.Second
+	defaultInfxDb   = "unifi"
+	defaultInfxUser = "unifi"
+	defaultInfxPass = "unifi"
+	defaultInfxURL  = "http://127.0.0.1:8086"
+	defaultUnifUser = "influx"
+	defaultUnifURL  = "https://127.0.0.1:8443"
 )
 
 // Config represents the data needed to poll a controller and report to influxdb.
 type Config struct {
 	Interval   time.Duration `json:"interval",toml:"interval",yaml:"interval"`
-	InfluxAddr string        `json:"influx_addr",toml:"influx_addr",yaml:"influx_addr"`
+	InfluxURL  string        `json:"influx_url",toml:"influx_addr",yaml:"influx_addr"`
 	InfluxUser string        `json:"influx_user",toml:"influx_user",yaml:"influx_user"`
 	InfluxPass string        `json:"influx_pass",toml:"influx_pass",yaml:"influx_pass"`
 	InfluxDB   string        `json:"influx_db",toml:"influx_db",yaml:"influx_db"`
