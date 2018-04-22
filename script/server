@@ -1,9 +1,0 @@
-#!/bin/bash
-set -e
-
-# Load the environment variables needed for testing
-export $(cat .env | grep -v ^# | xargs)
-
-go clean
-go build -o unifi
-./unifi
