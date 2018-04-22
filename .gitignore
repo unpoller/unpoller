@@ -1,4 +1,4 @@
-.env
+/up.conf
 /unifi-poller
 /*.1.gz
 /*.1
