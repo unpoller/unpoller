@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"crypto/tls"
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -12,15 +13,36 @@ import (
 	"time"
 
 	influx "github.com/influxdata/influxdb/client/v2"
+	"github.com/naoina/toml"
+	flg "github.com/ogier/pflag"
 	"github.com/pkg/errors"
 )
 
 func main() {
-	config := GetConfig()
+	flg.Usage = func() {
+		fmt.Println("Usage: unifi-poller [--config=filepath] [--debug] [--version]")
+		flg.PrintDefaults()
+	}
+	configFile := flg.StringP("config", "c", defaultConfFile, "Poller Config File (TOML Format)")
+	debug := flg.BoolP("debug", "D", false, "Turn on the Spam (default false)")
+	version := flg.BoolP("version", "v", false, "Print the version and exit.")
+	flg.Parse()
+	if *version {
+		fmt.Println("unifi-poller version:", Version)
+		os.Exit(0) // don't run anything else.
+	}
+	if log.SetFlags(0); *debug {
+		log.SetFlags(log.Lshortfile | log.Lmicroseconds | log.Ldate)
+	}
+	config, errc := GetConfig(*configFile)
+	if errc != nil {
+		flg.Usage()
+		log.Fatalln("Config Error:", errc)
+	}
 	if err := config.AuthController(); err != nil {
 		log.Fatal(err)
 	}
-	log.Println("Authenticated to Unifi Controller", config.UnifiBase, "as user", config.UnifiUser)
+	log.Println("Authenticated to Unifi Controller @", config.UnifiBase, "as user", config.UnifiUser)
 
 	infdb, err := influx.NewHTTPClient(influx.HTTPConfig{
 		Addr:     config.InfluxURL,
@@ -31,28 +53,30 @@ func main() {
 		log.Fatal(err)
 	}
 	log.Println("Logging Unifi Metrics to InfluXDB @", config.InfluxURL, "as user", config.InfluxUser)
-	log.Println("Polling Unifi Controller, interval:", config.Interval)
+	log.Println("Polling Unifi Controller, interval:", config.Interval.value)
 	config.PollUnifiController(infdb)
 }
 
 // GetConfig parses and returns our configuration data.
-func GetConfig() Config {
-	// TODO: A real config file.
-	interval, err := time.ParseDuration(os.Getenv("INTERVAL"))
-	if err != nil {
-		log.Println("Invalid Interval, defaulting to", defaultInterval)
-		interval = time.Duration(defaultInterval)
-	}
-	return Config{
-		InfluxURL:  os.Getenv("INFLUXDB_URL"),
-		InfluxUser: os.Getenv("INFLUXDB_USERNAME"),
-		InfluxPass: os.Getenv("INFLUXDB_PASSWORD"),
-		InfluxDB:   os.Getenv("INFLUXDB_DATABASE"),
-		UnifiUser:  os.Getenv("UNIFI_USERNAME"),
+func GetConfig(configFile string) (Config, error) {
+	// Preload our defaults.
+	config := Config{
+		InfluxURL:  defaultInfxURL,
+		InfluxUser: defaultInfxUser,
+		InfluxPass: defaultInfxPass,
+		InfluxDB:   defaultInfxDb,
+		UnifiUser:  defaultUnifUser,
 		UnifiPass:  os.Getenv("UNIFI_PASSWORD"),
-		UnifiBase:  "https://" + os.Getenv("UNIFI_ADDR") + ":" + os.Getenv("UNIFI_PORT"),
-		Interval:   interval,
+		UnifiBase:  defaultUnifURL,
+		Interval:   Dur{value: defaultInterval},
 	}
+	if buf, err := ioutil.ReadFile(configFile); err != nil {
+		return config, err
+		// This is where the defaults in the config variable are overwritten.
+	} else if err := toml.Unmarshal(buf, &config); err != nil {
+		return config, errors.Wrap(err, "invalid config")
+	}
+	return config, nil
 }
 
 // AuthController creates a http.Client with authenticated cookies.
@@ -80,7 +104,7 @@ func (c *Config) AuthController() error {
 
 // PollUnifiController runs forever, polling and pushing.
 func (c *Config) PollUnifiController(infdb influx.Client) {
-	ticker := time.NewTicker(c.Interval)
+	ticker := time.NewTicker(c.Interval.value)
 	for range ticker.C {
 		clients, err := c.GetUnifiClients()
 		if err != nil {
