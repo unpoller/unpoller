@@ -1,1 +1,5 @@
 .env
+/unifi-poller
+/*.1.gz
+/*.1
+/vendor

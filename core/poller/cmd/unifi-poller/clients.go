@@ -1,7 +1,6 @@
 package main
 
 import (
-	"log"
 	"strconv"
 	"time"
 
@@ -46,6 +45,9 @@ type Client struct {
 	BytesR              int64     `json:"bytes-r"`
 	Ccq                 int64     `json:"ccq"`
 	Channel             int       `json:"channel"`
+	DevCat              int       `json:"dev_cat"`
+	DevFamily           int       `json:"dev_family"`
+	DevID               int       `json:"dev_id"`
 	DpiStats            []DpiStat `json:"dpi_stats"`
 	DpiStatsLastUpdated int64     `json:"dpi_stats_last_updated"`
 	Essid               string    `json:"essid"`
@@ -67,6 +69,8 @@ type Client struct {
 	Noise               int64     `json:"noise"`
 	Note                string    `json:"note"`
 	Noted               bool      `json:"noted"`
+	OsClass             int       `json:"os_class"`
+	OsName              int       `json:"os_name"`
 	Oui                 string    `json:"oui"`
 	PowersaveEnabled    bool      `json:"powersave_enabled"`
 	QosPolicyApplied    bool      `json:"qos_policy_applied"`
@@ -94,10 +98,16 @@ type Client struct {
 	UserGroupID         string    `json:"usergroup_id"`
 	UseFixedIP          bool      `json:"use_fixedip"`
 	Vlan                int       `json:"vlan"`
+	WiredRxBytes        int64     `json:"wired-rx_bytes"`
+	WiredRxBytesR       int64     `json:"wired-rx_bytes-r"`
+	WiredRxPackets      int64     `json:"wired-rx_packets"`
+	WiredTxBytes        int64     `json:"wired-tx_bytes"`
+	WiredTxBytesR       int64     `json:"wired-tx_bytes-r"`
+	WiredTxPackets      int64     `json:"wired-tx_packets"`
 }
 
 // Point generates a client's datapoint for InfluxDB.
-func (c Client) Point() *influx.Point {
+func (c Client) Point() (*influx.Point, error) {
 	if c.Name == "" && c.Hostname != "" {
 		c.Name = c.Hostname
 	} else if c.Hostname == "" && c.Name != "" {
@@ -111,23 +121,23 @@ func (c Client) Point() *influx.Point {
 		"mac":                c.Mac,
 		"user_id":            c.UserID,
 		"site_id":            c.SiteID,
-		"ip":                 c.IP,
-		"fixed_ip":           c.FixedIP,
-		"essid":              c.Essid,
-		"bssid":              c.Bssid,
-		"network":            c.Network,
 		"network_id":         c.NetworkID,
 		"usergroup_id":       c.UserGroupID,
 		"ap_mac":             c.ApMac,
 		"gw_mac":             c.GwMac,
 		"sw_mac":             c.SwMac,
-		"sw_port":            strconv.Itoa(c.SwPort),
 		"oui":                c.Oui,
-		"name":               c.Name,
-		"hostname":           c.Hostname,
 		"radio_name":         c.RadioName,
 		"radio":              c.Radio,
 		"radio_proto":        c.RadioProto,
+		"name":               c.Name,
+		"fixed_ip":           c.FixedIP,
+		"sw_port":            strconv.Itoa(c.SwPort),
+		"os_class":           strconv.Itoa(c.OsClass),
+		"os_name":            strconv.Itoa(c.OsName),
+		"dev_cat":            strconv.Itoa(c.DevCat),
+		"dev_id":             strconv.Itoa(c.DevID),
+		"dev_family":         strconv.Itoa(c.DevFamily),
 		"authorized":         strconv.FormatBool(c.Authorized),
 		"is_11r":             strconv.FormatBool(c.Is11R),
 		"is_wired":           strconv.FormatBool(c.IsWired),
@@ -143,6 +153,10 @@ func (c Client) Point() *influx.Point {
 		"vlan":               strconv.Itoa(c.Vlan),
 	}
 	fields := map[string]interface{}{
+		"ip":                     c.IP,
+		"essid":                  c.Essid,
+		"bssid":                  c.Bssid,
+		"hostname":               c.Hostname,
 		"dpi_stats_last_updated": c.DpiStatsLastUpdated,
 		"last_seen_by_uap":       c.LastSeenByUAP,
 		"last_seen_by_ugw":       c.LastSeenByUGW,
@@ -157,6 +171,7 @@ func (c Client) Point() *influx.Point {
 		"idle_time":              c.IdleTime,
 		"last_seen":              c.LastSeen,
 		"latest_assoc_time":      c.LatestAssocTime,
+		"network":                c.Network,
 		"noise":                  c.Noise,
 		"note":                   c.Note,
 		"roam_count":             c.RoamCount,
@@ -172,12 +187,13 @@ func (c Client) Point() *influx.Point {
 		"tx_power":               c.TxPower,
 		"tx_rate":                c.TxRate,
 		"uptime":                 c.Uptime,
+		"wired-rx_bytes":         c.WiredRxBytes,
+		"wired-rx_bytes-r":       c.WiredRxBytesR,
+		"wired-rx_packets":       c.WiredRxPackets,
+		"wired-tx_bytes":         c.WiredTxBytes,
+		"wired-tx_bytes-r":       c.WiredTxBytesR,
+		"wired-tx_packets":       c.WiredTxPackets,
 	}
 
-	pt, err := influx.NewPoint("clients", tags, fields, time.Now())
-	if err != nil {
-		log.Println("Error creating point:", err)
-		return nil
-	}
-	return pt
+	return influx.NewPoint("clients", tags, fields, time.Now())
 }
