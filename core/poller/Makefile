@@ -1,5 +1,5 @@
 PACKAGES=`find ./cmd -mindepth 1 -maxdepth 1 -type d`
-LIBRARYS=
+LIBRARYS=./unidev
 
 all: clean man build
 
