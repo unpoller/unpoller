@@ -1,6 +1,9 @@
 package main
 
 import (
+	"encoding/json"
+	"io/ioutil"
+	"log"
 	"strconv"
 	"time"
 
@@ -104,6 +107,23 @@ type Client struct {
 	WiredTxBytes        int64     `json:"wired-tx_bytes"`
 	WiredTxBytesR       int64     `json:"wired-tx_bytes-r"`
 	WiredTxPackets      int64     `json:"wired-tx_packets"`
+}
+
+// GetUnifiClients returns a response full of clients' data from the Unifi Controller.
+func (c *Config) GetUnifiClients() ([]Client, error) {
+	response := &ClientResponse{}
+	if req, err := c.uniRequest(ClientPath, ""); err != nil {
+		return nil, err
+	} else if resp, err := c.uniClient.Do(req); err != nil {
+		return nil, err
+	} else if body, err := ioutil.ReadAll(resp.Body); err != nil {
+		return nil, err
+	} else if err = json.Unmarshal(body, response); err != nil {
+		return nil, err
+	} else if err = resp.Body.Close(); err != nil {
+		log.Println("resp.Body.Close():", err) // Not fatal? Just log it.
+	}
+	return response.Clients, nil
 }
 
 // Point generates a client's datapoint for InfluxDB.
