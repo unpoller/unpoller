@@ -1,15 +1,13 @@
 package main
 
 import (
-	"bytes"
-	"crypto/tls"
 	"fmt"
 	"io/ioutil"
 	"log"
-	"net/http"
-	"net/http/cookiejar"
 	"os"
 	"time"
+
+	"github.com/davidnewhall/unifi-poller/unidev"
 
 	influx "github.com/influxdata/influxdb/client/v2"
 	"github.com/naoina/toml"
@@ -23,22 +21,25 @@ func main() {
 		flg.PrintDefaults()
 	}
 	configFile := flg.StringP("config", "c", defaultConfFile, "Poller Config File (TOML Format)")
-	debug := flg.BoolP("debug", "D", false, "Turn on the Spam (default false)")
+	flg.BoolVarP(&Debug, "debug", "D", false, "Turn on the Spam (default false)")
 	version := flg.BoolP("version", "v", false, "Print the version and exit.")
 	flg.Parse()
 	if *version {
 		fmt.Println("unifi-poller version:", Version)
 		os.Exit(0) // don't run anything else.
 	}
-	if log.SetFlags(0); *debug {
+	if log.SetFlags(0); Debug {
 		log.SetFlags(log.Lshortfile | log.Lmicroseconds | log.Ldate)
+		unidev.Debug = true
 	}
-	config, errc := GetConfig(*configFile)
-	if errc != nil {
+	config, err := GetConfig(*configFile)
+	if err != nil {
 		flg.Usage()
-		log.Fatalln("Config Error:", errc)
+		log.Fatalln("Config Error:", err)
 	}
-	if err := config.AuthController(); err != nil {
+	// Create an authenticated session to the Unifi Controller.
+	unifi, err := unidev.AuthController(config.UnifiUser, config.UnifiPass, config.UnifiBase)
+	if err != nil {
 		log.Fatal(err)
 	}
 	log.Println("Authenticated to Unifi Controller @", config.UnifiBase, "as user", config.UnifiUser)
@@ -53,7 +54,7 @@ func main() {
 	}
 	log.Println("Logging Unifi Metrics to InfluXDB @", config.InfluxURL, "as user", config.InfluxUser)
 	log.Println("Polling Unifi Controller, interval:", config.Interval.value)
-	config.PollUnifiController(infdb)
+	config.PollUnifiController(infdb, unifi)
 }
 
 // GetConfig parses and returns our configuration data.
@@ -78,41 +79,18 @@ func GetConfig(configFile string) (Config, error) {
 	return config, nil
 }
 
-// AuthController creates a http.Client with authenticated cookies.
-// Used to make additional, authenticated requests to the APIs.
-func (c *Config) AuthController() error {
-	json := `{"username": "` + c.UnifiUser + `","password": "` + c.UnifiPass + `"}`
-	jar, err := cookiejar.New(nil)
-	if err != nil {
-		return errors.Wrap(err, "cookiejar.New(nil)")
-	}
-	c.uniClient = &http.Client{
-		Transport: &http.Transport{TLSClientConfig: &tls.Config{InsecureSkipVerify: true}},
-		Jar:       jar,
-	}
-	if req, err := c.uniRequest(LoginPath, json); err != nil {
-		return errors.Wrap(err, "c.uniRequest(LoginPath, json)")
-	} else if resp, err := c.uniClient.Do(req); err != nil {
-		return errors.Wrap(err, "c.uniClient.Do(req)")
-	} else if resp.StatusCode != http.StatusOK {
-		return errors.Errorf("authentication failed (%v): %v (status: %v/%v)",
-			c.UnifiUser, c.UnifiBase+LoginPath, resp.StatusCode, resp.Status)
-	}
-	return nil
-}
-
 // PollUnifiController runs forever, polling and pushing.
-func (c *Config) PollUnifiController(infdb influx.Client) {
+func (c *Config) PollUnifiController(infdb influx.Client, unifi *unidev.AuthedReq) {
 	ticker := time.NewTicker(c.Interval.value)
 	for range ticker.C {
-		clients, err := c.GetUnifiClients()
+		clients, err := unifi.GetUnifiClients()
 		if err != nil {
-			log.Println("GetUnifiClients():", err)
+			log.Println("unifi.GetUnifiClients():", err)
 			continue
 		}
-		devices, err := c.GetUnifiDevices()
+		devices, err := unifi.GetUnifiDevices()
 		if err != nil {
-			log.Println("GetUnifiDevices():", err)
+			log.Println("unifi.GetUnifiDevices():", err)
 			continue
 		}
 		bp, err := influx.NewBatchPoints(influx.BatchPointsConfig{
@@ -123,37 +101,18 @@ func (c *Config) PollUnifiController(infdb influx.Client) {
 			continue
 		}
 
-		for _, client := range clients {
-			if pt, errr := client.Point(); errr != nil {
-				log.Println("client.Point():", errr)
+		for _, asset := range append(clients, devices...) {
+			if pt, errr := asset.Point(); errr != nil {
+				log.Println("asset.Point():", errr)
 			} else {
 				bp.AddPoint(pt)
 			}
 		}
-		for _, device := range devices {
-			if pt, errr := device.Point(); errr != nil {
-				log.Println("device.Point():", errr)
-			} else {
-				bp.AddPoint(pt)
-			}
-		}
+
 		if err = infdb.Write(bp); err != nil {
 			log.Println("infdb.Write(bp):", err)
 			continue
 		}
 		log.Println("Logged client state. Clients:", len(clients), "- Devices:", len(devices))
 	}
-}
-
-// uniRequest is a small helper function that adds an Accept header.
-func (c *Config) uniRequest(url string, params string) (req *http.Request, err error) {
-	if params != "" {
-		req, err = http.NewRequest("POST", c.UnifiBase+url, bytes.NewBufferString(params))
-	} else {
-		req, err = http.NewRequest("GET", c.UnifiBase+url, nil)
-	}
-	if err == nil {
-		req.Header.Add("Accept", "application/json")
-	}
-	return
 }
