@@ -3,7 +3,6 @@ package main
 import (
 	"bytes"
 	"crypto/tls"
-	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"log"
@@ -108,7 +107,12 @@ func (c *Config) PollUnifiController(infdb influx.Client) {
 	for range ticker.C {
 		clients, err := c.GetUnifiClients()
 		if err != nil {
-			log.Println("GetUnifiClients(unifi):", err)
+			log.Println("GetUnifiClients():", err)
+			continue
+		}
+		devices, err := c.GetUnifiDevices()
+		if err != nil {
+			log.Println("GetUnifiDevices():", err)
 			continue
 		}
 		bp, err := influx.NewBatchPoints(influx.BatchPointsConfig{
@@ -126,29 +130,19 @@ func (c *Config) PollUnifiController(infdb influx.Client) {
 				bp.AddPoint(pt)
 			}
 		}
+		for _, device := range devices {
+			if pt, errr := device.Point(); errr != nil {
+				log.Println("device.Point():", errr)
+			} else {
+				bp.AddPoint(pt)
+			}
+		}
 		if err = infdb.Write(bp); err != nil {
 			log.Println("infdb.Write(bp):", err)
 			continue
 		}
-		log.Println("Logged client state. Clients:", len(clients))
+		log.Println("Logged client state. Clients:", len(clients), "- Devices:", len(devices))
 	}
-}
-
-// GetUnifiClients returns a response full of clients' data from the Unifi Controller.
-func (c *Config) GetUnifiClients() ([]Client, error) {
-	response := &ClientResponse{}
-	if req, err := c.uniRequest(ClientPath, ""); err != nil {
-		return nil, err
-	} else if resp, err := c.uniClient.Do(req); err != nil {
-		return nil, err
-	} else if body, err := ioutil.ReadAll(resp.Body); err != nil {
-		return nil, err
-	} else if err = json.Unmarshal(body, response); err != nil {
-		return nil, err
-	} else if err = resp.Body.Close(); err != nil {
-		log.Println("resp.Body.Close():", err) // Not fatal? Just log it.
-	}
-	return response.Clients, nil
 }
 
 // uniRequest is a small helper function that adds an Accept header.
