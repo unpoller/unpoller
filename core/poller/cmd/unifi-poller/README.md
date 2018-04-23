@@ -27,8 +27,8 @@ unifi-poller(1) -- Utility to poll Unifi Metrics and drop them into InfluxDB
 ## GO DURATION
 
 This application uses the Go Time Durations for a polling interval.
-The format is an integer followed by a time unit. You may append multiple time units
-to add them together. Some valid time units are:
+The format is an integer followed by a time unit. You may append
+multiple time units to add them together. Some valid time units are:
 
      `us` (microsecond)
      `ns` (nanosecond)
