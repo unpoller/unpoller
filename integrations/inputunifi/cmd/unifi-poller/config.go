@@ -1,24 +1,14 @@
 package main
 
-import (
-	"net/http"
-	"time"
-)
+import "time"
 
 // Version will be injected at build time.
-var Version = "v0.1"
+var (
+	Version = "v0.1"
+	Debug   = false
+)
 
 const (
-	// LoginPath is Unifi Controller Login API Path
-	LoginPath = "/api/login"
-	// ClientPath is Unifi Clients API Path
-	ClientPath = "/api/s/default/stat/sta"
-	// DevicePath is where we get data about Unifi devices.
-	DevicePath = "/api/s/default/stat/device"
-	// NetworkPath contains network-configuration data. Not really graphable.
-	NetworkPath = "/api/s/default/rest/networkconf"
-	// UserGroupPath contains usergroup configurations.
-	UserGroupPath = "/api/s/default/rest/usergroup"
 	// App defaults in case they're missing from the config.
 	defaultConfFile = "/usr/local/etc/unifi-poller/up.conf"
 	defaultInterval = 30 * time.Second
@@ -40,13 +30,10 @@ type Config struct {
 	UnifiUser  string `json:"unifi_user" toml:"unifi_user" xml:"unifi_user" yaml:"unifi_user"`
 	UnifiPass  string `json:"unifi_pass" toml:"unifi_pass" xml:"unifi_pass" yaml:"unifi_pass"`
 	UnifiBase  string `json:"unifi_url" toml:"unifi_url" xml:"unifi_url" yaml:"unifi_url"`
-	uniClient  *http.Client
 }
 
 // Dur is used to UnmarshalTOML into a time.Duration value.
-type Dur struct {
-	value time.Duration
-}
+type Dur struct{ value time.Duration }
 
 // UnmarshalTOML parses a duration type from a config file.
 func (v *Dur) UnmarshalTOML(data []byte) error {
