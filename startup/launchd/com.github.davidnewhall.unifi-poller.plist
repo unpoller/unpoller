@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+    <dict>
+        <key>Label</key>
+        <string>com.github.davidnewhall.unifi-poller</string>
+        <key>ProgramArguments</key>
+        <array>
+            <string>/usr/local/bin/unifi-poller</string>
+            <string>-c</string>
+            <string>/usr/local/etc/unifi-poller/up.conf</string>
+        </array>
+        <key>RunAtLoad</key>
+        <true/>
+        <key>KeepAlive</key>
+        <true/>
+        <key>StandardErrorPath</key>
+        <string>/usr/local/var/log/unifi-poller.log</string>
+        <key>StandardOutPath</key>
+        <string>/usr/local/var/log/unifi-poller.log</string>
+    </dict>
+</plist>
