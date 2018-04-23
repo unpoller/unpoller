@@ -1,5 +1,5 @@
 {
-	"ImportPath": "github.com/davidnewhall/unifi",
+	"ImportPath": "github.com/davidnewhall/unifi-poller",
 	"GoVersion": "go1.10",
 	"GodepVersion": "v79",
 	"Packages": [
