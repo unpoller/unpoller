@@ -15,7 +15,7 @@ const LoginPath = "/api/login"
 // Asset provides a common interface to retreive metrics from a device or client.
 type Asset interface {
 	// Point() means this is useful to influxdb..
-	Point() (*influx.Point, error)
+	Points() ([]*influx.Point, error)
 	// Add more methods to achieve more usefulness from this library.
 }
 
