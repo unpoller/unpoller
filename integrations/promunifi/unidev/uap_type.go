@@ -36,17 +36,17 @@ type UAP struct {
 		Name    string  `json:"name"`
 		NumPort float64 `json:"num_port"`
 	} `json:"ethernet_table"`
-	FwCaps          int    `json:"fw_caps"`
-	GuestNumSta     int    `json:"guest-num_sta"`
-	GuestToken      string `json:"guest_token"`
-	HasEth1         bool   `json:"has_eth1"`
-	HasSpeaker      bool   `json:"has_speaker"`
-	InformIP        string `json:"inform_ip"`
-	InformURL       string `json:"inform_url"`
-	IP              string `json:"ip"`
-	Isolated        bool   `json:"isolated"`
-	KnownCfgversion string `json:"known_cfgversion"`
-	LastSeen        int    `json:"last_seen"`
+	FwCaps          int     `json:"fw_caps"`
+	GuestNumSta     int     `json:"guest-num_sta"`
+	GuestToken      string  `json:"guest_token"`
+	HasEth1         bool    `json:"has_eth1"`
+	HasSpeaker      bool    `json:"has_speaker"`
+	InformIP        string  `json:"inform_ip"`
+	InformURL       string  `json:"inform_url"`
+	IP              string  `json:"ip"`
+	Isolated        bool    `json:"isolated"`
+	KnownCfgversion string  `json:"known_cfgversion"`
+	LastSeen        float64 `json:"last_seen"`
 	LastUplink      struct {
 		UplinkMac        string `json:"uplink_mac"`
 		UplinkRemotePort int    `json:"uplink_remote_port"`
@@ -132,28 +132,28 @@ type UAP struct {
 		Is11Ac             bool    `json:"is_11ac,omitempty"`
 	} `json:"radio_table"`
 	RadioTableStats []struct {
-		AstBeXmit   interface{} `json:"ast_be_xmit"`
-		AstCst      interface{} `json:"ast_cst"`
-		AstTxto     interface{} `json:"ast_txto"`
-		Channel     float64     `json:"channel"`
-		CuSelfRx    float64     `json:"cu_self_rx"`
-		CuSelfTx    float64     `json:"cu_self_tx"`
-		CuTotal     float64     `json:"cu_total"`
-		Extchannel  float64     `json:"extchannel"`
-		Gain        float64     `json:"gain"`
-		GuestNumSta float64     `json:"guest-num_sta"`
-		Name        string      `json:"name"`
-		NumSta      float64     `json:"num_sta"`
-		Radio       string      `json:"radio"`
-		State       string      `json:"state"`
-		TxPackets   float64     `json:"tx_packets"`
-		TxPower     float64     `json:"tx_power"`
-		TxRetries   float64     `json:"tx_retries"`
-		UserNumSta  float64     `json:"user-num_sta"`
+		AstBeXmit   float64 `json:"ast_be_xmit"`
+		AstCst      float64 `json:"ast_cst"`
+		AstTxto     float64 `json:"ast_txto"`
+		Channel     float64 `json:"channel"`
+		CuSelfRx    float64 `json:"cu_self_rx"`
+		CuSelfTx    float64 `json:"cu_self_tx"`
+		CuTotal     float64 `json:"cu_total"`
+		Extchannel  float64 `json:"extchannel"`
+		Gain        float64 `json:"gain"`
+		GuestNumSta float64 `json:"guest-num_sta"`
+		Name        string  `json:"name"`
+		NumSta      float64 `json:"num_sta"`
+		Radio       string  `json:"radio"`
+		State       string  `json:"state"`
+		TxPackets   float64 `json:"tx_packets"`
+		TxPower     float64 `json:"tx_power"`
+		TxRetries   float64 `json:"tx_retries"`
+		UserNumSta  float64 `json:"user-num_sta"`
 	} `json:"radio_table_stats"`
 	Rollupgrade      bool          `json:"rollupgrade"`
-	RxBytes          int           `json:"rx_bytes"`
-	RxBytesD         int           `json:"rx_bytes-d"`
+	RxBytes          float64       `json:"rx_bytes"`
+	RxBytesD         float64       `json:"rx_bytes-d"`
 	ScanRadioTable   []interface{} `json:"scan_radio_table"`
 	Scanning         bool          `json:"scanning"`
 	Serial           string        `json:"serial"`
@@ -257,12 +257,12 @@ type UAP struct {
 	} `json:"stat"`
 	State    int `json:"state"`
 	SysStats struct {
-		Loadavg1  string `json:"loadavg_1"`
-		Loadavg15 string `json:"loadavg_15"`
-		Loadavg5  string `json:"loadavg_5"`
-		MemBuffer int    `json:"mem_buffer"`
-		MemTotal  int    `json:"mem_total"`
-		MemUsed   int    `json:"mem_used"`
+		Loadavg1  string  `json:"loadavg_1"`
+		Loadavg15 string  `json:"loadavg_15"`
+		Loadavg5  string  `json:"loadavg_5"`
+		MemBuffer float64 `json:"mem_buffer"`
+		MemTotal  float64 `json:"mem_total"`
+		MemUsed   float64 `json:"mem_used"`
 	} `json:"sys_stats"`
 	SystemStats struct {
 		CPU    string `json:"cpu"`
@@ -270,7 +270,7 @@ type UAP struct {
 		Uptime string `json:"uptime"`
 	} `json:"system-stats"`
 	TxBytes    float64 `json:"tx_bytes"`
-	TxBytesD   int     `json:"tx_bytes-d"`
+	TxBytesD   float64 `json:"tx_bytes-d"`
 	Type       string  `json:"type"`
 	Upgradable bool    `json:"upgradable"`
 	Uplink     struct {
@@ -284,63 +284,63 @@ type UAP struct {
 		Netmask          string  `json:"netmask"`
 		NumPort          int     `json:"num_port"`
 		RxBytes          float64 `json:"rx_bytes"`
-		RxBytesR         int     `json:"rx_bytes-r"`
-		RxDropped        int     `json:"rx_dropped"`
-		RxErrors         int     `json:"rx_errors"`
-		RxMulticast      int     `json:"rx_multicast"`
-		RxPackets        int     `json:"rx_packets"`
-		Speed            int     `json:"speed"`
+		RxBytesR         float64 `json:"rx_bytes-r"`
+		RxDropped        float64 `json:"rx_dropped"`
+		RxErrors         float64 `json:"rx_errors"`
+		RxMulticast      float64 `json:"rx_multicast"`
+		RxPackets        float64 `json:"rx_packets"`
+		Speed            float64 `json:"speed"`
 		TxBytes          float64 `json:"tx_bytes"`
-		TxBytesR         int     `json:"tx_bytes-r"`
-		TxDropped        int     `json:"tx_dropped"`
-		TxErrors         int     `json:"tx_errors"`
-		TxPackets        int     `json:"tx_packets"`
+		TxBytesR         float64 `json:"tx_bytes-r"`
+		TxDropped        float64 `json:"tx_dropped"`
+		TxErrors         float64 `json:"tx_errors"`
+		TxPackets        float64 `json:"tx_packets"`
 		Type             string  `json:"type"`
 		Up               bool    `json:"up"`
 		UplinkMac        string  `json:"uplink_mac"`
 		UplinkRemotePort int     `json:"uplink_remote_port"`
 	} `json:"uplink"`
 	UplinkTable []interface{} `json:"uplink_table"`
-	Uptime      int           `json:"uptime"`
+	Uptime      float64       `json:"uptime"`
 	UserNumSta  int           `json:"user-num_sta"`
 	VapTable    []struct {
-		ApMac               string      `json:"ap_mac"`
-		Bssid               string      `json:"bssid"`
-		Ccq                 int         `json:"ccq"`
-		Channel             int         `json:"channel"`
-		Essid               string      `json:"essid"`
-		Extchannel          int         `json:"extchannel"`
-		ID                  string      `json:"id"`
-		IsGuest             bool        `json:"is_guest"`
-		IsWep               bool        `json:"is_wep"`
-		MacFilterRejections int         `json:"mac_filter_rejections"`
-		MapID               interface{} `json:"map_id"`
-		Name                string      `json:"name"`
-		NumSta              int         `json:"num_sta"`
-		Radio               string      `json:"radio"`
-		RadioName           string      `json:"radio_name"`
-		RxBytes             int         `json:"rx_bytes"`
-		RxCrypts            int         `json:"rx_crypts"`
-		RxDropped           int         `json:"rx_dropped"`
-		RxErrors            int         `json:"rx_errors"`
-		RxFrags             int         `json:"rx_frags"`
-		RxNwids             int         `json:"rx_nwids"`
-		RxPackets           int         `json:"rx_packets"`
-		SiteID              string      `json:"site_id"`
-		State               string      `json:"state"`
-		T                   string      `json:"t"`
-		TxBytes             int         `json:"tx_bytes"`
-		TxDropped           int         `json:"tx_dropped"`
-		TxErrors            int         `json:"tx_errors"`
-		TxLatencyAvg        float64     `json:"tx_latency_avg"`
-		TxLatencyMax        float64     `json:"tx_latency_max"`
-		TxLatencyMin        float64     `json:"tx_latency_min"`
-		TxPackets           int         `json:"tx_packets"`
-		TxPower             int         `json:"tx_power"`
-		TxRetries           int         `json:"tx_retries"`
-		Up                  bool        `json:"up"`
-		Usage               string      `json:"usage"`
-		WlanconfID          string      `json:"wlanconf_id"`
+		ApMac               string  `json:"ap_mac"`
+		Bssid               string  `json:"bssid"`
+		Ccq                 int     `json:"ccq"`
+		Channel             int     `json:"channel"`
+		Essid               string  `json:"essid"`
+		Extchannel          int     `json:"extchannel"`
+		ID                  string  `json:"id"`
+		IsGuest             bool    `json:"is_guest"`
+		IsWep               bool    `json:"is_wep"`
+		MacFilterRejections int     `json:"mac_filter_rejections"`
+		MapID               string  `json:"map_id"`
+		Name                string  `json:"name"`
+		NumSta              int     `json:"num_sta"`
+		Radio               string  `json:"radio"`
+		RadioName           string  `json:"radio_name"`
+		RxBytes             float64 `json:"rx_bytes"`
+		RxCrypts            float64 `json:"rx_crypts"`
+		RxDropped           float64 `json:"rx_dropped"`
+		RxErrors            float64 `json:"rx_errors"`
+		RxFrags             float64 `json:"rx_frags"`
+		RxNwids             float64 `json:"rx_nwids"`
+		RxPackets           float64 `json:"rx_packets"`
+		SiteID              string  `json:"site_id"`
+		State               string  `json:"state"`
+		T                   string  `json:"t"`
+		TxBytes             float64 `json:"tx_bytes"`
+		TxDropped           float64 `json:"tx_dropped"`
+		TxErrors            float64 `json:"tx_errors"`
+		TxLatencyAvg        float64 `json:"tx_latency_avg"`
+		TxLatencyMax        float64 `json:"tx_latency_max"`
+		TxLatencyMin        float64 `json:"tx_latency_min"`
+		TxPackets           float64 `json:"tx_packets"`
+		TxPower             int     `json:"tx_power"`
+		TxRetries           int     `json:"tx_retries"`
+		Up                  bool    `json:"up"`
+		Usage               string  `json:"usage"`
+		WlanconfID          string  `json:"wlanconf_id"`
 	} `json:"vap_table"`
 	Version             string        `json:"version"`
 	VersionIncompatible bool          `json:"version_incompatible"`
