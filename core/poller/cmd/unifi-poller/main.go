@@ -102,10 +102,10 @@ func (c *Config) PollUnifiController(infdb influx.Client, unifi *unidev.AuthedRe
 		}
 
 		for _, asset := range append(clients, devices...) {
-			if pt, errr := asset.Point(); errr != nil {
-				log.Println("asset.Point():", errr)
+			if pt, errr := asset.Points(); errr != nil {
+				log.Println("asset.Points():", errr)
 			} else {
-				bp.AddPoint(pt)
+				bp.AddPoints(pt)
 			}
 		}
 

@@ -7,8 +7,8 @@ import (
 	influx "github.com/influxdata/influxdb/client/v2"
 )
 
-// Point generates a client's datapoint for InfluxDB.
-func (u UCL) Point() (*influx.Point, error) {
+// Points generates a client's datapoints for InfluxDB.
+func (u UCL) Points() (points []*influx.Point, err error) {
 	if u.Name == "" && u.Hostname != "" {
 		u.Name = u.Hostname
 	} else if u.Hostname == "" && u.Name != "" {
@@ -95,6 +95,6 @@ func (u UCL) Point() (*influx.Point, error) {
 		"wired-tx_bytes-r":       u.WiredTxBytesR,
 		"wired-tx_packets":       u.WiredTxPackets,
 	}
-
-	return influx.NewPoint("clients", tags, fields, time.Now())
+	points[0], err = influx.NewPoint("clients", tags, fields, time.Now())
+	return
 }
