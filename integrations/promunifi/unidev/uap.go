@@ -75,6 +75,7 @@ func (u UAP) Points() ([]*influx.Point, error) {
 		"loadavg_15":                 u.SysStats.Loadavg15,
 		"mem_buffer":                 u.SysStats.MemBuffer,
 		"mem_total":                  u.SysStats.MemTotal,
+		"mem_used":                   u.SysStats.MemUsed,
 		"cpu":                        u.SystemStats.CPU,
 		"mem":                        u.SystemStats.Mem,
 		"system_uptime":              u.SystemStats.Uptime,
