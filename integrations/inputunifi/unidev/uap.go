@@ -7,8 +7,8 @@ import (
 	influx "github.com/influxdata/influxdb/client/v2"
 )
 
-// Point generates a device's datapoint for InfluxDB.
-func (u UAP) Point() (*influx.Point, error) {
+// Points generates a device's datapoints for InfluxDB.
+func (u UAP) Points() (points []*influx.Point, err error) {
 	tags := map[string]string{
 		"id":                      u.ID,
 		"mac":                     u.Mac,
@@ -165,5 +165,6 @@ func (u UAP) Point() (*influx.Point, error) {
 		"stat_wifi1-tx_packets":      u.Stat.Wifi1TxPackets,
 		"stat_wifi1-tx_retries":      u.Stat.Wifi1TxRetries,
 	}
-	return influx.NewPoint("uap", tags, fields, time.Now())
+	points[0], err = influx.NewPoint("uap", tags, fields, time.Now())
+	return
 }
