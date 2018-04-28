@@ -13,6 +13,9 @@ import (
 const LoginPath = "/api/login"
 
 // Asset provides a common interface to retreive metrics from a device or client.
+// It currently only supports InfluxDB, but could be amended to support other
+// libraries that have a similar interface.
+// This app only uses the .AddPoint/s() methods with the Asset type.
 type Asset interface {
 	// Point() means this is useful to influxdb..
 	Points() ([]*influx.Point, error)
