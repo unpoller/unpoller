@@ -34,7 +34,7 @@ func (c *AuthedReq) GetUnifiClients() ([]UCL, error) {
 		return nil, err
 	} else if body, err := ioutil.ReadAll(resp.Body); err != nil {
 		return nil, err
-	} else if err = json.Unmarshal(body, response); err != nil {
+	} else if err = json.Unmarshal(body, &response); err != nil {
 		return nil, err
 	} else if err = resp.Body.Close(); err != nil {
 		log.Println("resp.Body.Close():", err) // Not fatal? Just log it.
@@ -95,17 +95,17 @@ func (c *AuthedReq) GetUnifiDevices() ([]USG, []USW, []UAP, error) {
 		// Unmarshal again into the correct type..
 		switch assetType {
 		case "uap":
-			if err := json.Unmarshal(r, uap); err != nil {
+			if err := json.Unmarshal(r, &uap); err != nil {
 				return nil, nil, nil, err
 			}
 			uaps = append(uaps, uap)
 		case "ugw", "usg": // in case they ever fix the name in the api.
-			if err := json.Unmarshal(r, usg); err != nil {
+			if err := json.Unmarshal(r, &usg); err != nil {
 				return nil, nil, nil, err
 			}
 			usgs = append(usgs, usg)
 		case "usw":
-			if err := json.Unmarshal(r, usw); err != nil {
+			if err := json.Unmarshal(r, &usw); err != nil {
 				return nil, nil, nil, err
 			}
 			usws = append(usws, usw)
