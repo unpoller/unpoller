@@ -7,8 +7,8 @@ import (
 	influx "github.com/influxdata/influxdb/client/v2"
 )
 
-// Point generates a device's datapoint for InfluxDB.
-func (u USW) Point() (*influx.Point, error) {
+// Points generates a device's datapoints for InfluxDB.
+func (u USW) Points() (points []*influx.Point, err error) {
 	tags := map[string]string{
 		"id":                     u.ID,
 		"mac":                    u.Mac,
@@ -109,5 +109,6 @@ func (u USW) Point() (*influx.Point, error) {
 		"stat_tx_retries":          u.Stat.TxRetries,
 		// Add the port stats too.
 	}
-	return influx.NewPoint("usw", tags, fields, time.Now())
+	points[0], err = influx.NewPoint("usw", tags, fields, time.Now())
+	return
 }
