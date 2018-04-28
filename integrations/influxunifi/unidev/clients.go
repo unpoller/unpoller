@@ -8,7 +8,8 @@ import (
 )
 
 // Points generates a client's datapoints for InfluxDB.
-func (u UCL) Points() (points []*influx.Point, err error) {
+func (u UCL) Points() ([]*influx.Point, error) {
+	var points []*influx.Point
 	if u.Name == "" && u.Hostname != "" {
 		u.Name = u.Hostname
 	} else if u.Hostname == "" && u.Name != "" {
@@ -95,6 +96,9 @@ func (u UCL) Points() (points []*influx.Point, err error) {
 		"wired-tx_bytes-r":       u.WiredTxBytesR,
 		"wired-tx_packets":       u.WiredTxPackets,
 	}
-	points[0], err = influx.NewPoint("clients", tags, fields, time.Now())
-	return
+	pt, err := influx.NewPoint("clients", tags, fields, time.Now())
+	if err == nil {
+		points = append(points, pt)
+	}
+	return points, err
 }
