@@ -1,7 +1,12 @@
 package unidev
 
-// UAP is a Unifi Access Point
+// UAP is a Unifi Access Point.
 type UAP struct {
+	/* This was auto generated and then slowly edited by hand
+	   to get all the data types right and graphable.
+	   No ones feelings will be hurt if you want to break this
+		 up into multiple structs, and/or make it better in general.
+	*/
 	ID           string  `json:"_id"`
 	UUptime      float64 `json:"_uptime"`
 	AdoptIP      string  `json:"adopt_ip,omitempty"`
@@ -257,17 +262,17 @@ type UAP struct {
 	} `json:"stat"`
 	State    int `json:"state"`
 	SysStats struct {
-		Loadavg1  string  `json:"loadavg_1"`
-		Loadavg15 string  `json:"loadavg_15"`
-		Loadavg5  string  `json:"loadavg_5"`
+		Loadavg1  float64 `json:"loadavg_1,string"`
+		Loadavg15 float64 `json:"loadavg_15,string"`
+		Loadavg5  float64 `json:"loadavg_5,string"`
 		MemBuffer float64 `json:"mem_buffer"`
 		MemTotal  float64 `json:"mem_total"`
 		MemUsed   float64 `json:"mem_used"`
 	} `json:"sys_stats"`
 	SystemStats struct {
-		CPU    string `json:"cpu"`
-		Mem    string `json:"mem"`
-		Uptime string `json:"uptime"`
+		CPU    float64 `json:"cpu,string"`
+		Mem    float64 `json:"mem,string"`
+		Uptime float64 `json:"uptime,string"`
 	} `json:"system-stats"`
 	TxBytes    float64 `json:"tx_bytes"`
 	TxBytesD   float64 `json:"tx_bytes-d"`
