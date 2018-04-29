@@ -7,8 +7,9 @@ import (
 	influx "github.com/influxdata/influxdb/client/v2"
 )
 
-// Point generates a device's datapoint for InfluxDB.
-func (u USG) Point() (*influx.Point, error) {
+// Points generates a device's datapoints for InfluxDB.
+func (u USG) Points() ([]*influx.Point, error) {
+	var points []*influx.Point
 	tags := map[string]string{
 		"id":                      u.ID,
 		"mac":                     u.Mac,
@@ -117,5 +118,9 @@ func (u USG) Point() (*influx.Point, error) {
 		"wan-tx_bytes":      u.Stat.WanTxBytes,
 		"wan-tx_packets":    u.Stat.WanTxPackets,
 	}
-	return influx.NewPoint("usg", tags, fields, time.Now())
+	pt, err := influx.NewPoint("usg", tags, fields, time.Now())
+	if err == nil {
+		points = append(points, pt)
+	}
+	return points, err
 }
