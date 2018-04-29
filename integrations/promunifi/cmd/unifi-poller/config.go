@@ -4,7 +4,7 @@ import "time"
 
 // Version will be injected at build time.
 var (
-	Version = "v0.1"
+	Version = "v0.2"
 	Debug   = false
 )
 

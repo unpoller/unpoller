@@ -21,7 +21,7 @@ const (
 )
 
 // GetUnifiClients returns a response full of clients' data from the Unifi Controller.
-func (c *AuthedReq) GetUnifiClients() ([]Asset, error) {
+func (c *AuthedReq) GetUnifiClients() ([]UCL, error) {
 	var response struct {
 		Clients []UCL `json:"data"`
 		Meta    struct {
@@ -34,68 +34,103 @@ func (c *AuthedReq) GetUnifiClients() ([]Asset, error) {
 		return nil, err
 	} else if body, err := ioutil.ReadAll(resp.Body); err != nil {
 		return nil, err
-	} else if err = json.Unmarshal(body, response); err != nil {
+	} else if err = json.Unmarshal(body, &response); err != nil {
 		return nil, err
 	} else if err = resp.Body.Close(); err != nil {
 		log.Println("resp.Body.Close():", err) // Not fatal? Just log it.
 	}
-	clients := []Asset{}
-	for _, r := range response.Clients {
-		clients = append(clients, r)
+	return response.Clients, nil
+}
+
+// GetUnifiClientAssets provides an interface to return common asset types.
+func (c *AuthedReq) GetUnifiClientAssets() ([]Asset, error) {
+	clients, err := c.GetUnifiClients()
+	assets := []Asset{}
+	if err == nil {
+		for _, r := range clients {
+			assets = append(assets, r)
+		}
 	}
-	return clients, nil
+	return assets, err
 }
 
 // GetUnifiDevices returns a response full of devices' data from the Unifi Controller.
-func (c *AuthedReq) GetUnifiDevices() ([]Asset, error) {
+func (c *AuthedReq) GetUnifiDevices() ([]USG, []USW, []UAP, error) {
 	var parsed struct {
 		Data []json.RawMessage `json:"data"`
 		Meta struct {
 			Rc string `json:"rc"`
 		} `json:"meta"`
 	}
-	assets := []Asset{}
 	if req, err := c.UniReq(DevicePath, ""); err != nil {
-		return nil, err
+		return nil, nil, nil, err
 	} else if resp, err := c.Do(req); err != nil {
-		return nil, err
+		return nil, nil, nil, err
 	} else if body, err := ioutil.ReadAll(resp.Body); err != nil {
-		return nil, err
+		return nil, nil, nil, err
 	} else if err = json.Unmarshal(body, &parsed); err != nil {
-		return nil, err
+		return nil, nil, nil, err
 	} else if err = resp.Body.Close(); err != nil {
 		log.Println("resp.Body.Close():", err) // Not fatal? Just log it.
 	}
+	var usgs []USG
+	var usws []USW
+	var uaps []UAP
 	for _, r := range parsed.Data {
+		var usg USG
+		var usw USW
+		var uap UAP
 		// Unamrshal into a map and check "type"
 		var obj map[string]interface{}
 		if err := json.Unmarshal(r, &obj); err != nil {
-			return nil, err
+			return nil, nil, nil, err
 		}
-		assetType := ""
+		assetType := "- missing -"
 		if t, ok := obj["type"].(string); ok {
 			assetType = t
 		}
+		if Debug {
+			log.Println("Unmarshalling Device Type:", assetType)
+		}
 		// Unmarshal again into the correct type..
-		var asset Asset
 		switch assetType {
 		case "uap":
-			asset = &UAP{}
-		case "ugw":
-			asset = &USG{}
+			if err := json.Unmarshal(r, &uap); err != nil {
+				return nil, nil, nil, err
+			}
+			uaps = append(uaps, uap)
+		case "ugw", "usg": // in case they ever fix the name in the api.
+			if err := json.Unmarshal(r, &usg); err != nil {
+				return nil, nil, nil, err
+			}
+			usgs = append(usgs, usg)
 		case "usw":
-			asset = &USW{}
+			if err := json.Unmarshal(r, &usw); err != nil {
+				return nil, nil, nil, err
+			}
+			usws = append(usws, usw)
 		default:
 			log.Println("unknown asset type -", assetType, "- skipping")
 			continue
 		}
-		if Debug {
-			log.Println("Unmarshalling", assetType)
-		}
-		if err := json.Unmarshal(r, asset); err != nil {
-			return nil, err
-		}
-		assets = append(assets, asset)
 	}
-	return assets, nil
+	return usgs, usws, uaps, nil
+}
+
+// GetUnifiDeviceAssets provides an interface to return common asset types.
+func (c *AuthedReq) GetUnifiDeviceAssets() ([]Asset, error) {
+	usgs, usws, uaps, err := c.GetUnifiDevices()
+	assets := []Asset{}
+	if err == nil {
+		for _, r := range usgs {
+			assets = append(assets, r)
+		}
+		for _, r := range usws {
+			assets = append(assets, r)
+		}
+		for _, r := range uaps {
+			assets = append(assets, r)
+		}
+	}
+	return assets, err
 }
