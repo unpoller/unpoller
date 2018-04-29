@@ -7,8 +7,12 @@ import (
 	influx "github.com/influxdata/influxdb/client/v2"
 )
 
-// Point generates a device's datapoint for InfluxDB.
-func (u UAP) Point() (*influx.Point, error) {
+// Points generates a device's datapoints for InfluxDB.
+func (u UAP) Points() ([]*influx.Point, error) {
+	/* I generally suck at InfluxDB, so if I got the tags/fields wrong,
+	   please send me a PR or open an Issue to address my faults. Thanks!
+	*/
+	var points []*influx.Point
 	tags := map[string]string{
 		"id":                      u.ID,
 		"mac":                     u.Mac,
@@ -35,7 +39,7 @@ func (u UAP) Point() (*influx.Point, error) {
 		"has_speaker":             strconv.FormatBool(u.HasSpeaker),
 		"inform_ip":               u.InformIP,
 		"isolated":                strconv.FormatBool(u.Isolated),
-		"last_seen":               strconv.Itoa(u.LastSeen),
+		"last_seen":               strconv.FormatFloat(u.LastSeen, 'f', 6, 64),
 		"last_uplink_mac":         u.LastUplink.UplinkMac,
 		"last_uplink_remote_port": strconv.Itoa(u.LastUplink.UplinkRemotePort),
 		"known_cfgversion":        u.KnownCfgversion,
@@ -74,6 +78,7 @@ func (u UAP) Point() (*influx.Point, error) {
 		"loadavg_15":                 u.SysStats.Loadavg15,
 		"mem_buffer":                 u.SysStats.MemBuffer,
 		"mem_total":                  u.SysStats.MemTotal,
+		"mem_used":                   u.SysStats.MemUsed,
 		"cpu":                        u.SystemStats.CPU,
 		"mem":                        u.SystemStats.Mem,
 		"system_uptime":              u.SystemStats.Uptime,
@@ -165,5 +170,98 @@ func (u UAP) Point() (*influx.Point, error) {
 		"stat_wifi1-tx_packets":      u.Stat.Wifi1TxPackets,
 		"stat_wifi1-tx_retries":      u.Stat.Wifi1TxRetries,
 	}
-	return influx.NewPoint("uap", tags, fields, time.Now())
+	pt, err := influx.NewPoint("uap", tags, fields, time.Now())
+	if err != nil {
+		return nil, err
+	}
+	points = append(points, pt)
+	for _, p := range u.RadioTable {
+		tags := map[string]string{
+			"device_name":  u.Name,
+			"device_id":    u.ID,
+			"device_mac":   u.Mac,
+			"name":         p.Name,
+			"wlangroup_id": p.WlangroupID,
+			"channel":      p.Channel, // not the channel #
+			"radio":        p.Radio,
+		}
+		fields := map[string]interface{}{
+			"builtin_ant_gain":     p.BuiltinAntGain,
+			"current_antenna_gain": p.CurrentAntennaGain,
+			"has_dfs":              p.HasDfs,
+			"has_fccdfs":           p.HasFccdfs,
+			"ht":                   p.Ht,
+			"is_11ac":              p.Is11Ac,
+			"max_txpower":          p.MaxTxpower,
+			"min_rssi_enabled":     p.MinRssiEnabled,
+			"min_txpower":          p.MinTxpower,
+			"nss":                  p.Nss,
+			"radio_caps":           p.RadioCaps,
+			"tx_power":             p.TxPower,
+			"tx_power_mode":        p.TxPowerMode,
+		}
+
+		for _, s := range u.RadioTableStats {
+			// This may be a tad slower but it allows putting
+			// all the radio stats into one table.
+			if p.Name == s.Name {
+				fields["ast_be_xmit"] = s.AstBeXmit
+				fields["ast_cst"] = s.AstCst
+				fields["channel"] = s.Channel
+				fields["ast_txto"] = s.AstTxto
+				fields["cu_self_rx"] = s.CuSelfRx
+				fields["cu_self_tx"] = s.CuSelfTx
+				fields["cu_total"] = s.CuTotal
+				fields["extchannel"] = s.Extchannel
+				fields["gain"] = s.Gain
+				fields["guest-num_sta"] = s.GuestNumSta
+				fields["num_sta"] = s.NumSta
+				fields["radio"] = s.Radio
+				fields["state"] = s.State
+				fields["radio_tx_packets"] = s.TxPackets
+				fields["radio_tx_power"] = s.TxPower
+				fields["radio_tx_retries"] = s.TxRetries
+				fields["user-num_sta"] = s.UserNumSta
+			}
+		}
+		for _, s := range u.VapTable {
+			if p.Name == s.RadioName {
+				tags["ap_mac"] = s.ApMac
+				tags["bssid"] = s.Bssid
+				fields["ccq"] = s.Ccq
+				fields["essid"] = s.Essid
+				fields["extchannel"] = s.Extchannel
+				tags["vap_id"] = s.ID
+				fields["is_guest"] = s.IsGuest
+				fields["is_wep"] = s.IsWep
+				fields["mac_filter_rejections"] = s.MacFilterRejections
+				fields["map_id"] = s.MapID
+				tags["vap_name"] = s.Name
+				fields["rx_bytes"] = s.RxBytes
+				fields["rx_crypts"] = s.RxCrypts
+				fields["rx_dropped"] = s.RxDropped
+				fields["rx_errors"] = s.RxErrors
+				fields["rx_frags"] = s.RxFrags
+				fields["rx_nwids"] = s.RxNwids
+				fields["rx_packets"] = s.RxPackets
+				fields["tx_bytes"] = s.TxBytes
+				fields["tx_dropped"] = s.TxDropped
+				fields["tx_errors"] = s.TxErrors
+				fields["tx_latency_avg"] = s.TxLatencyAvg
+				fields["tx_latency_max"] = s.TxLatencyMax
+				fields["tx_latency_min"] = s.TxLatencyMin
+				fields["tx_packets"] = s.TxPackets
+				fields["tx_power"] = s.TxPower
+				fields["tx_retries"] = s.TxRetries
+				fields["usage"] = s.Usage
+				tags["wlanconf_id"] = s.WlanconfID
+			}
+		}
+		pt, err := influx.NewPoint("uap_radios", tags, fields, time.Now())
+		if err != nil {
+			return points, err
+		}
+		points = append(points, pt)
+	}
+	return points, nil
 }

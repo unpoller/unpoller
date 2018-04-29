@@ -83,14 +83,14 @@ func GetConfig(configFile string) (Config, error) {
 func (c *Config) PollUnifiController(infdb influx.Client, unifi *unidev.AuthedReq) {
 	ticker := time.NewTicker(c.Interval.value)
 	for range ticker.C {
-		clients, err := unifi.GetUnifiClients()
+		clients, err := unifi.GetUnifiClientAssets()
 		if err != nil {
-			log.Println("unifi.GetUnifiClients():", err)
+			log.Println("unifi.GetUnifiClientsAssets():", err)
 			continue
 		}
-		devices, err := unifi.GetUnifiDevices()
+		devices, err := unifi.GetUnifiDeviceAssets()
 		if err != nil {
-			log.Println("unifi.GetUnifiDevices():", err)
+			log.Println("unifi.GetUnifiDeviceAssets():", err)
 			continue
 		}
 		bp, err := influx.NewBatchPoints(influx.BatchPointsConfig{
@@ -102,10 +102,10 @@ func (c *Config) PollUnifiController(infdb influx.Client, unifi *unidev.AuthedRe
 		}
 
 		for _, asset := range append(clients, devices...) {
-			if pt, errr := asset.Point(); errr != nil {
-				log.Println("asset.Point():", errr)
+			if pt, errr := asset.Points(); errr != nil {
+				log.Println("asset.Points():", errr)
 			} else {
-				bp.AddPoint(pt)
+				bp.AddPoints(pt)
 			}
 		}
 
