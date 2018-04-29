@@ -9,6 +9,9 @@ import (
 
 // Points generates a device's datapoints for InfluxDB.
 func (u UAP) Points() ([]*influx.Point, error) {
+	/* I generally suck at InfluxDB, so if I got the tags/fields wrong,
+	   please send me a PR or open an Issue to address my faults. Thanks!
+	*/
 	var points []*influx.Point
 	tags := map[string]string{
 		"id":                      u.ID,
