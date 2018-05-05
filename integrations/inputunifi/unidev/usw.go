@@ -28,10 +28,7 @@ func (u USW) Points() ([]*influx.Point, error) {
 		"default":                strconv.FormatBool(u.Default),
 		"device_id":              u.DeviceID,
 		"discovered_via":         u.DiscoveredVia,
-		"fw_caps":                strconv.FormatFloat(u.FwCaps, 'f', 6, 64),
-		"guest-num_sta":          strconv.FormatFloat(u.GuestNumSta, 'f', 6, 64),
 		"inform_ip":              u.InformIP,
-		"last_seen":              strconv.FormatFloat(u.LastSeen, 'f', 6, 64),
 		"last_uplink_mac":        u.LastUplink.UplinkMac,
 		"known_cfgversion":       u.KnownCfgversion,
 		"led_override":           u.LedOverride,
@@ -51,6 +48,8 @@ func (u USW) Points() ([]*influx.Point, error) {
 		"uplink_depth":           strconv.FormatFloat(u.UplinkDepth, 'f', 6, 64),
 	}
 	fields := map[string]interface{}{
+		"fw_caps":                  u.FwCaps,
+		"guest-num_sta":            u.GuestNumSta,
 		"ip":                       u.IP,
 		"bytes":                    u.Bytes,
 		"fan_level":                u.FanLevel,
@@ -72,6 +71,7 @@ func (u USW) Points() ([]*influx.Point, error) {
 		"loadavg_5":                u.SysStats.Loadavg5,
 		"loadavg_15":               u.SysStats.Loadavg15,
 		"mem_buffer":               u.SysStats.MemBuffer,
+		"mem_used":                 u.SysStats.MemUsed,
 		"mem_total":                u.SysStats.MemTotal,
 		"cpu":                      u.SystemStats.CPU,
 		"mem":                      u.SystemStats.Mem,
