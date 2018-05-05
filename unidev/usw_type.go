@@ -366,17 +366,17 @@ type USW struct {
 	StpPriority string  `json:"stp_priority"`
 	StpVersion  string  `json:"stp_version"`
 	SysStats    struct {
-		Loadavg1  string  `json:"loadavg_1"`
-		Loadavg15 string  `json:"loadavg_15"`
-		Loadavg5  string  `json:"loadavg_5"`
+		Loadavg1  float64 `json:"loadavg_1,string"`
+		Loadavg15 float64 `json:"loadavg_15,string"`
+		Loadavg5  float64 `json:"loadavg_5,string"`
 		MemBuffer float64 `json:"mem_buffer"`
 		MemTotal  float64 `json:"mem_total"`
 		MemUsed   float64 `json:"mem_used"`
 	} `json:"sys_stats"`
 	SystemStats struct {
-		CPU    string `json:"cpu"`
-		Mem    string `json:"mem"`
-		Uptime string `json:"uptime"`
+		CPU    float64 `json:"cpu,string"`
+		Mem    float64 `json:"mem,string"`
+		Uptime float64 `json:"uptime,string"`
 	} `json:"system-stats"`
 	TxBytes    float64 `json:"tx_bytes"`
 	Type       string  `json:"type"`
