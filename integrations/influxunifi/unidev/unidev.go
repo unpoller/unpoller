@@ -3,10 +3,11 @@ package unidev
 import (
 	"bytes"
 	"crypto/tls"
-	influx "github.com/influxdata/influxdb/client/v2"
-	"github.com/pkg/errors"
 	"net/http"
 	"net/http/cookiejar"
+
+	influx "github.com/influxdata/influxdb/client/v2"
+	"github.com/pkg/errors"
 )
 
 // LoginPath is Unifi Controller Login API Path
@@ -41,9 +42,9 @@ func AuthController(user, pass, url string) (*AuthedReq, error) {
 		Jar:       jar,
 	}, url}
 	if req, err := authReq.UniReq(LoginPath, json); err != nil {
-		return nil, errors.Wrap(err, "uniRequest(LoginPath, json)")
+		return nil, errors.Wrap(err, "UniReq(LoginPath, json)")
 	} else if resp, err := authReq.Do(req); err != nil {
-		return nil, errors.Wrap(err, "c.uniClient.Do(req)")
+		return nil, errors.Wrap(err, "authReq.Do(req)")
 	} else if resp.StatusCode != http.StatusOK {
 		return nil, errors.Errorf("authentication failed (%v): %v (status: %v/%v)",
 			user, url+LoginPath, resp.StatusCode, resp.Status)
