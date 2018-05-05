@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"io/ioutil"
 	"log"
+
+	"github.com/pkg/errors"
 )
 
 // Debug ....
@@ -28,16 +30,23 @@ func (c *AuthedReq) GetUnifiClients() ([]UCL, error) {
 			Rc string `json:"rc"`
 		} `json:"meta"`
 	}
-	if req, err := c.UniReq(ClientPath, ""); err != nil {
-		return nil, err
-	} else if resp, err := c.Do(req); err != nil {
-		return nil, err
-	} else if body, err := ioutil.ReadAll(resp.Body); err != nil {
-		return nil, err
+	req, err := c.UniReq(ClientPath, "")
+	if err != nil {
+		return nil, errors.Wrap(err, "c.UniReq(ClientPath)")
+	}
+	resp, err := c.Do(req)
+	if err != nil {
+		return nil, errors.Wrap(err, "c.Do(req)")
+	}
+	defer func() {
+		if err := resp.Body.Close(); err != nil {
+			log.Println("resp.Body.Close():", err) // Not fatal? Just log it.
+		}
+	}()
+	if body, err := ioutil.ReadAll(resp.Body); err != nil {
+		return nil, errors.Wrap(err, "ioutil.ReadAll(resp.Body)")
 	} else if err = json.Unmarshal(body, &response); err != nil {
-		return nil, err
-	} else if err = resp.Body.Close(); err != nil {
-		log.Println("resp.Body.Close():", err) // Not fatal? Just log it.
+		return nil, errors.Wrap(err, "json.Unmarshal([]UCL)")
 	}
 	return response.Clients, nil
 }
@@ -62,30 +71,39 @@ func (c *AuthedReq) GetUnifiDevices() ([]USG, []USW, []UAP, error) {
 			Rc string `json:"rc"`
 		} `json:"meta"`
 	}
-	if req, err := c.UniReq(DevicePath, ""); err != nil {
-		return nil, nil, nil, err
-	} else if resp, err := c.Do(req); err != nil {
-		return nil, nil, nil, err
-	} else if body, err := ioutil.ReadAll(resp.Body); err != nil {
-		return nil, nil, nil, err
-	} else if err = json.Unmarshal(body, &parsed); err != nil {
-		return nil, nil, nil, err
-	} else if err = resp.Body.Close(); err != nil {
-		log.Println("resp.Body.Close():", err) // Not fatal? Just log it.
+	req, err := c.UniReq(DevicePath, "")
+	if err != nil {
+		return nil, nil, nil, errors.Wrap(err, "c.UniReq(DevicePath)")
 	}
+	resp, err := c.Do(req)
+	if err != nil {
+		return nil, nil, nil, errors.Wrap(err, "c.Do(req)")
+	}
+	defer func() {
+		if err := resp.Body.Close(); err != nil {
+			log.Println("resp.Body.Close():", err) // Not fatal? Just log it.
+		}
+	}()
+	if body, err := ioutil.ReadAll(resp.Body); err != nil {
+		return nil, nil, nil, errors.Wrap(err, "ioutil.ReadAll(resp.Body)")
+	} else if err = json.Unmarshal(body, &parsed); err != nil {
+		return nil, nil, nil, errors.Wrap(err, "json.Unmarshal([]json.RawMessage)")
+	}
+
 	var usgs []USG
 	var usws []USW
 	var uaps []UAP
-	for _, r := range parsed.Data {
+	// Loop each item in the raw JSON message, detect its type and unmarshal it.
+	for i, r := range parsed.Data {
 		var usg USG
 		var usw USW
 		var uap UAP
 		// Unamrshal into a map and check "type"
 		var obj map[string]interface{}
 		if err := json.Unmarshal(r, &obj); err != nil {
-			return nil, nil, nil, err
+			return nil, nil, nil, errors.Wrapf(err, "[%d] json.Unmarshal(interfce{})", i)
 		}
-		assetType := "- missing -"
+		assetType := "<missing>"
 		if t, ok := obj["type"].(string); ok {
 			assetType = t
 		}
@@ -96,17 +114,17 @@ func (c *AuthedReq) GetUnifiDevices() ([]USG, []USW, []UAP, error) {
 		switch assetType {
 		case "uap":
 			if err := json.Unmarshal(r, &uap); err != nil {
-				return nil, nil, nil, err
+				return nil, nil, nil, errors.Wrapf(err, "[%d] json.Unmarshal([]UAP)", i)
 			}
 			uaps = append(uaps, uap)
 		case "ugw", "usg": // in case they ever fix the name in the api.
 			if err := json.Unmarshal(r, &usg); err != nil {
-				return nil, nil, nil, err
+				return nil, nil, nil, errors.Wrapf(err, "[%d] json.Unmarshal([]USG)", i)
 			}
 			usgs = append(usgs, usg)
 		case "usw":
 			if err := json.Unmarshal(r, &usw); err != nil {
-				return nil, nil, nil, err
+				return nil, nil, nil, errors.Wrapf(err, "[%d] json.Unmarshal([]USW)", i)
 			}
 			usws = append(usws, usw)
 		default:
