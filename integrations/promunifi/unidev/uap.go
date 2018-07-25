@@ -39,7 +39,6 @@ func (u UAP) Points() ([]*influx.Point, error) {
 		"has_speaker":             strconv.FormatBool(u.HasSpeaker),
 		"inform_ip":               u.InformIP,
 		"isolated":                strconv.FormatBool(u.Isolated),
-		"last_seen":               strconv.FormatFloat(u.LastSeen, 'f', 6, 64),
 		"last_uplink_mac":         u.LastUplink.UplinkMac,
 		"last_uplink_remote_port": strconv.Itoa(u.LastUplink.UplinkRemotePort),
 		"known_cfgversion":        u.KnownCfgversion,
