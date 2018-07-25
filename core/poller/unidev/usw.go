@@ -45,7 +45,6 @@ func (u USW) Points() ([]*influx.Point, error) {
 		"jumboframe_enabled":     strconv.FormatBool(u.JumboframeEnabled),
 		"stp_priority":           u.StpPriority,
 		"stp_version":            u.StpVersion,
-		"uplink_depth":           strconv.FormatFloat(u.UplinkDepth, 'f', 6, 64),
 	}
 	fields := map[string]interface{}{
 		"fw_caps":                  u.FwCaps,
@@ -108,6 +107,7 @@ func (u USW) Points() ([]*influx.Point, error) {
 		"stat_tx_errors":           u.Stat.TxErrors,
 		"stat_tx_packets":          u.Stat.TxPackets,
 		"stat_tx_retries":          u.Stat.TxRetries,
+		"uplink_depth":             strconv.FormatFloat(u.UplinkDepth, 'f', 6, 64),
 		// Add the port stats too.
 	}
 	pt, err := influx.NewPoint("usw", tags, fields, time.Now())
