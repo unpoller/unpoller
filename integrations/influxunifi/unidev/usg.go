@@ -30,7 +30,6 @@ func (u USG) Points() ([]*influx.Point, error) {
 		"discovered_via":         u.DiscoveredVia,
 		"guest_token":            u.GuestToken,
 		"inform_ip":              u.InformIP,
-		"last_seen":              strconv.FormatFloat(u.LastSeen, 'f', 6, 64),
 		"known_cfgversion":       u.KnownCfgversion,
 		"led_override":           u.LedOverride,
 		"locating":               strconv.FormatBool(u.Locating),
