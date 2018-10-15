@@ -181,7 +181,7 @@ func (u UAP) Points() ([]*influx.Point, error) {
 			"device_mac":   u.Mac,
 			"name":         p.Name,
 			"wlangroup_id": p.WlangroupID,
-			"channel":      p.Channel, // not the channel #
+			"channel":      strconv.Itoa(p.Channel.Value),
 			"radio":        p.Radio,
 		}
 		fields := map[string]interface{}{
@@ -196,7 +196,7 @@ func (u UAP) Points() ([]*influx.Point, error) {
 			"min_txpower":          p.MinTxpower,
 			"nss":                  p.Nss,
 			"radio_caps":           p.RadioCaps,
-			"tx_power":             p.TxPower,
+			"tx_power":             p.TxPower.Value,
 			"tx_power_mode":        p.TxPowerMode,
 		}
 

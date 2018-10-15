@@ -1,5 +1,36 @@
 package unidev
 
+import (
+	"encoding/json"
+	"errors"
+	"strconv"
+)
+
+// FlexInt provides a container and unmarshalling for fields that may be
+// numbers or strings in the Unifi API
+type FlexInt struct {
+	Value int
+}
+
+func (this FlexInt) UnmarshalJSON(b []byte) error {
+	var unk interface{}
+	err := json.Unmarshal(b, &unk)
+	if err != nil {
+		return err
+	}
+	switch i := unk.(type) {
+	case float64:
+		this.Value = int(i)
+		return nil
+	case string:
+		this.Value, err = strconv.Atoi(i)
+		return err
+	default:
+		return errors.New("Cannot unmarshal to FlexInt")
+	}
+
+}
+
 // UAP is a Unifi Access Point.
 type UAP struct {
 	/* This was auto generated and then slowly edited by hand
@@ -119,7 +150,7 @@ type UAP struct {
 	RadioTable []struct {
 		BuiltinAntGain     float64 `json:"builtin_ant_gain"`
 		BuiltinAntenna     bool    `json:"builtin_antenna"`
-		Channel            string  `json:"channel"`
+		Channel            FlexInt `json:"channel"`
 		CurrentAntennaGain float64 `json:"current_antenna_gain"`
 		Ht                 string  `json:"ht"`
 		MaxTxpower         float64 `json:"max_txpower"`
@@ -129,7 +160,7 @@ type UAP struct {
 		Nss                float64 `json:"nss"`
 		Radio              string  `json:"radio"`
 		RadioCaps          float64 `json:"radio_caps"`
-		TxPower            string  `json:"tx_power"`
+		TxPower            FlexInt `json:"tx_power"`
 		TxPowerMode        string  `json:"tx_power_mode"`
 		WlangroupID        string  `json:"wlangroup_id"`
 		HasDfs             bool    `json:"has_dfs,omitempty"`
