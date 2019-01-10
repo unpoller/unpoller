@@ -47,9 +47,10 @@ func (value *FlexInt) UnmarshalJSON(b []byte) error {
 		*value = FlexInt(i)
 		return nil
 	case string:
-		j, err := strconv.Atoi(i)
+		// If it's a string like the word "auto" just set the integer to 0 and proceed.
+		j, _ := strconv.Atoi(i)
 		*value = FlexInt(j)
-		return err
+		return nil
 	default:
 		return errors.New("Cannot unmarshal to FlexInt")
 	}
