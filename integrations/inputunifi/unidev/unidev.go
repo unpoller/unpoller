@@ -3,8 +3,11 @@ package unidev
 import (
 	"bytes"
 	"crypto/tls"
+	"encoding/json"
+	"log"
 	"net/http"
 	"net/http/cookiejar"
+	"strconv"
 
 	influx "github.com/influxdata/influxdb/client/v2"
 	"github.com/pkg/errors"
@@ -29,6 +32,30 @@ type AuthedReq struct {
 	baseURL string
 }
 
+// FlexInt provides a container and unmarshalling for fields that may be
+// numbers or strings in the Unifi API
+type FlexInt int
+
+// UnmarshalJSON converts a string or number to an integer.
+func (value *FlexInt) UnmarshalJSON(b []byte) error {
+	var unk interface{}
+	if err := json.Unmarshal(b, &unk); err != nil {
+		return err
+	}
+	switch i := unk.(type) {
+	case float64:
+		*value = FlexInt(i)
+		return nil
+	case string:
+		// If it's a string like the word "auto" just set the integer to 0 and proceed.
+		j, _ := strconv.Atoi(i)
+		*value = FlexInt(j)
+		return nil
+	default:
+		return errors.New("Cannot unmarshal to FlexInt")
+	}
+}
+
 // AuthController creates a http.Client with authenticated cookies.
 // Used to make additional, authenticated requests to the APIs.
 func AuthController(user, pass, url string) (*AuthedReq, error) {
@@ -41,11 +68,20 @@ func AuthController(user, pass, url string) (*AuthedReq, error) {
 		Transport: &http.Transport{TLSClientConfig: &tls.Config{InsecureSkipVerify: true}},
 		Jar:       jar,
 	}, url}
-	if req, err := authReq.UniReq(LoginPath, json); err != nil {
+	req, err := authReq.UniReq(LoginPath, json)
+	if err != nil {
 		return nil, errors.Wrap(err, "UniReq(LoginPath, json)")
-	} else if resp, err := authReq.Do(req); err != nil {
+	}
+	resp, err := authReq.Do(req)
+	if err != nil {
 		return nil, errors.Wrap(err, "authReq.Do(req)")
-	} else if resp.StatusCode != http.StatusOK {
+	}
+	defer func() {
+		if err := resp.Body.Close(); err != nil {
+			log.Println("resp.Body.Close():", err) // Not fatal. Just log it.
+		}
+	}()
+	if resp.StatusCode != http.StatusOK {
 		return nil, errors.Errorf("authentication failed (%v): %v (status: %v/%v)",
 			user, url+LoginPath, resp.StatusCode, resp.Status)
 	}
