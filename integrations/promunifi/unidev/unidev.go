@@ -3,6 +3,7 @@ package unidev
 import (
 	"bytes"
 	"crypto/tls"
+	"log"
 	"net/http"
 	"net/http/cookiejar"
 
@@ -29,6 +30,9 @@ type AuthedReq struct {
 	baseURL string
 }
 
+// StringInt is used to unmarshal quoted integers in JSON responses.
+type StringInt int
+
 // AuthController creates a http.Client with authenticated cookies.
 // Used to make additional, authenticated requests to the APIs.
 func AuthController(user, pass, url string) (*AuthedReq, error) {
@@ -41,11 +45,20 @@ func AuthController(user, pass, url string) (*AuthedReq, error) {
 		Transport: &http.Transport{TLSClientConfig: &tls.Config{InsecureSkipVerify: true}},
 		Jar:       jar,
 	}, url}
-	if req, err := authReq.UniReq(LoginPath, json); err != nil {
+	req, err := authReq.UniReq(LoginPath, json)
+	if err != nil {
 		return nil, errors.Wrap(err, "UniReq(LoginPath, json)")
-	} else if resp, err := authReq.Do(req); err != nil {
+	}
+	resp, err := authReq.Do(req)
+	if err != nil {
 		return nil, errors.Wrap(err, "authReq.Do(req)")
-	} else if resp.StatusCode != http.StatusOK {
+	}
+	defer func() {
+		if err := resp.Body.Close(); err != nil {
+			log.Println("resp.Body.Close():", err) // Not fatal. Just log it.
+		}
+	}()
+	if resp.StatusCode != http.StatusOK {
 		return nil, errors.Errorf("authentication failed (%v): %v (status: %v/%v)",
 			user, url+LoginPath, resp.StatusCode, resp.Status)
 	}
