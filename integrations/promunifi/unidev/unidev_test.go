@@ -21,6 +21,6 @@ func TestFlexInt(t *testing.T) {
 	a.EqualValues(FlexInt(5), r.Channel)
 	a.Nil(json.Unmarshal(seven, &r))
 	a.EqualValues(FlexInt(7), r.Channel)
-	a.NotNil(json.Unmarshal(auto, &r))
+	a.Nil(json.Unmarshal(auto, &r), "a regular string must not produce an unmarshal error")
 	a.EqualValues(FlexInt(0), r.Channel)
 }
