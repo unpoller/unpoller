@@ -12,6 +12,7 @@ func TestFlexInt(t *testing.T) {
 	a := assert.New(t)
 	five := []byte(`{"channel": "5"}`)
 	seven := []byte(`{"channel": 7}`)
+	auto := []byte(`{"channel": "auto"}`)
 	type reply struct {
 		Channel FlexInt `json:"channel"`
 	}
@@ -20,4 +21,6 @@ func TestFlexInt(t *testing.T) {
 	a.EqualValues(FlexInt(5), r.Channel)
 	a.Nil(json.Unmarshal(seven, &r))
 	a.EqualValues(FlexInt(7), r.Channel)
+	a.NotNil(json.Unmarshal(auto, &r))
+	a.EqualValues(FlexInt(0), r.Channel)
 }
