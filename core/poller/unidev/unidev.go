@@ -3,9 +3,11 @@ package unidev
 import (
 	"bytes"
 	"crypto/tls"
+	"encoding/json"
 	"log"
 	"net/http"
 	"net/http/cookiejar"
+	"strconv"
 
 	influx "github.com/influxdata/influxdb/client/v2"
 	"github.com/pkg/errors"
@@ -30,8 +32,28 @@ type AuthedReq struct {
 	baseURL string
 }
 
-// StringInt is used to unmarshal quoted integers in JSON responses.
-type StringInt int
+// FlexInt provides a container and unmarshalling for fields that may be
+// numbers or strings in the Unifi API
+type FlexInt int
+
+// UnmarshalJSON converts a string or number to an integer.
+func (value *FlexInt) UnmarshalJSON(b []byte) error {
+	var unk interface{}
+	if err := json.Unmarshal(b, &unk); err != nil {
+		return err
+	}
+	switch i := unk.(type) {
+	case float64:
+		*value = FlexInt(i)
+		return nil
+	case string:
+		j, err := strconv.Atoi(i)
+		*value = FlexInt(j)
+		return err
+	default:
+		return errors.New("Cannot unmarshal to FlexInt")
+	}
+}
 
 // AuthController creates a http.Client with authenticated cookies.
 // Used to make additional, authenticated requests to the APIs.
