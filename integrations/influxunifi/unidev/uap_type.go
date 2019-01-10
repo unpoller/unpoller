@@ -1,36 +1,5 @@
 package unidev
 
-import (
-	"encoding/json"
-	"errors"
-	"strconv"
-)
-
-// FlexInt provides a container and unmarshalling for fields that may be
-// numbers or strings in the Unifi API
-type FlexInt struct {
-	Value int
-}
-
-func (this FlexInt) UnmarshalJSON(b []byte) error {
-	var unk interface{}
-	err := json.Unmarshal(b, &unk)
-	if err != nil {
-		return err
-	}
-	switch i := unk.(type) {
-	case float64:
-		this.Value = int(i)
-		return nil
-	case string:
-		this.Value, err = strconv.Atoi(i)
-		return err
-	default:
-		return errors.New("Cannot unmarshal to FlexInt")
-	}
-
-}
-
 // UAP is a Unifi Access Point.
 type UAP struct {
 	/* This was auto generated and then slowly edited by hand
