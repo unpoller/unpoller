@@ -306,7 +306,7 @@ type UAP struct {
 		UplinkRemotePort int     `json:"uplink_remote_port"`
 	} `json:"uplink"`
 	UplinkTable []interface{} `json:"uplink_table"`
-	Uptime      float64       `json:"uptime"`
+	Uptime      FlexInt       `json:"uptime"`
 	UserNumSta  int           `json:"user-num_sta"`
 	VapTable    []struct {
 		ApMac               string  `json:"ap_mac"`
