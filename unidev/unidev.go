@@ -34,22 +34,25 @@ type AuthedReq struct {
 
 // FlexInt provides a container and unmarshalling for fields that may be
 // numbers or strings in the Unifi API
-type FlexInt int
+type FlexInt struct {
+	Number float64
+	String string
+}
 
 // UnmarshalJSON converts a string or number to an integer.
-func (value *FlexInt) UnmarshalJSON(b []byte) error {
+func (f *FlexInt) UnmarshalJSON(b []byte) error {
 	var unk interface{}
 	if err := json.Unmarshal(b, &unk); err != nil {
 		return err
 	}
 	switch i := unk.(type) {
 	case float64:
-		*value = FlexInt(i)
+		f.Number = i
+		f.String = strconv.FormatFloat(i, 'f', -1, 64)
 		return nil
 	case string:
-		// If it's a string like the word "auto" just set the integer to 0 and proceed.
-		j, _ := strconv.Atoi(i)
-		*value = FlexInt(j)
+		f.String = i
+		f.Number, _ = strconv.ParseFloat(i, 64)
 		return nil
 	default:
 		return errors.New("Cannot unmarshal to FlexInt")
