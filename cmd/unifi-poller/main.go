@@ -83,24 +83,19 @@ func GetConfig(configFile string) (Config, error) {
 func (c *Config) PollUnifiController(infdb influx.Client, unifi *unidev.AuthedReq) {
 	ticker := time.NewTicker(c.Interval.value)
 	for range ticker.C {
-		clients, err := unifi.GetUnifiClientAssets()
-		if err != nil {
+		var clients, devices []unidev.Asset
+		var bp influx.BatchPoints
+		var err error
+		if clients, err = unifi.GetUnifiClientAssets(); err != nil {
 			log.Println("unifi.GetUnifiClientsAssets():", err)
-			continue
-		}
-		devices, err := unifi.GetUnifiDeviceAssets()
-		if err != nil {
+		} else if devices, err = unifi.GetUnifiDeviceAssets(); err != nil {
 			log.Println("unifi.GetUnifiDeviceAssets():", err)
-			continue
-		}
-		bp, err := influx.NewBatchPoints(influx.BatchPointsConfig{
-			Database: c.InfluxDB,
-		})
-		if err != nil {
+		} else if bp, err = influx.NewBatchPoints(influx.BatchPointsConfig{Database: c.InfluxDB}); err != nil {
 			log.Println("influx.NewBatchPoints:", err)
+		}
+		if err != nil {
 			continue
 		}
-
 		for _, asset := range append(clients, devices...) {
 			if pt, errr := asset.Points(); errr != nil {
 				log.Println("asset.Points():", errr)
@@ -108,7 +103,6 @@ func (c *Config) PollUnifiController(infdb influx.Client, unifi *unidev.AuthedRe
 				bp.AddPoints(pt)
 			}
 		}
-
 		if err = infdb.Write(bp); err != nil {
 			log.Println("infdb.Write(bp):", err)
 			continue
