@@ -62,7 +62,7 @@ func (u UAP) Points() ([]*influx.Point, error) {
 		"rx_bytes-d":                 u.RxBytesD,
 		"tx_bytes":                   u.TxBytes,
 		"tx_bytes-d":                 u.TxBytesD,
-		"uptime":                     u.Uptime,
+		"uptime":                     u.Uptime.Number,
 		"considered_lost_at":         u.ConsideredLostAt,
 		"next_heartbeat_at":          u.NextHeartbeatAt,
 		"scanning":                   u.Scanning,
