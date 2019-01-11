@@ -2,11 +2,8 @@ package main
 
 import "time"
 
-// Version will be injected at build time.
-var (
-	Version = "v0.2"
-	Debug   = false
-)
+// Version is loosely followed.
+var Version = "v0.2.1"
 
 const (
 	// App defaults in case they're missing from the config.
