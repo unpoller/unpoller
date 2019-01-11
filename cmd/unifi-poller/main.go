@@ -12,7 +12,6 @@ import (
 	influx "github.com/influxdata/influxdb/client/v2"
 	"github.com/naoina/toml"
 	flg "github.com/ogier/pflag"
-	"github.com/pkg/errors"
 )
 
 func main() {
@@ -21,26 +20,27 @@ func main() {
 		flg.PrintDefaults()
 	}
 	configFile := flg.StringP("config", "c", defaultConfFile, "Poller Config File (TOML Format)")
-	flg.BoolVarP(&Debug, "debug", "D", false, "Turn on the Spam (default false)")
+	flg.BoolVarP(&unidev.Debug, "debug", "D", false, "Turn on the Spam (default false)")
 	version := flg.BoolP("version", "v", false, "Print the version and exit.")
-	flg.Parse()
-	if *version {
+
+	if flg.Parse(); *version {
 		fmt.Println("unifi-poller version:", Version)
 		os.Exit(0) // don't run anything else.
 	}
-	if log.SetFlags(0); Debug {
+	if log.SetFlags(0); unidev.Debug {
 		log.SetFlags(log.Lshortfile | log.Lmicroseconds | log.Ldate)
-		unidev.Debug = true
+		log.Println("Debug Logging Enabled")
 	}
 	config, err := GetConfig(*configFile)
 	if err != nil {
 		flg.Usage()
-		log.Fatalln("Config Error:", err)
+		log.Fatalf("Config Error '%v': %v", *configFile, err)
 	}
+	log.Println("Loaded Configuration:", *configFile)
 	// Create an authenticated session to the Unifi Controller.
 	unifi, err := unidev.AuthController(config.UnifiUser, config.UnifiPass, config.UnifiBase)
 	if err != nil {
-		log.Fatal(err)
+		log.Fatalln("Unifi Controller Error:", err)
 	}
 	log.Println("Authenticated to Unifi Controller @", config.UnifiBase, "as user", config.UnifiUser)
 
@@ -50,7 +50,7 @@ func main() {
 		Password: config.InfluxPass,
 	})
 	if err != nil {
-		log.Fatal(err)
+		log.Fatalln("InfluxDB Error:", err)
 	}
 	log.Println("Logging Unifi Metrics to InfluXDB @", config.InfluxURL, "as user", config.InfluxUser)
 	log.Println("Polling Unifi Controller, interval:", config.Interval.value)
@@ -74,7 +74,7 @@ func GetConfig(configFile string) (Config, error) {
 		return config, err
 		// This is where the defaults in the config variable are overwritten.
 	} else if err := toml.Unmarshal(buf, &config); err != nil {
-		return config, errors.Wrap(err, "invalid config")
+		return config, err
 	}
 	return config, nil
 }
@@ -87,24 +87,24 @@ func (c *Config) PollUnifiController(infdb influx.Client, unifi *unidev.AuthedRe
 		var bp influx.BatchPoints
 		var err error
 		if clients, err = unifi.GetUnifiClientAssets(); err != nil {
-			log.Println("unifi.GetUnifiClientsAssets():", err)
+			log.Println("ERROR unifi.GetUnifiClientsAssets():", err)
 		} else if devices, err = unifi.GetUnifiDeviceAssets(); err != nil {
-			log.Println("unifi.GetUnifiDeviceAssets():", err)
+			log.Println("ERROR unifi.GetUnifiDeviceAssets():", err)
 		} else if bp, err = influx.NewBatchPoints(influx.BatchPointsConfig{Database: c.InfluxDB}); err != nil {
-			log.Println("influx.NewBatchPoints:", err)
+			log.Println("ERROR influx.NewBatchPoints:", err)
 		}
 		if err != nil {
 			continue
 		}
 		for _, asset := range append(clients, devices...) {
 			if pt, errr := asset.Points(); errr != nil {
-				log.Println("asset.Points():", errr)
+				log.Println("ERROR asset.Points():", errr)
 			} else {
 				bp.AddPoints(pt)
 			}
 		}
 		if err = infdb.Write(bp); err != nil {
-			log.Println("infdb.Write(bp):", err)
+			log.Println("ERROR infdb.Write(bp):", err)
 			continue
 		}
 		log.Println("Logged client state. Clients:", len(clients), "- Devices:", len(devices))
