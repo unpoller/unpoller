@@ -62,7 +62,7 @@ func (u UAP) Points() ([]*influx.Point, error) {
 		"rx_bytes-d":                 u.RxBytesD,
 		"tx_bytes":                   u.TxBytes,
 		"tx_bytes-d":                 u.TxBytesD,
-		"uptime":                     u.Uptime,
+		"uptime":                     u.Uptime.Number,
 		"considered_lost_at":         u.ConsideredLostAt,
 		"next_heartbeat_at":          u.NextHeartbeatAt,
 		"scanning":                   u.Scanning,
@@ -181,7 +181,7 @@ func (u UAP) Points() ([]*influx.Point, error) {
 			"device_mac":   u.Mac,
 			"name":         p.Name,
 			"wlangroup_id": p.WlangroupID,
-			"channel":      strconv.Itoa(int(p.Channel)),
+			"channel":      p.Channel.String,
 			"radio":        p.Radio,
 		}
 		fields := map[string]interface{}{
@@ -196,7 +196,7 @@ func (u UAP) Points() ([]*influx.Point, error) {
 			"min_txpower":          p.MinTxpower,
 			"nss":                  p.Nss,
 			"radio_caps":           p.RadioCaps,
-			"tx_power":             p.TxPower,
+			"tx_power":             p.TxPower.Number,
 			"tx_power_mode":        p.TxPowerMode,
 		}
 
