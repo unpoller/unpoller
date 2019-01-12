@@ -1,4 +1,8 @@
-# The Unifi Controller only updates traffic stats about every 30 seconds. 
+# unifi-poller primary configuration file.               #
+# copy this file to: /usr/local/etc/unifi-poller/up.conf #
+##########################################################
+
+# The Unifi Controller only updates traffic stats about every 30 seconds.
 # Setting this to something lower may lead to "zeros" in your data. You've been warned.
 interval = "30s"
 
