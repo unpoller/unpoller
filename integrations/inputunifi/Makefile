@@ -43,6 +43,4 @@ man:
 	script/build_manpages.sh ./
 
 deps:
-	rm -rf Godeps vendor
-	godep save ./...
-	godep update ./...
+	dep ensure -update
