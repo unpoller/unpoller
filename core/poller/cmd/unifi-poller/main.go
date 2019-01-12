@@ -21,12 +21,15 @@ func main() {
 	}
 	configFile := flg.StringP("config", "c", defaultConfFile, "Poller Config File (TOML Format)")
 	flg.BoolVarP(&unidev.Debug, "debug", "D", false, "Turn on the Spam (default false)")
-	version := flg.BoolP("version", "v", false, "Print the version and exit.")
+	quiet := flg.BoolP("quiet", "q", false, "Do not print logs on every poll, only errors")
+	version := flg.BoolP("version", "v", false, "Print the version and exit")
+	verifySSL := flg.BoolP("verify-ssl", "s", false, "If your controller has a valid SSL cert, require it with this flag")
 
 	if flg.Parse(); *version {
 		fmt.Println("unifi-poller version:", Version)
 		os.Exit(0) // don't run anything else.
 	}
+	log.Println("Unifi-Poller Starting Up! PID:", os.Getpid())
 	if log.SetFlags(0); unidev.Debug {
 		log.SetFlags(log.Lshortfile | log.Lmicroseconds | log.Ldate)
 		log.Println("Debug Logging Enabled")
@@ -38,12 +41,13 @@ func main() {
 	}
 	log.Println("Loaded Configuration:", *configFile)
 	// Create an authenticated session to the Unifi Controller.
-	unifi, err := unidev.AuthController(config.UnifiUser, config.UnifiPass, config.UnifiBase)
+	unifi, err := unidev.AuthController(config.UnifiUser, config.UnifiPass, config.UnifiBase, *verifySSL)
 	if err != nil {
 		log.Fatalln("Unifi Controller Error:", err)
 	}
-	log.Println("Authenticated to Unifi Controller @", config.UnifiBase, "as user", config.UnifiUser)
-
+	if !*quiet {
+		log.Println("Authenticated to Unifi Controller @", config.UnifiBase, "as user", config.UnifiUser)
+	}
 	infdb, err := influx.NewHTTPClient(influx.HTTPConfig{
 		Addr:     config.InfluxURL,
 		Username: config.InfluxUser,
@@ -52,9 +56,15 @@ func main() {
 	if err != nil {
 		log.Fatalln("InfluxDB Error:", err)
 	}
-	log.Println("Logging Unifi Metrics to InfluXDB @", config.InfluxURL, "as user", config.InfluxUser)
-	log.Println("Polling Unifi Controller, interval:", config.Interval.value)
-	config.PollUnifiController(infdb, unifi)
+	if *quiet {
+		// Do it this way allows debug error logs (line numbers, etc)
+		unidev.Debug = false
+	} else {
+		log.Println("Logging Unifi Metrics to InfluXDB @", config.InfluxURL, "as user", config.InfluxUser)
+		log.Println("Polling Unifi Controller, interval:", config.Interval.value)
+	}
+	log.Println("Everyting checks out! Beginning Poller Routine.")
+	config.PollUnifiController(infdb, unifi, *quiet)
 }
 
 // GetConfig parses and returns our configuration data.
@@ -80,7 +90,7 @@ func GetConfig(configFile string) (Config, error) {
 }
 
 // PollUnifiController runs forever, polling and pushing.
-func (c *Config) PollUnifiController(infdb influx.Client, unifi *unidev.AuthedReq) {
+func (c *Config) PollUnifiController(infdb influx.Client, unifi *unidev.AuthedReq, quiet bool) {
 	ticker := time.NewTicker(c.Interval.value)
 	for range ticker.C {
 		var clients, devices []unidev.Asset
@@ -107,6 +117,8 @@ func (c *Config) PollUnifiController(infdb influx.Client, unifi *unidev.AuthedRe
 			log.Println("ERROR infdb.Write(bp):", err)
 			continue
 		}
-		log.Println("Logged client state. Clients:", len(clients), "- Devices:", len(devices))
+		if !quiet {
+			log.Println("Logged client state. Clients:", len(clients), "- Devices:", len(devices))
+		}
 	}
 }
