@@ -9,24 +9,14 @@ unifi-poller(1) -- Utility to poll Unifi Metrics and drop them into InfluxDB
 
 * This application polls a Unifi Controller API for Client and Device Metrics.
 * The metrics are then stored in an InfluxDB instance.
+* See the example configuration file for help configuring this application.
 
 ## OPTIONS
 
-`unifi-poller [-c <config file>] [-D] [-q] [-s] [-h] [-v]`
+`unifi-poller [-c <config file>] [-h] [-v]`
 
     -c, --config <file_path>
         Provide a configuration file (instead of the default).
-
-    -D, --debug
-        Turns on line numbers, microsecond logging, and a per-device log.
-
-    -q, --quiet
-        Turns off per-device log and per-interval log. Logs only errors.
-        Recommend using -D with this setting for better error logging.
-
-    -s, --verify-ssl
-        If your Unifi controller has a valid SSL certificate, you can enable
-        this option to validate it. Otherwise, any SSL certificate is valid.
 
     -v, --version
         Display version and exit.
