@@ -90,13 +90,6 @@ select multiple to put specific stats side-by-side.
 
 ![image](images/unifi-uap-dashboard.png?raw=true)
 
-# Woah, there's a library in here.
-
-Sure is. If you want to write your own code around unifi data, you can import
-the `unidev` library and easily poll your controller. If you have interest in
-how to use the library, or need more features, open an Issue. I'm not committed
-to documenting it unless it seems useful.
-
 
 ## Copyright & License
 - Copyright © 2016 Garrett Bjerkhoel.
