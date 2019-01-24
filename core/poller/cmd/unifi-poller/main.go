@@ -8,7 +8,7 @@ import (
 	"time"
 
 	"github.com/golift/unifi"
-	"github.com/influxdata/influxdb/client/v2"
+	influx "github.com/influxdata/influxdb/client/v2"
 	"github.com/naoina/toml"
 	flag "github.com/ogier/pflag"
 )
@@ -33,7 +33,7 @@ func main() {
 	} else if !config.Quiet {
 		log.Println("Authenticated to Unifi Controller @", config.UnifiBase, "as user", config.UnifiUser)
 	}
-	infdb, err := client.NewHTTPClient(client.HTTPConfig{
+	infdb, err := influx.NewHTTPClient(influx.HTTPConfig{
 		Addr:     config.InfluxURL,
 		Username: config.InfluxUser,
 		Password: config.InfluxPass,
@@ -91,17 +91,17 @@ func GetConfig(configFile string) (Config, error) {
 }
 
 // PollUnifiController runs forever, polling and pushing.
-func (c *Config) PollUnifiController(infdb client.Client, device *unifi.AuthedReq, quiet bool) {
+func (c *Config) PollUnifiController(infdb influx.Client, device *unifi.AuthedReq, quiet bool) {
 	ticker := time.NewTicker(c.Interval.value)
 	for range ticker.C {
 		var clients, devices []unifi.Asset
-		var bp client.BatchPoints
+		var bp influx.BatchPoints
 		var err error
 		if clients, err = device.GetUnifiClientAssets(); err != nil {
 			log.Println("ERROR unifi.GetUnifiClientsAssets():", err)
 		} else if devices, err = device.GetUnifiDeviceAssets(); err != nil {
 			log.Println("ERROR unifi.GetUnifiDeviceAssets():", err)
-		} else if bp, err = client.NewBatchPoints(client.BatchPointsConfig{Database: c.InfluxDB}); err != nil {
+		} else if bp, err = influx.NewBatchPoints(influx.BatchPointsConfig{Database: c.InfluxDB}); err != nil {
 			log.Println("ERROR influx.NewBatchPoints:", err)
 		}
 		if err != nil {
