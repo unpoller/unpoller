@@ -7,19 +7,19 @@ import (
 	"os"
 	"time"
 
-	"github.com/davidnewhall/unifi-poller/unidev"
-
-	influx "github.com/influxdata/influxdb/client/v2"
+	"github.com/golift/unifi"
+	"github.com/influxdata/influxdb/client/v2"
 	"github.com/naoina/toml"
-	flg "github.com/ogier/pflag"
+	flag "github.com/ogier/pflag"
 )
 
 func main() {
+
 	configFile := parseFlags()
 	log.Println("Unifi-Poller Starting Up! PID:", os.Getpid())
 	config, err := GetConfig(configFile)
 	if err != nil {
-		flg.Usage()
+		flag.Usage()
 		log.Fatalf("Config Error '%v': %v", configFile, err)
 	} else if log.SetFlags(0); config.Debug {
 		log.SetFlags(log.Lshortfile | log.Lmicroseconds | log.Ldate)
@@ -27,13 +27,13 @@ func main() {
 	}
 	log.Println("Loaded Configuration:", configFile)
 	// Create an authenticated session to the Unifi Controller.
-	unifi, err := unidev.AuthController(config.UnifiUser, config.UnifiPass, config.UnifiBase, config.VerifySSL)
+	device, err := unifi.AuthController(config.UnifiUser, config.UnifiPass, config.UnifiBase, config.VerifySSL)
 	if err != nil {
 		log.Fatalln("Unifi Controller Error:", err)
 	} else if !config.Quiet {
 		log.Println("Authenticated to Unifi Controller @", config.UnifiBase, "as user", config.UnifiUser)
 	}
-	infdb, err := influx.NewHTTPClient(influx.HTTPConfig{
+	infdb, err := client.NewHTTPClient(client.HTTPConfig{
 		Addr:     config.InfluxURL,
 		Username: config.InfluxUser,
 		Password: config.InfluxPass,
@@ -42,23 +42,23 @@ func main() {
 		log.Fatalln("InfluxDB Error:", err)
 	} else if config.Quiet {
 		// Doing it this way allows debug error logs (line numbers, etc)
-		unidev.Debug = false
+		unifi.Debug = false
 	} else {
 		log.Println("Logging Unifi Metrics to InfluXDB @", config.InfluxURL, "as user", config.InfluxUser)
 		log.Println("Polling Unifi Controller, interval:", config.Interval.value)
 	}
 	log.Println("Everyting checks out! Beginning Poller Routine.")
-	config.PollUnifiController(infdb, unifi, config.Quiet)
+	config.PollUnifiController(infdb, device, config.Quiet)
 }
 
 func parseFlags() string {
-	flg.Usage = func() {
+	flag.Usage = func() {
 		fmt.Println("Usage: unifi-poller [--config=filepath] [--version]")
-		flg.PrintDefaults()
+		flag.PrintDefaults()
 	}
-	configFile := flg.StringP("config", "c", defaultConfFile, "Poller Config File (TOML Format)")
-	version := flg.BoolP("version", "v", false, "Print the version and exit")
-	if flg.Parse(); *version {
+	configFile := flag.StringP("config", "c", defaultConfFile, "Poller Config File (TOML Format)")
+	version := flag.BoolP("version", "v", false, "Print the version and exit")
+	if flag.Parse(); *version {
 		fmt.Println("unifi-poller version:", Version)
 		os.Exit(0) // don't run anything else.
 	}
@@ -91,17 +91,17 @@ func GetConfig(configFile string) (Config, error) {
 }
 
 // PollUnifiController runs forever, polling and pushing.
-func (c *Config) PollUnifiController(infdb influx.Client, unifi *unidev.AuthedReq, quiet bool) {
+func (c *Config) PollUnifiController(infdb client.Client, device *unifi.AuthedReq, quiet bool) {
 	ticker := time.NewTicker(c.Interval.value)
 	for range ticker.C {
-		var clients, devices []unidev.Asset
-		var bp influx.BatchPoints
+		var clients, devices []unifi.Asset
+		var bp client.BatchPoints
 		var err error
-		if clients, err = unifi.GetUnifiClientAssets(); err != nil {
+		if clients, err = device.GetUnifiClientAssets(); err != nil {
 			log.Println("ERROR unifi.GetUnifiClientsAssets():", err)
-		} else if devices, err = unifi.GetUnifiDeviceAssets(); err != nil {
+		} else if devices, err = device.GetUnifiDeviceAssets(); err != nil {
 			log.Println("ERROR unifi.GetUnifiDeviceAssets():", err)
-		} else if bp, err = influx.NewBatchPoints(influx.BatchPointsConfig{Database: c.InfluxDB}); err != nil {
+		} else if bp, err = client.NewBatchPoints(client.BatchPointsConfig{Database: c.InfluxDB}); err != nil {
 			log.Println("ERROR influx.NewBatchPoints:", err)
 		}
 		if err != nil {
