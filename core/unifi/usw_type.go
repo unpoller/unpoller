@@ -1,4 +1,4 @@
-package unidev
+package unifi
 
 // USW is a Unifi Switch
 type USW struct {

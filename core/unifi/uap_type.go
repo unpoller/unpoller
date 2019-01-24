@@ -1,4 +1,4 @@
-package unidev
+package unifi
 
 // UAP is a Unifi Access Point.
 type UAP struct {

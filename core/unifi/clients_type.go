@@ -1,4 +1,4 @@
-package unidev
+package unifi
 
 // UCL defines all the data a connected-network client contains.
 type UCL struct {

@@ -1,4 +1,4 @@
-package unidev
+package unifi
 
 import "encoding/json"
 
