@@ -14,7 +14,6 @@ import (
 )
 
 func main() {
-
 	configFile := parseFlags()
 	log.Println("Unifi-Poller Starting Up! PID:", os.Getpid())
 	config, err := GetConfig(configFile)
