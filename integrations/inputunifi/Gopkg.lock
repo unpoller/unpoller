@@ -2,10 +2,10 @@
 
 
 [[projects]]
-  name = "github.com/davecgh/go-spew"
-  packages = ["spew"]
-  revision = "8991bc29aa16c548c550c7ff78260e27b9ab7c73"
-  version = "v1.1.1"
+  branch = "master"
+  name = "github.com/golift/unifi"
+  packages = ["."]
+  revision = "24c7eb106b3c9ff4260c88b54c02f0f86301fa75"
 
 [[projects]]
   name = "github.com/influxdata/influxdb"
@@ -14,17 +14,16 @@
     "models",
     "pkg/escape"
   ]
-  revision = "76f907b0fada2f16931e37471da695349fcdf8c6"
-  version = "v1.7.2"
+  revision = "698dbc789aff13c2678357a6b93ff73dd7136571"
+  version = "v1.7.3"
 
 [[projects]]
-  branch = "master"
   name = "github.com/influxdata/platform"
   packages = [
     "models",
     "pkg/escape"
   ]
-  revision = "98469bf07613ffae6f025893761c1e7a5e96e4aa"
+  revision = "0f79e4ea3248354c789cba274542e0a8e55971db"
 
 [[projects]]
   name = "github.com/naoina/go-stringutil"
@@ -53,21 +52,9 @@
   revision = "ba968bfe8b2f7e042a574c888954fccecfa385b4"
   version = "v0.8.1"
 
-[[projects]]
-  name = "github.com/pmezard/go-difflib"
-  packages = ["difflib"]
-  revision = "792786c7400a136282c1664665ae0a8db921c6c2"
-  version = "v1.0.0"
-
-[[projects]]
-  name = "github.com/stretchr/testify"
-  packages = ["assert"]
-  revision = "ffdc059bfe9ce6a4e144ba849dbedead332c6053"
-  version = "v1.3.0"
-
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "3b1d8ae8346fc10f0725163478eab3fa466a2064f4d44077102c5f7651625dc4"
+  inputs-digest = "5fa0fad44ae6516c3c699a60210634ddcc7d36e6b8a10bae25d0efcc001bb768"
   solver-name = "gps-cdcl"
   solver-version = 1
