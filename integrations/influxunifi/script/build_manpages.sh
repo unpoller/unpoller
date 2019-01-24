@@ -8,5 +8,6 @@ for f in cmd/*/README.md;do
     PKGNOCMD="${f#cmd/}"
     PKG="${PKGNOCMD%/README.md}"
     echo "Creating Man Page: ${f} -> ${OUTPUT}${PKG}.1.gz"
+    echo "If this produces an error. Install ronn; something like: sudo gem install ronn"
     ronn < "$f" | gzip -9 > "${OUTPUT}${PKG}.1.gz"
 done
