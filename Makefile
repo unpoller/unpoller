@@ -12,7 +12,7 @@ build:
 linux:
 	for p in $(PACKAGES); do GOOS=linux go build -ldflags "-w -s" $${p}; done
 
-install: man
+install: man test build
 	@echo "If you get errors, you may need sudo."
 	GOBIN=/usr/local/bin go install -ldflags "-w -s" ./...
 	mkdir -p /usr/local/etc/unifi-poller /usr/local/share/man/man1
@@ -43,6 +43,4 @@ man:
 	script/build_manpages.sh ./
 
 deps:
-	rm -rf Godeps vendor
-	godep save ./...
-	godep update ./...
+	dep ensure -update
