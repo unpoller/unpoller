@@ -2,10 +2,10 @@
 
 
 [[projects]]
-  branch = "master"
   name = "github.com/golift/unifi"
   packages = ["."]
   revision = "24c7eb106b3c9ff4260c88b54c02f0f86301fa75"
+  version = "0.9.0"
 
 [[projects]]
   name = "github.com/influxdata/influxdb"
