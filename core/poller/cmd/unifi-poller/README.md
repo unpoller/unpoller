@@ -9,6 +9,7 @@ unifi-poller(1) -- Utility to poll Unifi Metrics and drop them into InfluxDB
 
 * This application polls a Unifi Controller API for Client and Device Metrics.
 * The metrics are then stored in an InfluxDB instance.
+* See the example configuration file for help configuring this application.
 
 ## OPTIONS
 
