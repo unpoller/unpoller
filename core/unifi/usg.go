@@ -7,8 +7,9 @@ import (
 	influx "github.com/influxdata/influxdb/client/v2"
 )
 
-// Points generates a device's datapoints for InfluxDB.
-func (u USG) Points() ([]*influx.Point, error) {
+// Points generates Unifi Gateway datapoints for InfluxDB.
+// These points can be passed directly to influx.
+func (u *USG) Points() ([]*influx.Point, error) {
 	var points []*influx.Point
 	tags := map[string]string{
 		"id":                     u.ID,

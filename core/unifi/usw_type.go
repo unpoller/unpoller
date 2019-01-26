@@ -1,6 +1,6 @@
 package unifi
 
-// USW is a Unifi Switch
+// USW represents all the data from the Ubiquit Controller for a Unifi Switch.
 type USW struct {
 	ID            string  `json:"_id"`
 	UUptime       float64 `json:"_uptime"`

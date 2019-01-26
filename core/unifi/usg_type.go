@@ -2,7 +2,7 @@ package unifi
 
 import "encoding/json"
 
-// USG is a Unifi Security Gateway
+// USG represents all the data from the Ubiquit Controller for a Unifi Security Gateway.
 type USG struct {
 	ID            string  `json:"_id"`
 	UUptime       float64 `json:"_uptime"`

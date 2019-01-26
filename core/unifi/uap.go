@@ -7,8 +7,9 @@ import (
 	influx "github.com/influxdata/influxdb/client/v2"
 )
 
-// Points generates a device's datapoints for InfluxDB.
-func (u UAP) Points() ([]*influx.Point, error) {
+// Points generates Wireless-Access-Point datapoints for InfluxDB.
+// These points can be passed directly to influx.
+func (u *UAP) Points() ([]*influx.Point, error) {
 	/* I generally suck at InfluxDB, so if I got the tags/fields wrong,
 	   please send me a PR or open an Issue to address my faults. Thanks!
 	*/
