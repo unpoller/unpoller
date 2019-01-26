@@ -26,8 +26,8 @@
 
 
 [[constraint]]
-  name = "github.com/influxdata/influxdb"
-  version = "1.7.3"
+  branch = "master"
+  name = "github.com/influxdata/influxdb1-client"
 
 [[constraint]]
   name = "github.com/pkg/errors"

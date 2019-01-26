@@ -4,12 +4,12 @@ import (
 	"strconv"
 	"time"
 
-	influx "github.com/influxdata/influxdb/client/v2"
+	influx "github.com/influxdata/influxdb1-client/v2"
 )
 
 // Points generates Unifi Client datapoints for InfluxDB.
 // These points can be passed directly to influx.
-func (c *UCL) Points() ([]*influx.Point, error) {
+func (c UCL) Points() ([]*influx.Point, error) {
 	var points []*influx.Point
 	// Fix name and hostname fields. Sometimes one or the other is blank.
 	if c.Name == "" && c.Hostname != "" {
