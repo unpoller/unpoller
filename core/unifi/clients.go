@@ -10,6 +10,7 @@ import (
 // Points generates a client's datapoints for InfluxDB.
 func (u UCL) Points() ([]*influx.Point, error) {
 	var points []*influx.Point
+	// Fix name and hostname fields. Sometimes one or the other is blank.
 	if u.Name == "" && u.Hostname != "" {
 		u.Name = u.Hostname
 	} else if u.Hostname == "" && u.Name != "" {

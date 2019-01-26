@@ -221,6 +221,7 @@ func (u UAP) Points() ([]*influx.Point, error) {
 				fields["radio_tx_power"] = s.TxPower
 				fields["radio_tx_retries"] = s.TxRetries
 				fields["user-num_sta"] = s.UserNumSta
+				continue
 			}
 		}
 		for _, s := range u.VapTable {
@@ -254,6 +255,7 @@ func (u UAP) Points() ([]*influx.Point, error) {
 				fields["tx_retries"] = s.TxRetries
 				fields["usage"] = s.Usage
 				tags["wlanconf_id"] = s.WlanconfID
+				continue
 			}
 		}
 		pt, err := influx.NewPoint("uap_radios", tags, fields, time.Now())
