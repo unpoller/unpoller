@@ -1,7 +1,7 @@
-# Unifi
+# Unifi Poller
 
 Collect your Unifi Controller Data and send it to an InfluxDB instance.
-Grafana dashboards included.
+Grafana dashboards included. Updated 2019.
 
 ## Installation
 
@@ -37,19 +37,18 @@ for making this dashboard; it gave me a fantastic start to making my own.
 
 # What now...
 
+- Better Linux support and testing
+
+I only, personally, run this on a Mac 10.13.something. I know others are using
+Linux and it's working, but I need more feedback. Does the unit file work? Are
+you able to stop and start the service? Does the Makefile do the right things?
+
 - I probably suck at InfluxDB.
 
 I don't know what should be a tag and what should be a field. I think
 I did my best, but there's certainly room for improvements in both
-the data input and the Grafana graphs (output).
-
-
-- The USW and USG code needs love.
-
-Up to this point, my focus has been on UAP. I have only included dashboards
-that focus on UAP. I am still working on the other two, but it may be a while
-before I get around to publishing them. Help is appreciated.
-
+the data input and the Grafana graphs (output). I'm always iterating, but
+if you find a deficiency or something that can be improved, let me know.
 
 - Are there other devices that need to be included?
 
@@ -60,18 +59,15 @@ ports, some switches have 10Gb, etc. These are things I do not have data on
 to write code for. If you have these devices, and want them graphed, open an
 Issue and lets discuss.
 
-
 - Better Installation instructions.
 
 If you're a nerd you can probably figure it out. I'd still like some pretty
 pictures and maybe even a Twitch VOD.
 
-
 - Sanity Checking
 
 Did I actually graph the right data in the right way? Some validation would
 be nice.
-
 
 - Radios, Frequencies, Interfaces, vAPs
 
