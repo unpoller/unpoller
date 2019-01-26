@@ -21,7 +21,7 @@ func main() {
 	username := "admin"
 	password := "superSecret1234"
 	URL := "https://127.0.0.1:8443/"
-	uni, err := unifi.AuthController(username, password, URL, false)
+	uni, err := unifi.GetController(username, password, URL, false)
 	if err != nil {
 		log.Fatalln("Error:", err)
 	}

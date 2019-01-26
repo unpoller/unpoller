@@ -13,15 +13,15 @@ import (
 
 const (
 	// ClientPath is Unifi Clients API Path
-	ClientPath = "/api/s/default/stat/sta"
+	ClientPath string = "/api/s/default/stat/sta"
 	// DevicePath is where we get data about Unifi devices.
-	DevicePath = "/api/s/default/stat/device"
+	DevicePath string = "/api/s/default/stat/device"
 	// NetworkPath contains network-configuration data. Not really graphable.
-	NetworkPath = "/api/s/default/rest/networkconf"
+	NetworkPath string = "/api/s/default/rest/networkconf"
 	// UserGroupPath contains usergroup configurations.
-	UserGroupPath = "/api/s/default/rest/usergroup"
+	UserGroupPath string = "/api/s/default/rest/usergroup"
 	// LoginPath is Unifi Controller Login API Path
-	LoginPath = "/api/login"
+	LoginPath string = "/api/login"
 )
 
 // Logger is a base type to deal with changing log outputs.
