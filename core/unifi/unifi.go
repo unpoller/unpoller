@@ -8,7 +8,7 @@ import (
 )
 
 // GetClients returns a response full of clients' data from the Unifi Controller.
-func (u *Unifi) GetClients() ([]UCL, error) {
+func (u *Unifi) GetClients() (*Clients, error) {
 	var response struct {
 		Clients []UCL `json:"data"`
 	}
@@ -28,7 +28,7 @@ func (u *Unifi) GetClients() ([]UCL, error) {
 	} else if err = json.Unmarshal(body, &response); err != nil {
 		return nil, errors.Wrap(err, "json.Unmarshal([]UCL)")
 	}
-	return response.Clients, nil
+	return &Clients{UCLs: response.Clients}, nil
 }
 
 // GetDevices returns a response full of devices' data from the Unifi Controller.

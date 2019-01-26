@@ -34,6 +34,11 @@ type Devices struct {
 	USWs []USW
 }
 
+// Clients conptains a list of all the unifi clients from a controller.
+type Clients struct {
+	UCLs []UCL
+}
+
 // Unifi is what you get in return for providing a password!
 type Unifi struct {
 	*http.Client
