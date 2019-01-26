@@ -24,15 +24,6 @@
 #   go-tests = true
 #   unused-packages = true
 
-
-[[constraint]]
-  branch = "master"
-  name = "github.com/golift/unifi"
-
-[[constraint]]
-  name = "github.com/influxdata/influxdb"
-  version = "1.7.3"
-
 [[constraint]]
   name = "github.com/naoina/toml"
   version = "0.1.1"
