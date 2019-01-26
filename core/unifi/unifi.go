@@ -7,8 +7,8 @@ import (
 	"github.com/pkg/errors"
 )
 
-// GetUnifiClients returns a response full of clients' data from the Unifi Controller.
-func (u *Unifi) GetUnifiClients() ([]UCL, error) {
+// GetClients returns a response full of clients' data from the Unifi Controller.
+func (u *Unifi) GetClients() ([]UCL, error) {
 	var response struct {
 		Clients []UCL `json:"data"`
 	}
@@ -31,8 +31,8 @@ func (u *Unifi) GetUnifiClients() ([]UCL, error) {
 	return response.Clients, nil
 }
 
-// GetUnifiDevices returns a response full of devices' data from the Unifi Controller.
-func (u *Unifi) GetUnifiDevices() (*Devices, error) {
+// GetDevices returns a response full of devices' data from the Unifi Controller.
+func (u *Unifi) GetDevices() (*Devices, error) {
 	var parsed struct {
 		Data []json.RawMessage `json:"data"`
 	}
@@ -52,11 +52,11 @@ func (u *Unifi) GetUnifiDevices() (*Devices, error) {
 	} else if err = json.Unmarshal(body, &parsed); err != nil {
 		return nil, errors.Wrap(err, "json.Unmarshal([]json.RawMessage)")
 	}
-	return u.parseUnifiDevices(parsed.Data), nil
+	return u.parseDevices(parsed.Data), nil
 }
 
-// parseUnifiDevices parses the raw JSON from the Unifi Controller into device structures.
-func (u *Unifi) parseUnifiDevices(data []json.RawMessage) *Devices {
+// parseDevices parses the raw JSON from the Unifi Controller into device structures.
+func (u *Unifi) parseDevices(data []json.RawMessage) *Devices {
 	devices := new(Devices)
 	// Loop each item in the raw JSON message, detect its type and unmarshal it.
 	for i, r := range data {
@@ -73,7 +73,7 @@ func (u *Unifi) parseUnifiDevices(data []json.RawMessage) *Devices {
 		if t, ok := obj["type"].(string); ok {
 			assetType = t
 		}
-		u.dLogf("Unmarshalling Device Type:", assetType)
+		u.dLogf("Unmarshalling Device Type: %v", assetType)
 		// Unmarshal again into the correct type..
 		switch assetType {
 		case "uap":
@@ -95,7 +95,7 @@ func (u *Unifi) parseUnifiDevices(data []json.RawMessage) *Devices {
 			}
 			devices.USWs = append(devices.USWs, usw)
 		default:
-			u.dLogf("unknown asset type -", assetType, "- skipping")
+			u.dLogf("unknown asset type - " + assetType + " - skipping")
 			continue
 		}
 	}

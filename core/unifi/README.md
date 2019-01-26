@@ -28,7 +28,7 @@ func main() {
   // Log with log.Printf or make your own interface that accepts (msg, fmt)
   uni.ErrorLog = log.Printf
   uni.DebugLog = log.Printf
-	clients, err := uni.GetUnifiClients()
+	clients, err := uni.GetClients()
 	if err != nil {
 		log.Fatalln("Error:", err)
 	}
@@ -36,7 +36,7 @@ func main() {
 	for i, client := range clients {
 		log.Println(i+1, client.ID, client.Hostname, client.IP, client.Name, client.LastSeen)
 	}
-	devices, err := uni.GetUnifiDevices()
+	devices, err := uni.GetDevices()
 	if err != nil {
 		log.Fatalln("Error:", err)
 	}

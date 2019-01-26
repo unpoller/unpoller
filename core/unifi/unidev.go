@@ -24,7 +24,7 @@ const (
 	LoginPath = "/api/login"
 )
 
-// Logger is a base type to deal with changing log outs.
+// Logger is a base type to deal with changing log outputs.
 type Logger func(msg string, fmt ...interface{})
 
 // Devices contains a list of all the unifi devices from a controller.
@@ -69,9 +69,9 @@ func (f *FlexInt) UnmarshalJSON(b []byte) error {
 	}
 }
 
-// AuthController creates a http.Client with authenticated cookies.
+// GetController creates a http.Client with authenticated cookies.
 // Used to make additional, authenticated requests to the APIs.
-func AuthController(user, pass, url string, verifySSL bool) (*Unifi, error) {
+func GetController(user, pass, url string, verifySSL bool) (*Unifi, error) {
 	json := `{"username": "` + user + `","password": "` + pass + `"}`
 	jar, err := cookiejar.New(nil)
 	if err != nil {
@@ -103,6 +103,8 @@ func AuthController(user, pass, url string, verifySSL bool) (*Unifi, error) {
 }
 
 // UniReq is a small helper function that adds an Accept header.
+// Use this if you're unmarshalling Unifi data into custom types.
+// And you're doing that... sumbut a pull request with your new struct. :)
 func (u *Unifi) UniReq(apiPath string, params string) (req *http.Request, err error) {
 	if params != "" {
 		req, err = http.NewRequest("POST", u.baseURL+apiPath, bytes.NewBufferString(params))
