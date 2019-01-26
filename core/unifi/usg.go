@@ -4,10 +4,11 @@ import (
 	"strconv"
 	"time"
 
-	influx "github.com/influxdata/influxdb/client/v2"
+	influx "github.com/influxdata/influxdb1-client/v2"
 )
 
-// Points generates a device's datapoints for InfluxDB.
+// Points generates Unifi Gateway datapoints for InfluxDB.
+// These points can be passed directly to influx.
 func (u USG) Points() ([]*influx.Point, error) {
 	var points []*influx.Point
 	tags := map[string]string{

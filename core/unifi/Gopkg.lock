@@ -2,50 +2,56 @@
 
 
 [[projects]]
+  digest = "1:ffe9824d294da03b391f44e1ae8281281b4afc1bdaa9588c9097785e3af10cec"
   name = "github.com/davecgh/go-spew"
   packages = ["spew"]
+  pruneopts = "UT"
   revision = "8991bc29aa16c548c550c7ff78260e27b9ab7c73"
   version = "v1.1.1"
 
 [[projects]]
-  name = "github.com/influxdata/influxdb"
-  packages = [
-    "client/v2",
-    "models",
-    "pkg/escape"
-  ]
-  revision = "698dbc789aff13c2678357a6b93ff73dd7136571"
-  version = "v1.7.3"
-
-[[projects]]
-  name = "github.com/influxdata/platform"
+  branch = "master"
+  digest = "1:50708c8fc92aec981df5c446581cf9f90ba9e2a5692118e0ce75d4534aaa14a2"
+  name = "github.com/influxdata/influxdb1-client"
   packages = [
     "models",
-    "pkg/escape"
+    "pkg/escape",
+    "v2",
   ]
-  revision = "0f79e4ea3248354c789cba274542e0a8e55971db"
+  pruneopts = "UT"
+  revision = "16c852ea613fa2d42fcdccc9a8b0802a8bdc6140"
 
 [[projects]]
+  digest = "1:cf31692c14422fa27c83a05292eb5cbe0fb2775972e8f1f8446a71549bd8980b"
   name = "github.com/pkg/errors"
   packages = ["."]
+  pruneopts = "UT"
   revision = "ba968bfe8b2f7e042a574c888954fccecfa385b4"
   version = "v0.8.1"
 
 [[projects]]
+  digest = "1:0028cb19b2e4c3112225cd871870f2d9cf49b9b4276531f03438a88e94be86fe"
   name = "github.com/pmezard/go-difflib"
   packages = ["difflib"]
+  pruneopts = "UT"
   revision = "792786c7400a136282c1664665ae0a8db921c6c2"
   version = "v1.0.0"
 
 [[projects]]
+  digest = "1:972c2427413d41a1e06ca4897e8528e5a1622894050e2f527b38ddf0f343f759"
   name = "github.com/stretchr/testify"
   packages = ["assert"]
+  pruneopts = "UT"
   revision = "ffdc059bfe9ce6a4e144ba849dbedead332c6053"
   version = "v1.3.0"
 
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "197affc1e5dd8eaa5e70f3a4f3f5ed63d0079ff7fbb632d9036bf985e3c60338"
+  input-imports = [
+    "github.com/influxdata/influxdb1-client/v2",
+    "github.com/pkg/errors",
+    "github.com/stretchr/testify/assert",
+  ]
   solver-name = "gps-cdcl"
   solver-version = 1

@@ -1,6 +1,6 @@
 package unifi
 
-// UAP is a Unifi Access Point.
+// UAP represents all the data from the Ubiquit Controller for a Unifi Access Point.
 type UAP struct {
 	/* This was auto generated and then slowly edited by hand
 	   to get all the data types right and graphable.

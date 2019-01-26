@@ -43,7 +43,7 @@ func TestUniReq(t *testing.T) {
 	u := "/test/path"
 	url := "http://some.url:8443"
 	// Test empty parameters.
-	authReq := &AuthedReq{&http.Client{}, url}
+	authReq := &Unifi{Client: &http.Client{}, baseURL: url}
 	r, err := authReq.UniReq(u, "")
 	a.Nil(err, "newrequest must not produce an error")
 	a.EqualValues(u, r.URL.Path,
@@ -54,7 +54,7 @@ func TestUniReq(t *testing.T) {
 
 	// Test with parameters
 	p := "key1=value9&key2=value7"
-	authReq = &AuthedReq{&http.Client{}, "http://some.url:8443"}
+	authReq = &Unifi{Client: &http.Client{}, baseURL: "http://some.url:8443"}
 	r, err = authReq.UniReq(u, p)
 	a.Nil(err, "newrequest must not produce an error")
 	a.EqualValues(u, r.URL.Path,
@@ -72,7 +72,7 @@ func TestAuthController(t *testing.T) {
 	t.Parallel()
 	a := assert.New(t)
 	url := "http://127.0.0.1:64431"
-	authReq, err := AuthController("user1", "pass2", url, false)
+	authReq, err := GetController("user1", "pass2", url, false)
 	a.NotNil(err)
 	a.EqualValues(url, authReq.baseURL)
 	a.Contains(err.Error(), "authReq.Do(req):", "an invalid destination should product a .Do(req) error.")
