@@ -27,6 +27,9 @@ func main() {
 	if err != nil {
 		log.Fatalln("error:", err)
 	}
+  // Log with log.Printf or make your own interface.
+  uni.ErrorLog = log.Printf
+  uni.DebugLog = log.Printf
 	clients, err := uni.GetUnifiClients()
 	if err != nil {
 		log.Fatalln("error:", err)
