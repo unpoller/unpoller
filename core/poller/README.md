@@ -75,6 +75,11 @@ My access points only seem to have two radios, one interface and vAP per radio.
 I'm not sure if the graphs, as-is, provide enough insight into APs with other
 configurations. Help me figure that out?
 
+- It possibly loses access to the controller at some point.
+
+I noticed metrics stop updating after a while. I think the new code will help
+isolate why this happens. We may need to issue a reconnect and get a new cookie.
+
 # What's it look like?
 
 Here's a picture of the Client dashboard.

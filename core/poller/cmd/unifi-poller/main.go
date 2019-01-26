@@ -25,9 +25,6 @@ func main() {
 	if err != nil {
 		flag.Usage()
 		log.Fatalf("Config Error '%v': %v", configFile, err)
-	} else if log.SetFlags(0); config.Debug {
-		log.SetFlags(log.Lshortfile | log.Lmicroseconds | log.Ldate)
-		log.Println("Debug Logging Enabled")
 	}
 	// Create an authenticated session to the Unifi Controller.
 	device, err := unifi.GetController(config.UnifiUser, config.UnifiPass, config.UnifiBase, config.VerifySSL)
@@ -37,6 +34,11 @@ func main() {
 		log.Println("Authenticated to Unifi Controller @", config.UnifiBase, "as user", config.UnifiUser)
 	}
 	device.ErrorLog = log.Printf
+	if log.SetFlags(0); config.Debug {
+		device.DebugLog = log.Printf
+		log.SetFlags(log.Lshortfile | log.Lmicroseconds | log.Ldate)
+		log.Println("Debug Logging Enabled")
+	}
 	infdb, err := influx.NewHTTPClient(influx.HTTPConfig{
 		Addr:     config.InfluxURL,
 		Username: config.InfluxUser,
@@ -44,9 +46,10 @@ func main() {
 	})
 	if err != nil {
 		log.Fatalln("InfluxDB Error:", err)
-	} else if config.Quiet {
+	}
+	if config.Quiet {
 		// Doing it this way allows debug error logs (line numbers, etc)
-		device.DebugLog = log.Printf
+		device.DebugLog = nil
 	} else {
 		log.Println("Logging Unifi Metrics to InfluXDB @", config.InfluxURL, "as user", config.InfluxUser)
 		log.Println("Polling Unifi Controller, interval:", config.Interval.value)
@@ -96,7 +99,7 @@ func GetConfig(configFile string) (Config, error) {
 
 // PollUnifiController runs forever, polling and pushing.
 func (c *Config) PollUnifiController(infdb influx.Client, uni *unifi.Unifi) {
-	log.Println("Everyting checks out! Beginning Poller Routine.")
+	log.Println("[INFO] Everyting checks out! Beginning Poller Routine.")
 	ticker := time.NewTicker(c.Interval.value)
 	for range ticker.C {
 		if clients, err := uni.GetClients(); err != nil {
@@ -105,12 +108,12 @@ func (c *Config) PollUnifiController(infdb influx.Client, uni *unifi.Unifi) {
 			logErrors([]error{err}, "uni.GetDevices()")
 		} else if bp, err := influx.NewBatchPoints(influx.BatchPointsConfig{Database: c.InfluxDB}); err != nil {
 			logErrors([]error{err}, "influx.NewBatchPoints")
-		} else if errs := batchPoints(devices, clients, bp); errs != nil {
+		} else if errs := batchPoints(devices, clients, bp); errs != nil && hasErr(errs) {
 			logErrors(errs, "asset.Points()")
 		} else if err := infdb.Write(bp); err != nil {
 			logErrors([]error{err}, "infdb.Write(bp)")
 		} else if !c.Quiet {
-			log.Println("Logged Unifi States. Clients:", len(clients.UCLs), "- Wireless APs:",
+			log.Println("[INFO] Logged Unifi States. Clients:", len(clients.UCLs), "- Wireless APs:",
 				len(devices.UAPs), "Gateways:", len(devices.USGs), "Switches:", len(devices.USWs))
 		}
 	}
@@ -141,11 +144,18 @@ func batchPoints(devices *unifi.Devices, clients *unifi.Clients, batchPoints inf
 	return
 }
 
+// hasErr checks a list of errors for a non-nil.
+func hasErr(errs []error) bool {
+	for _, err := range errs {
+		if err != nil {
+			return true
+		}
+	}
+	return false
+}
+
 // logErrors writes a slice of errors, with a prefix, to log-out.
 func logErrors(errs []error, prefix string) {
-	if errs == nil {
-		return
-	}
 	for _, err := range errs {
 		if err != nil {
 			log.Println("[ERROR]", prefix+":", err.Error())
