@@ -60,9 +60,6 @@ func (u *Unifi) parseDevices(data []json.RawMessage) *Devices {
 	devices := new(Devices)
 	// Loop each item in the raw JSON message, detect its type and unmarshal it.
 	for i, r := range data {
-		var usg USG
-		var usw USW
-		var uap UAP
 		// Unamrshal into a map and check "type"
 		var obj map[string]interface{}
 		if err := json.Unmarshal(r, &obj); err != nil {
@@ -77,18 +74,21 @@ func (u *Unifi) parseDevices(data []json.RawMessage) *Devices {
 		// Unmarshal again into the correct type..
 		switch assetType {
 		case "uap":
+			var uap UAP
 			if err := json.Unmarshal(r, &uap); err != nil {
 				u.eLogf("%d: json.Unmarshal([]UAP): %v", i, err)
 				continue
 			}
 			devices.UAPs = append(devices.UAPs, uap)
 		case "ugw", "usg": // in case they ever fix the name in the api.
+			var usg USG
 			if err := json.Unmarshal(r, &usg); err != nil {
 				u.eLogf("%d: json.Unmarshal([]USG): %v", i, err)
 				continue
 			}
 			devices.USGs = append(devices.USGs, usg)
 		case "usw":
+			var usw USW
 			if err := json.Unmarshal(r, &usw); err != nil {
 				u.eLogf("%d: json.Unmarshal([]USW): %v", i, err)
 				continue
