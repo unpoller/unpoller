@@ -43,7 +43,7 @@ func TestUniReq(t *testing.T) {
 	u := "/test/path"
 	url := "http://some.url:8443"
 	// Test empty parameters.
-	authReq := &AuthedReq{&http.Client{}, url}
+	authReq := &AuthedReq{Client: &http.Client{}, baseURL: url}
 	r, err := authReq.UniReq(u, "")
 	a.Nil(err, "newrequest must not produce an error")
 	a.EqualValues(u, r.URL.Path,
@@ -54,7 +54,7 @@ func TestUniReq(t *testing.T) {
 
 	// Test with parameters
 	p := "key1=value9&key2=value7"
-	authReq = &AuthedReq{&http.Client{}, "http://some.url:8443"}
+	authReq = &AuthedReq{Client: &http.Client{}, baseURL: "http://some.url:8443"}
 	r, err = authReq.UniReq(u, p)
 	a.Nil(err, "newrequest must not produce an error")
 	a.EqualValues(u, r.URL.Path,

@@ -4,32 +4,32 @@ import (
 	"bytes"
 	"crypto/tls"
 	"encoding/json"
-	"log"
 	"net/http"
 	"net/http/cookiejar"
 	"strconv"
 
-	influx "github.com/influxdata/influxdb/client/v2"
 	"github.com/pkg/errors"
 )
+
+// Logger is a base type to deal with changing log outs.
+type Logger func(msg string, fmt ...interface{})
 
 // LoginPath is Unifi Controller Login API Path
 const LoginPath = "/api/login"
 
-// Asset provides a common interface to retreive metrics from a device or client.
-// It currently only supports InfluxDB, but could be amended to support other
-// libraries that have a similar interface.
-// This app only uses the .AddPoint/s() methods with the Asset type.
-type Asset interface {
-	// Point() means this is useful to influxdb..
-	Points() ([]*influx.Point, error)
-	// Add more methods to achieve more usefulness from this library.
+// Devices contains a list of all the unifi devices from a controller.
+type Devices struct {
+	UAPs []UAP
+	USGs []USG
+	USWs []USW
 }
 
 // AuthedReq is what you get in return for providing a password!
 type AuthedReq struct {
 	*http.Client
-	baseURL string
+	baseURL  string
+	ErrorLog Logger
+	DebugLog Logger
 }
 
 // FlexInt provides a container and unmarshalling for fields that may be
@@ -67,10 +67,10 @@ func AuthController(user, pass, url string, verifySSL bool) (*AuthedReq, error) 
 	if err != nil {
 		return nil, errors.Wrap(err, "cookiejar.New(nil)")
 	}
-	a := &AuthedReq{&http.Client{
+	a := &AuthedReq{Client: &http.Client{
 		Transport: &http.Transport{TLSClientConfig: &tls.Config{InsecureSkipVerify: !verifySSL}},
 		Jar:       jar,
-	}, url}
+	}, baseURL: url}
 	req, err := a.UniReq(LoginPath, json)
 	if err != nil {
 		return a, errors.Wrap(err, "UniReq(LoginPath, json)")
@@ -80,9 +80,7 @@ func AuthController(user, pass, url string, verifySSL bool) (*AuthedReq, error) 
 		return a, errors.Wrap(err, "authReq.Do(req)")
 	}
 	defer func() {
-		if err := resp.Body.Close(); err != nil {
-			log.Println("resp.Body.Close():", err) // Not fatal. Just log it.
-		}
+		_ = resp.Body.Close()
 	}()
 	if resp.StatusCode != http.StatusOK {
 		return a, errors.Errorf("authentication failed (%v): %v (status: %v/%v)",
@@ -102,4 +100,16 @@ func (a AuthedReq) UniReq(apiPath string, params string) (req *http.Request, err
 		req.Header.Add("Accept", "application/json")
 	}
 	return
+}
+
+func (a AuthedReq) dLogf(msg string, v ...interface{}) {
+	if a.DebugLog != nil {
+		a.DebugLog("[DEBUG] "+msg, v...)
+	}
+}
+
+func (a AuthedReq) eLogf(msg string, v ...interface{}) {
+	if a.ErrorLog != nil {
+		a.ErrorLog("[ERROR] "+msg, v...)
+	}
 }
