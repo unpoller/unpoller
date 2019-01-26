@@ -25,15 +25,15 @@ func main() {
 	if err != nil {
 		log.Fatalln("Error:", err)
 	}
-  // Log with log.Printf or make your own interface that accepts (msg, fmt)
-  uni.ErrorLog = log.Printf
-  uni.DebugLog = log.Printf
+	// Log with log.Printf or make your own interface that accepts (msg, fmt)
+	uni.ErrorLog = log.Printf
+	uni.DebugLog = log.Printf
 	clients, err := uni.GetClients()
 	if err != nil {
 		log.Fatalln("Error:", err)
 	}
-	log.Println(len(clients), "Clients connected:")
-	for i, client := range clients {
+	log.Println(len(clients.UCLs), "Clients connected:")
+	for i, client := range clients.UCLs {
 		log.Println(i+1, client.ID, client.Hostname, client.IP, client.Name, client.LastSeen)
 	}
 	devices, err := uni.GetDevices()
@@ -48,4 +48,5 @@ func main() {
 		log.Println(i+1, uap.Name, uap.IP)
 	}
 }
+
 ```
