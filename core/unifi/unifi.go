@@ -33,7 +33,7 @@ func (u *Unifi) GetClients() (*Clients, error) {
 
 // GetDevices returns a response full of devices' data from the Unifi Controller.
 func (u *Unifi) GetDevices() (*Devices, error) {
-	var parsed struct {
+	var response struct {
 		Data []json.RawMessage `json:"data"`
 	}
 	req, err := u.UniReq(DevicePath, "")
@@ -49,18 +49,17 @@ func (u *Unifi) GetDevices() (*Devices, error) {
 	}()
 	if body, err := ioutil.ReadAll(resp.Body); err != nil {
 		return nil, errors.Wrap(err, "ioutil.ReadAll(resp.Body)")
-	} else if err = json.Unmarshal(body, &parsed); err != nil {
+	} else if err = json.Unmarshal(body, &response); err != nil {
 		return nil, errors.Wrap(err, "json.Unmarshal([]json.RawMessage)")
 	}
-	return u.parseDevices(parsed.Data), nil
+	return u.parseDevices(response.Data), nil
 }
 
 // parseDevices parses the raw JSON from the Unifi Controller into device structures.
 func (u *Unifi) parseDevices(data []json.RawMessage) *Devices {
 	devices := new(Devices)
-	// Loop each item in the raw JSON message, detect its type and unmarshal it.
 	for i, r := range data {
-		// Unamrshal into a map and check "type"
+		// Loop each item in the raw JSON message, detect its type and unmarshal it.
 		var obj map[string]interface{}
 		if err := json.Unmarshal(r, &obj); err != nil {
 			u.eLogf("%d: json.Unmarshal(interfce{}): %v", i, err)
