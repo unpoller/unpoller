@@ -13,9 +13,9 @@ unifi-poller(1) -- Utility to poll Unifi Metrics and drop them into InfluxDB
 
 ## OPTIONS
 
-`unifi-poller [-c <config file>] [-h] [-v]`
+`unifi-poller [-c <config-file>] [-h] [-v]`
 
-    -c, --config <file_path>
+    -c, --config <config-file>
         Provide a configuration file (instead of the default).
 
     -v, --version
