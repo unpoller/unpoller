@@ -77,10 +77,13 @@ func AuthController(user, pass, url string, verifySSL bool) (*Unifi, error) {
 	if err != nil {
 		return nil, errors.Wrap(err, "cookiejar.New(nil)")
 	}
-	u := &Unifi{Client: &http.Client{
-		Transport: &http.Transport{TLSClientConfig: &tls.Config{InsecureSkipVerify: !verifySSL}},
-		Jar:       jar,
-	}, baseURL: url}
+	u := &Unifi{
+		Client: &http.Client{
+			Transport: &http.Transport{TLSClientConfig: &tls.Config{InsecureSkipVerify: !verifySSL}},
+			Jar:       jar,
+		},
+		baseURL: url,
+	}
 	req, err := u.UniReq(LoginPath, json)
 	if err != nil {
 		return u, errors.Wrap(err, "UniReq(LoginPath, json)")

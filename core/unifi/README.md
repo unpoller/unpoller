@@ -23,22 +23,22 @@ func main() {
 	URL := "https://127.0.0.1:8443/"
 	uni, err := unifi.AuthController(username, password, URL, false)
 	if err != nil {
-		log.Fatalln("error:", err)
+		log.Fatalln("Error:", err)
 	}
   // Log with log.Printf or make your own interface that accepts (msg, fmt)
   uni.ErrorLog = log.Printf
   uni.DebugLog = log.Printf
 	clients, err := uni.GetUnifiClients()
 	if err != nil {
-		log.Fatalln("error:", err)
+		log.Fatalln("Error:", err)
 	}
-	log.Println(len(clients), "clients connected:")
+	log.Println(len(clients), "Clients connected:")
 	for i, client := range clients {
 		log.Println(i+1, client.ID, client.Hostname, client.IP, client.Name, client.LastSeen)
 	}
 	devices, err := uni.GetUnifiDevices()
 	if err != nil {
-		log.Fatalln("error:", err)
+		log.Fatalln("Error:", err)
 	}
 	log.Println(len(devices.USWs), "Unifi Switches Found")
 	log.Println(len(devices.USGs), "Unifi Gateways Found")
