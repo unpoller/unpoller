@@ -94,7 +94,7 @@ func (u *Unifi) parseDevices(data []json.RawMessage) *Devices {
 			}
 			devices.USWs = append(devices.USWs, usw)
 		default:
-			u.dLogf("unknown asset type - " + assetType + " - skipping")
+			u.eLogf("unknown asset type - %v - skipping", assetType)
 			continue
 		}
 	}

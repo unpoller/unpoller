@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"net/http/cookiejar"
 	"strconv"
+	"strings"
 
 	"github.com/pkg/errors"
 )
@@ -87,7 +88,9 @@ func GetController(user, pass, url string, verifySSL bool) (*Unifi, error) {
 			Transport: &http.Transport{TLSClientConfig: &tls.Config{InsecureSkipVerify: !verifySSL}},
 			Jar:       jar,
 		},
-		baseURL: url,
+	}
+	if u.baseURL = url; strings.HasSuffix(url, "/") {
+		u.baseURL = url[:len(url)-1]
 	}
 	req, err := u.UniReq(LoginPath, json)
 	if err != nil {
