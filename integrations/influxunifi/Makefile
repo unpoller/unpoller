@@ -1,5 +1,4 @@
 PACKAGES=`find ./cmd -mindepth 1 -maxdepth 1 -type d`
-LIBRARYS=
 BINARY=unifi-poller
 
 all: clean man build
@@ -49,11 +48,11 @@ test: lint
 	for p in $(PACKAGES) $(LIBRARYS); do go test -race -covermode=atomic $${p}; done
 
 lint:
-	goimports -l $(PACKAGES) $(LIBRARYS)
-	gofmt -l $(PACKAGES) $(LIBRARYS)
-	errcheck $(PACKAGES) $(LIBRARYS)
-	golint $(PACKAGES) $(LIBRARYS)
-	go vet $(PACKAGES) $(LIBRARYS)
+	goimports -l $(PACKAGES)
+	gofmt -l $(PACKAGES)
+	errcheck $(PACKAGES)
+	golint $(PACKAGES)
+	go vet $(PACKAGES)
 
 man:
 	script/build_manpages.sh ./
