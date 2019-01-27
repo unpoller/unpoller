@@ -27,15 +27,15 @@ func main() {
 		log.Fatalf("Config Error '%v': %v", configFile, err)
 	}
 	// Create an authenticated session to the Unifi Controller.
-	device, err := unifi.GetController(config.UnifiUser, config.UnifiPass, config.UnifiBase, config.VerifySSL)
+	controller, err := unifi.GetController(config.UnifiUser, config.UnifiPass, config.UnifiBase, config.VerifySSL)
 	if err != nil {
 		log.Fatalln("Unifi Controller Error:", err)
 	} else if !config.Quiet {
 		log.Println("Authenticated to Unifi Controller @", config.UnifiBase, "as user", config.UnifiUser)
 	}
-	device.ErrorLog = log.Printf
+	controller.ErrorLog = log.Printf
 	if log.SetFlags(0); config.Debug {
-		device.DebugLog = log.Printf
+		controller.DebugLog = log.Printf
 		log.SetFlags(log.Lshortfile | log.Lmicroseconds | log.Ldate)
 		log.Println("Debug Logging Enabled")
 	}
@@ -49,12 +49,12 @@ func main() {
 	}
 	if config.Quiet {
 		// Doing it this way allows debug error logs (line numbers, etc)
-		device.DebugLog = nil
+		controller.DebugLog = nil
 	} else {
 		log.Println("Logging Unifi Metrics to InfluXDB @", config.InfluxURL, "as user", config.InfluxUser)
 		log.Println("Polling Unifi Controller, interval:", config.Interval.value)
 	}
-	config.PollUnifiController(infdb, device)
+	config.PollUnifiController(controller, infdb)
 }
 
 func parseFlags() string {
@@ -98,13 +98,13 @@ func GetConfig(configFile string) (Config, error) {
 }
 
 // PollUnifiController runs forever, polling and pushing.
-func (c *Config) PollUnifiController(infdb influx.Client, uni *unifi.Unifi) {
+func (c *Config) PollUnifiController(controller *unifi.Unifi, infdb influx.Client) {
 	log.Println("[INFO] Everyting checks out! Beginning Poller Routine.")
 	ticker := time.NewTicker(c.Interval.value)
 	for range ticker.C {
-		if clients, err := uni.GetClients(); err != nil {
+		if clients, err := controller.GetClients(); err != nil {
 			logErrors([]error{err}, "uni.GetClients()")
-		} else if devices, err := uni.GetDevices(); err != nil {
+		} else if devices, err := controller.GetDevices(); err != nil {
 			logErrors([]error{err}, "uni.GetDevices()")
 		} else if bp, err := influx.NewBatchPoints(influx.BatchPointsConfig{Database: c.InfluxDB}); err != nil {
 			logErrors([]error{err}, "influx.NewBatchPoints")
