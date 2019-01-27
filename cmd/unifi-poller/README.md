@@ -87,8 +87,7 @@ Example Use: `1m`, `5h`, `100ms`, `17s`, `1s45ms`, `1m3s`
 
 ## AUTHOR
 
-* Garrett Bjerkhoel (original code) ~ 2016
-* David Newhall II (rewritten) ~ 4/20/2018
+* David Newhall II (rewritten) ~ 4/20/2018-2019
 
 ## LOCATION
 
