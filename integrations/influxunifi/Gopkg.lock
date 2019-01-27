@@ -2,59 +2,68 @@
 
 
 [[projects]]
+  digest = "1:e7f0acf99afe9a7b03d270164bd2976b687e1aef02ab3a0abd8db0b4de44b817"
   name = "github.com/golift/unifi"
   packages = ["."]
-  revision = "24c7eb106b3c9ff4260c88b54c02f0f86301fa75"
-  version = "0.9.0"
+  pruneopts = "UT"
+  revision = "f8fec42fbe169dceb69f15276a2323fb007a4539"
+  version = "v1.0.0"
 
 [[projects]]
-  name = "github.com/influxdata/influxdb"
-  packages = [
-    "client/v2",
-    "models",
-    "pkg/escape"
-  ]
-  revision = "698dbc789aff13c2678357a6b93ff73dd7136571"
-  version = "v1.7.3"
-
-[[projects]]
-  name = "github.com/influxdata/platform"
+  branch = "master"
+  digest = "1:50708c8fc92aec981df5c446581cf9f90ba9e2a5692118e0ce75d4534aaa14a2"
+  name = "github.com/influxdata/influxdb1-client"
   packages = [
     "models",
-    "pkg/escape"
+    "pkg/escape",
+    "v2",
   ]
-  revision = "0f79e4ea3248354c789cba274542e0a8e55971db"
+  pruneopts = "UT"
+  revision = "16c852ea613fa2d42fcdccc9a8b0802a8bdc6140"
 
 [[projects]]
+  digest = "1:b56c589214f01a5601e0821387db484617392d0042f26234bf2da853a2f498a1"
   name = "github.com/naoina/go-stringutil"
   packages = ["."]
+  pruneopts = "UT"
   revision = "6b638e95a32d0c1131db0e7fe83775cbea4a0d0b"
   version = "v0.1.0"
 
 [[projects]]
+  digest = "1:f58c3d0e46b64878d00652fedba24ee879725191ab919dca7b62586859281c04"
   name = "github.com/naoina/toml"
   packages = [
     ".",
-    "ast"
+    "ast",
   ]
+  pruneopts = "UT"
   revision = "e6f5723bf2a66af014955e0888881314cf294129"
   version = "v0.1.1"
 
 [[projects]]
+  digest = "1:8fd3a15613c7e70cceff3aa03dd57560dba87c4868864e397d5eb2f14addd3f5"
   name = "github.com/ogier/pflag"
   packages = ["."]
+  pruneopts = "UT"
   revision = "32a05c62658bd1d7c7e75cbc8195de5d585fde0f"
   version = "v0.0.1"
 
 [[projects]]
+  digest = "1:cf31692c14422fa27c83a05292eb5cbe0fb2775972e8f1f8446a71549bd8980b"
   name = "github.com/pkg/errors"
   packages = ["."]
+  pruneopts = "UT"
   revision = "ba968bfe8b2f7e042a574c888954fccecfa385b4"
   version = "v0.8.1"
 
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "5fa0fad44ae6516c3c699a60210634ddcc7d36e6b8a10bae25d0efcc001bb768"
+  input-imports = [
+    "github.com/golift/unifi",
+    "github.com/influxdata/influxdb1-client/v2",
+    "github.com/naoina/toml",
+    "github.com/ogier/pflag",
+  ]
   solver-name = "gps-cdcl"
   solver-version = 1
