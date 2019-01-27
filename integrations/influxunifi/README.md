@@ -93,5 +93,6 @@ select multiple to put specific stats side-by-side.
 
 
 ## Copyright & License
+- Copyright © 2016 Garrett Bjerkhoel.
 - Copyright © 2018 David Newhall II.
-- See [LICENSE](LICENSE) for license information.
+- See [MIT-LICENSE](MIT-LICENSE) for license information.
