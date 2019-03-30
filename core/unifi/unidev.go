@@ -75,6 +75,23 @@ func (f *FlexInt) UnmarshalJSON(b []byte) error {
 	}
 }
 
+// FlexBool provides a container and unmarshalling for fields that may be
+// boolean or strings in the Unifi API
+type FlexBool struct {
+	Bool   bool
+	String string
+}
+
+// UnmarshalJSO method converts armed/disarmed, yes/no, active/inactive or 0/1 to true/false.
+// Really it converts ready, up, t, armed, yes, active, enabled, 1, true to true. Anything else is false.
+func (f *FlexBool) UnmarshalJSON(b []byte) error {
+	f.String = strings.Trim(string(b), `"`)
+	f.Bool = f.String == "1" || strings.EqualFold(f.String, "true") || strings.EqualFold(f.String, "yes") ||
+		strings.EqualFold(f.String, "t") || strings.EqualFold(f.String, "armed") || strings.EqualFold(f.String, "active") ||
+		strings.EqualFold(f.String, "enabled") || strings.EqualFold(f.String, "ready") || strings.EqualFold(f.String, "up")
+	return nil
+}
+
 // GetController creates a http.Client with authenticated cookies.
 // Used to make additional, authenticated requests to the APIs.
 func GetController(user, pass, url string, verifySSL bool) (*Unifi, error) {

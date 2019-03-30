@@ -70,7 +70,7 @@ type USG struct {
 		SiteID                 string      `json:"site_id"`
 		TxBytes                float64     `json:"tx_bytes"`
 		TxPackets              float64     `json:"tx_packets"`
-		Up                     string      `json:"up"`
+		Up                     FlexBool    `json:"up"`
 		Vlan                   string      `json:"vlan,omitempty"`
 		VlanEnabled            bool        `json:"vlan_enabled"`
 		DhcpRelayEnabled       bool        `json:"dhcp_relay_enabled,omitempty"`
@@ -110,7 +110,7 @@ type USG struct {
 		TxDropped   float64  `json:"tx_dropped"`
 		TxErrors    float64  `json:"tx_errors"`
 		TxPackets   float64  `json:"tx_packets"`
-		Up          bool     `json:"up"`
+		Up          FlexBool `json:"up"`
 	} `json:"port_table"`
 	Rollupgrade     bool    `json:"rollupgrade"`
 	RxBytes         float64 `json:"rx_bytes"`
@@ -193,7 +193,7 @@ type USG struct {
 		TxErrors         float64  `json:"tx_errors"`
 		TxPackets        float64  `json:"tx_packets"`
 		Type             string   `json:"type"`
-		Up               bool     `json:"up"`
+		Up               FlexBool `json:"up"`
 		Uptime           float64  `json:"uptime"`
 		XputDown         float64  `json:"xput_down"`
 		XputUp           float64  `json:"xput_up"`
@@ -228,7 +228,7 @@ type USG struct {
 		TxErrors    float64  `json:"tx_errors"`
 		TxPackets   float64  `json:"tx_packets"`
 		Type        string   `json:"type"`
-		Up          bool     `json:"up"`
+		Up          FlexBool `json:"up"`
 	} `json:"wan1"`
 	Wan2 struct {
 		BytesR      float64  `json:"bytes-r"`
@@ -255,6 +255,6 @@ type USG struct {
 		TxErrors    float64  `json:"tx_errors"`
 		TxPackets   float64  `json:"tx_packets"`
 		Type        string   `json:"type"`
-		Up          bool     `json:"up"`
+		Up          FlexBool `json:"up"`
 	} `json:"wan2"`
 }
