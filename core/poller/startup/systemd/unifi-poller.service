@@ -5,7 +5,7 @@ After=network.target
 Requires=network.target
 
 [Service]
-ExecStart=/usr/local/bin/unifi-poller ---config=/usr/local/etc/unifi-poller/up.conf
+ExecStart=/usr/local/bin/unifi-poller --config=/usr/local/etc/unifi-poller/up.conf
 Restart=always
 StandardOutput=syslog
 StandardError=syslog
