@@ -5,6 +5,7 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/golift/unifi"
@@ -86,6 +87,7 @@ func GetConfig(configFile string) (Config, error) {
 		Debug:      defaultDebug,
 		Quiet:      defaultQuiet,
 		Interval:   Dur{value: defaultInterval},
+		Sites:      []string{"default"},
 	}
 	if buf, err := ioutil.ReadFile(configFile); err != nil {
 		return config, err
@@ -102,9 +104,11 @@ func (c *Config) PollUnifiController(controller *unifi.Unifi, infdb influx.Clien
 	log.Println("[INFO] Everyting checks out! Beginning Poller Routine.")
 	ticker := time.NewTicker(c.Interval.value)
 	for range ticker.C {
-		if clients, err := controller.GetClients(); err != nil {
+		if sites, err := filterSites(controller, c.Sites); err != nil {
+			logErrors([]error{err}, "uni.GetSites()")
+		} else if clients, err := controller.GetClients(sites); err != nil {
 			logErrors([]error{err}, "uni.GetClients()")
-		} else if devices, err := controller.GetDevices(); err != nil {
+		} else if devices, err := controller.GetDevices(sites); err != nil {
 			logErrors([]error{err}, "uni.GetDevices()")
 		} else if bp, err := influx.NewBatchPoints(influx.BatchPointsConfig{Database: c.InfluxDB}); err != nil {
 			logErrors([]error{err}, "influx.NewBatchPoints")
@@ -113,10 +117,29 @@ func (c *Config) PollUnifiController(controller *unifi.Unifi, infdb influx.Clien
 		} else if err := infdb.Write(bp); err != nil {
 			logErrors([]error{err}, "infdb.Write(bp)")
 		} else if !c.Quiet {
-			log.Println("[INFO] Logged Unifi States. Clients:", len(clients.UCLs), "- Wireless APs:",
-				len(devices.UAPs), "Gateways:", len(devices.USGs), "Switches:", len(devices.USWs))
+			log.Printf("[INFO] Logged Unifi States. Sites: %d Clients: %d, Wireless APs: %d, Gateways: %d, Switches: %d",
+				len(sites), len(clients.UCLs), len(devices.UAPs), len(devices.USGs), len(devices.USWs))
 		}
 	}
+}
+
+// filterSites returns a list of sites to fetch data for.
+// Omits requested but unconfigured sites.
+func filterSites(controller *unifi.Unifi, filter []string) ([]string, error) {
+	sites, err := controller.GetSites()
+	if err != nil {
+		return filter, err
+	} else if len(filter) < 1 || StringInSlice("all", filter) {
+		return sites, nil
+	}
+	output := []string{}
+	for _, s := range filter {
+		// Do not return requested sites that are not configured.
+		if StringInSlice(s, sites) {
+			output = append(output, s)
+		}
+	}
+	return output, nil
 }
 
 // batchPoints combines all device and client data into influxdb data points.
@@ -161,4 +184,14 @@ func logErrors(errs []error, prefix string) {
 			log.Println("[ERROR]", prefix+":", err.Error())
 		}
 	}
+}
+
+// StringInSlice returns true if a string is in a slice.
+func StringInSlice(str string, slc []string) bool {
+	for _, s := range slc {
+		if strings.EqualFold(s, str) {
+			return true
+		}
+	}
+	return false
 }
