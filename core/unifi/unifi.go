@@ -10,15 +10,15 @@ import (
 )
 
 // GetClients returns a response full of clients' data from the Unifi Controller.
-func (u *Unifi) GetClients(sites []string) (*Clients, error) {
+func (u *Unifi) GetClients(sites []Site) (*Clients, error) {
 	var data []UCL
 	for _, site := range sites {
 		var response struct {
 			Data []UCL `json:"data"`
 		}
-		u.dLogf("Polling Site '%s' Clients", site)
+		u.dLogf("Polling Site '%s' (%s) Clients", site.Name, site.Desc)
 		u.dLogf("Unmarshalling Device Type: ucl")
-		clientPath := fmt.Sprintf(ClientPath, site)
+		clientPath := fmt.Sprintf(ClientPath, site.Name)
 		if err := u.GetData(clientPath, &response); err != nil {
 			return nil, err
 		}
@@ -28,14 +28,14 @@ func (u *Unifi) GetClients(sites []string) (*Clients, error) {
 }
 
 // GetDevices returns a response full of devices' data from the Unifi Controller.
-func (u *Unifi) GetDevices(sites []string) (*Devices, error) {
+func (u *Unifi) GetDevices(sites []Site) (*Devices, error) {
 	var data []json.RawMessage
 	for _, site := range sites {
-		u.dLogf("Polling Site '%s' Devices", site)
+		u.dLogf("Polling Site '%s' (%s) Devices", site.Name, site.Desc)
 		var response struct {
 			Data []json.RawMessage `json:"data"`
 		}
-		devicePath := fmt.Sprintf(DevicePath, site)
+		devicePath := fmt.Sprintf(DevicePath, site.Name)
 		if err := u.GetData(devicePath, &response); err != nil {
 			return nil, err
 		}
@@ -44,23 +44,26 @@ func (u *Unifi) GetDevices(sites []string) (*Devices, error) {
 	return u.parseDevices(data), nil
 }
 
+// Site represents a site's data. There are more pieces to this.
+type Site struct {
+	Name string `json:"name"`
+	Desc string `json:"desc"`
+}
+
 // GetSites returns a list of configured sites on the Unifi controller.
-func (u *Unifi) GetSites() ([]string, error) {
+func (u *Unifi) GetSites() ([]Site, error) {
 	var response struct {
-		Data []struct {
-			// This is the only field we need. There are others.
-			Name string `json:"name"`
-		} `json:"data"`
+		Data []Site `json:"data"`
 	}
 	if err := u.GetData(SiteList, &response); err != nil {
 		return nil, err
 	}
-	var output []string
+	var sites []string
 	for i := range response.Data {
-		output = append(output, response.Data[i].Name)
+		sites = append(sites, response.Data[i].Name)
 	}
-	u.dLogf("Found %d sites: %s", len(output), strings.Join(output, ","))
-	return output, nil
+	u.dLogf("Found %d sites: %s", len(sites), strings.Join(sites, ","))
+	return response.Data, nil
 }
 
 // GetData makes a unifi request and unmarshal the response into a provided pointer.
