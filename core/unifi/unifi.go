@@ -2,57 +2,83 @@ package unifi
 
 import (
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
+	"strings"
 
 	"github.com/pkg/errors"
 )
 
 // GetClients returns a response full of clients' data from the Unifi Controller.
-func (u *Unifi) GetClients() (*Clients, error) {
-	var response struct {
-		Clients []UCL `json:"data"`
+func (u *Unifi) GetClients(sites []string) (*Clients, error) {
+	var data []UCL
+	for _, site := range sites {
+		var response struct {
+			Data []UCL `json:"data"`
+		}
+		clientPath := fmt.Sprintf(ClientPath, site)
+		if err := u.GetData(clientPath, &response); err != nil {
+			return nil, err
+		}
+		data = append(data, response.Data...)
 	}
-	req, err := u.UniReq(ClientPath, "")
-	if err != nil {
-		return nil, errors.Wrap(err, "c.UniReq(ClientPath)")
-	}
-	resp, err := u.Do(req)
-	if err != nil {
-		return nil, errors.Wrap(err, "c.Do(req)")
-	}
-	defer func() {
-		_ = resp.Body.Close()
-	}()
-	if body, err := ioutil.ReadAll(resp.Body); err != nil {
-		return nil, errors.Wrap(err, "ioutil.ReadAll(resp.Body)")
-	} else if err = json.Unmarshal(body, &response); err != nil {
-		return nil, errors.Wrap(err, "json.Unmarshal([]UCL)")
-	}
-	return &Clients{UCLs: response.Clients}, nil
+	return &Clients{UCLs: data}, nil
 }
 
 // GetDevices returns a response full of devices' data from the Unifi Controller.
-func (u *Unifi) GetDevices() (*Devices, error) {
-	var response struct {
-		Data []json.RawMessage `json:"data"`
+func (u *Unifi) GetDevices(sites []string) (*Devices, error) {
+	var data []json.RawMessage
+	for _, site := range sites {
+		var response struct {
+			Data []json.RawMessage `json:"data"`
+		}
+		devicePath := fmt.Sprintf(DevicePath, site)
+		if err := u.GetData(devicePath, &response); err != nil {
+			return nil, err
+		}
+		data = append(data, response.Data...)
 	}
-	req, err := u.UniReq(DevicePath, "")
+	return u.parseDevices(data), nil
+}
+
+// GetSites returns a list of configured sites on the Unifi controller.
+func (u *Unifi) GetSites() ([]string, error) {
+	var response struct {
+		Data []struct {
+			// This is the only field we need. There are others.
+			Name string `json:"name"`
+		} `json:"data"`
+	}
+	if err := u.GetData(SiteList, &response); err != nil {
+		return nil, err
+	}
+	var output []string
+	for i := range response.Data {
+		output = append(output, response.Data[i].Name)
+	}
+	u.dLogf("Found %d sites: %v", len(output), strings.Join(output, ","))
+	return output, nil
+}
+
+// GetData makes a unifi request and unmarshal the response into a provided pointer.
+func (u *Unifi) GetData(methodPath string, v interface{}) error {
+	req, err := u.UniReq(methodPath, "")
 	if err != nil {
-		return nil, errors.Wrap(err, "c.UniReq(DevicePath)")
+		return errors.Wrapf(err, "c.UniReq(%v)", methodPath)
 	}
 	resp, err := u.Do(req)
 	if err != nil {
-		return nil, errors.Wrap(err, "c.Do(req)")
+		return errors.Wrapf(err, "c.Do(%v)", methodPath)
 	}
 	defer func() {
 		_ = resp.Body.Close()
 	}()
 	if body, err := ioutil.ReadAll(resp.Body); err != nil {
-		return nil, errors.Wrap(err, "ioutil.ReadAll(resp.Body)")
-	} else if err = json.Unmarshal(body, &response); err != nil {
-		return nil, errors.Wrap(err, "json.Unmarshal([]json.RawMessage)")
+		return errors.Wrapf(err, "ioutil.ReadAll(%v)", methodPath)
+	} else if err = json.Unmarshal(body, v); err != nil {
+		return errors.Wrapf(err, "json.Unmarshal(%v)", methodPath)
 	}
-	return u.parseDevices(response.Data), nil
+	return nil
 }
 
 // parseDevices parses the raw JSON from the Unifi Controller into device structures.
