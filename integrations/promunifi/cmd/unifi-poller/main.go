@@ -125,21 +125,22 @@ func (c *Config) PollUnifiController(controller *unifi.Unifi, infdb influx.Clien
 
 // filterSites returns a list of sites to fetch data for.
 // Omits requested but unconfigured sites.
-func filterSites(controller *unifi.Unifi, filter []string) ([]string, error) {
+func filterSites(controller *unifi.Unifi, filter []string) ([]unifi.Site, error) {
 	sites, err := controller.GetSites()
 	if err != nil {
-		return filter, err
+		return []unifi.Site{{Name: "default", Desc: "DEFAULT"}}, err
 	} else if len(filter) < 1 || StringInSlice("all", filter) {
 		return sites, nil
 	}
-	output := []string{}
-	for _, s := range filter {
-		// Do not return requested sites that are not configured.
-		if StringInSlice(s, sites) {
-			output = append(output, s)
+	var i int
+	for _, s := range sites {
+		// Only include valid sites in the request filter.
+		if StringInSlice(s.Name, filter) {
+			sites[i] = s
+			i++
 		}
 	}
-	return output, nil
+	return sites[:i], nil
 }
 
 // batchPoints combines all device and client data into influxdb data points.
