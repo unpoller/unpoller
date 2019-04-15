@@ -32,7 +32,8 @@ unifi-poller(1) -- Utility to poll Unifi Metrics and drop them into InfluxDB
 
     `sites`          default: ["default"]
         This list of strings should represent the names of sites on the unifi
-        controller that should be polled for data.
+        controller that will be polled for data. Pass `all` in the list to
+        poll all sites.
 
     `interval`       default: 30s
         How often to poll the controller for updated client and device data.
