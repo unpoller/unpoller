@@ -5,6 +5,7 @@
 
 # If the controller has more than one site, specify which sites to poll here.
 # If only one site, "default" is likely the correct name.
+# Set this to ["all"] to poll all sites, no matter their names.
 #sites = ["default"]
 
 # The Unifi Controller only updates traffic stats about every 30 seconds.
