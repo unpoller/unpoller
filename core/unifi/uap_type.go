@@ -152,7 +152,7 @@ type UAP struct {
 		Radio       string  `json:"radio"`
 		State       string  `json:"state"`
 		TxPackets   float64 `json:"tx_packets"`
-		TxPower     float64 `json:"tx_power"`
+		TxPower     FlexInt `json:"tx_power"`
 		TxRetries   float64 `json:"tx_retries"`
 		UserNumSta  float64 `json:"user-num_sta"`
 	} `json:"radio_table_stats"`
@@ -341,7 +341,7 @@ type UAP struct {
 		TxLatencyMax        float64 `json:"tx_latency_max"`
 		TxLatencyMin        float64 `json:"tx_latency_min"`
 		TxPackets           float64 `json:"tx_packets"`
-		TxPower             int     `json:"tx_power"`
+		TxPower             FlexInt `json:"tx_power"`
 		TxRetries           int     `json:"tx_retries"`
 		Up                  bool    `json:"up"`
 		Usage               string  `json:"usage"`

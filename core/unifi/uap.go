@@ -219,7 +219,7 @@ func (u UAP) Points() ([]*influx.Point, error) {
 				fields["radio"] = s.Radio
 				fields["state"] = s.State
 				fields["radio_tx_packets"] = s.TxPackets
-				fields["radio_tx_power"] = s.TxPower
+				fields["radio_tx_power"] = s.TxPower.Number
 				fields["radio_tx_retries"] = s.TxRetries
 				fields["user-num_sta"] = s.UserNumSta
 				break
@@ -253,7 +253,7 @@ func (u UAP) Points() ([]*influx.Point, error) {
 				fields["vap_tx_latency_max"] = s.TxLatencyMax
 				fields["vap_tx_latency_min"] = s.TxLatencyMin
 				fields["vap_tx_packets"] = s.TxPackets
-				fields["vap_tx_power"] = s.TxPower
+				fields["vap_tx_power"] = s.TxPower.Number
 				fields["vap_tx_retries"] = s.TxRetries
 				fields["usage"] = s.Usage
 				break
