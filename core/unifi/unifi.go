@@ -16,6 +16,8 @@ func (u *Unifi) GetClients(sites []string) (*Clients, error) {
 		var response struct {
 			Data []UCL `json:"data"`
 		}
+		u.dLogf("Polling Site '%s' Clients", site)
+		u.dLogf("Unmarshalling Device Type: ucl")
 		clientPath := fmt.Sprintf(ClientPath, site)
 		if err := u.GetData(clientPath, &response); err != nil {
 			return nil, err
@@ -29,6 +31,7 @@ func (u *Unifi) GetClients(sites []string) (*Clients, error) {
 func (u *Unifi) GetDevices(sites []string) (*Devices, error) {
 	var data []json.RawMessage
 	for _, site := range sites {
+		u.dLogf("Polling Site '%s' Devices", site)
 		var response struct {
 			Data []json.RawMessage `json:"data"`
 		}
@@ -56,7 +59,7 @@ func (u *Unifi) GetSites() ([]string, error) {
 	for i := range response.Data {
 		output = append(output, response.Data[i].Name)
 	}
-	u.dLogf("Found %d sites: %v", len(output), strings.Join(output, ","))
+	u.dLogf("Found %d sites: %s", len(output), strings.Join(output, ","))
 	return output, nil
 }
 
@@ -64,19 +67,19 @@ func (u *Unifi) GetSites() ([]string, error) {
 func (u *Unifi) GetData(methodPath string, v interface{}) error {
 	req, err := u.UniReq(methodPath, "")
 	if err != nil {
-		return errors.Wrapf(err, "c.UniReq(%v)", methodPath)
+		return errors.Wrapf(err, "c.UniReq(%s)", methodPath)
 	}
 	resp, err := u.Do(req)
 	if err != nil {
-		return errors.Wrapf(err, "c.Do(%v)", methodPath)
+		return errors.Wrapf(err, "c.Do(%s)", methodPath)
 	}
 	defer func() {
 		_ = resp.Body.Close()
 	}()
 	if body, err := ioutil.ReadAll(resp.Body); err != nil {
-		return errors.Wrapf(err, "ioutil.ReadAll(%v)", methodPath)
+		return errors.Wrapf(err, "ioutil.ReadAll(%s)", methodPath)
 	} else if err = json.Unmarshal(body, v); err != nil {
-		return errors.Wrapf(err, "json.Unmarshal(%v)", methodPath)
+		return errors.Wrapf(err, "json.Unmarshal(%s)", methodPath)
 	}
 	return nil
 }
