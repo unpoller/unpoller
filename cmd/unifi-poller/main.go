@@ -128,7 +128,7 @@ func (c *Config) PollUnifiController(controller *unifi.Unifi, infdb influx.Clien
 func filterSites(controller *unifi.Unifi, filter []string) ([]unifi.Site, error) {
 	sites, err := controller.GetSites()
 	if err != nil {
-		return []unifi.Site{{Name: "default", Desc: "DEFAULT"}}, err
+		return nil, err
 	} else if len(filter) < 1 || StringInSlice("all", filter) {
 		return sites, nil
 	}
