@@ -10,14 +10,13 @@ import (
 // Points generates Unifi Gateway datapoints for InfluxDB.
 // These points can be passed directly to influx.
 func (u USG) Points() ([]*influx.Point, error) {
-	var points []*influx.Point
 	tags := map[string]string{
 		"id":                     u.ID,
 		"mac":                    u.Mac,
 		"device_type":            u.Stat.O,
 		"device_oid":             u.Stat.Oid,
 		"site_id":                u.SiteID,
-		"addopted":               strconv.FormatBool(u.Adopted),
+		"adopted":                strconv.FormatBool(u.Adopted),
 		"name":                   u.Name,
 		"adopt_ip":               u.AdoptIP,
 		"adopt_url":              u.AdoptURL,
@@ -92,7 +91,7 @@ func (u USG) Points() ([]*influx.Point, error) {
 		"wan1_rx_packets":         u.Wan1.RxPackets,
 		"wan1_type":               u.Wan1.Type,
 		"wan1_speed":              u.Wan1.Speed,
-		"wan1_up":                 u.Wan1.Up.Bool,
+		"wan1_up":                 u.Wan1.Up.Val,
 		"wan1_tx_bytes":           u.Wan1.TxBytes,
 		"wan1_tx_bytes-r":         u.Wan1.TxBytesR,
 		"wan1_tx_dropped":         u.Wan1.TxDropped,
@@ -130,7 +129,7 @@ func (u USG) Points() ([]*influx.Point, error) {
 	if err != nil {
 		return nil, err
 	}
-	points = append(points, pt)
+	points := []*influx.Point{pt}
 	for _, p := range u.NetworkTable {
 		tags := map[string]string{
 			"device_name":               u.Name,
@@ -170,7 +169,7 @@ func (u USG) Points() ([]*influx.Point, error) {
 			"rx_packets":             p.RxPackets,
 			"tx_bytes":               p.TxBytes,
 			"tx_packets":             p.TxPackets,
-			"up":                     p.Up.String,
+			"up":                     p.Up.Txt,
 			"vlan":                   p.Vlan,
 			"dhcpd_ntp_1":            p.DhcpdNtp1,
 			"dhcpd_unifi_controller": p.DhcpdUnifiController,
@@ -183,5 +182,5 @@ func (u USG) Points() ([]*influx.Point, error) {
 		}
 		points = append(points, pt)
 	}
-	return points, err
+	return points, nil
 }

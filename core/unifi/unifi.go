@@ -1,13 +1,62 @@
+// Package unifi provides a set of types to unload (unmarshal) Unifi Ubiquiti
+// controller data. Also provided are methods to easily get data for devices -
+// things like access points and switches, and for clients - the things
+// connected to those access points and switches. As a bonus, each device and
+// client type provided has an attached method to create InfluxDB datapoints.
 package unifi
 
 import (
+	"bytes"
+	"crypto/tls"
 	"encoding/json"
 	"fmt"
+	"io"
 	"io/ioutil"
+	"net/http"
+	"net/http/cookiejar"
 	"strings"
 
 	"github.com/pkg/errors"
 )
+
+// NewUnifi creates a http.Client with authenticated cookies.
+// Used to make additional, authenticated requests to the APIs.
+// Start here.
+func NewUnifi(user, pass, url string, verifySSL bool) (*Unifi, error) {
+	jar, err := cookiejar.New(nil)
+	if err != nil {
+		return nil, errors.Wrap(err, "cookiejar.New(nil)")
+	}
+	u := &Unifi{baseURL: strings.TrimRight(url, "/"),
+		Client: &http.Client{
+			Transport: &http.Transport{TLSClientConfig: &tls.Config{InsecureSkipVerify: !verifySSL}},
+			Jar:       jar,
+		},
+	}
+	return u, u.getController(user, pass)
+}
+
+// getController is a helper method to make testsing a bit easier.
+func (u *Unifi) getController(user, pass string) error {
+	// magic login.
+	req, err := u.UniReq(LoginPath, `{"username": "`+user+`","password": "`+pass+`"}`)
+	if err != nil {
+		return errors.Wrap(err, "UniReq(LoginPath, json)")
+	}
+	resp, err := u.Do(req)
+	if err != nil {
+		return errors.Wrap(err, "authReq.Do(req)")
+	}
+	defer func() {
+		_, _ = io.Copy(ioutil.Discard, resp.Body) // avoid leaking.
+		_ = resp.Body.Close()
+	}()
+	if resp.StatusCode != http.StatusOK {
+		return errors.Errorf("authentication failed (user: %s): %s (status: %d/%s)",
+			user, u.baseURL+LoginPath, resp.StatusCode, resp.Status)
+	}
+	return nil
+}
 
 // GetClients returns a response full of clients' data from the Unifi Controller.
 func (u *Unifi) GetClients(sites []Site) (*Clients, error) {
@@ -42,12 +91,6 @@ func (u *Unifi) GetDevices(sites []Site) (*Devices, error) {
 		data = append(data, response.Data...)
 	}
 	return u.parseDevices(data), nil
-}
-
-// Site represents a site's data. There are more pieces to this.
-type Site struct {
-	Name string `json:"name"`
-	Desc string `json:"desc"`
 }
 
 // GetSites returns a list of configured sites on the Unifi controller.
@@ -87,55 +130,18 @@ func (u *Unifi) GetData(methodPath string, v interface{}) error {
 	return nil
 }
 
-// parseDevices parses the raw JSON from the Unifi Controller into device structures.
-func (u *Unifi) parseDevices(data []json.RawMessage) *Devices {
-	devices := new(Devices)
-	for _, r := range data {
-		// Loop each item in the raw JSON message, detect its type and unmarshal it.
-		var obj map[string]interface{}
-		var uap UAP
-		var usg USG
-		var usw USW
-
-		if u.unmarshalDevice("interface{}", &obj, r) != nil {
-			continue
-		}
-		assetType := "<missing>"
-		if t, ok := obj["type"].(string); ok {
-			assetType = t
-		}
-		u.dLogf("Unmarshalling Device Type: %v", assetType)
-		switch assetType { // Unmarshal again into the correct type..
-		case "uap":
-			if u.unmarshalDevice(assetType, &uap, r) == nil {
-				devices.UAPs = append(devices.UAPs, uap)
-			}
-		case "ugw", "usg": // in case they ever fix the name in the api.
-			if u.unmarshalDevice(assetType, &usg, r) == nil {
-				devices.USGs = append(devices.USGs, usg)
-			}
-		case "usw":
-			if u.unmarshalDevice(assetType, &usw, r) == nil {
-				devices.USWs = append(devices.USWs, usw)
-			}
-		default:
-			u.eLogf("unknown asset type - %v - skipping", assetType)
-			continue
-		}
+// UniReq is a small helper function that adds an Accept header.
+// Use this if you're unmarshalling Unifi data into custom types.
+// And if you're doing that... sumbut a pull request with your new struct. :)
+// This is a helper method that is exposed for convenience.
+func (u *Unifi) UniReq(apiPath string, params string) (req *http.Request, err error) {
+	if params != "" {
+		req, err = http.NewRequest("POST", u.baseURL+apiPath, bytes.NewBufferString(params))
+	} else {
+		req, err = http.NewRequest("GET", u.baseURL+apiPath, nil)
 	}
-	return devices
-}
-
-// unmarshalDevice handles logging for the unmarshal operations in parseDevices().
-func (u *Unifi) unmarshalDevice(device string, ptr interface{}, payload json.RawMessage) error {
-	err := json.Unmarshal(payload, ptr)
-	if err != nil {
-		u.eLogf("json.Unmarshal(%v): %v", device, err)
-		u.eLogf("Enable Debug Logging to output the failed payload.")
-		json, err := payload.MarshalJSON()
-		u.dLogf("Failed Payload: %s (marshal err: %v)", json, err)
-		u.dLogf("The above payload can prove useful during torubleshooting when you open an Issue:")
-		u.dLogf("==- https://github.com/golift/unifi/issues/new -==")
+	if err == nil {
+		req.Header.Add("Accept", "application/json")
 	}
-	return err
+	return
 }

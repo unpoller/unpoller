@@ -10,7 +10,6 @@ import (
 // Points generates Unifi Switch datapoints for InfluxDB.
 // These points can be passed directly to influx.
 func (u USW) Points() ([]*influx.Point, error) {
-	var points []*influx.Point
 	tags := map[string]string{
 		"id":                     u.ID,
 		"mac":                    u.Mac,
@@ -18,7 +17,7 @@ func (u USW) Points() ([]*influx.Point, error) {
 		"device_oid":             u.Stat.Oid,
 		"site_id":                u.SiteID,
 		"name":                   u.Name,
-		"addopted":               strconv.FormatBool(u.Adopted),
+		"adopted":                strconv.FormatBool(u.Adopted),
 		"adopt_ip":               u.AdoptIP,
 		"adopt_url":              u.AdoptURL,
 		"cfgversion":             u.Cfgversion,
@@ -112,8 +111,8 @@ func (u USW) Points() ([]*influx.Point, error) {
 		// Add the port stats too.
 	}
 	pt, err := influx.NewPoint("usw", tags, fields, time.Now())
-	if err == nil {
-		points = append(points, pt)
+	if err != nil {
+		return nil, err
 	}
-	return points, err
+	return []*influx.Point{pt}, nil
 }

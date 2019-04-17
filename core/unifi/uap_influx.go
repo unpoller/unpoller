@@ -13,7 +13,6 @@ func (u UAP) Points() ([]*influx.Point, error) {
 	/* I generally suck at InfluxDB, so if I got the tags/fields wrong,
 	   please send me a PR or open an Issue to address my faults. Thanks!
 	*/
-	var points []*influx.Point
 	tags := map[string]string{
 		"id":                      u.ID,
 		"mac":                     u.Mac,
@@ -22,7 +21,7 @@ func (u UAP) Points() ([]*influx.Point, error) {
 		"device_ap":               u.Stat.Ap,
 		"site_id":                 u.SiteID,
 		"name":                    u.Name,
-		"addopted":                strconv.FormatBool(u.Adopted),
+		"adopted":                 strconv.FormatBool(u.Adopted),
 		"bandsteering_mode":       u.BandsteeringMode,
 		"board_rev":               strconv.Itoa(u.BoardRev),
 		"cfgversion":              u.Cfgversion,
@@ -63,7 +62,7 @@ func (u UAP) Points() ([]*influx.Point, error) {
 		"rx_bytes-d":                 u.RxBytesD,
 		"tx_bytes":                   u.TxBytes,
 		"tx_bytes-d":                 u.TxBytesD,
-		"uptime":                     u.Uptime.Number,
+		"uptime":                     u.Uptime.Val,
 		"considered_lost_at":         u.ConsideredLostAt,
 		"next_heartbeat_at":          u.NextHeartbeatAt,
 		"scanning":                   u.Scanning,
@@ -174,7 +173,7 @@ func (u UAP) Points() ([]*influx.Point, error) {
 	if err != nil {
 		return nil, err
 	}
-	points = append(points, pt)
+	points := []*influx.Point{pt}
 	for _, p := range u.RadioTable {
 		tags := map[string]string{
 			"device_name":  u.Name,
@@ -182,7 +181,7 @@ func (u UAP) Points() ([]*influx.Point, error) {
 			"device_mac":   u.Mac,
 			"name":         p.Name,
 			"wlangroup_id": p.WlangroupID,
-			"channel":      p.Channel.String,
+			"channel":      p.Channel.Txt,
 			"radio":        p.Radio,
 		}
 		fields := map[string]interface{}{
@@ -197,7 +196,7 @@ func (u UAP) Points() ([]*influx.Point, error) {
 			"min_txpower":          p.MinTxpower,
 			"nss":                  p.Nss,
 			"radio_caps":           p.RadioCaps,
-			"tx_power":             p.TxPower.Number,
+			"tx_power":             p.TxPower.Val,
 			"tx_power_mode":        p.TxPowerMode,
 		}
 
@@ -219,7 +218,7 @@ func (u UAP) Points() ([]*influx.Point, error) {
 				fields["radio"] = s.Radio
 				fields["state"] = s.State
 				fields["radio_tx_packets"] = s.TxPackets
-				fields["radio_tx_power"] = s.TxPower.Number
+				fields["radio_tx_power"] = s.TxPower.Val
 				fields["radio_tx_retries"] = s.TxRetries
 				fields["user-num_sta"] = s.UserNumSta
 				break
@@ -253,7 +252,7 @@ func (u UAP) Points() ([]*influx.Point, error) {
 				fields["vap_tx_latency_max"] = s.TxLatencyMax
 				fields["vap_tx_latency_min"] = s.TxLatencyMin
 				fields["vap_tx_packets"] = s.TxPackets
-				fields["vap_tx_power"] = s.TxPower.Number
+				fields["vap_tx_power"] = s.TxPower.Val
 				fields["vap_tx_retries"] = s.TxRetries
 				fields["usage"] = s.Usage
 				break
