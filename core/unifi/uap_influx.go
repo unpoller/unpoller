@@ -13,7 +13,6 @@ func (u UAP) Points() ([]*influx.Point, error) {
 	/* I generally suck at InfluxDB, so if I got the tags/fields wrong,
 	   please send me a PR or open an Issue to address my faults. Thanks!
 	*/
-	var points []*influx.Point
 	tags := map[string]string{
 		"id":                      u.ID,
 		"mac":                     u.Mac,
@@ -174,7 +173,7 @@ func (u UAP) Points() ([]*influx.Point, error) {
 	if err != nil {
 		return nil, err
 	}
-	points = append(points, pt)
+	points := []*influx.Point{pt}
 	for _, p := range u.RadioTable {
 		tags := map[string]string{
 			"device_name":  u.Name,

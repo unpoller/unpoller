@@ -10,7 +10,6 @@ import (
 // Points generates Unifi Gateway datapoints for InfluxDB.
 // These points can be passed directly to influx.
 func (u USG) Points() ([]*influx.Point, error) {
-	var points []*influx.Point
 	tags := map[string]string{
 		"id":                     u.ID,
 		"mac":                    u.Mac,
@@ -130,7 +129,7 @@ func (u USG) Points() ([]*influx.Point, error) {
 	if err != nil {
 		return nil, err
 	}
-	points = append(points, pt)
+	points := []*influx.Point{pt}
 	for _, p := range u.NetworkTable {
 		tags := map[string]string{
 			"device_name":               u.Name,
@@ -183,5 +182,5 @@ func (u USG) Points() ([]*influx.Point, error) {
 		}
 		points = append(points, pt)
 	}
-	return points, err
+	return points, nil
 }

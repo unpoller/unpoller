@@ -10,15 +10,15 @@ import (
 // Points generates Unifi Client datapoints for InfluxDB.
 // These points can be passed directly to influx.
 func (c UCL) Points() ([]*influx.Point, error) {
-	var points []*influx.Point
 	// Fix name and hostname fields. Sometimes one or the other is blank.
-	if c.Name == "" && c.Hostname != "" {
-		c.Name = c.Hostname
-	} else if c.Hostname == "" && c.Name != "" {
-		c.Hostname = c.Name
-	} else if c.Hostname == "" && c.Name == "" {
+	switch {
+	case c.Hostname == "" && c.Name == "":
 		c.Hostname = "-no-name-"
 		c.Name = "-no-name-"
+	case c.Hostname == "" && c.Name != "":
+		c.Hostname = c.Name
+	case c.Name == "" && c.Hostname != "":
+		c.Name = c.Hostname
 	}
 	tags := map[string]string{
 		"id":                 c.ID,
@@ -100,7 +100,7 @@ func (c UCL) Points() ([]*influx.Point, error) {
 	}
 	pt, err := influx.NewPoint("clients", tags, fields, time.Now())
 	if err == nil {
-		points = append(points, pt)
+		return nil, err
 	}
-	return points, err
+	return []*influx.Point{pt}, nil
 }
