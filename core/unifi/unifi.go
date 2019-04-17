@@ -9,6 +9,7 @@ import (
 	"bytes"
 	"crypto/tls"
 	"encoding/json"
+	"io"
 	"io/ioutil"
 	"net/http"
 	"net/http/cookiejar"
@@ -21,36 +22,38 @@ import (
 // Used to make additional, authenticated requests to the APIs.
 // Start here.
 func GetController(user, pass, url string, verifySSL bool) (*Unifi, error) {
+	u := &Unifi{baseURL: strings.TrimRight(url, "/")}
 	json := `{"username": "` + user + `","password": "` + pass + `"}`
-	jar, err := cookiejar.New(nil)
-	if err != nil {
-		return nil, errors.Wrap(err, "cookiejar.New(nil)")
-	}
-	u := &Unifi{
-		Client: &http.Client{
-			Transport: &http.Transport{TLSClientConfig: &tls.Config{InsecureSkipVerify: !verifySSL}},
-			Jar:       jar,
-		},
-	}
-	if u.baseURL = url; strings.HasSuffix(url, "/") {
-		u.baseURL = url[:len(url)-1]
-	}
 	req, err := u.UniReq(LoginPath, json)
 	if err != nil {
 		return u, errors.Wrap(err, "UniReq(LoginPath, json)")
 	}
+	jar, err := cookiejar.New(nil)
+	if err != nil {
+		return nil, errors.Wrap(err, "cookiejar.New(nil)")
+	}
+	u.Client = &http.Client{
+		Transport: &http.Transport{TLSClientConfig: &tls.Config{InsecureSkipVerify: !verifySSL}},
+		Jar:       jar,
+	}
+	return u, u.getController(req)
+}
+
+// getController is a helper method to make testsing a bit easier.
+func (u *Unifi) getController(req *http.Request) error {
 	resp, err := u.Do(req)
 	if err != nil {
-		return u, errors.Wrap(err, "authReq.Do(req)")
+		return errors.Wrap(err, "authReq.Do(req)")
 	}
 	defer func() {
+		_, _ = io.Copy(ioutil.Discard, resp.Body) // avoid leaking.
 		_ = resp.Body.Close()
 	}()
 	if resp.StatusCode != http.StatusOK {
-		return u, errors.Errorf("authentication failed (%v): %v (status: %v/%v)",
-			user, url+LoginPath, resp.StatusCode, resp.Status)
+		return errors.Errorf("authentication failed: %v (status: %v/%v)",
+			u.baseURL+LoginPath, resp.StatusCode, resp.Status)
 	}
-	return u, nil
+	return nil
 }
 
 // GetClients returns a response full of clients' data from the Unifi Controller.
