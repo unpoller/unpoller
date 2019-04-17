@@ -18,7 +18,7 @@ func (u USW) Points() ([]*influx.Point, error) {
 		"device_oid":             u.Stat.Oid,
 		"site_id":                u.SiteID,
 		"name":                   u.Name,
-		"addopted":               strconv.FormatBool(u.Adopted),
+		"adopted":                strconv.FormatBool(u.Adopted),
 		"adopt_ip":               u.AdoptIP,
 		"adopt_url":              u.AdoptURL,
 		"cfgversion":             u.Cfgversion,
