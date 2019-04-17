@@ -9,6 +9,7 @@ import (
 	"bytes"
 	"crypto/tls"
 	"encoding/json"
+	"fmt"
 	"io"
 	"io/ioutil"
 	"net/http"
@@ -22,25 +23,26 @@ import (
 // Used to make additional, authenticated requests to the APIs.
 // Start here.
 func GetController(user, pass, url string, verifySSL bool) (*Unifi, error) {
-	u := &Unifi{baseURL: strings.TrimRight(url, "/")}
-	json := `{"username": "` + user + `","password": "` + pass + `"}`
-	req, err := u.UniReq(LoginPath, json)
-	if err != nil {
-		return u, errors.Wrap(err, "UniReq(LoginPath, json)")
-	}
 	jar, err := cookiejar.New(nil)
 	if err != nil {
 		return nil, errors.Wrap(err, "cookiejar.New(nil)")
 	}
-	u.Client = &http.Client{
-		Transport: &http.Transport{TLSClientConfig: &tls.Config{InsecureSkipVerify: !verifySSL}},
-		Jar:       jar,
+	u := &Unifi{baseURL: strings.TrimRight(url, "/"),
+		Client: &http.Client{
+			Transport: &http.Transport{TLSClientConfig: &tls.Config{InsecureSkipVerify: !verifySSL}},
+			Jar:       jar,
+		},
 	}
-	return u, u.getController(req)
+	return u, u.getController(user, pass)
 }
 
 // getController is a helper method to make testsing a bit easier.
-func (u *Unifi) getController(req *http.Request) error {
+func (u *Unifi) getController(user, pass string) error {
+	// magic login.
+	req, err := u.UniReq(LoginPath, `{"username": "`+user+`","password": "`+pass+`"}`)
+	if err != nil {
+		return errors.Wrap(err, "UniReq(LoginPath, json)")
+	}
 	resp, err := u.Do(req)
 	if err != nil {
 		return errors.Wrap(err, "authReq.Do(req)")
@@ -50,58 +52,82 @@ func (u *Unifi) getController(req *http.Request) error {
 		_ = resp.Body.Close()
 	}()
 	if resp.StatusCode != http.StatusOK {
-		return errors.Errorf("authentication failed: %v (status: %v/%v)",
-			u.baseURL+LoginPath, resp.StatusCode, resp.Status)
+		return errors.Errorf("authentication failed (user: %s): %s (status: %d/%s)",
+			user, u.baseURL+LoginPath, resp.StatusCode, resp.Status)
 	}
 	return nil
 }
 
 // GetClients returns a response full of clients' data from the Unifi Controller.
-func (u *Unifi) GetClients() (*Clients, error) {
-	var response struct {
-		Clients []UCL `json:"data"`
+func (u *Unifi) GetClients(sites []Site) (*Clients, error) {
+	var data []UCL
+	for _, site := range sites {
+		var response struct {
+			Data []UCL `json:"data"`
+		}
+		u.dLogf("Polling Site '%s' (%s) Clients", site.Name, site.Desc)
+		u.dLogf("Unmarshalling Device Type: ucl")
+		clientPath := fmt.Sprintf(ClientPath, site.Name)
+		if err := u.GetData(clientPath, &response); err != nil {
+			return nil, err
+		}
+		data = append(data, response.Data...)
 	}
-	req, err := u.UniReq(ClientPath, "")
-	if err != nil {
-		return nil, errors.Wrap(err, "c.UniReq(ClientPath)")
-	}
-	resp, err := u.Do(req)
-	if err != nil {
-		return nil, errors.Wrap(err, "c.Do(req)")
-	}
-	defer func() {
-		_ = resp.Body.Close()
-	}()
-	if body, err := ioutil.ReadAll(resp.Body); err != nil {
-		return nil, errors.Wrap(err, "ioutil.ReadAll(resp.Body)")
-	} else if err = json.Unmarshal(body, &response); err != nil {
-		return nil, errors.Wrap(err, "json.Unmarshal([]UCL)")
-	}
-	return &Clients{UCLs: response.Clients}, nil
+	return &Clients{UCLs: data}, nil
 }
 
 // GetDevices returns a response full of devices' data from the Unifi Controller.
-func (u *Unifi) GetDevices() (*Devices, error) {
-	var response struct {
-		Data []json.RawMessage `json:"data"`
+func (u *Unifi) GetDevices(sites []Site) (*Devices, error) {
+	var data []json.RawMessage
+	for _, site := range sites {
+		u.dLogf("Polling Site '%s' (%s) Devices", site.Name, site.Desc)
+		var response struct {
+			Data []json.RawMessage `json:"data"`
+		}
+		devicePath := fmt.Sprintf(DevicePath, site.Name)
+		if err := u.GetData(devicePath, &response); err != nil {
+			return nil, err
+		}
+		data = append(data, response.Data...)
 	}
-	req, err := u.UniReq(DevicePath, "")
+	return u.parseDevices(data), nil
+}
+
+// GetSites returns a list of configured sites on the Unifi controller.
+func (u *Unifi) GetSites() ([]Site, error) {
+	var response struct {
+		Data []Site `json:"data"`
+	}
+	if err := u.GetData(SiteList, &response); err != nil {
+		return nil, err
+	}
+	var sites []string
+	for i := range response.Data {
+		sites = append(sites, response.Data[i].Name)
+	}
+	u.dLogf("Found %d sites: %s", len(sites), strings.Join(sites, ","))
+	return response.Data, nil
+}
+
+// GetData makes a unifi request and unmarshal the response into a provided pointer.
+func (u *Unifi) GetData(methodPath string, v interface{}) error {
+	req, err := u.UniReq(methodPath, "")
 	if err != nil {
-		return nil, errors.Wrap(err, "c.UniReq(DevicePath)")
+		return errors.Wrapf(err, "c.UniReq(%s)", methodPath)
 	}
 	resp, err := u.Do(req)
 	if err != nil {
-		return nil, errors.Wrap(err, "c.Do(req)")
+		return errors.Wrapf(err, "c.Do(%s)", methodPath)
 	}
 	defer func() {
 		_ = resp.Body.Close()
 	}()
 	if body, err := ioutil.ReadAll(resp.Body); err != nil {
-		return nil, errors.Wrap(err, "ioutil.ReadAll(resp.Body)")
-	} else if err = json.Unmarshal(body, &response); err != nil {
-		return nil, errors.Wrap(err, "json.Unmarshal([]json.RawMessage)")
+		return errors.Wrapf(err, "ioutil.ReadAll(%s)", methodPath)
+	} else if err = json.Unmarshal(body, v); err != nil {
+		return errors.Wrapf(err, "json.Unmarshal(%s)", methodPath)
 	}
-	return u.parseDevices(response.Data), nil
+	return nil
 }
 
 // UniReq is a small helper function that adds an Accept header.
