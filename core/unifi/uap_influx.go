@@ -218,44 +218,44 @@ func (u UAP) Points() ([]*influx.Point, error) {
 				fields["radio"] = s.Radio
 				fields["state"] = s.State
 				fields["radio_tx_packets"] = s.TxPackets
-				fields["radio_tx_power"] = s.TxPower
+				fields["radio_tx_power"] = s.TxPower.Val
 				fields["radio_tx_retries"] = s.TxRetries
 				fields["user-num_sta"] = s.UserNumSta
-				continue
+				break
 			}
 		}
 		for _, s := range u.VapTable {
 			if p.Name == s.RadioName {
 				tags["ap_mac"] = s.ApMac
 				tags["bssid"] = s.Bssid
+				tags["vap_id"] = s.ID
+				tags["vap_name"] = s.Name
+				tags["wlanconf_id"] = s.WlanconfID
 				fields["ccq"] = s.Ccq
 				fields["essid"] = s.Essid
 				fields["extchannel"] = s.Extchannel
-				tags["vap_id"] = s.ID
 				fields["is_guest"] = s.IsGuest
 				fields["is_wep"] = s.IsWep
 				fields["mac_filter_rejections"] = s.MacFilterRejections
 				fields["map_id"] = s.MapID
-				tags["vap_name"] = s.Name
-				fields["rx_bytes"] = s.RxBytes
-				fields["rx_crypts"] = s.RxCrypts
-				fields["rx_dropped"] = s.RxDropped
-				fields["rx_errors"] = s.RxErrors
-				fields["rx_frags"] = s.RxFrags
-				fields["rx_nwids"] = s.RxNwids
-				fields["rx_packets"] = s.RxPackets
-				fields["tx_bytes"] = s.TxBytes
-				fields["tx_dropped"] = s.TxDropped
-				fields["tx_errors"] = s.TxErrors
-				fields["tx_latency_avg"] = s.TxLatencyAvg
-				fields["tx_latency_max"] = s.TxLatencyMax
-				fields["tx_latency_min"] = s.TxLatencyMin
-				fields["tx_packets"] = s.TxPackets
-				fields["tx_power"] = s.TxPower
-				fields["tx_retries"] = s.TxRetries
+				fields["vap_rx_bytes"] = s.RxBytes
+				fields["vap_rx_crypts"] = s.RxCrypts
+				fields["vap_rx_dropped"] = s.RxDropped
+				fields["vap_rx_errors"] = s.RxErrors
+				fields["vap_rx_frags"] = s.RxFrags
+				fields["vap_rx_nwids"] = s.RxNwids
+				fields["vap_rx_packets"] = s.RxPackets
+				fields["vap_tx_bytes"] = s.TxBytes
+				fields["vap_tx_dropped"] = s.TxDropped
+				fields["vap_tx_errors"] = s.TxErrors
+				fields["vap_tx_latency_avg"] = s.TxLatencyAvg
+				fields["vap_tx_latency_max"] = s.TxLatencyMax
+				fields["vap_tx_latency_min"] = s.TxLatencyMin
+				fields["vap_tx_packets"] = s.TxPackets
+				fields["vap_tx_power"] = s.TxPower.Val
+				fields["vap_tx_retries"] = s.TxRetries
 				fields["usage"] = s.Usage
-				tags["wlanconf_id"] = s.WlanconfID
-				continue
+				break
 			}
 		}
 		pt, err := influx.NewPoint("uap_radios", tags, fields, time.Now())
