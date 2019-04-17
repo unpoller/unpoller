@@ -44,6 +44,7 @@ func main() {
 		log.Fatalln("Error:", err)
 	}
 
+	log.Println(len(sites), "Unifi Sites Found: ", sites)
 	log.Println(len(clients.UCLs), "Clients connected:")
 	for i, client := range clients.UCLs {
 		log.Println(i+1, client.ID, client.Hostname, client.IP, client.Name, client.LastSeen)

@@ -2,14 +2,14 @@ package unifi
 
 // USW represents all the data from the Ubiquiti Controller for a Unifi Switch.
 type USW struct {
-	ID            string  `json:"_id"`
-	UUptime       float64 `json:"_uptime"`
-	AdoptIP       string  `json:"adopt_ip"`
-	AdoptURL      string  `json:"adopt_url"`
-	Adopted       bool    `json:"adopted"`
-	BoardRev      float64 `json:"board_rev"`
-	Bytes         float64 `json:"bytes"`
-	Cfgversion    string  `json:"cfgversion"`
+	ID            string   `json:"_id"`
+	UUptime       float64  `json:"_uptime"`
+	AdoptIP       string   `json:"adopt_ip"`
+	AdoptURL      string   `json:"adopt_url"`
+	Adopted       FlexBool `json:"adopted"`
+	BoardRev      float64  `json:"board_rev"`
+	Bytes         float64  `json:"bytes"`
+	Cfgversion    string   `json:"cfgversion"`
 	ConfigNetwork struct {
 		IP   string `json:"ip"`
 		Type string `json:"type"`
@@ -17,48 +17,48 @@ type USW struct {
 	ConnectRequestIP     string        `json:"connect_request_ip"`
 	ConnectRequestPort   string        `json:"connect_request_port"`
 	ConsideredLostAt     float64       `json:"considered_lost_at"`
-	Default              bool          `json:"default"`
+	Default              FlexBool      `json:"default"`
 	DeviceID             string        `json:"device_id"`
 	DhcpServerTable      []interface{} `json:"dhcp_server_table"`
 	DiscoveredVia        string        `json:"discovered_via"`
-	Dot1XPortctrlEnabled bool          `json:"dot1x_portctrl_enabled"`
+	Dot1XPortctrlEnabled FlexBool      `json:"dot1x_portctrl_enabled"`
 	DownlinkTable        []struct {
-		FullDuplex bool    `json:"full_duplex"`
-		Mac        string  `json:"mac"`
-		PortIdx    float64 `json:"port_idx"`
-		Speed      float64 `json:"speed"`
+		FullDuplex FlexBool `json:"full_duplex"`
+		Mac        string   `json:"mac"`
+		PortIdx    float64  `json:"port_idx"`
+		Speed      float64  `json:"speed"`
 	} `json:"downlink_table"`
 	EthernetTable []struct {
 		Mac     string  `json:"mac"`
 		Name    string  `json:"name"`
 		NumPort float64 `json:"num_port,omitempty"`
 	} `json:"ethernet_table"`
-	FanLevel           float64 `json:"fan_level"`
-	FlowctrlEnabled    bool    `json:"flowctrl_enabled"`
-	FwCaps             float64 `json:"fw_caps"`
-	GeneralTemperature float64 `json:"general_temperature"`
-	GuestNumSta        float64 `json:"guest-num_sta"`
-	HasFan             bool    `json:"has_fan"`
-	HasTemperature     bool    `json:"has_temperature"`
-	InformIP           string  `json:"inform_ip"`
-	InformURL          string  `json:"inform_url"`
-	IP                 string  `json:"ip"`
-	JumboframeEnabled  bool    `json:"jumboframe_enabled"`
-	KnownCfgversion    string  `json:"known_cfgversion"`
-	LastSeen           float64 `json:"last_seen"`
+	FanLevel           float64  `json:"fan_level"`
+	FlowctrlEnabled    FlexBool `json:"flowctrl_enabled"`
+	FwCaps             float64  `json:"fw_caps"`
+	GeneralTemperature float64  `json:"general_temperature"`
+	GuestNumSta        float64  `json:"guest-num_sta"`
+	HasFan             FlexBool `json:"has_fan"`
+	HasTemperature     FlexBool `json:"has_temperature"`
+	InformIP           string   `json:"inform_ip"`
+	InformURL          string   `json:"inform_url"`
+	IP                 string   `json:"ip"`
+	JumboframeEnabled  FlexBool `json:"jumboframe_enabled"`
+	KnownCfgversion    string   `json:"known_cfgversion"`
+	LastSeen           float64  `json:"last_seen"`
 	LastUplink         struct {
 		UplinkMac string `json:"uplink_mac"`
 	} `json:"last_uplink"`
-	LedOverride         string  `json:"led_override"`
-	LicenseState        string  `json:"license_state"`
-	Locating            bool    `json:"locating"`
-	Mac                 string  `json:"mac"`
-	Model               string  `json:"model"`
-	Name                string  `json:"name"`
-	NextHeartbeatAt     float64 `json:"next_heartbeat_at"`
-	NumSta              float64 `json:"num_sta"`
-	OutdoorModeOverride string  `json:"outdoor_mode_override"`
-	Overheating         bool    `json:"overheating"`
+	LedOverride         string   `json:"led_override"`
+	LicenseState        string   `json:"license_state"`
+	Locating            FlexBool `json:"locating"`
+	Mac                 string   `json:"mac"`
+	Model               string   `json:"model"`
+	Name                string   `json:"name"`
+	NextHeartbeatAt     float64  `json:"next_heartbeat_at"`
+	NumSta              float64  `json:"num_sta"`
+	OutdoorModeOverride string   `json:"outdoor_mode_override"`
+	Overheating         FlexBool `json:"overheating"`
 	PortOverrides       []struct {
 		Name       string  `json:"name,omitempty"`
 		PoeMode    string  `json:"poe_mode,omitempty"`
@@ -66,32 +66,32 @@ type USW struct {
 		PortconfID string  `json:"portconf_id"`
 	} `json:"port_overrides"`
 	PortTable []struct {
-		AggregatedBy bool          `json:"aggregated_by"`
-		Autoneg      bool          `json:"autoneg"`
+		AggregatedBy FlexBool      `json:"aggregated_by"`
+		Autoneg      FlexBool      `json:"autoneg"`
 		BytesR       float64       `json:"bytes-r"`
 		Dot1XMode    string        `json:"dot1x_mode"`
 		Dot1XStatus  string        `json:"dot1x_status"`
-		Enable       bool          `json:"enable"`
-		FlowctrlRx   bool          `json:"flowctrl_rx"`
-		FlowctrlTx   bool          `json:"flowctrl_tx"`
-		FullDuplex   bool          `json:"full_duplex"`
-		IsUplink     bool          `json:"is_uplink"`
-		Jumbo        bool          `json:"jumbo"`
+		Enable       FlexBool      `json:"enable"`
+		FlowctrlRx   FlexBool      `json:"flowctrl_rx"`
+		FlowctrlTx   FlexBool      `json:"flowctrl_tx"`
+		FullDuplex   FlexBool      `json:"full_duplex"`
+		IsUplink     FlexBool      `json:"is_uplink"`
+		Jumbo        FlexBool      `json:"jumbo"`
 		LldpTable    []interface{} `json:"lldp_table"`
-		Masked       bool          `json:"masked"`
+		Masked       FlexBool      `json:"masked"`
 		Media        string        `json:"media"`
 		Name         string        `json:"name"`
 		OpMode       string        `json:"op_mode"`
 		PoeCaps      float64       `json:"poe_caps"`
 		PoeClass     string        `json:"poe_class,omitempty"`
 		PoeCurrent   string        `json:"poe_current,omitempty"`
-		PoeEnable    bool          `json:"poe_enable,omitempty"`
-		PoeGood      bool          `json:"poe_good,omitempty"`
+		PoeEnable    FlexBool      `json:"poe_enable,omitempty"`
+		PoeGood      FlexBool      `json:"poe_good,omitempty"`
 		PoeMode      string        `json:"poe_mode,omitempty"`
 		PoePower     string        `json:"poe_power,omitempty"`
 		PoeVoltage   string        `json:"poe_voltage,omitempty"`
 		PortIdx      float64       `json:"port_idx"`
-		PortPoe      bool          `json:"port_poe"`
+		PortPoe      FlexBool      `json:"port_poe"`
 		PortconfID   string        `json:"portconf_id"`
 		RxBroadcast  float64       `json:"rx_broadcast"`
 		RxBytes      float64       `json:"rx_bytes"`
@@ -110,10 +110,10 @@ type USW struct {
 		TxErrors     float64       `json:"tx_errors"`
 		TxMulticast  float64       `json:"tx_multicast"`
 		TxPackets    float64       `json:"tx_packets"`
-		Up           bool          `json:"up"`
-		SfpFound     bool          `json:"sfp_found,omitempty"`
+		Up           FlexBool      `json:"up"`
+		SfpFound     FlexBool      `json:"sfp_found,omitempty"`
 	} `json:"port_table"`
-	Rollupgrade     bool          `json:"rollupgrade"`
+	Rollupgrade     FlexBool      `json:"rollupgrade"`
 	RxBytes         float64       `json:"rx_bytes"`
 	Serial          string        `json:"serial"`
 	SiteID          string        `json:"site_id"`
@@ -378,38 +378,38 @@ type USW struct {
 		Mem    float64 `json:"mem,string"`
 		Uptime float64 `json:"uptime,string"`
 	} `json:"system-stats"`
-	TxBytes    float64 `json:"tx_bytes"`
-	Type       string  `json:"type"`
-	Upgradable bool    `json:"upgradable"`
+	TxBytes    float64  `json:"tx_bytes"`
+	Type       string   `json:"type"`
+	Upgradable FlexBool `json:"upgradable"`
 	Uplink     struct {
-		FullDuplex  bool    `json:"full_duplex"`
-		IP          string  `json:"ip"`
-		Mac         string  `json:"mac"`
-		MaxSpeed    float64 `json:"max_speed"`
-		Media       string  `json:"media"`
-		Name        string  `json:"name"`
-		Netmask     string  `json:"netmask"`
-		NumPort     float64 `json:"num_port"`
-		PortIdx     float64 `json:"port_idx"`
-		RxBytes     float64 `json:"rx_bytes"`
-		RxBytesR    float64 `json:"rx_bytes-r"`
-		RxDropped   float64 `json:"rx_dropped"`
-		RxErrors    float64 `json:"rx_errors"`
-		RxMulticast float64 `json:"rx_multicast"`
-		RxPackets   float64 `json:"rx_packets"`
-		Speed       float64 `json:"speed"`
-		TxBytes     float64 `json:"tx_bytes"`
-		TxBytesR    float64 `json:"tx_bytes-r"`
-		TxDropped   float64 `json:"tx_dropped"`
-		TxErrors    float64 `json:"tx_errors"`
-		TxPackets   float64 `json:"tx_packets"`
-		Type        string  `json:"type"`
-		Up          bool    `json:"up"`
-		UplinkMac   string  `json:"uplink_mac"`
+		FullDuplex  FlexBool `json:"full_duplex"`
+		IP          string   `json:"ip"`
+		Mac         string   `json:"mac"`
+		MaxSpeed    float64  `json:"max_speed"`
+		Media       string   `json:"media"`
+		Name        string   `json:"name"`
+		Netmask     string   `json:"netmask"`
+		NumPort     float64  `json:"num_port"`
+		PortIdx     float64  `json:"port_idx"`
+		RxBytes     float64  `json:"rx_bytes"`
+		RxBytesR    float64  `json:"rx_bytes-r"`
+		RxDropped   float64  `json:"rx_dropped"`
+		RxErrors    float64  `json:"rx_errors"`
+		RxMulticast float64  `json:"rx_multicast"`
+		RxPackets   float64  `json:"rx_packets"`
+		Speed       float64  `json:"speed"`
+		TxBytes     float64  `json:"tx_bytes"`
+		TxBytesR    float64  `json:"tx_bytes-r"`
+		TxDropped   float64  `json:"tx_dropped"`
+		TxErrors    float64  `json:"tx_errors"`
+		TxPackets   float64  `json:"tx_packets"`
+		Type        string   `json:"type"`
+		Up          FlexBool `json:"up"`
+		UplinkMac   string   `json:"uplink_mac"`
 	} `json:"uplink"`
-	UplinkDepth         float64 `json:"uplink_depth"`
-	Uptime              float64 `json:"uptime"`
-	UserNumSta          float64 `json:"user-num_sta"`
-	Version             string  `json:"version"`
-	VersionIncompatible bool    `json:"version_incompatible"`
+	UplinkDepth         float64  `json:"uplink_depth"`
+	Uptime              float64  `json:"uptime"`
+	UserNumSta          float64  `json:"user-num_sta"`
+	Version             string   `json:"version"`
+	VersionIncompatible FlexBool `json:"version_incompatible"`
 }

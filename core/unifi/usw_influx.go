@@ -1,7 +1,6 @@
 package unifi
 
 import (
-	"strconv"
 	"time"
 
 	influx "github.com/influxdata/influxdb1-client/v2"
@@ -17,7 +16,7 @@ func (u USW) Points() ([]*influx.Point, error) {
 		"device_oid":             u.Stat.Oid,
 		"site_id":                u.SiteID,
 		"name":                   u.Name,
-		"adopted":                strconv.FormatBool(u.Adopted),
+		"adopted":                u.Adopted.Txt,
 		"adopt_ip":               u.AdoptIP,
 		"adopt_url":              u.AdoptURL,
 		"cfgversion":             u.Cfgversion,
@@ -25,24 +24,24 @@ func (u USW) Points() ([]*influx.Point, error) {
 		"config_network_type":    u.ConfigNetwork.Type,
 		"connect_request_ip":     u.ConnectRequestIP,
 		"connect_request_port":   u.ConnectRequestPort,
-		"default":                strconv.FormatBool(u.Default),
+		"default":                u.Default.Txt,
 		"device_id":              u.DeviceID,
 		"discovered_via":         u.DiscoveredVia,
 		"inform_ip":              u.InformIP,
 		"last_uplink_mac":        u.LastUplink.UplinkMac,
 		"known_cfgversion":       u.KnownCfgversion,
 		"led_override":           u.LedOverride,
-		"locating":               strconv.FormatBool(u.Locating),
+		"locating":               u.Locating.Txt,
 		"model":                  u.Model,
 		"outdoor_mode_override":  u.OutdoorModeOverride,
 		"serial":                 u.Serial,
 		"type":                   u.Type,
-		"version_incompatible":   strconv.FormatBool(u.VersionIncompatible),
-		"dot1x_portctrl_enabled": strconv.FormatBool(u.Dot1XPortctrlEnabled),
-		"flowctrl_enabled":       strconv.FormatBool(u.FlowctrlEnabled),
-		"has_fan":                strconv.FormatBool(u.HasFan),
-		"has_temperature":        strconv.FormatBool(u.HasTemperature),
-		"jumboframe_enabled":     strconv.FormatBool(u.JumboframeEnabled),
+		"version_incompatible":   u.VersionIncompatible.Txt,
+		"dot1x_portctrl_enabled": u.Dot1XPortctrlEnabled.Txt,
+		"flowctrl_enabled":       u.FlowctrlEnabled.Txt,
+		"has_fan":                u.HasFan.Txt,
+		"has_temperature":        u.HasTemperature.Txt,
+		"jumboframe_enabled":     u.JumboframeEnabled.Txt,
 		"stp_priority":           u.StpPriority,
 		"stp_version":            u.StpVersion,
 	}
@@ -55,15 +54,15 @@ func (u USW) Points() ([]*influx.Point, error) {
 		"general_temperature":      u.GeneralTemperature,
 		"last_seen":                u.LastSeen,
 		"license_state":            u.LicenseState,
-		"overheating":              u.Overheating,
+		"overheating":              u.Overheating.Txt,
 		"rx_bytes":                 u.RxBytes,
 		"tx_bytes":                 u.TxBytes,
 		"uptime":                   u.Uptime,
 		"considered_lost_at":       u.ConsideredLostAt,
 		"next_heartbeat_at":        u.NextHeartbeatAt,
-		"roll_upgrade":             u.Rollupgrade,
+		"roll_upgrade":             u.Rollupgrade.Txt,
 		"state":                    u.State,
-		"upgradable":               u.Upgradable,
+		"upgradable":               u.Upgradable.Txt,
 		"user-num_sta":             u.UserNumSta,
 		"version":                  u.Version,
 		"loadavg_1":                u.SysStats.Loadavg1,
@@ -107,7 +106,7 @@ func (u USW) Points() ([]*influx.Point, error) {
 		"stat_tx_errors":           u.Stat.TxErrors,
 		"stat_tx_packets":          u.Stat.TxPackets,
 		"stat_tx_retries":          u.Stat.TxRetries,
-		"uplink_depth":             strconv.FormatFloat(u.UplinkDepth, 'f', 6, 64),
+		"uplink_depth":             u.UplinkDepth,
 		// Add the port stats too.
 	}
 	pt, err := influx.NewPoint("usw", tags, fields, time.Now())

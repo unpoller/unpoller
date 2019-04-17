@@ -21,7 +21,7 @@ func (u UAP) Points() ([]*influx.Point, error) {
 		"device_ap":               u.Stat.Ap,
 		"site_id":                 u.SiteID,
 		"name":                    u.Name,
-		"adopted":                 strconv.FormatBool(u.Adopted),
+		"adopted":                 u.Adopted.Txt,
 		"bandsteering_mode":       u.BandsteeringMode,
 		"board_rev":               strconv.Itoa(u.BoardRev),
 		"cfgversion":              u.Cfgversion,
@@ -29,27 +29,27 @@ func (u UAP) Points() ([]*influx.Point, error) {
 		"config_network_type":     u.ConfigNetwork.Type,
 		"connect_request_ip":      u.ConnectRequestIP,
 		"connect_request_port":    u.ConnectRequestPort,
-		"default":                 strconv.FormatBool(u.Default),
+		"default":                 u.Default.Txt,
 		"device_id":               u.DeviceID,
 		"discovered_via":          u.DiscoveredVia,
 		"fw_caps":                 strconv.Itoa(u.FwCaps),
 		"guest-num_sta":           strconv.Itoa(u.GuestNumSta),
 		"guest_token":             u.GuestToken,
-		"has_eth1":                strconv.FormatBool(u.HasEth1),
-		"has_speaker":             strconv.FormatBool(u.HasSpeaker),
+		"has_eth1":                u.HasEth1.Txt,
+		"has_speaker":             u.HasSpeaker.Txt,
 		"inform_ip":               u.InformIP,
-		"isolated":                strconv.FormatBool(u.Isolated),
+		"isolated":                u.Isolated.Txt,
 		"last_uplink_mac":         u.LastUplink.UplinkMac,
 		"last_uplink_remote_port": strconv.Itoa(u.LastUplink.UplinkRemotePort),
 		"known_cfgversion":        u.KnownCfgversion,
 		"led_override":            u.LedOverride,
-		"locating":                strconv.FormatBool(u.Locating),
+		"locating":                u.Locating.Txt,
 		"model":                   u.Model,
 		"outdoor_mode_override":   u.OutdoorModeOverride,
 		"serial":                  u.Serial,
 		"type":                    u.Type,
-		"version_incompatible":    strconv.FormatBool(u.VersionIncompatible),
-		"vwireEnabled":            strconv.FormatBool(u.VwireEnabled),
+		"version_incompatible":    u.VersionIncompatible.Txt,
+		"vwireEnabled":            u.VwireEnabled.Txt,
 		"wifi_caps":               strconv.Itoa(u.WifiCaps),
 	}
 	fields := map[string]interface{}{
@@ -65,11 +65,11 @@ func (u UAP) Points() ([]*influx.Point, error) {
 		"uptime":                     u.Uptime.Val,
 		"considered_lost_at":         u.ConsideredLostAt,
 		"next_heartbeat_at":          u.NextHeartbeatAt,
-		"scanning":                   u.Scanning,
+		"scanning":                   u.Scanning.Txt,
 		"spectrum_scanning":          u.SpectrumScanning,
-		"roll_upgrade":               u.Rollupgrade,
+		"roll_upgrade":               u.Rollupgrade.Txt,
 		"state":                      u.State,
-		"upgradable":                 u.Upgradable,
+		"upgradable":                 u.Upgradable.Txt,
 		"user-num_sta":               u.UserNumSta,
 		"version":                    u.Version,
 		"loadavg_1":                  u.SysStats.Loadavg1,
@@ -187,12 +187,12 @@ func (u UAP) Points() ([]*influx.Point, error) {
 		fields := map[string]interface{}{
 			"builtin_ant_gain":     p.BuiltinAntGain,
 			"current_antenna_gain": p.CurrentAntennaGain,
-			"has_dfs":              p.HasDfs,
-			"has_fccdfs":           p.HasFccdfs,
+			"has_dfs":              p.HasDfs.Txt,
+			"has_fccdfs":           p.HasFccdfs.Txt,
 			"ht":                   p.Ht,
-			"is_11ac":              p.Is11Ac,
+			"is_11ac":              p.Is11Ac.Txt,
 			"max_txpower":          p.MaxTxpower,
-			"min_rssi_enabled":     p.MinRssiEnabled,
+			"min_rssi_enabled":     p.MinRssiEnabled.Txt,
 			"min_txpower":          p.MinTxpower,
 			"nss":                  p.Nss,
 			"radio_caps":           p.RadioCaps,
@@ -234,8 +234,8 @@ func (u UAP) Points() ([]*influx.Point, error) {
 				fields["ccq"] = s.Ccq
 				fields["essid"] = s.Essid
 				fields["extchannel"] = s.Extchannel
-				fields["is_guest"] = s.IsGuest
-				fields["is_wep"] = s.IsWep
+				fields["is_guest"] = s.IsGuest.Txt
+				fields["is_wep"] = s.IsWep.Txt
 				fields["mac_filter_rejections"] = s.MacFilterRejections
 				fields["map_id"] = s.MapID
 				fields["vap_rx_bytes"] = s.RxBytes
