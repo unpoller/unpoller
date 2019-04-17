@@ -19,10 +19,10 @@ import (
 	"github.com/pkg/errors"
 )
 
-// GetController creates a http.Client with authenticated cookies.
+// NewUnifi creates a http.Client with authenticated cookies.
 // Used to make additional, authenticated requests to the APIs.
 // Start here.
-func GetController(user, pass, url string, verifySSL bool) (*Unifi, error) {
+func NewUnifi(user, pass, url string, verifySSL bool) (*Unifi, error) {
 	jar, err := cookiejar.New(nil)
 	if err != nil {
 		return nil, errors.Wrap(err, "cookiejar.New(nil)")

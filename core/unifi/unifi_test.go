@@ -8,11 +8,11 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestAuthController(t *testing.T) {
+func TestNewUnifi(t *testing.T) {
 	t.Parallel()
 	a := assert.New(t)
 	url := "http://127.0.0.1:64431"
-	authReq, err := GetController("user1", "pass2", url, false)
+	authReq, err := NewUnifi("user1", "pass2", url, false)
 	a.NotNil(err)
 	a.EqualValues(url, authReq.baseURL)
 	a.Contains(err.Error(), "authReq.Do(req):", "an invalid destination should product a .Do(req) error.")
