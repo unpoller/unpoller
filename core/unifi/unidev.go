@@ -13,14 +13,16 @@ import (
 )
 
 const (
+	// SiteList is the path to the api site list.
+	SiteList string = "/api/self/sites"
 	// ClientPath is Unifi Clients API Path
-	ClientPath string = "/api/s/default/stat/sta"
+	ClientPath string = "/api/s/%s/stat/sta"
 	// DevicePath is where we get data about Unifi devices.
-	DevicePath string = "/api/s/default/stat/device"
+	DevicePath string = "/api/s/%s/stat/device"
 	// NetworkPath contains network-configuration data. Not really graphable.
-	NetworkPath string = "/api/s/default/rest/networkconf"
+	NetworkPath string = "/api/s/%s/rest/networkconf"
 	// UserGroupPath contains usergroup configurations.
-	UserGroupPath string = "/api/s/default/rest/usergroup"
+	UserGroupPath string = "/api/s/%s/rest/usergroup"
 	// LoginPath is Unifi Controller Login API Path
 	LoginPath string = "/api/login"
 )
