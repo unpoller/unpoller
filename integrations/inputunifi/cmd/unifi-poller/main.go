@@ -11,6 +11,7 @@ import (
 	"github.com/golift/unifi"
 	influx "github.com/influxdata/influxdb1-client/v2"
 	"github.com/naoina/toml"
+	"github.com/pkg/errors"
 	flag "github.com/spf13/pflag"
 )
 
@@ -27,35 +28,45 @@ func main() {
 		flag.Usage()
 		log.Fatalf("Config Error '%v': %v", configFile, err)
 	}
-	// Create an authenticated session to the Unifi Controller.
-	controller, err := unifi.NewUnifi(config.UnifiUser, config.UnifiPass, config.UnifiBase, config.VerifySSL)
-	if err != nil {
-		log.Fatalln("Unifi Controller Error:", err)
-	} else if !config.Quiet {
-		log.Println("Authenticated to Unifi Controller @", config.UnifiBase, "as user", config.UnifiUser)
+	if err := config.Run(); err != nil {
+		log.Fatalln("ERROR:", err)
 	}
-	controller.ErrorLog = log.Printf
-	if log.SetFlags(0); config.Debug {
-		controller.DebugLog = log.Printf
-		log.SetFlags(log.Lshortfile | log.Lmicroseconds | log.Ldate)
+}
+
+// Run invokes all the application logic and routines.
+func (c *Config) Run() error {
+	// Create an authenticated session to the Unifi Controller.
+	controller, err := unifi.NewUnifi(c.UnifiUser, c.UnifiPass, c.UnifiBase, c.VerifySSL)
+	if err != nil {
+		return errors.Wrap(err, "unifi controller")
+	}
+	if !c.Quiet {
+		log.Println("Authenticated to Unifi Controller @", c.UnifiBase, "as user", c.UnifiUser)
+	}
+
+	controller.ErrorLog = log.Printf // Log all errors.
+	if log.SetFlags(0); c.Debug {
 		log.Println("Debug Logging Enabled")
+		log.SetFlags(log.Lshortfile | log.Lmicroseconds | log.Ldate)
+		controller.DebugLog = log.Printf // Log debug messages.
 	}
 	infdb, err := influx.NewHTTPClient(influx.HTTPConfig{
-		Addr:     config.InfluxURL,
-		Username: config.InfluxUser,
-		Password: config.InfluxPass,
+		Addr:     c.InfluxURL,
+		Username: c.InfluxUser,
+		Password: c.InfluxPass,
 	})
 	if err != nil {
-		log.Fatalln("InfluxDB Error:", err)
+		return errors.Wrap(err, "influxdb")
 	}
-	if config.Quiet {
+	if c.Quiet {
 		// Doing it this way allows debug error logs (line numbers, etc)
 		controller.DebugLog = nil
 	} else {
-		log.Println("Logging Unifi Metrics to InfluXDB @", config.InfluxURL, "as user", config.InfluxUser)
-		log.Printf("Polling Unifi Controller (sites %v), interval: %v", config.Sites, config.Interval.value)
+		log.Println("Logging Unifi Metrics to InfluXDB @", c.InfluxURL, "as user", c.InfluxUser)
+		log.Printf("Polling Unifi Controller (sites %v), interval: %v", c.Sites, c.Interval.value)
 	}
-	config.PollUnifiController(controller, infdb)
+	c.PollUnifiController(controller, infdb)
+	return nil
 }
 
 func parseFlags() string {
