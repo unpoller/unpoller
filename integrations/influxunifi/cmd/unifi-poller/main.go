@@ -111,20 +111,35 @@ func GetConfig(configFile string) (Config, error) {
 func (c *Config) PollUnifiController(controller *unifi.Unifi, infdb influx.Client) {
 	log.Println("[INFO] Everyting checks out! Beginning Poller Routine.")
 	ticker := time.NewTicker(c.Interval.value)
+
 	for range ticker.C {
-		if sites, err := filterSites(controller, c.Sites); err != nil {
+		sites, err := filterSites(controller, c.Sites)
+		if err != nil {
 			logErrors([]error{err}, "uni.GetSites()")
-		} else if clients, err := controller.GetClients(sites); err != nil {
+		}
+		// Get all the points.
+		clients, err := controller.GetClients(sites)
+		if err != nil {
 			logErrors([]error{err}, "uni.GetClients()")
-		} else if devices, err := controller.GetDevices(sites); err != nil {
+		}
+		devices, err := controller.GetDevices(sites)
+		if err != nil {
 			logErrors([]error{err}, "uni.GetDevices()")
-		} else if bp, err := influx.NewBatchPoints(influx.BatchPointsConfig{Database: c.InfluxDB}); err != nil {
+		}
+		bp, err := influx.NewBatchPoints(influx.BatchPointsConfig{Database: c.InfluxDB})
+		if err != nil {
 			logErrors([]error{err}, "influx.NewBatchPoints")
-		} else if errs := batchPoints(devices, clients, bp); errs != nil && hasErr(errs) {
+			continue
+		}
+
+		// Batch all the points.
+		if errs := batchPoints(devices, clients, bp); errs != nil && hasErr(errs) {
 			logErrors(errs, "asset.Points()")
-		} else if err := infdb.Write(bp); err != nil {
+		}
+		if err := infdb.Write(bp); err != nil {
 			logErrors([]error{err}, "infdb.Write(bp)")
-		} else if !c.Quiet {
+		}
+		if !c.Quiet {
 			log.Printf("[INFO] Logged Unifi States. Sites: %d Clients: %d, Wireless APs: %d, Gateways: %d, Switches: %d",
 				len(sites), len(clients.UCLs), len(devices.UAPs), len(devices.USGs), len(devices.USWs))
 		}
@@ -154,6 +169,9 @@ func filterSites(controller *unifi.Unifi, filter []string) ([]unifi.Site, error)
 // batchPoints combines all device and client data into influxdb data points.
 func batchPoints(devices *unifi.Devices, clients *unifi.Clients, batchPoints influx.BatchPoints) (errs []error) {
 	process := func(asset Asset) error {
+		if asset == nil {
+			return nil
+		}
 		influxPoints, err := asset.Points()
 		if err != nil {
 			return err
@@ -161,17 +179,21 @@ func batchPoints(devices *unifi.Devices, clients *unifi.Clients, batchPoints inf
 		batchPoints.AddPoints(influxPoints)
 		return nil
 	}
-	for _, asset := range devices.UAPs {
-		errs = append(errs, process(asset))
+	if devices != nil {
+		for _, asset := range devices.UAPs {
+			errs = append(errs, process(asset))
+		}
+		for _, asset := range devices.USGs {
+			errs = append(errs, process(asset))
+		}
+		for _, asset := range devices.USWs {
+			errs = append(errs, process(asset))
+		}
 	}
-	for _, asset := range devices.USGs {
-		errs = append(errs, process(asset))
-	}
-	for _, asset := range devices.USWs {
-		errs = append(errs, process(asset))
-	}
-	for _, asset := range clients.UCLs {
-		errs = append(errs, process(asset))
+	if clients != nil {
+		for _, asset := range clients.UCLs {
+			errs = append(errs, process(asset))
+		}
 	}
 	return
 }
