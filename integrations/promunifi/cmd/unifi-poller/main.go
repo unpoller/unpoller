@@ -28,7 +28,7 @@ func main() {
 		log.Fatalf("Config Error '%v': %v", configFile, err)
 	}
 	// Create an authenticated session to the Unifi Controller.
-	controller, err := unifi.GetController(config.UnifiUser, config.UnifiPass, config.UnifiBase, config.VerifySSL)
+	controller, err := unifi.NewUnifi(config.UnifiUser, config.UnifiPass, config.UnifiBase, config.VerifySSL)
 	if err != nil {
 		log.Fatalln("Unifi Controller Error:", err)
 	} else if !config.Quiet {
@@ -53,7 +53,7 @@ func main() {
 		controller.DebugLog = nil
 	} else {
 		log.Println("Logging Unifi Metrics to InfluXDB @", config.InfluxURL, "as user", config.InfluxUser)
-		log.Println("Polling Unifi Controller, interval:", config.Interval.value)
+		log.Printf("Polling Unifi Controller (sites %v), interval: %v", config.Sites, config.Interval.value)
 	}
 	config.PollUnifiController(controller, infdb)
 }
@@ -83,9 +83,6 @@ func GetConfig(configFile string) (Config, error) {
 		UnifiUser:  defaultUnifUser,
 		UnifiPass:  os.Getenv("UNIFI_PASSWORD"),
 		UnifiBase:  defaultUnifURL,
-		VerifySSL:  defaultVerifySSL,
-		Debug:      defaultDebug,
-		Quiet:      defaultQuiet,
 		Interval:   Dur{value: defaultInterval},
 		Sites:      []string{"default"},
 	}
