@@ -65,7 +65,7 @@ type USG struct {
 		Networkgroup           string      `json:"networkgroup"`
 		NumSta                 float64     `json:"num_sta"`
 		Purpose                string      `json:"purpose"`
-		RxBytes                float64     `json:"rx_bytes"`
+		RxBytes                FlexInt     `json:"rx_bytes"`
 		RxPackets              float64     `json:"rx_packets"`
 		SiteID                 string      `json:"site_id"`
 		TxBytes                float64     `json:"tx_bytes"`
@@ -100,7 +100,7 @@ type USG struct {
 		Mac         string   `json:"mac"`
 		Name        string   `json:"name"`
 		Netmask     string   `json:"netmask"`
-		RxBytes     float64  `json:"rx_bytes"`
+		RxBytes     FlexInt  `json:"rx_bytes"`
 		RxDropped   float64  `json:"rx_dropped"`
 		RxErrors    float64  `json:"rx_errors"`
 		RxMulticast float64  `json:"rx_multicast"`
@@ -113,7 +113,7 @@ type USG struct {
 		Up          FlexBool `json:"up"`
 	} `json:"port_table"`
 	Rollupgrade     FlexBool `json:"rollupgrade"`
-	RxBytes         float64  `json:"rx_bytes"`
+	RxBytes         FlexInt  `json:"rx_bytes"`
 	Serial          string   `json:"serial"`
 	SiteID          string   `json:"site_id"`
 	SpeedtestStatus struct {
@@ -177,7 +177,7 @@ type USG struct {
 		Nameservers      []string `json:"nameservers"`
 		Netmask          string   `json:"netmask"`
 		NumPort          float64  `json:"num_port"`
-		RxBytes          float64  `json:"rx_bytes"`
+		RxBytes          FlexInt  `json:"rx_bytes"`
 		RxBytesR         float64  `json:"rx_bytes-r"`
 		RxDropped        float64  `json:"rx_dropped"`
 		RxErrors         float64  `json:"rx_errors"`
@@ -215,7 +215,7 @@ type USG struct {
 		MaxSpeed    float64  `json:"max_speed"`
 		Name        string   `json:"name"`
 		Netmask     string   `json:"netmask"`
-		RxBytes     float64  `json:"rx_bytes"`
+		RxBytes     FlexInt  `json:"rx_bytes"`
 		RxBytesR    float64  `json:"rx_bytes-r"`
 		RxDropped   float64  `json:"rx_dropped"`
 		RxErrors    float64  `json:"rx_errors"`
@@ -242,7 +242,7 @@ type USG struct {
 		MaxSpeed    float64  `json:"max_speed"`
 		Name        string   `json:"name"`
 		Netmask     string   `json:"netmask"`
-		RxBytes     float64  `json:"rx_bytes"`
+		RxBytes     FlexInt  `json:"rx_bytes"`
 		RxBytesR    float64  `json:"rx_bytes-r"`
 		RxDropped   float64  `json:"rx_dropped"`
 		RxErrors    float64  `json:"rx_errors"`
