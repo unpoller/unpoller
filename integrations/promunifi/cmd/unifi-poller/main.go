@@ -11,7 +11,7 @@ import (
 	"github.com/golift/unifi"
 	influx "github.com/influxdata/influxdb1-client/v2"
 	"github.com/naoina/toml"
-	flag "github.com/ogier/pflag"
+	flag "github.com/spf13/pflag"
 )
 
 // Asset is used to give all devices and clients a common interface.
