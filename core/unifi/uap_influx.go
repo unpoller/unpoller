@@ -65,11 +65,11 @@ func (u UAP) Points() ([]*influx.Point, error) {
 		"uptime":                     u.Uptime.Val,
 		"considered_lost_at":         u.ConsideredLostAt,
 		"next_heartbeat_at":          u.NextHeartbeatAt,
-		"scanning":                   u.Scanning.Txt,
-		"spectrum_scanning":          u.SpectrumScanning,
-		"roll_upgrade":               u.Rollupgrade.Txt,
+		"scanning":                   u.Scanning.Val,
+		"spectrum_scanning":          u.SpectrumScanning.Val,
+		"roll_upgrade":               u.Rollupgrade.Val,
 		"state":                      u.State,
-		"upgradable":                 u.Upgradable.Txt,
+		"upgradable":                 u.Upgradable.Val,
 		"user-num_sta":               u.UserNumSta,
 		"version":                    u.Version,
 		"loadavg_1":                  u.SysStats.Loadavg1,
@@ -187,16 +187,16 @@ func (u UAP) Points() ([]*influx.Point, error) {
 		fields := map[string]interface{}{
 			"builtin_ant_gain":     p.BuiltinAntGain,
 			"current_antenna_gain": p.CurrentAntennaGain,
-			"has_dfs":              p.HasDfs.Txt,
-			"has_fccdfs":           p.HasFccdfs.Txt,
+			"has_dfs":              p.HasDfs.Val,
+			"has_fccdfs":           p.HasFccdfs.Val,
 			"ht":                   p.Ht,
-			"is_11ac":              p.Is11Ac.Txt,
+			"is_11ac":              p.Is11Ac.Val,
 			"max_txpower":          p.MaxTxpower,
-			"min_rssi_enabled":     p.MinRssiEnabled.Txt,
+			"min_rssi_enabled":     p.MinRssiEnabled.Val,
 			"min_txpower":          p.MinTxpower,
 			"nss":                  p.Nss,
 			"radio_caps":           p.RadioCaps,
-			"tx_power":             p.TxPower.Val,
+			"tx_power":             int(p.TxPower.Val), // this will go float in 2.1.
 			"tx_power_mode":        p.TxPowerMode,
 		}
 
@@ -234,8 +234,8 @@ func (u UAP) Points() ([]*influx.Point, error) {
 				fields["ccq"] = s.Ccq
 				fields["essid"] = s.Essid
 				fields["extchannel"] = s.Extchannel
-				fields["is_guest"] = s.IsGuest.Txt
-				fields["is_wep"] = s.IsWep.Txt
+				fields["is_guest"] = s.IsGuest.Val
+				fields["is_wep"] = s.IsWep.Val
 				fields["mac_filter_rejections"] = s.MacFilterRejections
 				fields["map_id"] = s.MapID
 				fields["vap_rx_bytes"] = s.RxBytes

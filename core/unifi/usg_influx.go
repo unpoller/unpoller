@@ -53,9 +53,9 @@ func (u USG) Points() ([]*influx.Point, error) {
 		"uptime":                         u.Uptime,
 		"considered_lost_at":             u.ConsideredLostAt,
 		"next_heartbeat_at":              u.NextHeartbeatAt,
-		"roll_upgrade":                   u.Rollupgrade.Txt,
+		"roll_upgrade":                   u.Rollupgrade.Val,
 		"state":                          u.State,
-		"upgradable":                     u.Upgradable.Txt,
+		"upgradable":                     u.Upgradable.Val,
 		"user-num_sta":                   u.UserNumSta,
 		"version":                        u.Version,
 		"num_desktop":                    u.NumDesktop,
@@ -73,8 +73,8 @@ func (u USG) Points() ([]*influx.Point, error) {
 		// have two WANs? mmmm, go ahead and add it. ;)
 		"config_network_wan_type": u.ConfigNetworkWan.Type,
 		"wan1_bytes-r":            u.Wan1.BytesR,
-		"wan1_enable":             u.Wan1.Enable,
-		"wan1_full_duplex":        u.Wan1.FullDuplex.Txt,
+		"wan1_enable":             u.Wan1.Enable.Val,
+		"wan1_full_duplex":        u.Wan1.FullDuplex.Val,
 		"wan1_purpose":            "uplink", // because it should have a purpose.
 		"wan1_gateway":            u.Wan1.Gateway,
 		"wan1_ifname":             u.Wan1.Ifname,

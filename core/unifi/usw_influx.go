@@ -54,15 +54,15 @@ func (u USW) Points() ([]*influx.Point, error) {
 		"general_temperature":      u.GeneralTemperature,
 		"last_seen":                u.LastSeen,
 		"license_state":            u.LicenseState,
-		"overheating":              u.Overheating.Txt,
+		"overheating":              u.Overheating.Val,
 		"rx_bytes":                 u.RxBytes,
 		"tx_bytes":                 u.TxBytes,
 		"uptime":                   u.Uptime,
 		"considered_lost_at":       u.ConsideredLostAt,
 		"next_heartbeat_at":        u.NextHeartbeatAt,
-		"roll_upgrade":             u.Rollupgrade.Txt,
+		"roll_upgrade":             u.Rollupgrade.Val,
 		"state":                    u.State,
-		"upgradable":               u.Upgradable.Txt,
+		"upgradable":               u.Upgradable.Val,
 		"user-num_sta":             u.UserNumSta,
 		"version":                  u.Version,
 		"loadavg_1":                u.SysStats.Loadavg1,
@@ -106,7 +106,7 @@ func (u USW) Points() ([]*influx.Point, error) {
 		"stat_tx_errors":           u.Stat.TxErrors,
 		"stat_tx_packets":          u.Stat.TxPackets,
 		"stat_tx_retries":          u.Stat.TxRetries,
-		"uplink_depth":             u.UplinkDepth,
+		"uplink_depth":             u.UplinkDepth.Txt,
 		// Add the port stats too.
 	}
 	pt, err := influx.NewPoint("usw", tags, fields, time.Now())

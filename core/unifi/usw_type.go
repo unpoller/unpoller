@@ -407,7 +407,7 @@ type USW struct {
 		Up          FlexBool `json:"up"`
 		UplinkMac   string   `json:"uplink_mac"`
 	} `json:"uplink"`
-	UplinkDepth         float64  `json:"uplink_depth"`
+	UplinkDepth         FlexInt  `json:"uplink_depth"`
 	Uptime              float64  `json:"uptime"`
 	UserNumSta          float64  `json:"user-num_sta"`
 	Version             string   `json:"version"`
