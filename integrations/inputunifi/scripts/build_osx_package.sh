@@ -24,7 +24,7 @@ mkdir -p package_build${BINFIX}/bin package_build${PREFIX}/etc/${BINARY} package
 mkdir -p package_build${PREFIX}/var/log
 
 # Copy the binary, config file and man page into the env.
-cp ${BINARY} package_build${BINFIX}/bin
+cp ${BINARY}.macos package_build${BINFIX}/bin/${BINARY}
 cp *.1.gz package_build${BINFIX}/share/man/man1
 cp examples/up.conf.example package_build${PREFIX}/etc/${BINARY}/
 
@@ -38,4 +38,8 @@ fpm -s dir -t osxpkg \
   --version ${VERSION} \
   --after-install scripts/after-install-osx.sh \
   --osxpkg-identifier-prefix com.github.davidnewhall \
+  --license MIT \
+  --maintainer 'david at sleepers dot pro' \
+  --url 'https://github.com/davidnewhall/unifi-poller' \
+  --description 'This daemon polls a Unifi controller at a short interval and stores the collected metric data in an Influx Database.' \
   --chdir package_build
