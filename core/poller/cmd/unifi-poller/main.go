@@ -26,10 +26,10 @@ func main() {
 	config, err := GetConfig(configFile)
 	if err != nil {
 		flag.Usage()
-		log.Fatalf("Config Error '%v': %v", configFile, err)
+		log.Fatalf("[ERROR] config file '%v': %v", configFile, err)
 	}
 	if err := config.Run(); err != nil {
-		log.Fatalln("ERROR:", err)
+		log.Fatalln("[ERROR]", err)
 	}
 }
 
