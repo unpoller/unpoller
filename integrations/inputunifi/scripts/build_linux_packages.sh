@@ -20,20 +20,26 @@ fi
 
 echo "Building '${OUTPUT}' package."
 
+PREFIX=
+BINFIX=/usr
+
 # Make a build environment.
-mkdir -p package_build/usr/bin package_build/etc/${BINARY} package_build/lib/systemd/system package_build/usr/share/man/man1
+rm -rf package_build
+mkdir -p package_build${BINFIX}/bin package_build${PREFIX}/etc/${BINARY} package_build${BINFIX}/share/man/man1
 
 # Copy the binary, config file and man page into the env.
-cp ${BINARY} package_build/usr/bin
-cp *.1.gz package_build/usr/share/man/man1
-cp examples/up.conf.example package_build/etc/${BINARY}/up.conf
+cp ${BINARY} package_build${BINFIX}/bin
+cp *.1.gz package_build${BINFIX}/share/man/man1
+cp examples/up.conf.example package_build${PREFIX}/etc/${BINARY}/up.conf
 
 # Fix the paths in the systemd unit file before copying it into the emv.
-sed "s#ExecStart.*#ExecStart=/usr/bin/${BINARY} --config=/etc/${BINARY}/up.conf#" \
+mkdir -p package_build/lib/systemd/system
+sed "s#ExecStart.*#ExecStart=${BINFIX}/bin/${BINARY} --config=${PREFIX}/etc/${BINARY}/up.conf#" \
   init/systemd/unifi-poller.service > package_build/lib/systemd/system/${BINARY}.service
 
 fpm -s dir -t ${OUTPUT} \
-  -n ${BINARY} \
-  -v ${VERSION} \
+  --name ${BINARY} \
+  --version ${VERSION} \
   --after-install scripts/after-install.sh \
+  --before-remove scripts/before-remove.sh \
   -C package_build
