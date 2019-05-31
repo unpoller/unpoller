@@ -2,6 +2,10 @@
 /unifi-poller
 /*.gz
 /*.1
+/*.deb
+/*.rpm
+/*.pkg
 /vendor
 .DS_Store
 *~
+/package_build
