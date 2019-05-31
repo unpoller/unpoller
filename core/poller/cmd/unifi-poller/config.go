@@ -3,7 +3,7 @@ package main
 import "time"
 
 // Version is loosely followed.
-var Version = "v1.0.0"
+var Version = "v1.1.1"
 
 const (
 	// App defaults in case they're missing from the config.
