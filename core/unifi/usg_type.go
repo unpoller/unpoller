@@ -68,7 +68,7 @@ type USG struct {
 		RxBytes                FlexInt     `json:"rx_bytes"`
 		RxPackets              float64     `json:"rx_packets"`
 		SiteID                 string      `json:"site_id"`
-		TxBytes                float64     `json:"tx_bytes"`
+		TxBytes                FlexInt     `json:"tx_bytes"`
 		TxPackets              float64     `json:"tx_packets"`
 		Up                     FlexBool    `json:"up"`
 		Vlan                   string      `json:"vlan,omitempty"`
@@ -106,7 +106,7 @@ type USG struct {
 		RxMulticast float64  `json:"rx_multicast"`
 		RxPackets   float64  `json:"rx_packets"`
 		Speed       float64  `json:"speed"`
-		TxBytes     float64  `json:"tx_bytes"`
+		TxBytes     FlexInt  `json:"tx_bytes"`
 		TxDropped   float64  `json:"tx_dropped"`
 		TxErrors    float64  `json:"tx_errors"`
 		TxPackets   float64  `json:"tx_packets"`
@@ -160,7 +160,7 @@ type USG struct {
 		Mem    float64 `json:"mem,string"`
 		Uptime float64 `json:"uptime,string"`
 	} `json:"system-stats"`
-	TxBytes    float64  `json:"tx_bytes"`
+	TxBytes    FlexInt  `json:"tx_bytes"`
 	Type       string   `json:"type"`
 	Upgradable FlexBool `json:"upgradable"`
 	Uplink     struct {
@@ -187,7 +187,7 @@ type USG struct {
 		SpeedtestLastrun float64  `json:"speedtest_lastrun"`
 		SpeedtestPing    float64  `json:"speedtest_ping"`
 		SpeedtestStatus  string   `json:"speedtest_status"`
-		TxBytes          float64  `json:"tx_bytes"`
+		TxBytes          FlexInt  `json:"tx_bytes"`
 		TxBytesR         float64  `json:"tx_bytes-r"`
 		TxDropped        float64  `json:"tx_dropped"`
 		TxErrors         float64  `json:"tx_errors"`
@@ -222,7 +222,7 @@ type USG struct {
 		RxMulticast float64  `json:"rx_multicast"`
 		RxPackets   float64  `json:"rx_packets"`
 		Speed       float64  `json:"speed"`
-		TxBytes     float64  `json:"tx_bytes"`
+		TxBytes     FlexInt  `json:"tx_bytes"`
 		TxBytesR    float64  `json:"tx_bytes-r"`
 		TxDropped   float64  `json:"tx_dropped"`
 		TxErrors    float64  `json:"tx_errors"`
@@ -249,7 +249,7 @@ type USG struct {
 		RxMulticast float64  `json:"rx_multicast"`
 		RxPackets   float64  `json:"rx_packets"`
 		Speed       float64  `json:"speed"`
-		TxBytes     float64  `json:"tx_bytes"`
+		TxBytes     FlexInt  `json:"tx_bytes"`
 		TxBytesR    float64  `json:"tx_bytes-r"`
 		TxDropped   float64  `json:"tx_dropped"`
 		TxErrors    float64  `json:"tx_errors"`
