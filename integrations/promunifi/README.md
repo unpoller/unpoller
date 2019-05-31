@@ -43,13 +43,6 @@ I only, personally, run this on a Mac 10.13.something. I know others are using
 Linux and it's working, but I need more feedback. Does the unit file work? Are
 you able to stop and start the service? Does the Makefile do the right things?
 
-- I probably suck at InfluxDB.
-
-I don't know what should be a tag and what should be a field. I think
-I did my best, but there's certainly room for improvements in both
-the data input and the Grafana graphs (output). I'm always iterating, but
-if you find a deficiency or something that can be improved, let me know.
-
 - Are there other devices that need to be included?
 
 I have: switch, router, access point. Three total, and the type structs are
@@ -63,11 +56,6 @@ Issue and lets discuss.
 
 If you're a nerd you can probably figure it out. I'd still like some pretty
 pictures and maybe even a Twitch VOD.
-
-- Sanity Checking
-
-Did I actually graph the right data in the right way? Some validation would
-be nice.
 
 - Radios, Frequencies, Interfaces, vAPs
 
@@ -84,12 +72,12 @@ isolate why this happens. We may need to issue a reconnect and get a new cookie.
 
 Here's a picture of the Client dashboard.
 
-![image](images/unifi-clients-dashboard.png?raw=true)
+![image](examples/unifi-clients-dashboard.png?raw=true)
 
 Here's a picture of the UAP dashboard. This only shows one device, but you can
 select multiple to put specific stats side-by-side.
 
-![image](images/unifi-uap-dashboard.png?raw=true)
+![image](examples/unifi-uap-dashboard.png?raw=true)
 
 
 ## Copyright & License
