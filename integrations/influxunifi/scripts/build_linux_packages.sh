@@ -28,7 +28,7 @@ rm -rf package_build
 mkdir -p package_build${BINFIX}/bin package_build${PREFIX}/etc/${BINARY} package_build${BINFIX}/share/man/man1
 
 # Copy the binary, config file and man page into the env.
-cp ${BINARY} package_build${BINFIX}/bin
+cp ${BINARY}.linux package_build${BINFIX}/bin/${BINARY}
 cp *.1.gz package_build${BINFIX}/share/man/man1
 cp examples/up.conf.example package_build${PREFIX}/etc/${BINARY}/up.conf
 
@@ -42,4 +42,8 @@ fpm -s dir -t ${OUTPUT} \
   --version ${VERSION} \
   --after-install scripts/after-install.sh \
   --before-remove scripts/before-remove.sh \
+  --license MIT \
+  --url 'https://github.com/davidnewhall/unifi-poller' \
+  --maintainer 'david at sleepers dot pro' \
+  --description 'This daemon polls a Unifi controller at a short interval and stores the collected metric data in an Influx Database.' \
   --chdir package_build
