@@ -1,5 +1,6 @@
 #!/bin/bash
 
+# This file uses ronn to build a man page for unifi-poller.
 set -o pipefail
 
 OUTPUT=$1
