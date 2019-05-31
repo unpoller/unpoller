@@ -1,7 +1,7 @@
 PACKAGES=`find ./cmd -mindepth 1 -maxdepth 1 -type d`
 BINARY=unifi-poller
 
-all: clean test man build
+all: clean man build
 
 clean:
 	for p in $(PACKAGES); do rm -f `echo $${p}|cut -d/ -f3`{,.1,.1.gz}; done
@@ -22,13 +22,13 @@ test: lint
 man:
 	scripts/build_manpages.sh ./
 
-rpm: clean test man linux
+rpm: clean man linux
 	scripts/build_linux_packages.sh rpm
 
-deb: clean test man linux
+deb: clean man linux
 	scripts/build_linux_packages.sh deb
 
-osxpkg: clean test man darwin
+osxpkg: clean man darwin
 	scripts/build_osx_package.sh
 
 install: all
