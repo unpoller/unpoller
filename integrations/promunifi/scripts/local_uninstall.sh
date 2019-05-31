@@ -6,14 +6,22 @@
 
 BINARY=unifi-poller
 
-echo "Uninstall unifi-poller. If you get errors, you may need sudo."
+echo "Uninstall unifi-poller. You may need sudo on Linux. Do not use sudo on macOS."
 
 # Stopping the daemon
 if [ -x /bin/systemctl ]; then
    /bin/systemctl stop ${BINARY}
 fi
+
 if [ -x /bin/launchctl ] && [ -f ~/Library/LaunchAgents/com.github.davidnewhall.${BINARY}.plist ]; then
-  /bin/launchctl unload ~/Library/LaunchAgents/com.github.davidnewhall.${BINARY}.plist
+  echo Unloading ~/Library/LaunchAgents/com.github.davidnewhall.${BINARY}.plist
+  /bin/launchctl unload ~/Library/LaunchAgents/com.github.davidnewhall.${BINARY}.plist || true
+fi
+
+if [ -x /bin/launchctl ] && [ -f /Library/LaunchAgents/com.github.davidnewhall.${BINARY}.plist ]; then
+  echo Unloading /Library/LaunchAgents/com.github.davidnewhall.${BINARY}.plist
+  /bin/launchctl unload /Library/LaunchAgents/com.github.davidnewhall.${BINARY}.plist || true
+  echo "Delete this file manually: sudo rm -f /Library/LaunchAgents/com.github.davidnewhall.${BINARY}.plist"
 fi
 
 # Deleting config file, binary, man page, launch agent or unit file.
