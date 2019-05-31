@@ -2,8 +2,8 @@ package main
 
 import "time"
 
-// Version is loosely followed.
-var Version = "v1.1.1"
+// Version is injected by the Makefile
+var Version = "development"
 
 const (
 	// App defaults in case they're missing from the config.
