@@ -42,4 +42,4 @@ fpm -s dir -t ${OUTPUT} \
   --version ${VERSION} \
   --after-install scripts/after-install.sh \
   --before-remove scripts/before-remove.sh \
-  -C package_build
+  --chdir package_build

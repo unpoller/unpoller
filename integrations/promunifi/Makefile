@@ -5,7 +5,7 @@ all: clean test man build
 
 clean:
 	for p in $(PACKAGES); do rm -f `echo $${p}|cut -d/ -f3`{,.1,.1.gz}; done
-	rm -rf build unifi-poller_*.deb unifi-poller-*.rpm unifi-poller-*.pkg
+	rm -rf package_build unifi-poller_*.deb unifi-poller-*.rpm unifi-poller-*.pkg
 
 build:
 	for p in $(PACKAGES); do go build -ldflags "-w -s" $${p}; done
