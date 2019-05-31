@@ -21,11 +21,12 @@ BINFIX=/usr/local
 # Make a build environment.
 rm -rf package_build
 mkdir -p package_build${BINFIX}/bin package_build${PREFIX}/etc/${BINARY} package_build${BINFIX}/share/man/man1
+mkdir -p package_build${PREFIX}/var/log
 
 # Copy the binary, config file and man page into the env.
 cp ${BINARY} package_build${BINFIX}/bin
 cp *.1.gz package_build${BINFIX}/share/man/man1
-cp examples/up.conf.example package_build${PREFIX}/etc/${BINARY}/up.conf
+cp examples/up.conf.example package_build${PREFIX}/etc/${BINARY}/
 
 # Copy in launch agent.
 mkdir -p package_build/Library/LaunchAgents
@@ -35,5 +36,6 @@ cp init/launchd/com.github.davidnewhall.unifi-poller.plist package_build/Library
 fpm -s dir -t osxpkg \
   --name ${BINARY} \
   --version ${VERSION} \
+  --after-install scripts/after-install-osx.sh \
   --osxpkg-identifier-prefix com.github.davidnewhall \
-  -C package_build
+  --chdir package_build
