@@ -1,4 +1,3 @@
-# untested, feedback welcomed.
 [Unit]
 Description=Unifi Poller - Ubiquiti Metrics->InfluxDB
 After=network.target
