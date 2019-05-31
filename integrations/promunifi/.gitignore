@@ -1,6 +1,6 @@
 /up.conf
 /unifi-poller
-/*.1.gz
+/*.gz
 /*.1
 /vendor
 .DS_Store
