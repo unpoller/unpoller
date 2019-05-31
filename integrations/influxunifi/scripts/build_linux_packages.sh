@@ -20,6 +20,7 @@ fi
 
 echo "Building '${OUTPUT}' package."
 
+# eh, don't change these.
 PREFIX=
 BINFIX=/usr
 
@@ -37,6 +38,7 @@ mkdir -p package_build/lib/systemd/system
 sed "s#ExecStart.*#ExecStart=${BINFIX}/bin/${BINARY} --config=${PREFIX}/etc/${BINARY}/up.conf#" \
   init/systemd/unifi-poller.service > package_build/lib/systemd/system/${BINARY}.service
 
+# Make a package.
 fpm -s dir -t ${OUTPUT} \
   --name ${BINARY} \
   --version ${VERSION} \
