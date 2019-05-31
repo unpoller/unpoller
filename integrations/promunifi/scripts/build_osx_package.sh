@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # This script builds a simple macos Installer pkg. Run by the Makefile.
-# Use: `make osx`
+# Use: `make osxpkg`
 
 OUTPUT=$1
 BINARY=unifi-poller
