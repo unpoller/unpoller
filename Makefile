@@ -22,13 +22,13 @@ test: lint
 man:
 	scripts/build_manpages.sh ./
 
-rpm: clean man linux
+rpm: man linux
 	scripts/build_linux_packages.sh rpm
 
-deb: clean man linux
+deb: man linux
 	scripts/build_linux_packages.sh deb
 
-osxpkg: clean man darwin
+osxpkg: man darwin
 	scripts/build_osx_package.sh
 
 install: all
