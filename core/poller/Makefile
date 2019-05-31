@@ -1,20 +1,22 @@
 PACKAGES=`find ./cmd -mindepth 1 -maxdepth 1 -type d`
 BINARY=unifi-poller
+VERSION=`git tag -l --merged | tail -n1`
 
 all: clean man build
 
 clean:
 	for p in $(PACKAGES); do rm -f `echo $${p}|cut -d/ -f3`{,.1,.1.gz}; done
 	rm -rf package_build unifi-poller_*.deb unifi-poller-*.rpm unifi-poller-*.pkg
+	rm -f unifi-poller.*.gz
 
 build:
-	for p in $(PACKAGES); do go build -ldflags "-w -s" $${p}; done
+	for p in $(PACKAGES); do go build -ldflags "-w -s -X main.Version=$(VERSION)" $${p}; done
 
 linux:
-	for p in $(PACKAGES); do GOOS=linux go build -ldflags "-w -s" $${p}; done
+	for p in $(PACKAGES); do GOOS=linux go build -ldflags "-w -s -X main.Version=$(VERSION)" $${p}; done
 
 darwin:
-	for p in $(PACKAGES); do GOOS=darwin go build -ldflags "-w -s" $${p}; done
+	for p in $(PACKAGES); do GOOS=darwin go build -ldflags "-w -s -X main.Version=$(VERSION)" $${p}; done
 
 test: lint
 	for p in $(PACKAGES) $(LIBRARYS); do go test -race -covermode=atomic $${p}; done
