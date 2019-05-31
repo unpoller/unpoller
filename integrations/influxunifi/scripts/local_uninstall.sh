@@ -10,7 +10,8 @@ echo "Uninstall unifi-poller. You may need sudo on Linux. Do not use sudo on mac
 
 # Stopping the daemon
 if [ -x /bin/systemctl ]; then
-   /bin/systemctl stop ${BINARY}
+  /bin/systemctl disable ${BINARY}
+  /bin/systemctl stop ${BINARY}
 fi
 
 if [ -x /bin/launchctl ] && [ -f ~/Library/LaunchAgents/com.github.davidnewhall.${BINARY}.plist ]; then
