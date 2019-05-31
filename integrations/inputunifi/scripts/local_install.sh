@@ -29,6 +29,8 @@ fi
 # Making systemd happy by telling it to reload.
 if [ -x /bin/systemctl ]; then
   /bin/systemctl --system daemon-reload
+  /bin/systemctl start unifi-poller
+  /bin/systemctl enable unifi-poller
 fi
 
 echo "Installation Complete. Edit the config file @ /usr/local/etc/${BINARY}/up.conf"
@@ -36,7 +38,7 @@ echo "Then start the daemon with:"
 if [ -d ~/Library/LaunchAgents ]; then
   echo "   launchctl load ~/Library/LaunchAgents/com.github.davidnewhall.${BINARY}.plist"
 fi
-if [ -d /etc/systemd/system ]; then
-  echo "   sudo /bin/systemctl start ${BINARY}"
+if [ -x /bin/systemctl ]; then
+  echo "   sudo /bin/systemctl restart ${BINARY}"
 fi
 echo "Examine the log file at: /usr/local/var/log/${BINARY}.log (logs may go elsewhere on linux, check syslog)"
