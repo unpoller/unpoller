@@ -5,12 +5,12 @@ VERSION=`git tag -l --merged | tail -n1`
 all: man unifi-poller
 
 # Prepare a release. Called in Travis CI.
-release: clean test man linux macos rpm deb
+release: clean test man linux macos rpm deb osxpkg
 	mkdir -p build_assets
 	gzip -9k unifi-poller.linux
 	gzip -9k unifi-poller.macos
 	mv unifi-poller.macos.gz unifi-poller.linux.gz build_assets/
-	cp *.rpm *.deb build_assets/
+	cp *.rpm *.deb *.pkg build_assets/
 
 clean:
 	rm -f `echo $(PACKAGE)|cut -d/ -f3`{.macos,.linux,.1,}{,.gz}
