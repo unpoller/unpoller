@@ -1,35 +1,39 @@
-PACKAGES=`find ./cmd -mindepth 1 -maxdepth 1 -type d`
+PACKAGE=./cmd/unifi-poller
 BINARY=unifi-poller
 VERSION=`git tag -l --merged | tail -n1`
 
 all: man unifi-poller
 
+# Prepare a release. Called in Travis CI.
+release: clean test man linux macos rpm deb
+	mkdir -p build_assets
+	gzip -9k unifi-poller.linux
+	gzip -9k unifi-poller.macos
+	mv unifi-poller.macos.gz unifi-poller.linux.gz build_assets/
+	cp *.rpm *.deb build_assets/
+
 clean:
-	for p in $(PACKAGES); do rm -f `echo $${p}|cut -d/ -f3`{.macos,.linux,.1,}{,.gz}; done
-	for p in $(PACKAGES); do rm -f `echo $${p}|cut -d/ -f3`{_,-}*.{deb,rpm,pkg}; done
-	rm -rf package_build
+	rm -f `echo $(PACKAGE)|cut -d/ -f3`{.macos,.linux,.1,}{,.gz}
+	rm -f `echo $(PACKAGE)|cut -d/ -f3`{_,-}*.{deb,rpm,pkg}
+	rm -rf package_build build_assets
 
 build: unifi-poller
 unifi-poller:
-	for p in $(PACKAGES); do go build -ldflags "-w -s -X main.Version=$(VERSION)" $${p}; done
+	go build -ldflags "-w -s -X main.Version=$(VERSION)" $(PACKAGE)
 
 linux: unifi-poller.linux
 unifi-poller.linux:
-	for p in $(PACKAGES); do GOOS=linux go build -o unifi-poller.linux -ldflags "-w -s -X main.Version=$(VERSION)" $${p}; done
+	GOOS=linux go build -o unifi-poller.linux -ldflags "-w -s -X main.Version=$(VERSION)" $(PACKAGE)
 
-darwin: unifi-poller.macos
+macos: unifi-poller.macos
 unifi-poller.macos:
-	for p in $(PACKAGES); do GOOS=darwin go build -o unifi-poller.macos -ldflags "-w -s -X main.Version=$(VERSION)" $${p}; done
+	GOOS=darwin go build -o unifi-poller.macos -ldflags "-w -s -X main.Version=$(VERSION)" $(PACKAGE)
 
 test: lint
-	for p in $(PACKAGES) $(LIBRARYS); do go test -race -covermode=atomic $${p}; done
+	go test -race -covermode=atomic $(PACKAGE)
 
 lint:
-	goimports -l $(PACKAGES)
-	gofmt -l $(PACKAGES)
-	errcheck $(PACKAGES)
-	golint $(PACKAGES)
-	go vet $(PACKAGES)
+	golangci-lint run --enable-all -D gochecknoglobals
 
 man: unifi-poller.1.gz
 unifi-poller.1.gz:
@@ -41,7 +45,7 @@ rpm: man linux
 deb: man linux
 	scripts/build_linux_packages.sh deb
 
-osxpkg: man darwin
+osxpkg: man macos
 	scripts/build_osx_package.sh
 
 install: man
