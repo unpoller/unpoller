@@ -36,6 +36,7 @@ cp init/launchd/com.github.davidnewhall.unifi-poller.plist package_build/Library
 fpm -s dir -t osxpkg \
   --name ${BINARY} \
   --version ${VERSION} \
+  --iteration $(git rev-list --all --count) \
   --after-install scripts/after-install-osx.sh \
   --osxpkg-identifier-prefix com.github.davidnewhall \
   --license MIT \
