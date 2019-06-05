@@ -6,16 +6,16 @@ all: man unifi-poller
 
 # Prepare a release. Called in Travis CI.
 release: clean test man linux macos rpm deb osxpkg
-	mkdir -p build_assets
+	mkdir -p release
 	gzip -9k unifi-poller.linux
 	gzip -9k unifi-poller.macos
-	mv unifi-poller.macos.gz unifi-poller.linux.gz build_assets/
-	cp *.rpm *.deb *.pkg build_assets/
+	mv unifi-poller.macos.gz unifi-poller.linux.gz release/
+	cp *.rpm *.deb *.pkg release/
 
 clean:
 	rm -f `echo $(PACKAGE)|cut -d/ -f3`{.macos,.linux,.1,}{,.gz}
 	rm -f `echo $(PACKAGE)|cut -d/ -f3`{_,-}*.{deb,rpm,pkg}
-	rm -rf package_build build_assets
+	rm -rf package_build release
 
 build: unifi-poller
 unifi-poller:
