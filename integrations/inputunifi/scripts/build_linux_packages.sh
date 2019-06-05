@@ -42,6 +42,7 @@ sed "s#ExecStart.*#ExecStart=${BINFIX}/bin/${BINARY} --config=${PREFIX}/etc/${BI
 fpm -s dir -t ${OUTPUT} \
   --name ${BINARY} \
   --version ${VERSION} \
+  --iteration $(git rev-list --all --count) \
   --after-install scripts/after-install.sh \
   --before-remove scripts/before-remove.sh \
   --license MIT \
