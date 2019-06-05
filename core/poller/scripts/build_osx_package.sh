@@ -3,7 +3,7 @@
 # This script builds a simple macos Installer pkg. Run by the Makefile.
 # Use: `make osxpkg`
 
-OUTPUT=$1
+OUTPUT=osxpkg
 BINARY=unifi-poller
 VERSION=$(git tag -l --merged | tail -n1 | tr -d v)
 
@@ -13,7 +13,7 @@ if [ "$?" != "0" ]; then
   exit 1
 fi
 
-echo "Building 'osxpkg' package."
+echo "Building '${OUTPUT}' package for ${BINARY} version ${VERSION}."
 
 PREFIX=/usr/local
 BINFIX=/usr/local
@@ -33,7 +33,7 @@ mkdir -p package_build/Library/LaunchAgents
 cp init/launchd/com.github.davidnewhall.unifi-poller.plist package_build/Library/LaunchAgents/
 
 # Make a package.
-fpm -s dir -t osxpkg \
+fpm -s dir -t ${OUTPUT} \
   --name ${BINARY} \
   --version ${VERSION} \
   --iteration $(git rev-list --all --count) \

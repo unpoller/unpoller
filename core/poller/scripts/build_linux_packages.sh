@@ -18,7 +18,7 @@ if [ "$?" != "0" ]; then
   exit 1
 fi
 
-echo "Building '${OUTPUT}' package."
+echo "Building '${OUTPUT}' package for ${BINARY} version ${VERSION}."
 
 # eh, don't change these.
 PREFIX=
