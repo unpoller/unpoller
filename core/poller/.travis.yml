@@ -1,0 +1,41 @@
+language: go
+addons:
+  apt:
+    packages:
+    - ruby-dev
+    - rpm
+    - build-essential
+    - git
+    - libgnome-keyring-dev
+    - fakeroot
+go:
+- 1.12.x
+env:
+- PATH=${PATH}:/home/travis/.gem/ruby/2.4.0/bin
+before_install:
+  # This deploy is not used atm.
+- openssl aes-256-cbc -K $encrypted_9f3147001275_key -iv $encrypted_9f3147001275_iv -in .github_deploy_key.enc -out github_deploy_key -d
+- chmod 600 github_deploy_key
+- eval $(ssh-agent -s)
+- ssh-add github_deploy_key
+  # Download the `dep` binary to bin folder in $GOPATH
+- curl -L -s https://github.com/golang/dep/releases/download/v0.5.3/dep-linux-amd64 -o $GOPATH/bin/dep
+- chmod +x $GOPATH/bin/dep
+  # download super-linter: golangci-lint
+- curl -sfL https://install.goreleaser.com/github.com/golangci/golangci-lint.sh | sh -s -- -b $(go env GOPATH)/bin latest
+install:
+- dep ensure
+- gem install --no-document ronn fpm
+script:
+- make release
+deploy:
+  provider: releases
+  api_key:
+    secure: GsvW0m+EnRELQMk8DjH63VXinqbwse4FJ4vNUslOE6CZ8PBXPrH0ZgaI7ic/uxRtm7CYj0sir4CZq62W5l6uhoXCCQfjOnmJspqnQcrFZ1xRdWktsNXaRwM6hlzaUThsJ/1PD9Psc66uKXBYTg0IlUz0yjZAZk7tCUE4libuj41z40ZKxUcbfcNvH4Njc9IpNB4QSA3ss+a9/6ZwBz4tHVamsGIrzaE0Zf99ItNBYvaOwhM2rC/NWIsFmwt8w4rIA2NIrkZgMDV+Z2Niqh4JRLAWCQNx/RjC5U52lG2yhqivUC3TromZ+q4O4alUltsyIzF2nVanLWgJmbeFo8uXT5A+gd3ovSkFLU9medXd9i4kap7kN/o5m9p5QZvrdEYHEmIU4ml5rjT2EQQVy5CtSmpiRAbhpEJIvA1wDtRq8rdz8IVfJXkHNjg2XdouNmMMWqa3OkEPw21+uxsqv4LscW/6ZjsavzL5SSdnBRU9n79EfGJE/tJLKiNumah/vLuJ5buNhgqmCdtX/Tg+DhQS1BOyYg4l4L8s9IIKZgFRwrOPsZnA/KsrWg4ZsjJ87cqKCaT/qs2EJx5odZcZWJYLBngeO8Tc6cQtLgJdieY2oEKo51Agq4rgikZDt21m6TY9/R5lPN0piwdpy3ZGKfv1ijXx74raMT03qskputzMCvc=
+  overwrite: true
+  skip_cleanup: true
+  file_glob: true
+  file: build_assets/*
+  on:
+    repo: davidnewhall/unifi-poller
+    tags: true
