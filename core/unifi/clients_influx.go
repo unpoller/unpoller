@@ -99,7 +99,7 @@ func (c UCL) Points() ([]*influx.Point, error) {
 		"wired-tx_packets":       c.WiredTxPackets,
 	}
 	pt, err := influx.NewPoint("clients", tags, fields, time.Now())
-	if err == nil {
+	if err != nil {
 		return nil, err
 	}
 	return []*influx.Point{pt}, nil
