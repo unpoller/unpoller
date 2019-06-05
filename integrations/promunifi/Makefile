@@ -2,26 +2,37 @@ PACKAGES=`find ./cmd -mindepth 1 -maxdepth 1 -type d`
 BINARY=unifi-poller
 VERSION=`git tag -l --merged | tail -n1`
 
-all: clean man build
+all: man unifi-poller
 
 clean:
-	for p in $(PACKAGES); do rm -f `echo $${p}|cut -d/ -f3`{,.1,.1.gz}; done
-	rm -rf package_build unifi-poller_*.deb unifi-poller-*.rpm unifi-poller-*.pkg
-	rm -f unifi-poller.*.gz
+	for p in $(PACKAGES); do rm -f `echo $${p}|cut -d/ -f3`{.macos,.linux,.1,}{,.gz}; done
+	for p in $(PACKAGES); do rm -f `echo $${p}|cut -d/ -f3`{_,-}*.{deb,rpm,pkg}; done
+	rm -rf package_build
 
-build:
+build: unifi-poller
+unifi-poller:
 	for p in $(PACKAGES); do go build -ldflags "-w -s -X main.Version=$(VERSION)" $${p}; done
 
-linux:
-	for p in $(PACKAGES); do GOOS=linux go build -ldflags "-w -s -X main.Version=$(VERSION)" $${p}; done
+linux: unifi-poller.linux
+unifi-poller.linux:
+	for p in $(PACKAGES); do GOOS=linux go build -o unifi-poller.linux -ldflags "-w -s -X main.Version=$(VERSION)" $${p}; done
 
-darwin:
-	for p in $(PACKAGES); do GOOS=darwin go build -ldflags "-w -s -X main.Version=$(VERSION)" $${p}; done
+darwin: unifi-poller.macos
+unifi-poller.macos:
+	for p in $(PACKAGES); do GOOS=darwin go build -o unifi-poller.macos -ldflags "-w -s -X main.Version=$(VERSION)" $${p}; done
 
 test: lint
 	for p in $(PACKAGES) $(LIBRARYS); do go test -race -covermode=atomic $${p}; done
 
-man:
+lint:
+	goimports -l $(PACKAGES)
+	gofmt -l $(PACKAGES)
+	errcheck $(PACKAGES)
+	golint $(PACKAGES)
+	go vet $(PACKAGES)
+
+man: unifi-poller.1.gz
+unifi-poller.1.gz:
 	scripts/build_manpages.sh ./
 
 rpm: man linux
@@ -33,18 +44,11 @@ deb: man linux
 osxpkg: man darwin
 	scripts/build_osx_package.sh
 
-install: all
+install: man
 	scripts/local_install.sh
 
 uninstall:
 	scripts/local_uninstall.sh
-
-lint:
-	goimports -l $(PACKAGES)
-	gofmt -l $(PACKAGES)
-	errcheck $(PACKAGES)
-	golint $(PACKAGES)
-	go vet $(PACKAGES)
 
 deps:
 	dep ensure -update
