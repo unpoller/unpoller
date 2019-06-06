@@ -74,6 +74,10 @@ Here's a picture of the Client dashboard.
 
 ![image](examples/unifi-clients-dashboard.png?raw=true)
 
+Here's a picture of the USG dashboard.
+
+![image](examples/unifi-usg-dashboard.png?raw=true)
+
 Here's a picture of the UAP dashboard. This only shows one device, but you can
 select multiple to put specific stats side-by-side.
 
