@@ -3,7 +3,7 @@
     "list": [
       {
         "builtIn": 1,
-        "datasource": "Unifi",
+        "datasource": "-- Grafana --",
         "enable": true,
         "hide": true,
         "iconColor": "rgba(0, 211, 255, 1)",
@@ -16,6 +16,7 @@
   "gnetId": null,
   "graphTooltip": 1,
   "id": 6,
+  "iteration": 1559783294182,
   "links": [],
   "panels": [
     {
@@ -31,6 +32,7 @@
       },
       "id": 21,
       "links": [],
+      "options": {},
       "pageSize": null,
       "scroll": true,
       "showHeader": true,
@@ -95,11 +97,19 @@
                 "name"
               ],
               "type": "tag"
+            },
+            {
+              "params": [
+                "ap_mac"
+              ],
+              "type": "tag"
             }
           ],
           "measurement": "clients",
           "orderByTime": "ASC",
           "policy": "default",
+          "query": "SELECT last(\"ip\") AS \"Address\", last(\"note\") AS \"Note\", last(\"network\") AS \"Network\" FROM \"clients\" WHERE (\"is_wired\" = 'false' AND \"ap_mac\" =~ /^$AP$/) AND $timeFilter GROUP BY \"mac\", \"oui\", \"channel\", \"radio\", \"name\", \"ap_mac\"",
+          "rawQuery": false,
           "refId": "A",
           "resultFormat": "table",
           "select": [
@@ -163,6 +173,24 @@
               "key": "is_wired",
               "operator": "=",
               "value": "false"
+            },
+            {
+              "condition": "AND",
+              "key": "ap_mac",
+              "operator": "=~",
+              "value": "/^$AP$/"
+            },
+            {
+              "condition": "AND",
+              "key": "name",
+              "operator": "=~",
+              "value": "/^$Client$/"
+            },
+            {
+              "condition": "AND",
+              "key": "site_name",
+              "operator": "=~",
+              "value": "/^$Site$/"
             }
           ]
         }
@@ -186,11 +214,12 @@
       "hideTimeOverride": false,
       "id": 22,
       "links": [],
+      "options": {},
       "pageSize": null,
       "scroll": true,
       "showHeader": true,
       "sort": {
-        "col": 0,
+        "col": 3,
         "desc": true
       },
       "styles": [
@@ -254,6 +283,8 @@
           "measurement": "clients",
           "orderByTime": "ASC",
           "policy": "default",
+          "query": "SELECT last(\"ip\") AS \"Address\", last(\"note\") AS \"Note\", last(\"network\") AS \"Network\" FROM \"clients\" WHERE (\"is_wired\" != 'false' AND \"name\" =~ /^$Client$/ AND \"site_name\" =~ /$Site$/) AND $timeFilter GROUP BY \"sw_port\", \"mac\", \"oui\", \"use_fixedip\", \"name\"",
+          "rawQuery": true,
           "refId": "A",
           "resultFormat": "table",
           "select": [
@@ -317,6 +348,12 @@
               "key": "is_wired",
               "operator": "=",
               "value": "true"
+            },
+            {
+              "condition": "AND",
+              "key": "name",
+              "operator": "=~",
+              "value": "/^$Client$/"
             }
           ]
         }
@@ -357,6 +394,7 @@
       "links": [],
       "maxDataPoints": 3,
       "nullPointMode": "connected",
+      "options": {},
       "pieType": "pie",
       "strokeWidth": 1,
       "targets": [
@@ -373,7 +411,7 @@
           "measurement": "clients",
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "select count(distinct(hostname)) FROM \"clients\" WHERE time > now() - 10m AND is_wired = 'true' group by channel",
+          "query": "select count(distinct(hostname)) FROM \"clients\" WHERE time > now() - 10m AND is_wired = 'true' AND \"site_name\" =~ /$Site$/ group by hostname",
           "rawQuery": true,
           "refId": "A",
           "resultFormat": "time_series",
@@ -417,7 +455,7 @@
           ],
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "select count(distinct(hostname)) FROM \"clients\" WHERE time > now() - 10m AND is_wired = 'false' group by channel",
+          "query": "select count(distinct(hostname)) FROM \"clients\" WHERE time > now() - 10m AND (is_wired != 'true' AND \"site_name\" =~ /$Site$/ AND \"ap_mac\" =~ /^$AP$/ AND \"name\" =~ /^$Client$/) group by channel",
           "rawQuery": true,
           "refId": "B",
           "resultFormat": "time_series",
@@ -476,11 +514,12 @@
       "links": [],
       "maxDataPoints": 3,
       "nullPointMode": "connected",
+      "options": {},
       "pieType": "pie",
       "strokeWidth": "3",
       "targets": [
         {
-          "alias": "Upstairs / $tag_radio_proto / $tag_radio / $tag_radio_name",
+          "alias": "$tag_ap_mac / $tag_radio_proto / $tag_radio / $tag_radio_name",
           "groupBy": [
             {
               "params": [
@@ -492,7 +531,7 @@
           "measurement": "clients",
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "select count(distinct(hostname)) FROM \"clients\" WHERE (time > now() - 10m AND ap_mac = '80:2a:a8:10:ae:87') group by radio_proto, radio, radio_name, ap_mac",
+          "query": "select count(distinct(hostname)) FROM \"clients\" WHERE (time > now() - 10m AND ap_mac =~ /$AP$/ AND \"site_name\" =~ /$Site$/ and  \"name\" =~ /^$Client$/) group by radio_proto, radio, radio_name, ap_mac",
           "rawQuery": true,
           "refId": "A",
           "resultFormat": "time_series",
@@ -517,44 +556,6 @@
               "value": "false"
             }
           ]
-        },
-        {
-          "alias": "Downstairs / $tag_radio_proto / $tag_radio / $tag_radio_name",
-          "groupBy": [
-            {
-              "params": [
-                "$__interval"
-              ],
-              "type": "time"
-            },
-            {
-              "params": [
-                "null"
-              ],
-              "type": "fill"
-            }
-          ],
-          "orderByTime": "ASC",
-          "policy": "default",
-          "query": "select count(distinct(hostname)) FROM \"clients\" WHERE (time > now() - 10m AND ap_mac = '80:2a:a8:10:ae:0c') group by radio_proto, radio, radio_name, ap_mac",
-          "rawQuery": true,
-          "refId": "B",
-          "resultFormat": "time_series",
-          "select": [
-            [
-              {
-                "params": [
-                  "value"
-                ],
-                "type": "field"
-              },
-              {
-                "params": [],
-                "type": "mean"
-              }
-            ]
-          ],
-          "tags": []
         }
       ],
       "timeFrom": "1h",
@@ -588,19 +589,19 @@
       "legend": {
         "header": "",
         "show": true,
-        "sort": "current",
-        "sortDesc": true,
+        "sortDesc": false,
         "values": true
       },
       "legendType": "Right side",
       "links": [],
       "maxDataPoints": 3,
       "nullPointMode": "connected",
+      "options": {},
       "pieType": "pie",
       "strokeWidth": 1,
       "targets": [
         {
-          "alias": "$tag_oui",
+          "alias": "w $tag_oui",
           "groupBy": [
             {
               "params": [
@@ -612,9 +613,48 @@
           "measurement": "clients",
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "select count(distinct(hostname)) FROM \"clients\" WHERE (time > now() - 60m) group by oui",
+          "query": "select count(distinct(hostname)) FROM \"clients\" WHERE (time > now() - 60m AND \"name\" =~ /^$Client$/ AND \"ap_mac\" =~ /^$AP$/ and site_name =~ /$Site$/ and \"name\" =~ /^$Client$/) group by oui",
           "rawQuery": true,
           "refId": "A",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "hostname"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "distinct"
+              }
+            ]
+          ],
+          "tags": [
+            {
+              "key": "is_wired",
+              "operator": "=",
+              "value": "false"
+            }
+          ]
+        },
+        {
+          "alias": "e $tag_oui",
+          "groupBy": [
+            {
+              "params": [
+                "channel"
+              ],
+              "type": "tag"
+            }
+          ],
+          "measurement": "clients",
+          "orderByTime": "ASC",
+          "policy": "default",
+          "query": "select count(distinct(hostname)) FROM \"clients\" WHERE (time > now() - 60m  AND \"is_wired\" = 'true' and site_name =~ /$Site$/) group by oui",
+          "rawQuery": true,
+          "refId": "B",
           "resultFormat": "time_series",
           "select": [
             [
@@ -669,13 +709,14 @@
       "interval": null,
       "legend": {
         "header": "",
-        "show": true,
+        "show": false,
         "values": true
       },
       "legendType": "Right side",
       "links": [],
       "maxDataPoints": 3,
       "nullPointMode": "connected",
+      "options": {},
       "pieType": "pie",
       "strokeWidth": 1,
       "targets": [
@@ -692,7 +733,7 @@
           "measurement": "clients",
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "select count(distinct(hostname)) FROM \"clients\" WHERE (time > now() - 10m) group by os_class, os_name, dev_cat, dev_family, dev_id ",
+          "query": "select count(distinct(hostname)) FROM \"clients\" WHERE (time > now() - 10m AND \"ap_mac\" =~ /^$AP$/ AND \"name\" =~ /^$Client$/ AND \"site_name\" =~ /$Site$/) group by os_class, os_name, dev_cat, dev_family, dev_id ",
           "rawQuery": true,
           "refId": "A",
           "resultFormat": "time_series",
@@ -757,6 +798,7 @@
       "linewidth": 1,
       "links": [],
       "nullPointMode": "connected",
+      "options": {},
       "percentage": false,
       "pointradius": 5,
       "points": false,
@@ -856,12 +898,31 @@
               "key": "name",
               "operator": "!~",
               "value": "/^(amazon-)/"
+            },
+            {
+              "condition": "AND",
+              "key": "name",
+              "operator": "=~",
+              "value": "/^$Client$/"
+            },
+            {
+              "condition": "AND",
+              "key": "ap_mac",
+              "operator": "=~",
+              "value": "/^$AP$/"
+            },
+            {
+              "condition": "AND",
+              "key": "site_name",
+              "operator": "=~",
+              "value": "/^$Site$/"
             }
           ]
         }
       ],
       "thresholds": [],
       "timeFrom": null,
+      "timeRegions": [],
       "timeShift": null,
       "title": "UAP Bandwidth / Wireless Devices",
       "tooltip": {
@@ -894,7 +955,11 @@
           "min": null,
           "show": false
         }
-      ]
+      ],
+      "yaxis": {
+        "align": false,
+        "alignLevel": null
+      }
     },
     {
       "aliasColors": {},
@@ -902,7 +967,7 @@
       "dashLength": 10,
       "dashes": false,
       "datasource": "Unifi",
-      "description": "Cameras TX / RX bytes per second (calculated in 30 second buckets).",
+      "description": "Cameras TX / RX bytes per second (calculated in 1 minute buckets).",
       "fill": 0,
       "gridPos": {
         "h": 7,
@@ -928,13 +993,14 @@
       "linewidth": 1,
       "links": [],
       "nullPointMode": "connected",
+      "options": {},
       "percentage": false,
       "pointradius": 5,
       "points": false,
       "renderer": "flot",
       "seriesOverrides": [],
       "spaceLength": 10,
-      "stack": false,
+      "stack": true,
       "steppedLine": false,
       "targets": [
         {
@@ -942,7 +1008,7 @@
           "groupBy": [
             {
               "params": [
-                "30s"
+                "1m"
               ],
               "type": "time"
             },
@@ -1020,13 +1086,20 @@
             {
               "key": "name",
               "operator": "=~",
-              "value": "/^camera-(.*)/"
+              "value": "/^camera/"
+            },
+            {
+              "condition": "AND",
+              "key": "site_name",
+              "operator": "=~",
+              "value": "/^$Site$/"
             }
           ]
         }
       ],
       "thresholds": [],
       "timeFrom": null,
+      "timeRegions": [],
       "timeShift": null,
       "title": "Switch Bandwidth / Cameras",
       "tooltip": {
@@ -1034,7 +1107,6 @@
         "sort": 2,
         "value_type": "individual"
       },
-      "transparent": false,
       "type": "graph",
       "xaxis": {
         "buckets": null,
@@ -1060,7 +1132,11 @@
           "min": null,
           "show": false
         }
-      ]
+      ],
+      "yaxis": {
+        "align": false,
+        "alignLevel": null
+      }
     },
     {
       "aliasColors": {},
@@ -1094,6 +1170,7 @@
       "linewidth": 1,
       "links": [],
       "nullPointMode": "connected",
+      "options": {},
       "percentage": false,
       "pointradius": 5,
       "points": false,
@@ -1191,8 +1268,26 @@
             {
               "condition": "AND",
               "key": "is_wired",
-              "operator": "=",
-              "value": "false"
+              "operator": "!=",
+              "value": "true"
+            },
+            {
+              "condition": "AND",
+              "key": "name",
+              "operator": "=~",
+              "value": "/^$Client$/"
+            },
+            {
+              "condition": "AND",
+              "key": "ap_mac",
+              "operator": "=~",
+              "value": "/^$AP$/"
+            },
+            {
+              "condition": "AND",
+              "key": "site_name",
+              "operator": "=~",
+              "value": "/^$Site$/"
             }
           ]
         },
@@ -1284,14 +1379,27 @@
             {
               "condition": "AND",
               "key": "is_wired",
-              "operator": "=",
-              "value": "true"
+              "operator": "!=",
+              "value": "false"
+            },
+            {
+              "condition": "AND",
+              "key": "name",
+              "operator": "=~",
+              "value": "/^$Client$/"
+            },
+            {
+              "condition": "AND",
+              "key": "site_name",
+              "operator": "=~",
+              "value": "/^$Site$/"
             }
           ]
         }
       ],
       "thresholds": [],
       "timeFrom": null,
+      "timeRegions": [],
       "timeShift": null,
       "title": "Switch Bandwidth / Echos & FireTVs",
       "tooltip": {
@@ -1325,7 +1433,11 @@
           "min": null,
           "show": false
         }
-      ]
+      ],
+      "yaxis": {
+        "align": false,
+        "alignLevel": null
+      }
     },
     {
       "aliasColors": {},
@@ -1333,7 +1445,7 @@
       "dashLength": 10,
       "dashes": false,
       "datasource": "Unifi",
-      "description": "Wired TX / RX bytes per second (calculated in 30 second buckets). Does not include amazon and camera devices.",
+      "description": "Wired TX / RX bytes per second (calculated in 30 second buckets). Does not include amazon and camera devices. Unaffected by the AP setting.",
       "fill": 0,
       "gridPos": {
         "h": 9,
@@ -1350,7 +1462,7 @@
         "min": false,
         "rightSide": true,
         "show": true,
-        "sort": "current",
+        "sort": "max",
         "sortDesc": true,
         "total": false,
         "values": true
@@ -1359,6 +1471,7 @@
       "linewidth": 1,
       "links": [],
       "nullPointMode": "connected",
+      "options": {},
       "percentage": false,
       "pointradius": 5,
       "points": false,
@@ -1458,12 +1571,25 @@
               "key": "name",
               "operator": "!~",
               "value": "/^(supermic-bmc|amazon-|camera-)/"
+            },
+            {
+              "condition": "AND",
+              "key": "name",
+              "operator": "=~",
+              "value": "/^$Client$/"
+            },
+            {
+              "condition": "AND",
+              "key": "site_name",
+              "operator": "=~",
+              "value": "/^$Site$/"
             }
           ]
         }
       ],
       "thresholds": [],
       "timeFrom": null,
+      "timeRegions": [],
       "timeShift": null,
       "title": "Switch Bandwidth / Wired Devices",
       "tooltip": {
@@ -1497,7 +1623,11 @@
           "min": null,
           "show": false
         }
-      ]
+      ],
+      "yaxis": {
+        "align": false,
+        "alignLevel": null
+      }
     },
     {
       "backgroundColor": "rgba(128,128,128,0.1)",
@@ -1521,7 +1651,7 @@
       ],
       "crosshairColor": "#8F070C",
       "datasource": "Unifi",
-      "description": "Shows which wireless radio a client is connected to.",
+      "description": "Shows which wireless radio a client is connected to. Setting AP does not change this.",
       "display": "timeline",
       "expandFromQueryS": 0,
       "extendLastValue": true,
@@ -1537,6 +1667,7 @@
       "lineColor": "rgba(0,0,0,0.1)",
       "links": [],
       "metricNameColor": "#000000",
+      "options": {},
       "rangeMaps": [
         {
           "from": "null",
@@ -1579,19 +1710,75 @@
           "tags": [
             {
               "key": "is_wired",
-              "operator": "=",
-              "value": "false"
+              "operator": "!=",
+              "value": "true"
+            },
+            {
+              "condition": "AND",
+              "key": "name",
+              "operator": "=~",
+              "value": "/^$Client$/"
+            },
+            {
+              "condition": "AND",
+              "key": "ap_mac",
+              "operator": "=~",
+              "value": "/^$AP$/"
+            },
+            {
+              "condition": "AND",
+              "key": "site_name",
+              "operator": "=~",
+              "value": "/^$Site$/"
             }
           ]
         }
       ],
       "textSize": 12,
       "textSizeTime": 9,
+      "timeOptions": [
+        {
+          "name": "Years",
+          "value": "years"
+        },
+        {
+          "name": "Months",
+          "value": "months"
+        },
+        {
+          "name": "Weeks",
+          "value": "weeks"
+        },
+        {
+          "name": "Days",
+          "value": "days"
+        },
+        {
+          "name": "Hours",
+          "value": "hours"
+        },
+        {
+          "name": "Minutes",
+          "value": "minutes"
+        },
+        {
+          "name": "Seconds",
+          "value": "seconds"
+        },
+        {
+          "name": "Milliseconds",
+          "value": "milliseconds"
+        }
+      ],
+      "timePrecision": {
+        "name": "Minutes",
+        "value": "minutes"
+      },
       "timeTextColor": "#d8d9da",
       "title": "Wifi Client / AP",
-      "transparent": false,
       "type": "natel-discrete-panel",
       "units": "short",
+      "useTimePrecision": false,
       "valueMaps": [
         {
           "op": "=",
@@ -1645,6 +1832,7 @@
       "lineColor": "rgba(0,0,0,0.1)",
       "links": [],
       "metricNameColor": "#000000",
+      "options": {},
       "rangeMaps": [
         {
           "from": "null",
@@ -1689,18 +1877,75 @@
           "tags": [
             {
               "key": "use_fixedip",
-              "operator": "=",
-              "value": "false"
+              "operator": "!=",
+              "value": "true"
+            },
+            {
+              "condition": "AND",
+              "key": "name",
+              "operator": "=~",
+              "value": "/^$Client$/"
+            },
+            {
+              "condition": "AND",
+              "key": "ap_mac",
+              "operator": "=~",
+              "value": "/^$AP$/"
+            },
+            {
+              "condition": "AND",
+              "key": "site_name",
+              "operator": "=~",
+              "value": "/^$Site$/"
             }
           ]
         }
       ],
       "textSize": 12,
       "textSizeTime": 9,
+      "timeOptions": [
+        {
+          "name": "Years",
+          "value": "years"
+        },
+        {
+          "name": "Months",
+          "value": "months"
+        },
+        {
+          "name": "Weeks",
+          "value": "weeks"
+        },
+        {
+          "name": "Days",
+          "value": "days"
+        },
+        {
+          "name": "Hours",
+          "value": "hours"
+        },
+        {
+          "name": "Minutes",
+          "value": "minutes"
+        },
+        {
+          "name": "Seconds",
+          "value": "seconds"
+        },
+        {
+          "name": "Milliseconds",
+          "value": "milliseconds"
+        }
+      ],
+      "timePrecision": {
+        "name": "Minutes",
+        "value": "minutes"
+      },
       "timeTextColor": "#d8d9da",
       "title": "Client / IP",
       "type": "natel-discrete-panel",
       "units": "short",
+      "useTimePrecision": false,
       "valueMaps": [
         {
           "op": "=",
@@ -1746,6 +1991,7 @@
       "linewidth": 1,
       "links": [],
       "nullPointMode": "connected",
+      "options": {},
       "percentage": false,
       "pointradius": 5,
       "points": false,
@@ -1787,12 +2033,31 @@
               "key": "is_wired",
               "operator": "=",
               "value": "false"
+            },
+            {
+              "condition": "AND",
+              "key": "name",
+              "operator": "=~",
+              "value": "/^$Client$/"
+            },
+            {
+              "condition": "AND",
+              "key": "ap_mac",
+              "operator": "=~",
+              "value": "/^$AP$/"
+            },
+            {
+              "condition": "AND",
+              "key": "site_name",
+              "operator": "=~",
+              "value": "/^$Site$/"
             }
           ]
         }
       ],
       "thresholds": [],
       "timeFrom": null,
+      "timeRegions": [],
       "timeShift": null,
       "title": "Received Signal Strength Indicator",
       "tooltip": {
@@ -1826,7 +2091,11 @@
           "min": null,
           "show": false
         }
-      ]
+      ],
+      "yaxis": {
+        "align": false,
+        "alignLevel": null
+      }
     },
     {
       "aliasColors": {},
@@ -1861,6 +2130,7 @@
       "linewidth": 1,
       "links": [],
       "nullPointMode": "connected",
+      "options": {},
       "percentage": false,
       "pointradius": 5,
       "points": false,
@@ -1902,14 +2172,33 @@
               "key": "is_wired",
               "operator": "=",
               "value": "false"
+            },
+            {
+              "condition": "AND",
+              "key": "name",
+              "operator": "=~",
+              "value": "/^$Client$/"
+            },
+            {
+              "condition": "AND",
+              "key": "ap_mac",
+              "operator": "=~",
+              "value": "/^$AP$/"
+            },
+            {
+              "condition": "AND",
+              "key": "site_name",
+              "operator": "=~",
+              "value": "/^$Site$/"
             }
           ]
         }
       ],
       "thresholds": [],
       "timeFrom": null,
+      "timeRegions": [],
       "timeShift": null,
-      "title": "Signal",
+      "title": "Wireless Signal",
       "tooltip": {
         "shared": true,
         "sort": 2,
@@ -1927,7 +2216,7 @@
       "yaxes": [
         {
           "format": "dBm",
-          "label": "Signal Level",
+          "label": "Signal Power",
           "logBase": 1,
           "max": null,
           "min": null,
@@ -1941,7 +2230,11 @@
           "min": null,
           "show": false
         }
-      ]
+      ],
+      "yaxis": {
+        "align": false,
+        "alignLevel": null
+      }
     },
     {
       "aliasColors": {},
@@ -1976,6 +2269,7 @@
       "linewidth": 1,
       "links": [],
       "nullPointMode": "connected",
+      "options": {},
       "percentage": false,
       "pointradius": 5,
       "points": false,
@@ -2017,12 +2311,31 @@
               "key": "is_wired",
               "operator": "=",
               "value": "false"
+            },
+            {
+              "condition": "AND",
+              "key": "name",
+              "operator": "=~",
+              "value": "/^$Client$/"
+            },
+            {
+              "condition": "AND",
+              "key": "ap_mac",
+              "operator": "=~",
+              "value": "/^$AP$/"
+            },
+            {
+              "condition": "AND",
+              "key": "site_name",
+              "operator": "=~",
+              "value": "/^$Site$/"
             }
           ]
         }
       ],
       "thresholds": [],
       "timeFrom": null,
+      "timeRegions": [],
       "timeShift": null,
       "title": "UAP Client Stats / Noise",
       "tooltip": {
@@ -2030,7 +2343,6 @@
         "sort": 1,
         "value_type": "individual"
       },
-      "transparent": false,
       "type": "graph",
       "xaxis": {
         "buckets": null,
@@ -2057,7 +2369,11 @@
           "min": null,
           "show": false
         }
-      ]
+      ],
+      "yaxis": {
+        "align": false,
+        "alignLevel": null
+      }
     },
     {
       "aliasColors": {},
@@ -2091,6 +2407,7 @@
       "linewidth": 1,
       "links": [],
       "nullPointMode": "connected",
+      "options": {},
       "percentage": false,
       "pointradius": 5,
       "points": false,
@@ -2130,14 +2447,33 @@
           "tags": [
             {
               "key": "is_wired",
-              "operator": "=",
-              "value": "false"
+              "operator": "!=",
+              "value": "true"
+            },
+            {
+              "condition": "AND",
+              "key": "name",
+              "operator": "=~",
+              "value": "/^$Client$/"
+            },
+            {
+              "condition": "AND",
+              "key": "ap_mac",
+              "operator": "=~",
+              "value": "/^$AP$/"
+            },
+            {
+              "condition": "AND",
+              "key": "site_name",
+              "operator": "=~",
+              "value": "/^$Site$/"
             }
           ]
         }
       ],
       "thresholds": [],
       "timeFrom": null,
+      "timeRegions": [],
       "timeShift": null,
       "title": "TX Power",
       "tooltip": {
@@ -2145,7 +2481,6 @@
         "sort": 2,
         "value_type": "individual"
       },
-      "transparent": false,
       "type": "graph",
       "xaxis": {
         "buckets": null,
@@ -2171,32 +2506,114 @@
           "min": null,
           "show": false
         }
-      ]
+      ],
+      "yaxis": {
+        "align": false,
+        "alignLevel": null
+      }
     }
   ],
   "refresh": "30s",
-  "schemaVersion": 16,
+  "schemaVersion": 18,
   "style": "dark",
   "tags": [],
   "templating": {
-    "list": []
+    "list": [
+      {
+        "allValue": null,
+        "current": {
+          "text": "All",
+          "value": "$__all"
+        },
+        "datasource": "Unifi",
+        "definition": "show tag values from \"clients\" with key=\"site_name\"",
+        "hide": 0,
+        "includeAll": true,
+        "label": null,
+        "multi": true,
+        "name": "Site",
+        "options": [],
+        "query": "show tag values from \"clients\" with key=\"site_name\"",
+        "refresh": 1,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 1,
+        "tagValuesQuery": "",
+        "tags": [],
+        "tagsQuery": "",
+        "type": "query",
+        "useTags": false
+      },
+      {
+        "allValue": null,
+        "current": {
+          "tags": [],
+          "text": "All",
+          "value": [
+            "$__all"
+          ]
+        },
+        "datasource": "Unifi",
+        "definition": "show tag values from \"clients\" with key=\"ap_mac\" where  site_name =~ /$Site$/",
+        "hide": 0,
+        "includeAll": true,
+        "label": null,
+        "multi": true,
+        "name": "AP",
+        "options": [],
+        "query": "show tag values from \"clients\" with key=\"ap_mac\" where  site_name =~ /$Site$/",
+        "refresh": 1,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 1,
+        "tagValuesQuery": "",
+        "tags": [],
+        "tagsQuery": "",
+        "type": "query",
+        "useTags": false
+      },
+      {
+        "allValue": null,
+        "current": {
+          "text": "All",
+          "value": [
+            "$__all"
+          ]
+        },
+        "datasource": "Unifi",
+        "definition": "show tag values from \"clients\" with key=\"name\" where  site_name =~ /$Site$/",
+        "hide": 0,
+        "includeAll": true,
+        "label": null,
+        "multi": true,
+        "name": "Client",
+        "options": [],
+        "query": "show tag values from \"clients\" with key=\"name\" where  site_name =~ /$Site$/",
+        "refresh": 1,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 1,
+        "tagValuesQuery": "",
+        "tags": [],
+        "tagsQuery": "",
+        "type": "query",
+        "useTags": false
+      }
+    ]
   },
   "time": {
     "from": "now-3h",
-    "to": "now"
+    "to": "now-20s"
   },
   "timepicker": {
+    "nowDelay": "20s",
     "refresh_intervals": [
       "5s",
       "10s",
       "30s",
       "1m",
       "5m",
-      "15m",
-      "30m",
-      "1h",
-      "2h",
-      "1d"
+      "15m"
     ],
     "time_options": [
       "5m",
@@ -2213,5 +2630,5 @@
   "timezone": "",
   "title": "Unifi Clients",
   "uid": "YVR23BZiz",
-  "version": 25
+  "version": 45
 }
