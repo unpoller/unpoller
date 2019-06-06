@@ -131,7 +131,6 @@ func (c *Config) PollUnifiController(controller *unifi.Unifi, infdb influx.Clien
 			logErrors([]error{err}, "influx.NewBatchPoints")
 			continue
 		}
-
 		// Batch all the points.
 		if errs := batchPoints(devices, clients, bp); errs != nil && hasErr(errs) {
 			logErrors(errs, "asset.Points()")
@@ -167,7 +166,7 @@ func filterSites(controller *unifi.Unifi, filter []string) ([]unifi.Site, error)
 }
 
 // batchPoints combines all device and client data into influxdb data points.
-func batchPoints(devices *unifi.Devices, clients *unifi.Clients, batchPoints influx.BatchPoints) (errs []error) {
+func batchPoints(devices *unifi.Devices, clients *unifi.Clients, bp influx.BatchPoints) (errs []error) {
 	process := func(asset Asset) error {
 		if asset == nil {
 			return nil
@@ -176,7 +175,7 @@ func batchPoints(devices *unifi.Devices, clients *unifi.Clients, batchPoints inf
 		if err != nil {
 			return err
 		}
-		batchPoints.AddPoints(influxPoints)
+		bp.AddPoints(influxPoints)
 		return nil
 	}
 	if devices != nil {
