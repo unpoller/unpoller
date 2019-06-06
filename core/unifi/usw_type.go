@@ -68,7 +68,7 @@ type USW struct {
 	PortTable []struct {
 		AggregatedBy FlexBool      `json:"aggregated_by"`
 		Autoneg      FlexBool      `json:"autoneg"`
-		BytesR       float64       `json:"bytes-r"`
+		BytesR       FlexInt       `json:"bytes-r"`
 		Dot1XMode    string        `json:"dot1x_mode"`
 		Dot1XStatus  string        `json:"dot1x_status"`
 		Enable       FlexBool      `json:"enable"`
@@ -82,34 +82,34 @@ type USW struct {
 		Media        string        `json:"media"`
 		Name         string        `json:"name"`
 		OpMode       string        `json:"op_mode"`
-		PoeCaps      float64       `json:"poe_caps"`
+		PoeCaps      FlexInt       `json:"poe_caps"`
 		PoeClass     string        `json:"poe_class,omitempty"`
-		PoeCurrent   string        `json:"poe_current,omitempty"`
+		PoeCurrent   FlexInt       `json:"poe_current,omitempty"`
 		PoeEnable    FlexBool      `json:"poe_enable,omitempty"`
 		PoeGood      FlexBool      `json:"poe_good,omitempty"`
 		PoeMode      string        `json:"poe_mode,omitempty"`
-		PoePower     string        `json:"poe_power,omitempty"`
-		PoeVoltage   string        `json:"poe_voltage,omitempty"`
-		PortIdx      float64       `json:"port_idx"`
+		PoePower     FlexInt       `json:"poe_power,omitempty"`
+		PoeVoltage   FlexInt       `json:"poe_voltage,omitempty"`
+		PortIdx      FlexInt       `json:"port_idx"`
 		PortPoe      FlexBool      `json:"port_poe"`
 		PortconfID   string        `json:"portconf_id"`
-		RxBroadcast  float64       `json:"rx_broadcast"`
-		RxBytes      float64       `json:"rx_bytes"`
-		RxBytesR     float64       `json:"rx_bytes-r"`
-		RxDropped    float64       `json:"rx_dropped"`
-		RxErrors     float64       `json:"rx_errors"`
-		RxMulticast  float64       `json:"rx_multicast"`
-		RxPackets    float64       `json:"rx_packets"`
-		Speed        float64       `json:"speed"`
-		StpPathcost  float64       `json:"stp_pathcost"`
+		RxBroadcast  FlexInt       `json:"rx_broadcast"`
+		RxBytes      FlexInt       `json:"rx_bytes"`
+		RxBytesR     FlexInt       `json:"rx_bytes-r"`
+		RxDropped    FlexInt       `json:"rx_dropped"`
+		RxErrors     FlexInt       `json:"rx_errors"`
+		RxMulticast  FlexInt       `json:"rx_multicast"`
+		RxPackets    FlexInt       `json:"rx_packets"`
+		Speed        FlexInt       `json:"speed"`
+		StpPathcost  FlexInt       `json:"stp_pathcost"`
 		StpState     string        `json:"stp_state"`
-		TxBroadcast  float64       `json:"tx_broadcast"`
-		TxBytes      float64       `json:"tx_bytes"`
-		TxBytesR     float64       `json:"tx_bytes-r"`
-		TxDropped    float64       `json:"tx_dropped"`
-		TxErrors     float64       `json:"tx_errors"`
-		TxMulticast  float64       `json:"tx_multicast"`
-		TxPackets    float64       `json:"tx_packets"`
+		TxBroadcast  FlexInt       `json:"tx_broadcast"`
+		TxBytes      FlexInt       `json:"tx_bytes"`
+		TxBytesR     FlexInt       `json:"tx_bytes-r"`
+		TxDropped    FlexInt       `json:"tx_dropped"`
+		TxErrors     FlexInt       `json:"tx_errors"`
+		TxMulticast  FlexInt       `json:"tx_multicast"`
+		TxPackets    FlexInt       `json:"tx_packets"`
 		Up           FlexBool      `json:"up"`
 		SfpFound     FlexBool      `json:"sfp_found,omitempty"`
 	} `json:"port_table"`
