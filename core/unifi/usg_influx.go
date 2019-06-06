@@ -16,6 +16,7 @@ func (u USG) Points() ([]*influx.Point, error) {
 		"device_type":            u.Stat.O,
 		"device_oid":             u.Stat.Oid,
 		"site_id":                u.SiteID,
+		"site_name":              u.SiteName,
 		"adopted":                u.Adopted.Txt,
 		"name":                   u.Name,
 		"adopt_ip":               u.AdoptIP,
@@ -153,6 +154,7 @@ func (u USG) Points() ([]*influx.Point, error) {
 			"is_nat":                    p.IsNat.Txt,
 			"networkgroup":              p.Networkgroup,
 			"site_id":                   p.SiteID,
+			"site_name":                 p.SiteName,
 		}
 		fields := map[string]interface{}{
 			"dhcpd_ip_1":             p.DhcpdIP1,

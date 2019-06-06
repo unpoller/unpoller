@@ -163,6 +163,7 @@ type UAP struct {
 	Scanning         FlexBool      `json:"scanning"`
 	Serial           string        `json:"serial"`
 	SiteID           string        `json:"site_id"`
+	SiteName         string        `json:"-"`
 	SpectrumScanning FlexBool      `json:"spectrum_scanning"`
 	SSHSessionTable  []interface{} `json:"ssh_session_table"`
 	Stat             struct {
@@ -332,6 +333,7 @@ type UAP struct {
 		RxNwids             float64  `json:"rx_nwids"`
 		RxPackets           float64  `json:"rx_packets"`
 		SiteID              string   `json:"site_id"`
+		SiteName            string   `json:"-"`
 		State               string   `json:"state"`
 		T                   string   `json:"t"`
 		TxBytes             float64  `json:"tx_bytes"`

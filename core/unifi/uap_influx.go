@@ -20,6 +20,7 @@ func (u UAP) Points() ([]*influx.Point, error) {
 		"device_oid":              u.Stat.Oid,
 		"device_ap":               u.Stat.Ap,
 		"site_id":                 u.SiteID,
+		"site_name":               u.SiteName,
 		"name":                    u.Name,
 		"adopted":                 u.Adopted.Txt,
 		"bandsteering_mode":       u.BandsteeringMode,
@@ -231,6 +232,8 @@ func (u UAP) Points() ([]*influx.Point, error) {
 				tags["vap_id"] = s.ID
 				tags["vap_name"] = s.Name
 				tags["wlanconf_id"] = s.WlanconfID
+				tags["site_id"] = s.SiteID
+				tags["site_name"] = s.SiteName
 				fields["ccq"] = s.Ccq
 				fields["essid"] = s.Essid
 				fields["extchannel"] = s.Extchannel

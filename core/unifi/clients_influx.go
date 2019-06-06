@@ -25,6 +25,7 @@ func (c UCL) Points() ([]*influx.Point, error) {
 		"mac":                c.Mac,
 		"user_id":            c.UserID,
 		"site_id":            c.SiteID,
+		"site_name":          c.SiteName,
 		"network_id":         c.NetworkID,
 		"usergroup_id":       c.UserGroupID,
 		"ap_mac":             c.ApMac,
