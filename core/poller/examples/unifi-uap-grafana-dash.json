@@ -1,63 +1,9 @@
 {
-  "__inputs": [
-    {
-      "name": "DS_UNIFI",
-      "label": "Unifi",
-      "description": "",
-      "type": "datasource",
-      "pluginId": "influxdb",
-      "pluginName": "InfluxDB"
-    }
-  ],
-  "__requires": [
-    {
-      "type": "grafana",
-      "id": "grafana",
-      "name": "Grafana",
-      "version": "5.0.4"
-    },
-    {
-      "type": "panel",
-      "id": "grafana-clock-panel",
-      "name": "Clock",
-      "version": "0.0.9"
-    },
-    {
-      "type": "panel",
-      "id": "graph",
-      "name": "Graph",
-      "version": "5.0.0"
-    },
-    {
-      "type": "datasource",
-      "id": "influxdb",
-      "name": "InfluxDB",
-      "version": "5.0.0"
-    },
-    {
-      "type": "panel",
-      "id": "singlestat",
-      "name": "Singlestat",
-      "version": "5.0.0"
-    },
-    {
-      "type": "panel",
-      "id": "table",
-      "name": "Table",
-      "version": "5.0.0"
-    },
-    {
-      "type": "panel",
-      "id": "text",
-      "name": "Text",
-      "version": "5.0.0"
-    }
-  ],
   "annotations": {
     "list": [
       {
         "builtIn": 1,
-        "datasource": "${DS_UNIFI}",
+        "datasource": "-- Grafana --",
         "enable": true,
         "hide": true,
         "iconColor": "rgba(0, 211, 255, 1)",
@@ -70,13 +16,13 @@
   "editable": true,
   "gnetId": 1486,
   "graphTooltip": 1,
-  "id": null,
-  "iteration": 1524957396402,
+  "id": 7,
+  "iteration": 1559783373023,
   "links": [],
   "panels": [
     {
       "columns": [],
-      "datasource": "${DS_UNIFI}",
+      "datasource": "Unifi",
       "editable": true,
       "error": false,
       "fontSize": "100%",
@@ -89,6 +35,7 @@
       "id": 1,
       "isNew": true,
       "links": [],
+      "options": {},
       "pageSize": null,
       "scroll": false,
       "showHeader": true,
@@ -297,6 +244,21 @@
           "thresholds": [],
           "type": "number",
           "unit": "percent"
+        },
+        {
+          "alias": "Guests",
+          "colorMode": null,
+          "colors": [
+            "rgba(245, 54, 54, 0.9)",
+            "rgba(237, 129, 40, 0.89)",
+            "rgba(50, 172, 45, 0.97)"
+          ],
+          "dateFormat": "YYYY-MM-DD HH:mm:ss",
+          "decimals": 0,
+          "pattern": "guest-num_sta",
+          "thresholds": [],
+          "type": "number",
+          "unit": "short"
         }
       ],
       "targets": [
@@ -349,6 +311,12 @@
             {
               "params": [
                 "device_ap"
+              ],
+              "type": "tag"
+            },
+            {
+              "params": [
+                "guest-num_sta"
               ],
               "type": "tag"
             }
@@ -454,6 +422,24 @@
                 ],
                 "type": "alias"
               }
+            ],
+            [
+              {
+                "params": [
+                  "user-num_sta"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "last"
+              },
+              {
+                "params": [
+                  "Users"
+                ],
+                "type": "alias"
+              }
             ]
           ],
           "tags": [
@@ -461,6 +447,12 @@
               "key": "name",
               "operator": "=~",
               "value": "/^$host$/"
+            },
+            {
+              "condition": "AND",
+              "key": "site_name",
+              "operator": "=~",
+              "value": "/^$Site$/"
             }
           ]
         }
@@ -468,7 +460,6 @@
       "timeFrom": null,
       "title": "AP Details",
       "transform": "table",
-      "transparent": false,
       "type": "table"
     },
     {
@@ -482,6 +473,7 @@
       "id": 34,
       "links": [],
       "mode": "html",
+      "options": {},
       "title": "",
       "transparent": true,
       "type": "text"
@@ -490,6 +482,7 @@
       "bgColor": "#3f2b5b",
       "clockType": "12 hour",
       "countdownSettings": {
+        "customFormat": null,
         "endCountdownTime": "2018-04-29T21:47:00.000Z",
         "endText": "00:00:00"
       },
@@ -510,6 +503,7 @@
       "mode": "time",
       "offsetFromUtc": null,
       "offsetFromUtcMinutes": null,
+      "options": {},
       "timeSettings": {
         "customFormat": "HH:mm:ss",
         "fontSize": "30px",
@@ -527,7 +521,7 @@
         "rgba(237, 129, 40, 0.89)",
         "rgba(50, 172, 45, 0.97)"
       ],
-      "datasource": "${DS_UNIFI}",
+      "datasource": "Unifi",
       "editable": true,
       "error": false,
       "format": "none",
@@ -563,6 +557,7 @@
       "maxDataPoints": 100,
       "nullPointMode": "connected",
       "nullText": null,
+      "options": {},
       "postfix": "",
       "postfixFontSize": "50%",
       "prefix": "",
@@ -621,13 +616,18 @@
               "key": "radio",
               "operator": "=",
               "value": "na"
+            },
+            {
+              "condition": "AND",
+              "key": "site_name",
+              "operator": "=~",
+              "value": "/^$Site$/"
             }
           ]
         }
       ],
       "thresholds": "",
       "title": "5GHz Radio Channel",
-      "transparent": false,
       "type": "singlestat",
       "valueFontSize": "80%",
       "valueMaps": [],
@@ -642,7 +642,7 @@
         "rgba(237, 129, 40, 0.89)",
         "rgba(50, 172, 45, 0.97)"
       ],
-      "datasource": "${DS_UNIFI}",
+      "datasource": "Unifi",
       "editable": true,
       "error": false,
       "format": "none",
@@ -677,6 +677,7 @@
       "maxDataPoints": 100,
       "nullPointMode": "connected",
       "nullText": null,
+      "options": {},
       "postfix": " dBm",
       "postfixFontSize": "50%",
       "prefix": "",
@@ -715,7 +716,7 @@
             [
               {
                 "params": [
-                  "tx_power"
+                  "vap_tx_power"
                 ],
                 "type": "field"
               }
@@ -732,13 +733,18 @@
               "key": "radio",
               "operator": "=",
               "value": "na"
+            },
+            {
+              "condition": "AND",
+              "key": "site_name",
+              "operator": "=~",
+              "value": "/^$Site$/"
             }
           ]
         }
       ],
       "thresholds": "10,18",
       "title": "5Ghz Radio Tx Power",
-      "transparent": false,
       "type": "singlestat",
       "valueFontSize": "80%",
       "valueMaps": [],
@@ -753,7 +759,7 @@
         "rgba(237, 129, 40, 0.89)",
         "#d44a3a"
       ],
-      "datasource": "${DS_UNIFI}",
+      "datasource": "Unifi",
       "decimals": 1,
       "format": "percent",
       "gauge": {
@@ -787,6 +793,7 @@
       "maxDataPoints": 100,
       "nullPointMode": "connected",
       "nullText": null,
+      "options": {},
       "postfix": "",
       "postfixFontSize": "50%",
       "prefix": "",
@@ -800,9 +807,9 @@
       ],
       "sparkline": {
         "fillColor": "rgba(31, 118, 189, 0.18)",
-        "full": false,
+        "full": true,
         "lineColor": "rgb(31, 120, 193)",
-        "show": false
+        "show": true
       },
       "tableColumn": "system_uptime",
       "targets": [
@@ -835,6 +842,12 @@
               "key": "name",
               "operator": "=~",
               "value": "/^$host$/"
+            },
+            {
+              "condition": "AND",
+              "key": "site_name",
+              "operator": "=~",
+              "value": "/^$Site$/"
             }
           ]
         }
@@ -862,7 +875,7 @@
         "rgba(237, 129, 40, 0.89)",
         "#d44a3a"
       ],
-      "datasource": "${DS_UNIFI}",
+      "datasource": "Unifi",
       "decimals": 3,
       "format": "dtdurations",
       "gauge": {
@@ -895,6 +908,7 @@
       "maxDataPoints": 100,
       "nullPointMode": "connected",
       "nullText": null,
+      "options": {},
       "postfix": "",
       "postfixFontSize": "50%",
       "prefix": "",
@@ -943,6 +957,12 @@
               "key": "name",
               "operator": "=~",
               "value": "/^$host$/"
+            },
+            {
+              "condition": "AND",
+              "key": "site_name",
+              "operator": "=~",
+              "value": "/^$Site$/"
             }
           ]
         }
@@ -969,7 +989,7 @@
         "rgba(237, 129, 40, 0.89)",
         "rgba(50, 172, 45, 0.97)"
       ],
-      "datasource": "${DS_UNIFI}",
+      "datasource": "Unifi",
       "editable": true,
       "error": false,
       "format": "none",
@@ -1004,6 +1024,7 @@
       "maxDataPoints": 100,
       "nullPointMode": "connected",
       "nullText": null,
+      "options": {},
       "postfix": " dBm",
       "postfixFontSize": "50%",
       "prefix": "",
@@ -1042,7 +1063,7 @@
             [
               {
                 "params": [
-                  "tx_power"
+                  "vap_tx_power"
                 ],
                 "type": "field"
               }
@@ -1059,13 +1080,18 @@
               "key": "device_name",
               "operator": "=~",
               "value": "/^$host$/"
+            },
+            {
+              "condition": "AND",
+              "key": "site_name",
+              "operator": "=~",
+              "value": "/^$Site$/"
             }
           ]
         }
       ],
       "thresholds": "10,18",
       "title": "2.4GHz Radio Tx Power",
-      "transparent": false,
       "type": "singlestat",
       "valueFontSize": "80%",
       "valueMaps": [
@@ -1086,7 +1112,7 @@
         "rgba(237, 129, 40, 0.89)",
         "rgba(50, 172, 45, 0.97)"
       ],
-      "datasource": "${DS_UNIFI}",
+      "datasource": "Unifi",
       "editable": true,
       "error": false,
       "format": "none",
@@ -1121,6 +1147,7 @@
       "maxDataPoints": 100,
       "nullPointMode": "connected",
       "nullText": null,
+      "options": {},
       "postfix": "",
       "postfixFontSize": "50%",
       "prefix": "",
@@ -1176,13 +1203,18 @@
               "key": "radio",
               "operator": "=",
               "value": "ng"
+            },
+            {
+              "condition": "AND",
+              "key": "site_name",
+              "operator": "=~",
+              "value": "/^$Site$/"
             }
           ]
         }
       ],
       "thresholds": "",
       "title": "2.4GHz Radio Channel",
-      "transparent": false,
       "type": "singlestat",
       "valueFontSize": "80%",
       "valueMaps": [],
@@ -1193,7 +1225,7 @@
       "bars": false,
       "dashLength": 10,
       "dashes": false,
-      "datasource": "${DS_UNIFI}",
+      "datasource": "Unifi",
       "editable": true,
       "error": false,
       "fill": 0,
@@ -1220,6 +1252,7 @@
       "linewidth": 2,
       "links": [],
       "nullPointMode": "connected",
+      "options": {},
       "percentage": false,
       "pointradius": 5,
       "points": false,
@@ -1300,6 +1333,7 @@
       ],
       "thresholds": [],
       "timeFrom": null,
+      "timeRegions": [],
       "timeShift": null,
       "title": "Load Average",
       "tooltip": {
@@ -1333,14 +1367,18 @@
           "min": null,
           "show": false
         }
-      ]
+      ],
+      "yaxis": {
+        "align": false,
+        "alignLevel": null
+      }
     },
     {
       "aliasColors": {},
       "bars": false,
       "dashLength": 10,
       "dashes": false,
-      "datasource": "${DS_UNIFI}",
+      "datasource": "Unifi",
       "editable": true,
       "error": false,
       "fill": 1,
@@ -1367,6 +1405,7 @@
       "linewidth": 2,
       "links": [],
       "nullPointMode": "connected",
+      "options": {},
       "percentage": false,
       "pointradius": 5,
       "points": false,
@@ -1447,6 +1486,7 @@
       ],
       "thresholds": [],
       "timeFrom": null,
+      "timeRegions": [],
       "timeShift": null,
       "title": "Memory",
       "tooltip": {
@@ -1480,14 +1520,18 @@
           "min": null,
           "show": false
         }
-      ]
+      ],
+      "yaxis": {
+        "align": false,
+        "alignLevel": null
+      }
     },
     {
       "aliasColors": {},
       "bars": false,
       "dashLength": 10,
       "dashes": false,
-      "datasource": "${DS_UNIFI}",
+      "datasource": "Unifi",
       "editable": true,
       "error": false,
       "fill": 1,
@@ -1513,6 +1557,7 @@
       "linewidth": 1,
       "links": [],
       "nullPointMode": "connected",
+      "options": {},
       "percentage": false,
       "pointradius": 5,
       "points": false,
@@ -1581,6 +1626,7 @@
       ],
       "thresholds": [],
       "timeFrom": null,
+      "timeRegions": [],
       "timeShift": null,
       "title": "Client Connection Quality",
       "tooltip": {
@@ -1614,14 +1660,18 @@
           "min": null,
           "show": false
         }
-      ]
+      ],
+      "yaxis": {
+        "align": false,
+        "alignLevel": null
+      }
     },
     {
       "aliasColors": {},
       "bars": false,
       "dashLength": 10,
       "dashes": false,
-      "datasource": "${DS_UNIFI}",
+      "datasource": "Unifi",
       "decimals": 0,
       "editable": true,
       "error": false,
@@ -1651,6 +1701,7 @@
       "linewidth": 1,
       "links": [],
       "nullPointMode": "connected",
+      "options": {},
       "percentage": false,
       "pointradius": 5,
       "points": false,
@@ -1763,6 +1814,7 @@
       ],
       "thresholds": [],
       "timeFrom": null,
+      "timeRegions": [],
       "timeShift": null,
       "title": "Clients",
       "tooltip": {
@@ -1796,14 +1848,18 @@
           "min": null,
           "show": false
         }
-      ]
+      ],
+      "yaxis": {
+        "align": false,
+        "alignLevel": null
+      }
     },
     {
       "aliasColors": {},
       "bars": false,
       "dashLength": 10,
       "dashes": false,
-      "datasource": "${DS_UNIFI}",
+      "datasource": "Unifi",
       "editable": true,
       "error": false,
       "fill": 0,
@@ -1830,6 +1886,7 @@
       "linewidth": 3,
       "links": [],
       "nullPointMode": "connected",
+      "options": {},
       "percentage": false,
       "pointradius": 5,
       "points": false,
@@ -1940,6 +1997,7 @@
       ],
       "thresholds": [],
       "timeFrom": null,
+      "timeRegions": [],
       "timeShift": null,
       "title": "5 GHz Channel Utilization",
       "tooltip": {
@@ -1974,14 +2032,18 @@
           "min": null,
           "show": false
         }
-      ]
+      ],
+      "yaxis": {
+        "align": false,
+        "alignLevel": null
+      }
     },
     {
       "aliasColors": {},
       "bars": false,
       "dashLength": 10,
       "dashes": false,
-      "datasource": "${DS_UNIFI}",
+      "datasource": "Unifi",
       "editable": true,
       "error": false,
       "fill": 0,
@@ -2008,6 +2070,7 @@
       "linewidth": 3,
       "links": [],
       "nullPointMode": "connected",
+      "options": {},
       "percentage": false,
       "pointradius": 5,
       "points": false,
@@ -2118,6 +2181,7 @@
       ],
       "thresholds": [],
       "timeFrom": null,
+      "timeRegions": [],
       "timeShift": null,
       "title": "2.4GHz Channel Utilization",
       "tooltip": {
@@ -2151,14 +2215,18 @@
           "min": null,
           "show": false
         }
-      ]
+      ],
+      "yaxis": {
+        "align": false,
+        "alignLevel": null
+      }
     },
     {
       "aliasColors": {},
       "bars": false,
       "dashLength": 10,
       "dashes": false,
-      "datasource": "${DS_UNIFI}",
+      "datasource": "Unifi",
       "editable": true,
       "error": false,
       "fill": 1,
@@ -2187,6 +2255,7 @@
       "linewidth": 1,
       "links": [],
       "nullPointMode": "connected",
+      "options": {},
       "percentage": false,
       "pointradius": 5,
       "points": false,
@@ -2233,7 +2302,7 @@
             [
               {
                 "params": [
-                  "rx_bytes"
+                  "vap_rx_bytes"
                 ],
                 "type": "field"
               },
@@ -2263,7 +2332,7 @@
             [
               {
                 "params": [
-                  "tx_bytes"
+                  "vap_tx_bytes"
                 ],
                 "type": "field"
               },
@@ -2308,6 +2377,7 @@
       ],
       "thresholds": [],
       "timeFrom": null,
+      "timeRegions": [],
       "timeShift": null,
       "title": "5 GHz Traffic",
       "tooltip": {
@@ -2341,14 +2411,18 @@
           "min": null,
           "show": false
         }
-      ]
+      ],
+      "yaxis": {
+        "align": false,
+        "alignLevel": null
+      }
     },
     {
       "aliasColors": {},
       "bars": false,
       "dashLength": 10,
       "dashes": false,
-      "datasource": "${DS_UNIFI}",
+      "datasource": "Unifi",
       "editable": true,
       "error": false,
       "fill": 1,
@@ -2377,6 +2451,7 @@
       "linewidth": 1,
       "links": [],
       "nullPointMode": "connected",
+      "options": {},
       "percentage": false,
       "pointradius": 5,
       "points": false,
@@ -2423,7 +2498,7 @@
             [
               {
                 "params": [
-                  "rx_bytes"
+                  "vap_rx_bytes"
                 ],
                 "type": "field"
               },
@@ -2453,7 +2528,7 @@
             [
               {
                 "params": [
-                  "tx_bytes"
+                  "vap_tx_bytes"
                 ],
                 "type": "field"
               },
@@ -2498,6 +2573,7 @@
       ],
       "thresholds": [],
       "timeFrom": null,
+      "timeRegions": [],
       "timeShift": null,
       "title": "2.4GHz Traffic",
       "tooltip": {
@@ -2531,14 +2607,18 @@
           "min": null,
           "show": false
         }
-      ]
+      ],
+      "yaxis": {
+        "align": false,
+        "alignLevel": null
+      }
     },
     {
       "aliasColors": {},
       "bars": false,
       "dashLength": 10,
       "dashes": false,
-      "datasource": "${DS_UNIFI}",
+      "datasource": "Unifi",
       "decimals": 0,
       "description": "PPS on the na band calculated in 30 second buckets.",
       "editable": true,
@@ -2567,6 +2647,7 @@
       "linewidth": 1,
       "links": [],
       "nullPointMode": "connected",
+      "options": {},
       "percentage": false,
       "pointradius": 5,
       "points": false,
@@ -2613,7 +2694,7 @@
             [
               {
                 "params": [
-                  "rx_packets"
+                  "vap_rx_packets"
                 ],
                 "type": "field"
               },
@@ -2637,7 +2718,7 @@
             [
               {
                 "params": [
-                  "tx_packets"
+                  "vap_tx_packets"
                 ],
                 "type": "field"
               },
@@ -2676,6 +2757,7 @@
       ],
       "thresholds": [],
       "timeFrom": null,
+      "timeRegions": [],
       "timeShift": null,
       "title": "5 GHz Packets",
       "tooltip": {
@@ -2710,14 +2792,18 @@
           "min": null,
           "show": false
         }
-      ]
+      ],
+      "yaxis": {
+        "align": false,
+        "alignLevel": null
+      }
     },
     {
       "aliasColors": {},
       "bars": false,
       "dashLength": 10,
       "dashes": false,
-      "datasource": "${DS_UNIFI}",
+      "datasource": "Unifi",
       "decimals": 0,
       "description": "PPS on the ng band calculated in 30 second buckets.",
       "editable": true,
@@ -2748,6 +2834,7 @@
       "linewidth": 1,
       "links": [],
       "nullPointMode": "connected",
+      "options": {},
       "percentage": false,
       "pointradius": 5,
       "points": false,
@@ -2794,7 +2881,7 @@
             [
               {
                 "params": [
-                  "rx_packets"
+                  "vap_rx_packets"
                 ],
                 "type": "field"
               },
@@ -2818,7 +2905,7 @@
             [
               {
                 "params": [
-                  "tx_packets"
+                  "vap_tx_packets"
                 ],
                 "type": "field"
               },
@@ -2857,6 +2944,7 @@
       ],
       "thresholds": [],
       "timeFrom": null,
+      "timeRegions": [],
       "timeShift": null,
       "title": "2.4GHz Packets",
       "tooltip": {
@@ -2891,14 +2979,18 @@
           "min": null,
           "show": false
         }
-      ]
+      ],
+      "yaxis": {
+        "align": false,
+        "alignLevel": null
+      }
     },
     {
       "aliasColors": {},
       "bars": false,
       "dashLength": 10,
       "dashes": false,
-      "datasource": "${DS_UNIFI}",
+      "datasource": "Unifi",
       "decimals": 0,
       "editable": true,
       "error": false,
@@ -2928,6 +3020,7 @@
       "linewidth": 1,
       "links": [],
       "nullPointMode": "connected",
+      "options": {},
       "percentage": false,
       "pointradius": 5,
       "points": false,
@@ -2980,7 +3073,7 @@
             [
               {
                 "params": [
-                  "rx_dropped"
+                  "vap_rx_dropped"
                 ],
                 "type": "field"
               },
@@ -3004,7 +3097,7 @@
             [
               {
                 "params": [
-                  "tx_dropped"
+                  "vap_tx_dropped"
                 ],
                 "type": "field"
               },
@@ -3028,7 +3121,7 @@
             [
               {
                 "params": [
-                  "rx_errors"
+                  "vap_rx_errors"
                 ],
                 "type": "field"
               },
@@ -3052,7 +3145,7 @@
             [
               {
                 "params": [
-                  "tx_errors"
+                  "vap_tx_errors"
                 ],
                 "type": "field"
               },
@@ -3076,7 +3169,7 @@
             [
               {
                 "params": [
-                  "rx_crypts"
+                  "vap_rx_crypts"
                 ],
                 "type": "field"
               },
@@ -3100,7 +3193,7 @@
             [
               {
                 "params": [
-                  "rx_frags"
+                  "vap_rx_frags"
                 ],
                 "type": "field"
               },
@@ -3124,7 +3217,7 @@
             [
               {
                 "params": [
-                  "tx_retries"
+                  "vap_tx_retries"
                 ],
                 "type": "field"
               },
@@ -3163,6 +3256,7 @@
       ],
       "thresholds": [],
       "timeFrom": null,
+      "timeRegions": [],
       "timeShift": null,
       "title": "5GHz Drops/Errors",
       "tooltip": {
@@ -3197,14 +3291,18 @@
           "min": null,
           "show": false
         }
-      ]
+      ],
+      "yaxis": {
+        "align": false,
+        "alignLevel": null
+      }
     },
     {
       "aliasColors": {},
       "bars": false,
       "dashLength": 10,
       "dashes": false,
-      "datasource": "${DS_UNIFI}",
+      "datasource": "Unifi",
       "decimals": 0,
       "editable": true,
       "error": false,
@@ -3234,6 +3332,7 @@
       "linewidth": 1,
       "links": [],
       "nullPointMode": "connected",
+      "options": {},
       "percentage": false,
       "pointradius": 5,
       "points": false,
@@ -3280,7 +3379,7 @@
             [
               {
                 "params": [
-                  "rx_dropped"
+                  "vap_rx_dropped"
                 ],
                 "type": "field"
               },
@@ -3304,7 +3403,7 @@
             [
               {
                 "params": [
-                  "tx_dropped"
+                  "vap_tx_dropped"
                 ],
                 "type": "field"
               },
@@ -3328,7 +3427,7 @@
             [
               {
                 "params": [
-                  "rx_errors"
+                  "vap_rx_errors"
                 ],
                 "type": "field"
               },
@@ -3352,7 +3451,7 @@
             [
               {
                 "params": [
-                  "tx_errors"
+                  "vap_tx_errors"
                 ],
                 "type": "field"
               },
@@ -3376,7 +3475,7 @@
             [
               {
                 "params": [
-                  "rx_crypts"
+                  "vap_rx_crypts"
                 ],
                 "type": "field"
               },
@@ -3400,7 +3499,7 @@
             [
               {
                 "params": [
-                  "rx_frags"
+                  "vap_rx_frags"
                 ],
                 "type": "field"
               },
@@ -3424,7 +3523,7 @@
             [
               {
                 "params": [
-                  "tx_retries"
+                  "vap_tx_retries"
                 ],
                 "type": "field"
               },
@@ -3463,6 +3562,7 @@
       ],
       "thresholds": [],
       "timeFrom": null,
+      "timeRegions": [],
       "timeShift": null,
       "title": "2.4GHz Drops/Errors",
       "tooltip": {
@@ -3497,44 +3597,84 @@
           "min": null,
           "show": false
         }
-      ]
+      ],
+      "yaxis": {
+        "align": false,
+        "alignLevel": null
+      }
     }
   ],
   "refresh": "30s",
-  "schemaVersion": 16,
+  "schemaVersion": 18,
   "style": "dark",
   "tags": [],
   "templating": {
     "list": [
       {
         "current": {
-          "selected": true,
           "text": "Glances",
           "value": "Glances"
         },
         "hide": 2,
+        "includeAll": false,
         "label": null,
+        "multi": false,
         "name": "dataSource",
         "options": [],
         "query": "influxdb",
         "refresh": 1,
         "regex": "",
+        "skipUrlSync": false,
         "type": "datasource"
       },
       {
         "allValue": null,
-        "current": {},
-        "datasource": "${DS_UNIFI}",
+        "current": {
+          "text": "All",
+          "value": [
+            "$__all"
+          ]
+        },
+        "datasource": "Unifi",
+        "definition": "show tag values from \"uap\" with key=\"site_name\"",
+        "hide": 0,
+        "includeAll": true,
+        "label": "",
+        "multi": true,
+        "name": "Site",
+        "options": [],
+        "query": "show tag values from \"uap\" with key=\"site_name\"",
+        "refresh": 1,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 1,
+        "tagValuesQuery": null,
+        "tags": [],
+        "tagsQuery": null,
+        "type": "query",
+        "useTags": false
+      },
+      {
+        "allValue": null,
+        "current": {
+          "text": "All",
+          "value": [
+            "$__all"
+          ]
+        },
+        "datasource": "Unifi",
+        "definition": "show tag values from \"uap\" with key=\"name\"  where site_name =~ /$Site$/",
         "hide": 0,
         "includeAll": true,
         "label": "UniFi AP:",
         "multi": true,
         "name": "host",
         "options": [],
-        "query": "show tag values from \"uap\" with key=\"name\"",
+        "query": "show tag values from \"uap\" with key=\"name\"  where site_name =~ /$Site$/",
         "refresh": 1,
         "regex": "",
-        "sort": 0,
+        "skipUrlSync": false,
+        "sort": 1,
         "tagValuesQuery": null,
         "tags": [],
         "tagsQuery": null,
@@ -3573,5 +3713,5 @@
   "timezone": "browser",
   "title": "UniFi UAP Insights",
   "uid": "8nQ_RPZiz",
-  "version": 28
+  "version": 37
 }
