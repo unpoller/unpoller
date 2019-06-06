@@ -1,67 +1,14 @@
 {
-  "__inputs": [
-    {
-      "name": "DS_UNIFI",
-      "label": "Unifi",
-      "description": "",
-      "type": "datasource",
-      "pluginId": "influxdb",
-      "pluginName": "InfluxDB"
-    }
-  ],
-  "__requires": [
-    {
-      "type": "grafana",
-      "id": "grafana",
-      "name": "Grafana",
-      "version": "5.0.4"
-    },
-    {
-      "type": "panel",
-      "id": "grafana-clock-panel",
-      "name": "Clock",
-      "version": "0.0.9"
-    },
-    {
-      "type": "panel",
-      "id": "graph",
-      "name": "Graph",
-      "version": "5.0.0"
-    },
-    {
-      "type": "datasource",
-      "id": "influxdb",
-      "name": "InfluxDB",
-      "version": "5.0.0"
-    },
-    {
-      "type": "panel",
-      "id": "singlestat",
-      "name": "Singlestat",
-      "version": "5.0.0"
-    },
-    {
-      "type": "panel",
-      "id": "table",
-      "name": "Table",
-      "version": "5.0.0"
-    },
-    {
-      "type": "panel",
-      "id": "text",
-      "name": "Text",
-      "version": "5.0.0"
-    }
-  ],
   "annotations": {
     "list": [
       {
         "builtIn": 1,
-        "datasource": "${DS_UNIFI}",
+        "datasource": "-- Grafana --",
         "enable": true,
         "hide": true,
         "iconColor": "rgba(0, 211, 255, 1)",
         "name": "Annotations & Alerts",
+        "showIn": 0,
         "type": "dashboard"
       }
     ]
@@ -70,8 +17,8 @@
   "editable": true,
   "gnetId": 1486,
   "graphTooltip": 1,
-  "id": null,
-  "iteration": 1524993362759,
+  "id": 9,
+  "iteration": 1559783436821,
   "links": [],
   "panels": [
     {
@@ -85,13 +32,14 @@
       "id": 34,
       "links": [],
       "mode": "html",
+      "options": {},
       "title": "",
       "transparent": true,
       "type": "text"
     },
     {
       "columns": [],
-      "datasource": "${DS_UNIFI}",
+      "datasource": "Unifi",
       "editable": true,
       "error": false,
       "fontSize": "100%",
@@ -104,6 +52,7 @@
       "id": 1,
       "isNew": true,
       "links": [],
+      "options": {},
       "pageSize": null,
       "scroll": false,
       "showHeader": true,
@@ -530,6 +479,12 @@
               "key": "name",
               "operator": "=~",
               "value": "/^$host$/"
+            },
+            {
+              "condition": "AND",
+              "key": "site_name",
+              "operator": "=~",
+              "value": "/^$Site$/"
             }
           ]
         }
@@ -549,7 +504,7 @@
         "#3f2b5b",
         "#511749"
       ],
-      "datasource": "${DS_UNIFI}",
+      "datasource": "Unifi",
       "decimals": 3,
       "format": "dtdurations",
       "gauge": {
@@ -582,6 +537,7 @@
       "maxDataPoints": 100,
       "nullPointMode": "connected",
       "nullText": null,
+      "options": {},
       "postfix": "",
       "postfixFontSize": "20%",
       "prefix": "",
@@ -656,7 +612,7 @@
         "rgba(237, 129, 40, 0.89)",
         "#d44a3a"
       ],
-      "datasource": "${DS_UNIFI}",
+      "datasource": "Unifi",
       "decimals": 0,
       "format": "none",
       "gauge": {
@@ -690,6 +646,7 @@
       "maxDataPoints": 100,
       "nullPointMode": "connected",
       "nullText": null,
+      "options": {},
       "postfix": "",
       "postfixFontSize": "50%",
       "prefix": "",
@@ -766,7 +723,7 @@
         "rgba(237, 129, 40, 0.89)",
         "#d44a3a"
       ],
-      "datasource": "${DS_UNIFI}",
+      "datasource": "Unifi",
       "decimals": 1,
       "description": "",
       "format": "ms",
@@ -801,6 +758,7 @@
       "maxDataPoints": 100,
       "nullPointMode": "connected",
       "nullText": null,
+      "options": {},
       "postfix": "",
       "postfixFontSize": "50%",
       "prefix": "",
@@ -849,6 +807,12 @@
               "key": "name",
               "operator": "=~",
               "value": "/^$host$/"
+            },
+            {
+              "condition": "AND",
+              "key": "site_name",
+              "operator": "=~",
+              "value": "/^$Site$/"
             }
           ]
         }
@@ -877,7 +841,7 @@
         "rgba(237, 129, 40, 0.89)",
         "#299c46"
       ],
-      "datasource": "${DS_UNIFI}",
+      "datasource": "Unifi",
       "decimals": 1,
       "description": "",
       "format": "Mbits",
@@ -912,6 +876,7 @@
       "maxDataPoints": 100,
       "nullPointMode": "connected",
       "nullText": null,
+      "options": {},
       "postfix": "",
       "postfixFontSize": "50%",
       "prefix": "",
@@ -960,6 +925,12 @@
               "key": "name",
               "operator": "=~",
               "value": "/^$host$/"
+            },
+            {
+              "condition": "AND",
+              "key": "site_name",
+              "operator": "=~",
+              "value": "/^$Site$/"
             }
           ]
         }
@@ -988,7 +959,7 @@
         "rgba(237, 129, 40, 0.89)",
         "#299c46"
       ],
-      "datasource": "${DS_UNIFI}",
+      "datasource": "Unifi",
       "decimals": 1,
       "description": "",
       "format": "Mbits",
@@ -1023,6 +994,7 @@
       "maxDataPoints": 100,
       "nullPointMode": "connected",
       "nullText": null,
+      "options": {},
       "postfix": "",
       "postfixFontSize": "50%",
       "prefix": "",
@@ -1071,6 +1043,12 @@
               "key": "name",
               "operator": "=~",
               "value": "/^$host$/"
+            },
+            {
+              "condition": "AND",
+              "key": "site_name",
+              "operator": "=~",
+              "value": "/^$Site$/"
             }
           ]
         }
@@ -1085,7 +1063,7 @@
         {
           "op": "=",
           "text": "N/A",
-          "value": "null"
+          "value": "0"
         }
       ],
       "valueName": "current"
@@ -1099,7 +1077,7 @@
         "rgba(237, 129, 40, 0.89)",
         "#d44a3a"
       ],
-      "datasource": "${DS_UNIFI}",
+      "datasource": "Unifi",
       "decimals": 1,
       "format": "percent",
       "gauge": {
@@ -1133,6 +1111,7 @@
       "maxDataPoints": 100,
       "nullPointMode": "connected",
       "nullText": null,
+      "options": {},
       "postfix": "",
       "postfixFontSize": "50%",
       "prefix": "",
@@ -1181,6 +1160,12 @@
               "key": "name",
               "operator": "=~",
               "value": "/^$host$/"
+            },
+            {
+              "condition": "AND",
+              "key": "site_name",
+              "operator": "=~",
+              "value": "/^$Site$/"
             }
           ]
         }
@@ -1209,7 +1194,7 @@
         "rgba(237, 129, 40, 0.89)",
         "#d44a3a"
       ],
-      "datasource": "${DS_UNIFI}",
+      "datasource": "Unifi",
       "decimals": 1,
       "description": "",
       "format": "percent",
@@ -1243,6 +1228,7 @@
       "maxDataPoints": 100,
       "nullPointMode": "connected",
       "nullText": null,
+      "options": {},
       "postfix": "",
       "postfixFontSize": "50%",
       "prefix": "",
@@ -1291,6 +1277,12 @@
               "key": "name",
               "operator": "=~",
               "value": "/^$host$/"
+            },
+            {
+              "condition": "AND",
+              "key": "site_name",
+              "operator": "=~",
+              "value": "/^$Site$/"
             }
           ]
         }
@@ -1319,7 +1311,7 @@
         "rgba(237, 129, 40, 0.89)",
         "#d44a3a"
       ],
-      "datasource": "${DS_UNIFI}",
+      "datasource": "Unifi",
       "decimals": 0,
       "format": "none",
       "gauge": {
@@ -1353,6 +1345,7 @@
       "maxDataPoints": 100,
       "nullPointMode": "connected",
       "nullText": null,
+      "options": {},
       "postfix": "",
       "postfixFontSize": "50%",
       "prefix": "",
@@ -1424,6 +1417,7 @@
       "bgColor": "#3f2b5b",
       "clockType": "12 hour",
       "countdownSettings": {
+        "customFormat": null,
         "endCountdownTime": "2018-04-29T21:47:00.000Z",
         "endText": "00:00:00"
       },
@@ -1444,6 +1438,7 @@
       "mode": "time",
       "offsetFromUtc": null,
       "offsetFromUtcMinutes": null,
+      "options": {},
       "timeSettings": {
         "customFormat": "HH:mm:ss",
         "fontSize": "24px",
@@ -1461,7 +1456,7 @@
         "rgba(237, 129, 40, 0.89)",
         "#d44a3a"
       ],
-      "datasource": "${DS_UNIFI}",
+      "datasource": "Unifi",
       "decimals": 0,
       "format": "none",
       "gauge": {
@@ -1495,6 +1490,7 @@
       "maxDataPoints": 100,
       "nullPointMode": "connected",
       "nullText": null,
+      "options": {},
       "postfix": "M",
       "postfixFontSize": "30%",
       "prefix": "",
@@ -1567,7 +1563,7 @@
       "bars": false,
       "dashLength": 10,
       "dashes": false,
-      "datasource": "${DS_UNIFI}",
+      "datasource": "Unifi",
       "decimals": 2,
       "description": "",
       "editable": true,
@@ -1597,6 +1593,7 @@
       "linewidth": 3,
       "links": [],
       "nullPointMode": "connected",
+      "options": {},
       "percentage": false,
       "pointradius": 5,
       "points": false,
@@ -1617,7 +1614,7 @@
           "groupBy": [
             {
               "params": [
-                "30s"
+                "1m"
               ],
               "type": "time"
             },
@@ -1670,12 +1667,19 @@
               "key": "name",
               "operator": "=~",
               "value": "/^$host$/"
+            },
+            {
+              "condition": "AND",
+              "key": "site_name",
+              "operator": "=~",
+              "value": "/^$Site$/"
             }
           ]
         }
       ],
       "thresholds": [],
       "timeFrom": null,
+      "timeRegions": [],
       "timeShift": null,
       "title": "WAN Multicast",
       "tooltip": {
@@ -1684,7 +1688,6 @@
         "sort": 0,
         "value_type": "cumulative"
       },
-      "transparent": false,
       "type": "graph",
       "xaxis": {
         "buckets": null,
@@ -1711,11 +1714,15 @@
           "min": null,
           "show": false
         }
-      ]
+      ],
+      "yaxis": {
+        "align": false,
+        "alignLevel": null
+      }
     },
     {
       "columns": [],
-      "datasource": "${DS_UNIFI}",
+      "datasource": "Unifi",
       "fontSize": "90%",
       "gridPos": {
         "h": 7,
@@ -1725,6 +1732,7 @@
       },
       "id": 43,
       "links": [],
+      "options": {},
       "pageSize": null,
       "scroll": true,
       "showHeader": true,
@@ -2181,6 +2189,12 @@
               "key": "device_name",
               "operator": "=~",
               "value": "/^$host$/"
+            },
+            {
+              "condition": "AND",
+              "key": "site_name",
+              "operator": "=~",
+              "value": "/^$Site$/"
             }
           ]
         },
@@ -2450,13 +2464,18 @@
               "key": "name",
               "operator": "=~",
               "value": "/^$host$/"
+            },
+            {
+              "condition": "AND",
+              "key": "site_name",
+              "operator": "=~",
+              "value": "/^$Site$/"
             }
           ]
         }
       ],
       "title": "Networks",
       "transform": "table",
-      "transparent": false,
       "type": "table"
     },
     {
@@ -2464,7 +2483,7 @@
       "bars": false,
       "dashLength": 10,
       "dashes": false,
-      "datasource": "${DS_UNIFI}",
+      "datasource": "Unifi",
       "description": "Spikes on this graph that are missing from the LAN graph indicate gateway-originated traffic, like a scheduled speed test.",
       "editable": true,
       "error": false,
@@ -2492,6 +2511,7 @@
       "linewidth": 3,
       "links": [],
       "nullPointMode": "connected",
+      "options": {},
       "percentage": false,
       "pointradius": 5,
       "points": false,
@@ -2517,7 +2537,7 @@
           "groupBy": [
             {
               "params": [
-                "30s"
+                "1m"
               ],
               "type": "time"
             },
@@ -2588,12 +2608,19 @@
               "key": "name",
               "operator": "=~",
               "value": "/^$host$/"
+            },
+            {
+              "condition": "AND",
+              "key": "site_name",
+              "operator": "=~",
+              "value": "/^$Site$/"
             }
           ]
         }
       ],
       "thresholds": [],
       "timeFrom": null,
+      "timeRegions": [],
       "timeShift": null,
       "title": "WAN Throughput",
       "tooltip": {
@@ -2628,14 +2655,18 @@
           "min": null,
           "show": false
         }
-      ]
+      ],
+      "yaxis": {
+        "align": false,
+        "alignLevel": null
+      }
     },
     {
       "aliasColors": {},
       "bars": false,
       "dashLength": 10,
       "dashes": false,
-      "datasource": "${DS_UNIFI}",
+      "datasource": "Unifi",
       "description": "Spikes on this graph that do not appear on the WAN graph indicate inter-VLAN-routing.",
       "editable": true,
       "error": false,
@@ -2663,6 +2694,7 @@
       "linewidth": 3,
       "links": [],
       "nullPointMode": "connected",
+      "options": {},
       "percentage": false,
       "pointradius": 5,
       "points": false,
@@ -2688,7 +2720,7 @@
           "groupBy": [
             {
               "params": [
-                "30s"
+                "1m"
               ],
               "type": "time"
             },
@@ -2759,12 +2791,19 @@
               "key": "name",
               "operator": "=~",
               "value": "/^$host$/"
+            },
+            {
+              "condition": "AND",
+              "key": "site_name",
+              "operator": "=~",
+              "value": "/^$Site$/"
             }
           ]
         }
       ],
       "thresholds": [],
       "timeFrom": null,
+      "timeRegions": [],
       "timeShift": null,
       "title": "LAN Throughput",
       "tooltip": {
@@ -2799,14 +2838,18 @@
           "min": null,
           "show": false
         }
-      ]
+      ],
+      "yaxis": {
+        "align": false,
+        "alignLevel": null
+      }
     },
     {
       "aliasColors": {},
       "bars": false,
       "dashLength": 10,
       "dashes": false,
-      "datasource": "${DS_UNIFI}",
+      "datasource": "Unifi",
       "decimals": 2,
       "description": "May show problems with your WAN interface.",
       "editable": true,
@@ -2837,6 +2880,7 @@
       "linewidth": 2,
       "links": [],
       "nullPointMode": "connected",
+      "options": {},
       "percentage": false,
       "pointradius": 5,
       "points": false,
@@ -2939,12 +2983,19 @@
               "key": "name",
               "operator": "=~",
               "value": "/^$host$/"
+            },
+            {
+              "condition": "AND",
+              "key": "site_name",
+              "operator": "=~",
+              "value": "/^$Site$/"
             }
           ]
         }
       ],
       "thresholds": [],
       "timeFrom": null,
+      "timeRegions": [],
       "timeShift": null,
       "title": "WAN Errors",
       "tooltip": {
@@ -2953,7 +3004,6 @@
         "sort": 0,
         "value_type": "cumulative"
       },
-      "transparent": false,
       "type": "graph",
       "xaxis": {
         "buckets": null,
@@ -2980,14 +3030,18 @@
           "min": null,
           "show": false
         }
-      ]
+      ],
+      "yaxis": {
+        "align": false,
+        "alignLevel": null
+      }
     },
     {
       "aliasColors": {},
       "bars": false,
       "dashLength": 10,
       "dashes": false,
-      "datasource": "${DS_UNIFI}",
+      "datasource": "Unifi",
       "decimals": 2,
       "description": "May show problems with your WAN interface.",
       "editable": true,
@@ -3018,6 +3072,7 @@
       "linewidth": 2,
       "links": [],
       "nullPointMode": "connected",
+      "options": {},
       "percentage": false,
       "pointradius": 5,
       "points": false,
@@ -3120,12 +3175,19 @@
               "key": "name",
               "operator": "=~",
               "value": "/^$host$/"
+            },
+            {
+              "condition": "AND",
+              "key": "site_name",
+              "operator": "=~",
+              "value": "/^$Site$/"
             }
           ]
         }
       ],
       "thresholds": [],
       "timeFrom": null,
+      "timeRegions": [],
       "timeShift": null,
       "title": "WAN Drops",
       "tooltip": {
@@ -3134,7 +3196,6 @@
         "sort": 0,
         "value_type": "cumulative"
       },
-      "transparent": false,
       "type": "graph",
       "xaxis": {
         "buckets": null,
@@ -3161,14 +3222,18 @@
           "min": null,
           "show": false
         }
-      ]
+      ],
+      "yaxis": {
+        "align": false,
+        "alignLevel": null
+      }
     },
     {
       "aliasColors": {},
       "bars": false,
       "dashLength": 10,
       "dashes": false,
-      "datasource": "${DS_UNIFI}",
+      "datasource": "Unifi",
       "decimals": 0,
       "description": "PPS on the WAN interface, calculated in 30 second buckets.",
       "editable": true,
@@ -3199,6 +3264,7 @@
       "linewidth": 3,
       "links": [],
       "nullPointMode": "connected",
+      "options": {},
       "percentage": false,
       "pointradius": 5,
       "points": false,
@@ -3224,7 +3290,7 @@
           "groupBy": [
             {
               "params": [
-                "30s"
+                "1m"
               ],
               "type": "time"
             },
@@ -3301,12 +3367,19 @@
               "key": "name",
               "operator": "=~",
               "value": "/^$host$/"
+            },
+            {
+              "condition": "AND",
+              "key": "site_name",
+              "operator": "=~",
+              "value": "/^$Site$/"
             }
           ]
         }
       ],
       "thresholds": [],
       "timeFrom": null,
+      "timeRegions": [],
       "timeShift": null,
       "title": "WAN Packets",
       "tooltip": {
@@ -3342,14 +3415,18 @@
           "min": null,
           "show": false
         }
-      ]
+      ],
+      "yaxis": {
+        "align": false,
+        "alignLevel": null
+      }
     },
     {
       "aliasColors": {},
       "bars": false,
       "dashLength": 10,
       "dashes": false,
-      "datasource": "${DS_UNIFI}",
+      "datasource": "Unifi",
       "decimals": 0,
       "description": "PPS on the LAN interface, calculated in 30 second buckets.",
       "editable": true,
@@ -3380,6 +3457,7 @@
       "linewidth": 3,
       "links": [],
       "nullPointMode": "connected",
+      "options": {},
       "percentage": false,
       "pointradius": 5,
       "points": false,
@@ -3405,7 +3483,7 @@
           "groupBy": [
             {
               "params": [
-                "30s"
+                "1m"
               ],
               "type": "time"
             },
@@ -3482,12 +3560,19 @@
               "key": "name",
               "operator": "=~",
               "value": "/^$host$/"
+            },
+            {
+              "condition": "AND",
+              "key": "site_name",
+              "operator": "=~",
+              "value": "/^$Site$/"
             }
           ]
         }
       ],
       "thresholds": [],
       "timeFrom": null,
+      "timeRegions": [],
       "timeShift": null,
       "title": "LAN Packets",
       "tooltip": {
@@ -3523,29 +3608,65 @@
           "min": null,
           "show": false
         }
-      ]
+      ],
+      "yaxis": {
+        "align": false,
+        "alignLevel": null
+      }
     }
   ],
   "refresh": "30s",
-  "schemaVersion": 16,
+  "schemaVersion": 18,
   "style": "dark",
   "tags": [],
   "templating": {
     "list": [
       {
         "allValue": null,
-        "current": {},
-        "datasource": "${DS_UNIFI}",
+        "current": {
+          "text": "All",
+          "value": "$__all"
+        },
+        "datasource": "Unifi",
+        "definition": "show tag values from \"usg\" with key=\"site_name\"",
+        "hide": 0,
+        "includeAll": true,
+        "label": "",
+        "multi": true,
+        "name": "Site",
+        "options": [],
+        "query": "show tag values from \"usg\" with key=\"site_name\"",
+        "refresh": 1,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 1,
+        "tagValuesQuery": null,
+        "tags": [],
+        "tagsQuery": null,
+        "type": "query",
+        "useTags": false
+      },
+      {
+        "allValue": null,
+        "current": {
+          "text": "gateway",
+          "value": [
+            "gateway"
+          ]
+        },
+        "datasource": "Unifi",
+        "definition": "show tag values from \"usg\" with key=\"name\" where site_name =~ /$Site$/",
         "hide": 0,
         "includeAll": true,
         "label": "UniFi USG:",
         "multi": true,
         "name": "host",
         "options": [],
-        "query": "show tag values from \"usg\" with key=\"name\"",
+        "query": "show tag values from \"usg\" with key=\"name\" where site_name =~ /$Site$/",
         "refresh": 1,
         "regex": "",
-        "sort": 0,
+        "skipUrlSync": false,
+        "sort": 1,
         "tagValuesQuery": null,
         "tags": [],
         "tagsQuery": null,
@@ -3584,5 +3705,5 @@
   "timezone": "browser",
   "title": "UniFi USG Insights",
   "uid": "WX6RJOMik",
-  "version": 1
+  "version": 33
 }
