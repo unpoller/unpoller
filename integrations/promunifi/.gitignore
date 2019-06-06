@@ -9,3 +9,6 @@
 .DS_Store
 *~
 /package_build
+/release
+/unifi-poller.macos
+/unifi-poller.linux
