@@ -232,6 +232,8 @@ func (u UAP) Points() ([]*influx.Point, error) {
 				tags["vap_id"] = s.ID
 				tags["vap_name"] = s.Name
 				tags["wlanconf_id"] = s.WlanconfID
+				tags["site_id"] = s.SiteID
+				tags["site_name"] = s.SiteName
 				fields["ccq"] = s.Ccq
 				fields["essid"] = s.Essid
 				fields["extchannel"] = s.Extchannel
