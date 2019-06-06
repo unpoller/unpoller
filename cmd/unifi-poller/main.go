@@ -43,7 +43,9 @@ func (c *Config) Run() error {
 	if !c.Quiet {
 		log.Println("Authenticated to Unifi Controller @", c.UnifiBase, "as user", c.UnifiUser)
 	}
-
+	if err := c.CheckSites(controller); err != nil {
+		return err
+	}
 	controller.ErrorLog = log.Printf // Log all errors.
 	if log.SetFlags(0); c.Debug {
 		log.Println("Debug Logging Enabled")
@@ -81,6 +83,31 @@ func parseFlags() string {
 		os.Exit(0) // don't run anything else.
 	}
 	return *configFile
+}
+
+// CheckSites makes sure the list of provided sites exists on the controller.
+func (c *Config) CheckSites(controller *unifi.Unifi) error {
+	sites, err := controller.GetSites()
+	if err != nil {
+		return err
+	}
+	if !c.Quiet {
+		msg := make([]string, 0)
+		for _, site := range sites {
+			msg = append(msg, site.Name+" ("+site.Desc+")")
+		}
+		log.Printf("Found %d site(s) on controller: %v", len(msg), strings.Join(msg, ","))
+	}
+FIRST:
+	for _, s := range c.Sites {
+		for _, site := range sites {
+			if s == site.Name || s == "all" {
+				continue FIRST
+			}
+		}
+		return errors.Errorf("configured site not found on controller: %v", s)
+	}
+	return nil
 }
 
 // GetConfig parses and returns our configuration data.
