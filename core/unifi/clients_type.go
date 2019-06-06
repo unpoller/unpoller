@@ -66,6 +66,7 @@ type UCL struct {
 	RxRate              int64    `json:"rx_rate"`
 	Signal              int64    `json:"signal"`
 	SiteID              string   `json:"site_id"`
+	SiteName            string   `json:"-"`
 	SwDepth             int      `json:"sw_depth"`
 	SwMac               string   `json:"sw_mac"`
 	SwPort              int      `json:"sw_port"`

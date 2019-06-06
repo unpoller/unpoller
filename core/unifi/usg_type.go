@@ -116,6 +116,7 @@ type USG struct {
 	RxBytes         FlexInt  `json:"rx_bytes"`
 	Serial          string   `json:"serial"`
 	SiteID          string   `json:"site_id"`
+	SiteName        string   `json:"-"`
 	SpeedtestStatus struct {
 		Latency        float64 `json:"latency"`
 		Rundate        float64 `json:"rundate"`

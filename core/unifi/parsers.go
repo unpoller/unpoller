@@ -3,7 +3,7 @@ package unifi
 import "encoding/json"
 
 // parseDevices parses the raw JSON from the Unifi Controller into device structures.
-func (u *Unifi) parseDevices(data []json.RawMessage) *Devices {
+func (u *Unifi) parseDevices(data []json.RawMessage, siteName string) *Devices {
 	devices := new(Devices)
 	for _, r := range data {
 		// Loop each item in the raw JSON message, detect its type and unmarshal it.
@@ -18,14 +18,17 @@ func (u *Unifi) parseDevices(data []json.RawMessage) *Devices {
 		switch assetType { // Unmarshal again into the correct type..
 		case "uap":
 			if uap := (UAP{}); u.unmarshalDevice(assetType, r, &uap) == nil {
+				uap.SiteName = siteName
 				devices.UAPs = append(devices.UAPs, uap)
 			}
 		case "ugw", "usg": // in case they ever fix the name in the api.
 			if usg := (USG{}); u.unmarshalDevice(assetType, r, &usg) == nil {
+				usg.SiteName = siteName
 				devices.USGs = append(devices.USGs, usg)
 			}
 		case "usw":
 			if usw := (USW{}); u.unmarshalDevice(assetType, r, &usw) == nil {
+				usw.SiteName = siteName
 				devices.USWs = append(devices.USWs, usw)
 			}
 		default:

@@ -16,6 +16,7 @@ func (u USG) Points() ([]*influx.Point, error) {
 		"device_type":            u.Stat.O,
 		"device_oid":             u.Stat.Oid,
 		"site_id":                u.SiteID,
+		"site_name":              u.SiteName,
 		"adopted":                u.Adopted.Txt,
 		"name":                   u.Name,
 		"adopt_ip":               u.AdoptIP,

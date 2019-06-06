@@ -60,7 +60,7 @@ func (u *Unifi) getController(user, pass string) error {
 
 // GetClients returns a response full of clients' data from the Unifi Controller.
 func (u *Unifi) GetClients(sites []Site) (*Clients, error) {
-	var data []UCL
+	data := make([]UCL, 0)
 	for _, site := range sites {
 		var response struct {
 			Data []UCL `json:"data"`
@@ -71,6 +71,9 @@ func (u *Unifi) GetClients(sites []Site) (*Clients, error) {
 		if err := u.GetData(clientPath, &response); err != nil {
 			return nil, err
 		}
+		for i := range response.Data {
+			response.Data[i].SiteName = site.Name
+		}
 		data = append(data, response.Data...)
 	}
 	return &Clients{UCLs: data}, nil
@@ -78,7 +81,7 @@ func (u *Unifi) GetClients(sites []Site) (*Clients, error) {
 
 // GetDevices returns a response full of devices' data from the Unifi Controller.
 func (u *Unifi) GetDevices(sites []Site) (*Devices, error) {
-	var data []json.RawMessage
+	devices := new(Devices)
 	for _, site := range sites {
 		u.dLogf("Polling Site '%s' (%s) Devices", site.Name, site.Desc)
 		var response struct {
@@ -88,9 +91,22 @@ func (u *Unifi) GetDevices(sites []Site) (*Devices, error) {
 		if err := u.GetData(devicePath, &response); err != nil {
 			return nil, err
 		}
-		data = append(data, response.Data...)
+		loopDevices := u.parseDevices(response.Data, site.Name)
+		// Add SiteName to each device asset.
+		for i := range loopDevices.UAPs {
+			loopDevices.UAPs[i].SiteName = site.Name
+		}
+		for i := range loopDevices.USGs {
+			loopDevices.USGs[i].SiteName = site.Name
+		}
+		for i := range loopDevices.USWs {
+			loopDevices.USWs[i].SiteName = site.Name
+		}
+		devices.UAPs = append(devices.UAPs, loopDevices.UAPs...)
+		devices.USGs = append(devices.USGs, loopDevices.USGs...)
+		devices.USWs = append(devices.USWs, loopDevices.USWs...)
 	}
-	return u.parseDevices(data), nil
+	return devices, nil
 }
 
 // GetSites returns a list of configured sites on the Unifi controller.
@@ -101,7 +117,7 @@ func (u *Unifi) GetSites() ([]Site, error) {
 	if err := u.GetData(SiteList, &response); err != nil {
 		return nil, err
 	}
-	var sites []string
+	sites := make([]string, 0)
 	for i := range response.Data {
 		sites = append(sites, response.Data[i].Name)
 	}

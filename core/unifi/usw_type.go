@@ -117,6 +117,7 @@ type USW struct {
 	RxBytes         float64       `json:"rx_bytes"`
 	Serial          string        `json:"serial"`
 	SiteID          string        `json:"site_id"`
+	SiteName        string        `json:"-"`
 	SSHSessionTable []interface{} `json:"ssh_session_table"`
 
 	Stat struct {

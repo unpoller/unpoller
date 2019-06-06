@@ -163,6 +163,7 @@ type UAP struct {
 	Scanning         FlexBool      `json:"scanning"`
 	Serial           string        `json:"serial"`
 	SiteID           string        `json:"site_id"`
+	SiteName         string        `json:"-"`
 	SpectrumScanning FlexBool      `json:"spectrum_scanning"`
 	SSHSessionTable  []interface{} `json:"ssh_session_table"`
 	Stat             struct {
