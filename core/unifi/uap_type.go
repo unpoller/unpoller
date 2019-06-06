@@ -333,6 +333,7 @@ type UAP struct {
 		RxNwids             float64  `json:"rx_nwids"`
 		RxPackets           float64  `json:"rx_packets"`
 		SiteID              string   `json:"site_id"`
+		SiteName            string   `json:"-"`
 		State               string   `json:"state"`
 		T                   string   `json:"t"`
 		TxBytes             float64  `json:"tx_bytes"`

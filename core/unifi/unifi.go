@@ -95,9 +95,15 @@ func (u *Unifi) GetDevices(sites []Site) (*Devices, error) {
 		// Add SiteName to each device asset.
 		for i := range loopDevices.UAPs {
 			loopDevices.UAPs[i].SiteName = site.Name
+			for j := range loopDevices.UAPs[i].VapTable {
+				loopDevices.UAPs[i].VapTable[j].SiteName = site.Name
+			}
 		}
 		for i := range loopDevices.USGs {
 			loopDevices.USGs[i].SiteName = site.Name
+			for j := range loopDevices.USGs[i].NetworkTable {
+				loopDevices.USGs[i].NetworkTable[j].SiteName = site.Name
+			}
 		}
 		for i := range loopDevices.USWs {
 			loopDevices.USWs[i].SiteName = site.Name

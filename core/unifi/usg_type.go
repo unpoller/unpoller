@@ -68,6 +68,7 @@ type USG struct {
 		RxBytes                FlexInt     `json:"rx_bytes"`
 		RxPackets              float64     `json:"rx_packets"`
 		SiteID                 string      `json:"site_id"`
+		SiteName               string      `json:"-"`
 		TxBytes                FlexInt     `json:"tx_bytes"`
 		TxPackets              float64     `json:"tx_packets"`
 		Up                     FlexBool    `json:"up"`

@@ -19,7 +19,7 @@
     "v2",
   ]
   pruneopts = "UT"
-  revision = "16c852ea613fa2d42fcdccc9a8b0802a8bdc6140"
+  revision = "8ff2fc3824fcb533795f9a2f233275f0bb18d6c5"
 
 [[projects]]
   digest = "1:cf31692c14422fa27c83a05292eb5cbe0fb2775972e8f1f8446a71549bd8980b"
