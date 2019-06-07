@@ -104,22 +104,20 @@ package_build_osx: man macos
 	cp *.1.gz $@/usr/local/share/man/man1
 	cp examples/*.conf.example $@/usr/local/etc/$(BINARY)/
 	cp examples/* $@/usr/local/share/doc/$(BINARY)/
-	cp init/launchd/com.github.davidnewhall.unifi-poller.plist $@/Library/LaunchAgents/
+	cp init/launchd/com.github.davidnewhall.$(BINARY).plist $@/Library/LaunchAgents/
 
 # Build an environment that can be packaged for linux.
 package_build_linux: man linux
 	# Building package environment for linux.
 	mkdir -p $@/usr/bin $@/etc/$(BINARY) $@/lib/systemd/system
 	mkdir -p $@/usr/share/man/man1 $@/usr/share/doc/$(BINARY)
-	# Copying the binary, config file and man page into the env.
+	# Copying the binary, config file, unit file, and man page into the env.
 	cp $(BINARY).linux $@/usr/bin/$(BINARY)
 	cp *.1.gz $@/usr/share/man/man1
 	cp examples/*.conf.example $@/etc/$(BINARY)/
 	cp examples/up.conf.example $@/etc/$(BINARY)/up.conf
 	cp examples/* $@/usr/share/doc/$(BINARY)/
-	# Fixing the paths in the systemd unit file before copying it into the emv.
-	sed "s%ExecStart.*%ExecStart=/usr/bin/$(BINARY) --config=/etc/$(BINARY)/up.conf%" \
-		init/systemd/unifi-poller.service > $@/lib/systemd/system/$(BINARY).service
+	cp init/systemd/$(BINARY).service $@/lib/systemd/system/
 
 check_fpm:
 	@fpm --version > /dev/null || (echo "FPM missing. Install FPM: https://fpm.readthedocs.io/en/latest/installing.html" && false)
@@ -134,9 +132,14 @@ lint:
 	# Checking lint.
 	golangci-lint run --enable-all -D gochecknoglobals
 
-# Install locally into /usr/local. Not recommended.
-install: man
-	scripts/local_install.sh
+# Deprecated.
+install:
+	@echo -  Local installation with the Makefile is no longer possible.
+	@echo If you wish to install the application manually, check out the wiki: \
+	https://github.com/davidnewhall/unifi-poller/wiki/Installation
+	@echo -  Otherwise, build and install a package: make rpm, make deb, make osxpkg
+	@echo See the Package Install wiki for more info: \
+	https://github.com/davidnewhall/unifi-poller/wiki/Package-Install
 
 # If you installed with `make install` run `make uninstall` before installing a binary package.
 # This will remove the package install from macOS, it will not remove a package install from Linux.
@@ -147,11 +150,11 @@ uninstall:
 		&& /bin/launchctl unload ~/Library/LaunchAgents/com.github.davidnewhall.$(BINARY).plist || true
 	[ -x /bin/launchctl ] && [ -f /Library/LaunchAgents/com.github.davidnewhall.$(BINARY).plist ] \
 		&& /bin/launchctl unload /Library/LaunchAgents/com.github.davidnewhall.$(BINARY).plist || true
-	rm -rf /usr/local/{etc,bin}/$(BINARY) /usr/local/share/man/man1/$(BINARY).1.gz
+	rm -rf /usr/local/{etc,bin,share/doc}/$(BINARY)
 	rm -f ~/Library/LaunchAgents/com.github.davidnewhall.$(BINARY).plist
-	rm -f /etc/systemd/system/$(BINARY).service
+	rm -f /etc/systemd/system/$(BINARY).service /usr/local/share/man/man1/$(BINARY).1.gz
 	[ -x /bin/systemctl ] && /bin/systemctl --system daemon-reload || true
-	@[ -x /bin/launchctl ] && [ -f /Library/LaunchAgents/com.github.davidnewhall.$(BINARY).plist ] \
+	@[ -f /Library/LaunchAgents/com.github.davidnewhall.$(BINARY).plist ] \
 		&& echo "  ==> Delete this file manually: sudo rm -f /Library/LaunchAgents/com.github.davidnewhall.$(BINARY).plist" || true
 
 # Don't run this unless you're ready to debug untested vendored dependencies.
