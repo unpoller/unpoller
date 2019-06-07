@@ -71,8 +71,18 @@
   "gnetId": 1486,
   "graphTooltip": 1,
   "id": null,
-  "iteration": 1559859372283,
-  "links": [],
+  "iteration": 1559898637306,
+  "links": [
+    {
+      "icon": "external link",
+      "includeVars": true,
+      "keepTime": true,
+      "tags": [
+        "unifi"
+      ],
+      "type": "dashboards"
+    }
+  ],
   "panels": [
     {
       "columns": [],
@@ -1292,7 +1302,7 @@
       "datasource": "${DS_UNIFI}",
       "editable": true,
       "error": false,
-      "fill": 0,
+      "fill": 1,
       "gridPos": {
         "h": 8,
         "w": 12,
@@ -1306,14 +1316,14 @@
         "avg": false,
         "current": true,
         "max": true,
-        "min": true,
+        "min": false,
         "show": true,
         "sortDesc": true,
         "total": false,
         "values": true
       },
       "lines": true,
-      "linewidth": 2,
+      "linewidth": 1,
       "links": [],
       "nullPointMode": "connected",
       "options": {},
@@ -1321,7 +1331,14 @@
       "pointradius": 5,
       "points": false,
       "renderer": "flot",
-      "seriesOverrides": [],
+      "seriesOverrides": [
+        {
+          "alias": "/load15$/",
+          "fill": 0,
+          "lines": true,
+          "linewidth": 6
+        }
+      ],
       "spaceLength": 10,
       "stack": false,
       "steppedLine": false,
@@ -1391,6 +1408,12 @@
               "key": "name",
               "operator": "=~",
               "value": "/^$host$/"
+            },
+            {
+              "condition": "AND",
+              "key": "site_name",
+              "operator": "=~",
+              "value": "/^$Site$/"
             }
           ]
         }
@@ -1544,6 +1567,12 @@
               "key": "name",
               "operator": "=~",
               "value": "/^$host$/"
+            },
+            {
+              "condition": "AND",
+              "key": "site_name",
+              "operator": "=~",
+              "value": "/^$Site$/"
             }
           ]
         }
@@ -1637,7 +1666,7 @@
           "groupBy": [
             {
               "params": [
-                "$interval"
+                "$__interval"
               ],
               "type": "time"
             },
@@ -1684,6 +1713,12 @@
               "key": "device_name",
               "operator": "=~",
               "value": "/^$host$/"
+            },
+            {
+              "condition": "AND",
+              "key": "site_name",
+              "operator": "=~",
+              "value": "/^$Site$/"
             }
           ]
         }
@@ -1822,6 +1857,12 @@
               "key": "radio",
               "operator": "=",
               "value": "na"
+            },
+            {
+              "condition": "AND",
+              "key": "site_name",
+              "operator": "=~",
+              "value": "/^$Site$/"
             }
           ]
         },
@@ -1872,6 +1913,12 @@
               "key": "radio",
               "operator": "=",
               "value": "ng"
+            },
+            {
+              "condition": "AND",
+              "key": "site_name",
+              "operator": "=~",
+              "value": "/^$Site$/"
             }
           ]
         }
@@ -1966,7 +2013,7 @@
           "groupBy": [
             {
               "params": [
-                "$interval"
+                "$__interval"
               ],
               "type": "time"
             },
@@ -2055,6 +2102,12 @@
               "key": "radio",
               "operator": "=",
               "value": "na"
+            },
+            {
+              "condition": "AND",
+              "key": "site_name",
+              "operator": "=~",
+              "value": "/^$Site$/"
             }
           ]
         }
@@ -2108,6 +2161,7 @@
       "dashLength": 10,
       "dashes": false,
       "datasource": "${DS_UNIFI}",
+      "description": "Displays 2.4GHz usage.",
       "editable": true,
       "error": false,
       "fill": 0,
@@ -2150,7 +2204,7 @@
           "groupBy": [
             {
               "params": [
-                "$interval"
+                "$__interval"
               ],
               "type": "time"
             },
@@ -2239,6 +2293,12 @@
               "key": "radio",
               "operator": "=",
               "value": "ng"
+            },
+            {
+              "condition": "AND",
+              "key": "site_name",
+              "operator": "=~",
+              "value": "/^$Site$/"
             }
           ]
         }
@@ -2291,6 +2351,7 @@
       "dashLength": 10,
       "dashes": false,
       "datasource": "${DS_UNIFI}",
+      "description": "I don't recall why I did *8 on this. The data here may not be entirely accurate?",
       "editable": true,
       "error": false,
       "fill": 1,
@@ -2340,7 +2401,7 @@
           "groupBy": [
             {
               "params": [
-                "30s"
+                "$__interval"
               ],
               "type": "time"
             },
@@ -2435,6 +2496,12 @@
               "key": "radio",
               "operator": "=",
               "value": "na"
+            },
+            {
+              "condition": "AND",
+              "key": "site_name",
+              "operator": "=~",
+              "value": "/^$Site$/"
             }
           ]
         }
@@ -2536,7 +2603,7 @@
           "groupBy": [
             {
               "params": [
-                "30s"
+                "$__interval"
               ],
               "type": "time"
             },
@@ -2631,6 +2698,12 @@
               "key": "radio",
               "operator": "=",
               "value": "ng"
+            },
+            {
+              "condition": "AND",
+              "key": "site_name",
+              "operator": "=~",
+              "value": "/^$Site$/"
             }
           ]
         }
@@ -2684,7 +2757,7 @@
       "dashes": false,
       "datasource": "${DS_UNIFI}",
       "decimals": 0,
-      "description": "PPS on the na band calculated in 30 second buckets.",
+      "description": "PPS on the na band.",
       "editable": true,
       "error": false,
       "fill": 1,
@@ -2732,7 +2805,7 @@
           "groupBy": [
             {
               "params": [
-                "30s"
+                "$__interval"
               ],
               "type": "time"
             },
@@ -2815,6 +2888,12 @@
               "key": "radio",
               "operator": "=",
               "value": "na"
+            },
+            {
+              "condition": "AND",
+              "key": "site_name",
+              "operator": "=~",
+              "value": "/^$Site$/"
             }
           ]
         }
@@ -2919,7 +2998,7 @@
           "groupBy": [
             {
               "params": [
-                "30s"
+                "$__interval"
               ],
               "type": "time"
             },
@@ -3002,6 +3081,12 @@
               "key": "radio",
               "operator": "=",
               "value": "ng"
+            },
+            {
+              "condition": "AND",
+              "key": "site_name",
+              "operator": "=~",
+              "value": "/^$Site$/"
             }
           ]
         }
@@ -3056,6 +3141,7 @@
       "dashes": false,
       "datasource": "${DS_UNIFI}",
       "decimals": 0,
+      "description": "Visualize packet errors (several types)  per second in the 5GHz band.",
       "editable": true,
       "error": false,
       "fill": 1,
@@ -3105,7 +3191,7 @@
           "groupBy": [
             {
               "params": [
-                "30s"
+                "$__interval"
               ],
               "type": "time"
             },
@@ -3314,6 +3400,12 @@
               "key": "radio",
               "operator": "=",
               "value": "na"
+            },
+            {
+              "condition": "AND",
+              "key": "site_name",
+              "operator": "=~",
+              "value": "/^$Site$/"
             }
           ]
         }
@@ -3417,7 +3509,7 @@
           "groupBy": [
             {
               "params": [
-                "30s"
+                "$__interval"
               ],
               "type": "time"
             },
@@ -3620,6 +3712,12 @@
               "key": "radio",
               "operator": "=",
               "value": "ng"
+            },
+            {
+              "condition": "AND",
+              "key": "site_name",
+              "operator": "=~",
+              "value": "/^$Site$/"
             }
           ]
         }
@@ -3671,7 +3769,10 @@
   "refresh": "30s",
   "schemaVersion": 18,
   "style": "dark",
-  "tags": [],
+  "tags": [
+    "unifi",
+    "uap"
+  ],
   "templating": {
     "list": [
       {
@@ -3738,8 +3839,8 @@
     ]
   },
   "time": {
-    "from": "now-2h",
-    "to": "now"
+    "from": "now-3h",
+    "to": "now-5s"
   },
   "timepicker": {
     "nowDelay": "5s",
@@ -3767,5 +3868,5 @@
   "timezone": "browser",
   "title": "UniFi UAP Insights",
   "uid": "8nQ_RPZiz",
-  "version": 37
+  "version": 42
 }

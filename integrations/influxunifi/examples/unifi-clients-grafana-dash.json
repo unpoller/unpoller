@@ -64,8 +64,18 @@
   "gnetId": null,
   "graphTooltip": 1,
   "id": null,
-  "iteration": 1559859351362,
-  "links": [],
+  "iteration": 1559898655544,
+  "links": [
+    {
+      "icon": "external link",
+      "includeVars": true,
+      "keepTime": true,
+      "tags": [
+        "unifi"
+      ],
+      "type": "dashboards"
+    }
+  ],
   "panels": [
     {
       "columns": [],
@@ -106,10 +116,92 @@
             "rgba(237, 129, 40, 0.89)",
             "rgba(50, 172, 45, 0.97)"
           ],
-          "decimals": 2,
-          "pattern": "/.*/",
+          "dateFormat": "YYYY-MM-DD HH:mm:ss",
+          "decimals": null,
+          "mappingType": 1,
+          "pattern": "/Bytes$/",
           "thresholds": [],
           "type": "number",
+          "unit": "decbytes"
+        },
+        {
+          "alias": "Name",
+          "colorMode": null,
+          "colors": [
+            "rgba(245, 54, 54, 0.9)",
+            "rgba(237, 129, 40, 0.89)",
+            "rgba(50, 172, 45, 0.97)"
+          ],
+          "dateFormat": "YYYY-MM-DD HH:mm:ss",
+          "decimals": 2,
+          "mappingType": 1,
+          "pattern": "name",
+          "thresholds": [],
+          "type": "string",
+          "unit": "short"
+        },
+        {
+          "alias": "AP",
+          "colorMode": null,
+          "colors": [
+            "rgba(245, 54, 54, 0.9)",
+            "rgba(237, 129, 40, 0.89)",
+            "rgba(50, 172, 45, 0.97)"
+          ],
+          "dateFormat": "YYYY-MM-DD HH:mm:ss",
+          "decimals": 2,
+          "mappingType": 1,
+          "pattern": "ap_mac",
+          "thresholds": [],
+          "type": "string",
+          "unit": "short"
+        },
+        {
+          "alias": "Chan",
+          "colorMode": null,
+          "colors": [
+            "rgba(245, 54, 54, 0.9)",
+            "rgba(237, 129, 40, 0.89)",
+            "rgba(50, 172, 45, 0.97)"
+          ],
+          "dateFormat": "YYYY-MM-DD HH:mm:ss",
+          "decimals": 2,
+          "mappingType": 1,
+          "pattern": "channel",
+          "thresholds": [],
+          "type": "string",
+          "unit": "short"
+        },
+        {
+          "alias": "Device MAC",
+          "colorMode": null,
+          "colors": [
+            "rgba(245, 54, 54, 0.9)",
+            "rgba(237, 129, 40, 0.89)",
+            "rgba(50, 172, 45, 0.97)"
+          ],
+          "dateFormat": "YYYY-MM-DD HH:mm:ss",
+          "decimals": 2,
+          "mappingType": 1,
+          "pattern": "mac",
+          "thresholds": [],
+          "type": "string",
+          "unit": "short"
+        },
+        {
+          "alias": "Radio",
+          "colorMode": null,
+          "colors": [
+            "rgba(245, 54, 54, 0.9)",
+            "rgba(237, 129, 40, 0.89)",
+            "rgba(50, 172, 45, 0.97)"
+          ],
+          "dateFormat": "YYYY-MM-DD HH:mm:ss",
+          "decimals": 2,
+          "mappingType": 1,
+          "pattern": "radio",
+          "thresholds": [],
+          "type": "string",
           "unit": "short"
         }
       ],
@@ -119,12 +211,6 @@
             {
               "params": [
                 "mac"
-              ],
-              "type": "tag"
-            },
-            {
-              "params": [
-                "oui"
               ],
               "type": "tag"
             },
@@ -214,6 +300,42 @@
                 ],
                 "type": "alias"
               }
+            ],
+            [
+              {
+                "params": [
+                  "rx_bytes"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "last"
+              },
+              {
+                "params": [
+                  "Total RX Bytes"
+                ],
+                "type": "alias"
+              }
+            ],
+            [
+              {
+                "params": [
+                  "tx_bytes"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "last"
+              },
+              {
+                "params": [
+                  "Total TX Bytes"
+                ],
+                "type": "alias"
+              }
             ]
           ],
           "tags": [
@@ -280,6 +402,69 @@
           "type": "hidden"
         },
         {
+          "alias": "Sw Port",
+          "colorMode": null,
+          "colors": [
+            "rgba(245, 54, 54, 0.9)",
+            "rgba(237, 129, 40, 0.89)",
+            "rgba(50, 172, 45, 0.97)"
+          ],
+          "decimals": 0,
+          "pattern": "sw_port",
+          "thresholds": [],
+          "type": "number",
+          "unit": "short"
+        },
+        {
+          "alias": "Fixed IP",
+          "colorMode": null,
+          "colors": [
+            "rgba(245, 54, 54, 0.9)",
+            "rgba(237, 129, 40, 0.89)",
+            "rgba(50, 172, 45, 0.97)"
+          ],
+          "dateFormat": "YYYY-MM-DD HH:mm:ss",
+          "decimals": 2,
+          "mappingType": 1,
+          "pattern": "use_fixedip",
+          "thresholds": [],
+          "type": "string",
+          "unit": "short"
+        },
+        {
+          "alias": "Name",
+          "colorMode": null,
+          "colors": [
+            "rgba(245, 54, 54, 0.9)",
+            "rgba(237, 129, 40, 0.89)",
+            "rgba(50, 172, 45, 0.97)"
+          ],
+          "dateFormat": "YYYY-MM-DD HH:mm:ss",
+          "decimals": 2,
+          "mappingType": 1,
+          "pattern": "name",
+          "thresholds": [],
+          "type": "string",
+          "unit": "short"
+        },
+        {
+          "alias": "Device MAC",
+          "colorMode": null,
+          "colors": [
+            "rgba(245, 54, 54, 0.9)",
+            "rgba(237, 129, 40, 0.89)",
+            "rgba(50, 172, 45, 0.97)"
+          ],
+          "dateFormat": "YYYY-MM-DD HH:mm:ss",
+          "decimals": 2,
+          "link": false,
+          "mappingType": 1,
+          "pattern": "mac",
+          "thresholds": [],
+          "type": "string",
+          "unit": "short"
+        },
+        {
           "alias": "",
           "colorMode": null,
           "colors": [
@@ -287,11 +472,13 @@
             "rgba(237, 129, 40, 0.89)",
             "rgba(50, 172, 45, 0.97)"
           ],
-          "decimals": 2,
-          "pattern": "/.*/",
+          "dateFormat": "YYYY-MM-DD HH:mm:ss",
+          "decimals": null,
+          "mappingType": 1,
+          "pattern": "/Bytes$/",
           "thresholds": [],
           "type": "number",
-          "unit": "short"
+          "unit": "decbytes"
         }
       ],
       "targets": [
@@ -306,12 +493,6 @@
             {
               "params": [
                 "mac"
-              ],
-              "type": "tag"
-            },
-            {
-              "params": [
-                "oui"
               ],
               "type": "tag"
             },
@@ -332,7 +513,7 @@
           "orderByTime": "ASC",
           "policy": "default",
           "query": "SELECT last(\"ip\") AS \"Address\", last(\"note\") AS \"Note\", last(\"network\") AS \"Network\" FROM \"clients\" WHERE (\"is_wired\" != 'false' AND \"name\" =~ /^$Client$/ AND \"site_name\" =~ /$Site$/) AND $timeFilter GROUP BY \"sw_port\", \"mac\", \"oui\", \"use_fixedip\", \"name\"",
-          "rawQuery": true,
+          "rawQuery": false,
           "refId": "A",
           "resultFormat": "table",
           "select": [
@@ -389,6 +570,42 @@
                 ],
                 "type": "alias"
               }
+            ],
+            [
+              {
+                "params": [
+                  "rx_bytes"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "last"
+              },
+              {
+                "params": [
+                  "Total RX Bytes"
+                ],
+                "type": "alias"
+              }
+            ],
+            [
+              {
+                "params": [
+                  "tx_bytes"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "last"
+              },
+              {
+                "params": [
+                  "Total TX Bytes"
+                ],
+                "type": "alias"
+              }
             ]
           ],
           "tags": [
@@ -421,7 +638,7 @@
       },
       "datasource": "${DS_UNIFI}",
       "decimals": 0,
-      "description": "",
+      "description": "Visualize wireless channel usage w/ wired client counts.",
       "fontSize": "70%",
       "format": "short",
       "gridPos": {
@@ -540,7 +757,7 @@
       },
       "datasource": "${DS_UNIFI}",
       "decimals": 0,
-      "description": "",
+      "description": "Visualize how many clients are connected to which radios/APs.",
       "fontSize": "70%",
       "format": "short",
       "gridPos": {
@@ -622,7 +839,7 @@
       },
       "datasource": "${DS_UNIFI}",
       "decimals": 0,
-      "description": "",
+      "description": "This shows an OUI breakdown from Unifi's perspective. The prefix w means wireless client and e means ethernet (wired) client.",
       "fontSize": "70%",
       "format": "short",
       "gridPos": {
@@ -743,7 +960,7 @@
       },
       "datasource": "${DS_UNIFI}",
       "decimals": 0,
-      "description": "",
+      "description": "No real idea what these numbers are, but Unifi provides them, so I made a cool pie chart out of them. What's your pie chart look like?",
       "fontSize": "70%",
       "format": "short",
       "gridPos": {
@@ -820,7 +1037,7 @@
       "dashLength": 10,
       "dashes": false,
       "datasource": "${DS_UNIFI}",
-      "description": "Bandwidth usage per wireless devices as reported by the UAPs. Does not include amazon devices.",
+      "description": "Bandwidth usage per wireless devices as reported by the UAPs. Rx is on the negative axis. Does not include amazon devices.",
       "fill": 1,
       "gridPos": {
         "h": 7,
@@ -851,7 +1068,12 @@
       "pointradius": 5,
       "points": false,
       "renderer": "flot",
-      "seriesOverrides": [],
+      "seriesOverrides": [
+        {
+          "alias": "/Rx$/",
+          "transform": "negative-Y"
+        }
+      ],
       "spaceLength": 10,
       "stack": false,
       "steppedLine": false,
@@ -861,7 +1083,7 @@
           "groupBy": [
             {
               "params": [
-                "30s"
+                "$__interval"
               ],
               "type": "time"
             },
@@ -901,7 +1123,7 @@
                 "params": [
                   "1s"
                 ],
-                "type": "derivative"
+                "type": "non_negative_derivative"
               },
               {
                 "params": [
@@ -925,7 +1147,7 @@
                 "params": [
                   "1s"
                 ],
-                "type": "derivative"
+                "type": "non_negative_derivative"
               },
               {
                 "params": [
@@ -938,8 +1160,8 @@
           "tags": [
             {
               "key": "is_wired",
-              "operator": "=",
-              "value": "false"
+              "operator": "!=",
+              "value": "true"
             },
             {
               "condition": "AND",
@@ -989,7 +1211,7 @@
       "yaxes": [
         {
           "format": "Bps",
-          "label": null,
+          "label": "bytes / sec",
           "logBase": 1,
           "max": null,
           "min": null,
@@ -1015,7 +1237,7 @@
       "dashLength": 10,
       "dashes": false,
       "datasource": "${DS_UNIFI}",
-      "description": "Cameras TX / RX bytes per second (calculated in 1 minute buckets).",
+      "description": "Cameras TX / RX bytes per second. Rx is on the negative axis. Cameras probably don't do much Tx. If you don't have cameras, don't include this graph on your dashboards.",
       "fill": 0,
       "gridPos": {
         "h": 7,
@@ -1046,7 +1268,12 @@
       "pointradius": 5,
       "points": false,
       "renderer": "flot",
-      "seriesOverrides": [],
+      "seriesOverrides": [
+        {
+          "alias": "/Rx$/",
+          "transform": "negative-Y"
+        }
+      ],
       "spaceLength": 10,
       "stack": true,
       "steppedLine": false,
@@ -1056,7 +1283,7 @@
           "groupBy": [
             {
               "params": [
-                "1m"
+                "$__interval"
               ],
               "type": "time"
             },
@@ -1096,7 +1323,7 @@
                 "params": [
                   "1s"
                 ],
-                "type": "derivative"
+                "type": "non_negative_derivative"
               },
               {
                 "params": [
@@ -1120,7 +1347,7 @@
                 "params": [
                   "1s"
                 ],
-                "type": "derivative"
+                "type": "non_negative_derivative"
               },
               {
                 "params": [
@@ -1166,7 +1393,7 @@
       "yaxes": [
         {
           "format": "Bps",
-          "label": null,
+          "label": "bytes / sec",
           "logBase": 1,
           "max": null,
           "min": null,
@@ -1192,7 +1419,7 @@
       "dashLength": 10,
       "dashes": false,
       "datasource": "${DS_UNIFI}",
-      "description": "Amazon Devices TX / RX bytes per second (calculated in 30 second buckets).",
+      "description": "Amazon Devices TX / RX bytes per second (calculated in 30 second buckets). Rx is on the native axis. My home network has a ton of Amazon devices, so I broke them out separately. If you don't have Amazon devices, don't fret, just don't include this graph in the new dashboards you're building. :)",
       "fill": 0,
       "gridPos": {
         "h": 9,
@@ -1223,7 +1450,12 @@
       "pointradius": 5,
       "points": false,
       "renderer": "flot",
-      "seriesOverrides": [],
+      "seriesOverrides": [
+        {
+          "alias": "/Rx$/",
+          "transform": "negative-Y"
+        }
+      ],
       "spaceLength": 10,
       "stack": false,
       "steppedLine": false,
@@ -1233,7 +1465,7 @@
           "groupBy": [
             {
               "params": [
-                "30s"
+                "$__interval"
               ],
               "type": "time"
             },
@@ -1273,7 +1505,7 @@
                 "params": [
                   "1s"
                 ],
-                "type": "derivative"
+                "type": "non_negative_derivative"
               },
               {
                 "params": [
@@ -1297,7 +1529,7 @@
                 "params": [
                   "1s"
                 ],
-                "type": "derivative"
+                "type": "non_negative_derivative"
               },
               {
                 "params": [
@@ -1317,7 +1549,7 @@
               "condition": "AND",
               "key": "is_wired",
               "operator": "!=",
-              "value": "true"
+              "value": "false"
             },
             {
               "condition": "AND",
@@ -1344,7 +1576,7 @@
           "groupBy": [
             {
               "params": [
-                "30s"
+                "$__interval"
               ],
               "type": "time"
             },
@@ -1384,7 +1616,7 @@
                 "params": [
                   "1s"
                 ],
-                "type": "derivative"
+                "type": "non_negative_derivative"
               },
               {
                 "params": [
@@ -1408,7 +1640,7 @@
                 "params": [
                   "1s"
                 ],
-                "type": "derivative"
+                "type": "non_negative_derivative"
               },
               {
                 "params": [
@@ -1428,7 +1660,7 @@
               "condition": "AND",
               "key": "is_wired",
               "operator": "!=",
-              "value": "false"
+              "value": "true"
             },
             {
               "condition": "AND",
@@ -1467,7 +1699,7 @@
       "yaxes": [
         {
           "format": "Bps",
-          "label": null,
+          "label": "bytes / sec",
           "logBase": 1,
           "max": null,
           "min": null,
@@ -1493,7 +1725,7 @@
       "dashLength": 10,
       "dashes": false,
       "datasource": "${DS_UNIFI}",
-      "description": "Wired TX / RX bytes per second (calculated in 30 second buckets). Does not include amazon and camera devices. Unaffected by the AP setting.",
+      "description": "Wired TX / RX bytes per second (calculated in 30 second buckets). Rx is on the negative axis. Does not include amazon and camera devices. Unaffected by the AP setting.",
       "fill": 0,
       "gridPos": {
         "h": 9,
@@ -1524,7 +1756,12 @@
       "pointradius": 5,
       "points": false,
       "renderer": "flot",
-      "seriesOverrides": [],
+      "seriesOverrides": [
+        {
+          "alias": "/Rx$/",
+          "transform": "negative-Y"
+        }
+      ],
       "spaceLength": 10,
       "stack": false,
       "steppedLine": false,
@@ -1534,7 +1771,7 @@
           "groupBy": [
             {
               "params": [
-                "30s"
+                "$__interval"
               ],
               "type": "time"
             },
@@ -1574,7 +1811,7 @@
                 "params": [
                   "1s"
                 ],
-                "type": "derivative"
+                "type": "non_negative_derivative"
               },
               {
                 "params": [
@@ -1598,7 +1835,7 @@
                 "params": [
                   "1s"
                 ],
-                "type": "derivative"
+                "type": "non_negative_derivative"
               },
               {
                 "params": [
@@ -1657,7 +1894,7 @@
       "yaxes": [
         {
           "format": "Bps",
-          "label": null,
+          "label": "bytes / sec",
           "logBase": 1,
           "max": null,
           "min": null,
@@ -2564,7 +2801,9 @@
   "refresh": "30s",
   "schemaVersion": 18,
   "style": "dark",
-  "tags": [],
+  "tags": [
+    "unifi"
+  ],
   "templating": {
     "list": [
       {
@@ -2637,7 +2876,7 @@
   },
   "time": {
     "from": "now-3h",
-    "to": "now-20s"
+    "to": "now-5s"
   },
   "timepicker": {
     "nowDelay": "20s",
@@ -2662,7 +2901,7 @@
     ]
   },
   "timezone": "",
-  "title": "Unifi Client Insights",
+  "title": "UniFi Client Insights",
   "uid": "YVR23BZiz",
-  "version": 48
+  "version": 54
 }
