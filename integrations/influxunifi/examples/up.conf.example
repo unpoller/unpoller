@@ -1,7 +1,6 @@
-# unifi-poller primary configuration file.               #
-# copy this file to: /usr/local/etc/unifi-poller/up.conf #
-# commented lines are defaults, uncomment to change.     #
-##########################################################
+# unifi-poller primary configuration file.           #
+# commented lines are defaults, uncomment to change. #
+######################################################
 
 # If the controller has more than one site, specify which sites to poll here.
 # If only one site, "default" is likely the correct name.
