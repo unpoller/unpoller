@@ -70,10 +70,20 @@
   "description": "",
   "editable": true,
   "gnetId": 1486,
-  "graphTooltip": 1,
+  "graphTooltip": 2,
   "id": null,
-  "iteration": 1559859384864,
-  "links": [],
+  "iteration": 1559898661329,
+  "links": [
+    {
+      "icon": "external link",
+      "includeVars": true,
+      "keepTime": true,
+      "tags": [
+        "unifi"
+      ],
+      "type": "dashboards"
+    }
+  ],
   "panels": [
     {
       "content": "<br>\n<center><b><font size=\"6px\">Unifi USG</font></b></center>\n",
@@ -640,6 +650,12 @@
               "key": "name",
               "operator": "=~",
               "value": "/^$host$/"
+            },
+            {
+              "condition": "AND",
+              "key": "site_name",
+              "operator": "=~",
+              "value": "/^$Site$/"
             }
           ]
         }
@@ -749,6 +765,12 @@
               "key": "name",
               "operator": "=~",
               "value": "/^$host$/"
+            },
+            {
+              "condition": "AND",
+              "key": "site_name",
+              "operator": "=~",
+              "value": "/^$Site$/"
             }
           ]
         }
@@ -1448,6 +1470,12 @@
               "key": "name",
               "operator": "=~",
               "value": "/^$host$/"
+            },
+            {
+              "condition": "AND",
+              "key": "site_name",
+              "operator": "=~",
+              "value": "/^$Site$/"
             }
           ]
         }
@@ -1603,6 +1631,12 @@
               "key": "name",
               "operator": "=~",
               "value": "/^$host$/"
+            },
+            {
+              "condition": "AND",
+              "key": "site_name",
+              "operator": "=~",
+              "value": "/^$Site$/"
             }
           ]
         }
@@ -1662,12 +1696,7 @@
       "pointradius": 5,
       "points": false,
       "renderer": "flot",
-      "seriesOverrides": [
-        {
-          "alias": "/In$/",
-          "color": "#806eb7"
-        }
-      ],
+      "seriesOverrides": [],
       "spaceLength": 10,
       "stack": false,
       "steppedLine": false,
@@ -1678,7 +1707,7 @@
           "groupBy": [
             {
               "params": [
-                "1m"
+                "$__interval"
               ],
               "type": "time"
             },
@@ -1762,9 +1791,9 @@
       },
       "yaxes": [
         {
-          "decimals": 2,
+          "decimals": null,
           "format": "pps",
-          "label": null,
+          "label": "packets / second",
           "logBase": 1,
           "max": null,
           "min": null,
@@ -2548,7 +2577,7 @@
       "dashLength": 10,
       "dashes": false,
       "datasource": "${DS_UNIFI}",
-      "description": "Spikes on this graph that are missing from the LAN graph indicate gateway-originated traffic, like a scheduled speed test.",
+      "description": "Spikes on this graph that are missing from the LAN graph indicate gateway-originated traffic, like a scheduled speed test. Rx is on the negative axis.",
       "editable": true,
       "error": false,
       "fill": 1,
@@ -2565,7 +2594,7 @@
         "avg": false,
         "current": true,
         "max": true,
-        "min": true,
+        "min": false,
         "show": true,
         "sortDesc": true,
         "total": false,
@@ -2583,12 +2612,7 @@
       "seriesOverrides": [
         {
           "alias": "/Rx$/",
-          "color": "#7eb26d",
           "transform": "negative-Y"
-        },
-        {
-          "alias": "/Tx$/",
-          "color": "#052b51"
         }
       ],
       "spaceLength": 10,
@@ -2601,7 +2625,7 @@
           "groupBy": [
             {
               "params": [
-                "1m"
+                "$__interval"
               ],
               "type": "time"
             },
@@ -2705,7 +2729,7 @@
       "yaxes": [
         {
           "format": "Bps",
-          "label": null,
+          "label": "bytes / second",
           "logBase": 1,
           "max": null,
           "min": null,
@@ -2731,7 +2755,7 @@
       "dashLength": 10,
       "dashes": false,
       "datasource": "${DS_UNIFI}",
-      "description": "Spikes on this graph that do not appear on the WAN graph indicate inter-VLAN-routing.",
+      "description": "Spikes on this graph that do not appear on the WAN graph indicate inter-VLAN-routing. Rx is on the negative axis.",
       "editable": true,
       "error": false,
       "fill": 1,
@@ -2748,7 +2772,7 @@
         "avg": false,
         "current": true,
         "max": true,
-        "min": true,
+        "min": false,
         "show": true,
         "sortDesc": true,
         "total": false,
@@ -2766,12 +2790,7 @@
       "seriesOverrides": [
         {
           "alias": "/Rx$/",
-          "color": "#584477",
           "transform": "negative-Y"
-        },
-        {
-          "alias": "/Tx$/",
-          "color": "#ba43a9"
         }
       ],
       "spaceLength": 10,
@@ -2784,7 +2803,7 @@
           "groupBy": [
             {
               "params": [
-                "1m"
+                "$__interval"
               ],
               "type": "time"
             },
@@ -2888,7 +2907,7 @@
       "yaxes": [
         {
           "format": "Bps",
-          "label": null,
+          "label": "bytes / second",
           "logBase": 1,
           "max": null,
           "min": null,
@@ -2914,8 +2933,8 @@
       "dashLength": 10,
       "dashes": false,
       "datasource": "${DS_UNIFI}",
-      "decimals": 2,
-      "description": "May show problems with your WAN interface.",
+      "decimals": null,
+      "description": "May show problems with your WAN interface. Rx is on the negative axis.",
       "editable": true,
       "error": false,
       "fill": 2,
@@ -2929,7 +2948,7 @@
       "isNew": true,
       "legend": {
         "alignAsTable": true,
-        "avg": true,
+        "avg": false,
         "current": true,
         "max": true,
         "min": false,
@@ -2937,7 +2956,7 @@
         "show": true,
         "sort": null,
         "sortDesc": null,
-        "total": false,
+        "total": true,
         "values": true
       },
       "lines": true,
@@ -2951,13 +2970,8 @@
       "renderer": "flot",
       "seriesOverrides": [
         {
-          "alias": "/:In$/",
-          "color": "#890f02",
+          "alias": "/Rx$/",
           "transform": "negative-Y"
-        },
-        {
-          "alias": "/Out$/",
-          "color": "#ea6460"
         }
       ],
       "spaceLength": 10,
@@ -2970,7 +2984,7 @@
           "groupBy": [
             {
               "params": [
-                "30s"
+                "$__interval"
               ],
               "type": "time"
             },
@@ -3012,7 +3026,7 @@
               },
               {
                 "params": [
-                  "Error:In"
+                  "Error Rx"
                 ],
                 "type": "alias"
               }
@@ -3036,7 +3050,7 @@
               },
               {
                 "params": [
-                  "Error:Out"
+                  "Error Tx"
                 ],
                 "type": "alias"
               }
@@ -3078,9 +3092,9 @@
       },
       "yaxes": [
         {
-          "decimals": 1,
+          "decimals": null,
           "format": "pps",
-          "label": null,
+          "label": "packets / second",
           "logBase": 1,
           "max": null,
           "min": null,
@@ -3106,8 +3120,8 @@
       "dashLength": 10,
       "dashes": false,
       "datasource": "${DS_UNIFI}",
-      "decimals": 2,
-      "description": "May show problems with your WAN interface.",
+      "decimals": null,
+      "description": "May show problems with your WAN interface. Rx on negative axis.",
       "editable": true,
       "error": false,
       "fill": 2,
@@ -3121,7 +3135,7 @@
       "isNew": true,
       "legend": {
         "alignAsTable": true,
-        "avg": true,
+        "avg": false,
         "current": true,
         "max": true,
         "min": false,
@@ -3129,7 +3143,7 @@
         "show": true,
         "sort": null,
         "sortDesc": null,
-        "total": false,
+        "total": true,
         "values": true
       },
       "lines": true,
@@ -3143,13 +3157,8 @@
       "renderer": "flot",
       "seriesOverrides": [
         {
-          "alias": "/:In$/",
-          "color": "#890f02",
+          "alias": "/:Rx$/",
           "transform": "negative-Y"
-        },
-        {
-          "alias": "/Out$/",
-          "color": "#ea6460"
         }
       ],
       "spaceLength": 10,
@@ -3162,7 +3171,7 @@
           "groupBy": [
             {
               "params": [
-                "30s"
+                "$__interval"
               ],
               "type": "time"
             },
@@ -3204,7 +3213,7 @@
               },
               {
                 "params": [
-                  "Drop:In"
+                  "Drop Rx"
                 ],
                 "type": "alias"
               }
@@ -3228,7 +3237,7 @@
               },
               {
                 "params": [
-                  "Drop:Out"
+                  "Drop Tx"
                 ],
                 "type": "alias"
               }
@@ -3270,9 +3279,9 @@
       },
       "yaxes": [
         {
-          "decimals": 1,
+          "decimals": null,
           "format": "pps",
-          "label": null,
+          "label": "packets / second",
           "logBase": 1,
           "max": null,
           "min": null,
@@ -3298,8 +3307,8 @@
       "dashLength": 10,
       "dashes": false,
       "datasource": "${DS_UNIFI}",
-      "decimals": 0,
-      "description": "PPS on the WAN interface, calculated in 30 second buckets.",
+      "decimals": null,
+      "description": "PPS on the WAN interface. Rx is on the negative axis.",
       "editable": true,
       "error": false,
       "fill": 1,
@@ -3335,13 +3344,8 @@
       "renderer": "flot",
       "seriesOverrides": [
         {
-          "alias": "/:In$/",
-          "color": "#f9d9f9",
+          "alias": "/Rx$/",
           "transform": "negative-Y"
-        },
-        {
-          "alias": "/Out$/",
-          "color": "#0a437c"
         }
       ],
       "spaceLength": 10,
@@ -3349,12 +3353,12 @@
       "steppedLine": false,
       "targets": [
         {
-          "alias": "$tag_name:$col",
+          "alias": "$tag_name $col",
           "dsType": "influxdb",
           "groupBy": [
             {
               "params": [
-                "1m"
+                "$__interval"
               ],
               "type": "time"
             },
@@ -3396,7 +3400,7 @@
               },
               {
                 "params": [
-                  "In"
+                  "Rx"
                 ],
                 "type": "alias"
               }
@@ -3420,7 +3424,7 @@
               },
               {
                 "params": [
-                  "Out"
+                  "Tx"
                 ],
                 "type": "alias"
               }
@@ -3463,9 +3467,9 @@
       },
       "yaxes": [
         {
-          "decimals": 1,
+          "decimals": null,
           "format": "pps",
-          "label": null,
+          "label": "packets / second",
           "logBase": 1,
           "max": null,
           "min": null,
@@ -3491,8 +3495,8 @@
       "dashLength": 10,
       "dashes": false,
       "datasource": "${DS_UNIFI}",
-      "decimals": 0,
-      "description": "PPS on the LAN interface, calculated in 30 second buckets.",
+      "decimals": null,
+      "description": "PPS on the LAN interface. Rx is on the negative axis.",
       "editable": true,
       "error": false,
       "fill": 1,
@@ -3528,13 +3532,8 @@
       "renderer": "flot",
       "seriesOverrides": [
         {
-          "alias": "/:In$/",
-          "color": "#2f575e",
+          "alias": "/Tx$/",
           "transform": "negative-Y"
-        },
-        {
-          "alias": "/Out$/",
-          "color": "#806eb7"
         }
       ],
       "spaceLength": 10,
@@ -3542,12 +3541,12 @@
       "steppedLine": false,
       "targets": [
         {
-          "alias": "$tag_name:$col",
+          "alias": "$tag_name $col",
           "dsType": "influxdb",
           "groupBy": [
             {
               "params": [
-                "1m"
+                "$__interval"
               ],
               "type": "time"
             },
@@ -3589,7 +3588,7 @@
               },
               {
                 "params": [
-                  "In"
+                  "Rx"
                 ],
                 "type": "alias"
               }
@@ -3613,7 +3612,7 @@
               },
               {
                 "params": [
-                  "Out"
+                  "Tx"
                 ],
                 "type": "alias"
               }
@@ -3656,9 +3655,9 @@
       },
       "yaxes": [
         {
-          "decimals": 1,
+          "decimals": null,
           "format": "pps",
-          "label": null,
+          "label": "packets / second",
           "logBase": 1,
           "max": null,
           "min": null,
@@ -3682,7 +3681,10 @@
   "refresh": "30s",
   "schemaVersion": 18,
   "style": "dark",
-  "tags": [],
+  "tags": [
+    "unifi",
+    "usg"
+  ],
   "templating": {
     "list": [
       {
@@ -3732,7 +3734,7 @@
     ]
   },
   "time": {
-    "from": "now-2h",
+    "from": "now-3h",
     "to": "now-5s"
   },
   "timepicker": {
@@ -3761,5 +3763,5 @@
   "timezone": "browser",
   "title": "UniFi USG Insights",
   "uid": "WX6RJOMik",
-  "version": 33
+  "version": 38
 }
