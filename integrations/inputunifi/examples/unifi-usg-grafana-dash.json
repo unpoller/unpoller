@@ -1,4 +1,58 @@
 {
+  "__inputs": [
+    {
+      "name": "DS_UNIFI",
+      "label": "Unifi",
+      "description": "",
+      "type": "datasource",
+      "pluginId": "influxdb",
+      "pluginName": "InfluxDB"
+    }
+  ],
+  "__requires": [
+    {
+      "type": "grafana",
+      "id": "grafana",
+      "name": "Grafana",
+      "version": "6.2.1"
+    },
+    {
+      "type": "panel",
+      "id": "grafana-clock-panel",
+      "name": "Clock",
+      "version": "0.1.0"
+    },
+    {
+      "type": "panel",
+      "id": "graph",
+      "name": "Graph",
+      "version": ""
+    },
+    {
+      "type": "datasource",
+      "id": "influxdb",
+      "name": "InfluxDB",
+      "version": "1.0.0"
+    },
+    {
+      "type": "panel",
+      "id": "singlestat",
+      "name": "Singlestat",
+      "version": ""
+    },
+    {
+      "type": "panel",
+      "id": "table",
+      "name": "Table",
+      "version": ""
+    },
+    {
+      "type": "panel",
+      "id": "text",
+      "name": "Text",
+      "version": ""
+    }
+  ],
   "annotations": {
     "list": [
       {
@@ -17,8 +71,8 @@
   "editable": true,
   "gnetId": 1486,
   "graphTooltip": 1,
-  "id": 9,
-  "iteration": 1559783436821,
+  "id": null,
+  "iteration": 1559859384864,
   "links": [],
   "panels": [
     {
@@ -39,7 +93,7 @@
     },
     {
       "columns": [],
-      "datasource": "Unifi",
+      "datasource": "${DS_UNIFI}",
       "editable": true,
       "error": false,
       "fontSize": "100%",
@@ -504,7 +558,7 @@
         "#3f2b5b",
         "#511749"
       ],
-      "datasource": "Unifi",
+      "datasource": "${DS_UNIFI}",
       "decimals": 3,
       "format": "dtdurations",
       "gauge": {
@@ -612,7 +666,7 @@
         "rgba(237, 129, 40, 0.89)",
         "#d44a3a"
       ],
-      "datasource": "Unifi",
+      "datasource": "${DS_UNIFI}",
       "decimals": 0,
       "format": "none",
       "gauge": {
@@ -723,7 +777,7 @@
         "rgba(237, 129, 40, 0.89)",
         "#d44a3a"
       ],
-      "datasource": "Unifi",
+      "datasource": "${DS_UNIFI}",
       "decimals": 1,
       "description": "",
       "format": "ms",
@@ -841,7 +895,7 @@
         "rgba(237, 129, 40, 0.89)",
         "#299c46"
       ],
-      "datasource": "Unifi",
+      "datasource": "${DS_UNIFI}",
       "decimals": 1,
       "description": "",
       "format": "Mbits",
@@ -959,7 +1013,7 @@
         "rgba(237, 129, 40, 0.89)",
         "#299c46"
       ],
-      "datasource": "Unifi",
+      "datasource": "${DS_UNIFI}",
       "decimals": 1,
       "description": "",
       "format": "Mbits",
@@ -1077,7 +1131,7 @@
         "rgba(237, 129, 40, 0.89)",
         "#d44a3a"
       ],
-      "datasource": "Unifi",
+      "datasource": "${DS_UNIFI}",
       "decimals": 1,
       "format": "percent",
       "gauge": {
@@ -1194,7 +1248,7 @@
         "rgba(237, 129, 40, 0.89)",
         "#d44a3a"
       ],
-      "datasource": "Unifi",
+      "datasource": "${DS_UNIFI}",
       "decimals": 1,
       "description": "",
       "format": "percent",
@@ -1311,7 +1365,7 @@
         "rgba(237, 129, 40, 0.89)",
         "#d44a3a"
       ],
-      "datasource": "Unifi",
+      "datasource": "${DS_UNIFI}",
       "decimals": 0,
       "format": "none",
       "gauge": {
@@ -1439,10 +1493,20 @@
       "offsetFromUtc": null,
       "offsetFromUtcMinutes": null,
       "options": {},
+      "refreshSettings": {
+        "syncWithDashboard": false
+      },
       "timeSettings": {
         "customFormat": "HH:mm:ss",
         "fontSize": "24px",
         "fontWeight": "normal"
+      },
+      "timezone": null,
+      "timezoneSettings": {
+        "fontSize": "12px",
+        "fontWeight": "normal",
+        "showTimezone": false,
+        "zoneFormat": "offsetAbbv"
       },
       "title": "Now",
       "type": "grafana-clock-panel"
@@ -1456,7 +1520,7 @@
         "rgba(237, 129, 40, 0.89)",
         "#d44a3a"
       ],
-      "datasource": "Unifi",
+      "datasource": "${DS_UNIFI}",
       "decimals": 0,
       "format": "none",
       "gauge": {
@@ -1563,7 +1627,7 @@
       "bars": false,
       "dashLength": 10,
       "dashes": false,
-      "datasource": "Unifi",
+      "datasource": "${DS_UNIFI}",
       "decimals": 2,
       "description": "",
       "editable": true,
@@ -1722,7 +1786,7 @@
     },
     {
       "columns": [],
-      "datasource": "Unifi",
+      "datasource": "${DS_UNIFI}",
       "fontSize": "90%",
       "gridPos": {
         "h": 7,
@@ -2483,7 +2547,7 @@
       "bars": false,
       "dashLength": 10,
       "dashes": false,
-      "datasource": "Unifi",
+      "datasource": "${DS_UNIFI}",
       "description": "Spikes on this graph that are missing from the LAN graph indicate gateway-originated traffic, like a scheduled speed test.",
       "editable": true,
       "error": false,
@@ -2666,7 +2730,7 @@
       "bars": false,
       "dashLength": 10,
       "dashes": false,
-      "datasource": "Unifi",
+      "datasource": "${DS_UNIFI}",
       "description": "Spikes on this graph that do not appear on the WAN graph indicate inter-VLAN-routing.",
       "editable": true,
       "error": false,
@@ -2849,7 +2913,7 @@
       "bars": false,
       "dashLength": 10,
       "dashes": false,
-      "datasource": "Unifi",
+      "datasource": "${DS_UNIFI}",
       "decimals": 2,
       "description": "May show problems with your WAN interface.",
       "editable": true,
@@ -3041,7 +3105,7 @@
       "bars": false,
       "dashLength": 10,
       "dashes": false,
-      "datasource": "Unifi",
+      "datasource": "${DS_UNIFI}",
       "decimals": 2,
       "description": "May show problems with your WAN interface.",
       "editable": true,
@@ -3233,7 +3297,7 @@
       "bars": false,
       "dashLength": 10,
       "dashes": false,
-      "datasource": "Unifi",
+      "datasource": "${DS_UNIFI}",
       "decimals": 0,
       "description": "PPS on the WAN interface, calculated in 30 second buckets.",
       "editable": true,
@@ -3426,7 +3490,7 @@
       "bars": false,
       "dashLength": 10,
       "dashes": false,
-      "datasource": "Unifi",
+      "datasource": "${DS_UNIFI}",
       "decimals": 0,
       "description": "PPS on the LAN interface, calculated in 30 second buckets.",
       "editable": true,
@@ -3623,11 +3687,8 @@
     "list": [
       {
         "allValue": null,
-        "current": {
-          "text": "All",
-          "value": "$__all"
-        },
-        "datasource": "Unifi",
+        "current": {},
+        "datasource": "${DS_UNIFI}",
         "definition": "show tag values from \"usg\" with key=\"site_name\"",
         "hide": 0,
         "includeAll": true,
@@ -3648,13 +3709,8 @@
       },
       {
         "allValue": null,
-        "current": {
-          "text": "gateway",
-          "value": [
-            "gateway"
-          ]
-        },
-        "datasource": "Unifi",
+        "current": {},
+        "datasource": "${DS_UNIFI}",
         "definition": "show tag values from \"usg\" with key=\"name\" where site_name =~ /$Site$/",
         "hide": 0,
         "includeAll": true,
