@@ -6,5 +6,7 @@ if [ "$1" = "upgrade" ] || [ "$1" = "1" ] ; then
   exit 0
 fi
 
-systemctl stop unifi-poller
-systemctl disable unifi-poller
+if [ -x "/bin/systemctl" ]; then
+  /bin/systemctl stop unifi-poller
+  /bin/systemctl disable unifi-poller
+fi
