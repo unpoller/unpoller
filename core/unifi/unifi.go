@@ -72,7 +72,7 @@ func (u *Unifi) GetClients(sites []Site) (*Clients, error) {
 			return nil, err
 		}
 		for i := range response.Data {
-			response.Data[i].SiteName = site.Name
+			response.Data[i].SiteName = site.Desc + " (" + site.Name + ")"
 		}
 		data = append(data, response.Data...)
 	}
@@ -91,22 +91,22 @@ func (u *Unifi) GetDevices(sites []Site) (*Devices, error) {
 		if err := u.GetData(devicePath, &response); err != nil {
 			return nil, err
 		}
-		loopDevices := u.parseDevices(response.Data, site.Name)
+		loopDevices := u.parseDevices(response.Data, site.Desc+" ("+site.Name+")")
 		// Add SiteName to each device asset.
 		for i := range loopDevices.UAPs {
 			loopDevices.UAPs[i].SiteName = site.Name
 			for j := range loopDevices.UAPs[i].VapTable {
-				loopDevices.UAPs[i].VapTable[j].SiteName = site.Name
+				loopDevices.UAPs[i].VapTable[j].SiteName = site.Desc + " (" + site.Name + ")"
 			}
 		}
 		for i := range loopDevices.USGs {
 			loopDevices.USGs[i].SiteName = site.Name
 			for j := range loopDevices.USGs[i].NetworkTable {
-				loopDevices.USGs[i].NetworkTable[j].SiteName = site.Name
+				loopDevices.USGs[i].NetworkTable[j].SiteName = site.Desc + " (" + site.Name + ")"
 			}
 		}
 		for i := range loopDevices.USWs {
-			loopDevices.USWs[i].SiteName = site.Name
+			loopDevices.USWs[i].SiteName = site.Desc + " (" + site.Name + ")"
 		}
 		devices.UAPs = append(devices.UAPs, loopDevices.UAPs...)
 		devices.USGs = append(devices.USGs, loopDevices.USGs...)
