@@ -5,7 +5,7 @@ Import these into Grafana to quickly visualize data from your devices.
 Created with Grafana 6.2.
 
 These dashboards require a few plugins.
-See the [Wiki](https://github.com/davidnewhall/unifi-poller/wiki/Grafana) for more info.
+See the [Grafana Wiki Article](https://github.com/davidnewhall/unifi-poller/wiki/Grafana) for more info.
 
 Keep in mind these dashboards are just examples. You should make an Example folder
 in Grafana to keep them in, and copy them to new dashboards that you want to change.
