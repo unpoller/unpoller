@@ -96,12 +96,15 @@ func (c *Config) CheckSites(controller *unifi.Unifi) error {
 		for _, site := range sites {
 			msg = append(msg, site.Name+" ("+site.Desc+")")
 		}
-		log.Printf("Found %d site(s) on controller: %v", len(msg), strings.Join(msg, ","))
+		log.Printf("Found %d site(s) on controller: %v", len(msg), strings.Join(msg, ", "))
+	}
+	if StringInSlice("all", c.Sites) {
+		return nil
 	}
 FIRST:
 	for _, s := range c.Sites {
 		for _, site := range sites {
-			if s == site.Name || s == "all" {
+			if s == site.Name {
 				continue FIRST
 			}
 		}
