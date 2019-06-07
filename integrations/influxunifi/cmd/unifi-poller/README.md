@@ -33,7 +33,9 @@ unifi-poller(1) -- Utility to poll UniFi Controller Metrics and store them in In
     `sites`          default: ["default"]
         This list of strings should represent the names of sites on the unifi
         controller that will be polled for data. Pass `all` in the list to
-        poll all sites.
+        poll all sites. On startup, the application prints out all site names
+        found in the controller; they're cryptic, but they have the human-name
+        next to them. The cryptic names go into the config file `sites` list.
 
     `interval`       default: 30s
         How often to poll the controller for updated client and device data.
