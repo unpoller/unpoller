@@ -1,4 +1,52 @@
 {
+  "__inputs": [
+    {
+      "name": "DS_UNIFI",
+      "label": "Unifi",
+      "description": "",
+      "type": "datasource",
+      "pluginId": "influxdb",
+      "pluginName": "InfluxDB"
+    }
+  ],
+  "__requires": [
+    {
+      "type": "grafana",
+      "id": "grafana",
+      "name": "Grafana",
+      "version": "6.2.1"
+    },
+    {
+      "type": "panel",
+      "id": "grafana-piechart-panel",
+      "name": "Pie Chart",
+      "version": "1.3.3"
+    },
+    {
+      "type": "panel",
+      "id": "graph",
+      "name": "Graph",
+      "version": ""
+    },
+    {
+      "type": "datasource",
+      "id": "influxdb",
+      "name": "InfluxDB",
+      "version": "1.0.0"
+    },
+    {
+      "type": "panel",
+      "id": "natel-discrete-panel",
+      "name": "Discrete",
+      "version": "0.0.9"
+    },
+    {
+      "type": "panel",
+      "id": "table",
+      "name": "Table",
+      "version": ""
+    }
+  ],
   "annotations": {
     "list": [
       {
@@ -15,17 +63,17 @@
   "editable": true,
   "gnetId": null,
   "graphTooltip": 1,
-  "id": 6,
-  "iteration": 1559783294182,
+  "id": null,
+  "iteration": 1559859351362,
   "links": [],
   "panels": [
     {
       "columns": [],
-      "datasource": "Unifi",
+      "datasource": "${DS_UNIFI}",
       "description": "",
       "fontSize": "80%",
       "gridPos": {
-        "h": 10,
+        "h": 13,
         "w": 12,
         "x": 0,
         "y": 0
@@ -202,11 +250,11 @@
     },
     {
       "columns": [],
-      "datasource": "Unifi",
+      "datasource": "${DS_UNIFI}",
       "description": "",
       "fontSize": "80%",
       "gridPos": {
-        "h": 10,
+        "h": 13,
         "w": 12,
         "x": 12,
         "y": 0
@@ -219,7 +267,7 @@
       "scroll": true,
       "showHeader": true,
       "sort": {
-        "col": 3,
+        "col": 8,
         "desc": true
       },
       "styles": [
@@ -371,7 +419,7 @@
         "label": "Others",
         "threshold": 0
       },
-      "datasource": "Unifi",
+      "datasource": "${DS_UNIFI}",
       "decimals": 0,
       "description": "",
       "fontSize": "70%",
@@ -380,7 +428,7 @@
         "h": 8,
         "w": 6,
         "x": 0,
-        "y": 10
+        "y": 13
       },
       "hideTimeOverride": true,
       "id": 9,
@@ -476,7 +524,7 @@
           "tags": []
         }
       ],
-      "timeFrom": "1h",
+      "timeFrom": null,
       "title": "Wifi Channels",
       "transparent": true,
       "type": "grafana-piechart-panel",
@@ -490,7 +538,7 @@
         "label": "Others",
         "threshold": 0
       },
-      "datasource": "Unifi",
+      "datasource": "${DS_UNIFI}",
       "decimals": 0,
       "description": "",
       "fontSize": "70%",
@@ -499,7 +547,7 @@
         "h": 8,
         "w": 6,
         "x": 6,
-        "y": 10
+        "y": 13
       },
       "hideTimeOverride": true,
       "id": 11,
@@ -558,7 +606,7 @@
           ]
         }
       ],
-      "timeFrom": "1h",
+      "timeFrom": null,
       "title": "AP Radio / Clients",
       "transparent": true,
       "type": "grafana-piechart-panel",
@@ -572,7 +620,7 @@
         "label": "Others",
         "threshold": 0
       },
-      "datasource": "Unifi",
+      "datasource": "${DS_UNIFI}",
       "decimals": 0,
       "description": "",
       "fontSize": "70%",
@@ -581,7 +629,7 @@
         "h": 8,
         "w": 6,
         "x": 12,
-        "y": 10
+        "y": 13
       },
       "hideTimeOverride": true,
       "id": 12,
@@ -679,7 +727,7 @@
           ]
         }
       ],
-      "timeFrom": "1h",
+      "timeFrom": null,
       "title": "Client MAC OUI Breakdown",
       "transparent": true,
       "type": "grafana-piechart-panel",
@@ -693,7 +741,7 @@
         "label": "Others",
         "threshold": 0
       },
-      "datasource": "Unifi",
+      "datasource": "${DS_UNIFI}",
       "decimals": 0,
       "description": "",
       "fontSize": "70%",
@@ -702,7 +750,7 @@
         "h": 8,
         "w": 6,
         "x": 18,
-        "y": 10
+        "y": 13
       },
       "hideTimeOverride": true,
       "id": 14,
@@ -760,7 +808,7 @@
           ]
         }
       ],
-      "timeFrom": "1h",
+      "timeFrom": null,
       "title": "OS/Dev Class/ID Breakdown",
       "transparent": true,
       "type": "grafana-piechart-panel",
@@ -771,14 +819,14 @@
       "bars": false,
       "dashLength": 10,
       "dashes": false,
-      "datasource": "Unifi",
+      "datasource": "${DS_UNIFI}",
       "description": "Bandwidth usage per wireless devices as reported by the UAPs. Does not include amazon devices.",
       "fill": 1,
       "gridPos": {
         "h": 7,
         "w": 12,
         "x": 0,
-        "y": 18
+        "y": 21
       },
       "id": 3,
       "legend": {
@@ -966,14 +1014,14 @@
       "bars": false,
       "dashLength": 10,
       "dashes": false,
-      "datasource": "Unifi",
+      "datasource": "${DS_UNIFI}",
       "description": "Cameras TX / RX bytes per second (calculated in 1 minute buckets).",
       "fill": 0,
       "gridPos": {
         "h": 7,
         "w": 12,
         "x": 12,
-        "y": 18
+        "y": 21
       },
       "id": 15,
       "legend": {
@@ -1143,14 +1191,14 @@
       "bars": false,
       "dashLength": 10,
       "dashes": false,
-      "datasource": "Unifi",
+      "datasource": "${DS_UNIFI}",
       "description": "Amazon Devices TX / RX bytes per second (calculated in 30 second buckets).",
       "fill": 0,
       "gridPos": {
         "h": 9,
         "w": 12,
         "x": 0,
-        "y": 25
+        "y": 28
       },
       "id": 23,
       "legend": {
@@ -1444,14 +1492,14 @@
       "bars": false,
       "dashLength": 10,
       "dashes": false,
-      "datasource": "Unifi",
+      "datasource": "${DS_UNIFI}",
       "description": "Wired TX / RX bytes per second (calculated in 30 second buckets). Does not include amazon and camera devices. Unaffected by the AP setting.",
       "fill": 0,
       "gridPos": {
         "h": 9,
         "w": 12,
         "x": 12,
-        "y": 25
+        "y": 28
       },
       "id": 2,
       "legend": {
@@ -1650,7 +1698,7 @@
         }
       ],
       "crosshairColor": "#8F070C",
-      "datasource": "Unifi",
+      "datasource": "${DS_UNIFI}",
       "description": "Shows which wireless radio a client is connected to. Setting AP does not change this.",
       "display": "timeline",
       "expandFromQueryS": 0,
@@ -1659,7 +1707,7 @@
         "h": 9,
         "w": 12,
         "x": 0,
-        "y": 34
+        "y": 37
       },
       "highlightOnMouseover": false,
       "id": 17,
@@ -1815,7 +1863,7 @@
         }
       ],
       "crosshairColor": "#8F070C",
-      "datasource": "Unifi",
+      "datasource": "${DS_UNIFI}",
       "description": "Shows IPs assigned to non-static clients.",
       "display": "timeline",
       "expandFromQueryS": 0,
@@ -1824,7 +1872,7 @@
         "h": 9,
         "w": 12,
         "x": 12,
-        "y": 34
+        "y": 37
       },
       "highlightOnMouseover": false,
       "id": 18,
@@ -1963,13 +2011,13 @@
       "bars": false,
       "dashLength": 10,
       "dashes": false,
-      "datasource": "Unifi",
+      "datasource": "${DS_UNIFI}",
       "fill": 0,
       "gridPos": {
         "h": 9,
         "w": 12,
         "x": 0,
-        "y": 43
+        "y": 46
       },
       "id": 7,
       "legend": {
@@ -1982,7 +2030,7 @@
         "min": true,
         "rightSide": true,
         "show": true,
-        "sort": "current",
+        "sort": "min",
         "sortDesc": true,
         "total": false,
         "values": true
@@ -2102,13 +2150,13 @@
       "bars": false,
       "dashLength": 10,
       "dashes": false,
-      "datasource": "Unifi",
+      "datasource": "${DS_UNIFI}",
       "fill": 0,
       "gridPos": {
         "h": 9,
         "w": 12,
         "x": 12,
-        "y": 43
+        "y": 46
       },
       "id": 10,
       "legend": {
@@ -2241,13 +2289,13 @@
       "bars": false,
       "dashLength": 10,
       "dashes": false,
-      "datasource": "Unifi",
+      "datasource": "${DS_UNIFI}",
       "fill": 0,
       "gridPos": {
         "h": 8,
         "w": 12,
         "x": 0,
-        "y": 52
+        "y": 55
       },
       "id": 6,
       "legend": {
@@ -2380,14 +2428,14 @@
       "bars": false,
       "dashLength": 10,
       "dashes": false,
-      "datasource": "Unifi",
+      "datasource": "${DS_UNIFI}",
       "description": "",
       "fill": 0,
       "gridPos": {
         "h": 8,
         "w": 12,
         "x": 12,
-        "y": 52
+        "y": 55
       },
       "id": 19,
       "legend": {
@@ -2521,11 +2569,8 @@
     "list": [
       {
         "allValue": null,
-        "current": {
-          "text": "All",
-          "value": "$__all"
-        },
-        "datasource": "Unifi",
+        "current": {},
+        "datasource": "${DS_UNIFI}",
         "definition": "show tag values from \"clients\" with key=\"site_name\"",
         "hide": 0,
         "includeAll": true,
@@ -2546,14 +2591,8 @@
       },
       {
         "allValue": null,
-        "current": {
-          "tags": [],
-          "text": "All",
-          "value": [
-            "$__all"
-          ]
-        },
-        "datasource": "Unifi",
+        "current": {},
+        "datasource": "${DS_UNIFI}",
         "definition": "show tag values from \"clients\" with key=\"ap_mac\" where  site_name =~ /$Site$/",
         "hide": 0,
         "includeAll": true,
@@ -2574,13 +2613,8 @@
       },
       {
         "allValue": null,
-        "current": {
-          "text": "All",
-          "value": [
-            "$__all"
-          ]
-        },
-        "datasource": "Unifi",
+        "current": {},
+        "datasource": "${DS_UNIFI}",
         "definition": "show tag values from \"clients\" with key=\"name\" where  site_name =~ /$Site$/",
         "hide": 0,
         "includeAll": true,
@@ -2628,7 +2662,7 @@
     ]
   },
   "timezone": "",
-  "title": "Unifi Clients",
+  "title": "Unifi Client Insights",
   "uid": "YVR23BZiz",
-  "version": 45
+  "version": 48
 }
