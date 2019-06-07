@@ -1,6 +1,6 @@
 # Grafana Dashboards & Examples
 
-This folder contains 3 grafana dashboards to get you started with the new data pool.
+This folder contains 4 grafana dashboards to get you started with the new data pool.
 Import these into Grafana to quickly visualize data from your devices.
 Created with Grafana 6.2.
 

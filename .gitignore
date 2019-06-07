@@ -5,10 +5,10 @@
 /unifi-poller*.deb
 /unifi-poller*.rpm
 /unifi-poller*.pkg
+/unifi-poller.macos
+/unifi-poller.linux
 /vendor
 .DS_Store
 *~
 /package_build_*
 /release
-/unifi-poller.macos
-/unifi-poller.linux
