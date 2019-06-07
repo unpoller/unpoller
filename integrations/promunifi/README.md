@@ -83,6 +83,12 @@ select multiple to put specific stats side-by-side.
 
 ![image](examples/unifi-uap-dashboard.png?raw=true)
 
+The USW / Switch Dashboard is pretty big with one data-filled section per selected port.
+You can drill down into specific sites, switches, and ports. Compare ports in different
+sites side-by-side. So easy! This screenshot barely does it justice.
+
+![image](examples/unifi-usw-dashboard.png?raw=true)
+
 
 ## Copyright & License
 - Copyright © 2016 Garrett Bjerkhoel.
