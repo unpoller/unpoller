@@ -82,7 +82,7 @@ $(BINARY)-$(VERSION).pkg: check_fpm package_build_osx
 		--name $(BINARY) \
 		--version $(VERSION) \
 		--iteration $(ITERATION) \
-		--after-install scripts/after-install-osx.sh \
+		--after-install scripts/after-install.sh \
 		--osxpkg-identifier-prefix com.github.davidnewhall \
 		--license MIT \
 		--url $(URL) \
