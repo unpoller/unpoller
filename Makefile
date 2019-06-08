@@ -98,7 +98,7 @@ $(BINARY)-$(VERSION).pkg: check_fpm package_build_osx
 package_build_osx: man macos
 	# Building package environment for macOS.
 	mkdir -p $@/usr/local/bin $@/usr/local/etc/$(BINARY) $@/Library/LaunchAgents
-	mkdir -p $@/usr/local/share/man/man1 $@/usr/local/share/doc/$(BINARY) $@/usr/local/var/log
+	mkdir -p $@/usr/local/share/man/man1 $@/usr/local/share/doc/$(BINARY) $@/usr/local/var/log/unifi-poller
 	# Copying the binary, config file and man page into the env.
 	cp $(BINARY).macos $@/usr/local/bin/$(BINARY)
 	cp *.1.gz $@/usr/local/share/man/man1
@@ -144,6 +144,7 @@ install:
 # If you installed with `make install` run `make uninstall` before installing a binary package.
 # This will remove the package install from macOS, it will not remove a package install from Linux.
 uninstall:
+	@echo "  ==> You must run make uninstall as root on Linux. Recommend not running as root on macOS."
 	[ -x /bin/systemctl ] && /bin/systemctl disable $(BINARY) || true
 	[ -x /bin/systemctl ] && /bin/systemctl stop $(BINARY) || true
 	[ -x /bin/launchctl ] && [ -f ~/Library/LaunchAgents/com.github.davidnewhall.$(BINARY).plist ] \
@@ -152,10 +153,10 @@ uninstall:
 		&& /bin/launchctl unload /Library/LaunchAgents/com.github.davidnewhall.$(BINARY).plist || true
 	rm -rf /usr/local/{etc,bin,share/doc}/$(BINARY)
 	rm -f ~/Library/LaunchAgents/com.github.davidnewhall.$(BINARY).plist
+	rm -f /Library/LaunchAgents/com.github.davidnewhall.$(BINARY).plist || true
 	rm -f /etc/systemd/system/$(BINARY).service /usr/local/share/man/man1/$(BINARY).1.gz
 	[ -x /bin/systemctl ] && /bin/systemctl --system daemon-reload || true
-	@[ -f /Library/LaunchAgents/com.github.davidnewhall.$(BINARY).plist ] \
-		&& echo "  ==> Delete this file manually: sudo rm -f /Library/LaunchAgents/com.github.davidnewhall.$(BINARY).plist" || true
+	@[ -f /Library/LaunchAgents/com.github.davidnewhall.$(BINARY).plist ] && echo "  ==> Unload and delete this file manually:" && echo "  sudo launchctl unload /Library/LaunchAgents/com.github.davidnewhall.$(BINARY).plist" && echo "  sudo rm -f /Library/LaunchAgents/com.github.davidnewhall.$(BINARY).plist" || true
 
 # Don't run this unless you're ready to debug untested vendored dependencies.
 deps:
