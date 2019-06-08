@@ -9,18 +9,21 @@ if [ "$(uname -s)" = "Darwin" ]; then
     cp /usr/local/etc/unifi-poller/up.conf.example /usr/local/etc/unifi-poller/up.conf
   fi
 
-  # Allow admins to change the configuration and write logs.
-  chgrp -R admin /usr/local/etc/unifi-poller
-  chmod -R g+wr /usr/local/etc/unifi-poller
+  # Allow admins to change the configuration and delete the docs.
+  chgrp -R admin /usr/local/etc/unifi-poller /usr/local/share/doc/unifi-poller
+  chmod -R g+wr /usr/local/etc/unifi-poller  /usr/local/share/doc/unifi-poller
 
-  # Make sure admins can write logs.
-  chgrp admin /usr/local/var/log
-  chmod g=rwx /usr/local/var/log
+  # Make sure admins can delete logs.
+  chown -R nobody:admin /usr/local/var/log/unifi-poller
+  chmod 0775 /usr/local/var/log/unifi-poller
+  chmod -R g+rw /usr/local/var/log/unifi-poller
 
-  # This starts it as root. no no no .... not sure how to fix that.
-  # launchctl load /Library/LaunchAgents/com.github.davidnewhall.unifi-poller.plist
+  # Restart the service - this starts the application as user nobody.
+  launchctl unload /Library/LaunchAgents/com.github.davidnewhall.unifi-poller.plist
+  launchctl load /Library/LaunchAgents/com.github.davidnewhall.unifi-poller.plist
 
 elif [ -x "/bin/systemctl" ]; then
+  # Reload and restart - this starts the application as user nobody.
   /bin/systemctl daemon-reload
   /bin/systemctl enable unifi-poller
   /bin/systemctl restart unifi-poller
