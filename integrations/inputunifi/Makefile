@@ -104,7 +104,7 @@ package_build_osx: man macos
 	cp $(BINARY).macos $@/usr/local/bin/$(BINARY)
 	cp *.1.gz $@/usr/local/share/man/man1
 	cp examples/*.conf.example $@/usr/local/etc/$(BINARY)/
-	cp examples/* $@/usr/local/share/doc/$(BINARY)/
+	cp examples/{*dash.json,up.conf.example} $@/usr/local/share/doc/$(BINARY)/
 	cp init/launchd/com.github.davidnewhall.$(BINARY).plist $@/Library/LaunchAgents/
 
 # Build an environment that can be packaged for linux.
@@ -117,7 +117,7 @@ package_build_linux: man linux
 	cp *.1.gz $@/usr/share/man/man1
 	cp examples/*.conf.example $@/etc/$(BINARY)/
 	cp examples/up.conf.example $@/etc/$(BINARY)/up.conf
-	cp examples/* $@/usr/share/doc/$(BINARY)/
+	cp examples/{*dash.json,up.conf.example} $@/usr/share/doc/$(BINARY)/
 	cp init/systemd/$(BINARY).service $@/lib/systemd/system/
 
 check_fpm:
