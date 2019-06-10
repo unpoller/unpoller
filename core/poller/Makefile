@@ -4,7 +4,7 @@ MAINT="david at sleepers dot pro"
 DESC="This daemon polls a Unifi controller at a short interval and stores the collected metric data in an Influx Database."
 PACKAGE:=./cmd/$(BINARY)
 VERSION:=$(shell git tag -l --merged | tail -n1 | tr -d v)
-ITERATION:=$(shell git rev-list --count master)
+ITERATION:=$(shell git rev-list --count HEAD)
 
 all: man build
 
