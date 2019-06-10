@@ -79,7 +79,7 @@ func parseFlags() string {
 	configFile := flag.StringP("config", "c", defaultConfFile, "Poller Config File (TOML Format)")
 	version := flag.BoolP("version", "v", false, "Print the version and exit")
 	if flag.Parse(); *version {
-		fmt.Println("unifi-poller version:", Version)
+		fmt.Printf("unifi-poller v%s\n", Version)
 		os.Exit(0) // don't run anything else.
 	}
 	return *configFile
@@ -92,7 +92,7 @@ func (c *Config) CheckSites(controller *unifi.Unifi) error {
 		return err
 	}
 	if !c.Quiet {
-		msg := make([]string, 0)
+		msg := []string{}
 		for _, site := range sites {
 			msg = append(msg, site.Name+" ("+site.Desc+")")
 		}
