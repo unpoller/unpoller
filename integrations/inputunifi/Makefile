@@ -54,6 +54,7 @@ $(BINARY)-$(VERSION)-$(ITERATION).x86_64.rpm: check_fpm package_build_linux
 	@echo "Building 'rpm' package for $(BINARY) version '$(VERSION)-$(ITERATION)'."
 	fpm -s dir -t rpm \
 		--name $(BINARY) \
+		--rpm-os linux \
 		--version $(VERSION) \
 		--iteration $(ITERATION) \
 		--after-install scripts/after-install.sh \
