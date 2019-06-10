@@ -37,12 +37,6 @@ for making this dashboard; it gave me a fantastic start to making my own.
 
 # What now...
 
-- Better Linux support and testing
-
-I only, personally, run this on a Mac 10.13.something. I know others are using
-Linux and it's working, but I need more feedback. Does the unit file work? Are
-you able to stop and start the service? Does the Makefile do the right things?
-
 - Are there other devices that need to be included?
 
 I have: switch, router, access point. Three total, and the type structs are
@@ -55,18 +49,16 @@ Issue and lets discuss.
 - Better Installation instructions.
 
 If you're a nerd you can probably figure it out. I'd still like some pretty
-pictures and maybe even a Twitch VOD.
+pictures and maybe even a Twitch VOD. Update: The installation has been
+simplified tremendously with the
+[creation of binary packages](https://github.com/davidnewhall/unifi-poller/wiki/Package-Install).
+More to come!
 
 - Radios, Frequencies, Interfaces, vAPs
 
 My access points only seem to have two radios, one interface and vAP per radio.
 I'm not sure if the graphs, as-is, provide enough insight into APs with other
 configurations. Help me figure that out?
-
-- It possibly loses access to the controller at some point.
-
-I noticed metrics stop updating after a while. I think the new code will help
-isolate why this happens. We may need to issue a reconnect and get a new cookie.
 
 # What's it look like?
 

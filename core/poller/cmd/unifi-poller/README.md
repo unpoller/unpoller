@@ -1,9 +1,9 @@
-unifi-poller(1) -- Utility to poll Unifi Metrics and drop them into InfluxDB
+unifi-poller(1) -- Utility to poll UniFi Controller Metrics and store them in InfluxDB
 ===
 
 ## SYNOPSIS
 
-`unifi-poller -c /usr/local/etc/unifi-poller.conf`
+`unifi-poller -c /etc/unifi-poller.conf`
 
 ## DESCRIPTION
 
@@ -26,14 +26,16 @@ unifi-poller(1) -- Utility to poll Unifi Metrics and drop them into InfluxDB
 
 ## CONFIGURATION
 
-* Config File Default Location: /usr/local/etc/unifi-poller/up.conf
+* Config File Default Location: /etc/unifi-poller/up.conf
 
 `Config File Parameters`
 
     `sites`          default: ["default"]
         This list of strings should represent the names of sites on the unifi
         controller that will be polled for data. Pass `all` in the list to
-        poll all sites.
+        poll all sites. On startup, the application prints out all site names
+        found in the controller; they're cryptic, but they have the human-name
+        next to them. The cryptic names go into the config file `sites` list.
 
     `interval`       default: 30s
         How often to poll the controller for updated client and device data.
@@ -94,10 +96,10 @@ Example Use: `1m`, `5h`, `100ms`, `17s`, `1s45ms`, `1m3s`
 
 * Garrett Bjerkhoel (original code) ~ 2016
 * David Newhall II (rewritten) ~ 4/20/2018
+* David Newhall II (still going) ~ 6/7/2019
 
 ## LOCATION
 
 * https://github.com/davidnewhall/unifi-poller
-* /usr/local/bin/unifi-poller
-* config-file: /usr/local/etc/unifi-poller/up.conf
+* UniFi Library: https://github.com/golift/unifi
 * previously: https://github.com/dewski/unifi
