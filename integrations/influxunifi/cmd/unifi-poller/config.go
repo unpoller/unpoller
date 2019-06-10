@@ -7,7 +7,7 @@ var Version = "development"
 
 const (
 	// App defaults in case they're missing from the config.
-	defaultConfFile = "/usr/local/etc/unifi-poller/up.conf"
+	defaultConfFile = "/etc/unifi-poller/up.conf"
 	defaultInterval = 30 * time.Second
 	defaultInfxDb   = "unifi"
 	defaultInfxUser = "unifi"

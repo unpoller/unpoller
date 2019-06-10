@@ -139,7 +139,7 @@ func GetConfig(configFile string) (Config, error) {
 
 // PollUnifiController runs forever, polling and pushing.
 func (c *Config) PollUnifiController(controller *unifi.Unifi, infdb influx.Client) {
-	log.Println("[INFO] Everyting checks out! Beginning Poller Routine.")
+	log.Println("[INFO] Everything checks out! Beginning Poller Routine.")
 	ticker := time.NewTicker(c.Interval.value)
 
 	for range ticker.C {
