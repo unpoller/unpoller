@@ -162,18 +162,17 @@ install: man readme $(BINARY)
 	@echo If you wish to install the application manually on Linux, check out the wiki: https://github.com/davidnewhall/unifi-poller/wiki/Installation
 	@echo -  Otherwise, build and install a package: make rpm -or- make deb
 	@echo See the Package Install wiki for more info: https://github.com/davidnewhall/unifi-poller/wiki/Package-Install
-	@[ "$$(uname)" = "Darwin" ] || (echo "Unable to continue, not a Mac." && exit)
-	@[ "$(PREFIX)" != "" ] || (echo "Unable to continue, PREFIX not set. Use: make install PREFIX=/usr/local" && exit)
-	mkdir -p $(PREFIX)/bin $(PREFIX)/etc/$(BINARY) $(PREFIX)/var/log/unifi-poller
-	mkdir -p $(PREFIX)/share/man/man1 $(PREFIX)/share/doc/$(BINARY)/examples
+	@[ "$$(uname)" = "Darwin" ] || (echo "Unable to continue, not a Mac." && false)
+	@[ "$(PREFIX)" != "" ] || (echo "Unable to continue, PREFIX not set. Use: make install PREFIX=/usr/local" && false)
 	# Copying the binary, config file, unit file, and man page into the env.
-	cp $(BINARY) $(PREFIX)/bin/$(BINARY)
-	cp *.1.gz $(PREFIX)/share/man/man1
-	cp examples/*.conf.example $(PREFIX)/etc/$(BINARY)/
-	cp examples/up.conf.example $(PREFIX)/etc/$(BINARY)/up.conf
-	cp *.html examples/{*dash.json,up.conf.example} $(PREFIX)/share/doc/$(BINARY)/
+	/usr/bin/install -m 0755 -d $(PREFIX)/bin $(PREFIX)/share/man/man1 $(PREFIX)/etc/$(BINARY) $(PREFIX)/share/doc/$(BINARY)/examples
+	/usr/bin/install -m 0755 -cp $(BINARY) $(PREFIX)/bin/$(BINARY)
+	/usr/bin/install -m 0644 -cp $(BINARY).1.gz $(PREFIX)/share/man/man1
+	/usr/bin/install -m 0644 -cp examples/up.conf.example $(PREFIX)/etc/$(BINARY)/
+	[ -f $(PREFIX)/etc/$(BINARY)/up.conf ] || /usr/bin/install -m 0644 -cp  examples/up.conf.example $(PREFIX)/etc/$(BINARY)/up.conf
+	/usr/bin/install -m 0644 -cp *.html examples/{*dash.json,up.conf.example} $(PREFIX)/share/doc/$(BINARY)/
 	# These go to their own folder so the img src in the html pages continue to work.
-	cp examples/*.png $(PREFIX)/share/doc/$(BINARY)/examples
+	/usr/bin/install -m 0644 -cp examples/*.png $(PREFIX)/share/doc/$(BINARY)/examples
 
 # If you installed with `make install` run `make uninstall` before installing a binary package.
 # This will remove the package install from macOS, it will not remove a package install from Linux.
