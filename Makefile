@@ -1,5 +1,5 @@
 BINARY:=unifi-poller
-URL=https://github.com/davidnewhall/unifi-poller
+URL:=https://github.com/davidnewhall/$(BINARY)
 MAINT=David Newhall II <david at sleepers dot pro>
 DESC=This daemon polls a Unifi controller at a short interval and stores the collected metric data in an Influx Database.
 PACKAGE:=./cmd/$(BINARY)
@@ -48,7 +48,6 @@ readme: README.html
 README.html: md2roff
 	# This turns README.md into README.html
 	./md2roff --manual $(BINARY) --version $(VERSION) --date "$$(date)" README.md
-	@rm -f README	# Delete useless "man" formatted version.
 
 # Binaries
 
@@ -146,10 +145,11 @@ package_build_linux: readme man linux
 check_fpm:
 	@fpm --version > /dev/null || (echo "FPM missing. Install FPM: https://fpm.readthedocs.io/en/latest/installing.html" && false)
 
+# This builds a Homebrew formula file that can be used to install this app from source.
 formula: $(BINARY).rb
 v$(VERSION).tar.gz.sha256:
 	# Calculate the SHA from the Github source file.
-	curl -sL https://github.com/davidnewhall/unifi-poller/archive/v$(VERSION).tar.gz | openssl dgst -sha256 | tee v$(VERSION).tar.gz.sha256
+	curl -sL $(URL)/archive/v$(VERSION).tar.gz | openssl dgst -sha256 | tee v$(VERSION).tar.gz.sha256
 $(BINARY).rb: v$(VERSION).tar.gz.sha256
 	# Creating formula from template using sed.
 	sed "s/{{Version}}/$(VERSION)/g;s/{{SHA256}}/$$(<v$(VERSION).tar.gz.sha256)/g;s/{{Desc}}/$(DESC)/g;s%{{URL}}%$(URL)%g" templates/$(BINARY).rb.tmpl | tee $(BINARY).rb
