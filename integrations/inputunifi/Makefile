@@ -16,20 +16,23 @@ release: clean test $(BINARY)-$(VERSION)-$(ITERATION).x86_64.rpm $(BINARY)_$(VER
 	gzip -9 $(BINARY).macos
 	mv $(BINARY)-$(VERSION)-$(ITERATION).x86_64.rpm $(BINARY)_$(VERSION)-$(ITERATION)_amd64.deb \
 		$(BINARY)-$(VERSION).pkg $(BINARY).macos.gz $(BINARY).linux.gz release/
+	openssl dgst -sha256 release/* | tee release/$(BINARY)_checksums_$(VERSION)-$(ITERATION).txt
 
 # Delete all build assets.
 clean:
 	# Cleaning up.
 	rm -f $(BINARY){.macos,.linux,.1,}{,.gz}
 	rm -f $(BINARY){_,-}*.{deb,rpm,pkg}
-	rm -rf package_build_* release
+	rm -rf package_build_* release cmd/unifi-poller/README{,.html}
 
-# Build a man page from a markdown file using ronn.
+# Build a man page from a markdown file using md2roff.
 man: $(BINARY).1.gz
 $(BINARY).1.gz:
-	# Building man page.
-	@ronn --version > /dev/null || (echo "Ronn missing. Install ronn: $(URL)/wiki/Ronn" && false)
-	ronn < "$(PACKAGE)/README.md" | gzip -9 > "$(BINARY).1.gz"
+	# Building man page. Build dependency first: md2roff
+	go build -o ./md2roff github.com/github/hub/md2roff-bin
+	./md2roff --manual $(BINARY) --version $(VERSION) --date "$$(date)" cmd/unifi-poller/README.md
+	gzip -9nc cmd/unifi-poller/README > unifi-poller.1.gz
+	rm ./md2roff
 
 # Binaries
 
