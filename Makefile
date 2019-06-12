@@ -30,6 +30,7 @@ clean:
 
 # md2roff is needed to build the man file and html pages from the READMEs.
 md2roff:
+	go get -u github.com/github/hub/md2roff-bin
 	go build -o ./md2roff github.com/github/hub/md2roff-bin
 
 # Build a man page from a markdown file using md2roff.
@@ -155,13 +156,24 @@ lint:
 	golangci-lint run --enable-all -D gochecknoglobals
 
 # Deprecated.
-install:
-	@echo -  Local installation with the Makefile is no longer possible.
-	@echo If you wish to install the application manually, check out the wiki: \
-	https://github.com/davidnewhall/unifi-poller/wiki/Installation
-	@echo -  Otherwise, build and install a package: make rpm, make deb, make osxpkg
-	@echo See the Package Install wiki for more info: \
-	https://github.com/davidnewhall/unifi-poller/wiki/Package-Install
+install: man readme $(BINARY)
+	@echo -  Done Building!  -
+	@echo -  Local installation with the Makefile is only supported on macOS.
+	@echo If you wish to install the application manually on Linux, check out the wiki: https://github.com/davidnewhall/unifi-poller/wiki/Installation
+	@echo -  Otherwise, build and install a package: make rpm -or- make deb
+	@echo See the Package Install wiki for more info: https://github.com/davidnewhall/unifi-poller/wiki/Package-Install
+	@[ "$$(uname)" = "Darwin" ] || (echo "Unable to continue, not a Mac." && exit)
+	@[ "$(PREFIX)" != "" ] || (echo "Unable to continue, PREFIX not set. Use: make install PREFIX=/usr/local" && exit)
+	mkdir -p $(PREFIX)/bin $(PREFIX)/etc/$(BINARY) $(PREFIX)/var/log/unifi-poller
+	mkdir -p $(PREFIX)/share/man/man1 $(PREFIX)/share/doc/$(BINARY)/examples
+	# Copying the binary, config file, unit file, and man page into the env.
+	cp $(BINARY) $(PREFIX)/bin/$(BINARY)
+	cp *.1.gz $(PREFIX)/share/man/man1
+	cp examples/*.conf.example $(PREFIX)/etc/$(BINARY)/
+	cp examples/up.conf.example $(PREFIX)/etc/$(BINARY)/up.conf
+	cp *.html examples/{*dash.json,up.conf.example} $(PREFIX)/share/doc/$(BINARY)/
+	# These go to their own folder so the img src in the html pages continue to work.
+	cp examples/*.png $(PREFIX)/share/doc/$(BINARY)/examples
 
 # If you installed with `make install` run `make uninstall` before installing a binary package.
 # This will remove the package install from macOS, it will not remove a package install from Linux.
