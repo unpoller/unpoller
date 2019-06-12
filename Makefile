@@ -1,3 +1,6 @@
+# This Makefile is written as generic as possible.
+# Setting these variables and creating the necesarry paths in your github repo will make this file work.
+#
 BINARY:=unifi-poller
 URL:=https://github.com/davidnewhall/$(BINARY)
 MAINT=David Newhall II <david at sleepers dot pro>
@@ -7,6 +10,8 @@ ifeq ($(VERSION),)
 	VERSION:=$(shell git tag -l --merged | tail -n1 | tr -d v||echo development)
 endif
 ITERATION:=$(shell git rev-list --count HEAD||echo 0)
+OSX_PKG_PREFIX=com.github.davidnewhall
+GOLANGCI_LINT_ARGS=--enable-all -D gochecknoglobals
 
 all: man build
 
@@ -39,7 +44,7 @@ md2roff:
 man: $(BINARY).1.gz
 $(BINARY).1.gz: md2roff
 	# Building man page. Build dependency first: md2roff
-	./md2roff --manual $(BINARY) --version $(VERSION) --date "$$(date)" cmd/unifi-poller/README.md
+	./md2roff --manual $(BINARY) --version $(VERSION) --date "$$(date)" cmd/$(BINARY)/README.md
 	gzip -9nc cmd/$(BINARY)/README > $(BINARY).1.gz
 	mv cmd/$(BINARY)/README.html $(BINARY)_manual.html
 
@@ -106,7 +111,7 @@ $(BINARY)-$(VERSION).pkg: check_fpm package_build_osx
 		--version $(VERSION) \
 		--iteration $(ITERATION) \
 		--after-install scripts/after-install.sh \
-		--osxpkg-identifier-prefix com.github.davidnewhall \
+		--osxpkg-identifier-prefix $(OSX_PKG_PREFIX) \
 		--license MIT \
 		--url $(URL) \
 		--maintainer "$(MAINT)" \
@@ -117,7 +122,7 @@ $(BINARY)-$(VERSION).pkg: check_fpm package_build_osx
 package_build_osx: readme man macos
 	# Building package environment for macOS.
 	mkdir -p $@/usr/local/bin $@/usr/local/etc/$(BINARY) $@/Library/LaunchAgents
-	mkdir -p $@/usr/local/share/man/man1 $@/usr/local/share/doc/$(BINARY)/examples $@/usr/local/var/log/unifi-poller
+	mkdir -p $@/usr/local/share/man/man1 $@/usr/local/share/doc/$(BINARY)/examples $@/usr/local/var/log/$(BINARY)
 	# Copying the binary, config file and man page into the env.
 	cp $(BINARY).macos $@/usr/local/bin/$(BINARY)
 	cp *.1.gz $@/usr/local/share/man/man1
@@ -125,7 +130,7 @@ package_build_osx: readme man macos
 	cp *.html examples/{*dash.json,up.conf.example} $@/usr/local/share/doc/$(BINARY)/
 	# These go to their own folder so the img src in the html pages continue to work.
 	cp examples/*.png $@/usr/local/share/doc/$(BINARY)/examples
-	cp init/launchd/com.github.davidnewhall.$(BINARY).plist $@/Library/LaunchAgents/
+	cp init/launchd/$(OSX_PKG_PREFIX).$(BINARY).plist $@/Library/LaunchAgents/
 
 # Build an environment that can be packaged for linux.
 package_build_linux: readme man linux
@@ -162,15 +167,15 @@ test: lint
 	go test -race -covermode=atomic $(PACKAGE)
 lint:
 	# Checking lint.
-	golangci-lint run --enable-all -D gochecknoglobals
+	golangci-lint run $(GOLANGCI_LINT_ARGS)
 
 # Deprecated.
 install: man readme $(BINARY)
 	@echo -  Done Building!  -
 	@echo -  Local installation with the Makefile is only supported on macOS.
-	@echo If you wish to install the application manually on Linux, check out the wiki: https://github.com/davidnewhall/unifi-poller/wiki/Installation
+	@echo If you wish to install the application manually on Linux, check out the wiki: $(URL)/wiki/Installation
 	@echo -  Otherwise, build and install a package: make rpm -or- make deb
-	@echo See the Package Install wiki for more info: https://github.com/davidnewhall/unifi-poller/wiki/Package-Install
+	@echo See the Package Install wiki for more info: $(URL)/wiki/Package-Install
 	@[ "$$(uname)" = "Darwin" ] || (echo "Unable to continue, not a Mac." && false)
 	@[ "$(PREFIX)" != "" ] || (echo "Unable to continue, PREFIX not set. Use: make install PREFIX=/usr/local" && false)
 	# Copying the binary, config file, unit file, and man page into the env.
@@ -189,16 +194,16 @@ uninstall:
 	@echo "  ==> You must run make uninstall as root on Linux. Recommend not running as root on macOS."
 	[ -x /bin/systemctl ] && /bin/systemctl disable $(BINARY) || true
 	[ -x /bin/systemctl ] && /bin/systemctl stop $(BINARY) || true
-	[ -x /bin/launchctl ] && [ -f ~/Library/LaunchAgents/com.github.davidnewhall.$(BINARY).plist ] \
-		&& /bin/launchctl unload ~/Library/LaunchAgents/com.github.davidnewhall.$(BINARY).plist || true
-	[ -x /bin/launchctl ] && [ -f /Library/LaunchAgents/com.github.davidnewhall.$(BINARY).plist ] \
-		&& /bin/launchctl unload /Library/LaunchAgents/com.github.davidnewhall.$(BINARY).plist || true
+	[ -x /bin/launchctl ] && [ -f ~/Library/LaunchAgents/$(OSX_PKG_PREFIX).$(BINARY).plist ] \
+		&& /bin/launchctl unload ~/Library/LaunchAgents/$(OSX_PKG_PREFIX).$(BINARY).plist || true
+	[ -x /bin/launchctl ] && [ -f /Library/LaunchAgents/$(OSX_PKG_PREFIX).$(BINARY).plist ] \
+		&& /bin/launchctl unload /Library/LaunchAgents/$(OSX_PKG_PREFIX).$(BINARY).plist || true
 	rm -rf /usr/local/{etc,bin,share/doc}/$(BINARY)
-	rm -f ~/Library/LaunchAgents/com.github.davidnewhall.$(BINARY).plist
-	rm -f /Library/LaunchAgents/com.github.davidnewhall.$(BINARY).plist || true
+	rm -f ~/Library/LaunchAgents/$(OSX_PKG_PREFIX).$(BINARY).plist
+	rm -f /Library/LaunchAgents/$(OSX_PKG_PREFIX).$(BINARY).plist || true
 	rm -f /etc/systemd/system/$(BINARY).service /usr/local/share/man/man1/$(BINARY).1.gz
 	[ -x /bin/systemctl ] && /bin/systemctl --system daemon-reload || true
-	@[ -f /Library/LaunchAgents/com.github.davidnewhall.$(BINARY).plist ] && echo "  ==> Unload and delete this file manually:" && echo "  sudo launchctl unload /Library/LaunchAgents/com.github.davidnewhall.$(BINARY).plist" && echo "  sudo rm -f /Library/LaunchAgents/com.github.davidnewhall.$(BINARY).plist" || true
+	@[ -f /Library/LaunchAgents/$(OSX_PKG_PREFIX).$(BINARY).plist ] && echo "  ==> Unload and delete this file manually:" && echo "  sudo launchctl unload /Library/LaunchAgents/$(OSX_PKG_PREFIX).$(BINARY).plist" && echo "  sudo rm -f /Library/LaunchAgents/$(OSX_PKG_PREFIX).$(BINARY).plist" || true
 
 # Don't run this unless you're ready to debug untested vendored dependencies.
 deps:
