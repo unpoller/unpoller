@@ -1,10 +1,12 @@
 BINARY:=unifi-poller
 URL=https://github.com/davidnewhall/unifi-poller
-MAINT="david at sleepers dot pro"
+MAINT="David Newhall II <david at sleepers dot pro>"
 DESC="This daemon polls a Unifi controller at a short interval and stores the collected metric data in an Influx Database."
 PACKAGE:=./cmd/$(BINARY)
-VERSION:=$(shell git tag -l --merged | tail -n1 | tr -d v)
-ITERATION:=$(shell git rev-list --count HEAD)
+ifeq ($(VERSION),)
+	VERSION:=$(shell git tag -l --merged | tail -n1 | tr -d v||echo development)
+endif
+ITERATION:=$(shell git rev-list --count HEAD||echo 0)
 
 all: man build
 
@@ -16,20 +18,37 @@ release: clean test $(BINARY)-$(VERSION)-$(ITERATION).x86_64.rpm $(BINARY)_$(VER
 	gzip -9 $(BINARY).macos
 	mv $(BINARY)-$(VERSION)-$(ITERATION).x86_64.rpm $(BINARY)_$(VERSION)-$(ITERATION)_amd64.deb \
 		$(BINARY)-$(VERSION).pkg $(BINARY).macos.gz $(BINARY).linux.gz release/
+	# Generating File Hashes
+	openssl dgst -sha256 release/* | tee release/$(BINARY)_checksums_$(VERSION)-$(ITERATION).txt
 
 # Delete all build assets.
 clean:
 	# Cleaning up.
 	rm -f $(BINARY){.macos,.linux,.1,}{,.gz}
-	rm -f $(BINARY){_,-}*.{deb,rpm,pkg}
+	rm -f $(BINARY){_,-}*.{deb,rpm,pkg} md2roff
+	rm -f cmd/$(BINARY)/README{,.html} README{,.html} ./$(BINARY)_manual.html
 	rm -rf package_build_* release
 
-# Build a man page from a markdown file using ronn.
+# md2roff is needed to build the man file and html pages from the READMEs.
+md2roff:
+	go get -u github.com/github/hub/md2roff-bin
+	go build -o ./md2roff github.com/github/hub/md2roff-bin
+
+# Build a man page from a markdown file using md2roff.
+# This also turns the repo readme into an html file.
 man: $(BINARY).1.gz
-$(BINARY).1.gz:
-	# Building man page.
-	@ronn --version > /dev/null || (echo "Ronn missing. Install ronn: $(URL)/wiki/Ronn" && false)
-	ronn < "$(PACKAGE)/README.md" | gzip -9 > "$(BINARY).1.gz"
+$(BINARY).1.gz: md2roff
+	# Building man page. Build dependency first: md2roff
+	./md2roff --manual $(BINARY) --version $(VERSION) --date "$$(date)" cmd/unifi-poller/README.md
+	gzip -9nc cmd/$(BINARY)/README > $(BINARY).1.gz
+	mv cmd/$(BINARY)/README.html $(BINARY)_manual.html
+
+# TODO: provide a template that adds the date to the built html file.
+readme: README.html
+README.html: md2roff
+	# This turns README.md into README.html
+	./md2roff --manual $(BINARY) --version $(VERSION) --date "$$(date)" README.md
+	@rm -f README	# Delete useless "man" formatted version.
 
 # Binaries
 
@@ -96,28 +115,32 @@ $(BINARY)-$(VERSION).pkg: check_fpm package_build_osx
 		--chdir package_build_osx
 
 # OSX packages use /usr/local because Apple doesn't allow writing many other places.
-package_build_osx: man macos
+package_build_osx: readme man macos
 	# Building package environment for macOS.
 	mkdir -p $@/usr/local/bin $@/usr/local/etc/$(BINARY) $@/Library/LaunchAgents
-	mkdir -p $@/usr/local/share/man/man1 $@/usr/local/share/doc/$(BINARY) $@/usr/local/var/log/unifi-poller
+	mkdir -p $@/usr/local/share/man/man1 $@/usr/local/share/doc/$(BINARY)/examples $@/usr/local/var/log/unifi-poller
 	# Copying the binary, config file and man page into the env.
 	cp $(BINARY).macos $@/usr/local/bin/$(BINARY)
 	cp *.1.gz $@/usr/local/share/man/man1
 	cp examples/*.conf.example $@/usr/local/etc/$(BINARY)/
-	cp examples/{*dash.json,up.conf.example} $@/usr/local/share/doc/$(BINARY)/
+	cp *.html examples/{*dash.json,up.conf.example} $@/usr/local/share/doc/$(BINARY)/
+	# These go to their own folder so the img src in the html pages continue to work.
+	cp examples/*.png $@/usr/local/share/doc/$(BINARY)/examples
 	cp init/launchd/com.github.davidnewhall.$(BINARY).plist $@/Library/LaunchAgents/
 
 # Build an environment that can be packaged for linux.
-package_build_linux: man linux
+package_build_linux: readme man linux
 	# Building package environment for linux.
 	mkdir -p $@/usr/bin $@/etc/$(BINARY) $@/lib/systemd/system
-	mkdir -p $@/usr/share/man/man1 $@/usr/share/doc/$(BINARY)
+	mkdir -p $@/usr/share/man/man1 $@/usr/share/doc/$(BINARY)/examples
 	# Copying the binary, config file, unit file, and man page into the env.
 	cp $(BINARY).linux $@/usr/bin/$(BINARY)
 	cp *.1.gz $@/usr/share/man/man1
 	cp examples/*.conf.example $@/etc/$(BINARY)/
 	cp examples/up.conf.example $@/etc/$(BINARY)/up.conf
-	cp examples/{*dash.json,up.conf.example} $@/usr/share/doc/$(BINARY)/
+	cp *.html examples/{*dash.json,up.conf.example} $@/usr/share/doc/$(BINARY)/
+	# These go to their own folder so the img src in the html pages continue to work.
+	cp examples/*.png $@/usr/share/doc/$(BINARY)/examples
 	cp init/systemd/$(BINARY).service $@/lib/systemd/system/
 
 check_fpm:
@@ -134,13 +157,23 @@ lint:
 	golangci-lint run --enable-all -D gochecknoglobals
 
 # Deprecated.
-install:
-	@echo -  Local installation with the Makefile is no longer possible.
-	@echo If you wish to install the application manually, check out the wiki: \
-	https://github.com/davidnewhall/unifi-poller/wiki/Installation
-	@echo -  Otherwise, build and install a package: make rpm, make deb, make osxpkg
-	@echo See the Package Install wiki for more info: \
-	https://github.com/davidnewhall/unifi-poller/wiki/Package-Install
+install: man readme $(BINARY)
+	@echo -  Done Building!  -
+	@echo -  Local installation with the Makefile is only supported on macOS.
+	@echo If you wish to install the application manually on Linux, check out the wiki: https://github.com/davidnewhall/unifi-poller/wiki/Installation
+	@echo -  Otherwise, build and install a package: make rpm -or- make deb
+	@echo See the Package Install wiki for more info: https://github.com/davidnewhall/unifi-poller/wiki/Package-Install
+	@[ "$$(uname)" = "Darwin" ] || (echo "Unable to continue, not a Mac." && false)
+	@[ "$(PREFIX)" != "" ] || (echo "Unable to continue, PREFIX not set. Use: make install PREFIX=/usr/local" && false)
+	# Copying the binary, config file, unit file, and man page into the env.
+	/usr/bin/install -m 0755 -d $(PREFIX)/bin $(PREFIX)/share/man/man1 $(PREFIX)/etc/$(BINARY) $(PREFIX)/share/doc/$(BINARY)/examples
+	/usr/bin/install -m 0755 -cp $(BINARY) $(PREFIX)/bin/$(BINARY)
+	/usr/bin/install -m 0644 -cp $(BINARY).1.gz $(PREFIX)/share/man/man1
+	/usr/bin/install -m 0644 -cp examples/up.conf.example $(PREFIX)/etc/$(BINARY)/
+	[ -f $(PREFIX)/etc/$(BINARY)/up.conf ] || /usr/bin/install -m 0644 -cp  examples/up.conf.example $(PREFIX)/etc/$(BINARY)/up.conf
+	/usr/bin/install -m 0644 -cp *.html examples/{*dash.json,up.conf.example} $(PREFIX)/share/doc/$(BINARY)/
+	# These go to their own folder so the img src in the html pages continue to work.
+	/usr/bin/install -m 0644 -cp examples/*.png $(PREFIX)/share/doc/$(BINARY)/examples
 
 # If you installed with `make install` run `make uninstall` before installing a binary package.
 # This will remove the package install from macOS, it will not remove a package install from Linux.
