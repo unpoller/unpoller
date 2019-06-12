@@ -7,6 +7,8 @@
 /unifi-poller*.pkg
 /unifi-poller.macos
 /unifi-poller.linux
+/unifi-poller.rb
+*.sha256
 /vendor
 .DS_Store
 *~
