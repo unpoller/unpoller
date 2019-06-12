@@ -20,13 +20,13 @@ before_install:
 - chmod +x $GOPATH/bin/dep
   # download super-linter: golangci-lint
 - curl -sL https://install.goreleaser.com/github.com/golangci/golangci-lint.sh | sh -s -- -b $(go env GOPATH)/bin latest
-- curl -sLo ./up.tgz https://github.com/davidnewhall/unifi-poller/archive/${TRAVIS_TAG}.tar.gz
 install:
 - dep ensure
 - rvm $brew_ruby do gem install --no-document fpm
 script:
 - rvm $brew_ruby do make release
-- openssl dgst -sha256 ./up.tgz | tee release/${TRAVIS_TAG}.tar.gz.sha256
+# TODO: upload the formula somewhere.
+- make formula
 deploy:
   provider: releases
   api_key:

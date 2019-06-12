@@ -1,7 +1,7 @@
 BINARY:=unifi-poller
 URL=https://github.com/davidnewhall/unifi-poller
-MAINT="David Newhall II <david at sleepers dot pro>"
-DESC="This daemon polls a Unifi controller at a short interval and stores the collected metric data in an Influx Database."
+MAINT=David Newhall II <david at sleepers dot pro>
+DESC=This daemon polls a Unifi controller at a short interval and stores the collected metric data in an Influx Database.
 PACKAGE:=./cmd/$(BINARY)
 ifeq ($(VERSION),)
 	VERSION:=$(shell git tag -l --merged | tail -n1 | tr -d v||echo development)
@@ -24,8 +24,8 @@ release: clean test $(BINARY)-$(VERSION)-$(ITERATION).x86_64.rpm $(BINARY)_$(VER
 # Delete all build assets.
 clean:
 	# Cleaning up.
-	rm -f $(BINARY){.macos,.linux,.1,}{,.gz}
-	rm -f $(BINARY){_,-}*.{deb,rpm,pkg} md2roff
+	rm -f $(BINARY){.macos,.linux,.1,}{,.gz} $(BINARY).rb
+	rm -f $(BINARY){_,-}*.{deb,rpm,pkg} md2roff v$(VERSION).tar.gz.sha256
 	rm -f cmd/$(BINARY)/README{,.html} README{,.html} ./$(BINARY)_manual.html
 	rm -rf package_build_* release
 
@@ -80,8 +80,8 @@ $(BINARY)-$(VERSION)-$(ITERATION).x86_64.rpm: check_fpm package_build_linux
 		--before-remove scripts/before-remove.sh \
 		--license MIT \
 		--url $(URL) \
-		--maintainer $(MAINT) \
-		--description $(DESC) \
+		--maintainer "$(MAINT)" \
+		--description "$(DESC)" \
 		--chdir package_build_linux
 
 deb: clean $(BINARY)_$(VERSION)-$(ITERATION)_amd64.deb
@@ -95,8 +95,8 @@ $(BINARY)_$(VERSION)-$(ITERATION)_amd64.deb: check_fpm package_build_linux
 		--before-remove scripts/before-remove.sh \
 		--license MIT \
 		--url $(URL) \
-		--maintainer $(MAINT) \
-		--description $(DESC) \
+		--maintainer "$(MAINT)" \
+		--description "$(DESC)" \
 		--chdir package_build_linux
 
 osxpkg: clean $(BINARY)-$(VERSION).pkg
@@ -110,8 +110,8 @@ $(BINARY)-$(VERSION).pkg: check_fpm package_build_osx
 		--osxpkg-identifier-prefix com.github.davidnewhall \
 		--license MIT \
 		--url $(URL) \
-		--maintainer $(MAINT) \
-		--description $(DESC) \
+		--maintainer "$(MAINT)" \
+		--description "$(DESC)" \
 		--chdir package_build_osx
 
 # OSX packages use /usr/local because Apple doesn't allow writing many other places.
@@ -145,6 +145,14 @@ package_build_linux: readme man linux
 
 check_fpm:
 	@fpm --version > /dev/null || (echo "FPM missing. Install FPM: https://fpm.readthedocs.io/en/latest/installing.html" && false)
+
+formula: $(BINARY).rb
+v$(VERSION).tar.gz.sha256:
+	# Calculate the SHA from the Github source file.
+	curl -sL https://github.com/davidnewhall/unifi-poller/archive/v$(VERSION).tar.gz | openssl dgst -sha256 | tee v$(VERSION).tar.gz.sha256
+$(BINARY).rb: v$(VERSION).tar.gz.sha256
+	# Creating formula from template using sed.
+	sed "s/{{Version}}/$(VERSION)/g;s/{{SHA256}}/$$(<v$(VERSION).tar.gz.sha256)/g;s/{{Desc}}/$(DESC)/g;s%{{URL}}%$(URL)%g" templates/$(BINARY).rb.tmpl | tee $(BINARY).rb
 
 # Extras
 
