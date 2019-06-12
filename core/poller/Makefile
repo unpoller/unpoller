@@ -26,7 +26,8 @@ clean:
 	# Cleaning up.
 	rm -f $(BINARY){.macos,.linux,.1,}{,.gz}
 	rm -f $(BINARY){_,-}*.{deb,rpm,pkg} md2roff
-	rm -rf package_build_* release cmd/unifi-poller/README{,.html}
+	rm -f cmd/$(BINARY)/README{,.html} README{,.html} ./$(BINARY)_manual.html
+	rm -rf package_build_* release
 
 # md2roff is needed to build the man file and html pages from the READMEs.
 md2roff:
@@ -40,7 +41,7 @@ $(BINARY).1.gz: md2roff
 	# Building man page. Build dependency first: md2roff
 	./md2roff --manual $(BINARY) --version $(VERSION) --date "$$(date)" cmd/unifi-poller/README.md
 	gzip -9nc cmd/$(BINARY)/README > $(BINARY).1.gz
-	mv cmd/$(BINARY)/README.html ./$(BINARY)_manual.html
+	mv cmd/$(BINARY)/README.html $(BINARY)_manual.html
 
 # TODO: provide a template that adds the date to the built html file.
 readme: README.html
