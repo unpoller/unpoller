@@ -46,7 +46,7 @@ deploy:
   - provider: script
     script: scripts/formula-deploy.sh
     on:
-      all_branches: true
+      tags: true
       repo: davidnewhall/unifi-poller
 env:
   global:
