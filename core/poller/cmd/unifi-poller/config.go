@@ -3,6 +3,7 @@ package main
 import (
 	"time"
 
+	"github.com/golift/unifi"
 	influx "github.com/influxdata/influxdb1-client/v2"
 	"github.com/spf13/pflag"
 )
@@ -27,12 +28,14 @@ type Asset interface {
 	Points() ([]*influx.Point, error)
 }
 
-// UnifiPoller contains the application startup data.
+// UnifiPoller contains the application startup data, and auth info for unifi & influx.
 type UnifiPoller struct {
 	ConfigFile string
 	DumpJSON   string
 	ShowVer    bool
 	Flag       *pflag.FlagSet
+	influx.Client
+	*unifi.Unifi
 	*Config
 }
 
