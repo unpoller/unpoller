@@ -21,7 +21,7 @@ func (c *Config) CheckSites(controller *unifi.Unifi) error {
 		for _, site := range sites {
 			msg = append(msg, site.Name+" ("+site.Desc+")")
 		}
-		log.Printf("Found %d site(s) on controller: %v", len(msg), strings.Join(msg, ", "))
+		log.Printf("[INFO] Found %d site(s) on controller: %v", len(msg), strings.Join(msg, ", "))
 	}
 	if StringInSlice("all", c.Sites) {
 		return nil
@@ -40,7 +40,7 @@ FIRST:
 
 // PollUnifiController runs forever, polling and pushing.
 func (c *Config) PollUnifiController(controller *unifi.Unifi, infdb influx.Client) {
-	log.Println("[INFO] Everything checks out! Beginning Poller Routine.")
+	log.Println("[INFO] Everything checks out! Poller started, interval:", c.Interval.value)
 	ticker := time.NewTicker(c.Interval.value)
 
 	for range ticker.C {
@@ -73,8 +73,10 @@ func (c *Config) PollUnifiController(controller *unifi.Unifi, infdb influx.Clien
 		}
 		// Talk about the data.
 		if !c.Quiet {
-			log.Printf("[INFO] Logged Unifi States. Sites: %d Clients: %d, Wireless APs: %d, Gateways: %d, Switches: %d",
-				len(sites), len(clients.UCLs), len(devices.UAPs), len(devices.USGs), len(devices.USWs))
+			log.Printf("[INFO] Unifi Measurements Recorded. Sites: %d Clients: %d, "+
+				"Wireless APs: %d, Gateways: %d, Switches: %d, Metrics: %d",
+				len(sites), len(clients.UCLs),
+				len(devices.UAPs), len(devices.USGs), len(devices.USWs), len(bp.Points()))
 		}
 	}
 }

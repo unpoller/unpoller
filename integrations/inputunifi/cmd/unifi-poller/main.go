@@ -17,7 +17,7 @@ func main() {
 	u := &UnifiPoller{}
 	if u.ParseFlags(os.Args[1:]); u.ShowVer {
 		fmt.Printf("unifi-poller v%s\n", Version)
-		os.Exit(0) // don't run anything else.
+		return // don't run anything else.
 	}
 	if err := u.GetConfig(); err != nil {
 		u.Flag.Usage()
@@ -66,7 +66,7 @@ func (u *UnifiPoller) GetConfig() error {
 		u.Quiet = true
 	}
 	if !u.Config.Quiet {
-		log.Println("Loaded Configuration:", u.ConfigFile)
+		log.Println("[INFO] Loaded Configuration:", u.ConfigFile)
 	}
 	return nil
 }
@@ -75,28 +75,27 @@ func (u *UnifiPoller) GetConfig() error {
 func (u *UnifiPoller) Run() error {
 	c := u.Config
 	if u.DumpJSON != "" {
-		if err := c.DumpJSON(u.DumpJSON); err != nil {
-			log.Fatalln("[ERROR] dumping JSON:", err)
-		}
-		return nil
+		return c.DumpJSON(u.DumpJSON)
 	}
-	log.Println("Unifi-Poller Starting Up! PID:", os.Getpid())
+	if log.SetFlags(0); c.Debug {
+		log.SetFlags(log.Lshortfile | log.Lmicroseconds | log.Ldate)
+		log.Println("[DEBUG] Debug Logging Enabled")
+	}
+	log.Printf("[INFO] Unifi-Poller v%v Starting Up! PID: %d", Version, os.Getpid())
 	// Create an authenticated session to the Unifi Controller.
 	controller, err := unifi.NewUnifi(c.UnifiUser, c.UnifiPass, c.UnifiBase, c.VerifySSL)
 	if err != nil {
 		return errors.Wrap(err, "unifi controller")
 	}
+	if c.Debug {
+		controller.DebugLog = log.Printf // Log debug messages.
+	}
+	controller.ErrorLog = log.Printf // Log all errors.
 	if !c.Quiet {
-		log.Println("Authenticated to Unifi Controller @", c.UnifiBase, "as user", c.UnifiUser)
+		log.Println("[INFO] Authenticated to Unifi Controller @", c.UnifiBase, "as user", c.UnifiUser)
 	}
 	if err := c.CheckSites(controller); err != nil {
 		return err
-	}
-	controller.ErrorLog = log.Printf // Log all errors.
-	if log.SetFlags(0); c.Debug {
-		log.Println("Debug Logging Enabled")
-		log.SetFlags(log.Lshortfile | log.Lmicroseconds | log.Ldate)
-		controller.DebugLog = log.Printf // Log debug messages.
 	}
 	infdb, err := influx.NewHTTPClient(influx.HTTPConfig{
 		Addr:     c.InfluxURL,
@@ -110,8 +109,8 @@ func (u *UnifiPoller) Run() error {
 		// Doing it this way allows debug error logs (line numbers, etc)
 		controller.DebugLog = nil
 	} else {
-		log.Println("Logging Unifi Metrics to InfluXDB @", c.InfluxURL, "as user", c.InfluxUser)
-		log.Printf("Polling Unifi Controller (sites %v), interval: %v", c.Sites, c.Interval.value)
+		log.Println("[INFO] Polling Unifi Controller Sites:", c.Sites)
+		log.Println("[INFO] Logging Measurements to InfluxDB at", c.InfluxURL, "as user", c.InfluxUser)
 	}
 	c.PollUnifiController(controller, infdb)
 	return nil
