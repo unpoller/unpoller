@@ -16,7 +16,7 @@ func (c *Config) DumpJSON(filter string) error {
 	if err != nil {
 		return err
 	}
-	fmt.Fprintln(os.Stderr, "Authenticated to Unifi Controller @", c.UnifiBase, "as user", c.UnifiUser)
+	fmt.Fprintln(os.Stderr, "[INFO] Authenticated to Unifi Controller @", c.UnifiBase, "as user", c.UnifiUser)
 	if err := c.CheckSites(controller); err != nil {
 		return err
 	}
@@ -75,7 +75,7 @@ func dumpJSON(path, what string, site unifi.Site, controller *unifi.Unifi) error
 	if err != nil {
 		return err
 	}
-	fmt.Fprintf(os.Stderr, "Dumping %s JSON for site %s (%s)\n", what, site.Desc, site.Name)
+	fmt.Fprintf(os.Stderr, "[INFO] Dumping %s JSON for site %s (%s)\n", what, site.Desc, site.Name)
 	fmt.Println(string(body))
 	return nil
 }
