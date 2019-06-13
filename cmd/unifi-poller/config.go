@@ -1,6 +1,12 @@
 package main
 
-import "time"
+import (
+	"time"
+
+	"github.com/golift/unifi"
+	influx "github.com/influxdata/influxdb1-client/v2"
+	"github.com/spf13/pflag"
+)
 
 // Version is injected by the Makefile
 var Version = "development"
@@ -17,11 +23,27 @@ const (
 	defaultUnifURL  = "https://127.0.0.1:8443"
 )
 
+// Asset is used to give all devices and clients a common interface.
+type Asset interface {
+	Points() ([]*influx.Point, error)
+}
+
+// UnifiPoller contains the application startup data, and auth info for unifi & influx.
+type UnifiPoller struct {
+	ConfigFile string
+	DumpJSON   string
+	ShowVer    bool
+	Flag       *pflag.FlagSet
+	influx.Client
+	*unifi.Unifi
+	*Config
+}
+
 // Config represents the data needed to poll a controller and report to influxdb.
 type Config struct {
 	Interval   Dur      `json:"interval,_omitempty" toml:"interval,_omitempty" xml:"interval" yaml:"interval"`
 	Debug      bool     `json:"debug" toml:"debug" xml:"debug" yaml:"debug"`
-	Quiet      bool     `json:"quiet" toml:"quiet" xml:"quiet" yaml:"quiet"`
+	Quiet      bool     `json:"quiet,_omitempty" toml:"quiet,_omitempty" xml:"quiet" yaml:"quiet"`
 	VerifySSL  bool     `json:"verify_ssl" toml:"verify_ssl" xml:"verify_ssl" yaml:"verify_ssl"`
 	InfluxURL  string   `json:"influx_url,_omitempty" toml:"influx_url,_omitempty" xml:"influx_url" yaml:"influx_url"`
 	InfluxUser string   `json:"influx_user,_omitempty" toml:"influx_user,_omitempty" xml:"influx_user" yaml:"influx_user"`
