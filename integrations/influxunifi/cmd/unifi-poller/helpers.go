@@ -33,3 +33,10 @@ func StringInSlice(str string, slc []string) bool {
 	}
 	return false
 }
+
+// Logf prints a log entry if quiet is false.
+func (c *Config) Logf(m string, v ...interface{}) {
+	if !c.Quiet {
+		log.Printf("[INFO] "+m, v...)
+	}
+}

@@ -16,13 +16,11 @@ func (c *Config) CheckSites(controller *unifi.Unifi) error {
 	if err != nil {
 		return err
 	}
-	if !c.Quiet {
-		msg := []string{}
-		for _, site := range sites {
-			msg = append(msg, site.Name+" ("+site.Desc+")")
-		}
-		log.Printf("[INFO] Found %d site(s) on controller: %v", len(msg), strings.Join(msg, ", "))
+	msg := []string{}
+	for _, site := range sites {
+		msg = append(msg, site.Name+" ("+site.Desc+")")
 	}
+	c.Logf("Found %d site(s) on controller: %v", len(msg), strings.Join(msg, ", "))
 	if StringInSlice("all", c.Sites) {
 		return nil
 	}
@@ -72,12 +70,15 @@ func (c *Config) PollUnifiController(controller *unifi.Unifi, infdb influx.Clien
 			logErrors([]error{err}, "infdb.Write(bp)")
 		}
 		// Talk about the data.
-		if !c.Quiet {
-			log.Printf("[INFO] Unifi Measurements Recorded. Sites: %d Clients: %d, "+
-				"Wireless APs: %d, Gateways: %d, Switches: %d, Metrics: %d",
-				len(sites), len(clients.UCLs),
-				len(devices.UAPs), len(devices.USGs), len(devices.USWs), len(bp.Points()))
+		var fieldcount int
+		for _, p := range bp.Points() {
+			i, _ := p.Fields()
+			fieldcount += len(i)
 		}
+		c.Logf("Unifi Measurements Recorded. Sites: %d Clients: %d, "+
+			"Wireless APs: %d, Gateways: %d, Switches: %d, Points: %d, Fields: %d",
+			len(sites), len(clients.UCLs),
+			len(devices.UAPs), len(devices.USGs), len(devices.USWs), len(bp.Points()), fieldcount)
 	}
 }
 
