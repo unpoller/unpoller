@@ -70,15 +70,16 @@ func (c *Config) PollUnifiController(controller *unifi.Unifi, infdb influx.Clien
 			logErrors([]error{err}, "infdb.Write(bp)")
 		}
 		// Talk about the data.
-		var fieldcount int
+		var fieldcount, pointcount int
 		for _, p := range bp.Points() {
+			pointcount++
 			i, _ := p.Fields()
 			fieldcount += len(i)
 		}
 		c.Logf("Unifi Measurements Recorded. Sites: %d Clients: %d, "+
 			"Wireless APs: %d, Gateways: %d, Switches: %d, Points: %d, Fields: %d",
 			len(sites), len(clients.UCLs),
-			len(devices.UAPs), len(devices.USGs), len(devices.USWs), len(bp.Points()), fieldcount)
+			len(devices.UAPs), len(devices.USGs), len(devices.USWs), pointcount, fieldcount)
 	}
 }
 
