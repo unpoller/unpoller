@@ -3,6 +3,7 @@ package main
 import (
 	"time"
 
+	influx "github.com/influxdata/influxdb1-client/v2"
 	"github.com/spf13/pflag"
 )
 
@@ -21,13 +22,18 @@ const (
 	defaultUnifURL  = "https://127.0.0.1:8443"
 )
 
+// Asset is used to give all devices and clients a common interface.
+type Asset interface {
+	Points() ([]*influx.Point, error)
+}
+
 // UnifiPoller contains the application startup data.
 type UnifiPoller struct {
 	ConfigFile string
 	DumpJSON   string
 	ShowVer    bool
+	Flag       *pflag.FlagSet
 	*Config
-	Flag *pflag.FlagSet
 }
 
 // Config represents the data needed to poll a controller and report to influxdb.
