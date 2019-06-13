@@ -21,20 +21,29 @@ type Asset interface {
 }
 
 func main() {
-	configFile := parseFlags()
-	log.Println("Unifi-Poller Starting Up! PID:", os.Getpid())
-	config, err := GetConfig(configFile)
-	if err != nil {
-		flag.Usage()
-		log.Fatalf("[ERROR] config file '%v': %v", configFile, err)
+	u := &UnifiPoller{}
+	if u.ParseFlags(os.Args[1:]); u.ShowVer {
+		fmt.Printf("unifi-poller v%s\n", Version)
+		os.Exit(0) // don't run anything else.
 	}
-	if err := config.Run(); err != nil {
+	if err := u.GetConfig(); err != nil {
+		u.Flag.Usage()
+		log.Fatalf("[ERROR] config file '%v': %v", u.ConfigFile, err)
+	}
+	if u.DumpJSON != "" {
+		if err := u.Config.DumpJSON(u.DumpJSON); err != nil {
+			log.Fatalln("[ERROR] dumping JSON:", err)
+		}
+		return
+	}
+	if err := u.Config.Run(); err != nil {
 		log.Fatalln("[ERROR]", err)
 	}
 }
 
 // Run invokes all the application logic and routines.
 func (c *Config) Run() error {
+	log.Println("Unifi-Poller Starting Up! PID:", os.Getpid())
 	// Create an authenticated session to the Unifi Controller.
 	controller, err := unifi.NewUnifi(c.UnifiUser, c.UnifiPass, c.UnifiBase, c.VerifySSL)
 	if err != nil {
@@ -71,18 +80,17 @@ func (c *Config) Run() error {
 	return nil
 }
 
-func parseFlags() string {
-	flag.Usage = func() {
+// ParseFlags runs the parser.
+func (u *UnifiPoller) ParseFlags(args []string) {
+	u.Flag = flag.NewFlagSet("unifi-poller", flag.ExitOnError)
+	u.Flag.Usage = func() {
 		fmt.Println("Usage: unifi-poller [--config=filepath] [--version]")
-		flag.PrintDefaults()
+		u.Flag.PrintDefaults()
 	}
-	configFile := flag.StringP("config", "c", defaultConfFile, "Poller Config File (TOML Format)")
-	version := flag.BoolP("version", "v", false, "Print the version and exit")
-	if flag.Parse(); *version {
-		fmt.Printf("unifi-poller v%s\n", Version)
-		os.Exit(0) // don't run anything else.
-	}
-	return *configFile
+	u.Flag.StringVarP(&u.DumpJSON, "dumpjson", "j", "", "This debug option prints the json payload for a device and exits.")
+	u.Flag.StringVarP(&u.ConfigFile, "config", "c", defaultConfFile, "Poller Config File (TOML Format)")
+	u.Flag.BoolVarP(&u.ShowVer, "version", "v", false, "Print the version and exit")
+	_ = u.Flag.Parse(args)
 }
 
 // CheckSites makes sure the list of provided sites exists on the controller.
@@ -114,9 +122,9 @@ FIRST:
 }
 
 // GetConfig parses and returns our configuration data.
-func GetConfig(configFile string) (Config, error) {
+func (u *UnifiPoller) GetConfig() error {
 	// Preload our defaults.
-	config := Config{
+	u.Config = &Config{
 		InfluxURL:  defaultInfxURL,
 		InfluxUser: defaultInfxUser,
 		InfluxPass: defaultInfxPass,
@@ -127,14 +135,19 @@ func GetConfig(configFile string) (Config, error) {
 		Interval:   Dur{value: defaultInterval},
 		Sites:      []string{"default"},
 	}
-	if buf, err := ioutil.ReadFile(configFile); err != nil {
-		return config, err
+	if buf, err := ioutil.ReadFile(u.ConfigFile); err != nil {
+		return err
 		// This is where the defaults in the config variable are overwritten.
-	} else if err := toml.Unmarshal(buf, &config); err != nil {
-		return config, err
+	} else if err := toml.Unmarshal(buf, u.Config); err != nil {
+		return err
 	}
-	log.Println("Loaded Configuration:", configFile)
-	return config, nil
+	if u.DumpJSON != "" {
+		u.Quiet = true
+	}
+	if !u.Config.Quiet {
+		log.Println("Loaded Configuration:", u.ConfigFile)
+	}
+	return nil
 }
 
 // PollUnifiController runs forever, polling and pushing.
