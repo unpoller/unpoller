@@ -28,9 +28,9 @@ func (c *Config) DumpJSON(filter string) error {
 	case err != nil:
 		return err
 	case StringInSlice(filter, []string{"d", "device", "devices"}):
-		return c.DumpClientsJSON(sites, controller)
-	case StringInSlice(filter, []string{"client", "clients", "c"}):
 		return c.DumpDeviceJSON(sites, controller)
+	case StringInSlice(filter, []string{"client", "clients", "c"}):
+		return c.DumpClientsJSON(sites, controller)
 	default:
 		return errors.New("must provide filter: devices, clients")
 	}
@@ -40,21 +40,9 @@ func (c *Config) DumpJSON(filter string) error {
 func (c *Config) DumpClientsJSON(sites []unifi.Site, controller *unifi.Unifi) error {
 	for _, s := range sites {
 		path := fmt.Sprintf(unifi.ClientPath, s.Name)
-		req, err := controller.UniReq(path, "")
-		if err != nil {
+		if err := dumpJSON(path, "Client", s, controller); err != nil {
 			return err
 		}
-		resp, err := controller.Do(req)
-		if err != nil {
-			return err
-		}
-		body, err := ioutil.ReadAll(resp.Body)
-		resp.Body.Close()
-		if err != nil {
-			return err
-		}
-		fmt.Fprintf(os.Stderr, "Dumping Client JSON for site %s (%s)\n", s.Desc, s.Name)
-		fmt.Println(string(body))
 	}
 	return nil
 }
@@ -63,21 +51,30 @@ func (c *Config) DumpClientsJSON(sites []unifi.Site, controller *unifi.Unifi) er
 func (c *Config) DumpDeviceJSON(sites []unifi.Site, controller *unifi.Unifi) error {
 	for _, s := range sites {
 		path := fmt.Sprintf(unifi.DevicePath, s.Name)
-		req, err := controller.UniReq(path, "")
-		if err != nil {
+		if err := dumpJSON(path, "Device", s, controller); err != nil {
 			return err
 		}
-		resp, err := controller.Do(req)
-		if err != nil {
-			return err
-		}
-		body, err := ioutil.ReadAll(resp.Body)
-		resp.Body.Close()
-		if err != nil {
-			return err
-		}
-		fmt.Fprintf(os.Stderr, "Dumping Device JSON for site %s (%s)\n", s.Desc, s.Name)
-		fmt.Println(string(body))
 	}
+	return nil
+}
+
+func dumpJSON(path, what string, site unifi.Site, controller *unifi.Unifi) error {
+	req, err := controller.UniReq(path, "")
+	if err != nil {
+		return err
+	}
+	resp, err := controller.Do(req)
+	if err != nil {
+		return err
+	}
+	defer func() {
+		_ = resp.Body.Close()
+	}()
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return err
+	}
+	fmt.Fprintf(os.Stderr, "Dumping %s JSON for site %s (%s)\n", what, site.Desc, site.Name)
+	fmt.Println(string(body))
 	return nil
 }
