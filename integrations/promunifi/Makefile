@@ -1,22 +1,29 @@
+# This Makefile is written as generic as possible.
+# Setting these variables and creating the necesarry paths in your github repo will make this file work.
+#
 BINARY:=unifi-poller
-URL=https://github.com/davidnewhall/unifi-poller
-MAINT="David Newhall II <david at sleepers dot pro>"
-DESC="This daemon polls a Unifi controller at a short interval and stores the collected metric data in an Influx Database."
+URL:=https://github.com/davidnewhall/$(BINARY)
+MAINT=David Newhall II <david at sleepers dot pro>
+DESC=This daemon polls a Unifi controller at a short interval and stores the collected metric data in an Influx Database.
 PACKAGE:=./cmd/$(BINARY)
 ifeq ($(VERSION),)
 	VERSION:=$(shell git tag -l --merged | tail -n1 | tr -d v||echo development)
 endif
 ITERATION:=$(shell git rev-list --count HEAD||echo 0)
+OSX_PKG_PREFIX=com.github.davidnewhall
+GOLANGCI_LINT_ARGS=--enable-all -D gochecknoglobals
+
+RPMVERSION:=$(shell echo $(VERSION) | tr -- - _)
 
 all: man build
 
 # Prepare a release. Called in Travis CI.
-release: clean test $(BINARY)-$(VERSION)-$(ITERATION).x86_64.rpm $(BINARY)_$(VERSION)-$(ITERATION)_amd64.deb $(BINARY)-$(VERSION).pkg
+release: clean test $(BINARY)-$(RPMVERSION)-$(ITERATION).x86_64.rpm $(BINARY)_$(VERSION)-$(ITERATION)_amd64.deb $(BINARY)-$(VERSION).pkg
 	# Prepareing a release!
 	mkdir -p release
 	gzip -9 $(BINARY).linux
 	gzip -9 $(BINARY).macos
-	mv $(BINARY)-$(VERSION)-$(ITERATION).x86_64.rpm $(BINARY)_$(VERSION)-$(ITERATION)_amd64.deb \
+	mv $(BINARY)-$(RPMVERSION)-$(ITERATION).x86_64.rpm $(BINARY)_$(VERSION)-$(ITERATION)_amd64.deb \
 		$(BINARY)-$(VERSION).pkg $(BINARY).macos.gz $(BINARY).linux.gz release/
 	# Generating File Hashes
 	openssl dgst -sha256 release/* | tee release/$(BINARY)_checksums_$(VERSION)-$(ITERATION).txt
@@ -24,8 +31,8 @@ release: clean test $(BINARY)-$(VERSION)-$(ITERATION).x86_64.rpm $(BINARY)_$(VER
 # Delete all build assets.
 clean:
 	# Cleaning up.
-	rm -f $(BINARY){.macos,.linux,.1,}{,.gz}
-	rm -f $(BINARY){_,-}*.{deb,rpm,pkg} md2roff
+	rm -f $(BINARY){.macos,.linux,.1,}{,.gz} $(BINARY).rb
+	rm -f $(BINARY){_,-}*.{deb,rpm,pkg} md2roff v$(VERSION).tar.gz.sha256
 	rm -f cmd/$(BINARY)/README{,.html} README{,.html} ./$(BINARY)_manual.html
 	rm -rf package_build_* release
 
@@ -39,7 +46,7 @@ md2roff:
 man: $(BINARY).1.gz
 $(BINARY).1.gz: md2roff
 	# Building man page. Build dependency first: md2roff
-	./md2roff --manual $(BINARY) --version $(VERSION) --date "$$(date)" cmd/unifi-poller/README.md
+	./md2roff --manual $(BINARY) --version $(VERSION) --date "$$(date)" cmd/$(BINARY)/README.md
 	gzip -9nc cmd/$(BINARY)/README > $(BINARY).1.gz
 	mv cmd/$(BINARY)/README.html $(BINARY)_manual.html
 
@@ -48,7 +55,6 @@ readme: README.html
 README.html: md2roff
 	# This turns README.md into README.html
 	./md2roff --manual $(BINARY) --version $(VERSION) --date "$$(date)" README.md
-	@rm -f README	# Delete useless "man" formatted version.
 
 # Binaries
 
@@ -68,20 +74,20 @@ $(BINARY).macos:
 
 # Packages
 
-rpm: clean $(BINARY)-$(VERSION)-$(ITERATION).x86_64.rpm
-$(BINARY)-$(VERSION)-$(ITERATION).x86_64.rpm: check_fpm package_build_linux
-	@echo "Building 'rpm' package for $(BINARY) version '$(VERSION)-$(ITERATION)'."
+rpm: clean $(BINARY)-$(RPMVERSION)-$(ITERATION).x86_64.rpm
+$(BINARY)-$(RPMVERSION)-$(ITERATION).x86_64.rpm: check_fpm package_build_linux
+	@echo "Building 'rpm' package for $(BINARY) version '$(RPMVERSION)-$(ITERATION)'."
 	fpm -s dir -t rpm \
 		--name $(BINARY) \
 		--rpm-os linux \
-		--version $(VERSION) \
+		--version $(RPMVERSION) \
 		--iteration $(ITERATION) \
 		--after-install scripts/after-install.sh \
 		--before-remove scripts/before-remove.sh \
 		--license MIT \
 		--url $(URL) \
-		--maintainer $(MAINT) \
-		--description $(DESC) \
+		--maintainer "$(MAINT)" \
+		--description "$(DESC)" \
 		--chdir package_build_linux
 
 deb: clean $(BINARY)_$(VERSION)-$(ITERATION)_amd64.deb
@@ -95,8 +101,8 @@ $(BINARY)_$(VERSION)-$(ITERATION)_amd64.deb: check_fpm package_build_linux
 		--before-remove scripts/before-remove.sh \
 		--license MIT \
 		--url $(URL) \
-		--maintainer $(MAINT) \
-		--description $(DESC) \
+		--maintainer "$(MAINT)" \
+		--description "$(DESC)" \
 		--chdir package_build_linux
 
 osxpkg: clean $(BINARY)-$(VERSION).pkg
@@ -107,18 +113,18 @@ $(BINARY)-$(VERSION).pkg: check_fpm package_build_osx
 		--version $(VERSION) \
 		--iteration $(ITERATION) \
 		--after-install scripts/after-install.sh \
-		--osxpkg-identifier-prefix com.github.davidnewhall \
+		--osxpkg-identifier-prefix $(OSX_PKG_PREFIX) \
 		--license MIT \
 		--url $(URL) \
-		--maintainer $(MAINT) \
-		--description $(DESC) \
+		--maintainer "$(MAINT)" \
+		--description "$(DESC)" \
 		--chdir package_build_osx
 
 # OSX packages use /usr/local because Apple doesn't allow writing many other places.
 package_build_osx: readme man macos
 	# Building package environment for macOS.
 	mkdir -p $@/usr/local/bin $@/usr/local/etc/$(BINARY) $@/Library/LaunchAgents
-	mkdir -p $@/usr/local/share/man/man1 $@/usr/local/share/doc/$(BINARY)/examples $@/usr/local/var/log/unifi-poller
+	mkdir -p $@/usr/local/share/man/man1 $@/usr/local/share/doc/$(BINARY)/examples $@/usr/local/var/log/$(BINARY)
 	# Copying the binary, config file and man page into the env.
 	cp $(BINARY).macos $@/usr/local/bin/$(BINARY)
 	cp *.1.gz $@/usr/local/share/man/man1
@@ -126,7 +132,7 @@ package_build_osx: readme man macos
 	cp *.html examples/{*dash.json,up.conf.example} $@/usr/local/share/doc/$(BINARY)/
 	# These go to their own folder so the img src in the html pages continue to work.
 	cp examples/*.png $@/usr/local/share/doc/$(BINARY)/examples
-	cp init/launchd/com.github.davidnewhall.$(BINARY).plist $@/Library/LaunchAgents/
+	cp init/launchd/$(OSX_PKG_PREFIX).$(BINARY).plist $@/Library/LaunchAgents/
 
 # Build an environment that can be packaged for linux.
 package_build_linux: readme man linux
@@ -146,6 +152,15 @@ package_build_linux: readme man linux
 check_fpm:
 	@fpm --version > /dev/null || (echo "FPM missing. Install FPM: https://fpm.readthedocs.io/en/latest/installing.html" && false)
 
+# This builds a Homebrew formula file that can be used to install this app from source.
+formula: $(BINARY).rb
+v$(VERSION).tar.gz.sha256:
+	# Calculate the SHA from the Github source file.
+	curl -sL $(URL)/archive/v$(VERSION).tar.gz | openssl dgst -sha256 | tee v$(VERSION).tar.gz.sha256
+$(BINARY).rb: v$(VERSION).tar.gz.sha256
+	# Creating formula from template using sed.
+	sed "s/{{Version}}/$(VERSION)/g;s/{{SHA256}}/$$(<v$(VERSION).tar.gz.sha256)/g;s/{{Desc}}/$(DESC)/g;s%{{URL}}%$(URL)%g" templates/$(BINARY).rb.tmpl | tee $(BINARY).rb
+
 # Extras
 
 # Run code tests and lint.
@@ -154,15 +169,15 @@ test: lint
 	go test -race -covermode=atomic $(PACKAGE)
 lint:
 	# Checking lint.
-	golangci-lint run --enable-all -D gochecknoglobals
+	golangci-lint run $(GOLANGCI_LINT_ARGS)
 
 # Deprecated.
 install: man readme $(BINARY)
 	@echo -  Done Building!  -
 	@echo -  Local installation with the Makefile is only supported on macOS.
-	@echo If you wish to install the application manually on Linux, check out the wiki: https://github.com/davidnewhall/unifi-poller/wiki/Installation
+	@echo If you wish to install the application manually on Linux, check out the wiki: $(URL)/wiki/Installation
 	@echo -  Otherwise, build and install a package: make rpm -or- make deb
-	@echo See the Package Install wiki for more info: https://github.com/davidnewhall/unifi-poller/wiki/Package-Install
+	@echo See the Package Install wiki for more info: $(URL)/wiki/Package-Install
 	@[ "$$(uname)" = "Darwin" ] || (echo "Unable to continue, not a Mac." && false)
 	@[ "$(PREFIX)" != "" ] || (echo "Unable to continue, PREFIX not set. Use: make install PREFIX=/usr/local" && false)
 	# Copying the binary, config file, unit file, and man page into the env.
@@ -181,16 +196,16 @@ uninstall:
 	@echo "  ==> You must run make uninstall as root on Linux. Recommend not running as root on macOS."
 	[ -x /bin/systemctl ] && /bin/systemctl disable $(BINARY) || true
 	[ -x /bin/systemctl ] && /bin/systemctl stop $(BINARY) || true
-	[ -x /bin/launchctl ] && [ -f ~/Library/LaunchAgents/com.github.davidnewhall.$(BINARY).plist ] \
-		&& /bin/launchctl unload ~/Library/LaunchAgents/com.github.davidnewhall.$(BINARY).plist || true
-	[ -x /bin/launchctl ] && [ -f /Library/LaunchAgents/com.github.davidnewhall.$(BINARY).plist ] \
-		&& /bin/launchctl unload /Library/LaunchAgents/com.github.davidnewhall.$(BINARY).plist || true
+	[ -x /bin/launchctl ] && [ -f ~/Library/LaunchAgents/$(OSX_PKG_PREFIX).$(BINARY).plist ] \
+		&& /bin/launchctl unload ~/Library/LaunchAgents/$(OSX_PKG_PREFIX).$(BINARY).plist || true
+	[ -x /bin/launchctl ] && [ -f /Library/LaunchAgents/$(OSX_PKG_PREFIX).$(BINARY).plist ] \
+		&& /bin/launchctl unload /Library/LaunchAgents/$(OSX_PKG_PREFIX).$(BINARY).plist || true
 	rm -rf /usr/local/{etc,bin,share/doc}/$(BINARY)
-	rm -f ~/Library/LaunchAgents/com.github.davidnewhall.$(BINARY).plist
-	rm -f /Library/LaunchAgents/com.github.davidnewhall.$(BINARY).plist || true
+	rm -f ~/Library/LaunchAgents/$(OSX_PKG_PREFIX).$(BINARY).plist
+	rm -f /Library/LaunchAgents/$(OSX_PKG_PREFIX).$(BINARY).plist || true
 	rm -f /etc/systemd/system/$(BINARY).service /usr/local/share/man/man1/$(BINARY).1.gz
 	[ -x /bin/systemctl ] && /bin/systemctl --system daemon-reload || true
-	@[ -f /Library/LaunchAgents/com.github.davidnewhall.$(BINARY).plist ] && echo "  ==> Unload and delete this file manually:" && echo "  sudo launchctl unload /Library/LaunchAgents/com.github.davidnewhall.$(BINARY).plist" && echo "  sudo rm -f /Library/LaunchAgents/com.github.davidnewhall.$(BINARY).plist" || true
+	@[ -f /Library/LaunchAgents/$(OSX_PKG_PREFIX).$(BINARY).plist ] && echo "  ==> Unload and delete this file manually:" && echo "  sudo launchctl unload /Library/LaunchAgents/$(OSX_PKG_PREFIX).$(BINARY).plist" && echo "  sudo rm -f /Library/LaunchAgents/$(OSX_PKG_PREFIX).$(BINARY).plist" || true
 
 # Don't run this unless you're ready to debug untested vendored dependencies.
 deps:
