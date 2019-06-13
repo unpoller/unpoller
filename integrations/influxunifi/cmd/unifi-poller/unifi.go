@@ -11,8 +11,8 @@ import (
 )
 
 // CheckSites makes sure the list of provided sites exists on the controller.
-func (c *Config) CheckSites(controller *unifi.Unifi) error {
-	sites, err := controller.GetSites()
+func (u *UnifiPoller) CheckSites() error {
+	sites, err := u.GetSites()
 	if err != nil {
 		return err
 	}
@@ -20,12 +20,12 @@ func (c *Config) CheckSites(controller *unifi.Unifi) error {
 	for _, site := range sites {
 		msg = append(msg, site.Name+" ("+site.Desc+")")
 	}
-	c.Logf("Found %d site(s) on controller: %v", len(msg), strings.Join(msg, ", "))
-	if StringInSlice("all", c.Sites) {
+	u.Logf("Found %d site(s) on controller: %v", len(msg), strings.Join(msg, ", "))
+	if StringInSlice("all", u.Sites) {
 		return nil
 	}
 FIRST:
-	for _, s := range c.Sites {
+	for _, s := range u.Sites {
 		for _, site := range sites {
 			if s == site.Name {
 				continue FIRST
@@ -36,28 +36,28 @@ FIRST:
 	return nil
 }
 
-// PollUnifiController runs forever, polling and pushing.
-func (c *Config) PollUnifiController(controller *unifi.Unifi, infdb influx.Client) {
-	log.Println("[INFO] Everything checks out! Poller started, interval:", c.Interval.value)
-	ticker := time.NewTicker(c.Interval.value)
+// PollController runs forever, polling unifi, and pushing to influx.
+func (u *UnifiPoller) PollController() {
+	log.Println("[INFO] Everything checks out! Poller started, interval:", u.Interval.value)
+	ticker := time.NewTicker(u.Interval.value)
 
 	for range ticker.C {
 		// Get the sites we care about.
-		sites, err := filterSites(controller, c.Sites)
+		sites, err := u.filterSites(u.Sites)
 		if err != nil {
 			logErrors([]error{err}, "uni.GetSites()")
 		}
 		// Get all the points.
-		clients, err := controller.GetClients(sites)
+		clients, err := u.GetClients(sites)
 		if err != nil {
 			logErrors([]error{err}, "uni.GetClients()")
 		}
-		devices, err := controller.GetDevices(sites)
+		devices, err := u.GetDevices(sites)
 		if err != nil {
 			logErrors([]error{err}, "uni.GetDevices()")
 		}
 		// Make a new Points Batcher.
-		bp, err := influx.NewBatchPoints(influx.BatchPointsConfig{Database: c.InfluxDB})
+		bp, err := influx.NewBatchPoints(influx.BatchPointsConfig{Database: u.InfluxDB})
 		if err != nil {
 			logErrors([]error{err}, "influx.NewBatchPoints")
 			continue
@@ -66,9 +66,10 @@ func (c *Config) PollUnifiController(controller *unifi.Unifi, infdb influx.Clien
 		if errs := batchPoints(devices, clients, bp); errs != nil && hasErr(errs) {
 			logErrors(errs, "asset.Points()")
 		}
-		if err := infdb.Write(bp); err != nil {
+		if err := u.Write(bp); err != nil {
 			logErrors([]error{err}, "infdb.Write(bp)")
 		}
+
 		// Talk about the data.
 		var fieldcount, pointcount int
 		for _, p := range bp.Points() {
@@ -76,7 +77,7 @@ func (c *Config) PollUnifiController(controller *unifi.Unifi, infdb influx.Clien
 			i, _ := p.Fields()
 			fieldcount += len(i)
 		}
-		c.Logf("Unifi Measurements Recorded. Sites: %d Clients: %d, "+
+		u.Logf("Unifi Measurements Recorded. Sites: %d Clients: %d, "+
 			"Wireless APs: %d, Gateways: %d, Switches: %d, Points: %d, Fields: %d",
 			len(sites), len(clients.UCLs),
 			len(devices.UAPs), len(devices.USGs), len(devices.USWs), pointcount, fieldcount)
@@ -117,8 +118,8 @@ func batchPoints(devices *unifi.Devices, clients *unifi.Clients, bp influx.Batch
 
 // filterSites returns a list of sites to fetch data for.
 // Omits requested but unconfigured sites.
-func filterSites(controller *unifi.Unifi, filter []string) ([]unifi.Site, error) {
-	sites, err := controller.GetSites()
+func (u *UnifiPoller) filterSites(filter []string) ([]unifi.Site, error) {
+	sites, err := u.GetSites()
 	if err != nil {
 		return nil, err
 	} else if len(filter) < 1 || StringInSlice("all", filter) {
