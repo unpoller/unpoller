@@ -70,56 +70,56 @@ func (u *UnifiPoller) GetConfig() error {
 }
 
 // Run invokes all the application logic and routines.
-func (u *UnifiPoller) Run() error {
-	c := u.Config
+func (u *UnifiPoller) Run() (err error) {
 	if u.DumpJSON != "" {
-		return c.DumpJSON(u.DumpJSON)
+		return u.DumpJSONPayload()
 	}
-	if log.SetFlags(0); c.Debug {
+	if log.SetFlags(0); u.Debug {
 		log.SetFlags(log.Lshortfile | log.Lmicroseconds | log.Ldate)
 		log.Println("[DEBUG] Debug Logging Enabled")
 	}
 	log.Printf("[INFO] Unifi-Poller v%v Starting Up! PID: %d", Version, os.Getpid())
-	controller, err := c.GetController()
-	if err != nil {
+
+	if err = u.GetUnifi(); err != nil {
 		return err
 	}
-	infdb, err := c.GetInfluxDB()
-	if err != nil {
+	if err = u.GetInfluxDB(); err != nil {
 		return err
 	}
-	c.PollUnifiController(controller, infdb)
+	u.PollController()
 	return nil
 }
 
-func (c *Config) GetInfluxDB() (influx.Client, error) {
-	infdb, err := influx.NewHTTPClient(influx.HTTPConfig{
-		Addr:     c.InfluxURL,
-		Username: c.InfluxUser,
-		Password: c.InfluxPass,
+// GetInfluxDB returns an influxdb interface.
+func (u *UnifiPoller) GetInfluxDB() (err error) {
+	u.Client, err = influx.NewHTTPClient(influx.HTTPConfig{
+		Addr:     u.InfluxURL,
+		Username: u.InfluxUser,
+		Password: u.InfluxPass,
 	})
 	if err != nil {
-		return nil, errors.Wrap(err, "influxdb")
+		return errors.Wrap(err, "influxdb")
 	}
-	c.Logf("Logging Measurements to InfluxDB at %s as user %s", c.InfluxURL, c.InfluxUser)
-	return infdb, nil
+	u.Logf("Logging Measurements to InfluxDB at %s as user %s", u.InfluxURL, u.InfluxUser)
+	return nil
 }
 
-func (c *Config) GetController() (*unifi.Unifi, error) {
+// GetUnifi returns a Unifi controller interface.
+func (u *UnifiPoller) GetUnifi() (err error) {
 	// Create an authenticated session to the Unifi Controller.
-	controller, err := unifi.NewUnifi(c.UnifiUser, c.UnifiPass, c.UnifiBase, c.VerifySSL)
+	u.Unifi, err = unifi.NewUnifi(u.UnifiUser, u.UnifiPass, u.UnifiBase, u.VerifySSL)
 	if err != nil {
-		return nil, errors.Wrap(err, "unifi controller")
+		return errors.Wrap(err, "unifi controller")
 	}
-	controller.ErrorLog = log.Printf // Log all errors.
+	u.Unifi.ErrorLog = log.Printf // Log all errors.
 	// Doing it this way allows debug error logs (line numbers, etc)
-	if c.Debug && !c.Quiet {
-		controller.DebugLog = log.Printf // Log debug messages.
+	if u.Debug && !u.Quiet {
+		u.Unifi.DebugLog = log.Printf // Log debug messages.
 	}
-	c.Logf("Authenticated to Unifi Controller at %s as user %s", c.UnifiBase, c.UnifiUser)
-	if err := c.CheckSites(controller); err != nil {
-		return nil, err
+	u.Logf("Authenticated to Unifi Controller at %s as user %s", u.UnifiBase, u.UnifiUser)
+	if err = u.CheckSites(); err != nil {
+		return err
 	}
-	c.Logf("Polling Unifi Controller Sites: %v", c.Sites)
-	return controller, nil
+	u.Logf("Polling Unifi Controller Sites: %v", u.Sites)
+	return nil
 }
