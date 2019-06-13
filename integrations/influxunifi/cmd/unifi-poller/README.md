@@ -5,6 +5,8 @@ unifi-poller(1) -- Utility to poll UniFi Controller Metrics and store them in In
 
 `unifi-poller -c /etc/unifi-poller.conf`
 
+This daemon polls a Unifi controller at a short interval and stores the collected measurements in an Influx Database.
+
 ## DESCRIPTION
 
 * This application polls a Unifi Controller API for Client and Device Metrics.
