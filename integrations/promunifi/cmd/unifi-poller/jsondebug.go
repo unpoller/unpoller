@@ -21,7 +21,7 @@ func (c *Config) DumpJSON(filter string) error {
 		return err
 	}
 	controller.ErrorLog = func(m string, v ...interface{}) {
-		fmt.Fprintf(os.Stderr, m, v...)
+		fmt.Fprintf(os.Stderr, "[ERROR] "+m, v...)
 	} // Log all errors to stderr.
 
 	switch sites, err := filterSites(controller, c.Sites); {
@@ -34,10 +34,6 @@ func (c *Config) DumpJSON(filter string) error {
 	default:
 		return errors.New("must provide filter: devices, clients")
 	}
-}
-
-func errorLog(m string, v ...interface{}) {
-	fmt.Fprintf(os.Stderr, m, v...)
 }
 
 // DumpClientsJSON prints the raw json for clients in a Unifi Controller.
