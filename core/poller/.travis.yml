@@ -10,7 +10,7 @@ go:
 - 1.12.x
 before_install:
 - mkdir -p $GOPATH/bin
-  # This deploy is not used atm.
+  # This deploy key is not used atm.
 - openssl aes-256-cbc -K $encrypted_9f3147001275_key -iv $encrypted_9f3147001275_iv -in .github_deploy_key.enc -out github_deploy_key -d
 - chmod 600 github_deploy_key
 - eval $(ssh-agent -s)
@@ -26,13 +26,19 @@ install:
 script:
 - rvm $brew_ruby do make release
 deploy:
-  provider: releases
-  api_key:
-    secure: GsvW0m+EnRELQMk8DjH63VXinqbwse4FJ4vNUslOE6CZ8PBXPrH0ZgaI7ic/uxRtm7CYj0sir4CZq62W5l6uhoXCCQfjOnmJspqnQcrFZ1xRdWktsNXaRwM6hlzaUThsJ/1PD9Psc66uKXBYTg0IlUz0yjZAZk7tCUE4libuj41z40ZKxUcbfcNvH4Njc9IpNB4QSA3ss+a9/6ZwBz4tHVamsGIrzaE0Zf99ItNBYvaOwhM2rC/NWIsFmwt8w4rIA2NIrkZgMDV+Z2Niqh4JRLAWCQNx/RjC5U52lG2yhqivUC3TromZ+q4O4alUltsyIzF2nVanLWgJmbeFo8uXT5A+gd3ovSkFLU9medXd9i4kap7kN/o5m9p5QZvrdEYHEmIU4ml5rjT2EQQVy5CtSmpiRAbhpEJIvA1wDtRq8rdz8IVfJXkHNjg2XdouNmMMWqa3OkEPw21+uxsqv4LscW/6ZjsavzL5SSdnBRU9n79EfGJE/tJLKiNumah/vLuJ5buNhgqmCdtX/Tg+DhQS1BOyYg4l4L8s9IIKZgFRwrOPsZnA/KsrWg4ZsjJ87cqKCaT/qs2EJx5odZcZWJYLBngeO8Tc6cQtLgJdieY2oEKo51Agq4rgikZDt21m6TY9/R5lPN0piwdpy3ZGKfv1ijXx74raMT03qskputzMCvc=
-  overwrite: true
-  skip_cleanup: true
-  file_glob: true
-  file: release/*
-  on:
-    repo: davidnewhall/unifi-poller
-    tags: true
+  - provider: releases
+    api_key:
+      secure: GsvW0m+EnRELQMk8DjH63VXinqbwse4FJ4vNUslOE6CZ8PBXPrH0ZgaI7ic/uxRtm7CYj0sir4CZq62W5l6uhoXCCQfjOnmJspqnQcrFZ1xRdWktsNXaRwM6hlzaUThsJ/1PD9Psc66uKXBYTg0IlUz0yjZAZk7tCUE4libuj41z40ZKxUcbfcNvH4Njc9IpNB4QSA3ss+a9/6ZwBz4tHVamsGIrzaE0Zf99ItNBYvaOwhM2rC/NWIsFmwt8w4rIA2NIrkZgMDV+Z2Niqh4JRLAWCQNx/RjC5U52lG2yhqivUC3TromZ+q4O4alUltsyIzF2nVanLWgJmbeFo8uXT5A+gd3ovSkFLU9medXd9i4kap7kN/o5m9p5QZvrdEYHEmIU4ml5rjT2EQQVy5CtSmpiRAbhpEJIvA1wDtRq8rdz8IVfJXkHNjg2XdouNmMMWqa3OkEPw21+uxsqv4LscW/6ZjsavzL5SSdnBRU9n79EfGJE/tJLKiNumah/vLuJ5buNhgqmCdtX/Tg+DhQS1BOyYg4l4L8s9IIKZgFRwrOPsZnA/KsrWg4ZsjJ87cqKCaT/qs2EJx5odZcZWJYLBngeO8Tc6cQtLgJdieY2oEKo51Agq4rgikZDt21m6TY9/R5lPN0piwdpy3ZGKfv1ijXx74raMT03qskputzMCvc=
+    overwrite: true
+    skip_cleanup: true
+    file_glob: true
+    file: release/*
+    on:
+      repo: davidnewhall/unifi-poller
+      tags: true
+  - provider: script
+    script: scripts/formula-deploy.sh ${TRAVIS_TAG}
+    on:
+      repo: davidnewhall/unifi-poller
+      tags: true
+secure: "0yBdTabuF8LM8nQ8hSF1wjigQawal9N/v2NlR62oioMvzqWOy0zKo8R+mcfHK+pCByx0Ki/VWslms/WBKQnQvolGKY32UOg2cJvoVMoOemcwaezLK0kGZt8+O83ZQLr0CsiuzLQxJoqjiYf8ca6N2tjDFIowLPzSNPQR32mAP8cTe5fkxKyFAXgmA41BkzWMTx/V9R6udcX+Oofi8tpIZv1fyqSMNVlItHLxLFeP7F/r6OSM/Y87abAOt1U/ugPDufCL1MpmjRNhkL+NnHajSI30RsHFMv0c96hV3Va2g1VXrEVTB3F/0HhwBd9vwWwmiAGDMP/Nh7WfkQjHgHYCWVlbYgEdZj3rxeP9p14WEki3VavW2tZENjXoHpJswcT3UhB2m49p+pyV9NbzxZKeJDa2oniYBA9RfCrIURUIDI9Mk7vb+SVdcwx8JioiOebo568eRNHFI66KmQFrCGs+ZSuGFMk2ftaqhHSSctaD14EXzIurmWernw8xwmJAyiyBx6bKUIF969lBPlLVVCbl86ekNjm5xPxCaUM+Evugzo6nGsGckEUor85Ej54Q8qcxO/3m12F6gbHaEUUVK1splk+3dvDrSTZ6zJ+opxKkFph1MLjqQOIwqGU6DMMKy0JxMusjRg8n135LQQ/V05+Mzci4AF+kctidKfE42JDt5vA="
