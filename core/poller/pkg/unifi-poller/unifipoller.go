@@ -1,4 +1,4 @@
-package main
+package unifipoller
 
 import (
 	"fmt"
@@ -12,21 +12,6 @@ import (
 	"github.com/pkg/errors"
 	flag "github.com/spf13/pflag"
 )
-
-func main() {
-	u := &UnifiPoller{}
-	if u.ParseFlags(os.Args[1:]); u.ShowVer {
-		fmt.Printf("unifi-poller v%s\n", Version)
-		return // don't run anything else.
-	}
-	if err := u.GetConfig(); err != nil {
-		u.Flag.Usage()
-		log.Fatalf("[ERROR] config file '%v': %v", u.ConfigFile, err)
-	}
-	if err := u.Run(); err != nil {
-		log.Fatalln("[ERROR]", err)
-	}
-}
 
 // ParseFlags runs the parser.
 func (u *UnifiPoller) ParseFlags(args []string) {
