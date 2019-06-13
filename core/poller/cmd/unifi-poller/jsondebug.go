@@ -24,7 +24,8 @@ func (c *Config) DumpJSON(filter string) error {
 		fmt.Fprintf(os.Stderr, "[ERROR] "+m, v...)
 	} // Log all errors to stderr.
 
-	switch sites, err := filterSites(controller, c.Sites); {
+	sites, err := filterSites(controller, c.Sites)
+	switch {
 	case err != nil:
 		return err
 	case StringInSlice(filter, []string{"d", "device", "devices"}):
