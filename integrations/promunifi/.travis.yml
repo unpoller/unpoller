@@ -10,11 +10,6 @@ go:
 - 1.12.x
 before_install:
 - mkdir -p $GOPATH/bin
-  # This deploy key is not used atm.
-- openssl aes-256-cbc -K $encrypted_9f3147001275_key -iv $encrypted_9f3147001275_iv -in .github_deploy_key.enc -out github_deploy_key -d
-- chmod 600 github_deploy_key
-- eval $(ssh-agent -s)
-- ssh-add github_deploy_key
   # Download the `dep` binary to bin folder in $GOPATH
 - curl -sLo $GOPATH/bin/dep https://github.com/golang/dep/releases/download/v0.5.3/dep-darwin-amd64
 - chmod +x $GOPATH/bin/dep
@@ -25,6 +20,13 @@ install:
 - rvm $brew_ruby do gem install --no-document fpm
 script:
 - rvm $brew_ruby do make release
+# get deploy key for golift/homebrew-repo.
+after_success:
+  - |
+      openssl aes-256-cbc -K $encrypted_9f3147001275_key -iv $encrypted_9f3147001275_iv -in github_deploy_key.enc -out github_deploy_key -d
+      $(npm bin)/set-up-ssh --key "$encrypted_9f3147001275_key" \
+                   --iv "$encrypted_9f3147001275_iv" \
+                   --path-encrypted-key ".travis/github_deploy_key.enc"
 deploy:
   - provider: releases
     api_key:
@@ -39,5 +41,9 @@ deploy:
   - provider: script
     script: scripts/formula-deploy.sh
     on:
+      all_branches: true
       repo: davidnewhall/unifi-poller
-    secure: "0yBdTabuF8LM8nQ8hSF1wjigQawal9N/v2NlR62oioMvzqWOy0zKo8R+mcfHK+pCByx0Ki/VWslms/WBKQnQvolGKY32UOg2cJvoVMoOemcwaezLK0kGZt8+O83ZQLr0CsiuzLQxJoqjiYf8ca6N2tjDFIowLPzSNPQR32mAP8cTe5fkxKyFAXgmA41BkzWMTx/V9R6udcX+Oofi8tpIZv1fyqSMNVlItHLxLFeP7F/r6OSM/Y87abAOt1U/ugPDufCL1MpmjRNhkL+NnHajSI30RsHFMv0c96hV3Va2g1VXrEVTB3F/0HhwBd9vwWwmiAGDMP/Nh7WfkQjHgHYCWVlbYgEdZj3rxeP9p14WEki3VavW2tZENjXoHpJswcT3UhB2m49p+pyV9NbzxZKeJDa2oniYBA9RfCrIURUIDI9Mk7vb+SVdcwx8JioiOebo568eRNHFI66KmQFrCGs+ZSuGFMk2ftaqhHSSctaD14EXzIurmWernw8xwmJAyiyBx6bKUIF969lBPlLVVCbl86ekNjm5xPxCaUM+Evugzo6nGsGckEUor85Ej54Q8qcxO/3m12F6gbHaEUUVK1splk+3dvDrSTZ6zJ+opxKkFph1MLjqQOIwqGU6DMMKy0JxMusjRg8n135LQQ/V05+Mzci4AF+kctidKfE42JDt5vA="
+env:
+  global:
+    - GH_USER_NAME=unifi-auto-releaser
+    - GH_USER_EMAIL=unifi@auto.releaser
