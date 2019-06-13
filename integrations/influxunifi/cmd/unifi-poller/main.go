@@ -5,8 +5,6 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
-	"strings"
-	"time"
 
 	"github.com/golift/unifi"
 	influx "github.com/influxdata/influxdb1-client/v2"
@@ -15,108 +13,39 @@ import (
 	flag "github.com/spf13/pflag"
 )
 
-// Asset is used to give all devices and clients a common interface.
-type Asset interface {
-	Points() ([]*influx.Point, error)
-}
-
 func main() {
-	configFile := parseFlags()
-	log.Println("Unifi-Poller Starting Up! PID:", os.Getpid())
-	config, err := GetConfig(configFile)
-	if err != nil {
-		flag.Usage()
-		log.Fatalf("[ERROR] config file '%v': %v", configFile, err)
+	u := &UnifiPoller{}
+	if u.ParseFlags(os.Args[1:]); u.ShowVer {
+		fmt.Printf("unifi-poller v%s\n", Version)
+		return // don't run anything else.
 	}
-	if err := config.Run(); err != nil {
+	if err := u.GetConfig(); err != nil {
+		u.Flag.Usage()
+		log.Fatalf("[ERROR] config file '%v': %v", u.ConfigFile, err)
+	}
+	if err := u.Run(); err != nil {
 		log.Fatalln("[ERROR]", err)
 	}
 }
 
-// Run invokes all the application logic and routines.
-func (c *Config) Run() error {
-	// Create an authenticated session to the Unifi Controller.
-	controller, err := unifi.NewUnifi(c.UnifiUser, c.UnifiPass, c.UnifiBase, c.VerifySSL)
-	if err != nil {
-		return errors.Wrap(err, "unifi controller")
-	}
-	if !c.Quiet {
-		log.Println("Authenticated to Unifi Controller @", c.UnifiBase, "as user", c.UnifiUser)
-	}
-	if err := c.CheckSites(controller); err != nil {
-		return err
-	}
-	controller.ErrorLog = log.Printf // Log all errors.
-	if log.SetFlags(0); c.Debug {
-		log.Println("Debug Logging Enabled")
-		log.SetFlags(log.Lshortfile | log.Lmicroseconds | log.Ldate)
-		controller.DebugLog = log.Printf // Log debug messages.
-	}
-	infdb, err := influx.NewHTTPClient(influx.HTTPConfig{
-		Addr:     c.InfluxURL,
-		Username: c.InfluxUser,
-		Password: c.InfluxPass,
-	})
-	if err != nil {
-		return errors.Wrap(err, "influxdb")
-	}
-	if c.Quiet {
-		// Doing it this way allows debug error logs (line numbers, etc)
-		controller.DebugLog = nil
-	} else {
-		log.Println("Logging Unifi Metrics to InfluXDB @", c.InfluxURL, "as user", c.InfluxUser)
-		log.Printf("Polling Unifi Controller (sites %v), interval: %v", c.Sites, c.Interval.value)
-	}
-	c.PollUnifiController(controller, infdb)
-	return nil
-}
-
-func parseFlags() string {
-	flag.Usage = func() {
+// ParseFlags runs the parser.
+func (u *UnifiPoller) ParseFlags(args []string) {
+	u.Flag = flag.NewFlagSet("unifi-poller", flag.ExitOnError)
+	u.Flag.Usage = func() {
 		fmt.Println("Usage: unifi-poller [--config=filepath] [--version]")
-		flag.PrintDefaults()
+		u.Flag.PrintDefaults()
 	}
-	configFile := flag.StringP("config", "c", defaultConfFile, "Poller Config File (TOML Format)")
-	version := flag.BoolP("version", "v", false, "Print the version and exit")
-	if flag.Parse(); *version {
-		fmt.Printf("unifi-poller v%s\n", Version)
-		os.Exit(0) // don't run anything else.
-	}
-	return *configFile
-}
-
-// CheckSites makes sure the list of provided sites exists on the controller.
-func (c *Config) CheckSites(controller *unifi.Unifi) error {
-	sites, err := controller.GetSites()
-	if err != nil {
-		return err
-	}
-	if !c.Quiet {
-		msg := []string{}
-		for _, site := range sites {
-			msg = append(msg, site.Name+" ("+site.Desc+")")
-		}
-		log.Printf("Found %d site(s) on controller: %v", len(msg), strings.Join(msg, ", "))
-	}
-	if StringInSlice("all", c.Sites) {
-		return nil
-	}
-FIRST:
-	for _, s := range c.Sites {
-		for _, site := range sites {
-			if s == site.Name {
-				continue FIRST
-			}
-		}
-		return errors.Errorf("configured site not found on controller: %v", s)
-	}
-	return nil
+	u.Flag.StringVarP(&u.DumpJSON, "dumpjson", "j", "",
+		"This debug option prints the json payload for a device and exits.")
+	u.Flag.StringVarP(&u.ConfigFile, "config", "c", defaultConfFile, "Poller Config File (TOML Format)")
+	u.Flag.BoolVarP(&u.ShowVer, "version", "v", false, "Print the version and exit")
+	_ = u.Flag.Parse(args)
 }
 
 // GetConfig parses and returns our configuration data.
-func GetConfig(configFile string) (Config, error) {
+func (u *UnifiPoller) GetConfig() error {
 	// Preload our defaults.
-	config := Config{
+	u.Config = &Config{
 		InfluxURL:  defaultInfxURL,
 		InfluxUser: defaultInfxUser,
 		InfluxPass: defaultInfxPass,
@@ -127,131 +56,70 @@ func GetConfig(configFile string) (Config, error) {
 		Interval:   Dur{value: defaultInterval},
 		Sites:      []string{"default"},
 	}
-	if buf, err := ioutil.ReadFile(configFile); err != nil {
-		return config, err
+	if buf, err := ioutil.ReadFile(u.ConfigFile); err != nil {
+		return err
 		// This is where the defaults in the config variable are overwritten.
-	} else if err := toml.Unmarshal(buf, &config); err != nil {
-		return config, err
+	} else if err := toml.Unmarshal(buf, u.Config); err != nil {
+		return err
 	}
-	log.Println("Loaded Configuration:", configFile)
-	return config, nil
+	if u.DumpJSON != "" {
+		u.Quiet = true
+	}
+	u.Config.Logf("Loaded Configuration: %s", u.ConfigFile)
+	return nil
 }
 
-// PollUnifiController runs forever, polling and pushing.
-func (c *Config) PollUnifiController(controller *unifi.Unifi, infdb influx.Client) {
-	log.Println("[INFO] Everything checks out! Beginning Poller Routine.")
-	ticker := time.NewTicker(c.Interval.value)
-
-	for range ticker.C {
-		sites, err := filterSites(controller, c.Sites)
-		if err != nil {
-			logErrors([]error{err}, "uni.GetSites()")
-		}
-		// Get all the points.
-		clients, err := controller.GetClients(sites)
-		if err != nil {
-			logErrors([]error{err}, "uni.GetClients()")
-		}
-		devices, err := controller.GetDevices(sites)
-		if err != nil {
-			logErrors([]error{err}, "uni.GetDevices()")
-		}
-		bp, err := influx.NewBatchPoints(influx.BatchPointsConfig{Database: c.InfluxDB})
-		if err != nil {
-			logErrors([]error{err}, "influx.NewBatchPoints")
-			continue
-		}
-		// Batch all the points.
-		if errs := batchPoints(devices, clients, bp); errs != nil && hasErr(errs) {
-			logErrors(errs, "asset.Points()")
-		}
-		if err := infdb.Write(bp); err != nil {
-			logErrors([]error{err}, "infdb.Write(bp)")
-		}
-		if !c.Quiet {
-			log.Printf("[INFO] Logged Unifi States. Sites: %d Clients: %d, Wireless APs: %d, Gateways: %d, Switches: %d",
-				len(sites), len(clients.UCLs), len(devices.UAPs), len(devices.USGs), len(devices.USWs))
-		}
+// Run invokes all the application logic and routines.
+func (u *UnifiPoller) Run() (err error) {
+	if u.DumpJSON != "" {
+		return u.DumpJSONPayload()
 	}
+	if log.SetFlags(0); u.Debug {
+		log.SetFlags(log.Lshortfile | log.Lmicroseconds | log.Ldate)
+		log.Println("[DEBUG] Debug Logging Enabled")
+	}
+	log.Printf("[INFO] Unifi-Poller v%v Starting Up! PID: %d", Version, os.Getpid())
+
+	if err = u.GetUnifi(); err != nil {
+		return err
+	}
+	if err = u.GetInfluxDB(); err != nil {
+		return err
+	}
+	u.PollController()
+	return nil
 }
 
-// filterSites returns a list of sites to fetch data for.
-// Omits requested but unconfigured sites.
-func filterSites(controller *unifi.Unifi, filter []string) ([]unifi.Site, error) {
-	sites, err := controller.GetSites()
+// GetInfluxDB returns an influxdb interface.
+func (u *UnifiPoller) GetInfluxDB() (err error) {
+	u.Client, err = influx.NewHTTPClient(influx.HTTPConfig{
+		Addr:     u.InfluxURL,
+		Username: u.InfluxUser,
+		Password: u.InfluxPass,
+	})
 	if err != nil {
-		return nil, err
-	} else if len(filter) < 1 || StringInSlice("all", filter) {
-		return sites, nil
+		return errors.Wrap(err, "influxdb")
 	}
-	var i int
-	for _, s := range sites {
-		// Only include valid sites in the request filter.
-		if StringInSlice(s.Name, filter) {
-			sites[i] = s
-			i++
-		}
-	}
-	return sites[:i], nil
+	u.Logf("Logging Measurements to InfluxDB at %s as user %s", u.InfluxURL, u.InfluxUser)
+	return nil
 }
 
-// batchPoints combines all device and client data into influxdb data points.
-func batchPoints(devices *unifi.Devices, clients *unifi.Clients, bp influx.BatchPoints) (errs []error) {
-	process := func(asset Asset) error {
-		if asset == nil {
-			return nil
-		}
-		influxPoints, err := asset.Points()
-		if err != nil {
-			return err
-		}
-		bp.AddPoints(influxPoints)
-		return nil
+// GetUnifi returns a Unifi controller interface.
+func (u *UnifiPoller) GetUnifi() (err error) {
+	// Create an authenticated session to the Unifi Controller.
+	u.Unifi, err = unifi.NewUnifi(u.UnifiUser, u.UnifiPass, u.UnifiBase, u.VerifySSL)
+	if err != nil {
+		return errors.Wrap(err, "unifi controller")
 	}
-	if devices != nil {
-		for _, asset := range devices.UAPs {
-			errs = append(errs, process(asset))
-		}
-		for _, asset := range devices.USGs {
-			errs = append(errs, process(asset))
-		}
-		for _, asset := range devices.USWs {
-			errs = append(errs, process(asset))
-		}
+	u.Unifi.ErrorLog = log.Printf // Log all errors.
+	// Doing it this way allows debug error logs (line numbers, etc)
+	if u.Debug && !u.Quiet {
+		u.Unifi.DebugLog = log.Printf // Log debug messages.
 	}
-	if clients != nil {
-		for _, asset := range clients.UCLs {
-			errs = append(errs, process(asset))
-		}
+	u.Logf("Authenticated to Unifi Controller at %s as user %s", u.UnifiBase, u.UnifiUser)
+	if err = u.CheckSites(); err != nil {
+		return err
 	}
-	return
-}
-
-// hasErr checks a list of errors for a non-nil.
-func hasErr(errs []error) bool {
-	for _, err := range errs {
-		if err != nil {
-			return true
-		}
-	}
-	return false
-}
-
-// logErrors writes a slice of errors, with a prefix, to log-out.
-func logErrors(errs []error, prefix string) {
-	for _, err := range errs {
-		if err != nil {
-			log.Println("[ERROR]", prefix+":", err.Error())
-		}
-	}
-}
-
-// StringInSlice returns true if a string is in a slice.
-func StringInSlice(str string, slc []string) bool {
-	for _, s := range slc {
-		if strings.EqualFold(s, str) {
-			return true
-		}
-	}
-	return false
+	u.Logf("Polling Unifi Controller Sites: %v", u.Sites)
+	return nil
 }
