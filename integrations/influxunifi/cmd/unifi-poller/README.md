@@ -24,9 +24,9 @@ unifi-poller(1) -- Utility to poll UniFi Controller Metrics and store them in In
     -j, --dumpjson <filter>
         This is a debug option; use this when you are missing data in your graphs,
         and/or you want to inspect the raw data coming from the controller. The
-        filter only accept two options: devices or clients. This will print a lot
+        filter only accepts two options: devices or clients. This will print a lot
         of information. Recommend piping it into a file and/or into jq for better
-        visualization. This requires a working config file that; one that contains
+        visualization. This requires a valid config file that; one that contains
         working authentication details for a Unifi Controller. This only dumps
         data for sites listed in the config file. The application exits after
         printing the JSON payload; it does not daemonize or report to InfluxDB
