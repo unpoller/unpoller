@@ -12,7 +12,7 @@ func main() {
 	u := &unifipoller.UnifiPoller{}
 	if u.ParseFlags(os.Args[1:]); u.ShowVer {
 		fmt.Printf("unifi-poller v%s\n", unifipoller.Version)
-		return // don't run anything else.
+		return // don't run anything else w/ version request.
 	}
 	if err := u.GetConfig(); err != nil {
 		u.Flag.Usage()
