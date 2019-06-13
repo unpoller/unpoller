@@ -21,7 +21,7 @@ install:
 - rvm $brew_ruby do gem install --no-document fpm
 script:
 - rvm $brew_ruby do make release
-# get deploy key for golift/homebrew-repo.
+# get deploy key for golift/homebrew-mugs.
 after_success:
   - |
       declare -r SSH_FILE="$(mktemp -u $HOME/.ssh/XXXXX)"
