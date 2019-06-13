@@ -3,7 +3,7 @@
 # Deploys a new unifi-poller.rb  formula file to golift/homebrew-tap.
 
 make unifi-poller.rb
-VERSION=$(grep '^\s*version\s*"' unifi-poller.rb | cut -d\" -f 2)
+VERSION=$(grep -E '^\s*version\s*"' unifi-poller.rb | cut -d\" -f 2)
 
 git config user.name "unifi-poller-bot"
 git config user.email "unifi@poller.bot"
@@ -16,5 +16,5 @@ pushd homebrew-repo
 echo "Showing diff:"
 git diff
 git commit -m "Update unifi-poller on Release: v${VERSION}" Formula/unifi-poller.rb
-#git push
+git push
 popd
