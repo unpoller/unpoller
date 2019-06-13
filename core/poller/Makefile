@@ -131,7 +131,7 @@ package_build_osx: readme man macos
 	cp $(BINARY).macos $@/usr/local/bin/$(BINARY)
 	cp *.1.gz $@/usr/local/share/man/man1
 	cp examples/*.conf.example $@/usr/local/etc/$(BINARY)/
-	cp *.html examples/{*dash.json,up.conf.example} $@/usr/local/share/doc/$(BINARY)/
+	cp LICENSE *.html examples/{*dash.json,up.conf.example} $@/usr/local/share/doc/$(BINARY)/
 	# These go to their own folder so the img src in the html pages continue to work.
 	cp examples/*.png $@/usr/local/share/doc/$(BINARY)/examples
 	cp init/launchd/$(OSX_PKG_PREFIX).$(BINARY).plist $@/Library/LaunchAgents/
@@ -146,7 +146,7 @@ package_build_linux: readme man linux
 	cp *.1.gz $@/usr/share/man/man1
 	cp examples/*.conf.example $@/etc/$(BINARY)/
 	cp examples/up.conf.example $@/etc/$(BINARY)/up.conf
-	cp *.html examples/{*dash.json,up.conf.example} $@/usr/share/doc/$(BINARY)/
+	cp LICENSE *.html examples/{*dash.json,up.conf.example} $@/usr/share/doc/$(BINARY)/
 	# These go to their own folder so the img src in the html pages continue to work.
 	cp examples/*.png $@/usr/share/doc/$(BINARY)/examples
 	cp init/systemd/$(BINARY).service $@/lib/systemd/system/
@@ -189,7 +189,7 @@ install: man readme $(BINARY)
 	/usr/bin/install -m 0644 -cp $(BINARY).1.gz $(PREFIX)/share/man/man1
 	/usr/bin/install -m 0644 -cp examples/up.conf.example $(ETC)/$(BINARY)/
 	[ -f $(ETC)/$(BINARY)/up.conf ] || /usr/bin/install -m 0644 -cp  examples/up.conf.example $(ETC)/$(BINARY)/up.conf
-	/usr/bin/install -m 0644 -cp *.html examples/{*dash.json,up.conf.example} $(PREFIX)/share/doc/$(BINARY)/
+	/usr/bin/install -m 0644 -cp LICENSE *.html examples/{*dash.json,up.conf.example} $(PREFIX)/share/doc/$(BINARY)/
 	# These go to their own folder so the img src in the html pages continue to work.
 	/usr/bin/install -m 0644 -cp examples/*.png $(PREFIX)/share/doc/$(BINARY)/examples
 
