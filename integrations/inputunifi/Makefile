@@ -179,13 +179,14 @@ install: man readme $(BINARY)
 	@echo -  Otherwise, build and install a package: make rpm -or- make deb
 	@echo See the Package Install wiki for more info: $(URL)/wiki/Package-Install
 	@[ "$$(uname)" = "Darwin" ] || (echo "Unable to continue, not a Mac." && false)
-	@[ "$(PREFIX)" != "" ] || (echo "Unable to continue, PREFIX not set. Use: make install PREFIX=/usr/local" && false)
+	@[ "$(PREFIX)" != "" ] || (echo "Unable to continue, PREFIX not set. Use: make install PREFIX=/usr/local ETC=/usr/local/etc" && false)
+	@[ "$(ETC)" != "" ] || (echo "Unable to continue, ETC not set. Use: make install PREFIX=/usr/local ETC=/usr/local/etc" && false)
 	# Copying the binary, config file, unit file, and man page into the env.
-	/usr/bin/install -m 0755 -d $(PREFIX)/bin $(PREFIX)/share/man/man1 $(PREFIX)/etc/$(BINARY) $(PREFIX)/share/doc/$(BINARY)/examples
+	/usr/bin/install -m 0755 -d $(PREFIX)/bin $(PREFIX)/share/man/man1 $(ETC)/$(BINARY) $(PREFIX)/share/doc/$(BINARY)/examples
 	/usr/bin/install -m 0755 -cp $(BINARY) $(PREFIX)/bin/$(BINARY)
 	/usr/bin/install -m 0644 -cp $(BINARY).1.gz $(PREFIX)/share/man/man1
-	/usr/bin/install -m 0644 -cp examples/up.conf.example $(PREFIX)/etc/$(BINARY)/
-	[ -f $(PREFIX)/etc/$(BINARY)/up.conf ] || /usr/bin/install -m 0644 -cp  examples/up.conf.example $(PREFIX)/etc/$(BINARY)/up.conf
+	/usr/bin/install -m 0644 -cp examples/up.conf.example $(ETC)/$(BINARY)/
+	[ -f $(ETC)/$(BINARY)/up.conf ] || /usr/bin/install -m 0644 -cp  examples/up.conf.example $(ETC)/$(BINARY)/up.conf
 	/usr/bin/install -m 0644 -cp *.html examples/{*dash.json,up.conf.example} $(PREFIX)/share/doc/$(BINARY)/
 	# These go to their own folder so the img src in the html pages continue to work.
 	/usr/bin/install -m 0644 -cp examples/*.png $(PREFIX)/share/doc/$(BINARY)/examples
