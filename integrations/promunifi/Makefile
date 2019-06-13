@@ -13,15 +13,17 @@ ITERATION:=$(shell git rev-list --count HEAD||echo 0)
 OSX_PKG_PREFIX=com.github.davidnewhall
 GOLANGCI_LINT_ARGS=--enable-all -D gochecknoglobals
 
+RPMVERSION:=$(shell echo $(VERSION) | tr -- - _)
+
 all: man build
 
 # Prepare a release. Called in Travis CI.
-release: clean test $(BINARY)-$(VERSION)-$(ITERATION).x86_64.rpm $(BINARY)_$(VERSION)-$(ITERATION)_amd64.deb $(BINARY)-$(VERSION).pkg
+release: clean test $(BINARY)-$(RPMVERSION)-$(ITERATION).x86_64.rpm $(BINARY)_$(VERSION)-$(ITERATION)_amd64.deb $(BINARY)-$(VERSION).pkg
 	# Prepareing a release!
 	mkdir -p release
 	gzip -9 $(BINARY).linux
 	gzip -9 $(BINARY).macos
-	mv $(BINARY)-$(VERSION)-$(ITERATION).x86_64.rpm $(BINARY)_$(VERSION)-$(ITERATION)_amd64.deb \
+	mv $(BINARY)-$(RPMVERSION)-$(ITERATION).x86_64.rpm $(BINARY)_$(VERSION)-$(ITERATION)_amd64.deb \
 		$(BINARY)-$(VERSION).pkg $(BINARY).macos.gz $(BINARY).linux.gz release/
 	# Generating File Hashes
 	openssl dgst -sha256 release/* | tee release/$(BINARY)_checksums_$(VERSION)-$(ITERATION).txt
@@ -72,13 +74,13 @@ $(BINARY).macos:
 
 # Packages
 
-rpm: clean $(BINARY)-$(VERSION)-$(ITERATION).x86_64.rpm
-$(BINARY)-$(VERSION)-$(ITERATION).x86_64.rpm: check_fpm package_build_linux
-	@echo "Building 'rpm' package for $(BINARY) version '$(VERSION)-$(ITERATION)'."
+rpm: clean $(BINARY)-$(RPMVERSION)-$(ITERATION).x86_64.rpm
+$(BINARY)-$(RPMVERSION)-$(ITERATION).x86_64.rpm: check_fpm package_build_linux
+	@echo "Building 'rpm' package for $(BINARY) version '$(RPMVERSION)-$(ITERATION)'."
 	fpm -s dir -t rpm \
 		--name $(BINARY) \
 		--rpm-os linux \
-		--version $(VERSION) \
+		--version $(RPMVERSION) \
 		--iteration $(ITERATION) \
 		--after-install scripts/after-install.sh \
 		--before-remove scripts/before-remove.sh \
