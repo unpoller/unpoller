@@ -6,6 +6,7 @@ URL:=https://github.com/davidnewhall/$(BINARY)
 MAINT=David Newhall II <david at sleepers dot pro>
 DESC=This daemon polls a Unifi controller at a short interval and stores the collected metric data in an Influx Database.
 PACKAGE:=./cmd/$(BINARY)
+LIBRARY:=./pkg/$(BINARY)
 ifeq ($(VERSION),)
 	VERSION:=$(shell git tag -l --merged | tail -n1 | tr -d v||echo development)
 endif
@@ -60,17 +61,17 @@ README.html: md2roff
 
 build: $(BINARY)
 $(BINARY):
-	go build -o $(BINARY) -ldflags "-w -s -X main.Version=$(VERSION)" $(PACKAGE)
+	go build -o $(BINARY) -ldflags "-w -s -X github.com/davidnewhall/unifi-poller/pkg/unifi-poller.Version=$(VERSION)" $(PACKAGE)
 
 linux: $(BINARY).linux
 $(BINARY).linux:
 	# Building linux binary.
-	GOOS=linux go build -o $(BINARY).linux -ldflags "-w -s -X main.Version=$(VERSION)" $(PACKAGE)
+	GOOS=linux go build -o $(BINARY).linux -ldflags "-w -s -X github.com/davidnewhall/unifi-poller/pkg/unifi-poller.Version=$(VERSION)" $(PACKAGE)
 
 macos: $(BINARY).macos
 $(BINARY).macos:
 	# Building darwin binary.
-	GOOS=darwin go build -o $(BINARY).macos -ldflags "-w -s -X main.Version=$(VERSION)" $(PACKAGE)
+	GOOS=darwin go build -o $(BINARY).macos -ldflags "-w -s -X github.com/davidnewhall/unifi-poller/pkg/unifi-poller.Version=$(VERSION)" $(PACKAGE)
 
 # Packages
 
@@ -166,7 +167,7 @@ $(BINARY).rb: v$(VERSION).tar.gz.sha256
 # Run code tests and lint.
 test: lint
 	# Testing.
-	go test -race -covermode=atomic $(PACKAGE)
+	go test -race -covermode=atomic $(LIBRARY)
 lint:
 	# Checking lint.
 	golangci-lint run $(GOLANGCI_LINT_ARGS)
