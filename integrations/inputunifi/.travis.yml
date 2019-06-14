@@ -25,8 +25,9 @@ install:
 - rvm 2.0.0 do gem install --no-document fpm
 - dep ensure
 - docker build -t unifi-poller .
-- docker run -d --name unifi-poller
+- docker run -d --name unifi-poller unifi-poller
 script:
+  # Once we figure out how to keep it running we can remove the -a in ps args.
 - docker ps -a | grep -q unifi-poller
 - rvm 2.0.0 do make release
 # get deploy key for golift/homebrew-mugs.
