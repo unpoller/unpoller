@@ -1,17 +1,19 @@
 language: go
-# so we can build an osx package.
-os: osx
 addons:
-  homebrew:
+  apt:
     packages:
+    - ruby-dev
     - rpm
-    - gnu-tar
+    - build-essential
+    - git
+    - libgnome-keyring-dev
+    - fakeroot
 go:
 - 1.12.x
 before_install:
 - mkdir -p $GOPATH/bin
   # Download the `dep` binary to bin folder in $GOPATH
-- curl -sLo $GOPATH/bin/dep https://github.com/golang/dep/releases/download/v0.5.3/dep-darwin-amd64
+- curl -sLo $GOPATH/bin/dep https://github.com/golang/dep/releases/download/v0.5.3/dep-linux-amd64
 - chmod +x $GOPATH/bin/dep
   # download super-linter: golangci-lint
 - curl -sfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(go env GOPATH)/bin latest

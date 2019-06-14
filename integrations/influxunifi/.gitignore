@@ -4,7 +4,6 @@
 /unifi-poller*.1
 /unifi-poller*.deb
 /unifi-poller*.rpm
-/unifi-poller*.pkg
 /unifi-poller.macos
 /unifi-poller.linux
 /unifi-poller.rb
