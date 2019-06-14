@@ -18,11 +18,12 @@ before_install:
   # download super-linter: golangci-lint
 - curl -sfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(go env GOPATH)/bin latest
 #- curl -sL https://install.goreleaser.com/github.com/golangci/golangci-lint.sh | sh -s -- -b $(go env GOPATH)/bin latest
+- rvm install 2.0.0
 install:
 - dep ensure
-- rvm $brew_ruby do gem install --no-document fpm
+- rvm 2.0.0 do gem install --no-document fpm
 script:
-- rvm $brew_ruby do make release
+- rvm 2.0.0 do make release
 # get deploy key for golift/homebrew-mugs.
 after_success:
   - |
