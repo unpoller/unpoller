@@ -20,13 +20,13 @@ RPMVERSION:=$(shell echo $(VERSION) | tr -- - _)
 all: man build
 
 # Prepare a release. Called in Travis CI.
-release: clean test $(BINARY)-$(RPMVERSION)-$(ITERATION).x86_64.rpm $(BINARY)_$(VERSION)-$(ITERATION)_amd64.deb $(BINARY)-$(VERSION).pkg
+release: clean test $(BINARY)-$(RPMVERSION)-$(ITERATION).x86_64.rpm $(BINARY)_$(VERSION)-$(ITERATION)_amd64.deb macos
 	# Prepareing a release!
 	mkdir -p release
 	gzip -9 $(BINARY).linux
 	gzip -9 $(BINARY).macos
 	mv $(BINARY)-$(RPMVERSION)-$(ITERATION).x86_64.rpm $(BINARY)_$(VERSION)-$(ITERATION)_amd64.deb \
-		$(BINARY)-$(VERSION).pkg $(BINARY).macos.gz $(BINARY).linux.gz release/
+	$(BINARY).macos.gz $(BINARY).linux.gz release/
 	# Generating File Hashes
 	openssl dgst -sha256 release/* | tee release/$(BINARY)_checksums_$(VERSION)-$(ITERATION).txt
 
@@ -34,7 +34,7 @@ release: clean test $(BINARY)-$(RPMVERSION)-$(ITERATION).x86_64.rpm $(BINARY)_$(
 clean:
 	# Cleaning up.
 	rm -f $(BINARY){.macos,.linux,.1,}{,.gz} $(BINARY).rb
-	rm -f $(BINARY){_,-}*.{deb,rpm,pkg} md2roff v*.tar.gz.sha256
+	rm -f $(BINARY){_,-}*.{deb,rpm} md2roff v*.tar.gz.sha256
 	rm -f cmd/$(BINARY)/README{,.html} README{,.html} ./$(BINARY)_manual.html
 	rm -rf package_build_* release
 
