@@ -147,7 +147,7 @@ lint:
 	# Checking lint.
 	golangci-lint run $(GOLANGCI_LINT_ARGS)
 
-# Deprecated.
+# Used for Homebrew only. Other disros can create packages.
 install: man readme $(BINARY)
 	@echo -  Done Building!  -
 	@echo -  Local installation with the Makefile is only supported on macOS.
