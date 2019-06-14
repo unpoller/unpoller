@@ -1,26 +1,36 @@
 language: go
-# so we can build an osx package.
-os: osx
 addons:
-  homebrew:
+  apt:
     packages:
+    - ruby-dev
     - rpm
-    - gnu-tar
+    - build-essential
+    - git
+    - libgnome-keyring-dev
+    - fakeroot
 go:
 - 1.12.x
+services:
+  - docker
 before_install:
 - mkdir -p $GOPATH/bin
   # Download the `dep` binary to bin folder in $GOPATH
-- curl -sLo $GOPATH/bin/dep https://github.com/golang/dep/releases/download/v0.5.3/dep-darwin-amd64
+- curl -sLo $GOPATH/bin/dep https://github.com/golang/dep/releases/download/v0.5.3/dep-linux-amd64
 - chmod +x $GOPATH/bin/dep
   # download super-linter: golangci-lint
 - curl -sfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(go env GOPATH)/bin latest
 #- curl -sL https://install.goreleaser.com/github.com/golangci/golangci-lint.sh | sh -s -- -b $(go env GOPATH)/bin latest
+- rvm install 2.0.0
 install:
+- rvm 2.0.0 do gem install --no-document fpm
 - dep ensure
-- rvm $brew_ruby do gem install --no-document fpm
+- docker build -t unifi-poller .
+- docker run -d --name unifi-poller unifi-poller | tee docker_id
 script:
-- rvm $brew_ruby do make release
+  # Once we figure out how to keep it running we can remove the -a in ps args.
+- docker ps -a | grep -q unifi-poller
+- docker logs $(<docker_id) 2>&1 | grep -Eq "Loaded Configuration[:] /etc/unifi-poller/up.conf"
+- rvm 2.0.0 do make release
 # get deploy key for golift/homebrew-mugs.
 after_success:
   - |
