@@ -12,11 +12,11 @@ COPY . $GOPATH/src/github.com/davidnewhall/unifi-poller
 WORKDIR $GOPATH/src/github.com/davidnewhall/unifi-poller
 
 RUN dep ensure \
-  && make dockerbin
+  && CGO_ENABLED=0 make build
 
 FROM scratch 
 
-COPY --from=builder /go/src/github.com/davidnewhall/unifi-poller/unifi-poller.dockerbin /unifi-poller
+COPY --from=builder /go/src/github.com/davidnewhall/unifi-poller/unifi-poller /unifi-poller
 COPY --from=builder /go/src/github.com/davidnewhall/unifi-poller/examples/up.conf.example /etc/unifi-poller/up.conf
 
 VOLUME [ "/etc/unifi-poller"]
