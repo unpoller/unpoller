@@ -112,7 +112,7 @@ type FlexBool struct {
 }
 
 // UnmarshalJSON method converts armed/disarmed, yes/no, active/inactive or 0/1 to true/false.
-// Really it converts ready, up, t, armed, yes, active, enabled, 1, true to true. Anything else is false.
+// Really it converts ready, ok, up, t, armed, yes, active, enabled, 1, true to true. Anything else is false.
 func (f *FlexBool) UnmarshalJSON(b []byte) error {
 	if f.Txt = strings.Trim(string(b), `"`); f.Txt == "" {
 		f.Txt = "false"
