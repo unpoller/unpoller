@@ -10,6 +10,8 @@ addons:
     - fakeroot
 go:
 - 1.12.x
+services:
+  - docker
 before_install:
 - mkdir -p $GOPATH/bin
   # Download the `dep` binary to bin folder in $GOPATH
@@ -22,7 +24,10 @@ before_install:
 install:
 - rvm 2.0.0 do gem install --no-document fpm
 - dep ensure
+- docker build -t unifi-poller .
+- docker run -d --name unifi-poller
 script:
+- docker ps -a | grep -q unifi-poller
 - rvm 2.0.0 do make release
 # get deploy key for golift/homebrew-mugs.
 after_success:
