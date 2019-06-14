@@ -1,11 +1,15 @@
+# Sytemd service unit for unifi-poller.
+
 [Unit]
-Description=Unifi Poller - Ubiquiti Metrics->InfluxDB
+Description=Unifi Poller - Stores Unifi Metrics in InfluxDB
 After=network.target
 Requires=network.target
 
 [Service]
-ExecStart=/usr/bin/unifi-poller --config=/etc/unifi-poller/up.conf
-Restart=always
+ExecStart=/usr/bin/unifi-poller $DAEMON_OPTS
+EnvironmentFile=-/etc/default/unifi-poller
+EnvironmentFile=-/etc/sysconfig/unifi-poller
+Restart=on-error
 StandardOutput=syslog
 StandardError=syslog
 SyslogIdentifier=unifi-poller

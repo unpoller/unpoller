@@ -53,7 +53,7 @@ Issue and lets discuss.
 If you're a nerd you can probably figure it out. I'd still like some pretty
 pictures and maybe even a Twitch VOD. Update: The installation has been
 simplified tremendously with the
-[creation of binary packages](https://github.com/davidnewhall/unifi-poller/wiki/Package-Install).
+[creation of binary packages](https://github.com/davidnewhall/unifi-poller/wiki/Installation).
 More to come!
 
 - Radios, Frequencies, Interfaces, vAPs
@@ -86,5 +86,5 @@ sites side-by-side. So easy! This screenshot barely does it justice.
 
 ## Copyright & License
 - Copyright © 2016 Garrett Bjerkhoel.
-- Copyright © 2018 David Newhall II.
-- See [MIT-LICENSE](MIT-LICENSE) for license information.
+- Copyright © 2018-2019 David Newhall II.
+- See [LICENSE](LICENSE) for license information.
