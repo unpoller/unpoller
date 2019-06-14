@@ -9,6 +9,7 @@ OSX_PKG_PREFIX=com.github.davidnewhall
 GOLANGCI_LINT_ARGS=--enable-all -D gochecknoglobals
 PACKAGE:=./cmd/$(BINARY)
 LIBRARY:=./pkg/$(BINARY)
+DOCKER_REPO=golift
 
 ITERATION:=$(shell git rev-list --count HEAD||echo 0)
 ifeq ($(VERSION),)
@@ -121,6 +122,9 @@ $(BINARY)-$(VERSION).pkg: check_fpm package_build_osx
 		--maintainer "$(MAINT)" \
 		--description "$(DESC)" \
 		--chdir package_build_osx
+
+docker:
+	docker build -t $(DOCKER_REPO)/$(BINARY) .
 
 # OSX packages use /usr/local because Apple doesn't allow writing many other places.
 package_build_osx: readme man macos
