@@ -9,7 +9,7 @@ OSX_PKG_PREFIX=com.github.davidnewhall
 GOLANGCI_LINT_ARGS=--enable-all -D gochecknoglobals
 PACKAGE:=./cmd/$(BINARY)
 LIBRARY:=./pkg/$(BINARY)
-DOCKER_REPO=""
+DOCKER_REPO="golift"
 
 ITERATION:=$(shell git rev-list --count HEAD||echo 0)
 ifeq ($(VERSION),)
@@ -69,12 +69,6 @@ linux: $(BINARY).linux
 $(BINARY).linux:
 	# Building linux binary.
 	GOOS=linux go build -o $(BINARY).linux -ldflags "-w -s -X github.com/davidnewhall/unifi-poller/pkg/unifi-poller.Version=$(VERSION)" $(PACKAGE)
-
-dockerbin: $(BINARY).dockerbin
-$(BINARY).dockerbin:
-	# Building linux binary.
-	CGO_ENABLED=0 GOOS=linux go build -o $(BINARY).dockerbin -ldflags "-w -s -X github.com/davidnewhall/unifi-poller/pkg/unifi-poller.Version=$(VERSION)" $(PACKAGE)
-
 
 macos: $(BINARY).macos
 $(BINARY).macos:
