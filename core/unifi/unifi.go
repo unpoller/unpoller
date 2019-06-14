@@ -58,6 +58,15 @@ func (u *Unifi) getController(user, pass string) error {
 	return nil
 }
 
+// GetServer returns the controller's version and UUID.
+func (u *Unifi) GetServer() (Server, error) {
+	var response struct {
+		Data Server `json:"meta"`
+	}
+	err := u.GetData(StatusPath, &response)
+	return response.Data, err
+}
+
 // GetClients returns a response full of clients' data from the Unifi Controller.
 func (u *Unifi) GetClients(sites []Site) (*Clients, error) {
 	data := make([]UCL, 0)

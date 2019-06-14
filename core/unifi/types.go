@@ -12,8 +12,10 @@ import (
 // This is a list of unifi API paths.
 // The %s in each string must be replaced with a Site.Name.
 const (
+	// StatusPath shows Controller version.
+	StatusPath string = "/status"
 	// SiteList is the path to the api site list.
-	SiteList string = "/api/self/sites"
+	SiteList string = "/api/stat/sites"
 	// ClientPath is Unifi Clients API Path
 	ClientPath string = "/api/s/%s/stat/sta"
 	// DevicePath is where we get data about Unifi devices.
@@ -67,11 +69,11 @@ type Unifi struct {
 	DebugLog Logger
 }
 
-// Site represents a site's data. There are more pieces to this, but this is
-// all we expose.
-type Site struct {
-	Name string `json:"name"`
-	Desc string `json:"desc"`
+// Server is the /status endpoint from the Unifi controller.
+type Server struct {
+	Up            FlexBool `json:"up"`
+	ServerVersion string   `json:"server_version"`
+	UUID          string   `json:"uuid"`
 }
 
 // FlexInt provides a container and unmarshalling for fields that may be
@@ -109,7 +111,7 @@ type FlexBool struct {
 	Txt string
 }
 
-// UnmarshalJSO method converts armed/disarmed, yes/no, active/inactive or 0/1 to true/false.
+// UnmarshalJSON method converts armed/disarmed, yes/no, active/inactive or 0/1 to true/false.
 // Really it converts ready, up, t, armed, yes, active, enabled, 1, true to true. Anything else is false.
 func (f *FlexBool) UnmarshalJSON(b []byte) error {
 	f.Txt = strings.Trim(string(b), `"`)
