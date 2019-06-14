@@ -5,7 +5,6 @@ BINARY:=unifi-poller
 URL:=https://github.com/davidnewhall/$(BINARY)
 MAINT=David Newhall II <david at sleepers dot pro>
 DESC=This daemon polls a Unifi controller at a short interval and stores the collected measurements in an Influx Database.
-OSX_PKG_PREFIX=com.github.davidnewhall
 GOLANGCI_LINT_ARGS=--enable-all -D gochecknoglobals
 PACKAGE:=./cmd/$(BINARY)
 LIBRARY:=./pkg/$(BINARY)
@@ -21,13 +20,13 @@ RPMVERSION:=$(shell echo $(VERSION) | tr -- - _)
 all: man build
 
 # Prepare a release. Called in Travis CI.
-release: clean test $(BINARY)-$(RPMVERSION)-$(ITERATION).x86_64.rpm $(BINARY)_$(VERSION)-$(ITERATION)_amd64.deb $(BINARY)-$(VERSION).pkg
+release: clean test $(BINARY)-$(RPMVERSION)-$(ITERATION).x86_64.rpm $(BINARY)_$(VERSION)-$(ITERATION)_amd64.deb macos
 	# Prepareing a release!
 	mkdir -p release
 	gzip -9 $(BINARY).linux
 	gzip -9 $(BINARY).macos
 	mv $(BINARY)-$(RPMVERSION)-$(ITERATION).x86_64.rpm $(BINARY)_$(VERSION)-$(ITERATION)_amd64.deb \
-		$(BINARY)-$(VERSION).pkg $(BINARY).macos.gz $(BINARY).linux.gz release/
+	$(BINARY).macos.gz $(BINARY).linux.gz release/
 	# Generating File Hashes
 	openssl dgst -sha256 release/* | tee release/$(BINARY)_checksums_$(VERSION)-$(ITERATION).txt
 
@@ -35,7 +34,7 @@ release: clean test $(BINARY)-$(RPMVERSION)-$(ITERATION).x86_64.rpm $(BINARY)_$(
 clean:
 	# Cleaning up.
 	rm -f $(BINARY){.macos,.linux,.1,}{,.gz} $(BINARY).rb
-	rm -f $(BINARY){_,-}*.{deb,rpm,pkg} md2roff v$(VERSION).tar.gz.sha256
+	rm -f $(BINARY){_,-}*.{deb,rpm} md2roff v*.tar.gz.sha256
 	rm -f cmd/$(BINARY)/README{,.html} README{,.html} ./$(BINARY)_manual.html
 	rm -rf package_build_* release
 
@@ -108,37 +107,8 @@ $(BINARY)_$(VERSION)-$(ITERATION)_amd64.deb: check_fpm package_build_linux
 		--description "$(DESC)" \
 		--chdir package_build_linux
 
-osxpkg: clean $(BINARY)-$(VERSION).pkg
-$(BINARY)-$(VERSION).pkg: check_fpm package_build_osx
-	@echo "Building 'osx' package for $(BINARY) version '$(VERSION)-$(ITERATION)'."
-	fpm -s dir -t osxpkg \
-		--name $(BINARY) \
-		--version $(VERSION) \
-		--iteration $(ITERATION) \
-		--after-install scripts/after-install.sh \
-		--osxpkg-identifier-prefix $(OSX_PKG_PREFIX) \
-		--license MIT \
-		--url $(URL) \
-		--maintainer "$(MAINT)" \
-		--description "$(DESC)" \
-		--chdir package_build_osx
-
 docker:
 	docker build -t $(DOCKER_REPO)/$(BINARY) .
-
-# OSX packages use /usr/local because Apple doesn't allow writing many other places.
-package_build_osx: readme man macos
-	# Building package environment for macOS.
-	mkdir -p $@/usr/local/bin $@/usr/local/etc/$(BINARY) $@/Library/LaunchAgents
-	mkdir -p $@/usr/local/share/man/man1 $@/usr/local/share/doc/$(BINARY)/examples $@/usr/local/var/log/$(BINARY)
-	# Copying the binary, config file and man page into the env.
-	cp $(BINARY).macos $@/usr/local/bin/$(BINARY)
-	cp *.1.gz $@/usr/local/share/man/man1
-	cp examples/*.conf.example $@/usr/local/etc/$(BINARY)/
-	cp LICENSE *.html examples/{*dash.json,up.conf.example} $@/usr/local/share/doc/$(BINARY)/
-	# These go to their own folder so the img src in the html pages continue to work.
-	cp examples/*.png $@/usr/local/share/doc/$(BINARY)/examples
-	cp init/launchd/$(OSX_PKG_PREFIX).$(BINARY).plist $@/Library/LaunchAgents/
 
 # Build an environment that can be packaged for linux.
 package_build_linux: readme man linux
@@ -150,7 +120,7 @@ package_build_linux: readme man linux
 	cp *.1.gz $@/usr/share/man/man1
 	cp examples/*.conf.example $@/etc/$(BINARY)/
 	cp examples/up.conf.example $@/etc/$(BINARY)/up.conf
-	cp LICENSE *.html examples/{*dash.json,up.conf.example} $@/usr/share/doc/$(BINARY)/
+	cp LICENSE *.html examples/*dash.json examples/up.conf.example $@/usr/share/doc/$(BINARY)/
 	# These go to their own folder so the img src in the html pages continue to work.
 	cp examples/*.png $@/usr/share/doc/$(BINARY)/examples
 	cp init/systemd/$(BINARY).service $@/lib/systemd/system/
@@ -177,7 +147,7 @@ lint:
 	# Checking lint.
 	golangci-lint run $(GOLANGCI_LINT_ARGS)
 
-# Deprecated.
+# Used for Homebrew only. Other disros can create packages.
 install: man readme $(BINARY)
 	@echo -  Done Building!  -
 	@echo -  Local installation with the Makefile is only supported on macOS.
@@ -203,16 +173,16 @@ uninstall:
 	@echo "  ==> You must run make uninstall as root on Linux. Recommend not running as root on macOS."
 	[ -x /bin/systemctl ] && /bin/systemctl disable $(BINARY) || true
 	[ -x /bin/systemctl ] && /bin/systemctl stop $(BINARY) || true
-	[ -x /bin/launchctl ] && [ -f ~/Library/LaunchAgents/$(OSX_PKG_PREFIX).$(BINARY).plist ] \
-		&& /bin/launchctl unload ~/Library/LaunchAgents/$(OSX_PKG_PREFIX).$(BINARY).plist || true
-	[ -x /bin/launchctl ] && [ -f /Library/LaunchAgents/$(OSX_PKG_PREFIX).$(BINARY).plist ] \
-		&& /bin/launchctl unload /Library/LaunchAgents/$(OSX_PKG_PREFIX).$(BINARY).plist || true
+	[ -x /bin/launchctl ] && [ -f ~/Library/LaunchAgents/com.github.davidnewhall.$(BINARY).plist ] \
+		&& /bin/launchctl unload ~/Library/LaunchAgents/com.github.davidnewhall.$(BINARY).plist || true
+	[ -x /bin/launchctl ] && [ -f /Library/LaunchAgents/com.github.davidnewhall.$(BINARY).plist ] \
+		&& /bin/launchctl unload /Library/LaunchAgents/com.github.davidnewhall.$(BINARY).plist || true
 	rm -rf /usr/local/{etc,bin,share/doc}/$(BINARY)
-	rm -f ~/Library/LaunchAgents/$(OSX_PKG_PREFIX).$(BINARY).plist
-	rm -f /Library/LaunchAgents/$(OSX_PKG_PREFIX).$(BINARY).plist || true
+	rm -f ~/Library/LaunchAgents/com.github.davidnewhall.$(BINARY).plist
+	rm -f /Library/LaunchAgents/com.github.davidnewhall.$(BINARY).plist || true
 	rm -f /etc/systemd/system/$(BINARY).service /usr/local/share/man/man1/$(BINARY).1.gz
 	[ -x /bin/systemctl ] && /bin/systemctl --system daemon-reload || true
-	@[ -f /Library/LaunchAgents/$(OSX_PKG_PREFIX).$(BINARY).plist ] && echo "  ==> Unload and delete this file manually:" && echo "  sudo launchctl unload /Library/LaunchAgents/$(OSX_PKG_PREFIX).$(BINARY).plist" && echo "  sudo rm -f /Library/LaunchAgents/$(OSX_PKG_PREFIX).$(BINARY).plist" || true
+	@[ -f /Library/LaunchAgents/com.github.davidnewhall.$(BINARY).plist ] && echo "  ==> Unload and delete this file manually:" && echo "  sudo launchctl unload /Library/LaunchAgents/com.github.davidnewhall.$(BINARY).plist" && echo "  sudo rm -f /Library/LaunchAgents/com.github.davidnewhall.$(BINARY).plist" || true
 
 # Don't run this unless you're ready to debug untested vendored dependencies.
 deps:

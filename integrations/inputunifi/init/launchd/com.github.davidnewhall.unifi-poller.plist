@@ -18,9 +18,5 @@
         <string>/usr/local/var/log/unifi-poller/log</string>
         <key>StandardOutPath</key>
         <string>/usr/local/var/log/unifi-poller/log</string>
-        <key>UserName</key>
-        <string>nobody</string>
-        <key>GroupName</key>
-        <string>nobody</string>
     </dict>
 </plist>
