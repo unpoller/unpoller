@@ -117,8 +117,9 @@ func (f *FlexBool) UnmarshalJSON(b []byte) error {
 	if f.Txt = strings.Trim(string(b), `"`); f.Txt == "" {
 		f.Txt = "false"
 	}
-	f.Val = f.Txt == "1" || strings.EqualFold(f.Txt, "true") || strings.EqualFold(f.Txt, "yes") || strings.EqualFold(f.Txt, "ok") ||
+	f.Val = f.Txt == "1" || strings.EqualFold(f.Txt, "true") || strings.EqualFold(f.Txt, "yes") ||
 		strings.EqualFold(f.Txt, "t") || strings.EqualFold(f.Txt, "armed") || strings.EqualFold(f.Txt, "active") ||
-		strings.EqualFold(f.Txt, "enabled") || strings.EqualFold(f.Txt, "ready") || strings.EqualFold(f.Txt, "up")
+		strings.EqualFold(f.Txt, "enabled") || strings.EqualFold(f.Txt, "ready") || strings.EqualFold(f.Txt, "up") ||
+		strings.EqualFold(f.Txt, "ok")
 	return nil
 }
