@@ -120,7 +120,7 @@ package_build_linux: readme man linux
 	cp *.1.gz $@/usr/share/man/man1
 	cp examples/*.conf.example $@/etc/$(BINARY)/
 	cp examples/up.conf.example $@/etc/$(BINARY)/up.conf
-	cp LICENSE *.html examples/{*dash.json,up.conf.example} $@/usr/share/doc/$(BINARY)/
+	cp LICENSE *.html examples/*dash.json examples/up.conf.example $@/usr/share/doc/$(BINARY)/
 	# These go to their own folder so the img src in the html pages continue to work.
 	cp examples/*.png $@/usr/share/doc/$(BINARY)/examples
 	cp init/systemd/$(BINARY).service $@/lib/systemd/system/

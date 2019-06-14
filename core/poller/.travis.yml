@@ -20,8 +20,8 @@ before_install:
 #- curl -sL https://install.goreleaser.com/github.com/golangci/golangci-lint.sh | sh -s -- -b $(go env GOPATH)/bin latest
 - rvm install 2.0.0
 install:
-- dep ensure
 - rvm 2.0.0 do gem install --no-document fpm
+- dep ensure
 script:
 - rvm 2.0.0 do make release
 # get deploy key for golift/homebrew-mugs.
