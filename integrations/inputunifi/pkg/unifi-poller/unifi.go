@@ -112,11 +112,11 @@ func (m *Metrics) processPoints(asset Asset) error {
 	if asset == nil {
 		return nil
 	}
-	influxPoints, err := asset.Points()
-	if err != nil || influxPoints == nil {
+	points, err := asset.Points()
+	if err != nil || points == nil {
 		return err
 	}
-	m.BatchPoints.AddPoints(influxPoints)
+	m.BatchPoints.AddPoints(points)
 	return nil
 }
 
