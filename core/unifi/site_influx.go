@@ -10,7 +10,7 @@ import (
 // Points generates Unifi Sites' datapoints for InfluxDB.
 // These points can be passed directly to influx.
 func (u Site) Points() ([]*influx.Point, error) {
-	points := make([]*influx.Point, 1)
+	var points []*influx.Point
 	for _, s := range u.Health {
 		tags := map[string]string{
 			"id":                   u.ID,

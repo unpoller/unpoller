@@ -54,11 +54,6 @@ type Devices struct {
 	USWs []USW
 }
 
-// Clients contains a list that contains all of the unifi clients from a controller.
-type Clients struct {
-	UCLs []UCL
-}
-
 // Unifi is what you get in return for providing a password! Unifi represents
 // a controller that you can make authenticated requests to. Use this to make
 // additional requests for devices, clients or other custom data.

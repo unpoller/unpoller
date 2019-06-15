@@ -1,5 +1,8 @@
 package unifi
 
+// Sites is a struct to match Devices and Clients.
+type Sites []Site
+
 // Site represents a site's data.
 type Site struct {
 	ID           string   `json:"_id"`

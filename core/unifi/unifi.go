@@ -125,7 +125,7 @@ func (u *Unifi) GetDevices(sites []Site) (*Devices, error) {
 }
 
 // GetSites returns a list of configured sites on the Unifi controller.
-func (u *Unifi) GetSites() ([]Site, error) {
+func (u *Unifi) GetSites() (Sites, error) {
 	var response struct {
 		Data []Site `json:"data"`
 	}
