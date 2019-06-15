@@ -8,6 +8,7 @@ type Site struct {
 	ID           string   `json:"_id"`
 	Name         string   `json:"name"`
 	Desc         string   `json:"desc"`
+	SiteName     string   `json:"-"`
 	AttrHiddenID string   `json:"attr_hidden_id"`
 	AttrNoDelete FlexBool `json:"attr_no_delete"`
 	Health       []struct {

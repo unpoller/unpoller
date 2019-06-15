@@ -132,6 +132,7 @@ func (u *Unifi) GetSites() (Sites, error) {
 	}
 	sites := make([]string, 0)
 	for i := range response.Data {
+		response.Data[i].SiteName = response.Data[i].Desc + " (" + response.Data[i].Name + ")"
 		sites = append(sites, response.Data[i].Name)
 	}
 	u.dLogf("Found %d site(s): %s", len(sites), strings.Join(sites, ","))

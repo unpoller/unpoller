@@ -15,6 +15,7 @@ func (u Site) Points() ([]*influx.Point, error) {
 		tags := map[string]string{
 			"id":                   u.ID,
 			"name":                 u.Name,
+			"site_name":            u.SiteName,
 			"desc":                 u.Desc,
 			"status":               s.Status,
 			"subsystem":            s.Subsystem,
