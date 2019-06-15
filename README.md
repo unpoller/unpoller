@@ -8,10 +8,10 @@ Grafana dashboards included. Updated 2019.
 [Ubiquiti](https://www.ui.com) makes networking devices like switches, gateways
 (routers) and wireless access points. They have a line of equipment named
 [UniFi](https://www.ui.com/products/#unifi) that uses a
-[controller](https://www.ui.com/download/unifi/) to keep stats and network
-device configuration This controller can be installed on Windows, macOS and Linux.
-Ubiquiti also provides a dedicated hardware devices called a CloudKey that runs
-the controller software.
+[controller](https://www.ui.com/download/unifi/) to keep stats and simplify network
+device configuration. This controller can be installed on Windows, macOS and Linux.
+Ubiquiti also provides a dedicated hardware device called a
+[CloudKey](https://www.ui.com/unifi/unifi-cloud-key/) that runs the controller software.
 
 Unifi-Poller is a smaller application that runs on macOS, Linux or Docker. It
 polls your controller every 30 seconds for metric data and stores that data in
