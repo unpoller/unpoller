@@ -13,7 +13,7 @@ func (u *Unifi) parseDevices(data []json.RawMessage, siteName string) *Devices {
 		} else if t, ok := o["type"].(string); ok {
 			assetType = t
 		}
-		u.dLogf("Unmarshalling Device Type: %v", assetType)
+		u.dLogf("Unmarshalling Device Type: %v, site %s ", assetType, siteName)
 		// Choose which type to unmarshal into based on the "type" json key.
 		switch assetType { // Unmarshal again into the correct type..
 		case "uap":

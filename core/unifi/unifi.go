@@ -58,15 +58,23 @@ func (u *Unifi) getController(user, pass string) error {
 	return nil
 }
 
+// GetServer returns the controller's version and UUID.
+func (u *Unifi) GetServer() (Server, error) {
+	var response struct {
+		Data Server `json:"meta"`
+	}
+	err := u.GetData(StatusPath, &response)
+	return response.Data, err
+}
+
 // GetClients returns a response full of clients' data from the Unifi Controller.
-func (u *Unifi) GetClients(sites []Site) (*Clients, error) {
-	data := make([]UCL, 0)
+func (u *Unifi) GetClients(sites []Site) (Clients, error) {
+	data := make([]Client, 0)
 	for _, site := range sites {
 		var response struct {
-			Data []UCL `json:"data"`
+			Data []Client `json:"data"`
 		}
-		u.dLogf("Polling Site '%s' (%s) Clients", site.Name, site.Desc)
-		u.dLogf("Unmarshalling Device Type: ucl")
+		u.dLogf("Polling Controller, retreiving Unifi Clients, site %s (%s) ", site.Name, site.Desc)
 		clientPath := fmt.Sprintf(ClientPath, site.Name)
 		if err := u.GetData(clientPath, &response); err != nil {
 			return nil, err
@@ -76,14 +84,13 @@ func (u *Unifi) GetClients(sites []Site) (*Clients, error) {
 		}
 		data = append(data, response.Data...)
 	}
-	return &Clients{UCLs: data}, nil
+	return data, nil
 }
 
 // GetDevices returns a response full of devices' data from the Unifi Controller.
 func (u *Unifi) GetDevices(sites []Site) (*Devices, error) {
 	devices := new(Devices)
 	for _, site := range sites {
-		u.dLogf("Polling Site '%s' (%s) Devices", site.Name, site.Desc)
 		var response struct {
 			Data []json.RawMessage `json:"data"`
 		}
@@ -116,7 +123,7 @@ func (u *Unifi) GetDevices(sites []Site) (*Devices, error) {
 }
 
 // GetSites returns a list of configured sites on the Unifi controller.
-func (u *Unifi) GetSites() ([]Site, error) {
+func (u *Unifi) GetSites() (Sites, error) {
 	var response struct {
 		Data []Site `json:"data"`
 	}
@@ -127,7 +134,7 @@ func (u *Unifi) GetSites() ([]Site, error) {
 	for i := range response.Data {
 		sites = append(sites, response.Data[i].Name)
 	}
-	u.dLogf("Found %d sites: %s", len(sites), strings.Join(sites, ","))
+	u.dLogf("Found %d site(s): %s", len(sites), strings.Join(sites, ","))
 	return response.Data, nil
 }
 

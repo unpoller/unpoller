@@ -9,7 +9,7 @@ import (
 
 // Points generates Unifi Client datapoints for InfluxDB.
 // These points can be passed directly to influx.
-func (c UCL) Points() ([]*influx.Point, error) {
+func (c Client) Points() ([]*influx.Point, error) {
 	// Fix name and hostname fields. Sometimes one or the other is blank.
 	switch {
 	case c.Hostname == "" && c.Name == "":
