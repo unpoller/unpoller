@@ -1,12 +1,10 @@
 package unifi
 
 // Clients contains a list that contains all of the unifi clients from a controller.
-type Clients struct {
-	UCLs []UCL
-}
+type Clients []Client
 
-// UCL defines all the data a connected-network client contains.
-type UCL struct {
+// Client defines all the data a connected-network client contains.
+type Client struct {
 	ID            string   `json:"_id"`
 	IsGuestByUAP  FlexBool `json:"_is_guest_by_uap"`
 	IsGuestByUGW  FlexBool `json:"_is_guest_by_ugw"`
