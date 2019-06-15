@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
+	"strings"
 
 	"github.com/golift/unifi"
 	"github.com/pkg/errors"
@@ -24,13 +25,15 @@ func (u *UnifiPoller) DumpJSONPayload() (err error) {
 		fmt.Fprintf(os.Stderr, "[ERROR] "+m, v...)
 	} // Log all errors to stderr.
 
-	switch sites, err := u.filterSites(u.Sites); {
+	switch sites, err := u.GetFilteredSites(); {
 	case err != nil:
 		return err
 	case StringInSlice(u.DumpJSON, []string{"d", "device", "devices"}):
 		return u.DumpDeviceJSON(sites)
 	case StringInSlice(u.DumpJSON, []string{"client", "clients", "c"}):
 		return u.DumpClientsJSON(sites)
+	case strings.HasPrefix(u.DumpJSON, "other "):
+		return u.DumpOtherJSON(sites)
 	default:
 		return errors.New("must provide filter: devices, clients")
 	}
@@ -52,6 +55,20 @@ func (u *UnifiPoller) DumpDeviceJSON(sites []unifi.Site) error {
 	for _, s := range sites {
 		path := fmt.Sprintf(unifi.DevicePath, s.Name)
 		if err := u.dumpJSON(path, "Device", s); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+// DumpOtherJSON prints the raw json for a user-provided path in a Unifi Controller.
+func (u *UnifiPoller) DumpOtherJSON(sites []unifi.Site) error {
+	for _, s := range sites {
+		path := strings.SplitN(u.DumpJSON, " ", 2)[1]
+		if strings.Contains(path, "%s") {
+			path = fmt.Sprintf(path, s.Name)
+		}
+		if err := u.dumpJSON(path, "Other", s); err != nil {
 			return err
 		}
 	}
