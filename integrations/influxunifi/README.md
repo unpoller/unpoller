@@ -3,6 +3,28 @@
 Collect your Unifi Controller Data and send it to an InfluxDB instance.
 Grafana dashboards included. Updated 2019.
 
+## Description
+
+[Ubiquiti](https://www.ui.com) makes networking devices like switches, gateways
+(routers) and wireless access points. They have a line of equipment named
+[UniFi](https://www.ui.com/products/#unifi) that uses a
+[controller](https://www.ui.com/download/unifi/) to keep stats and simplify network
+device configuration. This controller can be installed on Windows, macOS and Linux.
+Ubiquiti also provides a dedicated hardware device called a
+[CloudKey](https://www.ui.com/unifi/unifi-cloud-key/) that runs the controller software.
+
+Unifi-Poller is a smaller application that runs on macOS, Linux or Docker. It
+polls your controller every 30 seconds for metric data and stores that data in
+an Influx Database. A small setup with 2 APs, 1 switch, 1 gateway and 40 clients
+produces nearly 3000 fields (metrics).
+
+This application requires your controller to be running all the time. If you run
+a Unifi Controller, there's no excuse not to install
+[Influx](https://github.com/davidnewhall/unifi-poller/wiki/InfluxDB),
+[Grafana](https://github.com/davidnewhall/unifi-poller/wiki/Grafana) and this app.
+You'll have a plethora of data at your fingertips and the ability to craft custom
+graphs to slice the data any way you choose. Good luck!
+
 ## Installation
 
 [See the Wiki!](https://github.com/davidnewhall/unifi-poller/wiki/Installation)

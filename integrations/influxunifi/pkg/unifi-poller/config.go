@@ -1,6 +1,7 @@
 package unifipoller
 
 import (
+	"strings"
 	"time"
 
 	"github.com/golift/unifi"
@@ -39,6 +40,14 @@ type UnifiPoller struct {
 	*Config
 }
 
+// Metrics contains all the data from the controller.
+type Metrics struct {
+	unifi.Sites
+	unifi.Clients
+	*unifi.Devices
+	influx.BatchPoints
+}
+
 // Config represents the data needed to poll a controller and report to influxdb.
 type Config struct {
 	Interval   Dur      `json:"interval,_omitempty" toml:"interval,_omitempty" xml:"interval" yaml:"interval"`
@@ -60,7 +69,7 @@ type Dur struct{ value time.Duration }
 
 // UnmarshalTOML parses a duration type from a config file.
 func (v *Dur) UnmarshalTOML(data []byte) error {
-	unquoted := string(data[1 : len(data)-1])
+	unquoted := strings.Trim(string(data), `"`)
 	dur, err := time.ParseDuration(unquoted)
 	if err == nil {
 		v.value = dur
