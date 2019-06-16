@@ -39,7 +39,7 @@ func (u *Unifi) dLogf(msg string, v ...interface{}) {
 	}
 }
 
-// dLogf logs an error message.
+// eLogf logs an error message.
 func (u *Unifi) eLogf(msg string, v ...interface{}) {
 	if u.ErrorLog != nil {
 		u.ErrorLog("[ERROR] "+msg, v...)
