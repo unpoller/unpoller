@@ -206,7 +206,7 @@ type USG struct {
 	Version             string   `json:"version"`
 	VersionIncompatible FlexBool `json:"version_incompatible"`
 	Wan1                struct {
-		BytesR      float64  `json:"bytes-r"`
+		BytesR      FlexInt  `json:"bytes-r"`
 		DNS         []string `json:"dns"`
 		Enable      FlexBool `json:"enable"`
 		FullDuplex  FlexBool `json:"full_duplex"`
@@ -214,26 +214,26 @@ type USG struct {
 		Ifname      string   `json:"ifname"`
 		IP          string   `json:"ip"`
 		Mac         string   `json:"mac"`
-		MaxSpeed    float64  `json:"max_speed"`
+		MaxSpeed    FlexInt  `json:"max_speed"`
 		Name        string   `json:"name"`
 		Netmask     string   `json:"netmask"`
 		RxBytes     FlexInt  `json:"rx_bytes"`
-		RxBytesR    float64  `json:"rx_bytes-r"`
-		RxDropped   float64  `json:"rx_dropped"`
-		RxErrors    float64  `json:"rx_errors"`
-		RxMulticast float64  `json:"rx_multicast"`
-		RxPackets   float64  `json:"rx_packets"`
-		Speed       float64  `json:"speed"`
+		RxBytesR    FlexInt  `json:"rx_bytes-r"`
+		RxDropped   FlexInt  `json:"rx_dropped"`
+		RxErrors    FlexInt  `json:"rx_errors"`
+		RxMulticast FlexInt  `json:"rx_multicast"`
+		RxPackets   FlexInt  `json:"rx_packets"`
+		Speed       FlexInt  `json:"speed"`
 		TxBytes     FlexInt  `json:"tx_bytes"`
-		TxBytesR    float64  `json:"tx_bytes-r"`
-		TxDropped   float64  `json:"tx_dropped"`
-		TxErrors    float64  `json:"tx_errors"`
-		TxPackets   float64  `json:"tx_packets"`
+		TxBytesR    FlexInt  `json:"tx_bytes-r"`
+		TxDropped   FlexInt  `json:"tx_dropped"`
+		TxErrors    FlexInt  `json:"tx_errors"`
+		TxPackets   FlexInt  `json:"tx_packets"`
 		Type        string   `json:"type"`
 		Up          FlexBool `json:"up"`
 	} `json:"wan1"`
 	Wan2 struct {
-		BytesR      float64  `json:"bytes-r"`
+		BytesR      FlexInt  `json:"bytes-r"`
 		DNS         []string `json:"dns"`
 		Enable      FlexBool `json:"enable"`
 		FullDuplex  FlexBool `json:"full_duplex"`
@@ -241,21 +241,21 @@ type USG struct {
 		Ifname      string   `json:"ifname"`
 		IP          string   `json:"ip"`
 		Mac         string   `json:"mac"`
-		MaxSpeed    float64  `json:"max_speed"`
+		MaxSpeed    FlexInt  `json:"max_speed"`
 		Name        string   `json:"name"`
 		Netmask     string   `json:"netmask"`
 		RxBytes     FlexInt  `json:"rx_bytes"`
-		RxBytesR    float64  `json:"rx_bytes-r"`
-		RxDropped   float64  `json:"rx_dropped"`
-		RxErrors    float64  `json:"rx_errors"`
-		RxMulticast float64  `json:"rx_multicast"`
-		RxPackets   float64  `json:"rx_packets"`
-		Speed       float64  `json:"speed"`
+		RxBytesR    FlexInt  `json:"rx_bytes-r"`
+		RxDropped   FlexInt  `json:"rx_dropped"`
+		RxErrors    FlexInt  `json:"rx_errors"`
+		RxMulticast FlexInt  `json:"rx_multicast"`
+		RxPackets   FlexInt  `json:"rx_packets"`
+		Speed       FlexInt  `json:"speed"`
 		TxBytes     FlexInt  `json:"tx_bytes"`
-		TxBytesR    float64  `json:"tx_bytes-r"`
-		TxDropped   float64  `json:"tx_dropped"`
-		TxErrors    float64  `json:"tx_errors"`
-		TxPackets   float64  `json:"tx_packets"`
+		TxBytesR    FlexInt  `json:"tx_bytes-r"`
+		TxDropped   FlexInt  `json:"tx_dropped"`
+		TxErrors    FlexInt  `json:"tx_errors"`
+		TxPackets   FlexInt  `json:"tx_packets"`
 		Type        string   `json:"type"`
 		Up          FlexBool `json:"up"`
 	} `json:"wan2"`
