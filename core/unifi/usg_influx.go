@@ -41,7 +41,7 @@ func (u USG) Points() ([]*influx.Point, error) {
 		"version_incompatible":   u.VersionIncompatible.Txt,
 		"usg_caps":               strconv.FormatFloat(u.UsgCaps, 'f', 6, 64),
 		"speedtest-status-saved": u.SpeedtestStatusSaved.Txt,
-		"wan1_up":                u.Wan2.Up.Txt,
+		"wan1_up":                u.Wan1.Up.Txt,
 		"wan2_up":                u.Wan2.Up.Txt,
 	}
 	fields := map[string]interface{}{
