@@ -26,12 +26,12 @@ type Client struct {
 	DevFamily     int      `json:"dev_family"`
 	DevID         int      `json:"dev_id"`
 	DpiStats      struct {
-		App       int64
-		Cat       int64
-		RxBytes   int64
-		RxPackets int64
-		TxBytes   int64
-		TxPackets int64
+		App       FlexInt
+		Cat       FlexInt
+		RxBytes   FlexInt
+		RxPackets FlexInt
+		TxBytes   FlexInt
+		TxPackets FlexInt
 	} `json:"dpi_stats"`
 	DpiStatsLastUpdated int64    `json:"dpi_stats_last_updated"`
 	Essid               string   `json:"essid"`
