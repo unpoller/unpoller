@@ -141,12 +141,12 @@ func (u *Unifi) GetSites() (Sites, error) {
 
 // GetData makes a unifi request and unmarshal the response into a provided pointer.
 func (u *Unifi) GetData(methodPath string, v interface{}) error {
-	if body, err := u.GetJSON(methodPath); err != nil {
+	body, err := u.GetJSON(methodPath)
+	if err != nil {
 		return err
-	} else if err = json.Unmarshal(body, v); err != nil {
-		return errors.Wrapf(err, "json.Unmarshal(%s)", methodPath)
 	}
-	return nil
+	err = json.Unmarshal(body, v)
+	return errors.Wrapf(err, "json.Unmarshal(%s)", methodPath)
 }
 
 // UniReq is a small helper function that adds an Accept header.
