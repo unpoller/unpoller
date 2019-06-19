@@ -20,7 +20,13 @@
       "type": "panel",
       "id": "grafana-clock-panel",
       "name": "Clock",
-      "version": "0.1.0"
+      "version": "1.0.3"
+    },
+    {
+      "type": "panel",
+      "id": "grafana-piechart-panel",
+      "name": "Pie Chart",
+      "version": "1.3.6"
     },
     {
       "type": "panel",
@@ -71,7 +77,7 @@
   "gnetId": 1486,
   "graphTooltip": 1,
   "id": null,
-  "iteration": 1559898637306,
+  "iteration": 1560914080807,
   "links": [
     {
       "icon": "external link",
@@ -85,6 +91,675 @@
   ],
   "panels": [
     {
+      "content": "<br>\n<center><b><font size=\"6px\">Unifi UAP</font></b></center>\n",
+      "gridPos": {
+        "h": 3,
+        "w": 3,
+        "x": 0,
+        "y": 0
+      },
+      "id": 34,
+      "links": [],
+      "mode": "html",
+      "options": {},
+      "title": "",
+      "transparent": true,
+      "type": "text"
+    },
+    {
+      "aliasColors": {},
+      "breakPoint": "25%",
+      "cacheTimeout": null,
+      "combine": {
+        "label": "Others",
+        "threshold": 0
+      },
+      "datasource": "${DS_UNIFI}",
+      "decimals": 0,
+      "description": "",
+      "fontSize": "70%",
+      "format": "short",
+      "gridPos": {
+        "h": 8,
+        "w": 6,
+        "x": 3,
+        "y": 0
+      },
+      "hideTimeOverride": true,
+      "id": 36,
+      "interval": null,
+      "legend": {
+        "header": "",
+        "percentage": true,
+        "show": true,
+        "sortDesc": true,
+        "values": true
+      },
+      "legendType": "Right side",
+      "links": [],
+      "maxDataPoints": 3,
+      "nullPointMode": "connected",
+      "options": {},
+      "pieType": "pie",
+      "strokeWidth": "3",
+      "targets": [
+        {
+          "alias": "$tag_radio_proto",
+          "groupBy": [
+            {
+              "params": [
+                "channel"
+              ],
+              "type": "tag"
+            }
+          ],
+          "hide": false,
+          "measurement": "clients",
+          "orderByTime": "ASC",
+          "policy": "default",
+          "query": "select count(distinct(hostname)) FROM \"clients\" WHERE ($timeFilter and  is_wired != 'true' and site_name =~ /$Site$/) group by radio_proto",
+          "rawQuery": true,
+          "refId": "A",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "hostname"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "distinct"
+              }
+            ]
+          ],
+          "tags": [
+            {
+              "key": "is_wired",
+              "operator": "=",
+              "value": "false"
+            }
+          ]
+        }
+      ],
+      "timeFrom": "1h",
+      "title": "Clients per Band - All APs",
+      "transparent": true,
+      "type": "grafana-piechart-panel",
+      "valueName": "current"
+    },
+    {
+      "aliasColors": {},
+      "breakPoint": "50%",
+      "cacheTimeout": null,
+      "combine": {
+        "label": "Others",
+        "threshold": 0
+      },
+      "datasource": "${DS_UNIFI}",
+      "decimals": 0,
+      "description": "",
+      "fontSize": "70%",
+      "format": "short",
+      "gridPos": {
+        "h": 8,
+        "w": 6,
+        "x": 9,
+        "y": 0
+      },
+      "hideTimeOverride": true,
+      "id": 38,
+      "interval": null,
+      "legend": {
+        "header": "",
+        "show": true,
+        "sortDesc": true,
+        "values": true
+      },
+      "legendType": "Right side",
+      "links": [],
+      "maxDataPoints": 3,
+      "nullPointMode": "connected",
+      "options": {},
+      "pieType": "pie",
+      "strokeWidth": 1,
+      "targets": [
+        {
+          "alias": "Chan $tag_channel",
+          "groupBy": [
+            {
+              "params": [
+                "$__interval"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "null"
+              ],
+              "type": "fill"
+            }
+          ],
+          "measurement": "uap",
+          "orderByTime": "ASC",
+          "policy": "default",
+          "query": "select count(distinct(hostname)) FROM \"clients\" WHERE $timeFilter AND is_wired != 'true' and site_name =~ /$Site$/ group by channel",
+          "rawQuery": true,
+          "refId": "B",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "value"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "mean"
+              }
+            ]
+          ],
+          "tags": []
+        }
+      ],
+      "timeFrom": "1h",
+      "title": "Client per Wifi Channels - All APs",
+      "transparent": true,
+      "type": "grafana-piechart-panel",
+      "valueName": "current"
+    },
+    {
+      "aliasColors": {},
+      "breakPoint": "50%",
+      "cacheTimeout": null,
+      "combine": {
+        "label": "Others",
+        "threshold": 0
+      },
+      "datasource": "${DS_UNIFI}",
+      "decimals": 0,
+      "description": "",
+      "fontSize": "70%",
+      "format": "short",
+      "gridPos": {
+        "h": 8,
+        "w": 5,
+        "x": 15,
+        "y": 0
+      },
+      "hideTimeOverride": true,
+      "id": 40,
+      "interval": null,
+      "legend": {
+        "header": "",
+        "show": true,
+        "sort": "current",
+        "sortDesc": true,
+        "values": true
+      },
+      "legendType": "Right side",
+      "links": [],
+      "maxDataPoints": 3,
+      "nullPointMode": "connected",
+      "options": {},
+      "pieType": "pie",
+      "strokeWidth": 1,
+      "targets": [
+        {
+          "alias": "$tag_oui",
+          "groupBy": [
+            {
+              "params": [
+                "channel"
+              ],
+              "type": "tag"
+            }
+          ],
+          "measurement": "clients",
+          "orderByTime": "ASC",
+          "policy": "default",
+          "query": "select count(distinct(hostname)) FROM \"clients\" WHERE $timeFilter AND \"is_wired\" != 'true' and site_name =~ /$Site$/ group by oui",
+          "rawQuery": true,
+          "refId": "A",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "hostname"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "distinct"
+              }
+            ]
+          ],
+          "tags": [
+            {
+              "key": "is_wired",
+              "operator": "=",
+              "value": "false"
+            }
+          ]
+        }
+      ],
+      "timeFrom": "1h",
+      "title": "Client MAC OUI Breakdown - All APs",
+      "transparent": true,
+      "type": "grafana-piechart-panel",
+      "valueName": "current"
+    },
+    {
+      "cacheTimeout": null,
+      "colorBackground": false,
+      "colorValue": false,
+      "colors": [
+        "rgba(245, 54, 54, 0.9)",
+        "rgba(237, 129, 40, 0.89)",
+        "rgba(50, 172, 45, 0.97)"
+      ],
+      "datasource": "${DS_UNIFI}",
+      "description": "",
+      "editable": true,
+      "error": false,
+      "format": "none",
+      "gauge": {
+        "maxValue": 100,
+        "minValue": 0,
+        "show": false,
+        "thresholdLabels": false,
+        "thresholdMarkers": true
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 2,
+        "x": 20,
+        "y": 0
+      },
+      "id": 48,
+      "interval": null,
+      "isNew": true,
+      "links": [],
+      "mappingType": 1,
+      "mappingTypes": [
+        {
+          "name": "value to text",
+          "value": 1
+        },
+        {
+          "name": "range to text",
+          "value": 2
+        }
+      ],
+      "maxDataPoints": 100,
+      "nullPointMode": "connected",
+      "nullText": null,
+      "options": {},
+      "postfix": "",
+      "postfixFontSize": "50%",
+      "prefix": "",
+      "prefixFontSize": "50%",
+      "rangeMaps": [
+        {
+          "from": "null",
+          "text": "N/A",
+          "to": "null"
+        }
+      ],
+      "sparkline": {
+        "fillColor": "rgba(31, 118, 189, 0.18)",
+        "full": false,
+        "lineColor": "rgb(31, 120, 193)",
+        "show": false
+      },
+      "tableColumn": "",
+      "targets": [
+        {
+          "dsType": "influxdb",
+          "groupBy": [
+            {
+              "params": [
+                "device_name"
+              ],
+              "type": "tag"
+            }
+          ],
+          "measurement": "uap_radios",
+          "orderByTime": "ASC",
+          "policy": "default",
+          "query": "select count(distinct(hostname)) FROM \"clients\" WHERE ($timeFilter and  is_wired != 'true' and site_name =~ /$Site$/)",
+          "rawQuery": true,
+          "refId": "A",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "channel"
+                ],
+                "type": "field"
+              }
+            ]
+          ],
+          "tags": [
+            {
+              "key": "device_name",
+              "operator": "=~",
+              "value": "/^$host$/"
+            },
+            {
+              "condition": "AND",
+              "key": "radio",
+              "operator": "=",
+              "value": "ng"
+            },
+            {
+              "condition": "AND",
+              "key": "site_name",
+              "operator": "=~",
+              "value": "/^$Site$/"
+            }
+          ]
+        }
+      ],
+      "thresholds": "",
+      "title": "Total Users - All APs",
+      "type": "singlestat",
+      "valueFontSize": "80%",
+      "valueMaps": [],
+      "valueName": "current"
+    },
+    {
+      "cacheTimeout": null,
+      "colorBackground": false,
+      "colorValue": false,
+      "colors": [
+        "rgba(245, 54, 54, 0.9)",
+        "rgba(237, 129, 40, 0.89)",
+        "rgba(50, 172, 45, 0.97)"
+      ],
+      "datasource": "${DS_UNIFI}",
+      "description": "This only works when 1 AP is selected.",
+      "editable": true,
+      "error": false,
+      "format": "none",
+      "gauge": {
+        "maxValue": 100,
+        "minValue": 0,
+        "show": false,
+        "thresholdLabels": false,
+        "thresholdMarkers": true
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 2,
+        "x": 22,
+        "y": 0
+      },
+      "id": 10,
+      "interval": null,
+      "isNew": true,
+      "links": [],
+      "mappingType": 1,
+      "mappingTypes": [
+        {
+          "name": "value to text",
+          "value": 1
+        },
+        {
+          "name": "range to text",
+          "value": 2
+        }
+      ],
+      "maxDataPoints": 100,
+      "nullPointMode": "connected",
+      "nullText": null,
+      "options": {},
+      "postfix": "",
+      "postfixFontSize": "50%",
+      "prefix": "",
+      "prefixFontSize": "50%",
+      "rangeMaps": [
+        {
+          "from": "null",
+          "text": "N/A",
+          "to": "null"
+        }
+      ],
+      "sparkline": {
+        "fillColor": "rgba(31, 118, 189, 0.18)",
+        "full": false,
+        "lineColor": "rgb(31, 120, 193)",
+        "show": false
+      },
+      "tableColumn": "",
+      "targets": [
+        {
+          "dsType": "influxdb",
+          "groupBy": [
+            {
+              "params": [
+                "device_name"
+              ],
+              "type": "tag"
+            }
+          ],
+          "measurement": "uap_radios",
+          "orderByTime": "ASC",
+          "policy": "default",
+          "refId": "A",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "channel"
+                ],
+                "type": "field"
+              }
+            ]
+          ],
+          "tags": [
+            {
+              "key": "device_name",
+              "operator": "=~",
+              "value": "/^$host$/"
+            },
+            {
+              "condition": "AND",
+              "key": "radio",
+              "operator": "=",
+              "value": "ng"
+            },
+            {
+              "condition": "AND",
+              "key": "site_name",
+              "operator": "=~",
+              "value": "/^$Site$/"
+            }
+          ]
+        }
+      ],
+      "thresholds": "",
+      "title": "$host 2.4GHz Channel",
+      "type": "singlestat",
+      "valueFontSize": "80%",
+      "valueMaps": [],
+      "valueName": "current"
+    },
+    {
+      "bgColor": "#3f2b5b",
+      "clockType": "12 hour",
+      "countdownSettings": {
+        "customFormat": null,
+        "endCountdownTime": "2018-04-29T21:47:00.000Z",
+        "endText": "00:00:00"
+      },
+      "dateSettings": {
+        "dateFormat": "YYYY-MM-DD",
+        "fontSize": "12px",
+        "fontWeight": "bold",
+        "showDate": true
+      },
+      "gridPos": {
+        "h": 3,
+        "w": 3,
+        "x": 0,
+        "y": 3
+      },
+      "id": 32,
+      "links": [],
+      "mode": "time",
+      "offsetFromUtc": null,
+      "offsetFromUtcMinutes": null,
+      "options": {},
+      "refreshSettings": {
+        "syncWithDashboard": false
+      },
+      "timeSettings": {
+        "customFormat": "HH:mm:ss",
+        "fontSize": "30px",
+        "fontWeight": "normal"
+      },
+      "timezone": null,
+      "timezoneSettings": {
+        "fontSize": "12px",
+        "fontWeight": "normal",
+        "showTimezone": false,
+        "zoneFormat": "offsetAbbv"
+      },
+      "title": "Now",
+      "type": "grafana-clock-panel"
+    },
+    {
+      "cacheTimeout": null,
+      "colorBackground": false,
+      "colorValue": false,
+      "colors": [
+        "rgba(245, 54, 54, 0.9)",
+        "rgba(237, 129, 40, 0.89)",
+        "rgba(50, 172, 45, 0.97)"
+      ],
+      "datasource": "${DS_UNIFI}",
+      "description": "This only works when 1 AP is selected.",
+      "editable": true,
+      "error": false,
+      "format": "none",
+      "gauge": {
+        "maxValue": 100,
+        "minValue": 0,
+        "show": false,
+        "thresholdLabels": false,
+        "thresholdMarkers": true
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 2,
+        "x": 22,
+        "y": 4
+      },
+      "height": "",
+      "id": 9,
+      "interval": null,
+      "isNew": true,
+      "links": [],
+      "mappingType": 1,
+      "mappingTypes": [
+        {
+          "name": "value to text",
+          "value": 1
+        },
+        {
+          "name": "range to text",
+          "value": 2
+        }
+      ],
+      "maxDataPoints": 100,
+      "nullPointMode": "connected",
+      "nullText": null,
+      "options": {},
+      "postfix": "",
+      "postfixFontSize": "50%",
+      "prefix": "",
+      "prefixFontSize": "50%",
+      "rangeMaps": [
+        {
+          "from": "null",
+          "text": "N/A",
+          "to": "null"
+        }
+      ],
+      "sparkline": {
+        "fillColor": "rgba(31, 118, 189, 0.18)",
+        "full": false,
+        "lineColor": "rgb(31, 120, 193)",
+        "show": false
+      },
+      "tableColumn": "device_name",
+      "targets": [
+        {
+          "alias": "",
+          "dsType": "influxdb",
+          "groupBy": [
+            {
+              "params": [
+                "device_name"
+              ],
+              "type": "tag"
+            }
+          ],
+          "measurement": "uap_radios",
+          "orderByTime": "ASC",
+          "policy": "default",
+          "query": "SELECT \"channel\" FROM \"uap_radios\" WHERE (\"device_name\" =~ /^$host$/ AND \"radio\" = 'na') AND $timeFilter GROUP BY \"device_name\"",
+          "rawQuery": false,
+          "refId": "A",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "channel"
+                ],
+                "type": "field"
+              }
+            ]
+          ],
+          "tags": [
+            {
+              "key": "device_name",
+              "operator": "=~",
+              "value": "/^$host$/"
+            },
+            {
+              "condition": "AND",
+              "key": "radio",
+              "operator": "=",
+              "value": "na"
+            },
+            {
+              "condition": "AND",
+              "key": "site_name",
+              "operator": "=~",
+              "value": "/^$Site$/"
+            }
+          ]
+        }
+      ],
+      "thresholds": "",
+      "title": "5GHz Radio Channel",
+      "type": "singlestat",
+      "valueFontSize": "80%",
+      "valueMaps": [],
+      "valueName": "current"
+    },
+    {
       "columns": [],
       "datasource": "${DS_UNIFI}",
       "editable": true,
@@ -92,9 +767,9 @@
       "fontSize": "100%",
       "gridPos": {
         "h": 6,
-        "w": 21,
+        "w": 24,
         "x": 0,
-        "y": 0
+        "y": 8
       },
       "id": 1,
       "isNew": true,
@@ -527,367 +1202,48 @@
       "type": "table"
     },
     {
-      "content": "<br>\n<center><b><font size=\"6px\">Unifi UAP</font></b></center>\n",
-      "gridPos": {
-        "h": 3,
-        "w": 3,
-        "x": 21,
-        "y": 0
-      },
-      "id": 34,
-      "links": [],
-      "mode": "html",
-      "options": {},
-      "title": "",
-      "transparent": true,
-      "type": "text"
-    },
-    {
-      "bgColor": "#3f2b5b",
-      "clockType": "12 hour",
-      "countdownSettings": {
-        "customFormat": null,
-        "endCountdownTime": "2018-04-29T21:47:00.000Z",
-        "endText": "00:00:00"
-      },
-      "dateSettings": {
-        "dateFormat": "YYYY-MM-DD",
-        "fontSize": "12px",
-        "fontWeight": "bold",
-        "showDate": true
-      },
-      "gridPos": {
-        "h": 3,
-        "w": 3,
-        "x": 21,
-        "y": 3
-      },
-      "id": 32,
-      "links": [],
-      "mode": "time",
-      "offsetFromUtc": null,
-      "offsetFromUtcMinutes": null,
-      "options": {},
-      "refreshSettings": {
-        "syncWithDashboard": false
-      },
-      "timeSettings": {
-        "customFormat": "HH:mm:ss",
-        "fontSize": "30px",
-        "fontWeight": "normal"
-      },
-      "timezone": null,
-      "timezoneSettings": {
-        "fontSize": "12px",
-        "fontWeight": "normal",
-        "showTimezone": false,
-        "zoneFormat": "offsetAbbv"
-      },
-      "title": "Now",
-      "type": "grafana-clock-panel"
-    },
-    {
+      "aliasColors": {},
+      "bars": false,
       "cacheTimeout": null,
-      "colorBackground": false,
-      "colorValue": false,
-      "colors": [
-        "rgba(245, 54, 54, 0.9)",
-        "rgba(237, 129, 40, 0.89)",
-        "rgba(50, 172, 45, 0.97)"
-      ],
+      "dashLength": 10,
+      "dashes": false,
       "datasource": "${DS_UNIFI}",
-      "editable": true,
-      "error": false,
-      "format": "none",
-      "gauge": {
-        "maxValue": 100,
-        "minValue": 0,
-        "show": false,
-        "thresholdLabels": false,
-        "thresholdMarkers": true
-      },
+      "description": "",
+      "fill": 1,
       "gridPos": {
-        "h": 4,
-        "w": 4,
+        "h": 7,
+        "w": 12,
         "x": 0,
-        "y": 6
-      },
-      "height": "",
-      "id": 9,
-      "interval": null,
-      "isNew": true,
-      "links": [],
-      "mappingType": 1,
-      "mappingTypes": [
-        {
-          "name": "value to text",
-          "value": 1
-        },
-        {
-          "name": "range to text",
-          "value": 2
-        }
-      ],
-      "maxDataPoints": 100,
-      "nullPointMode": "connected",
-      "nullText": null,
-      "options": {},
-      "postfix": "",
-      "postfixFontSize": "50%",
-      "prefix": "",
-      "prefixFontSize": "50%",
-      "rangeMaps": [
-        {
-          "from": "null",
-          "text": "N/A",
-          "to": "null"
-        }
-      ],
-      "sparkline": {
-        "fillColor": "rgba(31, 118, 189, 0.18)",
-        "full": false,
-        "lineColor": "rgb(31, 120, 193)",
-        "show": false
-      },
-      "tableColumn": "device_name",
-      "targets": [
-        {
-          "alias": "",
-          "dsType": "influxdb",
-          "groupBy": [
-            {
-              "params": [
-                "device_name"
-              ],
-              "type": "tag"
-            }
-          ],
-          "measurement": "uap_radios",
-          "orderByTime": "ASC",
-          "policy": "default",
-          "query": "SELECT \"channel\" FROM \"uap_radios\" WHERE (\"device_name\" =~ /^$host$/ AND \"radio\" = 'na') AND $timeFilter GROUP BY \"device_name\"",
-          "rawQuery": false,
-          "refId": "A",
-          "resultFormat": "time_series",
-          "select": [
-            [
-              {
-                "params": [
-                  "channel"
-                ],
-                "type": "field"
-              }
-            ]
-          ],
-          "tags": [
-            {
-              "key": "device_name",
-              "operator": "=~",
-              "value": "/^$host$/"
-            },
-            {
-              "condition": "AND",
-              "key": "radio",
-              "operator": "=",
-              "value": "na"
-            },
-            {
-              "condition": "AND",
-              "key": "site_name",
-              "operator": "=~",
-              "value": "/^$Site$/"
-            }
-          ]
-        }
-      ],
-      "thresholds": "",
-      "title": "5GHz Radio Channel",
-      "type": "singlestat",
-      "valueFontSize": "80%",
-      "valueMaps": [],
-      "valueName": "current"
-    },
-    {
-      "cacheTimeout": null,
-      "colorBackground": false,
-      "colorValue": false,
-      "colors": [
-        "rgba(245, 54, 54, 0.9)",
-        "rgba(237, 129, 40, 0.89)",
-        "rgba(50, 172, 45, 0.97)"
-      ],
-      "datasource": "${DS_UNIFI}",
-      "editable": true,
-      "error": false,
-      "format": "none",
-      "gauge": {
-        "maxValue": 25,
-        "minValue": 6,
-        "show": true,
-        "thresholdLabels": false,
-        "thresholdMarkers": false
-      },
-      "gridPos": {
-        "h": 4,
-        "w": 4,
-        "x": 4,
-        "y": 6
-      },
-      "id": 11,
-      "interval": null,
-      "isNew": true,
-      "links": [],
-      "mappingType": 1,
-      "mappingTypes": [
-        {
-          "name": "value to text",
-          "value": 1
-        },
-        {
-          "name": "range to text",
-          "value": 2
-        }
-      ],
-      "maxDataPoints": 100,
-      "nullPointMode": "connected",
-      "nullText": null,
-      "options": {},
-      "postfix": " dBm",
-      "postfixFontSize": "50%",
-      "prefix": "",
-      "prefixFontSize": "50%",
-      "rangeMaps": [
-        {
-          "from": "null",
-          "text": "N/A",
-          "to": "null"
-        }
-      ],
-      "sparkline": {
-        "fillColor": "rgba(31, 120, 193, 0.18)",
-        "full": false,
-        "lineColor": "rgb(31, 120, 193)",
-        "show": false
-      },
-      "tableColumn": "",
-      "targets": [
-        {
-          "dsType": "influxdb",
-          "groupBy": [
-            {
-              "params": [
-                "device_name"
-              ],
-              "type": "tag"
-            }
-          ],
-          "measurement": "uap_radios",
-          "orderByTime": "ASC",
-          "policy": "default",
-          "refId": "A",
-          "resultFormat": "time_series",
-          "select": [
-            [
-              {
-                "params": [
-                  "vap_tx_power"
-                ],
-                "type": "field"
-              }
-            ]
-          ],
-          "tags": [
-            {
-              "key": "device_name",
-              "operator": "=~",
-              "value": "/^$host$/"
-            },
-            {
-              "condition": "AND",
-              "key": "radio",
-              "operator": "=",
-              "value": "na"
-            },
-            {
-              "condition": "AND",
-              "key": "site_name",
-              "operator": "=~",
-              "value": "/^$Site$/"
-            }
-          ]
-        }
-      ],
-      "thresholds": "10,18",
-      "title": "5Ghz Radio Tx Power",
-      "type": "singlestat",
-      "valueFontSize": "80%",
-      "valueMaps": [],
-      "valueName": "current"
-    },
-    {
-      "cacheTimeout": null,
-      "colorBackground": false,
-      "colorValue": true,
-      "colors": [
-        "#299c46",
-        "rgba(237, 129, 40, 0.89)",
-        "#d44a3a"
-      ],
-      "datasource": "${DS_UNIFI}",
-      "decimals": 1,
-      "format": "percent",
-      "gauge": {
-        "maxValue": 100,
-        "minValue": 0,
-        "show": true,
-        "thresholdLabels": true,
-        "thresholdMarkers": true
-      },
-      "gridPos": {
-        "h": 4,
-        "w": 4,
-        "x": 8,
-        "y": 6
+        "y": 14
       },
       "hideTimeOverride": true,
       "id": 30,
-      "interval": null,
-      "links": [],
-      "mappingType": 1,
-      "mappingTypes": [
-        {
-          "name": "value to text",
-          "value": 1
-        },
-        {
-          "name": "range to text",
-          "value": 2
-        }
-      ],
-      "maxDataPoints": 100,
-      "nullPointMode": "connected",
-      "nullText": null,
-      "options": {},
-      "postfix": "",
-      "postfixFontSize": "50%",
-      "prefix": "",
-      "prefixFontSize": "50%",
-      "rangeMaps": [
-        {
-          "from": "null",
-          "text": "N/A",
-          "to": "null"
-        }
-      ],
-      "sparkline": {
-        "fillColor": "rgba(31, 118, 189, 0.18)",
-        "full": true,
-        "lineColor": "rgb(31, 120, 193)",
-        "show": true
+      "interval": "",
+      "legend": {
+        "avg": false,
+        "current": false,
+        "max": true,
+        "min": false,
+        "show": true,
+        "total": false,
+        "values": true
       },
-      "tableColumn": "system_uptime",
+      "lines": true,
+      "linewidth": 1,
+      "links": [],
+      "nullPointMode": "null",
+      "options": {},
+      "percentage": false,
+      "pointradius": 2,
+      "points": false,
+      "renderer": "flot",
+      "seriesOverrides": [],
+      "spaceLength": 10,
+      "stack": false,
+      "steppedLine": false,
       "targets": [
         {
+          "alias": "$tag_name",
           "groupBy": [
             {
               "params": [
@@ -926,83 +1282,90 @@
           ]
         }
       ],
-      "thresholds": "40,70",
+      "thresholds": [],
       "timeFrom": "1h",
+      "timeRegions": [],
+      "timeShift": null,
       "title": "CPU Usage",
-      "type": "singlestat",
-      "valueFontSize": "70%",
-      "valueMaps": [
-        {
-          "op": "=",
-          "text": "N/A",
-          "value": "null"
-        }
-      ],
-      "valueName": "current"
-    },
-    {
-      "cacheTimeout": null,
-      "colorBackground": false,
-      "colorValue": false,
-      "colors": [
-        "#299c46",
-        "rgba(237, 129, 40, 0.89)",
-        "#d44a3a"
-      ],
-      "datasource": "${DS_UNIFI}",
-      "decimals": 3,
-      "format": "dtdurations",
-      "gauge": {
-        "maxValue": 100,
-        "minValue": 0,
-        "show": false,
-        "thresholdLabels": false,
-        "thresholdMarkers": true
+      "tooltip": {
+        "shared": true,
+        "sort": 0,
+        "value_type": "individual"
       },
-      "gridPos": {
-        "h": 4,
-        "w": 4,
-        "x": 12,
-        "y": 6
+      "type": "graph",
+      "xaxis": {
+        "buckets": null,
+        "mode": "time",
+        "name": null,
+        "show": true,
+        "values": []
       },
-      "id": 29,
-      "interval": null,
-      "links": [],
-      "mappingType": 1,
-      "mappingTypes": [
+      "yaxes": [
         {
-          "name": "value to text",
-          "value": 1
+          "format": "percent",
+          "label": "",
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": true
         },
         {
-          "name": "range to text",
-          "value": 2
+          "format": "short",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": true
         }
       ],
-      "maxDataPoints": 100,
-      "nullPointMode": "connected",
-      "nullText": null,
-      "options": {},
-      "postfix": "",
-      "postfixFontSize": "50%",
-      "prefix": "",
-      "prefixFontSize": "50%",
-      "rangeMaps": [
-        {
-          "from": "null",
-          "text": "N/A",
-          "to": "null"
-        }
-      ],
-      "sparkline": {
-        "fillColor": "rgba(31, 118, 189, 0.18)",
-        "full": false,
-        "lineColor": "rgb(31, 120, 193)",
-        "show": false
+      "yaxis": {
+        "align": false,
+        "alignLevel": null
+      }
+    },
+    {
+      "aliasColors": {},
+      "bars": false,
+      "cacheTimeout": null,
+      "dashLength": 10,
+      "dashes": false,
+      "datasource": "${DS_UNIFI}",
+      "description": "",
+      "fill": 1,
+      "gridPos": {
+        "h": 7,
+        "w": 12,
+        "x": 12,
+        "y": 14
       },
-      "tableColumn": "system_uptime",
+      "hideTimeOverride": true,
+      "id": 47,
+      "interval": "",
+      "legend": {
+        "avg": false,
+        "current": false,
+        "max": true,
+        "min": false,
+        "show": true,
+        "total": false,
+        "values": true
+      },
+      "lines": true,
+      "linewidth": 1,
+      "links": [],
+      "nullPointMode": "null",
+      "options": {},
+      "percentage": false,
+      "pointradius": 2,
+      "points": false,
+      "renderer": "flot",
+      "seriesOverrides": [],
+      "spaceLength": 10,
+      "stack": false,
+      "steppedLine": false,
       "targets": [
         {
+          "alias": "$tag_name",
           "groupBy": [
             {
               "params": [
@@ -1014,13 +1377,15 @@
           "measurement": "uap",
           "orderByTime": "ASC",
           "policy": "default",
+          "query": "SELECT \"mem_used\" FROM \"uap\" WHERE (\"name\" =~ /^$host$/ AND \"site_name\" =~ /^$Site$/) AND $timeFilter GROUP BY \"name\"",
+          "rawQuery": false,
           "refId": "A",
           "resultFormat": "time_series",
           "select": [
             [
               {
                 "params": [
-                  "uptime"
+                  "mem"
                 ],
                 "type": "field"
               }
@@ -1041,258 +1406,46 @@
           ]
         }
       ],
-      "thresholds": "",
-      "title": "System Uptime",
-      "type": "singlestat",
-      "valueFontSize": "70%",
-      "valueMaps": [
-        {
-          "op": "=",
-          "text": "N/A",
-          "value": "null"
-        }
-      ],
-      "valueName": "current"
-    },
-    {
-      "cacheTimeout": null,
-      "colorBackground": false,
-      "colorValue": false,
-      "colors": [
-        "rgba(245, 54, 54, 0.9)",
-        "rgba(237, 129, 40, 0.89)",
-        "rgba(50, 172, 45, 0.97)"
-      ],
-      "datasource": "${DS_UNIFI}",
-      "editable": true,
-      "error": false,
-      "format": "none",
-      "gauge": {
-        "maxValue": 25,
-        "minValue": 6,
+      "thresholds": [],
+      "timeFrom": "1h",
+      "timeRegions": [],
+      "timeShift": null,
+      "title": "Memory Usage",
+      "tooltip": {
+        "shared": true,
+        "sort": 0,
+        "value_type": "individual"
+      },
+      "type": "graph",
+      "xaxis": {
+        "buckets": null,
+        "mode": "time",
+        "name": null,
         "show": true,
-        "thresholdLabels": false,
-        "thresholdMarkers": false
+        "values": []
       },
-      "gridPos": {
-        "h": 4,
-        "w": 4,
-        "x": 16,
-        "y": 6
-      },
-      "id": 12,
-      "interval": null,
-      "isNew": true,
-      "links": [],
-      "mappingType": 1,
-      "mappingTypes": [
+      "yaxes": [
         {
-          "name": "value to text",
-          "value": 1
+          "format": "percent",
+          "label": "",
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": true
         },
         {
-          "name": "range to text",
-          "value": 2
+          "format": "short",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": true
         }
       ],
-      "maxDataPoints": 100,
-      "nullPointMode": "connected",
-      "nullText": null,
-      "options": {},
-      "postfix": " dBm",
-      "postfixFontSize": "50%",
-      "prefix": "",
-      "prefixFontSize": "50%",
-      "rangeMaps": [
-        {
-          "from": "null",
-          "text": "N/A",
-          "to": "null"
-        }
-      ],
-      "sparkline": {
-        "fillColor": "rgba(31, 118, 189, 0.18)",
-        "full": false,
-        "lineColor": "rgb(31, 120, 193)",
-        "show": false
-      },
-      "tableColumn": "",
-      "targets": [
-        {
-          "dsType": "influxdb",
-          "groupBy": [
-            {
-              "params": [
-                "device_name"
-              ],
-              "type": "tag"
-            }
-          ],
-          "measurement": "uap_radios",
-          "orderByTime": "ASC",
-          "policy": "default",
-          "refId": "A",
-          "resultFormat": "time_series",
-          "select": [
-            [
-              {
-                "params": [
-                  "vap_tx_power"
-                ],
-                "type": "field"
-              }
-            ]
-          ],
-          "tags": [
-            {
-              "key": "radio",
-              "operator": "=",
-              "value": "ng"
-            },
-            {
-              "condition": "AND",
-              "key": "device_name",
-              "operator": "=~",
-              "value": "/^$host$/"
-            },
-            {
-              "condition": "AND",
-              "key": "site_name",
-              "operator": "=~",
-              "value": "/^$Site$/"
-            }
-          ]
-        }
-      ],
-      "thresholds": "10,18",
-      "title": "2.4GHz Radio Tx Power",
-      "type": "singlestat",
-      "valueFontSize": "80%",
-      "valueMaps": [
-        {
-          "op": "=",
-          "text": "N/A",
-          "value": "null"
-        }
-      ],
-      "valueName": "current"
-    },
-    {
-      "cacheTimeout": null,
-      "colorBackground": false,
-      "colorValue": false,
-      "colors": [
-        "rgba(245, 54, 54, 0.9)",
-        "rgba(237, 129, 40, 0.89)",
-        "rgba(50, 172, 45, 0.97)"
-      ],
-      "datasource": "${DS_UNIFI}",
-      "editable": true,
-      "error": false,
-      "format": "none",
-      "gauge": {
-        "maxValue": 100,
-        "minValue": 0,
-        "show": false,
-        "thresholdLabels": false,
-        "thresholdMarkers": true
-      },
-      "gridPos": {
-        "h": 4,
-        "w": 4,
-        "x": 20,
-        "y": 6
-      },
-      "id": 10,
-      "interval": null,
-      "isNew": true,
-      "links": [],
-      "mappingType": 1,
-      "mappingTypes": [
-        {
-          "name": "value to text",
-          "value": 1
-        },
-        {
-          "name": "range to text",
-          "value": 2
-        }
-      ],
-      "maxDataPoints": 100,
-      "nullPointMode": "connected",
-      "nullText": null,
-      "options": {},
-      "postfix": "",
-      "postfixFontSize": "50%",
-      "prefix": "",
-      "prefixFontSize": "50%",
-      "rangeMaps": [
-        {
-          "from": "null",
-          "text": "N/A",
-          "to": "null"
-        }
-      ],
-      "sparkline": {
-        "fillColor": "rgba(31, 118, 189, 0.18)",
-        "full": false,
-        "lineColor": "rgb(31, 120, 193)",
-        "show": false
-      },
-      "tableColumn": "",
-      "targets": [
-        {
-          "dsType": "influxdb",
-          "groupBy": [
-            {
-              "params": [
-                "device_name"
-              ],
-              "type": "tag"
-            }
-          ],
-          "measurement": "uap_radios",
-          "orderByTime": "ASC",
-          "policy": "default",
-          "refId": "A",
-          "resultFormat": "time_series",
-          "select": [
-            [
-              {
-                "params": [
-                  "channel"
-                ],
-                "type": "field"
-              }
-            ]
-          ],
-          "tags": [
-            {
-              "key": "device_name",
-              "operator": "=~",
-              "value": "/^$host$/"
-            },
-            {
-              "condition": "AND",
-              "key": "radio",
-              "operator": "=",
-              "value": "ng"
-            },
-            {
-              "condition": "AND",
-              "key": "site_name",
-              "operator": "=~",
-              "value": "/^$Site$/"
-            }
-          ]
-        }
-      ],
-      "thresholds": "",
-      "title": "2.4GHz Radio Channel",
-      "type": "singlestat",
-      "valueFontSize": "80%",
-      "valueMaps": [],
-      "valueName": "current"
+      "yaxis": {
+        "align": false,
+        "alignLevel": null
+      }
     },
     {
       "aliasColors": {},
@@ -1304,10 +1457,10 @@
       "error": false,
       "fill": 1,
       "gridPos": {
-        "h": 8,
+        "h": 7,
         "w": 12,
         "x": 0,
-        "y": 10
+        "y": 21
       },
       "id": 3,
       "isNew": true,
@@ -1466,30 +1619,35 @@
       "dashLength": 10,
       "dashes": false,
       "datasource": "${DS_UNIFI}",
+      "decimals": 0,
       "editable": true,
       "error": false,
-      "fill": 1,
+      "fill": 0,
       "gridPos": {
-        "h": 8,
+        "h": 7,
         "w": 12,
         "x": 12,
-        "y": 10
+        "y": 21
       },
-      "id": 7,
+      "id": 46,
       "isNew": true,
       "legend": {
         "alignAsTable": true,
         "avg": false,
         "current": true,
+        "hideEmpty": true,
+        "hideZero": true,
         "max": true,
-        "min": false,
+        "min": true,
         "rightSide": true,
         "show": true,
+        "sort": "current",
+        "sortDesc": true,
         "total": false,
         "values": true
       },
       "lines": true,
-      "linewidth": 2,
+      "linewidth": 3,
       "links": [],
       "nullPointMode": "connected",
       "options": {},
@@ -1500,35 +1658,196 @@
       "seriesOverrides": [],
       "spaceLength": 10,
       "stack": false,
-      "steppedLine": false,
+      "steppedLine": true,
       "targets": [
         {
-          "alias": "$tag_name $col",
+          "alias": "$tag_device_name total",
           "dsType": "influxdb",
           "groupBy": [
             {
               "params": [
-                "name"
+                "$__interval"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "device_name"
               ],
               "type": "tag"
             }
           ],
-          "measurement": "uap",
+          "measurement": "uap_radios",
           "orderByTime": "ASC",
           "policy": "default",
+          "query": "SELECT last(\"num_sta\") FROM \"uap_radios\" WHERE (\"device_name\" =~ /^$host$/ AND \"radio\" = 'na') AND $timeFilter GROUP BY time($__interval), \"device_name\"",
+          "rawQuery": false,
           "refId": "A",
           "resultFormat": "time_series",
           "select": [
             [
               {
                 "params": [
-                  "mem_buffer"
+                  "num_sta"
                 ],
                 "type": "field"
               },
               {
+                "params": [],
+                "type": "last"
+              }
+            ]
+          ],
+          "tags": [
+            {
+              "key": "site_name",
+              "operator": "=~",
+              "value": "/^$Site$/"
+            },
+            {
+              "condition": "AND",
+              "key": "device_name",
+              "operator": "=~",
+              "value": "/^$host$/"
+            }
+          ]
+        }
+      ],
+      "thresholds": [],
+      "timeFrom": null,
+      "timeRegions": [],
+      "timeShift": null,
+      "title": "Clients per Access Point",
+      "tooltip": {
+        "msResolution": false,
+        "shared": true,
+        "sort": 2,
+        "value_type": "individual"
+      },
+      "transparent": true,
+      "type": "graph",
+      "xaxis": {
+        "buckets": null,
+        "mode": "time",
+        "name": null,
+        "show": true,
+        "values": []
+      },
+      "yaxes": [
+        {
+          "format": "none",
+          "label": "",
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": true
+        },
+        {
+          "format": "short",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": false
+        }
+      ],
+      "yaxis": {
+        "align": false,
+        "alignLevel": null
+      }
+    },
+    {
+      "aliasColors": {},
+      "bars": false,
+      "dashLength": 10,
+      "dashes": false,
+      "datasource": "${DS_UNIFI}",
+      "description": "Devices TX / RX bytes per second grouped by OUI. RX on negative axis.",
+      "fill": 1,
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 28
+      },
+      "id": 42,
+      "legend": {
+        "alignAsTable": true,
+        "avg": true,
+        "current": true,
+        "max": true,
+        "min": false,
+        "rightSide": true,
+        "show": true,
+        "sort": "current",
+        "sortDesc": true,
+        "total": false,
+        "values": true
+      },
+      "lines": true,
+      "linewidth": 1,
+      "links": [],
+      "nullPointMode": "connected",
+      "options": {},
+      "percentage": false,
+      "pointradius": 5,
+      "points": false,
+      "renderer": "flot",
+      "seriesOverrides": [
+        {
+          "alias": "/Rx$/",
+          "transform": "negative-Y"
+        }
+      ],
+      "spaceLength": 10,
+      "stack": false,
+      "steppedLine": false,
+      "targets": [
+        {
+          "alias": "$tag_oui $col",
+          "groupBy": [
+            {
+              "params": [
+                "$__interval"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "oui"
+              ],
+              "type": "tag"
+            },
+            {
+              "params": [
+                "none"
+              ],
+              "type": "fill"
+            }
+          ],
+          "hide": false,
+          "measurement": "clients",
+          "orderByTime": "ASC",
+          "policy": "default",
+          "query": "SELECT derivative(sum(\"rx_bytes\"), 1s) AS \"Rx\", derivative(sum(\"rx_bytes\"), 1s) AS \"Rx\" FROM \"clients\" WHERE (\"oui\" = 'Htc' AND \"is_wired\" = 'false') AND $timeFilter GROUP BY time(30s), \"oui\" fill(none)",
+          "rawQuery": false,
+          "refId": "B",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
                 "params": [
-                  "Buffer"
+                  "tx_bytes_r"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "sum"
+              },
+              {
+                "params": [
+                  "Tx"
                 ],
                 "type": "alias"
               }
@@ -1536,27 +1855,17 @@
             [
               {
                 "params": [
-                  "mem_used"
+                  "rx_bytes_r"
                 ],
                 "type": "field"
               },
               {
-                "params": [
-                  "Used"
-                ],
-                "type": "alias"
-              }
-            ],
-            [
-              {
-                "params": [
-                  "mem_total"
-                ],
-                "type": "field"
+                "params": [],
+                "type": "sum"
               },
               {
                 "params": [
-                  "Total"
+                  "Rx"
                 ],
                 "type": "alias"
               }
@@ -1564,9 +1873,9 @@
           ],
           "tags": [
             {
-              "key": "name",
-              "operator": "=~",
-              "value": "/^$host$/"
+              "key": "is_wired",
+              "operator": "!=",
+              "value": "true"
             },
             {
               "condition": "AND",
@@ -1581,7 +1890,255 @@
       "timeFrom": null,
       "timeRegions": [],
       "timeShift": null,
-      "title": "Memory",
+      "title": "WIFI Traffic per Vendor (all AP in Site(s): $Site)",
+      "tooltip": {
+        "shared": true,
+        "sort": 2,
+        "value_type": "individual"
+      },
+      "transparent": true,
+      "type": "graph",
+      "xaxis": {
+        "buckets": null,
+        "mode": "time",
+        "name": null,
+        "show": true,
+        "values": []
+      },
+      "yaxes": [
+        {
+          "format": "bps",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": true
+        },
+        {
+          "format": "short",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": false
+        }
+      ],
+      "yaxis": {
+        "align": false,
+        "alignLevel": null
+      }
+    },
+    {
+      "aliasColors": {},
+      "bars": false,
+      "dashLength": 10,
+      "dashes": false,
+      "datasource": "${DS_UNIFI}",
+      "decimals": 0,
+      "editable": true,
+      "error": false,
+      "fill": 2,
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 28
+      },
+      "id": 19,
+      "isNew": true,
+      "legend": {
+        "alignAsTable": true,
+        "avg": false,
+        "current": true,
+        "hideEmpty": true,
+        "hideZero": true,
+        "max": true,
+        "min": true,
+        "rightSide": true,
+        "show": true,
+        "total": false,
+        "values": true
+      },
+      "lines": true,
+      "linewidth": 1,
+      "links": [],
+      "nullPointMode": "connected",
+      "options": {},
+      "percentage": false,
+      "pointradius": 5,
+      "points": false,
+      "renderer": "flot",
+      "seriesOverrides": [],
+      "spaceLength": 10,
+      "stack": true,
+      "steppedLine": false,
+      "targets": [
+        {
+          "alias": "$tag_device_name 5GHz $col",
+          "dsType": "influxdb",
+          "groupBy": [
+            {
+              "params": [
+                "$__interval"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "device_name"
+              ],
+              "type": "tag"
+            }
+          ],
+          "measurement": "uap_radios",
+          "orderByTime": "ASC",
+          "policy": "default",
+          "refId": "A",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "user-num_sta"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "last"
+              },
+              {
+                "params": [
+                  "Users"
+                ],
+                "type": "alias"
+              }
+            ],
+            [
+              {
+                "params": [
+                  "guest-num_sta"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "last"
+              },
+              {
+                "params": [
+                  "Guests"
+                ],
+                "type": "alias"
+              }
+            ]
+          ],
+          "tags": [
+            {
+              "key": "device_name",
+              "operator": "=~",
+              "value": "/^$host$/"
+            },
+            {
+              "condition": "AND",
+              "key": "radio",
+              "operator": "=",
+              "value": "na"
+            },
+            {
+              "condition": "AND",
+              "key": "site_name",
+              "operator": "=~",
+              "value": "/^$Site$/"
+            }
+          ]
+        },
+        {
+          "alias": "$tag_device_name 2.4GHz $col",
+          "dsType": "influxdb",
+          "groupBy": [
+            {
+              "params": [
+                "$__interval"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "device_name"
+              ],
+              "type": "tag"
+            }
+          ],
+          "measurement": "uap_radios",
+          "orderByTime": "ASC",
+          "policy": "default",
+          "refId": "B",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "guest-num_sta"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "last"
+              },
+              {
+                "params": [
+                  "Guests"
+                ],
+                "type": "alias"
+              }
+            ],
+            [
+              {
+                "params": [
+                  "user-num_sta"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "last"
+              },
+              {
+                "params": [
+                  "Users"
+                ],
+                "type": "alias"
+              }
+            ]
+          ],
+          "tags": [
+            {
+              "key": "device_name",
+              "operator": "=~",
+              "value": "/^$host$/"
+            },
+            {
+              "condition": "AND",
+              "key": "radio",
+              "operator": "=",
+              "value": "ng"
+            },
+            {
+              "condition": "AND",
+              "key": "site_name",
+              "operator": "=~",
+              "value": "/^$Site$/"
+            }
+          ]
+        }
+      ],
+      "thresholds": [],
+      "timeFrom": null,
+      "timeRegions": [],
+      "timeShift": null,
+      "title": "Users and Guests per AP band",
       "tooltip": {
         "msResolution": false,
         "shared": true,
@@ -1598,8 +2155,8 @@
       },
       "yaxes": [
         {
-          "format": "decbytes",
-          "label": null,
+          "format": "none",
+          "label": "",
           "logBase": 1,
           "max": null,
           "min": null,
@@ -1632,7 +2189,7 @@
         "h": 8,
         "w": 12,
         "x": 0,
-        "y": 18
+        "y": 36
       },
       "id": 18,
       "isNew": true,
@@ -1771,28 +2328,26 @@
       "dashLength": 10,
       "dashes": false,
       "datasource": "${DS_UNIFI}",
-      "decimals": 0,
-      "editable": true,
-      "error": false,
-      "fill": 2,
+      "fill": 0,
       "gridPos": {
         "h": 8,
         "w": 12,
         "x": 12,
-        "y": 18
+        "y": 36
       },
-      "id": 19,
-      "isNew": true,
+      "id": 44,
       "legend": {
         "alignAsTable": true,
         "avg": false,
         "current": true,
-        "hideEmpty": true,
-        "hideZero": true,
+        "hideEmpty": false,
+        "hideZero": false,
         "max": true,
         "min": true,
         "rightSide": true,
         "show": true,
+        "sort": "current",
+        "sortDesc": true,
         "total": false,
         "values": true
       },
@@ -1807,12 +2362,11 @@
       "renderer": "flot",
       "seriesOverrides": [],
       "spaceLength": 10,
-      "stack": true,
+      "stack": false,
       "steppedLine": false,
       "targets": [
         {
-          "alias": "$tag_device_name 5GHz",
-          "dsType": "influxdb",
+          "alias": "$tag_ap_mac",
           "groupBy": [
             {
               "params": [
@@ -1822,97 +2376,37 @@
             },
             {
               "params": [
-                "device_name"
+                "ap_mac"
               ],
               "type": "tag"
             }
           ],
-          "measurement": "uap_radios",
+          "measurement": "clients",
           "orderByTime": "ASC",
           "policy": "default",
+          "query": "SELECT derivative(first(\"wired-rx_bytes\"), 1s) FROM \"clients\" WHERE (\"hostname\" = 'dns-rtn') AND $timeFilter GROUP BY time(10s) fill(none)",
+          "rawQuery": false,
           "refId": "A",
           "resultFormat": "time_series",
           "select": [
             [
               {
                 "params": [
-                  "num_sta"
+                  "rssi"
                 ],
                 "type": "field"
               },
               {
                 "params": [],
-                "type": "last"
+                "type": "mean"
               }
             ]
           ],
           "tags": [
             {
-              "key": "device_name",
-              "operator": "=~",
-              "value": "/^$host$/"
-            },
-            {
-              "condition": "AND",
-              "key": "radio",
-              "operator": "=",
-              "value": "na"
-            },
-            {
-              "condition": "AND",
-              "key": "site_name",
-              "operator": "=~",
-              "value": "/^$Site$/"
-            }
-          ]
-        },
-        {
-          "alias": "$tag_device_name 2.4GHz",
-          "dsType": "influxdb",
-          "groupBy": [
-            {
-              "params": [
-                "$__interval"
-              ],
-              "type": "time"
-            },
-            {
-              "params": [
-                "device_name"
-              ],
-              "type": "tag"
-            }
-          ],
-          "measurement": "uap_radios",
-          "orderByTime": "ASC",
-          "policy": "default",
-          "refId": "B",
-          "resultFormat": "time_series",
-          "select": [
-            [
-              {
-                "params": [
-                  "num_sta"
-                ],
-                "type": "field"
-              },
-              {
-                "params": [],
-                "type": "last"
-              }
-            ]
-          ],
-          "tags": [
-            {
-              "key": "device_name",
-              "operator": "=~",
-              "value": "/^$host$/"
-            },
-            {
-              "condition": "AND",
-              "key": "radio",
-              "operator": "=",
-              "value": "ng"
+              "key": "is_wired",
+              "operator": "!=",
+              "value": "true"
             },
             {
               "condition": "AND",
@@ -1927,13 +2421,13 @@
       "timeFrom": null,
       "timeRegions": [],
       "timeShift": null,
-      "title": "Clients",
+      "title": "Rssi (all APs in Site(s): $Site)",
       "tooltip": {
-        "msResolution": false,
         "shared": true,
         "sort": 2,
         "value_type": "individual"
       },
+      "transparent": true,
       "type": "graph",
       "xaxis": {
         "buckets": null,
@@ -1944,8 +2438,8 @@
       },
       "yaxes": [
         {
-          "format": "none",
-          "label": "",
+          "format": "dBm",
+          "label": "Rssi",
           "logBase": 1,
           "max": null,
           "min": null,
@@ -1975,10 +2469,10 @@
       "error": false,
       "fill": 0,
       "gridPos": {
-        "h": 7,
+        "h": 8,
         "w": 12,
         "x": 0,
-        "y": 26
+        "y": 44
       },
       "id": 8,
       "isNew": true,
@@ -2008,7 +2502,7 @@
       "steppedLine": false,
       "targets": [
         {
-          "alias": "$tag_device_name:$col",
+          "alias": "$tag_device_name $col",
           "dsType": "influxdb",
           "groupBy": [
             {
@@ -2120,7 +2614,7 @@
       "tooltip": {
         "msResolution": false,
         "shared": true,
-        "sort": 0,
+        "sort": 2,
         "value_type": "cumulative"
       },
       "type": "graph",
@@ -2166,10 +2660,10 @@
       "error": false,
       "fill": 0,
       "gridPos": {
-        "h": 7,
+        "h": 8,
         "w": 12,
         "x": 12,
-        "y": 26
+        "y": 44
       },
       "id": 27,
       "isNew": true,
@@ -2199,7 +2693,7 @@
       "steppedLine": false,
       "targets": [
         {
-          "alias": "$tag_device_name:$col",
+          "alias": "$tag_device_name $col",
           "dsType": "influxdb",
           "groupBy": [
             {
@@ -2351,7 +2845,7 @@
       "dashLength": 10,
       "dashes": false,
       "datasource": "${DS_UNIFI}",
-      "description": "I don't recall why I did *8 on this. The data here may not be entirely accurate?",
+      "description": "RX is on the negative Axis.",
       "editable": true,
       "error": false,
       "fill": 1,
@@ -2359,7 +2853,7 @@
         "h": 7,
         "w": 12,
         "x": 0,
-        "y": 33
+        "y": 52
       },
       "id": 20,
       "isNew": true,
@@ -2387,7 +2881,7 @@
       "renderer": "flot",
       "seriesOverrides": [
         {
-          "alias": "/:Rx$/",
+          "alias": "/Rx$/",
           "transform": "negative-Y"
         }
       ],
@@ -2396,7 +2890,7 @@
       "steppedLine": false,
       "targets": [
         {
-          "alias": "$tag_device_name:$col",
+          "alias": "$tag_device_name $col",
           "dsType": "influxdb",
           "groupBy": [
             {
@@ -2443,6 +2937,12 @@
               },
               {
                 "params": [
+                  "1s"
+                ],
+                "type": "non_negative_derivative"
+              },
+              {
+                "params": [
                   "*8"
                 ],
                 "type": "math"
@@ -2470,6 +2970,12 @@
                   "1s"
                 ],
                 "type": "derivative"
+              },
+              {
+                "params": [
+                  "1s"
+                ],
+                "type": "non_negative_derivative"
               },
               {
                 "params": [
@@ -2554,6 +3060,7 @@
       "dashLength": 10,
       "dashes": false,
       "datasource": "${DS_UNIFI}",
+      "description": "RX is on the negative Axis.",
       "editable": true,
       "error": false,
       "fill": 1,
@@ -2561,7 +3068,7 @@
         "h": 7,
         "w": 12,
         "x": 12,
-        "y": 33
+        "y": 52
       },
       "id": 24,
       "isNew": true,
@@ -2589,7 +3096,7 @@
       "renderer": "flot",
       "seriesOverrides": [
         {
-          "alias": "/:Rx$/",
+          "alias": "/Rx$/",
           "transform": "negative-Y"
         }
       ],
@@ -2598,7 +3105,7 @@
       "steppedLine": false,
       "targets": [
         {
-          "alias": "$tag_device_name:$col",
+          "alias": "$tag_device_name $col",
           "dsType": "influxdb",
           "groupBy": [
             {
@@ -2645,6 +3152,12 @@
               },
               {
                 "params": [
+                  "1s"
+                ],
+                "type": "non_negative_derivative"
+              },
+              {
+                "params": [
                   "*8"
                 ],
                 "type": "math"
@@ -2672,6 +3185,12 @@
                   "1s"
                 ],
                 "type": "derivative"
+              },
+              {
+                "params": [
+                  "1s"
+                ],
+                "type": "non_negative_derivative"
               },
               {
                 "params": [
@@ -2757,7 +3276,7 @@
       "dashes": false,
       "datasource": "${DS_UNIFI}",
       "decimals": 0,
-      "description": "PPS on the na band.",
+      "description": "PPS on the na band. In is on the negative Axis.",
       "editable": true,
       "error": false,
       "fill": 1,
@@ -2765,7 +3284,7 @@
         "h": 7,
         "w": 12,
         "x": 0,
-        "y": 40
+        "y": 59
       },
       "id": 22,
       "isNew": true,
@@ -2791,7 +3310,7 @@
       "renderer": "flot",
       "seriesOverrides": [
         {
-          "alias": "/:In$/",
+          "alias": "/In$/",
           "transform": "negative-Y"
         }
       ],
@@ -2800,7 +3319,7 @@
       "steppedLine": false,
       "targets": [
         {
-          "alias": "$tag_device_name:$col",
+          "alias": "$tag_device_name $col",
           "dsType": "influxdb",
           "groupBy": [
             {
@@ -2948,7 +3467,7 @@
       "dashes": false,
       "datasource": "${DS_UNIFI}",
       "decimals": 0,
-      "description": "PPS on the ng band calculated in 30 second buckets.",
+      "description": "PPS on the ng band calculated in 30 second buckets. In is on the negative Axis.",
       "editable": true,
       "error": false,
       "fill": 1,
@@ -2956,7 +3475,7 @@
         "h": 7,
         "w": 12,
         "x": 12,
-        "y": 40
+        "y": 59
       },
       "id": 25,
       "isNew": true,
@@ -2984,7 +3503,7 @@
       "renderer": "flot",
       "seriesOverrides": [
         {
-          "alias": "/:In$/",
+          "alias": "/In$/",
           "transform": "negative-Y"
         }
       ],
@@ -2993,7 +3512,7 @@
       "steppedLine": false,
       "targets": [
         {
-          "alias": "$tag_device_name:$col",
+          "alias": "$tag_device_name $col",
           "dsType": "influxdb",
           "groupBy": [
             {
@@ -3149,9 +3668,10 @@
         "h": 7,
         "w": 12,
         "x": 0,
-        "y": 47
+        "y": 66
       },
       "id": 21,
+      "interval": "",
       "isNew": true,
       "legend": {
         "alignAsTable": true,
@@ -3177,7 +3697,7 @@
       "renderer": "flot",
       "seriesOverrides": [
         {
-          "alias": "/:In$/",
+          "alias": "/In$/",
           "transform": "negative-Y"
         }
       ],
@@ -3186,7 +3706,7 @@
       "steppedLine": false,
       "targets": [
         {
-          "alias": "$tag_device_name:$col",
+          "alias": "$tag_device_name $col",
           "dsType": "influxdb",
           "groupBy": [
             {
@@ -3460,6 +3980,7 @@
       "dashes": false,
       "datasource": "${DS_UNIFI}",
       "decimals": 0,
+      "description": "In is on the negative axis.",
       "editable": true,
       "error": false,
       "fill": 1,
@@ -3467,7 +3988,7 @@
         "h": 7,
         "w": 12,
         "x": 12,
-        "y": 47
+        "y": 66
       },
       "id": 26,
       "isNew": true,
@@ -3495,7 +4016,7 @@
       "renderer": "flot",
       "seriesOverrides": [
         {
-          "alias": "/:In$/",
+          "alias": "/In$/",
           "transform": "negative-Y"
         }
       ],
@@ -3504,7 +4025,7 @@
       "steppedLine": false,
       "targets": [
         {
-          "alias": "$tag_device_name:$col",
+          "alias": "$tag_device_name $col",
           "dsType": "influxdb",
           "groupBy": [
             {
@@ -3868,5 +4389,5 @@
   "timezone": "browser",
   "title": "UniFi UAP Insights",
   "uid": "8nQ_RPZiz",
-  "version": 42
+  "version": 56
 }
