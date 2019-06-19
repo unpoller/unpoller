@@ -16,7 +16,7 @@ func hasErr(errs []error) bool {
 }
 
 // LogErrors writes a slice of errors, with a prefix, to log-out.
-// It also incriments the error counter.
+// It also increments the error counter.
 func (u *UnifiPoller) LogErrors(errs []error, prefix string) {
 	for _, err := range errs {
 		if err != nil {
