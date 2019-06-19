@@ -64,7 +64,7 @@
   "gnetId": null,
   "graphTooltip": 1,
   "id": null,
-  "iteration": 1560917275243,
+  "iteration": 1560917693674,
   "links": [
     {
       "icon": "external link",
@@ -2903,5 +2903,5 @@
   "timezone": "",
   "title": "UniFi Client Insights",
   "uid": "YVR23BZiz",
-  "version": 8
+  "version": 55
 }
