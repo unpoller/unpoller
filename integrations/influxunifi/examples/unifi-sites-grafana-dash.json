@@ -65,7 +65,7 @@
   "gnetId": null,
   "graphTooltip": 1,
   "id": null,
-  "iteration": 1560630117335,
+  "iteration": 1560916503572,
   "links": [
     {
       "icon": "external link",
@@ -2789,6 +2789,8 @@
           "measurement": "subsystems",
           "orderByTime": "ASC",
           "policy": "default",
+          "query": "SELECT max(\"rx_bytes-r\") AS \"Bytes RX\", max(\"tx_bytes-r\") AS \"Bytes TX\" FROM \"subsystems\" WHERE (\"site_name\" =~ /^$site$/) AND $timeFilter GROUP BY time($__interval), \"subsystem\" fill(null)",
+          "rawQuery": true,
           "refId": "A",
           "resultFormat": "time_series",
           "select": [
@@ -2842,7 +2844,7 @@
       "timeFrom": null,
       "timeRegions": [],
       "timeShift": null,
-      "title": "Site $Site Data Transfer",
+      "title": "Site $site Data Transfer",
       "tooltip": {
         "shared": true,
         "sort": 2,
@@ -3021,7 +3023,7 @@
       "timeFrom": null,
       "timeRegions": [],
       "timeShift": null,
-      "title": "Site $Site Client Counts",
+      "title": "Site $site Client Counts",
       "tooltip": {
         "shared": true,
         "sort": 2,
@@ -3073,7 +3075,7 @@
         "datasource": "${DS_UNIFI}",
         "definition": "show tag values from \"subsystems\" with key=\"site_name\"",
         "hide": 2,
-        "includeAll": false,
+        "includeAll": true,
         "label": "",
         "multi": false,
         "name": "site",
@@ -3082,7 +3084,7 @@
         "refresh": 1,
         "regex": "",
         "skipUrlSync": false,
-        "sort": 0,
+        "sort": 1,
         "tagValuesQuery": "",
         "tags": [],
         "tagsQuery": "",
@@ -3143,5 +3145,5 @@
   "timezone": "",
   "title": "Unifi Sites",
   "uid": "5_omrT7Zz",
-  "version": 26
+  "version": 36
 }
