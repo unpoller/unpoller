@@ -36,7 +36,7 @@ clean:
 	rm -f $(BINARY){.macos,.linux,.1,}{,.gz} $(BINARY).rb
 	rm -f $(BINARY){_,-}*.{deb,rpm} md2roff v*.tar.gz.sha256
 	rm -f cmd/$(BINARY)/README{,.html} README{,.html} ./$(BINARY)_manual.html
-	rm -rf package_build_* release
+	rm -rf package_build_* release vendor
 
 # md2roff is needed to build the man file and html pages from the READMEs.
 md2roff:
@@ -108,7 +108,7 @@ $(BINARY)_$(VERSION)-$(ITERATION)_amd64.deb: check_fpm package_build_linux
 		--chdir package_build_linux
 
 docker:
-	docker build -t $(DOCKER_REPO)/$(BINARY) .
+	docker build -f init/docker/Dockerfile -t $(DOCKER_REPO)/$(BINARY) .
 
 # Build an environment that can be packaged for linux.
 package_build_linux: readme man linux
@@ -135,7 +135,7 @@ v$(VERSION).tar.gz.sha256:
 	curl -sL $(URL)/archive/v$(VERSION).tar.gz | openssl dgst -r -sha256 | tee v$(VERSION).tar.gz.sha256
 $(BINARY).rb: v$(VERSION).tar.gz.sha256
 	# Creating formula from template using sed.
-	sed "s/{{Version}}/$(VERSION)/g;s/{{SHA256}}/`head -c64 v$(VERSION).tar.gz.sha256`/g;s/{{Desc}}/$(DESC)/g;s%{{URL}}%$(URL)%g" templates/$(BINARY).rb.tmpl | tee $(BINARY).rb
+	sed "s/{{Version}}/$(VERSION)/g;s/{{SHA256}}/`head -c64 v$(VERSION).tar.gz.sha256`/g;s/{{Desc}}/$(DESC)/g;s%{{URL}}%$(URL)%g" init/homebrew/$(BINARY).rb.tmpl | tee $(BINARY).rb
 
 # Extras
 
