@@ -141,19 +141,8 @@ func (u *Unifi) GetSites() (Sites, error) {
 
 // GetData makes a unifi request and unmarshal the response into a provided pointer.
 func (u *Unifi) GetData(methodPath string, v interface{}) error {
-	req, err := u.UniReq(methodPath, "")
-	if err != nil {
-		return errors.Wrapf(err, "c.UniReq(%s)", methodPath)
-	}
-	resp, err := u.Do(req)
-	if err != nil {
-		return errors.Wrapf(err, "c.Do(%s)", methodPath)
-	}
-	defer func() {
-		_ = resp.Body.Close()
-	}()
-	if body, err := ioutil.ReadAll(resp.Body); err != nil {
-		return errors.Wrapf(err, "ioutil.ReadAll(%s)", methodPath)
+	if body, err := u.GetJSON(methodPath); err != nil {
+		return err
 	} else if err = json.Unmarshal(body, v); err != nil {
 		return errors.Wrapf(err, "json.Unmarshal(%s)", methodPath)
 	}
@@ -174,4 +163,27 @@ func (u *Unifi) UniReq(apiPath string, params string) (req *http.Request, err er
 		req.Header.Add("Accept", "application/json")
 	}
 	return
+}
+
+// GetJSON returns the raw JSON from a path. This is useful for debugging.
+func (u *Unifi) GetJSON(apiPath string) ([]byte, error) {
+	req, err := u.UniReq(apiPath, "")
+	if err != nil {
+		return []byte{}, errors.Wrapf(err, "c.UniReq(%s)", apiPath)
+	}
+	resp, err := u.Do(req)
+	if err != nil {
+		return []byte{}, errors.Wrapf(err, "c.Do(%s)", apiPath)
+	}
+	defer func() {
+		_ = resp.Body.Close()
+	}()
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return body, errors.Wrapf(err, "ioutil.ReadAll(%s)", apiPath)
+	}
+	if resp.StatusCode != http.StatusOK {
+		err = errors.Errorf("invalid status code from server %v %v", resp.StatusCode, resp.Status)
+	}
+	return body, err
 }
