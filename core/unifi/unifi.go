@@ -12,6 +12,7 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"net/http/cookiejar"
 	"strings"
@@ -32,6 +33,8 @@ func NewUnifi(user, pass, url string, verifySSL bool) (*Unifi, error) {
 			Transport: &http.Transport{TLSClientConfig: &tls.Config{InsecureSkipVerify: !verifySSL}},
 			Jar:       jar,
 		},
+		ErrorLog: log.Printf,
+		DebugLog: DiscardLogs,
 	}
 	return u, u.getController(user, pass)
 }
@@ -39,7 +42,7 @@ func NewUnifi(user, pass, url string, verifySSL bool) (*Unifi, error) {
 // getController is a helper method to make testsing a bit easier.
 func (u *Unifi) getController(user, pass string) error {
 	// magic login.
-	req, err := u.UniReq(LoginPath, `{"username": "`+user+`","password": "`+pass+`"}`)
+	req, err := u.UniReq(LoginPath, fmt.Sprintf(`{"username":"%s","password":"%s"}`, user, pass))
 	if err != nil {
 		return errors.Wrap(err, "UniReq(LoginPath, json)")
 	}
@@ -52,8 +55,8 @@ func (u *Unifi) getController(user, pass string) error {
 		_ = resp.Body.Close()
 	}()
 	if resp.StatusCode != http.StatusOK {
-		return errors.Errorf("authentication failed (user: %s): %s (status: %d/%s)",
-			user, u.baseURL+LoginPath, resp.StatusCode, resp.Status)
+		return errors.Errorf("authentication failed (user: %s): %s (status: %s)",
+			user, u.baseURL+LoginPath, resp.Status)
 	}
 	return nil
 }
@@ -74,7 +77,7 @@ func (u *Unifi) GetClients(sites []Site) (Clients, error) {
 		var response struct {
 			Data []Client `json:"data"`
 		}
-		u.dLogf("Polling Controller, retreiving Unifi Clients, site %s (%s) ", site.Name, site.Desc)
+		u.DebugLog("Polling Controller, retreiving Unifi Clients, site %s (%s) ", site.Name, site.Desc)
 		clientPath := fmt.Sprintf(ClientPath, site.Name)
 		if err := u.GetData(clientPath, &response); err != nil {
 			return nil, err
@@ -135,18 +138,18 @@ func (u *Unifi) GetSites() (Sites, error) {
 		response.Data[i].SiteName = response.Data[i].Desc + " (" + response.Data[i].Name + ")"
 		sites = append(sites, response.Data[i].Name)
 	}
-	u.dLogf("Found %d site(s): %s", len(sites), strings.Join(sites, ","))
+	u.DebugLog("Found %d site(s): %s", len(sites), strings.Join(sites, ","))
 	return response.Data, nil
 }
 
 // GetData makes a unifi request and unmarshal the response into a provided pointer.
 func (u *Unifi) GetData(methodPath string, v interface{}) error {
-	if body, err := u.GetJSON(methodPath); err != nil {
+	body, err := u.GetJSON(methodPath)
+	if err != nil {
 		return err
-	} else if err = json.Unmarshal(body, v); err != nil {
-		return errors.Wrapf(err, "json.Unmarshal(%s)", methodPath)
 	}
-	return nil
+	err = json.Unmarshal(body, v)
+	return errors.Wrapf(err, "json.Unmarshal(%s)", methodPath)
 }
 
 // UniReq is a small helper function that adds an Accept header.
@@ -154,10 +157,11 @@ func (u *Unifi) GetData(methodPath string, v interface{}) error {
 // And if you're doing that... sumbut a pull request with your new struct. :)
 // This is a helper method that is exposed for convenience.
 func (u *Unifi) UniReq(apiPath string, params string) (req *http.Request, err error) {
-	if params != "" {
-		req, err = http.NewRequest("POST", u.baseURL+apiPath, bytes.NewBufferString(params))
-	} else {
-		req, err = http.NewRequest("GET", u.baseURL+apiPath, nil)
+	switch path := u.baseURL + apiPath; {
+	case params == "":
+		req, err = http.NewRequest("GET", path, nil)
+	default:
+		req, err = http.NewRequest("POST", path, bytes.NewBufferString(params))
 	}
 	if err == nil {
 		req.Header.Add("Accept", "application/json")
@@ -183,7 +187,7 @@ func (u *Unifi) GetJSON(apiPath string) ([]byte, error) {
 		return body, errors.Wrapf(err, "ioutil.ReadAll(%s)", apiPath)
 	}
 	if resp.StatusCode != http.StatusOK {
-		err = errors.Errorf("invalid status code from server %v %v", resp.StatusCode, resp.Status)
+		err = errors.Errorf("invalid status code from server %s", resp.Status)
 	}
 	return body, err
 }

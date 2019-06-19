@@ -32,18 +32,9 @@ const (
 // that matches this interface to capture debug and error logs.
 type Logger func(msg string, fmt ...interface{})
 
-// dLogf logs a debug message.
-func (u *Unifi) dLogf(msg string, v ...interface{}) {
-	if u.DebugLog != nil {
-		u.DebugLog("[DEBUG] "+msg, v...)
-	}
-}
-
-// eLogf logs an error message.
-func (u *Unifi) eLogf(msg string, v ...interface{}) {
-	if u.ErrorLog != nil {
-		u.ErrorLog("[ERROR] "+msg, v...)
-	}
+// DiscardLogs is the default debug logger.
+func DiscardLogs(msg string, v ...interface{}) {
+	// do nothing.
 }
 
 // Devices contains a list of all the unifi devices from a controller.
@@ -56,7 +47,8 @@ type Devices struct {
 
 // Unifi is what you get in return for providing a password! Unifi represents
 // a controller that you can make authenticated requests to. Use this to make
-// additional requests for devices, clients or other custom data.
+// additional requests for devices, clients or other custom data. Do not set
+// the loggers to nil. Set them to DiscardLogs if you want no logs.
 type Unifi struct {
 	*http.Client
 	baseURL  string
