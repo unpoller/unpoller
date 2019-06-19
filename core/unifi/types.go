@@ -47,7 +47,8 @@ type Devices struct {
 
 // Unifi is what you get in return for providing a password! Unifi represents
 // a controller that you can make authenticated requests to. Use this to make
-// additional requests for devices, clients or other custom data.
+// additional requests for devices, clients or other custom data. Do not set
+// the loggers to nil. Set them to DiscardLogs if you want no logs.
 type Unifi struct {
 	*http.Client
 	baseURL  string
