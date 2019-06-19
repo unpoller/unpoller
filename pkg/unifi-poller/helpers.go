@@ -15,11 +15,13 @@ func hasErr(errs []error) bool {
 	return false
 }
 
-// logErrors writes a slice of errors, with a prefix, to log-out.
-func logErrors(errs []error, prefix string) {
+// LogErrors writes a slice of errors, with a prefix, to log-out.
+// It also incriments the error counter.
+func (u *UnifiPoller) LogErrors(errs []error, prefix string) {
 	for _, err := range errs {
 		if err != nil {
-			log.Println("[ERROR]", prefix+":", err.Error())
+			u.errorCount++
+			log.Printf("[ERROR] (%v/%v) %v: %v", prefix, err.Error(), u.errorCount, u.MaxErrors)
 		}
 	}
 }
@@ -35,8 +37,8 @@ func StringInSlice(str string, slc []string) bool {
 }
 
 // Logf prints a log entry if quiet is false.
-func (c *Config) Logf(m string, v ...interface{}) {
-	if !c.Quiet {
+func (u *UnifiPoller) Logf(m string, v ...interface{}) {
+	if !u.Quiet {
 		log.Printf("[INFO] "+m, v...)
 	}
 }

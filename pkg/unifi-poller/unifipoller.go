@@ -50,7 +50,7 @@ func (u *UnifiPoller) GetConfig() error {
 	if u.DumpJSON != "" {
 		u.Quiet = true
 	}
-	u.Config.Logf("Loaded Configuration: %s", u.ConfigFile)
+	u.Logf("Loaded Configuration: %s", u.ConfigFile)
 	return nil
 }
 
@@ -71,8 +71,7 @@ func (u *UnifiPoller) Run() (err error) {
 	if err = u.GetInfluxDB(); err != nil {
 		return err
 	}
-	u.PollController()
-	return nil
+	return u.PollController()
 }
 
 // GetInfluxDB returns an influxdb interface.
