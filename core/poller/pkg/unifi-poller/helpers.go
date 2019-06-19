@@ -21,7 +21,7 @@ func (u *UnifiPoller) LogErrors(errs []error, prefix string) {
 	for _, err := range errs {
 		if err != nil {
 			u.errorCount++
-			log.Printf("[ERROR] (%v/%v) %v: %v", prefix, err.Error(), u.errorCount, u.MaxErrors)
+			log.Printf("[ERROR] (%v/%v) %v: %v", u.errorCount, u.MaxErrors, prefix, err.Error())
 		}
 	}
 }
