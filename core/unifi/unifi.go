@@ -157,6 +157,9 @@ func (u *Unifi) GetData(methodPath string, v interface{}) error {
 	} else if err = json.Unmarshal(body, v); err != nil {
 		return errors.Wrapf(err, "json.Unmarshal(%s)", methodPath)
 	}
+	if resp.StatusCode != http.StatusOK {
+		return errors.Errorf("invalid status code from server %v %v", resp.StatusCode, resp.Status)
+	}
 	return nil
 }
 
