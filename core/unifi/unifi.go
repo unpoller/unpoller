@@ -39,7 +39,7 @@ func NewUnifi(user, pass, url string, verifySSL bool) (*Unifi, error) {
 // getController is a helper method to make testsing a bit easier.
 func (u *Unifi) getController(user, pass string) error {
 	// magic login.
-	req, err := u.UniReq(LoginPath, `{"username": "`+user+`","password": "`+pass+`"}`)
+	req, err := u.UniReq(LoginPath, fmt.Sprintf(`{"username":"%s","password":"%s"}`, user, pass))
 	if err != nil {
 		return errors.Wrap(err, "UniReq(LoginPath, json)")
 	}
@@ -52,8 +52,8 @@ func (u *Unifi) getController(user, pass string) error {
 		_ = resp.Body.Close()
 	}()
 	if resp.StatusCode != http.StatusOK {
-		return errors.Errorf("authentication failed (user: %s): %s (status: %d/%s)",
-			user, u.baseURL+LoginPath, resp.StatusCode, resp.Status)
+		return errors.Errorf("authentication failed (user: %s): %s (status: %s)",
+			user, u.baseURL+LoginPath, resp.Status)
 	}
 	return nil
 }
@@ -154,10 +154,11 @@ func (u *Unifi) GetData(methodPath string, v interface{}) error {
 // And if you're doing that... sumbut a pull request with your new struct. :)
 // This is a helper method that is exposed for convenience.
 func (u *Unifi) UniReq(apiPath string, params string) (req *http.Request, err error) {
-	if params != "" {
-		req, err = http.NewRequest("POST", u.baseURL+apiPath, bytes.NewBufferString(params))
-	} else {
-		req, err = http.NewRequest("GET", u.baseURL+apiPath, nil)
+	switch path := u.baseURL + apiPath; {
+	case params == "":
+		req, err = http.NewRequest("GET", path, nil)
+	default:
+		req, err = http.NewRequest("POST", path, bytes.NewBufferString(params))
 	}
 	if err == nil {
 		req.Header.Add("Accept", "application/json")
@@ -183,7 +184,7 @@ func (u *Unifi) GetJSON(apiPath string) ([]byte, error) {
 		return body, errors.Wrapf(err, "ioutil.ReadAll(%s)", apiPath)
 	}
 	if resp.StatusCode != http.StatusOK {
-		err = errors.Errorf("invalid status code from server %v %v", resp.StatusCode, resp.Status)
+		err = errors.Errorf("invalid status code from server %s", resp.Status)
 	}
 	return body, err
 }
