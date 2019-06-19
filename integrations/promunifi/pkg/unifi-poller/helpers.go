@@ -1,6 +1,7 @@
 package unifipoller
 
 import (
+	"fmt"
 	"log"
 	"strings"
 )
@@ -15,11 +16,13 @@ func hasErr(errs []error) bool {
 	return false
 }
 
-// logErrors writes a slice of errors, with a prefix, to log-out.
-func logErrors(errs []error, prefix string) {
+// LogErrors writes a slice of errors, with a prefix, to log-out.
+// It also increments the error counter.
+func (u *UnifiPoller) LogErrors(errs []error, prefix string) {
 	for _, err := range errs {
 		if err != nil {
-			log.Println("[ERROR]", prefix+":", err.Error())
+			u.errorCount++
+			_ = log.Output(2, fmt.Sprintf("[ERROR] (%v/%v) %v: %v", u.errorCount, u.MaxErrors, prefix, err))
 		}
 	}
 }
@@ -35,8 +38,20 @@ func StringInSlice(str string, slc []string) bool {
 }
 
 // Logf prints a log entry if quiet is false.
-func (c *Config) Logf(m string, v ...interface{}) {
-	if !c.Quiet {
-		log.Printf("[INFO] "+m, v...)
+func (u *UnifiPoller) Logf(m string, v ...interface{}) {
+	if !u.Quiet {
+		_ = log.Output(2, fmt.Sprintf("[INFO] "+m, v...))
 	}
+}
+
+// LogDebugf prints a debug log entry if debug is true and quite is false
+func (u *UnifiPoller) LogDebugf(m string, v ...interface{}) {
+	if u.Debug && !u.Quiet {
+		_ = log.Output(2, fmt.Sprintf("[DEBUG] "+m, v...))
+	}
+}
+
+// LogErrorf prints an error log entry.
+func (u *UnifiPoller) LogErrorf(m string, v ...interface{}) {
+	_ = log.Output(2, fmt.Sprintf("[ERROR] "+m, v...))
 }

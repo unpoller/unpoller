@@ -132,10 +132,10 @@ check_fpm:
 formula: $(BINARY).rb
 v$(VERSION).tar.gz.sha256:
 	# Calculate the SHA from the Github source file.
-	curl -sL $(URL)/archive/v$(VERSION).tar.gz | openssl dgst -sha256 | tee v$(VERSION).tar.gz.sha256
+	curl -sL $(URL)/archive/v$(VERSION).tar.gz | openssl dgst -r -sha256 | tee v$(VERSION).tar.gz.sha256
 $(BINARY).rb: v$(VERSION).tar.gz.sha256
 	# Creating formula from template using sed.
-	sed "s/{{Version}}/$(VERSION)/g;s/{{SHA256}}/$$(<v$(VERSION).tar.gz.sha256)/g;s/{{Desc}}/$(DESC)/g;s%{{URL}}%$(URL)%g" templates/$(BINARY).rb.tmpl | tee $(BINARY).rb
+	sed "s/{{Version}}/$(VERSION)/g;s/{{SHA256}}/`head -c64 v$(VERSION).tar.gz.sha256`/g;s/{{Desc}}/$(DESC)/g;s%{{URL}}%$(URL)%g" templates/$(BINARY).rb.tmpl | tee $(BINARY).rb
 
 # Extras
 
