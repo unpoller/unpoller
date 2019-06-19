@@ -2,7 +2,6 @@ package unifipoller
 
 import (
 	"fmt"
-	"io/ioutil"
 	"os"
 	"strings"
 
@@ -29,69 +28,32 @@ func (u *UnifiPoller) DumpJSONPayload() (err error) {
 	case err != nil:
 		return err
 	case StringInSlice(u.DumpJSON, []string{"d", "device", "devices"}):
-		return u.DumpDeviceJSON(sites)
+		return u.dumpSitesJSON(unifi.DevicePath, "Devices", sites)
 	case StringInSlice(u.DumpJSON, []string{"client", "clients", "c"}):
-		return u.DumpClientsJSON(sites)
+		return u.dumpSitesJSON(unifi.ClientPath, "Clients", sites)
 	case strings.HasPrefix(u.DumpJSON, "other "):
-		return u.DumpOtherJSON(sites)
+		apiPath := strings.SplitN(u.DumpJSON, " ", 2)[1]
+		_, _ = fmt.Fprintf(os.Stderr, "[INFO] Dumping Path '%s':\n", apiPath)
+		return u.PrintRawAPIJSON(apiPath)
 	default:
-		return errors.New("must provide filter: devices, clients")
+		return errors.New("must provide filter: devices, clients, other")
 	}
 }
 
-// DumpClientsJSON prints the raw json for clients in a Unifi Controller.
-func (u *UnifiPoller) DumpClientsJSON(sites []unifi.Site) error {
+func (u *UnifiPoller) dumpSitesJSON(path, name string, sites []unifi.Site) error {
 	for _, s := range sites {
-		path := fmt.Sprintf(unifi.ClientPath, s.Name)
-		if err := u.dumpJSON(path, "Client", s); err != nil {
+		apiPath := fmt.Sprintf(path, s.Name)
+		_, _ = fmt.Fprintf(os.Stderr, "[INFO] Dumping %s: '%s' JSON for site: %s (%s):\n", name, apiPath, s.Desc, s.Name)
+		if err := u.PrintRawAPIJSON(apiPath); err != nil {
 			return err
 		}
 	}
 	return nil
 }
 
-// DumpDeviceJSON prints the raw json for devices in a Unifi Controller.
-func (u *UnifiPoller) DumpDeviceJSON(sites []unifi.Site) error {
-	for _, s := range sites {
-		path := fmt.Sprintf(unifi.DevicePath, s.Name)
-		if err := u.dumpJSON(path, "Device", s); err != nil {
-			return err
-		}
-	}
-	return nil
-}
-
-// DumpOtherJSON prints the raw json for a user-provided path in a Unifi Controller.
-func (u *UnifiPoller) DumpOtherJSON(sites []unifi.Site) error {
-	for _, s := range sites {
-		path := strings.SplitN(u.DumpJSON, " ", 2)[1]
-		if strings.Contains(path, "%s") {
-			path = fmt.Sprintf(path, s.Name)
-		}
-		if err := u.dumpJSON(path, "Other", s); err != nil {
-			return err
-		}
-	}
-	return nil
-}
-
-func (u *UnifiPoller) dumpJSON(path, what string, site unifi.Site) error {
-	req, err := u.UniReq(path, "")
-	if err != nil {
-		return err
-	}
-	resp, err := u.Do(req)
-	if err != nil {
-		return err
-	}
-	defer func() {
-		_ = resp.Body.Close()
-	}()
-	body, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		return err
-	}
-	fmt.Fprintf(os.Stderr, "[INFO] Dumping %s JSON for site %s (%s)\n", what, site.Desc, site.Name)
+// PrintRawAPIJSON prints the raw json for a user-provided path on a Unifi Controller.
+func (u *UnifiPoller) PrintRawAPIJSON(apiPath string) error {
+	body, err := u.GetJSON(apiPath)
 	fmt.Println(string(body))
-	return nil
+	return err
 }
