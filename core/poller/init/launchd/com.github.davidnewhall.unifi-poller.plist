@@ -15,8 +15,8 @@
         <key>KeepAlive</key>
         <true/>
         <key>StandardErrorPath</key>
-        <string>/usr/local/var/log/unifi-poller/log</string>
+        <string>/usr/local/var/log/unifi-poller.log</string>
         <key>StandardOutPath</key>
-        <string>/usr/local/var/log/unifi-poller/log</string>
+        <string>/usr/local/var/log/unifi-poller.log</string>
     </dict>
 </plist>

@@ -35,6 +35,7 @@ type UnifiPoller struct {
 	DumpJSON   string
 	ShowVer    bool
 	Flag       *pflag.FlagSet
+	errorCount int
 	influx.Client
 	*unifi.Unifi
 	*Config
@@ -50,6 +51,7 @@ type Metrics struct {
 
 // Config represents the data needed to poll a controller and report to influxdb.
 type Config struct {
+	MaxErrors  int      `json:"max_errors,_omitempty" toml:"max_errors,_omitempty" xml:"max_errors" yaml:"max_errors"`
 	Interval   Dur      `json:"interval,_omitempty" toml:"interval,_omitempty" xml:"interval" yaml:"interval"`
 	Debug      bool     `json:"debug" toml:"debug" xml:"debug" yaml:"debug"`
 	Quiet      bool     `json:"quiet,_omitempty" toml:"quiet,_omitempty" xml:"quiet" yaml:"quiet"`

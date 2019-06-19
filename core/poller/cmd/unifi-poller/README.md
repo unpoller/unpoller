@@ -26,13 +26,15 @@ This daemon polls a Unifi controller at a short interval and stores the collecte
     -j, --dumpjson <filter>
         This is a debug option; use this when you are missing data in your graphs,
         and/or you want to inspect the raw data coming from the controller. The
-        filter only accepts two options: devices or clients. This will print a lot
-        of information. Recommend piping it into a file and/or into jq for better
-        visualization. This requires a valid config file that; one that contains
+        filter accepts three options: devices, clients, other. This will print a
+        lot of information. Recommend piping it into a file and/or into jq for
+        better visualization. This requires a valid config file that contains
         working authentication details for a Unifi Controller. This only dumps
         data for sites listed in the config file. The application exits after
         printing the JSON payload; it does not daemonize or report to InfluxDB
-        with this option.
+        with this option. The `other` option is special. This allows you request
+        any api path. It must be enclosed in quotes with the word other. Example:
+           unifi-poller -j "other /stat/admins"
 
     -h, --help
         Display usage and exit.
@@ -62,6 +64,18 @@ This daemon polls a Unifi controller at a short interval and stores the collecte
         Setting this to true will turn off per-device and per-interval logs. Only
         errors will be logged. Using this with debug=true adds line numbers to
         any error logs.
+
+    `max_errors`     default: 0
+        If you restart the UniFI controller, the poller will lose access until
+        it is restarted. Specifying a number greater than -1 for max_errors will
+        cause the poller to exit when it reaches the error count specified.
+        This problematic condition can be triggered by InfluxDB having issues
+        too. Generally only 1 error per interval is created, but if more than one
+        backend is having issues > 1 error could be generated per interval. Once
+        the poller exits, it is expected that something will restart it
+        automatically so it gets back in line; something is usually systemd,
+        docker or launchd. The default setting of 0 will cause an exit after
+        just 1 error. Recommended values are 0-5.
 
     `influx_url`     default: http://127.0.0.1:8086
         This is the URL where the Influx web server is available.

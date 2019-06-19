@@ -50,7 +50,7 @@ func (u *UnifiPoller) GetConfig() error {
 	if u.DumpJSON != "" {
 		u.Quiet = true
 	}
-	u.Config.Logf("Loaded Configuration: %s", u.ConfigFile)
+	u.Logf("Loaded Configuration: %s", u.ConfigFile)
 	return nil
 }
 
@@ -61,7 +61,7 @@ func (u *UnifiPoller) Run() (err error) {
 	}
 	if log.SetFlags(0); u.Debug {
 		log.SetFlags(log.Lshortfile | log.Lmicroseconds | log.Ldate)
-		log.Println("[DEBUG] Debug Logging Enabled")
+		u.LogDebugf("Debug Logging Enabled")
 	}
 	log.Printf("[INFO] Unifi-Poller v%v Starting Up! PID: %d", Version, os.Getpid())
 
@@ -71,8 +71,7 @@ func (u *UnifiPoller) Run() (err error) {
 	if err = u.GetInfluxDB(); err != nil {
 		return err
 	}
-	u.PollController()
-	return nil
+	return u.PollController()
 }
 
 // GetInfluxDB returns an influxdb interface.
@@ -96,11 +95,8 @@ func (u *UnifiPoller) GetUnifi() (err error) {
 	if err != nil {
 		return errors.Wrap(err, "unifi controller")
 	}
-	u.Unifi.ErrorLog = log.Printf // Log all errors.
-	// Doing it this way allows debug error logs (line numbers, etc)
-	if u.Debug && !u.Quiet {
-		u.Unifi.DebugLog = log.Printf // Log debug messages.
-	}
+	u.Unifi.ErrorLog = u.LogErrorf // Log all errors.
+	u.Unifi.DebugLog = u.LogDebugf // Log debug messages.
 	v, err := u.GetServer()
 	if err != nil {
 		v.ServerVersion = "unknown"
