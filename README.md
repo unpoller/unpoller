@@ -70,14 +70,6 @@ ports, some switches have 10Gb, etc. These are things I do not have data on
 to write code for. If you have these devices, and want them graphed, open an
 Issue and lets discuss.
 
-- Better Installation instructions.
-
-If you're a nerd you can probably figure it out. I'd still like some pretty
-pictures and maybe even a Twitch VOD. Update: The installation has been
-simplified tremendously with the
-[creation of binary packages](https://github.com/davidnewhall/unifi-poller/wiki/Installation).
-More to come!
-
 - Radios, Frequencies, Interfaces, vAPs
 
 My access points only seem to have two radios, one interface and vAP per radio.
