@@ -37,7 +37,7 @@ FIRST:
 }
 
 // PollController runs forever, polling unifi, and pushing to influx.
-func (u *UnifiPoller) PollController() {
+func (u *UnifiPoller) PollController() error {
 	log.Println("[INFO] Everything checks out! Poller started, interval:", u.Interval.value)
 	ticker := time.NewTicker(u.Interval.value)
 	var err error
@@ -45,28 +45,28 @@ func (u *UnifiPoller) PollController() {
 		m := &Metrics{}
 		// Get the sites we care about.
 		if m.Sites, err = u.GetFilteredSites(); err != nil {
-			logErrors([]error{err}, "uni.GetSites()")
+			u.LogErrors([]error{err}, "unifi.GetSites()")
 		}
 		// Get all the points.
 		if m.Clients, err = u.GetClients(m.Sites); err != nil {
-			logErrors([]error{err}, "uni.GetClients()")
+			u.LogErrors([]error{err}, "unifi.GetClients()")
 		}
 		if m.Devices, err = u.GetDevices(m.Sites); err != nil {
-			logErrors([]error{err}, "uni.GetDevices()")
+			u.LogErrors([]error{err}, "unifi.GetDevices()")
 		}
 
 		// Make a new Points Batcher.
 		m.BatchPoints, err = influx.NewBatchPoints(influx.BatchPointsConfig{Database: u.InfluxDB})
 		if err != nil {
-			logErrors([]error{err}, "influx.NewBatchPoints")
+			u.LogErrors([]error{err}, "influx.NewBatchPoints")
 			continue
 		}
 		// Batch (and send) all the points.
 		if errs := m.SendPoints(); errs != nil && hasErr(errs) {
-			logErrors(errs, "asset.Points()")
+			u.LogErrors(errs, "asset.Points()")
 		}
 		if err := u.Write(m.BatchPoints); err != nil {
-			logErrors([]error{err}, "infdb.Write(bp)")
+			u.LogErrors([]error{err}, "infdb.Write(bp)")
 		}
 
 		// Talk about the data.
@@ -79,7 +79,12 @@ func (u *UnifiPoller) PollController() {
 		u.Logf("Unifi Measurements Recorded. Sites: %d, Clients: %d, "+
 			"Wireless APs: %d, Gateways: %d, Switches: %d, Points: %d, Fields: %d",
 			len(m.Sites), len(m.Clients), len(m.UAPs), len(m.USGs), len(m.USWs), pointcount, fieldcount)
+
+		if u.MaxErrors >= 0 && u.errorCount > u.MaxErrors {
+			return errors.Errorf("reached maximum error count, stopping poller (%d > %d)", u.errorCount, u.MaxErrors)
+		}
 	}
+	return nil
 }
 
 // SendPoints combines all device and client data into influxdb data points.
