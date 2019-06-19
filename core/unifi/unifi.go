@@ -142,7 +142,7 @@ func (u *Unifi) GetSites() (Sites, error) {
 // GetData makes a unifi request and unmarshal the response into a provided pointer.
 func (u *Unifi) GetData(methodPath string, v interface{}) error {
 	if body, err := u.GetJSON(methodPath); err != nil {
-		return errors.Wrapf(err, "ioutil.ReadAll(%s)", methodPath)
+		return err
 	} else if err = json.Unmarshal(body, v); err != nil {
 		return errors.Wrapf(err, "json.Unmarshal(%s)", methodPath)
 	}
@@ -180,7 +180,7 @@ func (u *Unifi) GetJSON(apiPath string) ([]byte, error) {
 	}()
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		return body, err
+		return body, errors.Wrapf(err, "ioutil.ReadAll(%s)", apiPath)
 	}
 	if resp.StatusCode != http.StatusOK {
 		err = errors.Errorf("invalid status code from server %v %v", resp.StatusCode, resp.Status)
