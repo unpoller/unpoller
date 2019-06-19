@@ -32,18 +32,9 @@ const (
 // that matches this interface to capture debug and error logs.
 type Logger func(msg string, fmt ...interface{})
 
-// dLogf logs a debug message.
-func (u *Unifi) dLogf(msg string, v ...interface{}) {
-	if u.DebugLog != nil {
-		u.DebugLog("[DEBUG] "+msg, v...)
-	}
-}
-
-// eLogf logs an error message.
-func (u *Unifi) eLogf(msg string, v ...interface{}) {
-	if u.ErrorLog != nil {
-		u.ErrorLog("[ERROR] "+msg, v...)
-	}
+// DiscardLogs is the default logger.
+func DiscardLogs(msg string, v ...interface{}) {
+	// do nothing.
 }
 
 // Devices contains a list of all the unifi devices from a controller.

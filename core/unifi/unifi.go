@@ -32,6 +32,8 @@ func NewUnifi(user, pass, url string, verifySSL bool) (*Unifi, error) {
 			Transport: &http.Transport{TLSClientConfig: &tls.Config{InsecureSkipVerify: !verifySSL}},
 			Jar:       jar,
 		},
+		ErrorLog: DiscardLogs,
+		DebugLog: DiscardLogs,
 	}
 	return u, u.getController(user, pass)
 }
@@ -74,7 +76,7 @@ func (u *Unifi) GetClients(sites []Site) (Clients, error) {
 		var response struct {
 			Data []Client `json:"data"`
 		}
-		u.dLogf("Polling Controller, retreiving Unifi Clients, site %s (%s) ", site.Name, site.Desc)
+		u.DebugLog("Polling Controller, retreiving Unifi Clients, site %s (%s) ", site.Name, site.Desc)
 		clientPath := fmt.Sprintf(ClientPath, site.Name)
 		if err := u.GetData(clientPath, &response); err != nil {
 			return nil, err
@@ -135,7 +137,7 @@ func (u *Unifi) GetSites() (Sites, error) {
 		response.Data[i].SiteName = response.Data[i].Desc + " (" + response.Data[i].Name + ")"
 		sites = append(sites, response.Data[i].Name)
 	}
-	u.dLogf("Found %d site(s): %s", len(sites), strings.Join(sites, ","))
+	u.DebugLog("Found %d site(s): %s", len(sites), strings.Join(sites, ","))
 	return response.Data, nil
 }
 
