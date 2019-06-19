@@ -32,7 +32,7 @@ const (
 // that matches this interface to capture debug and error logs.
 type Logger func(msg string, fmt ...interface{})
 
-// DiscardLogs is the default logger.
+// DiscardLogs is the default debug logger.
 func DiscardLogs(msg string, v ...interface{}) {
 	// do nothing.
 }

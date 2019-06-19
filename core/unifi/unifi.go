@@ -12,6 +12,7 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"net/http/cookiejar"
 	"strings"
@@ -32,7 +33,7 @@ func NewUnifi(user, pass, url string, verifySSL bool) (*Unifi, error) {
 			Transport: &http.Transport{TLSClientConfig: &tls.Config{InsecureSkipVerify: !verifySSL}},
 			Jar:       jar,
 		},
-		ErrorLog: DiscardLogs,
+		ErrorLog: log.Printf,
 		DebugLog: DiscardLogs,
 	}
 	return u, u.getController(user, pass)
