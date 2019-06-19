@@ -20,7 +20,7 @@
       "type": "panel",
       "id": "grafana-piechart-panel",
       "name": "Pie Chart",
-      "version": "1.3.3"
+      "version": "1.3.6"
     },
     {
       "type": "panel",
@@ -64,7 +64,7 @@
   "gnetId": null,
   "graphTooltip": 1,
   "id": null,
-  "iteration": 1559898655544,
+  "iteration": 1560917693674,
   "links": [
     {
       "icon": "external link",
@@ -784,7 +784,7 @@
       "strokeWidth": "3",
       "targets": [
         {
-          "alias": "$tag_ap_mac / $tag_radio_proto / $tag_radio / $tag_radio_name",
+          "alias": "$tag_radio_proto",
           "groupBy": [
             {
               "params": [
@@ -796,7 +796,7 @@
           "measurement": "clients",
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "select count(distinct(hostname)) FROM \"clients\" WHERE (time > now() - 10m AND ap_mac =~ /$AP$/ AND \"site_name\" =~ /$Site$/ and  \"name\" =~ /^$Client$/) group by radio_proto, radio, radio_name, ap_mac",
+          "query": "SELECT count(distinct(\"hostname\")) FROM \"clients\" WHERE \"is_wired\" != 'true' AND $timeFilter  AND \"site_name\" =~ /$Site$/  AND \"name\" =~ /^$Client$/ GROUP BY radio_proto",
           "rawQuery": true,
           "refId": "A",
           "resultFormat": "time_series",
@@ -817,14 +817,14 @@
           "tags": [
             {
               "key": "is_wired",
-              "operator": "=",
-              "value": "false"
+              "operator": "!=",
+              "value": "true"
             }
           ]
         }
       ],
       "timeFrom": null,
-      "title": "AP Radio / Clients",
+      "title": "Clients / AP Radio",
       "transparent": true,
       "type": "grafana-piechart-panel",
       "valueName": "current"
@@ -2903,5 +2903,5 @@
   "timezone": "",
   "title": "UniFi Client Insights",
   "uid": "YVR23BZiz",
-  "version": 54
+  "version": 55
 }
