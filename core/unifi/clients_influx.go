@@ -98,6 +98,12 @@ func (c Client) Points() ([]*influx.Point, error) {
 		"wired-tx_bytes":         c.WiredTxBytes,
 		"wired-tx_bytes-r":       c.WiredTxBytesR,
 		"wired-tx_packets":       c.WiredTxPackets,
+		"dpi_app":                c.DpiStats.App.Val,
+		"dpi_cat":                c.DpiStats.Cat.Val,
+		"dpi_rx_bytes":           c.DpiStats.RxBytes.Val,
+		"dpi_rx_packets":         c.DpiStats.RxPackets.Val,
+		"dpi_tx_bytes":           c.DpiStats.TxBytes.Val,
+		"dpi_tx_packets":         c.DpiStats.TxPackets.Val,
 	}
 	pt, err := influx.NewPoint("clients", tags, fields, time.Now())
 	if err != nil {
