@@ -9,7 +9,9 @@ GOLANGCI_LINT_ARGS=--enable-all -D gochecknoglobals
 PACKAGE:=./cmd/$(BINARY)
 LIBRARY:=./pkg/$(BINARY)
 DOCKER_REPO=golift
+MD2ROFF_BIN=github.com/github/hub/md2roff-bin
 
+# These don't generally need to be changed.
 ITERATION:=$(shell git rev-list --count HEAD||echo 0)
 ifeq ($(VERSION),)
 	VERSION:=$(shell git tag -l --merged | tail -n1 | tr -d v||echo development)
@@ -34,29 +36,28 @@ release: clean vendor test macos windows $(BINARY)-$(RPMVERSION)-$(ITERATION).x8
 clean:
 	# Cleaning up.
 	rm -f $(BINARY){.macos,.linux,.1,}{,.gz} $(BINARY).rb
-	rm -f $(BINARY){_,-}*.{deb,rpm} md2roff v*.tar.gz.sha256
+	rm -f $(BINARY){_,-}*.{deb,rpm} v*.tar.gz.sha256
 	rm -f cmd/$(BINARY)/README{,.html} README{,.html} ./$(BINARY)_manual.html
 	rm -rf package_build_* release
 
-# md2roff is needed to build the man file and html pages from the READMEs.
-md2roff:
-	go get -u github.com/github/hub/md2roff-bin
-	go build -o ./md2roff github.com/github/hub/md2roff-bin
-
 # Build a man page from a markdown file using md2roff.
 # This also turns the repo readme into an html file.
+# md2roff is needed to build the man file and html pages from the READMEs.
 man: $(BINARY).1.gz
 $(BINARY).1.gz: md2roff
 	# Building man page. Build dependency first: md2roff
-	./md2roff --manual $(BINARY) --version $(VERSION) --date "$$(date)" cmd/$(BINARY)/README.md
+	go run $(MD2ROFF_BIN) --manual $(BINARY) --version $(VERSION) --date "$$(date)" cmd/$(BINARY)/README.md
 	gzip -9nc cmd/$(BINARY)/README > $(BINARY).1.gz
 	mv cmd/$(BINARY)/README.html $(BINARY)_manual.html
+
+md2roff:
+	go get $(MD2ROFF_BIN)
 
 # TODO: provide a template that adds the date to the built html file.
 readme: README.html
 README.html: md2roff
 	# This turns README.md into README.html
-	./md2roff --manual $(BINARY) --version $(VERSION) --date "$$(date)" README.md
+	go run $(MD2ROFF_BIN) --manual $(BINARY) --version $(VERSION) --date "$$(date)" README.md
 
 # Binaries
 
