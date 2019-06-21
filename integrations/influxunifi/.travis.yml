@@ -38,7 +38,6 @@ after_success:
   - ls -l release/
   - |
       declare -r SSH_FILE="$(mktemp -u $HOME/.ssh/XXXXX)"
-
       echo -e "Host github.com\n\tStrictHostKeyChecking no\n" >> ~/.ssh/config
       # Get deploy key for golift/homebrew-mugs.
       openssl aes-256-cbc -K $encrypted_9f3147001275_key -iv $encrypted_9f3147001275_iv -in ".travis/github_deploy_key.enc" -out "$SSH_FILE" -d

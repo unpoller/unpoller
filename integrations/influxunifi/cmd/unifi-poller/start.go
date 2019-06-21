@@ -9,6 +9,7 @@ import (
 )
 
 func main() {
+	log.SetFlags(log.LstdFlags)
 	unifi := &unifipoller.UnifiPoller{}
 	if unifi.ParseFlags(os.Args[1:]); unifi.ShowVer {
 		fmt.Printf("unifi-poller v%s\n", unifipoller.Version)
