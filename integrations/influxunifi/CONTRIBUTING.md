@@ -19,10 +19,10 @@ As long as this document is kept up to date, this is what the travis file does:
 -   Tests that the Docker container ran and produced expected output.
 -   Makes a release. `make release`: This does a lot of things, controlled by the [Makefile](Makefile).
     -   Runs go tests and go linters.
-    -   Compiles the application binaries for Linux and macOS.
+    -   Compiles the application binaries for Windows, Linux and macOS.
     -   Compiles a man page that goes into the packages.
     -   Creates rpm and deb packages using fpm.
-    -   Puts the packages, gzipped binaries and a file containing the SHA256s of each asset into a release folder.
+    -   Puts the packages, gzipped binaries and files containing the SHA256s of each asset into a release folder.
 
 After the release is built and Docker image tested:
 -   Deploys the release assets to the tagged release on GitHub using an encrypted GitHub Token (api key).
