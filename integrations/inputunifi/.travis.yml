@@ -8,6 +8,7 @@ addons:
     - git
     - libgnome-keyring-dev
     - fakeroot
+    - zip
 go:
 - 1.12.x
 services:
