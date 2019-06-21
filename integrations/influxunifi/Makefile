@@ -20,7 +20,7 @@ RPMVERSION:=$(shell echo $(VERSION) | tr -- - _)
 all: man build
 
 # Prepare a release. Called in Travis CI.
-release: clean dep test macos windows $(BINARY)-$(RPMVERSION)-$(ITERATION).x86_64.rpm $(BINARY)_$(VERSION)-$(ITERATION)_amd64.deb
+release: clean vendor test macos windows $(BINARY)-$(RPMVERSION)-$(ITERATION).x86_64.rpm $(BINARY)_$(VERSION)-$(ITERATION)_amd64.deb
 	# Prepareing a release!
 	mkdir -p release
 	mv $(BINARY).linux $(BINARY).macos release/
@@ -28,7 +28,7 @@ release: clean dep test macos windows $(BINARY)-$(RPMVERSION)-$(ITERATION).x86_6
 	zip -9qm release/unifi-poller.exe.zip unifi-poller.exe
 	mv $(BINARY)-$(RPMVERSION)-$(ITERATION).x86_64.rpm $(BINARY)_$(VERSION)-$(ITERATION)_amd64.deb release/
 	# Generating File Hashes
-	for i in release/*; do (openssl dgst -r -sha256 "$$i" | head -c64 ; echo) | tee "$$i.sha256.txt"; done
+	for i in release/*; do /bin/echo -n "$$i " ; (openssl dgst -r -sha256 "$$i" | head -c64 ; echo) | tee "$$i.sha256.txt"; done
 
 # Delete all build assets.
 clean:
