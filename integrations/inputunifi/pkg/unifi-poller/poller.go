@@ -49,14 +49,14 @@ func (u *UnifiPoller) GetConfig() (err error) {
 	switch buf, err = ioutil.ReadFile(u.ConfigFile); {
 	case err != nil:
 		return err
-	default:
-		err = toml.Unmarshal(buf, u.Config)
 	case strings.HasSuffix(u.ConfigFile, ".json"):
 		err = json.Unmarshal(buf, u.Config)
 	case strings.HasSuffix(u.ConfigFile, ".xml"):
 		err = xml.Unmarshal(buf, u.Config)
 	case strings.HasSuffix(u.ConfigFile, ".yaml"):
 		err = yaml.Unmarshal(buf, u.Config)
+	default:
+		err = toml.Unmarshal(buf, u.Config)
 	}
 	if err != nil {
 		return err
