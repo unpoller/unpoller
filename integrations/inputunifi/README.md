@@ -13,10 +13,10 @@ device configuration. This controller can be installed on Windows, macOS and Lin
 Ubiquiti also provides a dedicated hardware device called a
 [CloudKey](https://www.ui.com/unifi/unifi-cloud-key/) that runs the controller software.
 
-Unifi-Poller is a small application that runs on macOS, Linux or Docker. It
-polls your controller every 30 seconds for metric data and stores that data in
+Unifi-Poller is a small application that runs on Windows, macOS, Linux or Docker.
+It polls your controller every 30 seconds for measurements and stores the data in
 an Influx Database. A small setup with 2 APs, 1 switch, 1 gateway and 40 clients
-produces nearly 3000 fields (metrics).
+produces over 3000 fields (metrics).
 
 This application requires your controller to be running all the time. If you run
 a Unifi Controller, there's no excuse not to install
@@ -76,15 +76,16 @@ I'm totally open to add more configuration options if someone raises a need or c
 You can control this app with puppet, chef, saltstack, homebrew or a simple bash
 script if you needed to. It's available for macOS, Linux and Docker. It comes with
 a systemd service unit that allows you automatically start it up on most Linux
-hosts. It probably works just fine on Windows too;
-[let me know eh](https://github.com/davidnewhall/unifi-poller/wiki/Windows)?
+hosts. It works just fine on [Windows](https://github.com/davidnewhall/unifi-poller/wiki/Windows) too.
 
-The unifi data extraction is provided as an [external library](https://github.com/golift/unifi),
+The unifi data extraction is provided as an [external library](https://godoc.org/github.com/golift/unifi),
 and you can import that code directly without futzing with this application. That
 means, if you wanted to do something like make telegraf collect your data instead
 of unifi-poller you can achieve that with a little bit of Go code. You could write
-a small app that acts as a telegraf input plugin using the available
-[unifi](https://github.com/golift/unifi) library to grab the data from your controller.
+a small app that acts as a telegraf input plugin using the [unifi](https://github.com/golift/unifi)
+library to grab the data from your controller. As a bonus, all of the code in unifi-poller is
+[also a library](https://godoc.org/github.com/davidnewhall/unifi-poller/pkg/unifi-poller)
+and can be used in other projects.
 
 # What now...
 

@@ -20,15 +20,14 @@ RPMVERSION:=$(shell echo $(VERSION) | tr -- - _)
 all: man build
 
 # Prepare a release. Called in Travis CI.
-release: clean test $(BINARY)-$(RPMVERSION)-$(ITERATION).x86_64.rpm $(BINARY)_$(VERSION)-$(ITERATION)_amd64.deb macos
+release: clean test macos windows $(BINARY)-$(RPMVERSION)-$(ITERATION).x86_64.rpm $(BINARY)_$(VERSION)-$(ITERATION)_amd64.deb
 	# Prepareing a release!
 	mkdir -p release
-	gzip -9 $(BINARY).linux
-	gzip -9 $(BINARY).macos
-	mv $(BINARY)-$(RPMVERSION)-$(ITERATION).x86_64.rpm $(BINARY)_$(VERSION)-$(ITERATION)_amd64.deb \
-	$(BINARY).macos.gz $(BINARY).linux.gz release/
+	mv $(BINARY).linux $(BINARY).macos $(BINARY).exe release/
+	gzip -9r release/
+	mv $(BINARY)-$(RPMVERSION)-$(ITERATION).x86_64.rpm $(BINARY)_$(VERSION)-$(ITERATION)_amd64.deb release/
 	# Generating File Hashes
-	openssl dgst -sha256 release/* | tee release/$(BINARY)_checksums_$(VERSION)-$(ITERATION).txt
+	for i in release/*; do (openssl dgst -r -sha256 "$$i" | head -c64 ; echo) | tee "$$i.sha256.txt"; done
 
 # Delete all build assets.
 clean:
@@ -73,6 +72,12 @@ macos: $(BINARY).macos
 $(BINARY).macos:
 	# Building darwin binary.
 	GOOS=darwin go build -o $(BINARY).macos -ldflags "-w -s -X github.com/davidnewhall/unifi-poller/pkg/unifi-poller.Version=$(VERSION)" $(PACKAGE)
+
+exe: $(BINARY).exe
+windows: $(BINARY).exe
+$(BINARY).exe:
+	# Building darwin binary.
+	GOOS=windows go build -o $(BINARY).exe -ldflags "-w -s -X github.com/davidnewhall/unifi-poller/pkg/unifi-poller.Version=$(VERSION)" $(PACKAGE)
 
 # Packages
 
