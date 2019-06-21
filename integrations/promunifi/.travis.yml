@@ -30,14 +30,14 @@ script:
 - docker run -d --name unifi-poller golift/unifi-poller | tee docker_id
   # Once we figure out how to keep it running we can remove the -a in ps args.
 - docker ps -a | grep -q unifi-poller
-- docker logs $(<docker_id) 2>&1 | grep -Eq "Loaded Configuration[:] /etc/unifi-poller/up.conf"
+- docker logs $(<docker_id) 2>&1 | grep -Eq "Loading Configuration File[:] /etc/unifi-poller/up.conf"
 # test and build everything
 - rvm 2.0.0 do make release
 after_success:
+  # Display Release Folder
+  - ls -l release/
   - |
       declare -r SSH_FILE="$(mktemp -u $HOME/.ssh/XXXXX)"
-      # Display Release Folder
-      ls -l release/
       echo -e "Host github.com\n\tStrictHostKeyChecking no\n" >> ~/.ssh/config
       # Get deploy key for golift/homebrew-mugs.
       openssl aes-256-cbc -K $encrypted_9f3147001275_key -iv $encrypted_9f3147001275_iv -in ".travis/github_deploy_key.enc" -out "$SSH_FILE" -d

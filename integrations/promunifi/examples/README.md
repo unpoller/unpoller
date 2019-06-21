@@ -14,4 +14,6 @@ new benefits to the existing dashboards. When that happens I update them.
 Keeping an Example set allows you to update too, inspect the changes, and apply them
 to your own custom dashboards.
 
-This folder also contains an example configuration file and some dashboard screenshots.
+This folder also contains dashboard screenshots and example configuration files in four supported formats.
+You can use any format you want for the config file, just give it the appropriate prefix for the format.
+ie. an xml file should end with `.xml`.
