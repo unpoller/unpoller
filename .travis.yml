@@ -30,7 +30,7 @@ script:
 - docker run -d --name unifi-poller golift/unifi-poller | tee docker_id
   # Once we figure out how to keep it running we can remove the -a in ps args.
 - docker ps -a | grep -q unifi-poller
-- docker logs $(<docker_id) 2>&1 | grep -Eq "Loaded Configuration[:] /etc/unifi-poller/up.conf"
+- docker logs $(<docker_id) 2>&1 | grep -Eq "Loading Configuration File[:] /etc/unifi-poller/up.conf"
 # test and build everything
 - rvm 2.0.0 do make release
 after_success:
