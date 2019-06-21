@@ -44,29 +44,22 @@ func (u *UnifiPoller) GetConfig() (err error) {
 		UnifiBase:  defaultUnifURL,
 		Interval:   Dur{defaultInterval},
 		Sites:      []string{"default"},
+		Quiet:      u.DumpJSON != "",
 	}
+	u.Logf("Loading Configuration File: %s", u.ConfigFile)
 	var buf []byte
 	switch buf, err = ioutil.ReadFile(u.ConfigFile); {
 	case err != nil:
 		return err
 	case strings.HasSuffix(u.ConfigFile, ".json"):
-		err = json.Unmarshal(buf, u.Config)
+		return json.Unmarshal(buf, u.Config)
 	case strings.HasSuffix(u.ConfigFile, ".xml"):
-		err = xml.Unmarshal(buf, u.Config)
+		return xml.Unmarshal(buf, u.Config)
 	case strings.HasSuffix(u.ConfigFile, ".yaml"):
-		err = yaml.Unmarshal(buf, u.Config)
+		return yaml.Unmarshal(buf, u.Config)
 	default:
-		err = toml.Unmarshal(buf, u.Config)
+		return toml.Unmarshal(buf, u.Config)
 	}
-	if err != nil {
-		return err
-	}
-
-	if u.DumpJSON != "" {
-		u.Quiet = true
-	}
-	u.Logf("Loaded Configuration: %s", u.ConfigFile)
-	return nil
 }
 
 // Run invokes all the application logic and routines.
@@ -74,7 +67,7 @@ func (u *UnifiPoller) Run() (err error) {
 	if u.DumpJSON != "" {
 		return u.DumpJSONPayload()
 	}
-	if log.SetFlags(0); u.Debug {
+	if u.Debug {
 		log.SetFlags(log.Lshortfile | log.Lmicroseconds | log.Ldate)
 		u.LogDebugf("Debug Logging Enabled")
 	}
