@@ -24,10 +24,6 @@
 #   go-tests = true
 #   unused-packages = true
 
-[[constraint]]
-  name = "github.com/naoina/toml"
-  version = "0.1.1"
-
 [prune]
   go-tests = true
   unused-packages = true
