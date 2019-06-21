@@ -38,8 +38,8 @@ FIRST:
 
 // PollController runs forever, polling unifi, and pushing to influx.
 func (u *UnifiPoller) PollController() error {
-	log.Println("[INFO] Everything checks out! Poller started, interval:", u.Interval.value)
-	ticker := time.NewTicker(u.Interval.value)
+	log.Println("[INFO] Everything checks out! Poller started, interval:", u.Interval.Round(time.Second))
+	ticker := time.NewTicker(u.Interval.Round(time.Second))
 	var err error
 	for range ticker.C {
 		m := &Metrics{}
