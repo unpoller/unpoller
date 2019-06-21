@@ -1,7 +1,6 @@
 package unifipoller
 
 import (
-	"strings"
 	"time"
 
 	"github.com/golift/unifi"
@@ -67,14 +66,10 @@ type Config struct {
 }
 
 // Dur is used to UnmarshalTOML into a time.Duration value.
-type Dur struct{ value time.Duration }
+type Dur struct{ time.Duration }
 
-// UnmarshalTOML parses a duration type from a config file.
-func (v *Dur) UnmarshalTOML(data []byte) error {
-	unquoted := strings.Trim(string(data), `"`)
-	dur, err := time.ParseDuration(unquoted)
-	if err == nil {
-		v.value = dur
-	}
-	return err
+// UnmarshalText parses a duration type from a config file.
+func (d *Dur) UnmarshalText(data []byte) (err error) {
+	d.Duration, err = time.ParseDuration(string(data))
+	return
 }

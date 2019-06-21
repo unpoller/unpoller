@@ -1,16 +1,20 @@
 package unifipoller
 
 import (
+	"encoding/json"
+	"encoding/xml"
 	"fmt"
 	"io/ioutil"
 	"log"
 	"os"
+	"strings"
 
+	"github.com/BurntSushi/toml"
 	"github.com/golift/unifi"
 	influx "github.com/influxdata/influxdb1-client/v2"
-	"github.com/naoina/toml"
 	"github.com/pkg/errors"
 	flag "github.com/spf13/pflag"
+	yaml "gopkg.in/yaml.v2"
 )
 
 // ParseFlags runs the parser.
@@ -28,7 +32,7 @@ func (u *UnifiPoller) ParseFlags(args []string) {
 }
 
 // GetConfig parses and returns our configuration data.
-func (u *UnifiPoller) GetConfig() error {
+func (u *UnifiPoller) GetConfig() (err error) {
 	// Preload our defaults.
 	u.Config = &Config{
 		InfluxURL:  defaultInfxURL,
@@ -38,15 +42,26 @@ func (u *UnifiPoller) GetConfig() error {
 		UnifiUser:  defaultUnifUser,
 		UnifiPass:  os.Getenv("UNIFI_PASSWORD"),
 		UnifiBase:  defaultUnifURL,
-		Interval:   Dur{value: defaultInterval},
+		Interval:   Dur{defaultInterval},
 		Sites:      []string{"default"},
 	}
-	if buf, err := ioutil.ReadFile(u.ConfigFile); err != nil {
+	var buf []byte
+	switch buf, err = ioutil.ReadFile(u.ConfigFile); {
+	case err != nil:
 		return err
-		// This is where the defaults in the config variable are overwritten.
-	} else if err := toml.Unmarshal(buf, u.Config); err != nil {
+	default:
+		err = toml.Unmarshal(buf, u.Config)
+	case strings.HasSuffix(u.ConfigFile, ".json"):
+		err = json.Unmarshal(buf, u.Config)
+	case strings.HasSuffix(u.ConfigFile, ".xml"):
+		err = xml.Unmarshal(buf, u.Config)
+	case strings.HasSuffix(u.ConfigFile, ".yaml"):
+		err = yaml.Unmarshal(buf, u.Config)
+	}
+	if err != nil {
 		return err
 	}
+
 	if u.DumpJSON != "" {
 		u.Quiet = true
 	}
