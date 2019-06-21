@@ -1,42 +1,42 @@
-# unifi-poller primary configuration file. TOML FORMAT #
-# commented lines are defaults, uncomment to change.   #
+# unifi-poller primary configuration file. YAML FORMAT #
+# provided values are defaults                         #
 ########################################################
-
+---
 # If the controller has more than one site, specify which sites to poll here.
 # If only one site, "default" is likely the correct name.
-# Set this to ["all"] to poll all sites, no matter their names.
-#sites = ["default"]
+# Change default to all to poll all sites, no matter their names.
+sites:
+  - default
 
 # The Unifi Controller only updates traffic stats about every 30 seconds.
 # Setting this to something lower may lead to "zeros" in your data. You've been warned.
-#interval = "30s"
+interval: "30s"
 
 # Turns on line numbers, microsecond logging, and a per-device log.
-#debug = false
+debug: false
 
 # Turns off per-device log and per-interval log. Logs only errors.
 # Recommend using debug with this setting for better error logging.
-#quiet = false
+quiet: false
 
 # If the poller experiences an error from the Unifi Controller or from InfluxDB
 # it will exit. If you do not want it to exit, change max_errors to -1. You can
 # adjust the config to tolerate more errors by setting this to a higher value.
 # Recommend setting this between 0 and 5. See man page for more explanation.
-#max_errors = 0
+max_errors: 0
 
 # InfluxDB does not require auth by default, so the user/password are probably unimportant.
-#influx_url = "http://127.0.0.1:8086"
-#influx_user = "unifi"
-#influx_pass = "unifi"
+influx_url: "http://127.0.0.1:8086"
+influx_user: "unifi"
+influx_pass: "unifi"
 # Be sure to create this database.
-#influx_db = "unifi"
+influx_db: "unifi"
 
 # Make a read-only user in the Unifi Admin Settings.
-#unifi_user = "influxdb"
-# You may also set env variable UNIFI_PASSWORD instead of putting this in the config.
-unifi_pass = "4BB9345C-2341-48D7-99F5-E01B583FF77F"
-#unifi_url = "https://127.0.0.1:8443"
+unifi_user: "influxdb"
+unifi_pass: ""
+unifi_url: "https://127.0.0.1:8443"
 
 # If your Unifi controller has a valid SSL certificate, you can enable
 # this option to validate it. Otherwise, any SSL certificate is valid.
-#verify_ssl = false
+verify_ssl: false
