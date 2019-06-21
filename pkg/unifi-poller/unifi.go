@@ -22,6 +22,7 @@ func (u *UnifiPoller) CheckSites() error {
 	}
 	u.Logf("Found %d site(s) on controller: %v", len(msg), strings.Join(msg, ", "))
 	if StringInSlice("all", u.Sites) {
+		u.Sites = []string{"all"}
 		return nil
 	}
 FIRST:
