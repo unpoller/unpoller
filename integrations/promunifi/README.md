@@ -13,7 +13,7 @@ device configuration. This controller can be installed on Windows, macOS and Lin
 Ubiquiti also provides a dedicated hardware device called a
 [CloudKey](https://www.ui.com/unifi/unifi-cloud-key/) that runs the controller software.
 
-Unifi-Poller is a smaller application that runs on macOS, Linux or Docker. It
+Unifi-Poller is a small application that runs on macOS, Linux or Docker. It
 polls your controller every 30 seconds for metric data and stores that data in
 an Influx Database. A small setup with 2 APs, 1 switch, 1 gateway and 40 clients
 produces nearly 3000 fields (metrics).
@@ -28,6 +28,7 @@ graphs to slice the data any way you choose. Good luck!
 ## Installation
 
 [See the Wiki!](https://github.com/davidnewhall/unifi-poller/wiki/Installation)
+We have a special place for [Docker Users](https://github.com/davidnewhall/unifi-poller/wiki/Docker).
 
 # Backstory
 
@@ -59,9 +60,35 @@ for making this dashboard; it gave me a fantastic start to making my own.
 
 I've also created [another forum post](https://community.ubnt.com/t5/UniFi-Wireless/Unifi-Poller-Store-Unifi-Controller-Metrics-in-InfluxDB-without/td-p/2811951) you may use to get additional help.
 
+# Development
+
+The "What now..." section below used to be a lot larger. I've received a lot of
+support, feedback and assistance from the community. Many thanks! This app is
+extremely stable with a tiny memory and cpu footprint. I imagine one day we'll
+figure out how to make it run on a CloudKey device directly; once I have one
+personally that will be my goal. In addition to stability, this app provides
+an intuitive installation and configuration process. Maintenance is a breeze too.
+
+I'm not a software engineer, I'm a a firm believer in operational excellence above
+all else. To that end, this app shall remain easy, intuitive and highly adaptable.
+I'm totally open to add more configuration options if someone raises a need or concern.
+
+You can control this app with puppet, chef, saltstack, homebrew or a simple bash
+script if you needed to. It's available for macOS, Linux and Docker. It comes with
+a systemd service unit that allows you automatically start it up on most Linux
+hosts. It probably works just fine on Windows too;
+[let me know eh](https://github.com/davidnewhall/unifi-poller/wiki/Windows)?
+
+The unifi data extraction is provided as an [external library](https://github.com/golift/unifi),
+and you can import that code directly without futzing with this application. That
+means, if you wanted to do something like make telegraf collect your data instead
+of unifi-poller you can achieve that with a little bit of Go code. You could write
+a small app that acts as a telegraf input plugin using the available
+[unifi](https://github.com/golift/unifi) library to grab the data from your controller.
+
 # What now...
 
-- Are there other devices that need to be included?
+### Are there other devices that need to be included?
 
 I have: switch, router, access point. Three total, and the type structs are
 likely missing data for variants of these devices. e.g. Some UAPs have more
@@ -70,15 +97,7 @@ ports, some switches have 10Gb, etc. These are things I do not have data on
 to write code for. If you have these devices, and want them graphed, open an
 Issue and lets discuss.
 
-- Better Installation instructions.
-
-If you're a nerd you can probably figure it out. I'd still like some pretty
-pictures and maybe even a Twitch VOD. Update: The installation has been
-simplified tremendously with the
-[creation of binary packages](https://github.com/davidnewhall/unifi-poller/wiki/Installation).
-More to come!
-
-- Radios, Frequencies, Interfaces, vAPs
+### Radios, Frequencies, Interfaces, vAPs
 
 My access points only seem to have two radios, one interface and vAP per radio.
 I'm not sure if the graphs, as-is, provide enough insight into APs with other
@@ -107,6 +126,6 @@ sites side-by-side. So easy! This screenshot barely does it justice.
 
 
 ## Copyright & License
-- Copyright © 2016 Garrett Bjerkhoel.
-- Copyright © 2018-2019 David Newhall II.
-- See [LICENSE](LICENSE) for license information.
+-   Copyright © 2016 Garrett Bjerkhoel.
+-   Copyright © 2018-2019 David Newhall II.
+-   See [LICENSE](LICENSE) for license information.

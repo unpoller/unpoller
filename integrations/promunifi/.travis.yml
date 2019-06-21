@@ -24,8 +24,8 @@ before_install:
 install:
 - rvm 2.0.0 do gem install --no-document fpm
 - dep ensure
-- docker build -t unifi-poller .
-- docker run -d --name unifi-poller unifi-poller | tee docker_id
+- make docker
+- docker run -d --name unifi-poller golift/unifi-poller | tee docker_id
 script:
   # Once we figure out how to keep it running we can remove the -a in ps args.
 - docker ps -a | grep -q unifi-poller
