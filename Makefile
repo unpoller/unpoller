@@ -20,7 +20,7 @@ RPMVERSION:=$(shell echo $(VERSION) | tr -- - _)
 all: man build
 
 # Prepare a release. Called in Travis CI.
-release: clean test macos windows $(BINARY)-$(RPMVERSION)-$(ITERATION).x86_64.rpm $(BINARY)_$(VERSION)-$(ITERATION)_amd64.deb
+release: clean dep test macos windows $(BINARY)-$(RPMVERSION)-$(ITERATION).x86_64.rpm $(BINARY)_$(VERSION)-$(ITERATION)_amd64.deb
 	# Prepareing a release!
 	mkdir -p release
 	mv $(BINARY).linux $(BINARY).macos release/
@@ -77,7 +77,7 @@ $(BINARY).macos:
 exe: $(BINARY).exe
 windows: $(BINARY).exe
 $(BINARY).exe:
-	# Building darwin binary.
+	# Building windows binary.
 	GOOS=windows go build -o $(BINARY).exe -ldflags "-w -s -X github.com/davidnewhall/unifi-poller/pkg/unifi-poller.Version=$(VERSION)" $(PACKAGE)
 
 # Packages
@@ -189,6 +189,11 @@ uninstall:
 	rm -f /etc/systemd/system/$(BINARY).service /usr/local/share/man/man1/$(BINARY).1.gz
 	[ -x /bin/systemctl ] && /bin/systemctl --system daemon-reload || true
 	@[ -f /Library/LaunchAgents/com.github.davidnewhall.$(BINARY).plist ] && echo "  ==> Unload and delete this file manually:" && echo "  sudo launchctl unload /Library/LaunchAgents/com.github.davidnewhall.$(BINARY).plist" && echo "  sudo rm -f /Library/LaunchAgents/com.github.davidnewhall.$(BINARY).plist" || true
+
+# This is safe; recommended even.
+dep: vendor
+vendor:
+	dep ensure
 
 # Don't run this unless you're ready to debug untested vendored dependencies.
 deps:
