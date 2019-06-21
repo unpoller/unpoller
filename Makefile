@@ -36,7 +36,7 @@ clean:
 	rm -f $(BINARY){.macos,.linux,.1,}{,.gz} $(BINARY).rb
 	rm -f $(BINARY){_,-}*.{deb,rpm} md2roff v*.tar.gz.sha256
 	rm -f cmd/$(BINARY)/README{,.html} README{,.html} ./$(BINARY)_manual.html
-	rm -rf package_build_* release vendor
+	rm -rf package_build_* release
 
 # md2roff is needed to build the man file and html pages from the READMEs.
 md2roff:
