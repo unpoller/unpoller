@@ -25,14 +25,14 @@ func (u *UnifiPoller) ParseFlags(args []string) {
 		u.Flag.PrintDefaults()
 	}
 	u.Flag.StringVarP(&u.DumpJSON, "dumpjson", "j", "",
-		"This debug option prints the json payload for a device and exits.")
+		"This debug option prints a json payload and exits. See man page for more.")
 	u.Flag.StringVarP(&u.ConfigFile, "config", "c", defaultConfFile, "Poller Config File (TOML Format)")
 	u.Flag.BoolVarP(&u.ShowVer, "version", "v", false, "Print the version and exit")
 	_ = u.Flag.Parse(args)
 }
 
 // GetConfig parses and returns our configuration data.
-func (u *UnifiPoller) GetConfig() (err error) {
+func (u *UnifiPoller) GetConfig() error {
 	// Preload our defaults.
 	u.Config = &Config{
 		InfluxURL:  defaultInfxURL,
@@ -42,20 +42,19 @@ func (u *UnifiPoller) GetConfig() (err error) {
 		UnifiUser:  defaultUnifUser,
 		UnifiPass:  os.Getenv("UNIFI_PASSWORD"),
 		UnifiBase:  defaultUnifURL,
-		Interval:   Dur{defaultInterval},
+		Interval:   Duration{defaultInterval},
 		Sites:      []string{"default"},
 		Quiet:      u.DumpJSON != "",
 	}
 	u.Logf("Loading Configuration File: %s", u.ConfigFile)
-	var buf []byte
-	switch buf, err = ioutil.ReadFile(u.ConfigFile); {
+	switch buf, err := ioutil.ReadFile(u.ConfigFile); {
 	case err != nil:
 		return err
-	case strings.HasSuffix(u.ConfigFile, ".json"):
+	case strings.Contains(u.ConfigFile, ".json"):
 		return json.Unmarshal(buf, u.Config)
-	case strings.HasSuffix(u.ConfigFile, ".xml"):
+	case strings.Contains(u.ConfigFile, ".xml"):
 		return xml.Unmarshal(buf, u.Config)
-	case strings.HasSuffix(u.ConfigFile, ".yaml"):
+	case strings.Contains(u.ConfigFile, ".yaml"):
 		return yaml.Unmarshal(buf, u.Config)
 	default:
 		return toml.Unmarshal(buf, u.Config)
