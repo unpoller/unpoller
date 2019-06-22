@@ -40,7 +40,7 @@ type UnifiPoller struct {
 	*Config
 }
 
-// Metrics contains all the data from the controller.
+// Metrics contains all the data from the controller and an influx endpoint to send them to.
 type Metrics struct {
 	unifi.Sites
 	unifi.Clients
@@ -51,7 +51,7 @@ type Metrics struct {
 // Config represents the data needed to poll a controller and report to influxdb.
 type Config struct {
 	MaxErrors  int      `json:"max_errors,_omitempty" toml:"max_errors,_omitempty" xml:"max_errors" yaml:"max_errors"`
-	Interval   Dur      `json:"interval,_omitempty" toml:"interval,_omitempty" xml:"interval" yaml:"interval"`
+	Interval   Duration `json:"interval,_omitempty" toml:"interval,_omitempty" xml:"interval" yaml:"interval"`
 	Debug      bool     `json:"debug" toml:"debug" xml:"debug" yaml:"debug"`
 	Quiet      bool     `json:"quiet,_omitempty" toml:"quiet,_omitempty" xml:"quiet" yaml:"quiet"`
 	VerifySSL  bool     `json:"verify_ssl" toml:"verify_ssl" xml:"verify_ssl" yaml:"verify_ssl"`
@@ -65,11 +65,11 @@ type Config struct {
 	Sites      []string `json:"sites,_omitempty" toml:"sites,_omitempty" xml:"sites" yaml:"sites"`
 }
 
-// Dur is used to UnmarshalTOML into a time.Duration value.
-type Dur struct{ time.Duration }
+// Duration is used to UnmarshalTOML into a time.Duration value.
+type Duration struct{ time.Duration }
 
 // UnmarshalText parses a duration type from a config file.
-func (d *Dur) UnmarshalText(data []byte) (err error) {
+func (d *Duration) UnmarshalText(data []byte) (err error) {
 	d.Duration, err = time.ParseDuration(string(data))
 	return
 }
