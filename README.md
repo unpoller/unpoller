@@ -13,10 +13,10 @@ device configuration. This controller can be installed on Windows, macOS and Lin
 Ubiquiti also provides a dedicated hardware device called a
 [CloudKey](https://www.ui.com/unifi/unifi-cloud-key/) that runs the controller software.
 
-Unifi-Poller is a small application that runs on Windows, macOS, Linux or Docker.
-It polls your controller every 30 seconds for measurements and stores the data in
-an Influx Database. A small setup with 2 APs, 1 switch, 1 gateway and 40 clients
-produces over 3000 fields (metrics).
+Unifi-Poller is a small Golang application that runs on Windows, macOS, Linux or
+Docker. It polls a UniFi controller every 30 seconds for measurements and stores
+the data in an Influx database. A small setup with 2 APs, 1 switch, 1 gateway and
+40 clients produces over 3000 fields (metrics).
 
 This application requires your controller to be running all the time. If you run
 a Unifi Controller, there's no excuse not to install
