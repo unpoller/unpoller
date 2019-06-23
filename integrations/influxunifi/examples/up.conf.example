@@ -3,22 +3,24 @@
 ########################################################
 
 # If the controller has more than one site, specify which sites to poll here.
-# If only one site, "default" is likely the correct name.
-# Set this to ["all"] to poll all sites, no matter their names.
-#sites = ["default"]
+# Set this to ["default"] to poll only the first site on the controller.
+# A setting of ["all"] will poll all sites; this works if you only have 1 site too.
+#sites = ["all"]
 
-# The Unifi Controller only updates traffic stats about every 30 seconds.
+# The UniFi Controller only updates traffic stats about every 30 seconds.
 # Setting this to something lower may lead to "zeros" in your data. You've been warned.
 #interval = "30s"
 
 # Turns on line numbers, microsecond logging, and a per-device log.
+# The default is false, but I personally leave this on at home (four devices).
+# This may be noisy if you have a lot of devices. It adds one line per device.
 #debug = false
 
-# Turns off per-device log and per-interval log. Logs only errors.
-# Recommend using debug with this setting for better error logging.
+# Turns off per-interval logs. Only startup and error logs will be emitted.
+# Recommend enabling debug with this setting for better error logging.
 #quiet = false
 
-# If the poller experiences an error from the Unifi Controller or from InfluxDB
+# If the poller experiences an error from the UniFi Controller or from InfluxDB
 # it will exit. If you do not want it to exit, change max_errors to -1. You can
 # adjust the config to tolerate more errors by setting this to a higher value.
 # Recommend setting this between 0 and 5. See man page for more explanation.
@@ -31,12 +33,13 @@
 # Be sure to create this database.
 #influx_db = "unifi"
 
-# Make a read-only user in the Unifi Admin Settings.
+# Make a read-only user in the UniFi Admin Settings.
 #unifi_user = "influxdb"
 # You may also set env variable UNIFI_PASSWORD instead of putting this in the config.
 unifi_pass = "4BB9345C-2341-48D7-99F5-E01B583FF77F"
 #unifi_url = "https://127.0.0.1:8443"
 
-# If your Unifi controller has a valid SSL certificate, you can enable
+# If your UniFi controller has a valid SSL certificate, you can enable
 # this option to validate it. Otherwise, any SSL certificate is valid.
+# If you don't know if you have a valid SSL cert, then you don't have one.
 #verify_ssl = false
