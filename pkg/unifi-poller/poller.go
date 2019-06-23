@@ -70,7 +70,7 @@ func (u *UnifiPoller) Run() (err error) {
 		log.SetFlags(log.Lshortfile | log.Lmicroseconds | log.Ldate)
 		u.LogDebugf("Debug Logging Enabled")
 	}
-	log.Printf("[INFO] Unifi-Poller v%v Starting Up! PID: %d", Version, os.Getpid())
+	log.Printf("[INFO] UniFi Poller v%v Starting Up! PID: %d", Version, os.Getpid())
 
 	if err = u.GetUnifi(); err != nil {
 		return err
@@ -81,7 +81,7 @@ func (u *UnifiPoller) Run() (err error) {
 	return u.PollController()
 }
 
-// GetInfluxDB returns an influxdb interface.
+// GetInfluxDB returns an InfluxDB interface.
 func (u *UnifiPoller) GetInfluxDB() (err error) {
 	u.Client, err = influx.NewHTTPClient(influx.HTTPConfig{
 		Addr:     u.InfluxURL,
@@ -95,7 +95,7 @@ func (u *UnifiPoller) GetInfluxDB() (err error) {
 	return nil
 }
 
-// GetUnifi returns a Unifi controller interface.
+// GetUnifi returns a UniFi controller interface.
 func (u *UnifiPoller) GetUnifi() (err error) {
 	// Create an authenticated session to the Unifi Controller.
 	u.Unifi, err = unifi.NewUnifi(u.UnifiUser, u.UnifiPass, u.UnifiBase, u.VerifySSL)
@@ -108,10 +108,10 @@ func (u *UnifiPoller) GetUnifi() (err error) {
 	if err != nil {
 		v.ServerVersion = "unknown"
 	}
-	u.Logf("Authenticated to Unifi Controller at %s version %s as user %s", u.UnifiBase, v.ServerVersion, u.UnifiUser)
+	u.Logf("Authenticated to UniFi Controller at %s version %s as user %s", u.UnifiBase, v.ServerVersion, u.UnifiUser)
 	if err = u.CheckSites(); err != nil {
 		return err
 	}
-	u.Logf("Polling Unifi Controller Sites: %v", u.Sites)
+	u.Logf("Polling UniFi Controller Sites: %v", u.Sites)
 	return nil
 }
