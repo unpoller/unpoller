@@ -55,7 +55,7 @@ func (u *UnifiPoller) PollController() error {
 }
 
 // CollectMetrics grabs all the measurements from a UniFi controller and returns them.
-// This also creates an InfluxDB writer, and retuns error if that fails.
+// This also creates an InfluxDB writer, and returns error if that fails.
 func (u *UnifiPoller) CollectMetrics() (*Metrics, error) {
 	m := &Metrics{}
 	var err error
