@@ -1,7 +1,8 @@
 # UniFi Poller
 
-Collect your UniFi Controller Data and send it to an InfluxDB instance.
-Grafana dashboards included. Updated 2019.
+Collect your UniFi controller data and send it to an InfluxDB instance.
+[Grafana Dashboards](http://grafana.com/dashboards?search=unifi-poller) included.
+Updated 2019.
 
 ## Description
 
@@ -19,7 +20,7 @@ the data in an Influx database. A small setup with 2 access points, 1 switch, 1
 gateway and 40 clients produces over 3000 fields (metrics).
 
 This application requires your controller to be running all the time. If you run
-a UniFi Controller, there's no excuse not to install
+a UniFi controller, there's no excuse not to install
 [Influx](https://github.com/davidnewhall/unifi-poller/wiki/InfluxDB),
 [Grafana](https://github.com/davidnewhall/unifi-poller/wiki/Grafana) and this app.
 You'll have a plethora of data at your fingertips and the ability to craft custom
