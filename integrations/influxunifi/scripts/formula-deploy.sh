@@ -1,6 +1,8 @@
 #!/bin/bash
 
-# Deploys a new unifi-poller.rb  formula file to golift/homebrew-tap.
+# Deploys a new unifi-poller.rb formula file to golift/homebrew-tap.
+# Requires SSH credentials in ssh-agent to work.
+# Run by Travis-CI when a new release is created on GitHub.
 
 make unifi-poller.rb
 VERSION=$(grep -E '^\s*version\s*"' unifi-poller.rb | cut -d\" -f 2)
@@ -12,8 +14,6 @@ git clone git@github.com:golift/homebrew-mugs.git
 
 cp unifi-poller.rb homebrew-mugs/Formula
 pushd homebrew-mugs
-echo "Showing diff:"
-git diff
 git commit -m "Update unifi-poller on Release: v${VERSION}" Formula/unifi-poller.rb
 git push
 popd
