@@ -83,6 +83,16 @@ is provided so the application can be easily adapted to any environment.
         errors will be logged. Using this with debug=true adds line numbers to
         any error logs.
 
+    lambda         default: false
+        * Until reports of astonishing success with this mode, it is EXPERIMENTAL.
+        Setting this to true will invoke a run-once mode where the application
+        immediately polls the controller and reports the metrics to InfluxDB.
+        Then it exits. This mode is useful in an AWS Lambda or a crontab where
+        the execution timings are controlled. This mode may also be adapted
+        to run in other collector scripts and apps like telegraf or diamond.
+        This mode can also be combined with a "test database" in InfluxDB to
+        give yourself a "test config file" you may run ad-hoc to test changes.
+
     max_errors     default: 0
         If you restart the UniFI controller, the poller will lose access until
         it is restarted. Specifying a number greater than -1 for max_errors will
