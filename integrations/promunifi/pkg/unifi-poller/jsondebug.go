@@ -9,14 +9,14 @@ import (
 	"github.com/pkg/errors"
 )
 
-// DumpJSONPayload prints raw json from the Unifi Controller.
+// DumpJSONPayload prints raw json from the UniFi Controller.
 func (u *UnifiPoller) DumpJSONPayload() (err error) {
 	u.Quiet = true
 	u.Unifi, err = unifi.NewUnifi(u.UnifiUser, u.UnifiPass, u.UnifiBase, u.VerifySSL)
 	if err != nil {
 		return err
 	}
-	fmt.Fprintln(os.Stderr, "[INFO] Authenticated to Unifi Controller @", u.UnifiBase, "as user", u.UnifiUser)
+	fmt.Fprintln(os.Stderr, "[INFO] Authenticated to UniFi Controller @", u.UnifiBase, "as user", u.UnifiUser)
 	if err := u.CheckSites(); err != nil {
 		return err
 	}
@@ -51,7 +51,7 @@ func (u *UnifiPoller) dumpSitesJSON(path, name string, sites []unifi.Site) error
 	return nil
 }
 
-// PrintRawAPIJSON prints the raw json for a user-provided path on a Unifi Controller.
+// PrintRawAPIJSON prints the raw json for a user-provided path on a UniFi Controller.
 func (u *UnifiPoller) PrintRawAPIJSON(apiPath string) error {
 	body, err := u.GetJSON(apiPath)
 	fmt.Println(string(body))

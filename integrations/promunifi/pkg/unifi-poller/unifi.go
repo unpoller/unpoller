@@ -37,7 +37,8 @@ FIRST:
 	return nil
 }
 
-// PollController runs forever, polling unifi, and pushing to influx.
+// PollController runs forever, polling UniFi, and pushing to influx.
+// This is started by Run() after everything checks out.
 func (u *UnifiPoller) PollController() error {
 	log.Println("[INFO] Everything checks out! Poller started, interval:", u.Interval.Round(time.Second))
 	ticker := time.NewTicker(u.Interval.Round(time.Second))
@@ -77,7 +78,7 @@ func (u *UnifiPoller) PollController() error {
 			i, _ := p.Fields()
 			fieldcount += len(i)
 		}
-		u.Logf("Unifi Measurements Recorded. Sites: %d, Clients: %d, "+
+		u.Logf("UniFi Measurements Recorded. Sites: %d, Clients: %d, "+
 			"Wireless APs: %d, Gateways: %d, Switches: %d, Points: %d, Fields: %d",
 			len(m.Sites), len(m.Clients), len(m.UAPs), len(m.USGs), len(m.USWs), pointcount, fieldcount)
 

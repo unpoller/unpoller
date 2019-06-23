@@ -63,10 +63,10 @@ too much opinion. If you want to provide a way to do something, please also prov
 any alternatives you're aware of. If you're not sure, just open an issue and we can
 hash it out. I'm reasonable.
 
-## Unifi Library
+## UniFi Library
 
-If you're trying to fix something in the unifi data collection (ie. you got an
+If you're trying to fix something in the UniFi data collection (ie. you got an
 unmarshal error, or you want to add something I didn't include) then you
-should look at the [unifi library](https://github.com/golift/unifi). All the
+should look at the [UniFi library](https://github.com/golift/unifi). All the
 data collection and export code lives there. Contributions and Issues are welcome
 on that code base as well.

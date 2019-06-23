@@ -28,7 +28,7 @@ type Asset interface {
 	Points() ([]*influx.Point, error)
 }
 
-// UnifiPoller contains the application startup data, and auth info for unifi & influx.
+// UnifiPoller contains the application startup data, and auth info for UniFi & Influx.
 type UnifiPoller struct {
 	ConfigFile string
 	DumpJSON   string
@@ -40,7 +40,7 @@ type UnifiPoller struct {
 	*Config
 }
 
-// Metrics contains all the data from the controller and an influx endpoint to send them to.
+// Metrics contains all the data from the controller and an influx endpoint to send it to.
 type Metrics struct {
 	unifi.Sites
 	unifi.Clients
