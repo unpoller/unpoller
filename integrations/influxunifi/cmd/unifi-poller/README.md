@@ -10,6 +10,9 @@ measurements in an Influx Database. The measurements and metrics collected belon
 to every available site, device and client found on the controller. Including
 UniFi Security Gateways, Access Points, Switches and possibly more.
 
+Dashboards for Grafana are available.
+Find them at [Grafana.com](https://grafana.com/dashboards?search=unifi-poller).
+
 DESCRIPTION
 ---
 Unifi-Poller is a small Golang application that runs on Windows, macOS, Linux or
