@@ -78,6 +78,13 @@ func (u *UnifiPoller) Run() (err error) {
 	if err = u.GetInfluxDB(); err != nil {
 		return err
 	}
+	if u.Lambda {
+		metrics, err := u.CollectMetrics()
+		if err != nil {
+			return err
+		}
+		return u.ReportMetrics(metrics)
+	}
 	return u.PollController()
 }
 
