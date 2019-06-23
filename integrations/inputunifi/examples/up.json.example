@@ -1,5 +1,5 @@
 {
- "sites": ["default"],
+ "sites": ["all"],
  "interval": "30s",
  "debug": false,
  "quiet": false,
