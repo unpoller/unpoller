@@ -3,6 +3,7 @@
  "interval": "30s",
  "debug": false,
  "quiet": false,
+ "lambda": false,
  "max_errors": 0,
  "influx_url": "http://127.0.0.1:8086",
  "influx_user": "unifi",

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
 #######################################################
-# unifi-poller primary configuration file. XML FORMAT #
+# UniFi Poller primary configuration file. XML FORMAT #
 # provided values are defaults                        #
 #######################################################
 -->
@@ -36,7 +36,14 @@
   <quiet>false</quiet>
 
   <!--
-  # If the poller experiences an error from the UniFi Controller or from InfluxDB
+  # Lambda mode makes the application exit after collecting and reporting metrics one time.
+  # This mode requires an external process like an AWS Lambda or a simple crontab to keep
+  # the timings accurate on UniFi Poller run intervals.
+  -->
+  <lambda>false</lambda>
+
+  <!--
+  # If the poller experiences an error from the UniFi controller or from InfluxDB
   # it will exit. If you do not want it to exit, change max_errors to -1. You can
   # adjust the config to tolerate more errors by setting this to a higher value.
   # Recommend setting this between 0 and 5. See man page for more explanation.
