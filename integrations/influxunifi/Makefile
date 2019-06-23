@@ -121,13 +121,13 @@ docker:
 package_build_linux: readme man linux
 	# Building package environment for linux.
 	mkdir -p $@/usr/bin $@/etc/$(BINARY) $@/lib/systemd/system
-	mkdir -p $@/usr/share/man/man1 $@/usr/share/doc/$(BINARY)/examples
+	mkdir -p $@/usr/share/man/man1 $@/usr/share/doc/$(BINARY)
 	# Copying the binary, config file, unit file, and man page into the env.
 	cp $(BINARY).linux $@/usr/bin/$(BINARY)
 	cp *.1.gz $@/usr/share/man/man1
-	cp examples/*.conf.example $@/etc/$(BINARY)/
+	cp examples/up.conf.example $@/etc/$(BINARY)/
 	cp examples/up.conf.example $@/etc/$(BINARY)/up.conf
-	cp LICENSE *.html examples/up.conf.example $@/usr/share/doc/$(BINARY)/
+	cp LICENSE *.html examples/* $@/usr/share/doc/$(BINARY)/
 	# These go to their own folder so the img src in the html pages continue to work.
 	cp init/systemd/$(BINARY).service $@/lib/systemd/system/
 
@@ -164,12 +164,12 @@ install: man readme $(BINARY)
 	@[ "$(PREFIX)" != "" ] || (echo "Unable to continue, PREFIX not set. Use: make install PREFIX=/usr/local ETC=/usr/local/etc" && false)
 	@[ "$(ETC)" != "" ] || (echo "Unable to continue, ETC not set. Use: make install PREFIX=/usr/local ETC=/usr/local/etc" && false)
 	# Copying the binary, config file, unit file, and man page into the env.
-	/usr/bin/install -m 0755 -d $(PREFIX)/bin $(PREFIX)/share/man/man1 $(ETC)/$(BINARY) $(PREFIX)/share/doc/$(BINARY)/examples
+	/usr/bin/install -m 0755 -d $(PREFIX)/bin $(PREFIX)/share/man/man1 $(ETC)/$(BINARY) $(PREFIX)/share/doc/$(BINARY)
 	/usr/bin/install -m 0755 -cp $(BINARY) $(PREFIX)/bin/$(BINARY)
 	/usr/bin/install -m 0644 -cp $(BINARY).1.gz $(PREFIX)/share/man/man1
 	/usr/bin/install -m 0644 -cp examples/up.conf.example $(ETC)/$(BINARY)/
 	[ -f $(ETC)/$(BINARY)/up.conf ] || /usr/bin/install -m 0644 -cp  examples/up.conf.example $(ETC)/$(BINARY)/up.conf
-	/usr/bin/install -m 0644 -cp LICENSE *.html examples/up.conf.example $(PREFIX)/share/doc/$(BINARY)/
+	/usr/bin/install -m 0644 -cp LICENSE *.html examples/* $(PREFIX)/share/doc/$(BINARY)/
 	# These go to their own folder so the img src in the html pages continue to work.
 
 # If you installed with `make install` run `make uninstall` before installing a binary package.
