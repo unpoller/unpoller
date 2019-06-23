@@ -42,46 +42,11 @@ FIRST:
 func (u *UnifiPoller) PollController() error {
 	log.Println("[INFO] Everything checks out! Poller started, interval:", u.Interval.Round(time.Second))
 	ticker := time.NewTicker(u.Interval.Round(time.Second))
-	var err error
 	for range ticker.C {
-		m := &Metrics{}
-		// Get the sites we care about.
-		if m.Sites, err = u.GetFilteredSites(); err != nil {
-			u.LogErrors([]error{err}, "unifi.GetSites()")
+		metrics, err := u.CollectMetrics()
+		if err == nil {
+			u.LogError(u.ReportMetrics(metrics), "reporting metrics")
 		}
-		// Get all the points.
-		if m.Clients, err = u.GetClients(m.Sites); err != nil {
-			u.LogErrors([]error{err}, "unifi.GetClients()")
-		}
-		if m.Devices, err = u.GetDevices(m.Sites); err != nil {
-			u.LogErrors([]error{err}, "unifi.GetDevices()")
-		}
-
-		// Make a new Points Batcher.
-		m.BatchPoints, err = influx.NewBatchPoints(influx.BatchPointsConfig{Database: u.InfluxDB})
-		if err != nil {
-			u.LogErrors([]error{err}, "influx.NewBatchPoints")
-			continue
-		}
-		// Batch (and send) all the points.
-		if errs := m.SendPoints(); errs != nil && hasErr(errs) {
-			u.LogErrors(errs, "asset.Points()")
-		}
-		if err := u.Write(m.BatchPoints); err != nil {
-			u.LogErrors([]error{err}, "infdb.Write(bp)")
-		}
-
-		// Talk about the data.
-		var fieldcount, pointcount int
-		for _, p := range m.Points() {
-			pointcount++
-			i, _ := p.Fields()
-			fieldcount += len(i)
-		}
-		u.Logf("UniFi Measurements Recorded. Sites: %d, Clients: %d, "+
-			"Wireless APs: %d, Gateways: %d, Switches: %d, Points: %d, Fields: %d",
-			len(m.Sites), len(m.Clients), len(m.UAPs), len(m.USGs), len(m.USWs), pointcount, fieldcount)
-
 		if u.MaxErrors >= 0 && u.errorCount > u.MaxErrors {
 			return errors.Errorf("reached maximum error count, stopping poller (%d > %d)", u.errorCount, u.MaxErrors)
 		}
@@ -89,10 +54,52 @@ func (u *UnifiPoller) PollController() error {
 	return nil
 }
 
-// SendPoints combines all device and client data into influxdb data points.
+// CollectMetrics grabs all the measurements from a UniFi controller and returns them.
+// This also creates an InfluxDB writer, and retuns error if that fails.
+func (u *UnifiPoller) CollectMetrics() (*Metrics, error) {
+	m := &Metrics{}
+	var err error
+	// Get the sites we care about.
+	m.Sites, err = u.GetFilteredSites()
+	u.LogError(err, "unifi.GetSites()")
+	// Get all the points.
+	m.Clients, err = u.GetClients(m.Sites)
+	u.LogError(err, "unifi.GetClients()")
+	m.Devices, err = u.GetDevices(m.Sites)
+	u.LogError(err, "unifi.GetDevices()")
+	// Make a new Influx Points Batcher.
+	m.BatchPoints, err = influx.NewBatchPoints(influx.BatchPointsConfig{Database: u.InfluxDB})
+	u.LogError(err, "influx.NewBatchPoints")
+	return m, err
+}
+
+// ReportMetrics batches all the metrics and writes them to InfluxDB.
+// Returns an error if the write to influx fails.
+func (u *UnifiPoller) ReportMetrics(metrics *Metrics) error {
+	// Batch (and send) all the points.
+	for _, err := range metrics.ProcessPoints() {
+		u.LogError(err, "asset.Points()")
+	}
+	err := u.Write(metrics.BatchPoints)
+	if err != nil {
+		return errors.Wrap(err, "infdb.Write(bp)")
+	}
+	var fields, points int
+	for _, p := range metrics.Points() {
+		points++
+		i, _ := p.Fields()
+		fields += len(i)
+	}
+	u.Logf("UniFi Measurements Recorded. Sites: %d, Clients: %d, "+
+		"Wireless APs: %d, Gateways: %d, Switches: %d, Points: %d, Fields: %d",
+		len(metrics.Sites), len(metrics.Clients), len(metrics.UAPs),
+		len(metrics.USGs), len(metrics.USWs), points, fields)
+	return nil
+}
+
+// ProcessPoints batches all device and client data into influxdb data points.
 // Call this after you've collected all the data you care about.
-// This sends all the batched points to InfluxDB.
-func (m *Metrics) SendPoints() (errs []error) {
+func (m *Metrics) ProcessPoints() (errs []error) {
 	for _, asset := range m.Sites {
 		errs = append(errs, m.processPoints(asset))
 	}
@@ -114,7 +121,7 @@ func (m *Metrics) SendPoints() (errs []error) {
 	return
 }
 
-// processPoints is helper function for SendPoints.
+// processPoints is helper function for ProcessPoints.
 func (m *Metrics) processPoints(asset Asset) error {
 	if asset == nil {
 		return nil
