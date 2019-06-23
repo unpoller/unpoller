@@ -107,23 +107,19 @@ configurations. Help me figure that out?
 # What's it look like?
 
 Here's a picture of the Client dashboard.
-
-![image](examples/unifi-clients-dashboard.png?raw=true)
+![UniFi Clients Dashboard Image](https://grafana.com/api/dashboards/10418/images/6554/image)
 
 Here's a picture of the USG dashboard.
-
-![image](examples/unifi-usg-dashboard.png?raw=true)
+![USG Dashboard Image](https://grafana.com/api/dashboards/10416/images/6552/image)
 
 Here's a picture of the UAP dashboard. This only shows one device, but you can
 select multiple to put specific stats side-by-side.
-
-![image](examples/unifi-uap-dashboard.png?raw=true)
+![UAP Dashboard Image](https://grafana.com/api/dashboards/10415/images/6551/image)
 
 The USW / Switch Dashboard is pretty big with one data-filled section per selected port.
 You can drill down into specific sites, switches, and ports. Compare ports in different
 sites side-by-side. So easy! This screenshot barely does it justice.
-
-![image](examples/unifi-usw-dashboard.png?raw=true)
+![USW Dashboard Image](https://grafana.com/api/dashboards/10417/images/6553/image)
 
 
 ## Copyright & License
