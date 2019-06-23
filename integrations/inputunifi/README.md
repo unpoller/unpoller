@@ -1,6 +1,6 @@
-# Unifi Poller
+# UniFi Poller
 
-Collect your Unifi Controller Data and send it to an InfluxDB instance.
+Collect your UniFi Controller Data and send it to an InfluxDB instance.
 Grafana dashboards included. Updated 2019.
 
 ## Description
@@ -13,13 +13,13 @@ device configuration. This controller can be installed on Windows, macOS and Lin
 Ubiquiti also provides a dedicated hardware device called a
 [CloudKey](https://www.ui.com/unifi/unifi-cloud-key/) that runs the controller software.
 
-Unifi-Poller is a small Golang application that runs on Windows, macOS, Linux or
+UniFi Poller is a small Golang application that runs on Windows, macOS, Linux or
 Docker. It polls a UniFi controller every 30 seconds for measurements and stores
-the data in an Influx database. A small setup with 2 APs, 1 switch, 1 gateway and
-40 clients produces over 3000 fields (metrics).
+the data in an Influx database. A small setup with 2 access points, 1 switch, 1
+gateway and 40 clients produces over 3000 fields (metrics).
 
 This application requires your controller to be running all the time. If you run
-a Unifi Controller, there's no excuse not to install
+a UniFi Controller, there's no excuse not to install
 [Influx](https://github.com/davidnewhall/unifi-poller/wiki/InfluxDB),
 [Grafana](https://github.com/davidnewhall/unifi-poller/wiki/Grafana) and this app.
 You'll have a plethora of data at your fingertips and the ability to craft custom
@@ -32,11 +32,11 @@ We have a special place for [Docker Users](https://github.com/davidnewhall/unifi
 
 # Backstory
 
-Okay, so here's the deal. I found a simple piece of code on github that
+Okay, so here's the deal. I found a simple piece of code on GitHub that
 sorta did what I needed; we all know that story. I wanted more data, so
 I added more data collection. I believe I've completely rewritten every
 piece of original code, except the copyright/license file and that's fine
-by me. I probably wouldn't have made it this far if
+with me. I probably wouldn't have made it this far if
 [Garrett](https://github.com/dewski/unifi) hadn't written the original
 code I started with. Many props my man.
 
@@ -53,12 +53,12 @@ I've been trying to get my UAP data into Grafana. Sure, google search that.
 You'll find [this](https://community.ubnt.com/t5/UniFi-Wireless/Grafana-dashboard-for-UniFi-APs-now-available/td-p/1833532).
 And that's all you'll find. What if you don't want to deal with SNMP?
 Well, here you go. I've replicated 90% of what you see on those SNMP-powered
-dashboards with this Go app running on the same mac as my Unifi controller.
+dashboards with this Go app running on the same mac as my UniFi controller.
 All without enabling SNMP nor trying to understand those OIDs. Mad props
 to [waterside](https://community.ubnt.com/t5/user/viewprofilepage/user-id/303058)
 for making this dashboard; it gave me a fantastic start to making my own.
 
-I've also created [another forum post](https://community.ubnt.com/t5/UniFi-Wireless/Unifi-Poller-Store-Unifi-Controller-Metrics-in-InfluxDB-without/td-p/2811951) you may use to get additional help.
+I've also created [another forum post](https://community.ubnt.com/t5/UniFi-Wireless/UniFi Poller-Store-UniFi-Controller-Metrics-in-InfluxDB-without/td-p/2811951) you may use to get additional help.
 
 # Development
 
@@ -81,9 +81,9 @@ hosts. It works just fine on [Windows](https://github.com/davidnewhall/unifi-pol
 The unifi data extraction is provided as an [external library](https://godoc.org/github.com/golift/unifi),
 and you can import that code directly without futzing with this application. That
 means, if you wanted to do something like make telegraf collect your data instead
-of unifi-poller you can achieve that with a little bit of Go code. You could write
+of UniFi Poller you can achieve that with a little bit of Go code. You could write
 a small app that acts as a telegraf input plugin using the [unifi](https://github.com/golift/unifi)
-library to grab the data from your controller. As a bonus, all of the code in unifi-poller is
+library to grab the data from your controller. As a bonus, all of the code in UniFi Poller is
 [also a library](https://godoc.org/github.com/davidnewhall/unifi-poller/pkg/unifi-poller)
 and can be used in other projects.
 
