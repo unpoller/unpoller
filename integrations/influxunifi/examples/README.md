@@ -1,11 +1,8 @@
 # Grafana Dashboards & Examples
 
-This folder contains 4 grafana dashboards to get you started with the new data pool.
-Import these into Grafana to quickly visualize data from your devices.
-Created with Grafana 6.2.
+This folder used to contain Grafana Dashboards.
 
-These dashboards require a few plugins.
-See the [Grafana Wiki Article](https://github.com/davidnewhall/unifi-poller/wiki/Grafana) for more info.
+**They are now located at [Grafana.com](https://grafana.com/dashboards?search=unifi-poller).** More info is available on The [Grafana Dashboards Wiki Page](https://github.com/davidnewhall/unifi-poller/wiki/Grafana-Dashboards).
 
 Keep in mind these dashboards are just examples. You should make an Example folder
 in Grafana to keep them in, and copy them to new dashboards that you want to change.
