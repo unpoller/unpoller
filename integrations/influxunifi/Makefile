@@ -1,10 +1,10 @@
 # This Makefile is written as generic as possible.
-# Setting these variables and creating the necesarry paths in your github repo will make this file work.
+# Setting these variables and creating the necesarry paths in your GitHub repo will make this file work.
 #
 BINARY:=unifi-poller
 URL:=https://github.com/davidnewhall/$(BINARY)
 MAINT=David Newhall II <david at sleepers dot pro>
-DESC=This daemon polls a Unifi controller at a short interval and stores the collected measurements in an Influx Database.
+DESC=This daemon polls a UniFi controller at a short interval and stores the collected measurements in an Influx Database.
 GOLANGCI_LINT_ARGS=--enable-all -D gochecknoglobals
 PACKAGE:=./cmd/$(BINARY)
 LIBRARY:=./pkg/$(BINARY)

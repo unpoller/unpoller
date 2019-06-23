@@ -1,7 +1,7 @@
 # Sytemd service unit for unifi-poller.
 
 [Unit]
-Description=Unifi Poller - Stores Unifi Metrics in InfluxDB
+Description=UniFi Poller - Stores UniFi Metrics in InfluxDB
 After=network.target
 Requires=network.target
 
