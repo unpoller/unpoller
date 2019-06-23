@@ -15,7 +15,7 @@ Find them at [Grafana.com](https://grafana.com/dashboards?search=unifi-poller).
 
 DESCRIPTION
 ---
-Unifi-Poller is a small Golang application that runs on Windows, macOS, Linux or
+UniFi Poller is a small Golang application that runs on Windows, macOS, Linux or
 Docker. It polls a UniFi controller every 30 seconds for measurements and stores
 the data in an Influx database. See the example configuration file for more
 examples and default configurations.
@@ -55,7 +55,7 @@ CONFIGURATION
 *   Possible formats: `XML`, `JSON`, `TOML`, `YAML`
 
 The config file can be written in four different syntax formats. The application
-decides which one to used based on the file's name. If it contains `.xml` it will
+decides which one to use based on the file's name. If it contains `.xml` it will
 be parsed as XML. The same goes for `.json` and `.yaml`. If the filename contains
 none of these strings, then it is parsed as the default format, TOML. This option
 is provided so the application can be easily adapted to any environment.
@@ -149,3 +149,4 @@ LOCATION
 ---
 *   UniFi Poller: [https://github.com/davidnewhall/unifi-poller](https://github.com/davidnewhall/unifi-poller)
 *   UniFi Library: [https://github.com/golift/unifi](https://github.com/golift/unifi)
+*   Grafana Dashboards: [https://grafana.com/dashboards?search=unifi-poller](https://grafana.com/dashboards?search=unifi-poller)
