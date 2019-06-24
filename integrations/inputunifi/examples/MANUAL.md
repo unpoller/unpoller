@@ -83,9 +83,14 @@ is provided so the application can be easily adapted to any environment.
         errors will be logged. Using this with debug=true adds line numbers to
         any error logs.
 
-    lambda         default: false
-        * Until reports of astonishing success with this mode, it is EXPERIMENTAL.
-        Setting this to true will invoke a run-once mode where the application
+    mode           default: "influx"
+        * Value: influx
+        This default mode runs this application as a daemon. It will poll
+        the controller at the configured interval. Providing an invalid value
+        will run in this default mode.
+
+        * Value: influxlambda  -  (the only other available option right now)
+        Setting this value will invoke a run-once mode where the application
         immediately polls the controller and reports the metrics to InfluxDB.
         Then it exits. This mode is useful in an AWS Lambda or a crontab where
         the execution timings are controlled. This mode may also be adapted
