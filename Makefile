@@ -7,7 +7,6 @@ MAINT=David Newhall II <david at sleepers dot pro>
 DESC=This daemon polls a UniFi controller at a short interval and stores the collected measurements in an Influx Database.
 GOLANGCI_LINT_ARGS=--enable-all -D gochecknoglobals
 PACKAGE:=./cmd/$(BINARY)
-LIBRARY:=./pkg/$(BINARY)
 DOCKER_REPO=golift
 MD2ROFF_BIN=github.com/github/hub/md2roff-bin
 
@@ -46,9 +45,9 @@ clean:
 man: $(BINARY).1.gz
 $(BINARY).1.gz: md2roff
 	# Building man page. Build dependency first: md2roff
-	go run $(MD2ROFF_BIN) --manual $(BINARY) --version $(VERSION) --date "$$(date)" cmd/$(BINARY)/README.md
-	gzip -9nc cmd/$(BINARY)/README > $(BINARY).1.gz
-	mv cmd/$(BINARY)/README.html $(BINARY)_manual.html
+	go run $(MD2ROFF_BIN) --manual $(BINARY) --version $(VERSION) --date "$$(date)" examples/MANUAL.md
+	gzip -9nc examples/MANUAL > $(BINARY).1.gz
+	mv examples/MANUAL.html $(BINARY)_manual.html
 
 md2roff:
 	go get $(MD2ROFF_BIN)
@@ -148,7 +147,7 @@ $(BINARY).rb: v$(VERSION).tar.gz.sha256
 # Run code tests and lint.
 test: lint
 	# Testing.
-	go test -race -covermode=atomic $(PACKAGE) $(LIBRARY)
+	go test -race -covermode=atomic ./...
 lint:
 	# Checking lint.
 	golangci-lint run $(GOLANGCI_LINT_ARGS)

@@ -11,7 +11,11 @@ import (
 )
 
 // CheckSites makes sure the list of provided sites exists on the controller.
+// This does not run in Lambda (run-once) mode.
 func (u *UnifiPoller) CheckSites() error {
+	if strings.Contains(strings.ToLower(u.Mode), "lambda") {
+		return nil // Skip this in lambda mode.
+	}
 	sites, err := u.GetSites()
 	if err != nil {
 		return err
@@ -32,7 +36,8 @@ FIRST:
 				continue FIRST
 			}
 		}
-		return errors.Errorf("configured site not found on controller: %v", s)
+		// This is fine, it may get added later.
+		u.LogErrorf("configured site not found on controller: %v", s)
 	}
 	return nil
 }
@@ -42,46 +47,8 @@ FIRST:
 func (u *UnifiPoller) PollController() error {
 	log.Println("[INFO] Everything checks out! Poller started, interval:", u.Interval.Round(time.Second))
 	ticker := time.NewTicker(u.Interval.Round(time.Second))
-	var err error
 	for range ticker.C {
-		m := &Metrics{}
-		// Get the sites we care about.
-		if m.Sites, err = u.GetFilteredSites(); err != nil {
-			u.LogErrors([]error{err}, "unifi.GetSites()")
-		}
-		// Get all the points.
-		if m.Clients, err = u.GetClients(m.Sites); err != nil {
-			u.LogErrors([]error{err}, "unifi.GetClients()")
-		}
-		if m.Devices, err = u.GetDevices(m.Sites); err != nil {
-			u.LogErrors([]error{err}, "unifi.GetDevices()")
-		}
-
-		// Make a new Points Batcher.
-		m.BatchPoints, err = influx.NewBatchPoints(influx.BatchPointsConfig{Database: u.InfluxDB})
-		if err != nil {
-			u.LogErrors([]error{err}, "influx.NewBatchPoints")
-			continue
-		}
-		// Batch (and send) all the points.
-		if errs := m.SendPoints(); errs != nil && hasErr(errs) {
-			u.LogErrors(errs, "asset.Points()")
-		}
-		if err := u.Write(m.BatchPoints); err != nil {
-			u.LogErrors([]error{err}, "infdb.Write(bp)")
-		}
-
-		// Talk about the data.
-		var fieldcount, pointcount int
-		for _, p := range m.Points() {
-			pointcount++
-			i, _ := p.Fields()
-			fieldcount += len(i)
-		}
-		u.Logf("UniFi Measurements Recorded. Sites: %d, Clients: %d, "+
-			"Wireless APs: %d, Gateways: %d, Switches: %d, Points: %d, Fields: %d",
-			len(m.Sites), len(m.Clients), len(m.UAPs), len(m.USGs), len(m.USWs), pointcount, fieldcount)
-
+		_ = u.CollectAndReport()
 		if u.MaxErrors >= 0 && u.errorCount > u.MaxErrors {
 			return errors.Errorf("reached maximum error count, stopping poller (%d > %d)", u.errorCount, u.MaxErrors)
 		}
@@ -89,10 +56,73 @@ func (u *UnifiPoller) PollController() error {
 	return nil
 }
 
-// SendPoints combines all device and client data into influxdb data points.
+// CollectAndReport collects measurements and reports them to influxdb.
+// Can be called once or in a ticker loop. This function and all the ones below
+// handle their own logging. An error is returned so the calling function may
+// determine if there was a read or write erorr and act on it. This is currently
+// called in two places in this library. One returns an error, one does not.
+func (u *UnifiPoller) CollectAndReport() error {
+	metrics, err := u.CollectMetrics()
+	if err != nil {
+		return err
+	}
+	err = u.ReportMetrics(metrics)
+	u.LogError(err, "reporting metrics")
+	return err
+}
+
+// CollectMetrics grabs all the measurements from a UniFi controller and returns them.
+// This also creates an InfluxDB writer, and returns an error if that fails.
+func (u *UnifiPoller) CollectMetrics() (*Metrics, error) {
+	m := &Metrics{}
+	var err error
+	// Get the sites we care about.
+	m.Sites, err = u.GetFilteredSites()
+	u.LogError(err, "unifi.GetSites()")
+	// Get all the points.
+	m.Clients, err = u.GetClients(m.Sites)
+	u.LogError(err, "unifi.GetClients()")
+	m.Devices, err = u.GetDevices(m.Sites)
+	u.LogError(err, "unifi.GetDevices()")
+	// Make a new Influx Points Batcher.
+	m.BatchPoints, err = influx.NewBatchPoints(influx.BatchPointsConfig{Database: u.InfluxDB})
+	u.LogError(err, "influx.NewBatchPoints")
+	return m, err
+}
+
+// ReportMetrics batches all the metrics and writes them to InfluxDB.
+// Returns an error if the write to influx fails.
+func (u *UnifiPoller) ReportMetrics(metrics *Metrics) error {
+	// Batch (and send) all the points.
+	for _, err := range metrics.ProcessPoints() {
+		u.LogError(err, "asset.Points()")
+	}
+	err := u.Write(metrics.BatchPoints)
+	if err != nil {
+		return errors.Wrap(err, "influxdb.Write(points)")
+	}
+	var fields, points int
+	for _, p := range metrics.Points() {
+		points++
+		i, _ := p.Fields()
+		fields += len(i)
+	}
+	u.Logf("UniFi Measurements Recorded. Sites: %d, Clients: %d, "+
+		"Wireless APs: %d, Gateways: %d, Switches: %d, Points: %d, Fields: %d",
+		len(metrics.Sites), len(metrics.Clients), len(metrics.UAPs),
+		len(metrics.USGs), len(metrics.USWs), points, fields)
+	return nil
+}
+
+// ProcessPoints batches all device and client data into influxdb data points.
 // Call this after you've collected all the data you care about.
-// This sends all the batched points to InfluxDB.
-func (m *Metrics) SendPoints() (errs []error) {
+// This function is sorta weird and returns a slice of errors. The reasoning is
+// that some points may process while others fail, so we attempt to process them
+// all. This is (usually) run in a loop, so we can't really exit on error,
+// we just log the errors and tally them on a counter. In reality, this never
+// returns any errors because we control the data going in; cool right? But we
+// still check&log it in case the data going is skewed up and causes errors!
+func (m *Metrics) ProcessPoints() (errs []error) {
 	for _, asset := range m.Sites {
 		errs = append(errs, m.processPoints(asset))
 	}
@@ -114,7 +144,7 @@ func (m *Metrics) SendPoints() (errs []error) {
 	return
 }
 
-// processPoints is helper function for SendPoints.
+// processPoints is helper function for ProcessPoints.
 func (m *Metrics) processPoints(asset Asset) error {
 	if asset == nil {
 		return nil
@@ -129,7 +159,7 @@ func (m *Metrics) processPoints(asset Asset) error {
 
 // GetFilteredSites returns a list of sites to fetch data for.
 // Omits requested but unconfigured sites. Grabs the full list from the
-// controller and filters the sites provided in the config file.
+// controller and returns the sites provided in the config file.
 func (u *UnifiPoller) GetFilteredSites() (unifi.Sites, error) {
 	sites, err := u.GetSites()
 	if err != nil {
