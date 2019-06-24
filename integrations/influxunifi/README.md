@@ -59,7 +59,7 @@ All without enabling SNMP nor trying to understand those OIDs. Mad props
 to [waterside](https://community.ubnt.com/t5/user/viewprofilepage/user-id/303058)
 for making this dashboard; it gave me a fantastic start to making my own.
 
-I've also created [another forum post](https://community.ubnt.com/t5/UniFi-Wireless/UniFi Poller-Store-UniFi-Controller-Metrics-in-InfluxDB-without/td-p/2811951) you may use to get additional help.
+I've also created [another forum post](https://community.ui.com/questions/Unifi-Poller-Store-Unifi-Controller-Metrics-in-InfluxDB-without-SNMP/58a0ea34-d2b3-41cd-93bb-d95d3896d1a1) you may use to get additional help.
 
 # Development
 
