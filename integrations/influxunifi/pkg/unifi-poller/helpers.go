@@ -6,30 +6,18 @@ import (
 	"strings"
 )
 
-// hasErr checks a list of errors for a non-nil.
-func hasErr(errs []error) bool {
-	for _, err := range errs {
-		if err != nil {
-			return true
-		}
-	}
-	return false
-}
-
-// LogErrors writes a slice of errors, with a prefix, to log-out.
-// It also increments the error counter.
-func (u *UnifiPoller) LogErrors(errs []error, prefix string) {
-	for _, err := range errs {
-		if err != nil {
-			u.errorCount++
-			_ = log.Output(2, fmt.Sprintf("[ERROR] (%v/%v) %v: %v", u.errorCount, u.MaxErrors, prefix, err))
-		}
+// LogError logs an error and increments the error counter.
+// Should be used in the poller loop.
+func (u *UnifiPoller) LogError(err error, prefix string) {
+	if err != nil {
+		u.errorCount++
+		_ = log.Output(2, fmt.Sprintf("[ERROR] (%v/%v) %v: %v", u.errorCount, u.MaxErrors, prefix, err))
 	}
 }
 
 // StringInSlice returns true if a string is in a slice.
-func StringInSlice(str string, slc []string) bool {
-	for _, s := range slc {
+func StringInSlice(str string, slice []string) bool {
+	for _, s := range slice {
 		if strings.EqualFold(s, str) {
 			return true
 		}
@@ -51,7 +39,7 @@ func (u *UnifiPoller) LogDebugf(m string, v ...interface{}) {
 	}
 }
 
-// LogErrorf prints an error log entry.
+// LogErrorf prints an error log entry. This is used for external library logging.
 func (u *UnifiPoller) LogErrorf(m string, v ...interface{}) {
 	_ = log.Output(2, fmt.Sprintf("[ERROR] "+m, v...))
 }
