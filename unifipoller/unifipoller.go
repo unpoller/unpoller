@@ -96,8 +96,8 @@ func (u *UnifiPoller) Run() (err error) {
 	if err = u.GetInfluxDB(); err != nil {
 		return err
 	}
-	switch {
-	case u.Lambda:
+	switch strings.ToLower(u.Mode) {
+	case "influxlambda", "lambdainflux", "lambda_influx", "influx_lambda":
 		u.LogDebugf("Lambda Mode Enabled")
 		return u.CollectAndReport()
 	default:
@@ -128,13 +128,12 @@ func (u *UnifiPoller) GetUnifi() (err error) {
 	}
 	u.Unifi.ErrorLog = u.LogErrorf // Log all errors.
 	u.Unifi.DebugLog = u.LogDebugf // Log debug messages.
-	// this may fail? but we'll try one more time with u.CheckSites below.
 	v, err := u.GetServer()
 	if err != nil {
-		v.ServerVersion = "unknown"
+		return err
 	}
 	u.Logf("Authenticated to UniFi Controller at %s version %s as user %s", u.UnifiBase, v.ServerVersion, u.UnifiUser)
-	if err = u.CheckSites(); err != nil {
+	if err := u.CheckSites(); err != nil {
 		return err
 	}
 	u.Logf("Polling UniFi Controller Sites: %v", u.Sites)
