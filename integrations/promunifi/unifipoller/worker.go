@@ -43,15 +43,24 @@ func (u *UnifiPoller) PollController() error {
 	log.Println("[INFO] Everything checks out! Poller started, interval:", u.Interval.Round(time.Second))
 	ticker := time.NewTicker(u.Interval.Round(time.Second))
 	for range ticker.C {
-		metrics, err := u.CollectMetrics()
-		if err == nil {
-			u.LogError(u.ReportMetrics(metrics), "reporting metrics")
-		}
+		_ = u.CollectAndReport()
 		if u.MaxErrors >= 0 && u.errorCount > u.MaxErrors {
 			return errors.Errorf("reached maximum error count, stopping poller (%d > %d)", u.errorCount, u.MaxErrors)
 		}
 	}
 	return nil
+}
+
+// CollectAndReport collects measurements and reports them to influxdb.
+// Can be called once or in a ticker loop.
+func (u *UnifiPoller) CollectAndReport() error {
+	metrics, err := u.CollectMetrics()
+	if err != nil {
+		return err
+	}
+	err = u.ReportMetrics(metrics)
+	u.LogError(err, "reporting metrics")
+	return err
 }
 
 // CollectMetrics grabs all the measurements from a UniFi controller and returns them.
