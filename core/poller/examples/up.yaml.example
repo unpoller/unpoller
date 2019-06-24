@@ -21,10 +21,16 @@ debug: false
 # Recommend enabling debug with this setting for better error logging.
 quiet: false
 
-# Lambda mode makes the application exit after collecting and reporting metrics one time.
-# This mode requires an external process like an AWS Lambda or a simple crontab to keep
-# the timings accurate on UniFi Poller run intervals.
-lambda: false
+# Which mode to run this application in. The default mode is "influx". Providing
+# an invalid mode will also result in "influx". In this default mode the application
+# runs as a daemon and polls the controller at the configured interval.
+#
+# There is only one other option at this time: "influxlambda"
+#
+# Lambda mode makes the application exit after collecting and reporting metrics
+# to InfluxDB one time. This mode requires an external process like an AWS Lambda
+# or a simple crontab to keep the timings accurate on UniFi Poller run intervals.
+mode: "influx"
 
 # If the poller experiences an error from the UniFi controller or from InfluxDB
 # it will exit. If you do not want it to exit, change max_errors to -1. You can

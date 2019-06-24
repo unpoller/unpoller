@@ -11,7 +11,11 @@ import (
 )
 
 // CheckSites makes sure the list of provided sites exists on the controller.
+// This does not run in Lambda (run-once) mode.
 func (u *UnifiPoller) CheckSites() error {
+	if strings.Contains(strings.ToLower(u.Mode), "lambda") {
+		return nil // Skip this in lambda mode.
+	}
 	sites, err := u.GetSites()
 	if err != nil {
 		return err

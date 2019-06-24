@@ -56,7 +56,7 @@ type Config struct {
 	Debug      bool     `json:"debug" toml:"debug" xml:"debug" yaml:"debug"`
 	Quiet      bool     `json:"quiet,_omitempty" toml:"quiet,_omitempty" xml:"quiet" yaml:"quiet"`
 	VerifySSL  bool     `json:"verify_ssl" toml:"verify_ssl" xml:"verify_ssl" yaml:"verify_ssl"`
-	Lambda     bool     `json:"lambda" toml:"lambda" xml:"lambda" yaml:"lambda"`
+	Mode       string   `json:"mode" toml:"mode" xml:"mode" yaml:"mode"`
 	InfluxURL  string   `json:"influx_url,_omitempty" toml:"influx_url,_omitempty" xml:"influx_url" yaml:"influx_url"`
 	InfluxUser string   `json:"influx_user,_omitempty" toml:"influx_user,_omitempty" xml:"influx_user" yaml:"influx_user"`
 	InfluxPass string   `json:"influx_pass,_omitempty" toml:"influx_pass,_omitempty" xml:"influx_pass" yaml:"influx_pass"`
