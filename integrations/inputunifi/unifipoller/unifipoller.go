@@ -17,6 +17,22 @@ import (
 	yaml "gopkg.in/yaml.v2"
 )
 
+// Start begins the application from a CLI.
+// Parses flags, parses config and executes Run().
+func Start() error {
+	log.SetFlags(log.LstdFlags)
+	up := &UnifiPoller{}
+	if up.ParseFlags(os.Args[1:]); up.ShowVer {
+		fmt.Printf("unifi-poller v%s\n", Version)
+		return nil // don't run anything else w/ version request.
+	}
+	if err := up.GetConfig(); err != nil {
+		up.Flag.Usage()
+		return err
+	}
+	return up.Run()
+}
+
 // ParseFlags runs the parser.
 func (u *UnifiPoller) ParseFlags(args []string) {
 	u.Flag = flag.NewFlagSet("unifi-poller", flag.ExitOnError)
@@ -71,21 +87,18 @@ func (u *UnifiPoller) Run() (err error) {
 		u.LogDebugf("Debug Logging Enabled")
 	}
 	log.Printf("[INFO] UniFi Poller v%v Starting Up! PID: %d", Version, os.Getpid())
-
 	if err = u.GetUnifi(); err != nil {
 		return err
 	}
 	if err = u.GetInfluxDB(); err != nil {
 		return err
 	}
-	if u.Lambda {
-		metrics, err := u.CollectMetrics()
-		if err != nil {
-			return err
-		}
-		return u.ReportMetrics(metrics)
+	switch {
+	case u.Lambda:
+		return u.CollectAndReport()
+	default:
+		return u.PollController()
 	}
-	return u.PollController()
 }
 
 // GetInfluxDB returns an InfluxDB interface.
