@@ -128,6 +128,7 @@ func (u *UnifiPoller) GetUnifi() (err error) {
 	}
 	u.Unifi.ErrorLog = u.LogErrorf // Log all errors.
 	u.Unifi.DebugLog = u.LogDebugf // Log debug messages.
+	// this may fail? but we'll try one more time with u.CheckSites below.
 	v, err := u.GetServer()
 	if err != nil {
 		v.ServerVersion = "unknown"
