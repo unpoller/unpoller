@@ -62,23 +62,23 @@ README.html: md2roff
 
 build: $(BINARY)
 $(BINARY):
-	go build -o $(BINARY) -ldflags "-w -s -X github.com/davidnewhall/unifi-poller/unifipoller.Version=$(VERSION)" $(PACKAGE)
+	go build -o $(BINARY) -ldflags "-w -s -X github.com/davidnewhall/unifi-poller/pkg/unifi-poller.Version=$(VERSION)" $(PACKAGE)
 
 linux: $(BINARY).linux
 $(BINARY).linux:
 	# Building linux binary.
-	GOOS=linux go build -o $(BINARY).linux -ldflags "-w -s -X github.com/davidnewhall/unifi-poller/unifipoller.Version=$(VERSION)" $(PACKAGE)
+	GOOS=linux go build -o $(BINARY).linux -ldflags "-w -s -X github.com/davidnewhall/unifi-poller/pkg/unifi-poller.Version=$(VERSION)" $(PACKAGE)
 
 macos: $(BINARY).macos
 $(BINARY).macos:
 	# Building darwin binary.
-	GOOS=darwin go build -o $(BINARY).macos -ldflags "-w -s -X github.com/davidnewhall/unifi-poller/unifipoller.Version=$(VERSION)" $(PACKAGE)
+	GOOS=darwin go build -o $(BINARY).macos -ldflags "-w -s -X github.com/davidnewhall/unifi-poller/pkg/unifi-poller.Version=$(VERSION)" $(PACKAGE)
 
 exe: $(BINARY).exe
 windows: $(BINARY).exe
 $(BINARY).exe:
 	# Building windows binary.
-	GOOS=windows go build -o $(BINARY).exe -ldflags "-w -s -X github.com/davidnewhall/unifi-poller/unifipoller.Version=$(VERSION)" $(PACKAGE)
+	GOOS=windows go build -o $(BINARY).exe -ldflags "-w -s -X github.com/davidnewhall/unifi-poller/pkg/unifi-poller.Version=$(VERSION)" $(PACKAGE)
 
 # Packages
 
