@@ -32,7 +32,8 @@ FIRST:
 				continue FIRST
 			}
 		}
-		return errors.Errorf("configured site not found on controller: %v", s)
+		// This is fine, it may get added later.
+		u.LogErrorf("configured site not found on controller: %v", s)
 	}
 	return nil
 }
@@ -154,7 +155,7 @@ func (m *Metrics) processPoints(asset Asset) error {
 
 // GetFilteredSites returns a list of sites to fetch data for.
 // Omits requested but unconfigured sites. Grabs the full list from the
-// controller and filters the sites provided in the config file.
+// controller and returns the sites provided in the config file.
 func (u *UnifiPoller) GetFilteredSites() (unifi.Sites, error) {
 	sites, err := u.GetSites()
 	if err != nil {
