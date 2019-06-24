@@ -22,10 +22,7 @@ import (
 func Start() error {
 	log.SetFlags(log.LstdFlags)
 	up := &UnifiPoller{}
-	if os.Args != nil && len(os.Args) > 1 {
-		up.ParseFlags(os.Args[1:])
-	}
-	if up.ShowVer {
+	if up.ParseFlags(os.Args[1:]); up.ShowVer {
 		fmt.Printf("unifi-poller v%s\n", Version)
 		return nil // don't run anything else w/ version request.
 	}
