@@ -6,7 +6,6 @@ URL:=https://github.com/davidnewhall/$(BINARY)
 MAINT=David Newhall II <david at sleepers dot pro>
 DESC=This daemon polls a UniFi controller at a short interval and stores the collected measurements in an Influx Database.
 GOLANGCI_LINT_ARGS=--enable-all -D gochecknoglobals
-PACKAGE:=./cmd/$(BINARY)
 DOCKER_REPO=golift
 MD2ROFF_BIN=github.com/github/hub/md2roff-bin
 
@@ -62,23 +61,23 @@ README.html: md2roff
 
 build: $(BINARY)
 $(BINARY):
-	go build -o $(BINARY) -ldflags "-w -s -X github.com/davidnewhall/unifi-poller/unifipoller.Version=$(VERSION)" $(PACKAGE)
+	go build -o $(BINARY) -ldflags "-w -s -X github.com/davidnewhall/unifi-poller/unifipoller.Version=$(VERSION)"
 
 linux: $(BINARY).linux
 $(BINARY).linux:
 	# Building linux binary.
-	GOOS=linux go build -o $(BINARY).linux -ldflags "-w -s -X github.com/davidnewhall/unifi-poller/unifipoller.Version=$(VERSION)" $(PACKAGE)
+	GOOS=linux go build -o $(BINARY).linux -ldflags "-w -s -X github.com/davidnewhall/unifi-poller/unifipoller.Version=$(VERSION)"
 
 macos: $(BINARY).macos
 $(BINARY).macos:
 	# Building darwin binary.
-	GOOS=darwin go build -o $(BINARY).macos -ldflags "-w -s -X github.com/davidnewhall/unifi-poller/unifipoller.Version=$(VERSION)" $(PACKAGE)
+	GOOS=darwin go build -o $(BINARY).macos -ldflags "-w -s -X github.com/davidnewhall/unifi-poller/unifipoller.Version=$(VERSION)"
 
 exe: $(BINARY).exe
 windows: $(BINARY).exe
 $(BINARY).exe:
 	# Building windows binary.
-	GOOS=windows go build -o $(BINARY).exe -ldflags "-w -s -X github.com/davidnewhall/unifi-poller/unifipoller.Version=$(VERSION)" $(PACKAGE)
+	GOOS=windows go build -o $(BINARY).exe -ldflags "-w -s -X github.com/davidnewhall/unifi-poller/unifipoller.Version=$(VERSION)"
 
 # Packages
 
