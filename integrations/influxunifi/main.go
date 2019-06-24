@@ -3,7 +3,7 @@ package main
 import (
 	"log"
 
-	unifipoller "github.com/davidnewhall/unifi-poller/pkg/unifi-poller"
+	"github.com/davidnewhall/unifi-poller/unifipoller"
 )
 
 // Keep it simple.
