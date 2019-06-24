@@ -33,7 +33,6 @@ type UnifiPoller struct {
 	ConfigFile string
 	DumpJSON   string
 	ShowVer    bool
-	Lambda     bool
 	Flag       *pflag.FlagSet
 	errorCount int
 	influx.Client
