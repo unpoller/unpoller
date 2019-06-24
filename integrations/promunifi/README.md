@@ -85,7 +85,7 @@ means, if you wanted to do something like make telegraf collect your data instea
 of UniFi Poller you can achieve that with a little bit of Go code. You could write
 a small app that acts as a telegraf input plugin using the [unifi](https://github.com/golift/unifi)
 library to grab the data from your controller. As a bonus, all of the code in UniFi Poller is
-[also a library](https://godoc.org/github.com/davidnewhall/unifi-poller/unifipoller)
+[also a library](https://godoc.org/github.com/davidnewhall/unifi-poller/pkg/unifi-poller)
 and can be used in other projects.
 
 # What now...
