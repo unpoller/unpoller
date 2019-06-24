@@ -22,7 +22,10 @@ import (
 func Start() error {
 	log.SetFlags(log.LstdFlags)
 	up := &UnifiPoller{}
-	if up.ParseFlags(os.Args[1:]); up.ShowVer {
+	if os.Args != nil && len(os.Args) > 1 {
+		up.ParseFlags(os.Args[1:])
+	}
+	if up.ShowVer {
 		fmt.Printf("unifi-poller v%s\n", Version)
 		return nil // don't run anything else w/ version request.
 	}
@@ -95,6 +98,7 @@ func (u *UnifiPoller) Run() (err error) {
 	}
 	switch {
 	case u.Lambda:
+		u.LogDebugf("Lambda Mode Enabled")
 		return u.CollectAndReport()
 	default:
 		return u.PollController()
