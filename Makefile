@@ -10,9 +10,9 @@ DOCKER_REPO=golift
 MD2ROFF_BIN=github.com/github/hub/md2roff-bin
 
 # These don't generally need to be changed.
-ITERATION:=$(shell git rev-list --count HEAD||echo 0)
+ITERATION:=$(shell git rev-list --count HEAD || echo 0)
 ifeq ($(VERSION),)
-	VERSION:=$(shell git tag -l --merged | tail -n1 | tr -d v||echo development)
+	VERSION:=$(shell git tag -l --merged | tail -n1 | tr -d v || echo development)
 endif
 # rpm is wierd and changes - to _ in versions.
 RPMVERSION:=$(shell echo $(VERSION) | tr -- - _)
@@ -44,7 +44,7 @@ clean:
 man: $(BINARY).1.gz
 $(BINARY).1.gz: md2roff
 	# Building man page. Build dependency first: md2roff
-	go run $(MD2ROFF_BIN) --manual $(BINARY) --version $(VERSION) --date "$$(date)" examples/MANUAL.md
+	go run $(MD2ROFF_BIN) --manual $(BINARY) --version $(VERSION) --date "$(shell date)" examples/MANUAL.md
 	gzip -9nc examples/MANUAL > $(BINARY).1.gz
 	mv examples/MANUAL.html $(BINARY)_manual.html
 
@@ -55,7 +55,7 @@ md2roff:
 readme: README.html
 README.html: md2roff
 	# This turns README.md into README.html
-	go run $(MD2ROFF_BIN) --manual $(BINARY) --version $(VERSION) --date "$$(date)" README.md
+	go run $(MD2ROFF_BIN) --manual $(BINARY) --version $(VERSION) --date "$(shell date)" README.md
 
 # Binaries
 
@@ -158,7 +158,7 @@ install: man readme $(BINARY)
 	@echo If you wish to install the application manually on Linux, check out the wiki: $(URL)/wiki/Installation
 	@echo -  Otherwise, build and install a package: make rpm -or- make deb
 	@echo See the Package Install wiki for more info: $(URL)/wiki/Package-Install
-	@[ "$$(uname)" = "Darwin" ] || (echo "Unable to continue, not a Mac." && false)
+	@[ "$(shell uname)" = "Darwin" ] || (echo "Unable to continue, not a Mac." && false)
 	@[ "$(PREFIX)" != "" ] || (echo "Unable to continue, PREFIX not set. Use: make install PREFIX=/usr/local ETC=/usr/local/etc" && false)
 	@[ "$(ETC)" != "" ] || (echo "Unable to continue, ETC not set. Use: make install PREFIX=/usr/local ETC=/usr/local/etc" && false)
 	# Copying the binary, config file, unit file, and man page into the env.
@@ -190,8 +190,8 @@ uninstall:
 # This is safe; recommended even.
 dep: vendor
 vendor:
-	dep ensure
+	dep ensure --vendor-only
 
 # Don't run this unless you're ready to debug untested vendored dependencies.
 deps:
-	dep ensure -update
+	dep ensure --update
