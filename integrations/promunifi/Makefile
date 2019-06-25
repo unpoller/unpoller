@@ -4,7 +4,7 @@
 BINARY:=unifi-poller
 URL:=https://github.com/davidnewhall/$(BINARY)
 MAINT=David Newhall II <david at sleepers dot pro>
-DESC=This daemon polls a UniFi controller at a short interval and stores the collected measurements in an Influx Database.
+DESC=Polls a UniFi controller and stores metrics in InfluxDB
 GOLANGCI_LINT_ARGS=--enable-all -D gochecknoglobals
 DOCKER_REPO=golift
 MD2ROFF_BIN=github.com/github/hub/md2roff-bin
