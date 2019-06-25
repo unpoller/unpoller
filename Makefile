@@ -33,9 +33,8 @@ release: clean vendor test macos windows $(BINARY)-$(RPMVERSION)-$(ITERATION).x8
 # Delete all build assets.
 clean:
 	# Cleaning up.
-	rm -f $(BINARY){.macos,.linux,.1,}{,.gz} $(BINARY).rb
-	rm -f $(BINARY){_,-}*.{deb,rpm} v*.tar.gz.sha256
-	rm -f cmd/$(BINARY)/README{,.html} README{,.html} ./$(BINARY)_manual.html
+	rm -f $(BINARY){.macos,.linux,.1.gz,.exe,.rb} $(BINARY){_,-}*.{deb,rpm}
+	rm -f examples/MANUAL ./$(BINARY)_manual.html README{,.html} v*.tar.gz.sha256
 	rm -rf package_build_* release
 
 # Build a man page from a markdown file using md2roff.
@@ -81,7 +80,7 @@ $(BINARY).exe:
 
 # Packages
 
-rpm: clean $(BINARY)-$(RPMVERSION)-$(ITERATION).x86_64.rpm
+rpm: $(BINARY)-$(RPMVERSION)-$(ITERATION).x86_64.rpm
 $(BINARY)-$(RPMVERSION)-$(ITERATION).x86_64.rpm: check_fpm package_build_linux
 	@echo "Building 'rpm' package for $(BINARY) version '$(RPMVERSION)-$(ITERATION)'."
 	fpm -s dir -t rpm \
@@ -97,7 +96,7 @@ $(BINARY)-$(RPMVERSION)-$(ITERATION).x86_64.rpm: check_fpm package_build_linux
 		--description "$(DESC)" \
 		--chdir package_build_linux
 
-deb: clean $(BINARY)_$(VERSION)-$(ITERATION)_amd64.deb
+deb: $(BINARY)_$(VERSION)-$(ITERATION)_amd64.deb
 $(BINARY)_$(VERSION)-$(ITERATION)_amd64.deb: check_fpm package_build_linux
 	@echo "Building 'deb' package for $(BINARY) version '$(VERSION)-$(ITERATION)'."
 	fpm -s dir -t deb \
