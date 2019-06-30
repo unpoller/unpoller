@@ -1,21 +1,37 @@
 # This Makefile is written as generic as possible.
 # Setting these variables and creating the necesarry paths in your GitHub repo will make this file work.
 #
-BINARY:=unifi-poller
-URL:=https://github.com/davidnewhall/$(BINARY)
+# github username
+GHUSER=davidnewhall
+# docker hub username
+DHUSER=golift
 MAINT=David Newhall II <david at sleepers dot pro>
 DESC=Polls a UniFi controller and stores metrics in InfluxDB
 GOLANGCI_LINT_ARGS=--enable-all -D gochecknoglobals
-DOCKER_REPO=golift
-MD2ROFF_BIN=github.com/github/hub/md2roff-bin
+BINARY:=$(shell basename $(shell pwd))
+URL:=https://github.com/$(GHUSER)/$(BINARY)
+CONFIG_FILE=up.conf
 
 # These don't generally need to be changed.
-ITERATION:=$(shell git rev-list --count HEAD||echo 0)
+
+# md2roff turns markdown into man files and html files.
+MD2ROFF_BIN=github.com/github/hub/md2roff-bin
+# This produces a 0 in some envirnoments (like Docker), but it's only used for packages.
+ITERATION:=$(shell git rev-list --count HEAD || echo 0)
+# Travis CI passes the version in. Local builds get it from the current git tag.
 ifeq ($(VERSION),)
-	VERSION:=$(shell git tag -l --merged | tail -n1 | tr -d v||echo development)
+	VERSION:=$(shell git tag -l --merged | tail -n1 | tr -d v || echo development)
 endif
 # rpm is wierd and changes - to _ in versions.
 RPMVERSION:=$(shell echo $(VERSION) | tr -- - _)
+DATE:=$(shell date)
+
+# This parameter is passed in as -X to go build. Used to override the Version variable in a package.
+# This makes a path like github.com/davidnewhall/unifi-poller/unifipoller.Version=1.3.3
+# Name the Version-containing library the same as the github repo, without dashes.
+VERSION_PATH:=github.com/$(GHUSER)/$(BINARY)/$(shell echo $(BINARY) | tr -d -- -).Version=$(VERSION)
+
+# Makefile targets follow.
 
 all: man build
 
@@ -25,7 +41,7 @@ release: clean vendor test macos windows $(BINARY)-$(RPMVERSION)-$(ITERATION).x8
 	mkdir -p release
 	mv $(BINARY).linux $(BINARY).macos release/
 	gzip -9r release/
-	zip -9qm release/unifi-poller.exe.zip unifi-poller.exe
+	zip -9qm release/$(BINARY).exe.zip $(BINARY).exe
 	mv $(BINARY)-$(RPMVERSION)-$(ITERATION).x86_64.rpm $(BINARY)_$(VERSION)-$(ITERATION)_amd64.deb release/
 	# Generating File Hashes
 	for i in release/*; do /bin/echo -n "$$i " ; (openssl dgst -r -sha256 "$$i" | head -c64 ; echo) | tee "$$i.sha256.txt"; done
@@ -44,7 +60,7 @@ clean:
 man: $(BINARY).1.gz
 $(BINARY).1.gz: md2roff
 	# Building man page. Build dependency first: md2roff
-	go run $(MD2ROFF_BIN) --manual $(BINARY) --version $(VERSION) --date "$$(date)" examples/MANUAL.md
+	go run $(MD2ROFF_BIN) --manual $(BINARY) --version $(VERSION) --date "$(DATE)" examples/MANUAL.md
 	gzip -9nc examples/MANUAL > $(BINARY).1.gz
 	mv examples/MANUAL.html $(BINARY)_manual.html
 
@@ -55,33 +71,33 @@ md2roff:
 readme: README.html
 README.html: md2roff
 	# This turns README.md into README.html
-	go run $(MD2ROFF_BIN) --manual $(BINARY) --version $(VERSION) --date "$$(date)" README.md
+	go run $(MD2ROFF_BIN) --manual $(BINARY) --version $(VERSION) --date "$(DATE)" README.md
 
 # Binaries
 
 build: $(BINARY)
 $(BINARY):
-	go build -o $(BINARY) -ldflags "-w -s -X github.com/davidnewhall/unifi-poller/unifipoller.Version=$(VERSION)"
+	go build -o $(BINARY) -ldflags "-w -s -X $(VERSION_PATH)"
 
 linux: $(BINARY).linux
 $(BINARY).linux:
 	# Building linux binary.
-	GOOS=linux go build -o $(BINARY).linux -ldflags "-w -s -X github.com/davidnewhall/unifi-poller/unifipoller.Version=$(VERSION)"
+	GOOS=linux go build -o $(BINARY).linux -ldflags "-w -s -X $(VERSION_PATH)"
 
 macos: $(BINARY).macos
 $(BINARY).macos:
 	# Building darwin binary.
-	GOOS=darwin go build -o $(BINARY).macos -ldflags "-w -s -X github.com/davidnewhall/unifi-poller/unifipoller.Version=$(VERSION)"
+	GOOS=darwin go build -o $(BINARY).macos -ldflags "-w -s -X $(VERSION_PATH)"
 
 exe: $(BINARY).exe
 windows: $(BINARY).exe
 $(BINARY).exe:
 	# Building windows binary.
-	GOOS=windows go build -o $(BINARY).exe -ldflags "-w -s -X github.com/davidnewhall/unifi-poller/unifipoller.Version=$(VERSION)"
+	GOOS=windows go build -o $(BINARY).exe -ldflags "-w -s -X $(VERSION_PATH)"
 
 # Packages
 
-rpm: clean $(BINARY)-$(RPMVERSION)-$(ITERATION).x86_64.rpm
+rpm: $(BINARY)-$(RPMVERSION)-$(ITERATION).x86_64.rpm
 $(BINARY)-$(RPMVERSION)-$(ITERATION).x86_64.rpm: check_fpm package_build_linux
 	@echo "Building 'rpm' package for $(BINARY) version '$(RPMVERSION)-$(ITERATION)'."
 	fpm -s dir -t rpm \
@@ -95,13 +111,15 @@ $(BINARY)-$(RPMVERSION)-$(ITERATION).x86_64.rpm: check_fpm package_build_linux
 		--url $(URL) \
 		--maintainer "$(MAINT)" \
 		--description "$(DESC)" \
+		--config-files "/etc/$(BINARY)/$(CONFIG_FILE)" \
 		--chdir package_build_linux
 
-deb: clean $(BINARY)_$(VERSION)-$(ITERATION)_amd64.deb
+deb: $(BINARY)_$(VERSION)-$(ITERATION)_amd64.deb
 $(BINARY)_$(VERSION)-$(ITERATION)_amd64.deb: check_fpm package_build_linux
 	@echo "Building 'deb' package for $(BINARY) version '$(VERSION)-$(ITERATION)'."
 	fpm -s dir -t deb \
 		--name $(BINARY) \
+		--deb-no-default-config-files \
 		--version $(VERSION) \
 		--iteration $(ITERATION) \
 		--after-install scripts/after-install.sh \
@@ -110,10 +128,11 @@ $(BINARY)_$(VERSION)-$(ITERATION)_amd64.deb: check_fpm package_build_linux
 		--url $(URL) \
 		--maintainer "$(MAINT)" \
 		--description "$(DESC)" \
+		--config-files "/etc/$(BINARY)/$(CONFIG_FILE)" \
 		--chdir package_build_linux
 
 docker:
-	docker build -f init/docker/Dockerfile -t $(DOCKER_REPO)/$(BINARY) .
+	docker build -f init/docker/Dockerfile -t $(DHUSER)/$(BINARY) .
 
 # Build an environment that can be packaged for linux.
 package_build_linux: readme man linux
@@ -123,9 +142,9 @@ package_build_linux: readme man linux
 	# Copying the binary, config file, unit file, and man page into the env.
 	cp $(BINARY).linux $@/usr/bin/$(BINARY)
 	cp *.1.gz $@/usr/share/man/man1
-	cp examples/up.conf.example $@/etc/$(BINARY)/
-	cp examples/up.conf.example $@/etc/$(BINARY)/up.conf
-	cp LICENSE *.html examples/* $@/usr/share/doc/$(BINARY)/
+	cp examples/$(CONFIG_FILE).example $@/etc/$(BINARY)/
+	cp examples/$(CONFIG_FILE).example $@/etc/$(BINARY)/$(CONFIG_FILE)
+	cp LICENSE *.html examples/*.* $@/usr/share/doc/$(BINARY)/
 	# These go to their own folder so the img src in the html pages continue to work.
 	cp init/systemd/$(BINARY).service $@/lib/systemd/system/
 
@@ -133,6 +152,8 @@ check_fpm:
 	@fpm --version > /dev/null || (echo "FPM missing. Install FPM: https://fpm.readthedocs.io/en/latest/installing.html" && false)
 
 # This builds a Homebrew formula file that can be used to install this app from source.
+# The source used comes from the released version on GitHub. This will not work with local source.
+# This target is used by Travis CI to update the released Forumla when a new tag is created.
 formula: $(BINARY).rb
 v$(VERSION).tar.gz.sha256:
 	# Calculate the SHA from the Github source file.
@@ -151,7 +172,18 @@ lint:
 	# Checking lint.
 	golangci-lint run $(GOLANGCI_LINT_ARGS)
 
-# Used for Homebrew only. Other disros can create packages.
+# This is safe; recommended even.
+dep: vendor
+vendor:
+	dep ensure
+
+# Don't run this unless you're ready to debug untested vendored dependencies.
+deps:
+	dep ensure -update
+
+# Homebrew stuff. macOS only.
+
+# Used for Homebrew only. Other distros can create packages.
 install: man readme $(BINARY)
 	@echo -  Done Building!  -
 	@echo -  Local installation with the Makefile is only supported on macOS.
@@ -165,33 +197,24 @@ install: man readme $(BINARY)
 	/usr/bin/install -m 0755 -d $(PREFIX)/bin $(PREFIX)/share/man/man1 $(ETC)/$(BINARY) $(PREFIX)/share/doc/$(BINARY)
 	/usr/bin/install -m 0755 -cp $(BINARY) $(PREFIX)/bin/$(BINARY)
 	/usr/bin/install -m 0644 -cp $(BINARY).1.gz $(PREFIX)/share/man/man1
-	/usr/bin/install -m 0644 -cp examples/up.conf.example $(ETC)/$(BINARY)/
-	[ -f $(ETC)/$(BINARY)/up.conf ] || /usr/bin/install -m 0644 -cp  examples/up.conf.example $(ETC)/$(BINARY)/up.conf
+	/usr/bin/install -m 0644 -cp examples/$(CONFIG_FILE).example $(ETC)/$(BINARY)/
+	[ -f $(ETC)/$(BINARY)/$(CONFIG_FILE) ] || /usr/bin/install -m 0644 -cp  examples/$(CONFIG_FILE).example $(ETC)/$(BINARY)/$(CONFIG_FILE)
 	/usr/bin/install -m 0644 -cp LICENSE *.html examples/* $(PREFIX)/share/doc/$(BINARY)/
 	# These go to their own folder so the img src in the html pages continue to work.
 
-# If you installed with `make install` run `make uninstall` before installing a binary package.
+# If you installed with `make install` run `make uninstall` before installing a binary package. (even on Linux!!!)
 # This will remove the package install from macOS, it will not remove a package install from Linux.
 uninstall:
 	@echo "  ==> You must run make uninstall as root on Linux. Recommend not running as root on macOS."
 	[ -x /bin/systemctl ] && /bin/systemctl disable $(BINARY) || true
 	[ -x /bin/systemctl ] && /bin/systemctl stop $(BINARY) || true
-	[ -x /bin/launchctl ] && [ -f ~/Library/LaunchAgents/com.github.davidnewhall.$(BINARY).plist ] \
-		&& /bin/launchctl unload ~/Library/LaunchAgents/com.github.davidnewhall.$(BINARY).plist || true
-	[ -x /bin/launchctl ] && [ -f /Library/LaunchAgents/com.github.davidnewhall.$(BINARY).plist ] \
-		&& /bin/launchctl unload /Library/LaunchAgents/com.github.davidnewhall.$(BINARY).plist || true
+	[ -x /bin/launchctl ] && [ -f ~/Library/LaunchAgents/com.github.$(GHUSER).$(BINARY).plist ] \
+		&& /bin/launchctl unload ~/Library/LaunchAgents/com.github.$(GHUSER).$(BINARY).plist || true
+	[ -x /bin/launchctl ] && [ -f /Library/LaunchAgents/com.github.$(GHUSER).$(BINARY).plist ] \
+		&& /bin/launchctl unload /Library/LaunchAgents/com.github.$(GHUSER).$(BINARY).plist || true
 	rm -rf /usr/local/{etc,bin,share/doc}/$(BINARY)
-	rm -f ~/Library/LaunchAgents/com.github.davidnewhall.$(BINARY).plist
-	rm -f /Library/LaunchAgents/com.github.davidnewhall.$(BINARY).plist || true
+	rm -f ~/Library/LaunchAgents/com.github.$(GHUSER).$(BINARY).plist
+	rm -f /Library/LaunchAgents/com.github.$(GHUSER).$(BINARY).plist || true
 	rm -f /etc/systemd/system/$(BINARY).service /usr/local/share/man/man1/$(BINARY).1.gz
 	[ -x /bin/systemctl ] && /bin/systemctl --system daemon-reload || true
-	@[ -f /Library/LaunchAgents/com.github.davidnewhall.$(BINARY).plist ] && echo "  ==> Unload and delete this file manually:" && echo "  sudo launchctl unload /Library/LaunchAgents/com.github.davidnewhall.$(BINARY).plist" && echo "  sudo rm -f /Library/LaunchAgents/com.github.davidnewhall.$(BINARY).plist" || true
-
-# This is safe; recommended even.
-dep: vendor
-vendor:
-	dep ensure
-
-# Don't run this unless you're ready to debug untested vendored dependencies.
-deps:
-	dep ensure -update
+	@[ -f /Library/LaunchAgents/com.github.$(GHUSER).$(BINARY).plist ] && echo "  ==> Unload and delete this file manually:" && echo "  sudo launchctl unload /Library/LaunchAgents/com.github.$(GHUSER).$(BINARY).plist" && echo "  sudo rm -f /Library/LaunchAgents/com.github.$(GHUSER).$(BINARY).plist" || true
