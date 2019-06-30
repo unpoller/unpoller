@@ -8,7 +8,7 @@ DHUSER=golift
 MAINT=David Newhall II <david at sleepers dot pro>
 DESC=Polls a UniFi controller and stores metrics in InfluxDB
 GOLANGCI_LINT_ARGS=--enable-all -D gochecknoglobals
-BINARY:=$(shell basename $$(pwd))
+BINARY:=$(shell basename $(shell pwd))
 URL:=https://github.com/$(GHUSER)/$(BINARY)
 CONFIG_FILE=up.conf
 
