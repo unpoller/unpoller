@@ -129,7 +129,7 @@ $(BINARY)_$(VERSION)-$(ITERATION)_amd64.deb: check_fpm package_build_linux
 		--chdir package_build_linux
 
 docker:
-	docker build -f init/docker/Dockerfile -t $(DOCKER)/$(BINARY) .
+	docker build -f init/docker/Dockerfile -t $(DHUSER)/$(BINARY) .
 
 # Build an environment that can be packaged for linux.
 package_build_linux: readme man linux
