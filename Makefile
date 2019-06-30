@@ -25,6 +25,7 @@ endif
 # rpm is wierd and changes - to _ in versions.
 RPMVERSION:=$(shell echo $(VERSION) | tr -- - _)
 DATE:=$(shell date)
+
 # This parameter is passed in as -X to go build. Used to override the Version variable in a package.
 # This makes a path like github.com/davidnewhall/unifi-poller/unifipoller.Version=1.3.3
 # Name the Version-containing library the same as the github repo, without dashes.
