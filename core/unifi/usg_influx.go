@@ -198,7 +198,7 @@ func (u USG) Points() ([]*influx.Point, error) {
 			"tx_bytes":               p.TxBytes.Val,
 			"tx_packets":             p.TxPackets,
 			"up":                     p.Up.Txt,
-			"vlan":                   p.Vlan,
+			"vlan":                   p.Vlan.Val,
 			"dhcpd_ntp_1":            p.DhcpdNtp1,
 			"dhcpd_unifi_controller": p.DhcpdUnifiController,
 			"ipv6_interface_type":    p.Ipv6InterfaceType,
