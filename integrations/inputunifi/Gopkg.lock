@@ -10,12 +10,12 @@
   version = "v0.3.1"
 
 [[projects]]
-  digest = "1:7a6d857bd263ca56a403bfd8a4466b2cb01510e5177c7a16e3f87e084deecca7"
+  digest = "1:b148ed25622a093e995956ed755bbfc0dd9907ced48946c3b04ca38fc69319e0"
   name = "github.com/golift/unifi"
   packages = ["."]
   pruneopts = "UT"
-  revision = "4648720c158a153924d1717f7f74736aa42a8ecb"
-  version = "v2.1.4"
+  revision = "af72953b15407ea795c955ddd503c75ee25c9d47"
+  version = "v2.1.5"
 
 [[projects]]
   branch = "master"
