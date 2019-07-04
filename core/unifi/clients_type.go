@@ -16,6 +16,7 @@ type Client struct {
 	UptimeByUGW   int64    `json:"_uptime_by_ugw"`
 	UptimeByUSW   int64    `json:"_uptime_by_usw"`
 	ApMac         string   `json:"ap_mac"`
+	ApName        string   `json:"-"`
 	AssocTime     int64    `json:"assoc_time"`
 	Authorized    FlexBool `json:"authorized"`
 	Bssid         string   `json:"bssid"`
@@ -39,6 +40,7 @@ type Client struct {
 	FixedIP             string   `json:"fixed_ip"`
 	Hostname            string   `json:"hostname"`
 	GwMac               string   `json:"gw_mac"`
+	GwName              string   `json:"-"`
 	IdleTime            int64    `json:"idle_time"`
 	IP                  string   `json:"ip"`
 	Is11R               FlexBool `json:"is_11r"`
@@ -72,6 +74,7 @@ type Client struct {
 	SiteName            string   `json:"-"`
 	SwDepth             int      `json:"sw_depth"`
 	SwMac               string   `json:"sw_mac"`
+	SwName              string   `json:"-"`
 	SwPort              int      `json:"sw_port"`
 	TxBytes             int64    `json:"tx_bytes"`
 	TxBytesR            int64    `json:"tx_bytes-r"`
