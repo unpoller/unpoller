@@ -66,6 +66,9 @@ func (u *UnifiPoller) CollectAndReport() error {
 	if err != nil {
 		return err
 	}
+	if err := u.AugmentMetrics(metrics); err != nil {
+		return err
+	}
 	err = u.ReportMetrics(metrics)
 	u.LogError(err, "reporting metrics")
 	return err
@@ -88,6 +91,29 @@ func (u *UnifiPoller) CollectMetrics() (*Metrics, error) {
 	m.BatchPoints, err = influx.NewBatchPoints(influx.BatchPointsConfig{Database: u.InfluxDB})
 	u.LogError(err, "influx.NewBatchPoints")
 	return m, err
+}
+
+// AugmentMetrics is our middleware layer between collecting metrics and writing them.
+// This is where we can manipuate the returned data or make arbitrary decisions.
+// This function currently adds parent device names to client metrics.
+func (u *UnifiPoller) AugmentMetrics(metrics *Metrics) error {
+	devices := make(map[string]string)
+	for _, r := range metrics.UAPs {
+		devices[r.Mac] = r.Name
+	}
+	for _, r := range metrics.USGs {
+		devices[r.Mac] = r.Name
+	}
+	for _, r := range metrics.USWs {
+		devices[r.Mac] = r.Name
+	}
+	// These come blank, so set them here.
+	for i, c := range metrics.Clients {
+		metrics.Clients[i].SwName = devices[c.SwMac]
+		metrics.Clients[i].ApName = devices[c.ApMac]
+		metrics.Clients[i].GwName = devices[c.GwMac]
+	}
+	return nil
 }
 
 // ReportMetrics batches all the metrics and writes them to InfluxDB.
