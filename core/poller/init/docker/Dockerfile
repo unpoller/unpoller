@@ -17,16 +17,16 @@ RUN dep ensure \
   && CGO_ENABLED=0 make linux
 
 #
-# creating container for run 
-# to use this container use the following command: 
+# creating container for run
+# to use this container use the following command:
 #
 # docker run -d -v /your/config/up.conf:/etc/unifi-poller/up.conf golift/unifi-poller
 #
 # by using "-e UNIFI_PASSWORD=your-secret-pasword" you can avoid this configuration in the config file
 #
-FROM scratch 
+FROM scratch
 
-COPY --from=builder /go/src/github.com/davidnewhall/unifi-poller/unifi-poller.linux /unifi-poller
+COPY --from=builder /go/src/github.com/davidnewhall/unifi-poller/unifi-poller.amd64.linux /unifi-poller
 COPY --from=builder /go/src/github.com/davidnewhall/unifi-poller/examples/up.conf.example /etc/unifi-poller/up.conf
 
 VOLUME [ "/etc/unifi-poller"]
