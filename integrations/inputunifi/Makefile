@@ -36,20 +36,20 @@ VERSION_PATH:=github.com/$(GHUSER)/$(BINARY)/$(shell echo $(BINARY) | tr -d -- -
 all: man build
 
 # Prepare a release. Called in Travis CI.
-release: clean vendor test macos windows $(BINARY)-$(RPMVERSION)-$(ITERATION).x86_64.rpm $(BINARY)_$(VERSION)-$(ITERATION)_amd64.deb
+release: clean vendor test macos arm windows linux_packages
 	# Prepareing a release!
 	mkdir -p release
-	mv $(BINARY).linux $(BINARY).macos release/
+	mv $(BINARY).*.linux $(BINARY).*.macos release/
 	gzip -9r release/
-	zip -9qm release/$(BINARY).exe.zip $(BINARY).exe
-	mv $(BINARY)-$(RPMVERSION)-$(ITERATION).x86_64.rpm $(BINARY)_$(VERSION)-$(ITERATION)_amd64.deb release/
+	for i in $(BINARY)*.exe; do zip -9qm release/$$i.zip $$i;done
+	mv *.rpm *.deb release/
 	# Generating File Hashes
 	for i in release/*; do /bin/echo -n "$$i " ; (openssl dgst -r -sha256 "$$i" | head -c64 ; echo) | tee "$$i.sha256.txt"; done
 
 # Delete all build assets.
 clean:
 	# Cleaning up.
-	rm -f $(BINARY){.macos,.linux,.1,}{,.gz} $(BINARY).rb
+	rm -f $(BINARY) $(BINARY).*.{macos,linux,exe}{,.gz} $(BINARY).1{,.gz} $(BINARY).rb
 	rm -f $(BINARY){_,-}*.{deb,rpm} v*.tar.gz.sha256
 	rm -f cmd/$(BINARY)/README{,.html} README{,.html} ./$(BINARY)_manual.html
 	rm -rf package_build_* release
@@ -79,28 +79,41 @@ build: $(BINARY)
 $(BINARY):
 	go build -o $(BINARY) -ldflags "-w -s -X $(VERSION_PATH)"
 
-linux: $(BINARY).linux
-$(BINARY).linux:
+linux: $(BINARY).amd64.linux
+$(BINARY).amd64.linux:
 	# Building linux binary.
-	GOOS=linux go build -o $(BINARY).linux -ldflags "-w -s -X $(VERSION_PATH)"
+	GOOS=linux GOARCH=amd64 go build -o $(BINARY).amd64.linux -ldflags "-w -s -X $(VERSION_PATH)"
 
-macos: $(BINARY).macos
-$(BINARY).macos:
+linux386: $(BINARY).i386.linux
+$(BINARY).i386.linux:
+	# Building linux binary.
+	GOOS=linux GOARCH=386 go build -o $(BINARY).i386.linux -ldflags "-w -s -X $(VERSION_PATH)"
+
+arm: $(BINARY).arm.linux
+$(BINARY).arm.linux:
+	# Building linux binary.
+	GOOS=linux GOARCH=arm GOARM=5 go build -o $(BINARY).arm.linux -ldflags "-w -s -X $(VERSION_PATH)"
+
+macos: $(BINARY).amd64.macos
+$(BINARY).amd64.macos:
 	# Building darwin binary.
-	GOOS=darwin go build -o $(BINARY).macos -ldflags "-w -s -X $(VERSION_PATH)"
+	GOOS=darwin GOARCH=amd64 go build -o $(BINARY).amd64.macos -ldflags "-w -s -X $(VERSION_PATH)"
 
-exe: $(BINARY).exe
-windows: $(BINARY).exe
-$(BINARY).exe:
+exe: $(BINARY).amd64.exe
+windows: $(BINARY).amd64.exe
+$(BINARY).amd64.exe:
 	# Building windows binary.
-	GOOS=windows go build -o $(BINARY).exe -ldflags "-w -s -X $(VERSION_PATH)"
+	GOOS=windows GOARCH=amd64 go build -o $(BINARY).amd64.exe -ldflags "-w -s -X $(VERSION_PATH)"
 
 # Packages
+
+linux_packages: rpm deb rpm386 deb386 debarm rpmarm
 
 rpm: $(BINARY)-$(RPMVERSION)-$(ITERATION).x86_64.rpm
 $(BINARY)-$(RPMVERSION)-$(ITERATION).x86_64.rpm: check_fpm package_build_linux
 	@echo "Building 'rpm' package for $(BINARY) version '$(RPMVERSION)-$(ITERATION)'."
 	fpm -s dir -t rpm \
+		--architecture x86_64 \
 		--name $(BINARY) \
 		--rpm-os linux \
 		--version $(RPMVERSION) \
@@ -118,6 +131,7 @@ deb: $(BINARY)_$(VERSION)-$(ITERATION)_amd64.deb
 $(BINARY)_$(VERSION)-$(ITERATION)_amd64.deb: check_fpm package_build_linux
 	@echo "Building 'deb' package for $(BINARY) version '$(VERSION)-$(ITERATION)'."
 	fpm -s dir -t deb \
+		--architecture amd64 \
 		--name $(BINARY) \
 		--deb-no-default-config-files \
 		--version $(VERSION) \
@@ -131,6 +145,77 @@ $(BINARY)_$(VERSION)-$(ITERATION)_amd64.deb: check_fpm package_build_linux
 		--config-files "/etc/$(BINARY)/$(CONFIG_FILE)" \
 		--chdir package_build_linux
 
+rpm386: $(BINARY)-$(RPMVERSION)-$(ITERATION).i386.rpm
+$(BINARY)-$(RPMVERSION)-$(ITERATION).i386.rpm: check_fpm package_build_linux_386
+	@echo "Building 32-bit 'rpm' package for $(BINARY) version '$(RPMVERSION)-$(ITERATION)'."
+	fpm -s dir -t rpm \
+		--architecture i386 \
+		--name $(BINARY) \
+		--rpm-os linux \
+		--version $(RPMVERSION) \
+		--iteration $(ITERATION) \
+		--after-install scripts/after-install.sh \
+		--before-remove scripts/before-remove.sh \
+		--license MIT \
+		--url $(URL) \
+		--maintainer "$(MAINT)" \
+		--description "$(DESC)" \
+		--config-files "/etc/$(BINARY)/$(CONFIG_FILE)" \
+		--chdir package_build_linux_386
+
+deb386: $(BINARY)_$(VERSION)-$(ITERATION)_i386.deb
+$(BINARY)_$(VERSION)-$(ITERATION)_i386.deb: check_fpm package_build_linux_386
+	@echo "Building 32-bit 'deb' package for $(BINARY) version '$(VERSION)-$(ITERATION)'."
+	fpm -s dir -t deb \
+		--architecture i386 \
+		--name $(BINARY) \
+		--deb-no-default-config-files \
+		--version $(VERSION) \
+		--iteration $(ITERATION) \
+		--after-install scripts/after-install.sh \
+		--before-remove scripts/before-remove.sh \
+		--license MIT \
+		--url $(URL) \
+		--maintainer "$(MAINT)" \
+		--description "$(DESC)" \
+		--config-files "/etc/$(BINARY)/$(CONFIG_FILE)" \
+		--chdir package_build_linux_386
+
+rpmarm: $(BINARY)-$(RPMVERSION)-$(ITERATION).arm.rpm
+$(BINARY)-$(RPMVERSION)-$(ITERATION).arm.rpm: check_fpm package_build_linux_arm
+	@echo "Building 32-bit ARM 'rpm' package for $(BINARY) version '$(RPMVERSION)-$(ITERATION)'."
+	fpm -s dir -t rpm \
+		--architecture arm \
+		--name $(BINARY) \
+		--rpm-os linux \
+		--version $(RPMVERSION) \
+		--iteration $(ITERATION) \
+		--after-install scripts/after-install.sh \
+		--before-remove scripts/before-remove.sh \
+		--license MIT \
+		--url $(URL) \
+		--maintainer "$(MAINT)" \
+		--description "$(DESC)" \
+		--config-files "/etc/$(BINARY)/$(CONFIG_FILE)" \
+		--chdir package_build_linux_arm
+
+debarm: $(BINARY)_$(VERSION)-$(ITERATION)_arm.deb
+$(BINARY)_$(VERSION)-$(ITERATION)_arm.deb: check_fpm package_build_linux_arm
+	@echo "Building 32-bit ARM 'deb' package for $(BINARY) version '$(VERSION)-$(ITERATION)'."
+	fpm -s dir -t deb \
+		--architecture arm \
+		--name $(BINARY) \
+		--deb-no-default-config-files \
+		--version $(VERSION) \
+		--iteration $(ITERATION) \
+		--after-install scripts/after-install.sh \
+		--before-remove scripts/before-remove.sh \
+		--license MIT \
+		--url $(URL) \
+		--maintainer "$(MAINT)" \
+		--description "$(DESC)" \
+		--config-files "/etc/$(BINARY)/$(CONFIG_FILE)" \
+		--chdir package_build_linux_arm
 docker:
 	docker build -f init/docker/Dockerfile -t $(DHUSER)/$(BINARY) .
 
@@ -140,13 +225,23 @@ package_build_linux: readme man linux
 	mkdir -p $@/usr/bin $@/etc/$(BINARY) $@/lib/systemd/system
 	mkdir -p $@/usr/share/man/man1 $@/usr/share/doc/$(BINARY)
 	# Copying the binary, config file, unit file, and man page into the env.
-	cp $(BINARY).linux $@/usr/bin/$(BINARY)
+	cp $(BINARY).amd64.linux $@/usr/bin/$(BINARY)
 	cp *.1.gz $@/usr/share/man/man1
 	cp examples/$(CONFIG_FILE).example $@/etc/$(BINARY)/
 	cp examples/$(CONFIG_FILE).example $@/etc/$(BINARY)/$(CONFIG_FILE)
 	cp LICENSE *.html examples/*.* $@/usr/share/doc/$(BINARY)/
 	# These go to their own folder so the img src in the html pages continue to work.
 	cp init/systemd/$(BINARY).service $@/lib/systemd/system/
+
+package_build_linux_386: package_build_linux linux386
+	mkdir -p package_build_linux_386
+	cp -r package_build_linux/* package_build_linux_386/
+	cp $(BINARY).i386.linux $@/usr/bin/$(BINARY)
+
+package_build_linux_arm: package_build_linux arm
+	mkdir -p package_build_linux_arm
+	cp -r package_build_linux/* package_build_linux_arm/
+	cp $(BINARY).arm.linux $@/usr/bin/$(BINARY)
 
 check_fpm:
 	@fpm --version > /dev/null || (echo "FPM missing. Install FPM: https://fpm.readthedocs.io/en/latest/installing.html" && false)
