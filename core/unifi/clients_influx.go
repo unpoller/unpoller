@@ -1,7 +1,6 @@
 package unifi
 
 import (
-	"strconv"
 	"time"
 
 	influx "github.com/influxdata/influxdb1-client/v2"
@@ -13,8 +12,8 @@ func (c Client) Points() ([]*influx.Point, error) {
 	// Fix name and hostname fields. Sometimes one or the other is blank.
 	switch {
 	case c.Hostname == "" && c.Name == "":
-		c.Hostname = "-no-name-"
-		c.Name = "-no-name-"
+		c.Hostname = c.Mac
+		c.Name = c.Mac
 	case c.Hostname == "" && c.Name != "":
 		c.Hostname = c.Name
 	case c.Name == "" && c.Hostname != "":
@@ -40,13 +39,13 @@ func (c Client) Points() ([]*influx.Point, error) {
 		"radio_proto":        c.RadioProto,
 		"name":               c.Name,
 		"fixed_ip":           c.FixedIP,
-		"sw_port":            strconv.Itoa(c.SwPort),
-		"os_class":           strconv.Itoa(c.OsClass),
-		"os_name":            strconv.Itoa(c.OsName),
-		"dev_cat":            strconv.Itoa(c.DevCat),
-		"dev_id":             strconv.Itoa(c.DevID),
-		"dev_family":         strconv.Itoa(c.DevFamily),
-		"authorized":         c.Authorized.Txt,
+		"sw_port":            c.SwPort.Txt,
+		"os_class":           c.OsClass.Txt,
+		"os_name":            c.OsName.Txt,
+		"dev_cat":            c.DevCat.Txt,
+		"dev_id":             c.DevID.Txt,
+		"dev_vendor":         c.DevVendor.Txt,
+		"dev_family":         c.DevFamily.Txt,
 		"is_11r":             c.Is11R.Txt,
 		"is_wired":           c.IsWired.Txt,
 		"is_guest":           c.IsGuest.Txt,
@@ -57,10 +56,11 @@ func (c Client) Points() ([]*influx.Point, error) {
 		"powersave_enabled":  c.PowersaveEnabled.Txt,
 		"qos_policy_applied": c.QosPolicyApplied.Txt,
 		"use_fixedip":        c.UseFixedIP.Txt,
-		"channel":            strconv.Itoa(c.Channel),
-		"vlan":               strconv.Itoa(c.Vlan),
+		"channel":            c.Channel.Txt,
+		"vlan":               c.Vlan.Txt,
 	}
 	fields := map[string]interface{}{
+		"anomalies":              c.Anomalies,
 		"ip":                     c.IP,
 		"essid":                  c.Essid,
 		"bssid":                  c.Bssid,
@@ -95,6 +95,7 @@ func (c Client) Points() ([]*influx.Point, error) {
 		"tx_power":               c.TxPower,
 		"tx_rate":                c.TxRate,
 		"uptime":                 c.Uptime,
+		"wifi_tx_attempts":       c.WifiTxAttempts,
 		"wired-rx_bytes":         c.WiredRxBytes,
 		"wired-rx_bytes-r":       c.WiredRxBytesR,
 		"wired-rx_packets":       c.WiredRxPackets,
