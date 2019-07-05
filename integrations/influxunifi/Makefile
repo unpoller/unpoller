@@ -44,7 +44,7 @@ release: clean vendor test macos arm windows linux_packages
 	for i in $(BINARY)*.exe; do zip -9qm release/$$i.zip $$i;done
 	mv *.rpm *.deb release/
 	# Generating File Hashes
-	for i in release/*; do /bin/echo -n "$$i " ; (openssl dgst -r -sha256 "$$i" | head -c64 ; echo) | tee "$$i.sha256.txt"; done
+	openssl dgst -r -sha256 release/* | sed 's#release/##' | tee release/checksums.sha256.txt
 
 # Delete all build assets.
 clean:
