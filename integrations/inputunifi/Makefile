@@ -270,11 +270,11 @@ lint:
 # This is safe; recommended even.
 dep: vendor
 vendor:
-	dep ensure
+	dep ensure --vendor-only
 
 # Don't run this unless you're ready to debug untested vendored dependencies.
 deps:
-	dep ensure -update
+	dep ensure --update
 
 # Homebrew stuff. macOS only.
 
@@ -285,7 +285,7 @@ install: man readme $(BINARY)
 	@echo If you wish to install the application manually on Linux, check out the wiki: $(URL)/wiki/Installation
 	@echo -  Otherwise, build and install a package: make rpm -or- make deb
 	@echo See the Package Install wiki for more info: $(URL)/wiki/Package-Install
-	@[ "$$(uname)" = "Darwin" ] || (echo "Unable to continue, not a Mac." && false)
+	@[ "$(shell uname)" = "Darwin" ] || (echo "Unable to continue, not a Mac." && false)
 	@[ "$(PREFIX)" != "" ] || (echo "Unable to continue, PREFIX not set. Use: make install PREFIX=/usr/local ETC=/usr/local/etc" && false)
 	@[ "$(ETC)" != "" ] || (echo "Unable to continue, ETC not set. Use: make install PREFIX=/usr/local ETC=/usr/local/etc" && false)
 	# Copying the binary, config file, unit file, and man page into the env.
