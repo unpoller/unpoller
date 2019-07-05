@@ -14,10 +14,10 @@ LATEST=https://api.github.com/repos/${REPO}/releases/latest
 ARCH=$(uname -m)
 
 # $ARCH is passed into egrep to find the right file.
-if [ "$ARCH" = "x86_64" ]; then
-  ARCH="$ARCH|amd64"
-elif [ "$ARCH" = "amd64" ]; then
-  ARCH="$ARCH|x86_64"
+if [ "$ARCH" = "x86_64" ] || [ "$ARCH" = "amd64" ]; then
+  ARCH="x86_64|amd64"
+elif [[ $ARCH == *386* ]] || [[ $ARCH == *686* ]]; then
+  ARCH="i386"
 elif [[ $ARCH == *arm64* ]] || [[ $ARCH == *armv8* ]]; then
   echo "Unsupported Architecture: ${ARCH}, sorry!"
   exit 1
