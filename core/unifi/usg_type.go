@@ -72,7 +72,7 @@ type USG struct {
 		TxBytes                FlexInt     `json:"tx_bytes"`
 		TxPackets              float64     `json:"tx_packets"`
 		Up                     FlexBool    `json:"up"`
-		Vlan                   string      `json:"vlan,omitempty"`
+		Vlan                   FlexInt     `json:"vlan,omitempty"`
 		VlanEnabled            FlexBool    `json:"vlan_enabled"`
 		DhcpRelayEnabled       FlexBool    `json:"dhcp_relay_enabled,omitempty"`
 		DhcpdGatewayEnabled    FlexBool    `json:"dhcpd_gateway_enabled,omitempty"`
