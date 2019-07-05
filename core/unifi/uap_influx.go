@@ -169,7 +169,8 @@ func (u UAP) Points() ([]*influx.Point, error) {
 
 	tags = make(map[string]string)
 	fields = make(map[string]interface{})
-	// Loop each virtual AP (ESSID) and extract data for it from radio_tables and radio_table_stats.
+	// Loop each virtual AP (ESSID) and extract data for it
+	// from radio_tables and radio_table_stats.
 	for _, s := range u.VapTable {
 		tags["device_name"] = u.Name
 		tags["device_id"] = u.ID
@@ -226,6 +227,7 @@ func (u UAP) Points() ([]*influx.Point, error) {
 		fields["wifi_tx_latency_mov_min"] = s.WifiTxLatencyMov.Min.Val
 		fields["wifi_tx_latency_mov_total"] = s.WifiTxLatencyMov.Total.Val
 		fields["wifi_tx_latency_mov_cuont"] = s.WifiTxLatencyMov.TotalCount.Val
+
 		for _, p := range u.RadioTable {
 			if p.Name != s.RadioName {
 				continue
@@ -242,9 +244,8 @@ func (u UAP) Points() ([]*influx.Point, error) {
 			fields["radio_caps"] = p.RadioCaps.Val
 			fields["tx_power"] = p.TxPower.Val
 		}
+
 		for _, p := range u.RadioTableStats {
-			// This may be a tad slower but it allows putting
-			// all the radio stats into one table.
 			if p.Name != s.RadioName {
 				continue
 			}
@@ -263,6 +264,7 @@ func (u UAP) Points() ([]*influx.Point, error) {
 			fields["tx_retries"] = p.TxRetries.Val
 			fields["user-num_sta"] = p.UserNumSta.Val
 		}
+
 		pt, err := influx.NewPoint("uap_vaps", tags, fields, time.Now())
 		if err != nil {
 			return points, err
