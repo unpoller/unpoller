@@ -18,6 +18,11 @@ if [ "$ARCH" = "x86_64" ]; then
   ARCH="$ARCH|amd64"
 elif [ "$ARCH" = "amd64" ]; then
   ARCH="$ARCH|x86_64"
+elif [[ $ARCH == *arm64* ]] || [[ $ARCH == *armv8* ]]; then
+  echo "Unsupported Architecture: ${ARCH}, sorry!"
+  exit 1
+elif [[ $ARCH == *armv6* ]] || [[ $ARCH == *armv7* ]]; then
+  ARCH="armhf"
 elif [[ $ARCH == *arm* ]]; then
   ARCH="arm"
 else
@@ -63,7 +68,7 @@ if [ "$CMD" = "" ]; then
 fi
 
 # Grab latest release file from github.
-URL=$($CMD ${LATEST} | egrep "browser_download_url.*\.(${ARCH}).${FILE}\"" | cut -d\" -f 4)
+URL=$($CMD ${LATEST} | egrep "browser_download_url.*\.(${ARCH})\.${FILE}\"" | cut -d\" -f 4)
 
 if [ "$?" != "0" ] || [ "$URL" = "" ]; then
   echo "Error locating latest release at ${LATEST}"
