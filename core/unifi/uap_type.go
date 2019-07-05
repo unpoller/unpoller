@@ -176,7 +176,6 @@ type UAP struct {
 		UplinkRemotePort int      `json:"uplink_remote_port"`
 	} `json:"uplink"`
 	VapTable []struct {
-		SiteName          string `json:"-"`
 		AnomaliesBarChart struct {
 			HighTCPLatency    FlexInt `json:"high_tcp_latency"`
 			HighTCPPacketLoss FlexInt `json:"high_tcp_packet_loss"`

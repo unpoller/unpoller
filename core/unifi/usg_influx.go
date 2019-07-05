@@ -1,7 +1,7 @@
 package unifi
 
 import (
-	"strconv"
+	"strings"
 	"time"
 
 	influx "github.com/influxdata/influxdb1-client/v2"
@@ -10,6 +10,7 @@ import (
 // Points generates Unifi Gateway datapoints for InfluxDB.
 // These points can be passed directly to influx.
 func (u USG) Points() ([]*influx.Point, error) {
+	now := time.Now()
 	tags := map[string]string{
 		"id":                     u.ID,
 		"mac":                    u.Mac,
@@ -19,16 +20,12 @@ func (u USG) Points() ([]*influx.Point, error) {
 		"site_name":              u.SiteName,
 		"adopted":                u.Adopted.Txt,
 		"name":                   u.Name,
-		"adopt_ip":               u.AdoptIP,
-		"adopt_url":              u.AdoptURL,
 		"cfgversion":             u.Cfgversion,
 		"config_network_ip":      u.ConfigNetwork.IP,
 		"config_network_type":    u.ConfigNetwork.Type,
 		"connect_request_ip":     u.ConnectRequestIP,
 		"connect_request_port":   u.ConnectRequestPort,
-		"default":                u.Default.Txt,
 		"device_id":              u.DeviceID,
-		"discovered_via":         u.DiscoveredVia,
 		"guest_token":            u.GuestToken,
 		"inform_ip":              u.InformIP,
 		"known_cfgversion":       u.KnownCfgversion,
@@ -38,42 +35,39 @@ func (u USG) Points() ([]*influx.Point, error) {
 		"outdoor_mode_override":  u.OutdoorModeOverride,
 		"serial":                 u.Serial,
 		"type":                   u.Type,
-		"version_incompatible":   u.VersionIncompatible.Txt,
-		"usg_caps":               strconv.FormatFloat(u.UsgCaps, 'f', 6, 64),
+		"usg_caps":               u.UsgCaps.Txt,
 		"speedtest-status-saved": u.SpeedtestStatusSaved.Txt,
 		"wan1_up":                u.Wan1.Up.Txt,
 		"wan2_up":                u.Wan2.Up.Txt,
 	}
 	fields := map[string]interface{}{
 		"ip":                             u.IP,
-		"bytes":                          u.Bytes,
-		"last_seen":                      u.LastSeen,
+		"bytes":                          u.Bytes.Val,
+		"last_seen":                      u.LastSeen.Val,
 		"license_state":                  u.LicenseState,
-		"fw_caps":                        u.FwCaps,
-		"guest-num_sta":                  u.GuestNumSta,
+		"fw_caps":                        u.FwCaps.Val,
+		"guest-num_sta":                  u.GuestNumSta.Val,
 		"rx_bytes":                       u.RxBytes.Val,
 		"tx_bytes":                       u.TxBytes.Val,
-		"uptime":                         u.Uptime,
-		"considered_lost_at":             u.ConsideredLostAt,
-		"next_heartbeat_at":              u.NextHeartbeatAt,
+		"uptime":                         u.Uptime.Val,
 		"roll_upgrade":                   u.Rollupgrade.Val,
-		"state":                          u.State,
+		"state":                          u.State.Val,
 		"upgradable":                     u.Upgradable.Val,
-		"user-num_sta":                   u.UserNumSta,
+		"user-num_sta":                   u.UserNumSta.Val,
 		"version":                        u.Version,
-		"num_desktop":                    u.NumDesktop,
-		"num_handheld":                   u.NumHandheld,
-		"num_mobile":                     u.NumMobile,
-		"speedtest-status_latency":       u.SpeedtestStatus.Latency,
-		"speedtest-status_rundate":       u.SpeedtestStatus.Rundate,
-		"speedtest-status_runtime":       u.SpeedtestStatus.Runtime,
-		"speedtest-status_download":      u.SpeedtestStatus.StatusDownload,
-		"speedtest-status_ping":          u.SpeedtestStatus.StatusPing,
-		"speedtest-status_summary":       u.SpeedtestStatus.StatusSummary,
-		"speedtest-status_upload":        u.SpeedtestStatus.StatusUpload,
-		"speedtest-status_xput_download": u.SpeedtestStatus.XputDownload,
-		"speedtest-status_xput_upload":   u.SpeedtestStatus.XputUpload,
-		"config_network_wan_type":        u.ConfigNetworkWan.Type,
+		"num_desktop":                    u.NumDesktop.Val,
+		"num_handheld":                   u.NumHandheld.Val,
+		"num_mobile":                     u.NumMobile.Val,
+		"speedtest-status_latency":       u.SpeedtestStatus.Latency.Val,
+		"speedtest-status_rundate":       u.SpeedtestStatus.Rundate.Val,
+		"speedtest-status_runtime":       u.SpeedtestStatus.Runtime.Val,
+		"speedtest-status_download":      u.SpeedtestStatus.StatusDownload.Val,
+		"speedtest-status_ping":          u.SpeedtestStatus.StatusPing.Val,
+		"speedtest-status_summary":       u.SpeedtestStatus.StatusSummary.Val,
+		"speedtest-status_upload":        u.SpeedtestStatus.StatusUpload.Val,
+		"speedtest-status_xput_download": u.SpeedtestStatus.XputDownload.Val,
+		"speedtest-status_xput_upload":   u.SpeedtestStatus.XputUpload.Val,
+		"config_network_wan_type":        u.ConfigNetwork.Type,
 		"wan1_bytes-r":                   u.Wan1.BytesR.Val,
 		"wan1_enable":                    u.Wan1.Enable.Val,
 		"wan1_full_duplex":               u.Wan1.FullDuplex.Val,
@@ -124,35 +118,35 @@ func (u USG) Points() ([]*influx.Point, error) {
 		"wan2_tx_dropped":                u.Wan2.TxDropped.Val,
 		"wan2_tx_errors":                 u.Wan2.TxErrors.Val,
 		"wan2_tx_packets":                u.Wan2.TxPackets.Val,
-		"loadavg_1":                      u.SysStats.Loadavg1,
-		"loadavg_5":                      u.SysStats.Loadavg5,
-		"loadavg_15":                     u.SysStats.Loadavg15,
-		"mem_used":                       u.SysStats.MemUsed,
-		"mem_buffer":                     u.SysStats.MemBuffer,
-		"mem_total":                      u.SysStats.MemTotal,
-		"cpu":                            u.SystemStats.CPU,
-		"mem":                            u.SystemStats.Mem,
-		"system_uptime":                  u.SystemStats.Uptime,
-		"stat_duration":                  u.Stat.Duration,
+		"loadavg_1":                      u.SysStats.Loadavg1.Val,
+		"loadavg_5":                      u.SysStats.Loadavg5.Val,
+		"loadavg_15":                     u.SysStats.Loadavg15.Val,
+		"mem_used":                       u.SysStats.MemUsed.Val,
+		"mem_buffer":                     u.SysStats.MemBuffer.Val,
+		"mem_total":                      u.SysStats.MemTotal.Val,
+		"cpu":                            u.SystemStats.CPU.Val,
+		"mem":                            u.SystemStats.Mem.Val,
+		"system_uptime":                  u.SystemStats.Uptime.Val,
+		"stat_duration":                  u.Stat.Duration.Val,
 		"stat_datetime":                  u.Stat.Datetime,
 		"gw":                             u.Stat.Gw,
 		"false":                          "false", // to fill holes in graphs.
-		"lan-rx_bytes":                   u.Stat.LanRxBytes,
-		"lan-rx_packets":                 u.Stat.LanRxPackets,
-		"lan-tx_bytes":                   u.Stat.LanTxBytes,
-		"lan-tx_packets":                 u.Stat.LanTxPackets,
-		"wan-rx_bytes":                   u.Stat.WanRxBytes,
-		"wan-rx_dropped":                 u.Stat.WanRxDropped,
-		"wan-rx_packets":                 u.Stat.WanRxPackets,
-		"wan-tx_bytes":                   u.Stat.WanTxBytes,
-		"wan-tx_packets":                 u.Stat.WanTxPackets,
+		"lan-rx_bytes":                   u.Stat.LanRxBytes.Val,
+		"lan-rx_packets":                 u.Stat.LanRxPackets.Val,
+		"lan-tx_bytes":                   u.Stat.LanTxBytes.Val,
+		"lan-tx_packets":                 u.Stat.LanTxPackets.Val,
+		"wan-rx_bytes":                   u.Stat.WanRxBytes.Val,
+		"wan-rx_dropped":                 u.Stat.WanRxDropped.Val,
+		"wan-rx_packets":                 u.Stat.WanRxPackets.Val,
+		"wan-tx_bytes":                   u.Stat.WanTxBytes.Val,
+		"wan-tx_packets":                 u.Stat.WanTxPackets.Val,
 		"uplink_name":                    u.Uplink.Name,
-		"uplink_latency":                 u.Uplink.Latency,
-		"uplink_speed":                   u.Uplink.Speed,
-		"uplink_num_ports":               u.Uplink.NumPort,
-		"uplink_max_speed":               u.Uplink.MaxSpeed,
+		"uplink_latency":                 u.Uplink.Latency.Val,
+		"uplink_speed":                   u.Uplink.Speed.Val,
+		"uplink_num_ports":               u.Uplink.NumPort.Val,
+		"uplink_max_speed":               u.Uplink.MaxSpeed.Val,
 	}
-	pt, err := influx.NewPoint("usg", tags, fields, time.Now())
+	pt, err := influx.NewPoint("usg", tags, fields, now)
 	if err != nil {
 		return nil, err
 	}
@@ -162,6 +156,7 @@ func (u USG) Points() ([]*influx.Point, error) {
 			"device_name":               u.Name,
 			"device_id":                 u.ID,
 			"device_mac":                u.Mac,
+			"site_name":                 u.SiteName,
 			"name":                      p.Name,
 			"dhcpd_dns_enabled":         p.DhcpdDNSEnabled.Txt,
 			"dhcpd_enabled":             p.DhcpdEnabled.Txt,
@@ -180,7 +175,6 @@ func (u USG) Points() ([]*influx.Point, error) {
 			"is_nat":                    p.IsNat.Txt,
 			"networkgroup":              p.Networkgroup,
 			"site_id":                   p.SiteID,
-			"site_name":                 p.SiteName,
 		}
 		fields := map[string]interface{}{
 			"dhcpd_ip_1":             p.DhcpdIP1,
@@ -191,20 +185,54 @@ func (u USG) Points() ([]*influx.Point, error) {
 			"ip_subnet":              p.IPSubnet,
 			"mac":                    p.Mac,
 			"name":                   p.Name,
-			"num_sta":                p.NumSta,
+			"num_sta":                p.NumSta.Val,
 			"purpose":                p.Purpose,
 			"rx_bytes":               p.RxBytes.Val,
-			"rx_packets":             p.RxPackets,
+			"rx_packets":             p.RxPackets.Val,
 			"tx_bytes":               p.TxBytes.Val,
-			"tx_packets":             p.TxPackets,
-			"up":                     p.Up.Txt,
+			"tx_packets":             p.TxPackets.Val,
 			"vlan":                   p.Vlan.Txt,
 			"dhcpd_ntp_1":            p.DhcpdNtp1,
 			"dhcpd_unifi_controller": p.DhcpdUnifiController,
 			"ipv6_interface_type":    p.Ipv6InterfaceType,
 			"attr_hidden_id":         p.AttrHiddenID,
 		}
-		pt, err = influx.NewPoint("usg_networks", tags, fields, time.Now())
+		pt, err = influx.NewPoint("usg_networks", tags, fields, now)
+		if err != nil {
+			return points, err
+		}
+		points = append(points, pt)
+	}
+	for _, p := range u.PortTable {
+		tags := map[string]string{
+			"device_name": u.Name,
+			"device_id":   u.ID,
+			"device_mac":  u.Mac,
+			"site_name":   u.SiteName,
+			"name":        p.Name,
+			"ifname":      p.Ifname,
+			"ip":          p.IP,
+			"netmask":     p.Netmask,
+			"mac":         p.Mac,
+			"up":          p.Up.Txt,
+			"speed":       p.Speed.Txt,
+			"full_duplex": p.FullDuplex.Txt,
+			"enable":      p.Enable.Txt,
+			"gateway":     p.Gateway,
+		}
+		fields := map[string]interface{}{
+			"rx_bytes":     p.RxBytes.Val,
+			"rx_dropped":   p.RxDropped.Val,
+			"rx_errors":    p.RxErrors.Val,
+			"rx_packets":   p.RxBytes.Val,
+			"tx_bytes":     p.TxBytes.Val,
+			"tx_dropped":   p.TxDropped.Val,
+			"tx_errors":    p.TxErrors.Val,
+			"tx_packets":   p.TxPackets.Val,
+			"rx_multicast": p.RxMulticast.Val,
+			"dns_servers":  strings.Join(p.DNS, ","),
+		}
+		pt, err = influx.NewPoint("usg_ports", tags, fields, now)
 		if err != nil {
 			return points, err
 		}
