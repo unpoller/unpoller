@@ -1,0 +1,7 @@
+#!/bin/bash
+
+# https://www.smockle.com/blog/2019/04/22/migrating-from-travis-ci-to-docker-hub-automated-builds/
+
+apt-get -y update
+apt-get -y --only-upgrade install docker-ee
+docker run --rm --privileged multiarch/qemu-user-static:register --reset

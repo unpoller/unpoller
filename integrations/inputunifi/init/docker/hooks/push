@@ -1,0 +1,37 @@
+#!/bin/bash
+
+# This post build hook creates multi-architecture docker manifests.
+# It's all a bit complicated for some reason.
+set -e -o pipefail
+
+VERSION=$(git tag -l --merged | tail -n1 | tr -d v)
+SHORTVER=$(echo $VERSION | cut -d. -f1,2)
+if [ "$BUILDS" != "" ] && [ "$VERSION" != "" ]; then
+  TAGS=latest
+fi
+
+# Push the extra custom images that were created.
+for build in $BUILDS; do
+  os=$(echo $build | cut -d: -f1)
+  name=$(echo $build | cut -d: -f2)
+  echo "Pushing Image ${IMAGE_NAME}_${os}_${name}"
+  docker push ${IMAGE_NAME}_${os}_${name}
+  IMAGES="${IMAGES} ${IMAGE_NAME}_${os}_${name}"
+done
+echo "Annotating Images: ${IMAGES}"
+
+[ "$VERSION" != "$SOURCE_BRANCH" ] || TAGS="latest $VERSION $SHORTVER stable"
+echo "Version: $VERSION, Source: $SOURCE_BRANCH, Building tags: ${TAGS}"
+
+for tag in $TAGS; do
+  docker manifest create --amend ${DOCKER_REPO}:${tag} $IMAGES
+  for build in $BUILDS; do
+    os=$(echo $build | cut -d: -f1)
+    name=$(echo $build | cut -d: -f2)
+    arch=$(echo $build | cut -d: -f3)
+    vari=$(echo $build | cut -d: -f4)
+    docker manifest annotate ${DOCKER_REPO}:${tag} ${IMAGE_NAME}_${os}_${name} --os ${os} --arch ${arch} --variant "${vari}"
+  done
+  echo "Pushing Manifest ${DOCKER_REPO}:${tag}"
+  docker manifest push ${DOCKER_REPO}:${tag}
+done
