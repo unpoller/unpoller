@@ -36,7 +36,7 @@ VERSION_PATH:=github.com/$(GHUSER)/$(BINARY)/$(shell echo $(BINARY) | tr -d -- -
 all: man build
 
 # Prepare a release. Called in Travis CI.
-release: clean vendor test macos arm windows linux_packages
+release: clean vendor test macos arm arm64 windows linux_packages
 	# Prepareing a release!
 	mkdir -p $@
 	mv $(BINARY).*.linux $(BINARY).*.macos $@/
@@ -89,10 +89,12 @@ $(BINARY).i386.linux:
 	# Building linux binary.
 	GOOS=linux GOARCH=386 go build -o $@ -ldflags "-w -s -X $(VERSION_PATH)"
 
-arm: $(BINARY).arm.linux
-$(BINARY).arm.linux:
+arm: arm64 armhf
+
+arm64: $(BINARY).arm64.linux
+$(BINARY).arm64.linux:
 	# Building linux binary.
-	GOOS=linux GOARCH=arm GOARM=5 go build -o $@ -ldflags "-w -s -X $(VERSION_PATH)"
+	GOOS=linux GOARCH=arm64 go build -o $@ -ldflags "-w -s -X $(VERSION_PATH)"
 
 armhf: $(BINARY).armhf.linux
 $(BINARY).armhf.linux:
@@ -186,11 +188,11 @@ $(BINARY)_$(VERSION)-$(ITERATION)_i386.deb: package_build_linux_386 check_fpm
 		--config-files "/etc/$(BINARY)/$(CONFIG_FILE)" \
 		--chdir $<
 
-rpmarm: $(BINARY)-$(RPMVERSION)-$(ITERATION).arm.rpm
-$(BINARY)-$(RPMVERSION)-$(ITERATION).arm.rpm: package_build_linux_arm check_fpm
-	@echo "Building 32-bit ARM 'rpm' package for $(BINARY) version '$(RPMVERSION)-$(ITERATION)'."
+rpmarm: $(BINARY)-$(RPMVERSION)-$(ITERATION).arm64.rpm
+$(BINARY)-$(RPMVERSION)-$(ITERATION).arm64.rpm: package_build_linux_arm64 check_fpm
+	@echo "Building 64-bit ARM8 'rpm' package for $(BINARY) version '$(RPMVERSION)-$(ITERATION)'."
 	fpm -s dir -t rpm \
-		--architecture arm \
+		--architecture arm64 \
 		--name $(BINARY) \
 		--rpm-os linux \
 		--version $(RPMVERSION) \
@@ -204,11 +206,11 @@ $(BINARY)-$(RPMVERSION)-$(ITERATION).arm.rpm: package_build_linux_arm check_fpm
 		--config-files "/etc/$(BINARY)/$(CONFIG_FILE)" \
 		--chdir $<
 
-debarm: $(BINARY)_$(VERSION)-$(ITERATION)_arm.deb
-$(BINARY)_$(VERSION)-$(ITERATION)_arm.deb: package_build_linux_arm check_fpm
-	@echo "Building 32-bit ARM 'deb' package for $(BINARY) version '$(VERSION)-$(ITERATION)'."
+debarm: $(BINARY)_$(VERSION)-$(ITERATION)_arm64.deb
+$(BINARY)_$(VERSION)-$(ITERATION)_arm64.deb: package_build_linux_arm64 check_fpm
+	@echo "Building 64-bit ARM8 'deb' package for $(BINARY) version '$(VERSION)-$(ITERATION)'."
 	fpm -s dir -t deb \
-		--architecture arm \
+		--architecture arm64 \
 		--name $(BINARY) \
 		--deb-no-default-config-files \
 		--version $(VERSION) \
@@ -224,7 +226,7 @@ $(BINARY)_$(VERSION)-$(ITERATION)_arm.deb: package_build_linux_arm check_fpm
 
 rpmarmhf: $(BINARY)-$(RPMVERSION)-$(ITERATION).armhf.rpm
 $(BINARY)-$(RPMVERSION)-$(ITERATION).armhf.rpm: package_build_linux_armhf check_fpm
-	@echo "Building 32-bit ARM HF 'rpm' package for $(BINARY) version '$(RPMVERSION)-$(ITERATION)'."
+	@echo "Building 32-bit ARM6/7 HF 'rpm' package for $(BINARY) version '$(RPMVERSION)-$(ITERATION)'."
 	fpm -s dir -t rpm \
 		--architecture armhf \
 		--name $(BINARY) \
@@ -242,7 +244,7 @@ $(BINARY)-$(RPMVERSION)-$(ITERATION).armhf.rpm: package_build_linux_armhf check_
 
 debarmhf: $(BINARY)_$(VERSION)-$(ITERATION)_armhf.deb
 $(BINARY)_$(VERSION)-$(ITERATION)_armhf.deb: package_build_linux_armhf check_fpm
-	@echo "Building 32-bit ARM HF 'deb' package for $(BINARY) version '$(VERSION)-$(ITERATION)'."
+	@echo "Building 32-bit ARM6/7 HF 'deb' package for $(BINARY) version '$(VERSION)-$(ITERATION)'."
 	fpm -s dir -t deb \
 		--architecture armhf \
 		--name $(BINARY) \
@@ -280,10 +282,10 @@ package_build_linux_386: package_build_linux linux386
 	cp -r $</* $@/
 	cp $(BINARY).i386.linux $@/usr/bin/$(BINARY)
 
-package_build_linux_arm: package_build_linux arm
+package_build_linux_arm64: package_build_linux arm64
 	mkdir -p $@
 	cp -r $</* $@/
-	cp $(BINARY).arm.linux $@/usr/bin/$(BINARY)
+	cp $(BINARY).arm64.linux $@/usr/bin/$(BINARY)
 
 package_build_linux_armhf: package_build_linux armhf
 	mkdir -p $@
