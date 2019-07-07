@@ -15,7 +15,7 @@ COPY . $GOPATH/src/github.com/davidnewhall/unifi-poller
 WORKDIR $GOPATH/src/github.com/davidnewhall/unifi-poller
 
 RUN dep ensure --vendor-only \
-  && CGO_ENABLED=0 make unifi-poller.${ARCH}.${OS}
+  && CGO_ENABLED=0 make unifi-poller.${ARCH}.${OS} \
   && mv unifi-poller.${ARCH}.${OS} unifi-poller
 
 #
