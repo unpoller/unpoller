@@ -39,7 +39,7 @@ all: man build
 release: clean vendor test macos arm windows linux_packages
 	# Prepareing a release!
 	mkdir -p $@
-	mv $(BINARY).*.{macos,linux} $@/
+	mv $(BINARY).*.macos $(BINARY).*.linux $@/
 	gzip -9r $@/
 	for i in $(BINARY)*.exe; do zip -9qm $@/$$i.zip $$i;done
 	mv *.rpm *.deb $@/
