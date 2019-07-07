@@ -1,6 +1,9 @@
 package unifi
 
-import "time"
+import (
+	"encoding/json"
+	"time"
+)
 
 // USG represents all the data from the Ubiquiti Controller for a Unifi Security Gateway.
 type USG struct {
@@ -230,32 +233,53 @@ type USG struct {
 		MaxSpeed         FlexInt  `json:"max_speed"`
 		Type             string   `json:"type"`
 	} `json:"uplink"`
-	Stat struct {
-		SiteID       string    `json:"site_id"`
-		O            string    `json:"o"`
-		Oid          string    `json:"oid"`
-		Gw           string    `json:"gw"`
-		Time         FlexInt   `json:"time"`
-		Datetime     time.Time `json:"datetime"`
-		Duration     FlexInt   `json:"duration"`
-		WanRxPackets FlexInt   `json:"wan-rx_packets"`
-		WanRxBytes   FlexInt   `json:"wan-rx_bytes"`
-		WanTxPackets FlexInt   `json:"wan-tx_packets"`
-		WanTxBytes   FlexInt   `json:"wan-tx_bytes"`
-		LanRxPackets FlexInt   `json:"lan-rx_packets"`
-		LanRxBytes   FlexInt   `json:"lan-rx_bytes"`
-		LanTxPackets FlexInt   `json:"lan-tx_packets"`
-		LanTxBytes   FlexInt   `json:"lan-tx_bytes"`
-		WanRxDropped FlexInt   `json:"wan-rx_dropped"`
-		LanRxDropped FlexInt   `json:"lan-rx_dropped"`
-	} `json:"stat"`
-	TxBytes     FlexInt `json:"tx_bytes"`
-	RxBytes     FlexInt `json:"rx_bytes"`
-	Bytes       FlexInt `json:"bytes"`
-	NumSta      FlexInt `json:"num_sta"`
-	UserNumSta  FlexInt `json:"user-num_sta"`
-	GuestNumSta FlexInt `json:"guest-num_sta"`
-	NumDesktop  FlexInt `json:"num_desktop"`
-	NumMobile   FlexInt `json:"num_mobile"`
-	NumHandheld FlexInt `json:"num_handheld"`
+	Stat        *USGStat `json:"stat"`
+	TxBytes     FlexInt  `json:"tx_bytes"`
+	RxBytes     FlexInt  `json:"rx_bytes"`
+	Bytes       FlexInt  `json:"bytes"`
+	NumSta      FlexInt  `json:"num_sta"`
+	UserNumSta  FlexInt  `json:"user-num_sta"`
+	GuestNumSta FlexInt  `json:"guest-num_sta"`
+	NumDesktop  FlexInt  `json:"num_desktop"`
+	NumMobile   FlexInt  `json:"num_mobile"`
+	NumHandheld FlexInt  `json:"num_handheld"`
+}
+
+// USGStat holds the "stat" data for a gateway.
+// This is split out because of a JSON data format change from 5.10 to 5.11.
+type USGStat struct {
+	*gw
+}
+
+type gw struct {
+	SiteID       string    `json:"site_id"`
+	O            string    `json:"o"`
+	Oid          string    `json:"oid"`
+	Gw           string    `json:"gw"`
+	Time         FlexInt   `json:"time"`
+	Datetime     time.Time `json:"datetime"`
+	Duration     FlexInt   `json:"duration"`
+	WanRxPackets FlexInt   `json:"wan-rx_packets"`
+	WanRxBytes   FlexInt   `json:"wan-rx_bytes"`
+	WanTxPackets FlexInt   `json:"wan-tx_packets"`
+	WanTxBytes   FlexInt   `json:"wan-tx_bytes"`
+	LanRxPackets FlexInt   `json:"lan-rx_packets"`
+	LanRxBytes   FlexInt   `json:"lan-rx_bytes"`
+	LanTxPackets FlexInt   `json:"lan-tx_packets"`
+	LanTxBytes   FlexInt   `json:"lan-tx_bytes"`
+	WanRxDropped FlexInt   `json:"wan-rx_dropped"`
+	LanRxDropped FlexInt   `json:"lan-rx_dropped"`
+}
+
+// UnmarshalJSON unmarshalls 5.10 or 5.11 formatted Gateway Stat data.
+func (v *USGStat) UnmarshalJSON(data []byte) error {
+	var n struct {
+		gw `json:"gw"`
+	}
+	v.gw = &n.gw
+	err := json.Unmarshal(data, v.gw) // controller version 5.10.
+	if err != nil {
+		return json.Unmarshal(data, &n) // controller version 5.11.
+	}
+	return nil
 }

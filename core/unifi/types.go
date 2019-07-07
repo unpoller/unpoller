@@ -54,10 +54,11 @@ type Unifi struct {
 	baseURL  string
 	ErrorLog Logger
 	DebugLog Logger
+	*server
 }
 
-// Server is the /status endpoint from the Unifi controller.
-type Server struct {
+// server is the /status endpoint from the Unifi controller.
+type server struct {
 	Up            FlexBool `json:"up"`
 	ServerVersion string   `json:"server_version"`
 	UUID          string   `json:"uuid"`
