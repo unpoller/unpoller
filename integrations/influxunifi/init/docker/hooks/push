@@ -21,7 +21,7 @@ done
 echo "Annotating Images: ${IMAGES}"
 
 # Build all the Docker tags if the github branch is a release and not master.
-[ "$SOURCE_BRANCH" == "master" ] || TAGS="latest $VERSION $SHORTVER stable"
+[ "v$VERSION" != "$SOURCE_BRANCH" ] || TAGS="latest $VERSION $SHORTVER stable"
 echo "Version: $VERSION, Source: $SOURCE_BRANCH, Building tags: ${TAGS}"
 
 # Create multi-architecture manifests for each tag with all the built images.
