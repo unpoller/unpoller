@@ -1,21 +1,26 @@
 #
 # building static go binary with Debian golang container
 #
-ARG ARCH=amd64
+ARG BINARY=unifi-poller
+ARG REPO=github.com/davidnewhall/${BINARY}
 
 FROM golang:stretch as builder
-ARG ARCH
+ARG ARCH=amd64
+ARG OS=linux
+ARG BINARY
+ARG REPO
 
-RUN mkdir -p $GOPATH/pkg/mod $GOPATH/bin $GOPATH/src/github.com/davidnewhall
+RUN mkdir -p $GOPATH/pkg/mod $GOPATH/bin $GOPATH/src/${REPO}
 RUN apt-get update \
   && apt-get install -y curl  \
   && curl https://raw.githubusercontent.com/golang/dep/master/install.sh | sh
 
-COPY . $GOPATH/src/github.com/davidnewhall/unifi-poller
-WORKDIR $GOPATH/src/github.com/davidnewhall/unifi-poller
+COPY . $GOPATH/src/${REPO}
+WORKDIR $GOPATH/src/${REPO}
 
 RUN dep ensure --vendor-only \
-  && CGO_ENABLED=0 make unifi-poller.${ARCH}.linux
+  && CGO_ENABLED=0 make ${BINARY}.${ARCH}.${OS} \
+  && mv ${BINARY}.${ARCH}.${OS} ${BINARY}
 
 #
 # creating container for run
@@ -25,11 +30,13 @@ RUN dep ensure --vendor-only \
 #
 # by using "-e UNIFI_PASSWORD=your-secret-pasword" you can avoid this configuration in the config file
 #
+
 FROM scratch
-ARG ARCH
+ARG REPO
+ARG BINARY
 
-COPY --from=builder /go/src/github.com/davidnewhall/unifi-poller/unifi-poller.${ARCH}.linux /unifi-poller
-COPY --from=builder /go/src/github.com/davidnewhall/unifi-poller/examples/up.conf.example /etc/unifi-poller/up.conf
+COPY --from=builder /go/src/${REPO}/${BINARY} /${BINARY}
+COPY --from=builder /go/src/${REPO}/examples/up.conf.example /etc/${BINARY}/up.conf
 
-VOLUME [ "/etc/unifi-poller" ]
-ENTRYPOINT [ "/unifi-poller" ]
+VOLUME [ "/etc/${BINARY}" ]
+ENTRYPOINT [ "/${BINARY}" ]
