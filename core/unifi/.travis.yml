@@ -12,3 +12,4 @@ install:
 - dep ensure
 script:
 - golangci-lint run --enable-all -e G402
+- go test ./...

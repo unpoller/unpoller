@@ -58,16 +58,22 @@ func (u *Unifi) getController(user, pass string) error {
 		return errors.Errorf("authentication failed (user: %s): %s (status: %s)",
 			user, u.baseURL+LoginPath, resp.Status)
 	}
-	return nil
+	return errors.Wrap(u.getServer(), "unable to get server version")
+}
+
+// getServer sets the controller's version and UUID.
+func (u *Unifi) getServer() error {
+	var response struct {
+		Data server `json:"meta"`
+	}
+	u.server = &response.Data
+	return u.GetData(StatusPath, &response)
 }
 
 // GetServer returns the controller's version and UUID.
-func (u *Unifi) GetServer() (Server, error) {
-	var response struct {
-		Data Server `json:"meta"`
-	}
-	err := u.GetData(StatusPath, &response)
-	return response.Data, err
+// This method is deprecated and will go away in a future release, use u.Server*
+func (u *Unifi) GetServer() (*server, error) {
+	return u.server, nil
 }
 
 // GetClients returns a response full of clients' data from the Unifi Controller.
