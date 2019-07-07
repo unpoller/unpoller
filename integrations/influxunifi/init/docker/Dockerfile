@@ -27,6 +27,8 @@ RUN dep ensure --vendor-only \
 # by using "-e UNIFI_PASSWORD=your-secret-pasword" you can avoid this configuration in the config file
 #
 
+FROM scratch
+
 COPY --from=builder /go/src/github.com/davidnewhall/unifi-poller/unifi-poller /unifi-poller
 COPY --from=builder /go/src/github.com/davidnewhall/unifi-poller/examples/up.conf.example /etc/unifi-poller/up.conf
 
