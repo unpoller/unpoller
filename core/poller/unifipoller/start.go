@@ -125,11 +125,7 @@ func (u *UnifiPoller) GetUnifi() (err error) {
 	}
 	u.Unifi.ErrorLog = u.LogErrorf // Log all errors.
 	u.Unifi.DebugLog = u.LogDebugf // Log debug messages.
-	v, err := u.GetServer()
-	if err != nil {
-		return err
-	}
-	u.Logf("Authenticated to UniFi Controller at %s version %s as user %s", u.UnifiBase, v.ServerVersion, u.UnifiUser)
+	u.Logf("Authenticated to UniFi Controller at %s version %s as user %s", u.UnifiBase, u.ServerVersion, u.UnifiUser)
 	if err := u.CheckSites(); err != nil {
 		return err
 	}
