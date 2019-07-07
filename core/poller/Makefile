@@ -36,10 +36,10 @@ VERSION_PATH:=github.com/$(GHUSER)/$(BINARY)/$(shell echo $(BINARY) | tr -d -- -
 all: man build
 
 # Prepare a release. Called in Travis CI.
-release: clean vendor test macos arm arm64 windows linux_packages
+release: clean vendor test macos arm windows linux_packages
 	# Prepareing a release!
 	mkdir -p $@
-	mv $(BINARY).*.linux $(BINARY).*.macos $@/
+	mv $(BINARY).*.{macos,linux} $@/
 	gzip -9r $@/
 	for i in $(BINARY)*.exe; do zip -9qm $@/$$i.zip $$i;done
 	mv *.rpm *.deb $@/
@@ -49,7 +49,7 @@ release: clean vendor test macos arm arm64 windows linux_packages
 # Delete all build assets.
 clean:
 	# Cleaning up.
-	rm -f $(BINARY) $(BINARY).*.{macos,linux,exe}{,.gz} $(BINARY).1{,.gz} $(BINARY).rb
+	rm -f $(BINARY) $(BINARY).*.{macos,linux,exe}{,.gz,.zip} $(BINARY).1{,.gz} $(BINARY).rb
 	rm -f $(BINARY){_,-}*.{deb,rpm} v*.tar.gz.sha256
 	rm -f cmd/$(BINARY)/README{,.html} README{,.html} ./$(BINARY)_manual.html
 	rm -rf package_build_* release
