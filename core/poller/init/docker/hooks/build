@@ -1,11 +1,20 @@
 #!/bin/bash
 
-# This always run local to the Dockerfile folder.
+# This always run local to the Dockerfile folder, so the path is ../..
+
 set -e -o pipefail
 
+# The Docker Cloud config must pass in the BUILDS env variable.
+# See README.md (in this dir) and the screenshot for more info.
+
+# Build each configured image from Docker Cloud.
 for build in $BUILDS; do
+  # os:name:arch:variant
   os=$(echo $build | cut -d: -f1)
   name=$(echo $build | cut -d: -f2)
   echo "Building Image ${IMAGE_NAME}_${os}_${name}"
-  docker build --build-arg "ARCH=${name}" --tag "${IMAGE_NAME}_${os}_${name}" --file Dockerfile ../..
+  docker build \
+    --build-arg "ARCH=${name}" \
+    --tag "${IMAGE_NAME}_${os}_${name}" \
+    --file Dockerfile ../..
 done
