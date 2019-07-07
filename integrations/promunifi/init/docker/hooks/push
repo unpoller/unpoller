@@ -4,8 +4,8 @@
 # It's all a bit complicated for some reason.
 set -e -o pipefail
 
-VERSION=$(git tag -l --merged | tail -n1 | tr -d v)
-SHORTVER=$(echo $VERSION | cut -d. -f1,2)
+VERSION=$(git tag -l --merged | tail -n1 | tr -d v) # 1.2.3
+SHORTVER=$(echo $VERSION | cut -d. -f1,2)           # 1.2
 if [ "$BUILDS" != "" ] && [ "$VERSION" != "" ]; then
   TAGS=latest
 fi
@@ -20,16 +20,20 @@ for build in $BUILDS; do
 done
 echo "Annotating Images: ${IMAGES}"
 
-[ "$VERSION" != "$SOURCE_BRANCH" ] || TAGS="latest $VERSION $SHORTVER stable"
+# Build all the Docker tags if the github branch is a release and not master.
+[ "$SOURCE_BRANCH" == "master" ] || TAGS="latest $VERSION $SHORTVER stable"
 echo "Version: $VERSION, Source: $SOURCE_BRANCH, Building tags: ${TAGS}"
 
+# Create multi-architecture manifests for each tag with all the built images.
 for tag in $TAGS; do
   docker manifest create --amend ${DOCKER_REPO}:${tag} $IMAGES
   for build in $BUILDS; do
+    # os:name:arch:variant, ie linux:amd64:amd64: (no variant is ok)
     os=$(echo $build | cut -d: -f1)
     name=$(echo $build | cut -d: -f2)
     arch=$(echo $build | cut -d: -f3)
     vari=$(echo $build | cut -d: -f4)
+    # Annotating updates the manifest to describe each images' capabilities.
     docker manifest annotate ${DOCKER_REPO}:${tag} ${IMAGE_NAME}_${os}_${name} --os ${os} --arch ${arch} --variant "${vari}"
   done
   echo "Pushing Manifest ${DOCKER_REPO}:${tag}"
