@@ -41,8 +41,9 @@ in how it works for you.
 ### Docker
 
 Docker is built automatically by Docker Cloud using the Dockerfile in the path
-[init/docker/Dockerfile](init/docker/Dockerfile). Other than the Dockerfile, all
-the configuration is done in the Cloud service under my personal account `golift`.
+[init/docker/Dockerfile](init/docker/Dockerfile). Some of the configuration is
+done in the Cloud service under my personal account `golift`, but the majority
+happens in the build files in the [init/docker/hooks/](init/docker/hooks/) directory.
 
 If you have need to change the Dockerfile, please clearly explain what problem your
 changes are solving, and how it has been tested and validated. As far as I'm
