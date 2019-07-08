@@ -42,7 +42,7 @@ ARG VERSION
 # Build-time metadata as defined at https://github.com/opencontainers/image-spec/blob/master/annotations.md
 LABEL org.opencontainers.image.created="${BUILD_DATE}" \
       org.opencontainers.image.title="UniFi Poller" \
-      org.opencontainers.image.documentation="https://github.com/davidnewhall/unifi-poller/wiki" \
+      org.opencontainers.image.documentation="https://github.com/davidnewhall/unifi-poller/wiki/Docker" \
       org.opencontainers.image.description="Polls a UniFi controller and stores metrics in InfluxDB" \
       org.opencontainers.image.url="https://github.com/davidnewhall/unifi-poller" \
       org.opencontainers.image.revision="${COMMIT}" \
