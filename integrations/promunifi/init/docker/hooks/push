@@ -20,7 +20,7 @@ for build in $BUILDS; do
 done
 echo "Annotating Images: ${IMAGES}"
 
-# Build all the Docker tags if the github branch is a release and not master.
+# Build all the Docker tags if the source branch is a release and not a branch.
 [ "v$VERSION" != "$SOURCE_BRANCH" ] || TAGS="latest $VERSION $SHORTVER stable"
 echo "Version: $VERSION, Source: $SOURCE_BRANCH, Building tags: ${TAGS}"
 
