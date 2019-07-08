@@ -19,12 +19,9 @@ if [ "$ARCH" = "x86_64" ] || [ "$ARCH" = "amd64" ]; then
 elif [[ $ARCH == *386* ]] || [[ $ARCH == *686* ]]; then
   ARCH="i386"
 elif [[ $ARCH == *arm64* ]] || [[ $ARCH == *armv8* ]]; then
-  echo "Unsupported Architecture: ${ARCH}, sorry!"
-  exit 1
+  ARCH="arm64"
 elif [[ $ARCH == *armv6* ]] || [[ $ARCH == *armv7* ]]; then
   ARCH="armhf"
-elif [[ $ARCH == *arm* ]]; then
-  ARCH="arm"
 else
   echo "Unknown Architecture. Submit a pull request to fix this, please."
   echo ==> $ARCH
