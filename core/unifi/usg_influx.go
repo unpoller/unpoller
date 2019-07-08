@@ -158,6 +158,7 @@ func (u USG) Points() ([]*influx.Point, error) {
 			"device_mac":                u.Mac,
 			"site_name":                 u.SiteName,
 			"name":                      p.Name,
+			"up":                        p.Up.Txt,
 			"dhcpd_dns_enabled":         p.DhcpdDNSEnabled.Txt,
 			"dhcpd_enabled":             p.DhcpdEnabled.Txt,
 			"dhcpd_ntp_enabled":         p.DhcpdNtpEnabled.Txt,

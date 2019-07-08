@@ -185,7 +185,7 @@ type USG struct {
 		Mac                    string   `json:"mac"`
 		IsGuest                FlexBool `json:"is_guest"`
 		IP                     string   `json:"ip"`
-		Up                     string   `json:"up"`
+		Up                     FlexBool `json:"up"`
 		NumSta                 FlexInt  `json:"num_sta"`
 		RxBytes                FlexInt  `json:"rx_bytes"`
 		RxPackets              FlexInt  `json:"rx_packets"`
