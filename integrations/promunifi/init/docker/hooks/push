@@ -6,7 +6,7 @@ set -e -o pipefail
 
 VERSION=$(git tag -l --merged | tail -n1 | tr -d v) # 1.2.3
 SHORTVER=$(echo $VERSION | cut -d. -f1,2)           # 1.2
-if [ "$BUILDS" != "" ] && [ "$VERSION" != "" ]; then
+if [ "$BUILDS" != "" ]; then
   TAGS=$DOCKER_TAG
 fi
 
