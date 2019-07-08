@@ -30,7 +30,7 @@ RUN dep ensure --vendor-only \
 FROM scratch
 
 COPY --from=builder /go/src/github.com/davidnewhall/unifi-poller/unifi-poller /unifi-poller
-COPY --from=builder /go/src/github.com/davidnewhall/unifi-poller/examples/up.conf.example /etc/unifi-poller}/up.conf
+COPY --from=builder /go/src/github.com/davidnewhall/unifi-poller/examples/up.conf.example /etc/unifi-poller/up.conf
 
 VOLUME [ "/etc/unifi-poller" ]
 ENTRYPOINT [ "/unifi-poller" ]
