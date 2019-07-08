@@ -268,7 +268,7 @@ docker:
 	docker build -f init/docker/Dockerfile \
 		--build-arg "BUILD_DATE=${DATE}" \
 		--build-arg "COMMIT=${COMMIT}" \
-		--build-arg "VERSION=${VERSION}" \
+		--build-arg "VERSION=${VERSION}-${ITERATION}" \
 		--tag $(DHUSER)/$(BINARY):local .
 
 # Build an environment that can be packaged for linux.
