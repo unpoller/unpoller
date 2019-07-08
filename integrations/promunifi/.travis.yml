@@ -26,7 +26,7 @@ install:
 - make docker
 script:
   # Test built docker image.
-- docker run golift/unifi-poller 2>&1 | grep -Eq "Loading Configuration File[:] /etc/unifi-poller/up.conf"
+- docker run golift/unifi-poller:local 2>&1 | grep -Eq "Loading Configuration File[:] /etc/unifi-poller/up.conf"
 # test and build everything
 - rvm 2.0.0 do make release
 after_success:
