@@ -1,26 +1,22 @@
 #
 # building static go binary with Debian golang container
 #
-ARG BINARY=unifi-poller
-ARG REPO=github.com/davidnewhall/${BINARY}
 
 FROM golang:stretch as builder
 ARG ARCH=amd64
 ARG OS=linux
-ARG BINARY
-ARG REPO
 
-RUN mkdir -p $GOPATH/pkg/mod $GOPATH/bin $GOPATH/src/${REPO}
+RUN mkdir -p $GOPATH/pkg/mod $GOPATH/bin $GOPATH/src/github.com/davidnewhall/unifi-poller
 RUN apt-get update \
   && apt-get install -y curl  \
   && curl https://raw.githubusercontent.com/golang/dep/master/install.sh | sh
 
-COPY . $GOPATH/src/${REPO}
-WORKDIR $GOPATH/src/${REPO}
+COPY . $GOPATH/src/github.com/davidnewhall/unifi-poller
+WORKDIR $GOPATH/src/github.com/davidnewhall/unifi-poller
 
 RUN dep ensure --vendor-only \
-  && CGO_ENABLED=0 make ${BINARY}.${ARCH}.${OS} \
-  && mv ${BINARY}.${ARCH}.${OS} ${BINARY}
+  && CGO_ENABLED=0 make unifi-poller.${ARCH}.${OS} \
+  && mv unifi-poller.${ARCH}.${OS} unifi-poller
 
 #
 # creating container for run
@@ -32,11 +28,9 @@ RUN dep ensure --vendor-only \
 #
 
 FROM scratch
-ARG REPO
-ARG BINARY
 
-COPY --from=builder /go/src/${REPO}/${BINARY} /${BINARY}
-COPY --from=builder /go/src/${REPO}/examples/up.conf.example /etc/${BINARY}/up.conf
+COPY --from=builder /go/src/github.com/davidnewhall/unifi-poller/unifi-poller /unifi-poller
+COPY --from=builder /go/src/github.com/davidnewhall/unifi-poller/examples/up.conf.example /etc/unifi-poller}/up.conf
 
-VOLUME [ "/etc/${BINARY}" ]
-ENTRYPOINT [ "/${BINARY}" ]
+VOLUME [ "/etc/unifi-poller" ]
+ENTRYPOINT [ "/unifi-poller" ]
