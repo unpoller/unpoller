@@ -12,7 +12,7 @@ git config --global user.name "unifi-auto-releaser"
 git clone git@github.com:golift/homebrew-mugs.git
 
 cp unifi-poller.rb homebrew-mugs/Formula
-pushd homebrew-mugs
-git commit -m "Update unifi-poller on Release: ${VERSION}" Formula/unifi-poller.rb
+pushd homebrew-mugs/Formula
+git commit -m "Update unifi-poller on Release: ${VERSION}" unifi-poller.rb
 git push
 popd
