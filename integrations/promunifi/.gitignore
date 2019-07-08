@@ -10,7 +10,7 @@
 /unifi-poller.*.macos
 /unifi-poller.*.linux
 /unifi-poller.rb
-checksums.sha256.txt
+*.sha256
 /vendor
 .DS_Store
 *~
