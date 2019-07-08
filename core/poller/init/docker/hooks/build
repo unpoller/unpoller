@@ -10,6 +10,7 @@ set -e -o pipefail
 VERSION=$(git tag -l --merged | tail -n1 | tr -d v) # 1.2.3
 DATE=$(date -u +%Y-%m-%dT%H:%M:%SZ)
 COMMIT=$(git rev-parse --short HEAD)
+ITERATION=$(git rev-list --count --all)
 
 # Build each configured image from Docker Cloud.
 for build in $BUILDS; do
@@ -21,7 +22,7 @@ for build in $BUILDS; do
     --build-arg "ARCH=${name}" \
     --build-arg "BUILD_DATE=${DATE}" \
     --build-arg "COMMIT=${COMMIT}" \
-    --build-arg "VERSION=${VERSION}" \
+    --build-arg "VERSION=${VERSION}-${ITERATION}" \
     --tag "${IMAGE_NAME}_${os}_${name}" \
     --file Dockerfile ../..
 done
