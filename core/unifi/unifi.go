@@ -70,12 +70,6 @@ func (u *Unifi) getServer() error {
 	return u.GetData(StatusPath, &response)
 }
 
-// GetServer returns the controller's version and UUID.
-// This method is deprecated and will go away in a future release, use u.Server*
-func (u *Unifi) GetServer() (*server, error) {
-	return u.server, nil
-}
-
 // GetClients returns a response full of clients' data from the Unifi Controller.
 func (u *Unifi) GetClients(sites []Site) (Clients, error) {
 	data := make([]Client, 0)
