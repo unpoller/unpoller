@@ -17,7 +17,7 @@ CONFIG_FILE=up.conf
 # md2roff turns markdown into man files and html files.
 MD2ROFF_BIN=github.com/github/hub/md2roff-bin
 # This produces a 0 in some envirnoments (like Docker), but it's only used for packages.
-ITERATION:=$(shell git rev-list --count -all || echo 0)
+ITERATION:=$(shell git rev-list --count --all || echo 0)
 # Travis CI passes the version in. Local builds get it from the current git tag.
 ifeq ($(VERSION),)
 	VERSION:=$(shell git tag -l --merged | tail -n1 | tr -d v || echo development)
