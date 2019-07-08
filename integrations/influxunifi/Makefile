@@ -12,6 +12,11 @@ BINARY:=$(shell basename $(shell pwd))
 URL:=https://github.com/$(GHUSER)/$(BINARY)
 CONFIG_FILE=up.conf
 
+# This parameter is passed in as -X to go build. Used to override the Version variable in a package.
+# This makes a path like github.com/davidnewhall/unifi-poller/unifipoller.Version=1.3.3
+# Name the Version-containing library the same as the github repo, without dashes.
+VERSION_PATH:=github.com/$(GHUSER)/$(BINARY)/$(shell echo $(BINARY) | tr -d -- -).Version
+
 # These don't generally need to be changed.
 
 # md2roff turns markdown into man files and html files.
@@ -22,14 +27,12 @@ ITERATION:=$(shell git rev-list --count --all || echo 0)
 ifeq ($(VERSION),)
 	VERSION:=$(shell git tag -l --merged | tail -n1 | tr -d v || echo development)
 endif
+ifeq ($(VERSION),)
+	VERSION:=development
+endif
 # rpm is wierd and changes - to _ in versions.
 RPMVERSION:=$(shell echo $(VERSION) | tr -- - _)
 DATE:=$(shell date)
-
-# This parameter is passed in as -X to go build. Used to override the Version variable in a package.
-# This makes a path like github.com/davidnewhall/unifi-poller/unifipoller.Version=1.3.3
-# Name the Version-containing library the same as the github repo, without dashes.
-VERSION_PATH:=github.com/$(GHUSER)/$(BINARY)/$(shell echo $(BINARY) | tr -d -- -).Version=$(VERSION)
 
 # Makefile targets follow.
 
@@ -77,40 +80,40 @@ README.html: md2roff
 
 build: $(BINARY)
 $(BINARY):
-	go build -o $(BINARY) -ldflags "-w -s -X $(VERSION_PATH)"
+	go build -o $(BINARY) -ldflags "-w -s -X $(VERSION_PATH)=$(VERSION)"
 
 linux: $(BINARY).amd64.linux
 $(BINARY).amd64.linux:
 	# Building linux 64-bit x86 binary.
-	GOOS=linux GOARCH=amd64 go build -o $@ -ldflags "-w -s -X $(VERSION_PATH)"
+	GOOS=linux GOARCH=amd64 go build -o $@ -ldflags "-w -s -X $(VERSION_PATH)=$(VERSION)"
 
 linux386: $(BINARY).i386.linux
 $(BINARY).i386.linux:
 	# Building linux 32-bit x86 binary.
-	GOOS=linux GOARCH=386 go build -o $@ -ldflags "-w -s -X $(VERSION_PATH)"
+	GOOS=linux GOARCH=386 go build -o $@ -ldflags "-w -s -X $(VERSION_PATH)=$(VERSION)"
 
 arm: arm64 armhf
 
 arm64: $(BINARY).arm64.linux
 $(BINARY).arm64.linux:
 	# Building linux 64-bit ARM binary.
-	GOOS=linux GOARCH=arm64 go build -o $@ -ldflags "-w -s -X $(VERSION_PATH)"
+	GOOS=linux GOARCH=arm64 go build -o $@ -ldflags "-w -s -X $(VERSION_PATH)=$(VERSION)"
 
 armhf: $(BINARY).armhf.linux
 $(BINARY).armhf.linux:
 	# Building linux 32-bit ARM binary.
-	GOOS=linux GOARCH=arm GOARM=6 go build -o $@ -ldflags "-w -s -X $(VERSION_PATH)"
+	GOOS=linux GOARCH=arm GOARM=6 go build -o $@ -ldflags "-w -s -X $(VERSION_PATH)=$(VERSION)"
 
 macos: $(BINARY).amd64.macos
 $(BINARY).amd64.macos:
 	# Building darwin 64-bit x86 binary.
-	GOOS=darwin GOARCH=amd64 go build -o $@ -ldflags "-w -s -X $(VERSION_PATH)"
+	GOOS=darwin GOARCH=amd64 go build -o $@ -ldflags "-w -s -X $(VERSION_PATH)=$(VERSION)"
 
 exe: $(BINARY).amd64.exe
 windows: $(BINARY).amd64.exe
 $(BINARY).amd64.exe:
 	# Building windows 64-bit x86 binary.
-	GOOS=windows GOARCH=amd64 go build -o $@ -ldflags "-w -s -X $(VERSION_PATH)"
+	GOOS=windows GOARCH=amd64 go build -o $@ -ldflags "-w -s -X $(VERSION_PATH)=$(VERSION)"
 
 # Packages
 
