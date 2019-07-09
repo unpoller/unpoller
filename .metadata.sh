@@ -13,8 +13,8 @@ CONFIG_FILE="up.conf"
 LICENSE="MIT"
 
 # The rest if mostly automatic.
-
-BINARY="$(basename $(pwd))"
+BINARY="$(basename $(git rev-parse --show-toplevel))"
+[ "$BINARY" != "" ] || BINARY="$(basename $(pwd))"
 GHREPO="${GHUSER}/${BINARY}"
 URL="https://github.com/${GHREPO}"
 
