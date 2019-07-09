@@ -1,0 +1,20 @@
+# Systemd service unit for {{BINARY}}.
+
+[Unit]
+Description={{BINARY}} - {{DESC}}
+After=network.target
+Requires=network.target
+
+[Service]
+ExecStart=/usr/bin/{{BINARY}} $DAEMON_OPTS
+EnvironmentFile=-/etc/default/{{BINARY}}
+EnvironmentFile=-/etc/sysconfig/{{BINARY}}
+Restart=on-error
+StandardOutput=syslog
+StandardError=syslog
+SyslogIdentifier={{BINARY}}
+Type=simple
+User=nobody
+
+[Install]
+WantedBy=multi-user.target
