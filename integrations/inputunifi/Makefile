@@ -1,39 +1,27 @@
 # This Makefile is written as generic as possible.
-# Setting these variables and creating the necesarry paths in your GitHub repo will make this file work.
+# Setting the variables in .metadata.sh and creating the paths in the repo makes this work.
 #
-# github username
-GHUSER=davidnewhall
-# docker hub username
-DHUSER=golift
-MAINT=David Newhall II <david at sleepers dot pro>
-DESC=Polls a UniFi controller and stores metrics in InfluxDB
-GOLANGCI_LINT_ARGS=--enable-all -D gochecknoglobals
-BINARY:=$(shell basename $(shell pwd))
-URL:=https://github.com/$(GHUSER)/$(BINARY)
-CONFIG_FILE=up.conf
 
-# This parameter is passed in as -X to go build. Used to override the Version variable in a package.
-# This makes a path like github.com/davidnewhall/unifi-poller/unifipoller.Version=1.3.3
-# Name the Version-containing library the same as the github repo, without dashes.
-VERSION_PATH:=github.com/$(GHUSER)/$(BINARY)/$(shell echo $(BINARY) | tr -d -- -).Version
-
-# These don't generally need to be changed.
+# Suck in our application information.
+IGNORE := $(shell bash -c "source .metadata.sh ; env | sed 's/=/:=/;s/^/export /' > .metadata.make")
 
 # md2roff turns markdown into man files and html files.
 MD2ROFF_BIN=github.com/github/hub/md2roff-bin
-# This produces a 0 in some envirnoments (like Homebrew), but it's only used for packages.
-ITERATION:=$(shell git rev-list --count --all || echo 0)
+
 # Travis CI passes the version in. Local builds get it from the current git tag.
 ifeq ($(VERSION),)
-	VERSION:=$(shell git tag -l --merged | tail -n1 | tr -d v || echo development)
+	include .metadata.make
+else
+	# Preserve the passed-in version & iteration (homebrew).
+	_VERSION:=$(VERSION)
+	_ITERATION:=$(ITERATION)
+	include .metadata.make
+	VERSION:=$(_VERSION)
+	ITERATION:=$(_ITERATION)
 endif
-ifeq ($(VERSION),)
-	VERSION:=development
-endif
+
 # rpm is wierd and changes - to _ in versions.
 RPMVERSION:=$(shell echo $(VERSION) | tr -- - _)
-DATE:=$(shell date -u +%Y-%m-%dT%H:%M:%SZ)
-COMMIT:=$(shell git rev-parse --short HEAD || echo 0)
 
 # Makefile targets follow.
 
@@ -54,7 +42,7 @@ release: clean vendor test macos arm windows linux_packages
 clean:
 	# Cleaning up.
 	rm -f $(BINARY) $(BINARY).*.{macos,linux,exe}{,.gz,.zip} $(BINARY).1{,.gz} $(BINARY).rb
-	rm -f $(BINARY){_,-}*.{deb,rpm} v*.tar.gz.sha256
+	rm -f $(BINARY){_,-}*.{deb,rpm} v*.tar.gz.sha256 .metadata.make
 	rm -f cmd/$(BINARY)/README{,.html} README{,.html} ./$(BINARY)_manual.html
 	rm -rf package_build_* release
 
@@ -131,7 +119,7 @@ $(BINARY)-$(RPMVERSION)-$(ITERATION).x86_64.rpm: package_build_linux check_fpm
 		--iteration $(ITERATION) \
 		--after-install scripts/after-install.sh \
 		--before-remove scripts/before-remove.sh \
-		--license MIT \
+		--license $(LICENSE) \
 		--url $(URL) \
 		--maintainer "$(MAINT)" \
 		--description "$(DESC)" \
@@ -149,7 +137,7 @@ $(BINARY)_$(VERSION)-$(ITERATION)_amd64.deb: package_build_linux check_fpm
 		--iteration $(ITERATION) \
 		--after-install scripts/after-install.sh \
 		--before-remove scripts/before-remove.sh \
-		--license MIT \
+		--license $(LICENSE) \
 		--url $(URL) \
 		--maintainer "$(MAINT)" \
 		--description "$(DESC)" \
@@ -167,7 +155,7 @@ $(BINARY)-$(RPMVERSION)-$(ITERATION).i386.rpm: package_build_linux_386 check_fpm
 		--iteration $(ITERATION) \
 		--after-install scripts/after-install.sh \
 		--before-remove scripts/before-remove.sh \
-		--license MIT \
+		--license $(LICENSE) \
 		--url $(URL) \
 		--maintainer "$(MAINT)" \
 		--description "$(DESC)" \
@@ -185,7 +173,7 @@ $(BINARY)_$(VERSION)-$(ITERATION)_i386.deb: package_build_linux_386 check_fpm
 		--iteration $(ITERATION) \
 		--after-install scripts/after-install.sh \
 		--before-remove scripts/before-remove.sh \
-		--license MIT \
+		--license $(LICENSE) \
 		--url $(URL) \
 		--maintainer "$(MAINT)" \
 		--description "$(DESC)" \
@@ -203,7 +191,7 @@ $(BINARY)-$(RPMVERSION)-$(ITERATION).arm64.rpm: package_build_linux_arm64 check_
 		--iteration $(ITERATION) \
 		--after-install scripts/after-install.sh \
 		--before-remove scripts/before-remove.sh \
-		--license MIT \
+		--license $(LICENSE) \
 		--url $(URL) \
 		--maintainer "$(MAINT)" \
 		--description "$(DESC)" \
@@ -221,7 +209,7 @@ $(BINARY)_$(VERSION)-$(ITERATION)_arm64.deb: package_build_linux_arm64 check_fpm
 		--iteration $(ITERATION) \
 		--after-install scripts/after-install.sh \
 		--before-remove scripts/before-remove.sh \
-		--license MIT \
+		--license $(LICENSE) \
 		--url $(URL) \
 		--maintainer "$(MAINT)" \
 		--description "$(DESC)" \
@@ -239,7 +227,7 @@ $(BINARY)-$(RPMVERSION)-$(ITERATION).armhf.rpm: package_build_linux_armhf check_
 		--iteration $(ITERATION) \
 		--after-install scripts/after-install.sh \
 		--before-remove scripts/before-remove.sh \
-		--license MIT \
+		--license $(LICENSE) \
 		--url $(URL) \
 		--maintainer "$(MAINT)" \
 		--description "$(DESC)" \
@@ -257,7 +245,7 @@ $(BINARY)_$(VERSION)-$(ITERATION)_armhf.deb: package_build_linux_armhf check_fpm
 		--iteration $(ITERATION) \
 		--after-install scripts/after-install.sh \
 		--before-remove scripts/before-remove.sh \
-		--license MIT \
+		--license $(LICENSE) \
 		--url $(URL) \
 		--maintainer "$(MAINT)" \
 		--description "$(DESC)" \
@@ -266,24 +254,33 @@ $(BINARY)_$(VERSION)-$(ITERATION)_armhf.deb: package_build_linux_armhf check_fpm
 
 docker:
 	docker build -f init/docker/Dockerfile \
-		--build-arg "BUILD_DATE=${DATE}" \
-		--build-arg "COMMIT=${COMMIT}" \
-		--build-arg "VERSION=${VERSION}-${ITERATION}" \
+		--build-arg "BUILD_DATE=$(DATE)" \
+		--build-arg "COMMIT=$(COMMIT)" \
+		--build-arg "VERSION=$(VERSION)-$(ITERATION)" \
+		--build-arg "LICENSE=$(LICENSE)" \
+		--build-arg "DESC=$(DESC)" \
+		--build-arg "URL=$(URL)" \
+		--build-arg "VENDOR=$(VENDOR)" \
+		--build-arg "AUTHOR=$(MAINT)" \
+		--build-arg "BINARY=$(BINARY)" \
+		--build-arg "GHREPO=$(GHREPO)" \
+		--build-arg "CONFIG_FILE=$(CONFIG_FILE)" \
 		--tag $(DHUSER)/$(BINARY):local .
 
 # Build an environment that can be packaged for linux.
 package_build_linux: readme man linux
 	# Building package environment for linux.
-	mkdir -p $@/usr/bin $@/etc/$(BINARY) $@/lib/systemd/system
-	mkdir -p $@/usr/share/man/man1 $@/usr/share/doc/$(BINARY)
+	mkdir -p $@/usr/bin $@/etc/$(BINARY) $@/usr/share/man/man1 $@/usr/share/doc/$(BINARY)
 	# Copying the binary, config file, unit file, and man page into the env.
 	cp $(BINARY).amd64.linux $@/usr/bin/$(BINARY)
 	cp *.1.gz $@/usr/share/man/man1
 	cp examples/$(CONFIG_FILE).example $@/etc/$(BINARY)/
 	cp examples/$(CONFIG_FILE).example $@/etc/$(BINARY)/$(CONFIG_FILE)
 	cp LICENSE *.html examples/*?.?* $@/usr/share/doc/$(BINARY)/
-	# These go to their own folder so the img src in the html pages continue to work.
-	cp init/systemd/$(BINARY).service $@/lib/systemd/system/
+	[ ! -f init/systemd/template.unit.service ] || mkdir -p $@/lib/systemd/system
+	[ ! -f init/systemd/template.unit.service ] || \
+		sed -e "s/{{BINARY}}/$(BINARY)/g" -e "s/{{DESC}}/$(DESC)/g" \
+		init/systemd/template.unit.service > $@/lib/systemd/system/$(BINARY).service
 
 package_build_linux_386: package_build_linux linux386
 	mkdir -p $@
@@ -312,7 +309,15 @@ v$(VERSION).tar.gz.sha256:
 	curl -sL $(URL)/archive/v$(VERSION).tar.gz | openssl dgst -r -sha256 | tee $@
 $(BINARY).rb: v$(VERSION).tar.gz.sha256
 	# Creating formula from template using sed.
-	sed "s/{{Version}}/$(VERSION)/g;s/{{SHA256}}/`head -c64 $<`/g;s/{{Desc}}/$(DESC)/g;s%{{URL}}%$(URL)%g" init/homebrew/$(BINARY).rb.tmpl | tee $(BINARY).rb
+	sed -e "s/{{Version}}/$(VERSION)/g" \
+		-e "s/{{Iter}}/$(ITERATION)/g" \
+		-e "s/{{SHA256}}/$(shell head -c64 $<)/g" \
+		-e "s/{{Desc}}/$(DESC)/g" \
+		-e "s%{{URL}}%$(URL)%g" \
+		-e "s%{{GHREPO}}%$(GHREPO)%g" \
+		-e "s%{{CONFIG_FILE}}%$(CONFIG_FILE)%g" \
+		-e "s%{{Class}}%$(shell echo $(BINARY) | perl -pe 's/(?:\b|-)(\p{Ll})/\u$$1/g')%g" \
+		init/homebrew/formula.rb.tmpl | tee $(BINARY).rb
 
 # Extras
 
@@ -352,7 +357,6 @@ install: man readme $(BINARY)
 	/usr/bin/install -m 0644 -cp examples/$(CONFIG_FILE).example $(ETC)/$(BINARY)/
 	[ -f $(ETC)/$(BINARY)/$(CONFIG_FILE) ] || /usr/bin/install -m 0644 -cp  examples/$(CONFIG_FILE).example $(ETC)/$(BINARY)/$(CONFIG_FILE)
 	/usr/bin/install -m 0644 -cp LICENSE *.html examples/* $(PREFIX)/share/doc/$(BINARY)/
-	# These go to their own folder so the img src in the html pages continue to work.
 
 # If you installed with `make install` run `make uninstall` before installing a binary package. (even on Linux!!!)
 # This will remove the package install from macOS, it will not remove a package install from Linux.
