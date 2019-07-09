@@ -13,8 +13,8 @@ ifeq ($(VERSION),)
 	include .metadata.make
 else
 	# Preserve the passed-in version & iteration (homebrew).
-  _VERSION:=$(VERSION)
-  _ITERATION:=$(ITERATION)
+	_VERSION:=$(VERSION)
+	_ITERATION:=$(ITERATION)
 	include .metadata.make
 	VERSION:=$(_VERSION)
 	ITERATION:=$(_ITERATION)
@@ -42,7 +42,7 @@ release: clean vendor test macos arm windows linux_packages
 clean:
 	# Cleaning up.
 	rm -f $(BINARY) $(BINARY).*.{macos,linux,exe}{,.gz,.zip} $(BINARY).1{,.gz} $(BINARY).rb
-	rm -f $(BINARY){_,-}*.{deb,rpm} v*.tar.gz.sha256
+	rm -f $(BINARY){_,-}*.{deb,rpm} v*.tar.gz.sha256 .metadata.make
 	rm -f cmd/$(BINARY)/README{,.html} README{,.html} ./$(BINARY)_manual.html
 	rm -rf package_build_* release
 
@@ -254,15 +254,17 @@ $(BINARY)_$(VERSION)-$(ITERATION)_armhf.deb: package_build_linux_armhf check_fpm
 
 docker:
 	docker build -f init/docker/Dockerfile \
-		--build-arg "BUILD_DATE=${DATE}" \
-		--build-arg "COMMIT=${COMMIT}" \
-		--build-arg "VERSION=${VERSION}-${ITERATION}" \
-		--build-arg "LICENSE=${LICENSE}" \
-		--build-arg "TITLE=${TITLE}" \
-		--build-arg "DESC=${DESC}" \
-		--build-arg "URL=${URL}" \
-		--build-arg "VENDOR=${VENDOR}" \
-		--build-arg "AUTHOR=${MAINT}" \
+		--build-arg "BUILD_DATE=$(DATE)" \
+		--build-arg "COMMIT=$(COMMIT)" \
+		--build-arg "VERSION=$(VERSION)-$(ITERATION)" \
+		--build-arg "LICENSE=$(LICENSE)" \
+		--build-arg "DESC=$(DESC)" \
+		--build-arg "URL=$(URL)" \
+		--build-arg "VENDOR=$(VENDOR)" \
+		--build-arg "AUTHOR=$(MAINT)" \
+		--build-arg "BINARY=$(BINARY)" \
+		--build-arg "GHREPO=$(GHREPO)" \
+    --build-arg "CONFIG_FILE=$(CONFIG_FILE)" \
 		--tag $(DHUSER)/$(BINARY):local .
 
 # Build an environment that can be packaged for linux.
@@ -306,8 +308,15 @@ v$(VERSION).tar.gz.sha256:
 	curl -sL $(URL)/archive/v$(VERSION).tar.gz | openssl dgst -r -sha256 | tee $@
 $(BINARY).rb: v$(VERSION).tar.gz.sha256
 	# Creating formula from template using sed.
-	sed "s/{{Version}}/$(VERSION)/g;s/{{SHA256}}/`head -c64 $<`/g;s/{{Desc}}/$(DESC)/g;s%{{URL}}%$(URL)%g" init/homebrew/$(BINARY).rb.tmpl | tee $(BINARY).rb
-
+	sed -e "s/{{Version}}/$(VERSION)/g" \
+		-e "s/{{Iter}}/$(ITERATION)/g" \
+		-e "s/{{SHA256}}/$(shell head -c64 $<)/g" \
+		-e "s/{{Desc}}/$(DESC)/g" \
+		-e "s%{{URL}}%$(URL)%g" \
+		-e "s%{{GHREPO}}%$(GHREPO)%g" \
+		-e "s%{{CONFIG_FILE}}%$(CONFIG_FILE)%g" \
+		-e "s%{{Class}}%$(shell echo $(BINARY) | perl -pe 's/(?:\b|-)(\p{Ll})/\u$$1/g')%g" \
+		init/homebrew/$(BINARY).rb.tmpl | tee $(BINARY).rb
 # Extras
 
 # Run code tests and lint.
