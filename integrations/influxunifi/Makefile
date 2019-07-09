@@ -1,39 +1,27 @@
 # This Makefile is written as generic as possible.
 # Setting these variables and creating the necesarry paths in your GitHub repo will make this file work.
 #
-# github username
-GHUSER=davidnewhall
-# docker hub username
-DHUSER=golift
-MAINT=David Newhall II <david at sleepers dot pro>
-DESC=Polls a UniFi controller and stores metrics in InfluxDB
-GOLANGCI_LINT_ARGS=--enable-all -D gochecknoglobals
-BINARY:=$(shell basename $(shell pwd))
-URL:=https://github.com/$(GHUSER)/$(BINARY)
-CONFIG_FILE=up.conf
 
-# This parameter is passed in as -X to go build. Used to override the Version variable in a package.
-# This makes a path like github.com/davidnewhall/unifi-poller/unifipoller.Version=1.3.3
-# Name the Version-containing library the same as the github repo, without dashes.
-VERSION_PATH:=github.com/$(GHUSER)/$(BINARY)/$(shell echo $(BINARY) | tr -d -- -).Version
+IGNORE := $(shell bash -c "source .metadata.sh ; env | sed 's/=/:=/;s/^/export /' > .metadata.make")
 
 # These don't generally need to be changed.
 
 # md2roff turns markdown into man files and html files.
 MD2ROFF_BIN=github.com/github/hub/md2roff-bin
-# This produces a 0 in some envirnoments (like Homebrew), but it's only used for packages.
-ITERATION:=$(shell git rev-list --count --all || echo 0)
 # Travis CI passes the version in. Local builds get it from the current git tag.
 ifeq ($(VERSION),)
-	VERSION:=$(shell git tag -l --merged | tail -n1 | tr -d v || echo development)
+	include .metadata.make
+else
+	# Preserve the passed-in version & iteration (homebrew).
+  _VERSION:=$(VERSION)
+  _ITERATION:=$(ITERATION)
+	include .metadata.make
+	VERSION:=$(_VERSION)
+	ITERATION:=$(_ITERATION)
 endif
-ifeq ($(VERSION),)
-	VERSION:=development
-endif
+
 # rpm is wierd and changes - to _ in versions.
 RPMVERSION:=$(shell echo $(VERSION) | tr -- - _)
-DATE:=$(shell date -u +%Y-%m-%dT%H:%M:%SZ)
-COMMIT:=$(shell git rev-parse --short HEAD || echo 0)
 
 # Makefile targets follow.
 
