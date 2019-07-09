@@ -37,7 +37,7 @@ COMMIT:=$(shell git rev-parse --short HEAD || echo 0)
 
 # Makefile targets follow.
 
-all: man build
+all: build
 
 # Prepare a release. Called in Travis CI.
 release: clean vendor test macos arm windows linux_packages
