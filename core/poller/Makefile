@@ -356,7 +356,6 @@ install: man readme $(BINARY)
 	/usr/bin/install -m 0644 -cp examples/$(CONFIG_FILE).example $(ETC)/$(BINARY)/
 	[ -f $(ETC)/$(BINARY)/$(CONFIG_FILE) ] || /usr/bin/install -m 0644 -cp  examples/$(CONFIG_FILE).example $(ETC)/$(BINARY)/$(CONFIG_FILE)
 	/usr/bin/install -m 0644 -cp LICENSE *.html examples/* $(PREFIX)/share/doc/$(BINARY)/
-	# These go to their own folder so the img src in the html pages continue to work.
 
 # If you installed with `make install` run `make uninstall` before installing a binary package. (even on Linux!!!)
 # This will remove the package install from macOS, it will not remove a package install from Linux.
