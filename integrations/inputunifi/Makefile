@@ -119,7 +119,7 @@ $(BINARY)-$(RPMVERSION)-$(ITERATION).x86_64.rpm: package_build_linux check_fpm
 		--iteration $(ITERATION) \
 		--after-install scripts/after-install.sh \
 		--before-remove scripts/before-remove.sh \
-		--license MIT \
+		--license $(LICENSE) \
 		--url $(URL) \
 		--maintainer "$(MAINT)" \
 		--description "$(DESC)" \
@@ -137,7 +137,7 @@ $(BINARY)_$(VERSION)-$(ITERATION)_amd64.deb: package_build_linux check_fpm
 		--iteration $(ITERATION) \
 		--after-install scripts/after-install.sh \
 		--before-remove scripts/before-remove.sh \
-		--license MIT \
+		--license $(LICENSE) \
 		--url $(URL) \
 		--maintainer "$(MAINT)" \
 		--description "$(DESC)" \
@@ -155,7 +155,7 @@ $(BINARY)-$(RPMVERSION)-$(ITERATION).i386.rpm: package_build_linux_386 check_fpm
 		--iteration $(ITERATION) \
 		--after-install scripts/after-install.sh \
 		--before-remove scripts/before-remove.sh \
-		--license MIT \
+		--license $(LICENSE) \
 		--url $(URL) \
 		--maintainer "$(MAINT)" \
 		--description "$(DESC)" \
@@ -173,7 +173,7 @@ $(BINARY)_$(VERSION)-$(ITERATION)_i386.deb: package_build_linux_386 check_fpm
 		--iteration $(ITERATION) \
 		--after-install scripts/after-install.sh \
 		--before-remove scripts/before-remove.sh \
-		--license MIT \
+		--license $(LICENSE) \
 		--url $(URL) \
 		--maintainer "$(MAINT)" \
 		--description "$(DESC)" \
@@ -191,7 +191,7 @@ $(BINARY)-$(RPMVERSION)-$(ITERATION).arm64.rpm: package_build_linux_arm64 check_
 		--iteration $(ITERATION) \
 		--after-install scripts/after-install.sh \
 		--before-remove scripts/before-remove.sh \
-		--license MIT \
+		--license $(LICENSE) \
 		--url $(URL) \
 		--maintainer "$(MAINT)" \
 		--description "$(DESC)" \
@@ -209,7 +209,7 @@ $(BINARY)_$(VERSION)-$(ITERATION)_arm64.deb: package_build_linux_arm64 check_fpm
 		--iteration $(ITERATION) \
 		--after-install scripts/after-install.sh \
 		--before-remove scripts/before-remove.sh \
-		--license MIT \
+		--license $(LICENSE) \
 		--url $(URL) \
 		--maintainer "$(MAINT)" \
 		--description "$(DESC)" \
@@ -227,7 +227,7 @@ $(BINARY)-$(RPMVERSION)-$(ITERATION).armhf.rpm: package_build_linux_armhf check_
 		--iteration $(ITERATION) \
 		--after-install scripts/after-install.sh \
 		--before-remove scripts/before-remove.sh \
-		--license MIT \
+		--license $(LICENSE) \
 		--url $(URL) \
 		--maintainer "$(MAINT)" \
 		--description "$(DESC)" \
@@ -245,7 +245,7 @@ $(BINARY)_$(VERSION)-$(ITERATION)_armhf.deb: package_build_linux_armhf check_fpm
 		--iteration $(ITERATION) \
 		--after-install scripts/after-install.sh \
 		--before-remove scripts/before-remove.sh \
-		--license MIT \
+		--license $(LICENSE) \
 		--url $(URL) \
 		--maintainer "$(MAINT)" \
 		--description "$(DESC)" \
@@ -257,6 +257,12 @@ docker:
 		--build-arg "BUILD_DATE=${DATE}" \
 		--build-arg "COMMIT=${COMMIT}" \
 		--build-arg "VERSION=${VERSION}-${ITERATION}" \
+		--build-arg "LICENSE=${LICENSE}" \
+		--build-arg "TITLE=${TITLE}" \
+		--build-arg "DESC=${DESC}" \
+		--build-arg "URL=${URL}" \
+		--build-arg "VENDOR=${VENDOR}" \
+		--build-arg "AUTHOR=${MAINT}" \
 		--tag $(DHUSER)/$(BINARY):local .
 
 # Build an environment that can be packaged for linux.
