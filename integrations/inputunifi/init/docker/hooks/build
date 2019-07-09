@@ -27,7 +27,7 @@ for build in $BUILDS; do
     --build-arg "VENDOR=${VENDOR}" \
     --build-arg "AUTHOR=${MAINT}" \
     --tag "${IMAGE_NAME}_${os}_${name}" \
-    --file Dockerfile .
+    --file ${DOCKERFILE_PATH} .
 done
 
 popd
