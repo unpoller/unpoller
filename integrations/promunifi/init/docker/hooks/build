@@ -1,13 +1,13 @@
 #!/bin/bash
-
-# This always run local to the Dockerfile folder, so the path is ../..
-
-set -e -o pipefail
-
 # The Docker Cloud config must pass in the BUILDS env variable.
 # See README.md (in this dir) and the screenshot for more info.
 
-source ../../.metadata.sh
+set -e -o pipefail
+
+# This always run local to the Dockerfile folder, so the path is ../..
+pushd ../..
+
+source .metadata.sh
 
 # Build each configured image from Docker Cloud.
 for build in $BUILDS; do
@@ -27,5 +27,7 @@ for build in $BUILDS; do
     --build-arg "VENDOR=${VENDOR}" \
     --build-arg "AUTHOR=${MAINT}" \
     --tag "${IMAGE_NAME}_${os}_${name}" \
-    --file Dockerfile ../..
+    --file Dockerfile .
 done
+
+popd
