@@ -25,7 +25,7 @@ for build in $BUILDS; do
     --build-arg "DESC=${DESC}" \
     --build-arg "URL=${URL}" \
     --build-arg "VENDOR=${VENDOR}" \
-    --build-arg "AUTHOR=${AUTHOR}" \
+    --build-arg "AUTHOR=${MAINT}" \
     --tag "${IMAGE_NAME}_${os}_${name}" \
     --file Dockerfile ../..
 done

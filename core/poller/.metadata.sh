@@ -1,6 +1,6 @@
 # Each line must have an export clause.
 # This file is parsed and sourced by the Makefile, Docker and Homebrew builds.
-
+TITLE="UniFi Poller"
 # github username
 GHUSER="davidnewhall"
 # docker hub username
@@ -30,5 +30,5 @@ ITERATION=$(git rev-list --count --all || echo 0)
 DATE="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
 COMMIT="$(git rev-parse --short HEAD || echo 0)"
 
-export GHUSER DHUSER MAINT DESC CONFIG_FILE LICENSE GOLANGCI_LINT_ARGS
+export TITLE GHUSER DHUSER MAINT VENDOR DESC CONFIG_FILE LICENSE GOLANGCI_LINT_ARGS
 export BINARY GHREPO URL VERSION_PATH VERSION ITERATION DATE COMMIT
