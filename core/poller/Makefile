@@ -1,13 +1,13 @@
 # This Makefile is written as generic as possible.
-# Setting these variables and creating the necesarry paths in your GitHub repo will make this file work.
+# Setting the variables in .metadata.sh and creating the paths in the repo makes this work.
 #
 
+# Suck in our application information.
 IGNORE := $(shell bash -c "source .metadata.sh ; env | sed 's/=/:=/;s/^/export /' > .metadata.make")
-
-# These don't generally need to be changed.
 
 # md2roff turns markdown into man files and html files.
 MD2ROFF_BIN=github.com/github/hub/md2roff-bin
+
 # Travis CI passes the version in. Local builds get it from the current git tag.
 ifeq ($(VERSION),)
 	include .metadata.make
@@ -264,22 +264,22 @@ docker:
 		--build-arg "AUTHOR=$(MAINT)" \
 		--build-arg "BINARY=$(BINARY)" \
 		--build-arg "GHREPO=$(GHREPO)" \
-    --build-arg "CONFIG_FILE=$(CONFIG_FILE)" \
+		--build-arg "CONFIG_FILE=$(CONFIG_FILE)" \
 		--tag $(DHUSER)/$(BINARY):local .
 
 # Build an environment that can be packaged for linux.
 package_build_linux: readme man linux
 	# Building package environment for linux.
-	mkdir -p $@/usr/bin $@/etc/$(BINARY) $@/lib/systemd/system
-	mkdir -p $@/usr/share/man/man1 $@/usr/share/doc/$(BINARY)
+	mkdir -p $@/usr/bin $@/etc/$(BINARY) $@/usr/share/man/man1 $@/usr/share/doc/$(BINARY)
 	# Copying the binary, config file, unit file, and man page into the env.
 	cp $(BINARY).amd64.linux $@/usr/bin/$(BINARY)
 	cp *.1.gz $@/usr/share/man/man1
 	cp examples/$(CONFIG_FILE).example $@/etc/$(BINARY)/
 	cp examples/$(CONFIG_FILE).example $@/etc/$(BINARY)/$(CONFIG_FILE)
 	cp LICENSE *.html examples/*?.?* $@/usr/share/doc/$(BINARY)/
-	# These go to their own folder so the img src in the html pages continue to work.
-	sed -e "s/{{BINARY}}/$(BINARY)/g" -e "s/{{DESC}}/$(DESC)/g" \
+	[ ! -f init/systemd/template.unit.service ] || mkdir -p $@/lib/systemd/system
+	[ ! -f init/systemd/template.unit.service ] || \
+		sed -e "s/{{BINARY}}/$(BINARY)/g" -e "s/{{DESC}}/$(DESC)/g" \
 		init/systemd/template.unit.service > $@/lib/systemd/system/$(BINARY).service
 
 package_build_linux_386: package_build_linux linux386
@@ -318,6 +318,7 @@ $(BINARY).rb: v$(VERSION).tar.gz.sha256
 		-e "s%{{CONFIG_FILE}}%$(CONFIG_FILE)%g" \
 		-e "s%{{Class}}%$(shell echo $(BINARY) | perl -pe 's/(?:\b|-)(\p{Ll})/\u$$1/g')%g" \
 		init/homebrew/formula.rb.tmpl | tee $(BINARY).rb
+
 # Extras
 
 # Run code tests and lint.
