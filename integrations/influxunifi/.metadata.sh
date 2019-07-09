@@ -7,6 +7,8 @@ BINARY="unifi-poller"
 GHUSER="davidnewhall"
 # docker hub username
 DHUSER="golift"
+# Github repo containing homebrew formula repo.
+HBREPO="golift/homebrew-mugs"
 MAINT="David Newhall II <david at sleepers dot pro>"
 VENDOR="Go Lift"
 DESC="Polls a UniFi controller and stores metrics in InfluxDB"
@@ -15,7 +17,7 @@ GOLANGCI_LINT_ARGS="--enable-all -D gochecknoglobals"
 CONFIG_FILE="up.conf"
 LICENSE="MIT"
 
-export BINARY GHUSER DHUSER MAINT VENDOR DESC GOLANGCI_LINT_ARGS CONFIG_FILE LICENSE
+export BINARY GHUSER DHUSER HBREPO MAINT VENDOR DESC GOLANGCI_LINT_ARGS CONFIG_FILE LICENSE
 
 # The rest is mostly automatic.
 
