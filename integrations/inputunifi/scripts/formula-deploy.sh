@@ -11,11 +11,11 @@ make ${BINARY}.rb
 git config --global user.email "${BINARY}@auto.releaser"
 git config --global user.name "${BINARY}-auto-releaser"
 
-rm -rf homebrew-mugs
-git clone git@github.com:golift/homebrew-mugs.git
+rm -rf homebrew_release_repo
+git clone git@github.com:${HBREPO}.git homebrew_release_repo
 
-cp ${BINARY}.rb homebrew-mugs/Formula
-pushd homebrew-mugs
+cp ${BINARY}.rb homebrew_release_repo/Formula
+pushd homebrew_release_repo
 git commit -m "Update ${BINARY} on Release: v${VERSION}-${ITERATION}" Formula/${BINARY}.rb
 git push
 popd
