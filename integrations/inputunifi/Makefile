@@ -279,7 +279,8 @@ package_build_linux: readme man linux
 	cp examples/$(CONFIG_FILE).example $@/etc/$(BINARY)/$(CONFIG_FILE)
 	cp LICENSE *.html examples/*?.?* $@/usr/share/doc/$(BINARY)/
 	# These go to their own folder so the img src in the html pages continue to work.
-	cp init/systemd/$(BINARY).service $@/lib/systemd/system/
+	sed -e "s/{{BINARY}}/$(BINARY)/g" -e "s/{{DESC}}/$(DESC)/g" \
+		init/systemd/template.unit.service > $@/lib/systemd/system/$(BINARY).service
 
 package_build_linux_386: package_build_linux linux386
 	mkdir -p $@
@@ -316,7 +317,7 @@ $(BINARY).rb: v$(VERSION).tar.gz.sha256
 		-e "s%{{GHREPO}}%$(GHREPO)%g" \
 		-e "s%{{CONFIG_FILE}}%$(CONFIG_FILE)%g" \
 		-e "s%{{Class}}%$(shell echo $(BINARY) | perl -pe 's/(?:\b|-)(\p{Ll})/\u$$1/g')%g" \
-		init/homebrew/$(BINARY).rb.tmpl | tee $(BINARY).rb
+		init/homebrew/formula.rb.tmpl | tee $(BINARY).rb
 # Extras
 
 # Run code tests and lint.
