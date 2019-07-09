@@ -21,11 +21,13 @@ for build in $BUILDS; do
     --build-arg "COMMIT=${COMMIT}" \
     --build-arg "VERSION=${VERSION}-${ITERATION}" \
     --build-arg "LICENSE=${LICENSE}" \
-    --build-arg "TITLE=${TITLE}" \
     --build-arg "DESC=${DESC}" \
     --build-arg "URL=${URL}" \
     --build-arg "VENDOR=${VENDOR}" \
     --build-arg "AUTHOR=${MAINT}" \
+    --build-arg "BINARY=${BINARY}" \
+    --build-arg "GHREPO=${GHREPO}" \
+    --build-arg "CONFIG_FILE=${CONFIG_FILE}" \
     --tag "${IMAGE_NAME}_${os}_${name}" \
     --file ${DOCKERFILE_PATH} .
 done
