@@ -1,4 +1,6 @@
 language: go
+git:
+  depth: false
 addons:
   apt:
     packages:
