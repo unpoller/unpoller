@@ -26,6 +26,8 @@ const (
 	UserGroupPath string = "/api/s/%s/rest/usergroup"
 	// LoginPath is Unifi Controller Login API Path
 	LoginPath string = "/api/login"
+	// IDSEvents returns Intrusion Detection Systems Events
+	IDSEvents string = "/api/s/%s/stat/ips/event"
 )
 
 // Logger is a base type to deal with changing log outputs. Create a logger
