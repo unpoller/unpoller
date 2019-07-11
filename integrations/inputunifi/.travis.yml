@@ -25,18 +25,24 @@ install:
 #- curl -sL https://install.goreleaser.com/github.com/golangci/golangci-lint.sh | sh -s -- -b $(go env GOPATH)/bin latest
 - rvm install 2.0.0
 - rvm 2.0.0 do gem install --no-document fpm
-- make docker
+before_script:
+  - source .metadata.sh
+  - make vendor
 script:
+  # Test Go and Docker.
+  - make test
+  - make docker
   # Test built docker image.
-- docker run golift/unifi-poller:local 2>&1 | grep -Eq "Loading Configuration File[:] /etc/unifi-poller/up.conf"
-# test and build everything
-- rvm 2.0.0 do make release
+  - docker run $BINARY -v 2>&1 | grep -Eq "^$BINARY v$VERSION"
+  # Build everything
+  - rvm 2.0.0 do make release
 after_success:
   # Display Release Folder
   - ls -l release/
   - |
-      declare -r SSH_FILE="$(mktemp -u $HOME/.ssh/XXXXX)"
-      echo -e "Host github.com\n\tStrictHostKeyChecking no\n" >> ~/.ssh/config
+    mkdir -p $HOME/.ssh
+    declare -r SSH_FILE="$(mktemp -u $HOME/.ssh/XXXXX)"
+    echo -e "Host github.com\n\tStrictHostKeyChecking no\n" >> $HOME/.ssh/config
       # Get deploy key for golift/homebrew-mugs.
       openssl aes-256-cbc -K $encrypted_9f3147001275_key -iv $encrypted_9f3147001275_iv -in ".travis/github_deploy_key.enc" -out "$SSH_FILE" -d
       chmod 600 "$SSH_FILE" \
@@ -44,7 +50,7 @@ after_success:
           "Host github.com" \
           "  IdentityFile $SSH_FILE" \
           "  StrictHostKeyChecking no" \
-          "  LogLevel ERROR" >> ~/.ssh/config
+          "  LogLevel ERROR" >> $HOME/.ssh/config
 deploy:
   - provider: releases
     api_key:
@@ -54,14 +60,8 @@ deploy:
     file_glob: true
     file: release/*
     on:
-      repo: davidnewhall/unifi-poller
       tags: true
   - provider: script
     script: scripts/formula-deploy.sh
     on:
       tags: true
-      repo: davidnewhall/unifi-poller
-env:
-  global:
-    - GH_USER_NAME=unifi-auto-releaser
-    - GH_USER_EMAIL=unifi@auto.releaser
