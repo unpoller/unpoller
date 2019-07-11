@@ -138,6 +138,12 @@ is provided so the application can be easily adapted to any environment.
         Password used to authenticate with UniFi controller. This can also be
         set in an environment variable instead of a configuration file.
 
+    collect_ids    default: false
+        Setting this parameter to true will enable collection of Intrusion
+        Detection System data. IDS and IPS are the same data set. This is off
+        by default because most controllers do not have this enabled. It also
+        creates a lot of new metrics from controllers with a lot of IDS entries.
+
     verify_ssl     default: false
         If your UniFi controller has a valid SSL certificate, you can enable
         this option to validate it. Otherwise, any SSL certificate is valid.
