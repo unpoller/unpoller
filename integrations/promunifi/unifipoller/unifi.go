@@ -1,6 +1,7 @@
 package unifipoller
 
 import (
+	"fmt"
 	"log"
 	"strings"
 	"time"
@@ -82,6 +83,11 @@ func (u *UnifiPoller) CollectMetrics() (*Metrics, error) {
 	// Get the sites we care about.
 	m.Sites, err = u.GetFilteredSites()
 	u.LogError(err, "unifi.GetSites()")
+	if u.CollectIDS {
+		// Check back in time since twice the interval. Dups are discarded by InfluxDB.
+		m.IDSList, err = u.GetIDS(m.Sites, time.Now().Add(2*u.Interval.Duration), time.Now())
+		u.LogError(err, "unifi.GetIDS()")
+	}
 	// Get all the points.
 	m.Clients, err = u.GetClients(m.Sites)
 	u.LogError(err, "unifi.GetClients()")
@@ -133,10 +139,14 @@ func (u *UnifiPoller) ReportMetrics(metrics *Metrics) error {
 		i, _ := p.Fields()
 		fields += len(i)
 	}
+	idsMsg := ""
+	if u.CollectIDS {
+		idsMsg = fmt.Sprintf("IDS Events: %d, ", len(metrics.IDSList))
+	}
 	u.Logf("UniFi Measurements Recorded. Sites: %d, Clients: %d, "+
-		"Wireless APs: %d, Gateways: %d, Switches: %d, Points: %d, Fields: %d",
+		"Wireless APs: %d, Gateways: %d, Switches: %d, %sPoints: %d, Fields: %d",
 		len(metrics.Sites), len(metrics.Clients), len(metrics.UAPs),
-		len(metrics.USGs), len(metrics.USWs), points, fields)
+		len(metrics.USGs), len(metrics.USWs), idsMsg, points, fields)
 	return nil
 }
 
@@ -153,6 +163,9 @@ func (m *Metrics) ProcessPoints() (errs []error) {
 		errs = append(errs, m.processPoints(asset))
 	}
 	for _, asset := range m.Clients {
+		errs = append(errs, m.processPoints(asset))
+	}
+	for _, asset := range m.IDSList {
 		errs = append(errs, m.processPoints(asset))
 	}
 	if m.Devices == nil {
