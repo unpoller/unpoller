@@ -1,9 +1,9 @@
-# This Makefile is written as generic as possible.
+# This# This Makefile is written as generic as possible.
 # Setting the variables in .metadata.sh and creating the paths in the repo makes this work.
 #
 
 # Suck in our application information.
-IGNORE := $(shell bash -c "source .metadata.sh ; env | sed 's/=/:=/;s/^/export /' > .metadata.make")
+IGNORED:=$(shell bash -c "source .metadata.sh ; env | sed 's/=/:=/;s/^/export /' > .metadata.make")
 
 # md2roff turns markdown into man files and html files.
 MD2ROFF_BIN=github.com/github/hub/md2roff-bin
@@ -23,12 +23,31 @@ endif
 # rpm is wierd and changes - to _ in versions.
 RPMVERSION:=$(shell echo $(VERSION) | tr -- - _)
 
+PACKAGE_SCRIPTS=
+ifeq ($(FORMULA),service)
+	PACKAGE_SCRIPTS=--after-install scripts/after-install.sh --before-remove scripts/before-remove.sh
+endif
+
+define PACKAGE_ARGS
+$(PACKAGE_SCRIPTS) \
+--name $(BINARY) \
+--deb-no-default-config-files \
+--rpm-os linux \
+--iteration $(ITERATION) \
+--license $(LICENSE) \
+--url $(URL) \
+--maintainer "$(MAINT)" \
+--vendor "$(VENDOR)" \
+--description "$(DESC)" \
+--config-files "/etc/$(BINARY)/$(CONFIG_FILE)"
+endef
+
 # Makefile targets follow.
 
 all: build
 
 # Prepare a release. Called in Travis CI.
-release: clean vendor test macos arm windows linux_packages
+release: clean macos arm windows linux_packages
 	# Prepareing a release!
 	mkdir -p $@
 	mv $(BINARY).*.macos $(BINARY).*.linux $@/
@@ -42,7 +61,7 @@ release: clean vendor test macos arm windows linux_packages
 clean:
 	# Cleaning up.
 	rm -f $(BINARY) $(BINARY).*.{macos,linux,exe}{,.gz,.zip} $(BINARY).1{,.gz} $(BINARY).rb
-	rm -f $(BINARY){_,-}*.{deb,rpm} v*.tar.gz.sha256 .metadata.make
+	rm -f $(BINARY){_,-}*.{deb,rpm} v*.tar.gz.sha256 examples/MANUAL .metadata.make
 	rm -f cmd/$(BINARY)/README{,.html} README{,.html} ./$(BINARY)_manual.html
 	rm -rf package_build_* release
 
@@ -111,161 +130,42 @@ linux_packages: rpm deb rpm386 deb386 debarm rpmarm debarmhf rpmarmhf
 rpm: $(BINARY)-$(RPMVERSION)-$(ITERATION).x86_64.rpm
 $(BINARY)-$(RPMVERSION)-$(ITERATION).x86_64.rpm: package_build_linux check_fpm
 	@echo "Building 'rpm' package for $(BINARY) version '$(RPMVERSION)-$(ITERATION)'."
-	fpm -s dir -t rpm \
-		--architecture x86_64 \
-		--name $(BINARY) \
-		--rpm-os linux \
-		--version $(RPMVERSION) \
-		--iteration $(ITERATION) \
-		--after-install scripts/after-install.sh \
-		--before-remove scripts/before-remove.sh \
-		--license $(LICENSE) \
-		--url $(URL) \
-		--maintainer "$(MAINT)" \
-		--description "$(DESC)" \
-		--config-files "/etc/$(BINARY)/$(CONFIG_FILE)" \
-		--chdir $<
+	fpm -s dir -t rpm $(PACKAGE_ARGS) -a x86_64 -v $(RPMVERSION) -C $<
 
 deb: $(BINARY)_$(VERSION)-$(ITERATION)_amd64.deb
 $(BINARY)_$(VERSION)-$(ITERATION)_amd64.deb: package_build_linux check_fpm
 	@echo "Building 'deb' package for $(BINARY) version '$(VERSION)-$(ITERATION)'."
-	fpm -s dir -t deb \
-		--architecture amd64 \
-		--name $(BINARY) \
-		--deb-no-default-config-files \
-		--version $(VERSION) \
-		--iteration $(ITERATION) \
-		--after-install scripts/after-install.sh \
-		--before-remove scripts/before-remove.sh \
-		--license $(LICENSE) \
-		--url $(URL) \
-		--maintainer "$(MAINT)" \
-		--description "$(DESC)" \
-		--config-files "/etc/$(BINARY)/$(CONFIG_FILE)" \
-		--chdir $<
+	fpm -s dir -t deb $(PACKAGE_ARGS) -a amd64 -v $(VERSION) -C $<
 
 rpm386: $(BINARY)-$(RPMVERSION)-$(ITERATION).i386.rpm
 $(BINARY)-$(RPMVERSION)-$(ITERATION).i386.rpm: package_build_linux_386 check_fpm
 	@echo "Building 32-bit 'rpm' package for $(BINARY) version '$(RPMVERSION)-$(ITERATION)'."
-	fpm -s dir -t rpm \
-		--architecture i386 \
-		--name $(BINARY) \
-		--rpm-os linux \
-		--version $(RPMVERSION) \
-		--iteration $(ITERATION) \
-		--after-install scripts/after-install.sh \
-		--before-remove scripts/before-remove.sh \
-		--license $(LICENSE) \
-		--url $(URL) \
-		--maintainer "$(MAINT)" \
-		--description "$(DESC)" \
-		--config-files "/etc/$(BINARY)/$(CONFIG_FILE)" \
-		--chdir $<
+	fpm -s dir -t rpm $(PACKAGE_ARGS) -a i386 -v $(RPMVERSION) -C $<
 
 deb386: $(BINARY)_$(VERSION)-$(ITERATION)_i386.deb
 $(BINARY)_$(VERSION)-$(ITERATION)_i386.deb: package_build_linux_386 check_fpm
 	@echo "Building 32-bit 'deb' package for $(BINARY) version '$(VERSION)-$(ITERATION)'."
-	fpm -s dir -t deb \
-		--architecture i386 \
-		--name $(BINARY) \
-		--deb-no-default-config-files \
-		--version $(VERSION) \
-		--iteration $(ITERATION) \
-		--after-install scripts/after-install.sh \
-		--before-remove scripts/before-remove.sh \
-		--license $(LICENSE) \
-		--url $(URL) \
-		--maintainer "$(MAINT)" \
-		--description "$(DESC)" \
-		--config-files "/etc/$(BINARY)/$(CONFIG_FILE)" \
-		--chdir $<
+	fpm -s dir -t deb $(PACKAGE_ARGS) -a i386 -v $(VERSION) -C $<
 
 rpmarm: $(BINARY)-$(RPMVERSION)-$(ITERATION).arm64.rpm
 $(BINARY)-$(RPMVERSION)-$(ITERATION).arm64.rpm: package_build_linux_arm64 check_fpm
 	@echo "Building 64-bit ARM8 'rpm' package for $(BINARY) version '$(RPMVERSION)-$(ITERATION)'."
-	fpm -s dir -t rpm \
-		--architecture arm64 \
-		--name $(BINARY) \
-		--rpm-os linux \
-		--version $(RPMVERSION) \
-		--iteration $(ITERATION) \
-		--after-install scripts/after-install.sh \
-		--before-remove scripts/before-remove.sh \
-		--license $(LICENSE) \
-		--url $(URL) \
-		--maintainer "$(MAINT)" \
-		--description "$(DESC)" \
-		--config-files "/etc/$(BINARY)/$(CONFIG_FILE)" \
-		--chdir $<
+	fpm -s dir -t rpm $(PACKAGE_ARGS) -a arm64 -v $(RPMVERSION) -C $<
 
 debarm: $(BINARY)_$(VERSION)-$(ITERATION)_arm64.deb
 $(BINARY)_$(VERSION)-$(ITERATION)_arm64.deb: package_build_linux_arm64 check_fpm
 	@echo "Building 64-bit ARM8 'deb' package for $(BINARY) version '$(VERSION)-$(ITERATION)'."
-	fpm -s dir -t deb \
-		--architecture arm64 \
-		--name $(BINARY) \
-		--deb-no-default-config-files \
-		--version $(VERSION) \
-		--iteration $(ITERATION) \
-		--after-install scripts/after-install.sh \
-		--before-remove scripts/before-remove.sh \
-		--license $(LICENSE) \
-		--url $(URL) \
-		--maintainer "$(MAINT)" \
-		--description "$(DESC)" \
-		--config-files "/etc/$(BINARY)/$(CONFIG_FILE)" \
-		--chdir $<
+	fpm -s dir -t deb $(PACKAGE_ARGS) -a arm64 -v $(VERSION) -C $<
 
 rpmarmhf: $(BINARY)-$(RPMVERSION)-$(ITERATION).armhf.rpm
 $(BINARY)-$(RPMVERSION)-$(ITERATION).armhf.rpm: package_build_linux_armhf check_fpm
 	@echo "Building 32-bit ARM6/7 HF 'rpm' package for $(BINARY) version '$(RPMVERSION)-$(ITERATION)'."
-	fpm -s dir -t rpm \
-		--architecture armhf \
-		--name $(BINARY) \
-		--rpm-os linux \
-		--version $(RPMVERSION) \
-		--iteration $(ITERATION) \
-		--after-install scripts/after-install.sh \
-		--before-remove scripts/before-remove.sh \
-		--license $(LICENSE) \
-		--url $(URL) \
-		--maintainer "$(MAINT)" \
-		--description "$(DESC)" \
-		--config-files "/etc/$(BINARY)/$(CONFIG_FILE)" \
-		--chdir $<
+	fpm -s dir -t rpm $(PACKAGE_ARGS) -a armhf -v $(RPMVERSION) -C $<
 
 debarmhf: $(BINARY)_$(VERSION)-$(ITERATION)_armhf.deb
 $(BINARY)_$(VERSION)-$(ITERATION)_armhf.deb: package_build_linux_armhf check_fpm
 	@echo "Building 32-bit ARM6/7 HF 'deb' package for $(BINARY) version '$(VERSION)-$(ITERATION)'."
-	fpm -s dir -t deb \
-		--architecture armhf \
-		--name $(BINARY) \
-		--deb-no-default-config-files \
-		--version $(VERSION) \
-		--iteration $(ITERATION) \
-		--after-install scripts/after-install.sh \
-		--before-remove scripts/before-remove.sh \
-		--license $(LICENSE) \
-		--url $(URL) \
-		--maintainer "$(MAINT)" \
-		--description "$(DESC)" \
-		--config-files "/etc/$(BINARY)/$(CONFIG_FILE)" \
-		--chdir $<
-
-docker:
-	docker build -f init/docker/Dockerfile \
-		--build-arg "BUILD_DATE=$(DATE)" \
-		--build-arg "COMMIT=$(COMMIT)" \
-		--build-arg "VERSION=$(VERSION)-$(ITERATION)" \
-		--build-arg "LICENSE=$(LICENSE)" \
-		--build-arg "DESC=$(DESC)" \
-		--build-arg "URL=$(URL)" \
-		--build-arg "VENDOR=$(VENDOR)" \
-		--build-arg "AUTHOR=$(MAINT)" \
-		--build-arg "BINARY=$(BINARY)" \
-		--build-arg "GHREPO=$(GHREPO)" \
-		--build-arg "CONFIG_FILE=$(CONFIG_FILE)" \
-		--tag $(DHUSER)/$(BINARY):local .
+	fpm -s dir -t deb $(PACKAGE_ARGS) -a armhf -v $(VERSION) -C $<
 
 # Build an environment that can be packaged for linux.
 package_build_linux: readme man linux
@@ -277,8 +177,8 @@ package_build_linux: readme man linux
 	cp examples/$(CONFIG_FILE).example $@/etc/$(BINARY)/
 	cp examples/$(CONFIG_FILE).example $@/etc/$(BINARY)/$(CONFIG_FILE)
 	cp LICENSE *.html examples/*?.?* $@/usr/share/doc/$(BINARY)/
-	[ ! -f init/systemd/template.unit.service ] || mkdir -p $@/lib/systemd/system
-	[ ! -f init/systemd/template.unit.service ] || \
+	[ "$(FORMULA)" != "service" ] || mkdir -p $@/lib/systemd/system
+	[ "$(FORMULA)" != "service" ] || \
 		sed -e "s/{{BINARY}}/$(BINARY)/g" -e "s/{{DESC}}/$(DESC)/g" \
 		init/systemd/template.unit.service > $@/lib/systemd/system/$(BINARY).service
 
@@ -300,6 +200,21 @@ package_build_linux_armhf: package_build_linux armhf
 check_fpm:
 	@fpm --version > /dev/null || (echo "FPM missing. Install FPM: https://fpm.readthedocs.io/en/latest/installing.html" && false)
 
+docker:
+	docker build -f init/docker/Dockerfile \
+		--build-arg "BUILD_DATE=$(DATE)" \
+		--build-arg "COMMIT=$(COMMIT)" \
+		--build-arg "VERSION=$(VERSION)-$(ITERATION)" \
+		--build-arg "LICENSE=$(LICENSE)" \
+		--build-arg "DESC=$(DESC)" \
+		--build-arg "URL=$(URL)" \
+		--build-arg "VENDOR=$(VENDOR)" \
+		--build-arg "AUTHOR=$(MAINT)" \
+		--build-arg "BINARY=$(BINARY)" \
+		--build-arg "GHREPO=$(GHREPO)" \
+		--build-arg "CONFIG_FILE=$(CONFIG_FILE)" \
+		--tag $(BINARY) .
+
 # This builds a Homebrew formula file that can be used to install this app from source.
 # The source used comes from the released version on GitHub. This will not work with local source.
 # This target is used by Travis CI to update the released Forumla when a new tag is created.
@@ -317,7 +232,7 @@ $(BINARY).rb: v$(VERSION).tar.gz.sha256
 		-e "s%{{GHREPO}}%$(GHREPO)%g" \
 		-e "s%{{CONFIG_FILE}}%$(CONFIG_FILE)%g" \
 		-e "s%{{Class}}%$(shell echo $(BINARY) | perl -pe 's/(?:\b|-)(\p{Ll})/\u$$1/g')%g" \
-		init/homebrew/formula.rb.tmpl | tee $(BINARY).rb
+		init/homebrew/$(FORMULA).rb.tmpl | tee $(BINARY).rb
 
 # Extras
 
@@ -344,9 +259,9 @@ deps:
 install: man readme $(BINARY)
 	@echo -  Done Building!  -
 	@echo -  Local installation with the Makefile is only supported on macOS.
-	@echo If you wish to install the application manually on Linux, check out the wiki: $(URL)/wiki/Installation
+	@echo If you wish to install the application manually on Linux, check out the wiki: https://github.com/$(GHREPO)/wiki/Installation
 	@echo -  Otherwise, build and install a package: make rpm -or- make deb
-	@echo See the Package Install wiki for more info: $(URL)/wiki/Package-Install
+	@echo See the Package Install wiki for more info: https://github.com/$(GHREPO)/wiki/Package-Install
 	@[ "$(shell uname)" = "Darwin" ] || (echo "Unable to continue, not a Mac." && false)
 	@[ "$(PREFIX)" != "" ] || (echo "Unable to continue, PREFIX not set. Use: make install PREFIX=/usr/local ETC=/usr/local/etc" && false)
 	@[ "$(ETC)" != "" ] || (echo "Unable to continue, ETC not set. Use: make install PREFIX=/usr/local ETC=/usr/local/etc" && false)
