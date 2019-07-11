@@ -90,40 +90,57 @@ type IDS struct {
 func (u *Unifi) GetIDS(sites []Site, from, to time.Time) ([]IDS, error) {
 	data := []IDS{}
 	for _, site := range sites {
-		var response struct {
-			Data []IDS `json:"data"`
-		}
-		u.DebugLog("Polling Controller, retreiving Unifi IDS/IPS Data, site %s (%s) ", site.Name, site.Desc)
-		URIpath := fmt.Sprintf(IPSEvents, site.Name)
-		params := fmt.Sprintf(`{"start":"%v000","end":"%v000","_limit":50000}`, from.Unix(), to.Unix())
-		req, err := u.UniReq(URIpath, params)
+		u.DebugLog("Polling Controller for IDS/IPS Data, site %s (%s) ", site.Name, site.Desc)
+		ids, err := u.GetSiteIDS(site, from, to)
 		if err != nil {
-			return nil, err
+			return data, err
 		}
-		resp, err := u.Do(req)
-		if err != nil {
-			return nil, err
-		}
-		defer func() {
-			_ = resp.Body.Close()
-		}()
-		body, err := ioutil.ReadAll(resp.Body)
-		if err != nil {
-			return nil, err
-		}
-		if resp.StatusCode != http.StatusOK {
-			return nil, errors.Errorf("invalid status code from server %s", resp.Status)
-		}
-		if err := json.Unmarshal(body, &response); err != nil {
-			return nil, err
-		}
-		for i := range response.Data {
-			response.Data[i].SiteName = site.SiteName
-		}
-		data = append(data, response.Data...)
-		u.DebugLog("Found %d IDS entries. %s", len(data), params)
+		data = append(data, ids...)
 	}
 	return data, nil
+}
+
+// GetSiteIDS is a helper to offload the for-loop work.
+// This method retreives the Intrusion Detection System Data for 1 Site.
+func (u *Unifi) GetSiteIDS(site Site, from, to time.Time) ([]IDS, error) {
+	var response struct {
+		Data []IDS `json:"data"`
+	}
+	URIpath := fmt.Sprintf(IPSEvents, site.Name)
+	params := fmt.Sprintf(`{"start":"%v000","end":"%v000","_limit":50000}`, from.Unix(), to.Unix())
+	req, err := u.UniReq(URIpath, params)
+	if err != nil {
+		return nil, err
+	}
+	resp, err := u.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	defer func() {
+		_ = resp.Body.Close()
+	}()
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return nil, err
+	}
+	if resp.StatusCode != http.StatusOK {
+		return nil, errors.Errorf("invalid status code from server %s", resp.Status)
+	}
+	if err := json.Unmarshal(body, &response); err != nil {
+		return nil, err
+	}
+	for i := range response.Data {
+		response.Data[i].SiteName = site.SiteName
+	}
+	return response.Data, nil
+}
+
+// PointsAt has no usefulness. It is provided to satisfy external interfaces.
+// These events have a timestamp, so that is used instead of any passed-in value.
+// This method generates intrusion detection datapoints for InfluxDB.
+// These points can be passed directly to influx.
+func (i IDS) PointsAt(now time.Time) ([]*influx.Point, error) {
+	return i.Points()
 }
 
 // Points generates intrusion detection datapoints for InfluxDB.

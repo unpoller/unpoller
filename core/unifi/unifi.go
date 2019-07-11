@@ -1,4 +1,4 @@
-// Package unifi provides a set of types to unload (unmarshal) Unifi Ubiquiti
+// Package unifi provides a set of types to unload (unmarshal) Ubiquiti UniFi
 // controller data. Also provided are methods to easily get data for devices -
 // things like access points and switches, and for clients - the things
 // connected to those access points and switches. As a bonus, each device and
@@ -70,14 +70,14 @@ func (u *Unifi) getServer() error {
 	return u.GetData(StatusPath, &response)
 }
 
-// GetClients returns a response full of clients' data from the Unifi Controller.
+// GetClients returns a response full of clients' data from the UniFi Controller.
 func (u *Unifi) GetClients(sites []Site) (Clients, error) {
 	data := make([]Client, 0)
 	for _, site := range sites {
 		var response struct {
 			Data []Client `json:"data"`
 		}
-		u.DebugLog("Polling Controller, retreiving Unifi Clients, site %s (%s) ", site.Name, site.Desc)
+		u.DebugLog("Polling Controller, retreiving UniFi Clients, site %s (%s) ", site.Name, site.Desc)
 		clientPath := fmt.Sprintf(ClientPath, site.Name)
 		if err := u.GetData(clientPath, &response); err != nil {
 			return nil, err
@@ -94,7 +94,7 @@ func (u *Unifi) GetClients(sites []Site) (Clients, error) {
 	return data, nil
 }
 
-// GetDevices returns a response full of devices' data from the Unifi Controller.
+// GetDevices returns a response full of devices' data from the UniFi Controller.
 func (u *Unifi) GetDevices(sites []Site) (*Devices, error) {
 	devices := new(Devices)
 	for _, site := range sites {
@@ -113,7 +113,7 @@ func (u *Unifi) GetDevices(sites []Site) (*Devices, error) {
 	return devices, nil
 }
 
-// GetSites returns a list of configured sites on the Unifi controller.
+// GetSites returns a list of configured sites on the UniFi controller.
 func (u *Unifi) GetSites() (Sites, error) {
 	var response struct {
 		Data []Site `json:"data"`
@@ -144,7 +144,7 @@ func (u *Unifi) GetData(methodPath string, v interface{}) error {
 }
 
 // UniReq is a small helper function that adds an Accept header.
-// Use this if you're unmarshalling Unifi data into custom types.
+// Use this if you're unmarshalling UniFi data into custom types.
 // And if you're doing that... sumbut a pull request with your new struct. :)
 // This is a helper method that is exposed for convenience.
 func (u *Unifi) UniReq(apiPath string, params string) (req *http.Request, err error) {
