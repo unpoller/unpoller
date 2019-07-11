@@ -11,6 +11,9 @@ import (
 	"github.com/pkg/errors"
 )
 
+// IDSList contains a list that contains all of the IDS Events on a controller.
+type IDSList []IDS
+
 // IDS holds an Intrusion Prevention System Event.
 type IDS struct {
 	ID            string   `json:"_id"`
@@ -91,8 +94,8 @@ func (u *Unifi) GetIDS(sites []Site, from, to time.Time) ([]IDS, error) {
 			Data []IDS `json:"data"`
 		}
 		u.DebugLog("Polling Controller, retreiving Unifi IDS/IPS Data, site %s (%s) ", site.Name, site.Desc)
-		URIpath := fmt.Sprintf(IDSEvents, site.Name)
-		params := fmt.Sprintf(`{"start":"%v","end":"%v","_limit":50000}`, from.UnixNano(), to.UnixNano())
+		URIpath := fmt.Sprintf(IPSEvents, site.Name)
+		params := fmt.Sprintf(`{"start":"%v000","end":"%v000","_limit":50000}`, from.Unix(), to.Unix())
 		req, err := u.UniReq(URIpath, params)
 		if err != nil {
 			return nil, err
@@ -118,6 +121,7 @@ func (u *Unifi) GetIDS(sites []Site, from, to time.Time) ([]IDS, error) {
 			response.Data[i].SiteName = site.SiteName
 		}
 		data = append(data, response.Data...)
+		u.DebugLog("Found %d IDS entries. %s", len(data), params)
 	}
 	return data, nil
 }
@@ -142,8 +146,18 @@ func (i IDS) Points() ([]*influx.Point, error) {
 		"subsystem":      i.Subsystem,
 		"catname":        i.Catname,
 	}
-	fields := map[string]interface{}{}
-	pt, err := influx.NewPoint("uap_vaps", tags, fields, i.Datetime)
+	fields := map[string]interface{}{
+		"event_type":   i.EventType,
+		"proto":        i.Proto,
+		"app_proto":    i.AppProto,
+		"usgip":        i.Usgip,
+		"country_name": i.SrcipGeo.CountryName,
+		"city":         i.SrcipGeo.City,
+		"postal_code":  i.SrcipGeo.PostalCode,
+		"srcipASN":     i.SrcipASN,
+		"usgipASN":     i.UsgipASN,
+	}
+	pt, err := influx.NewPoint("intrusion_detect", tags, fields, i.Datetime)
 	if err != nil {
 		return nil, err
 	}
