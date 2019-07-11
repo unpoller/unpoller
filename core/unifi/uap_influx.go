@@ -9,6 +9,13 @@ import (
 // Points generates Wireless-Access-Point datapoints for InfluxDB.
 // These points can be passed directly to influx.
 func (u UAP) Points() ([]*influx.Point, error) {
+	return u.PointsAt(time.Now())
+}
+
+// PointsAt generates Wireless-Access-Point datapoints for InfluxDB.
+// These points can be passed directly to influx.
+// This is just like Points(), but specify when points were created.
+func (u UAP) PointsAt(now time.Time) ([]*influx.Point, error) {
 	tags := map[string]string{
 		"id":                    u.ID,
 		"mac":                   u.Mac,
@@ -161,7 +168,7 @@ func (u UAP) Points() ([]*influx.Point, error) {
 		"stat_wifi0-tx_retries":       u.Stat.Wifi0TxRetries.Val,
 		"stat_wifi1-tx_retries":       u.Stat.Wifi1TxRetries.Val,
 	}
-	pt, err := influx.NewPoint("uap", tags, fields, time.Now())
+	pt, err := influx.NewPoint("uap", tags, fields, now)
 	if err != nil {
 		return nil, err
 	}
@@ -265,7 +272,7 @@ func (u UAP) Points() ([]*influx.Point, error) {
 			fields["user-num_sta"] = p.UserNumSta.Val
 		}
 
-		pt, err := influx.NewPoint("uap_vaps", tags, fields, time.Now())
+		pt, err := influx.NewPoint("uap_vaps", tags, fields, now)
 		if err != nil {
 			return points, err
 		}
