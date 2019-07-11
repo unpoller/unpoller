@@ -43,6 +43,7 @@ type UnifiPoller struct {
 // Metrics contains all the data from the controller and an influx endpoint to send it to.
 type Metrics struct {
 	unifi.Sites
+	unifi.IDSList
 	unifi.Clients
 	*unifi.Devices
 	influx.BatchPoints
@@ -56,6 +57,7 @@ type Config struct {
 	Debug      bool     `json:"debug" toml:"debug" xml:"debug" yaml:"debug"`
 	Quiet      bool     `json:"quiet,_omitempty" toml:"quiet,_omitempty" xml:"quiet" yaml:"quiet"`
 	VerifySSL  bool     `json:"verify_ssl" toml:"verify_ssl" xml:"verify_ssl" yaml:"verify_ssl"`
+	CollectIDS bool     `json:"collect_ids" toml:"collect_ids" xml:"collect_ids" yaml:"collect_ids"`
 	Mode       string   `json:"mode" toml:"mode" xml:"mode" yaml:"mode"`
 	InfluxURL  string   `json:"influx_url,_omitempty" toml:"influx_url,_omitempty" xml:"influx_url" yaml:"influx_url"`
 	InfluxUser string   `json:"influx_user,_omitempty" toml:"influx_user,_omitempty" xml:"influx_user" yaml:"influx_user"`
