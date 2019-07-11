@@ -5,8 +5,6 @@
 BINARY="unifi-poller"
 # github username
 GHUSER="davidnewhall"
-# docker hub username
-DHUSER="golift"
 # Github repo containing homebrew formula repo.
 HBREPO="golift/homebrew-mugs"
 MAINT="David Newhall II <david at sleepers dot pro>"
@@ -16,10 +14,15 @@ GOLANGCI_LINT_ARGS="--enable-all -D gochecknoglobals"
 # Example must exist at examples/$CONFIG_FILE.example
 CONFIG_FILE="up.conf"
 LICENSE="MIT"
+# FORMULA is either 'service' or 'tool'. Services run as a daemon, tools do not.
+# This affects the homebrew formula (launchd) and linux packages (systemd).
+FORMULA="service"
 
-export BINARY GHUSER DHUSER HBREPO MAINT VENDOR DESC GOLANGCI_LINT_ARGS CONFIG_FILE LICENSE
+export BINARY GHUSER HBREPO MAINT VENDOR DESC GOLANGCI_LINT_ARGS CONFIG_FILE LICENSE FORMULA
 
 # The rest is mostly automatic.
+# Fix the repo if it doesn't match the binary name.
+# Provide a better URL if one exists.
 
 GHREPO="${GHUSER}/${BINARY}"
 URL="https://github.com/${GHREPO}"
@@ -30,7 +33,7 @@ URL="https://github.com/${GHREPO}"
 VERSION_PATH="github.com/${GHREPO}/$(echo ${BINARY} | tr -d -- -).Version"
 
 # Dynamic. Recommend not changing.
-VERSION="$(git tag -l --merged | tail -n1 | tr -d v || echo development)"
+VERSION="$(git tag -l --merged | tail -n1 | tr -d v | grep -E '^\S+$' || echo development)"
 # This produces a 0 in some envirnoments (like Homebrew), but it's only used for packages.
 ITERATION=$(git rev-list --count --all || echo 0)
 DATE="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
