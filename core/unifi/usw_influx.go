@@ -9,6 +9,13 @@ import (
 // Points generates Unifi Switch datapoints for InfluxDB.
 // These points can be passed directly to influx.
 func (u USW) Points() ([]*influx.Point, error) {
+	return u.PointsAt(time.Now())
+}
+
+// PointsAt generates Unifi Switch datapoints for InfluxDB.
+// These points can be passed directly to influx.
+// This is just like Points(), but specify when points were created.
+func (u USW) PointsAt(now time.Time) ([]*influx.Point, error) {
 	tags := map[string]string{
 		"id":                     u.ID,
 		"mac":                    u.Mac,
@@ -93,7 +100,7 @@ func (u USW) Points() ([]*influx.Point, error) {
 		"uplink_depth":          u.UplinkDepth.Txt,
 		// Add the port stats too.
 	}
-	pt, err := influx.NewPoint("usw", tags, fields, time.Now())
+	pt, err := influx.NewPoint("usw", tags, fields, now)
 	if err != nil {
 		return nil, err
 	}
@@ -153,7 +160,7 @@ func (u USW) Points() ([]*influx.Point, error) {
 			"poe_voltage":  p.PoeVoltage.Val,
 			"full_duplex":  p.FullDuplex.Val,
 		}
-		pt, err = influx.NewPoint("usw_ports", tags, fields, time.Now())
+		pt, err = influx.NewPoint("usw_ports", tags, fields, now)
 		if err != nil {
 			return points, err
 		}

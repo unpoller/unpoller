@@ -82,8 +82,12 @@ func (u *Unifi) GetClients(sites []Site) (Clients, error) {
 		if err := u.GetData(clientPath, &response); err != nil {
 			return nil, err
 		}
-		for i := range response.Data {
+		for i, d := range response.Data {
+			// Add the special "Site Name" to each client. This becomes a Grafana filter somewhere.
 			response.Data[i].SiteName = site.Desc + " (" + site.Name + ")"
+			// Fix name and hostname fields. Sometimes one or the other is blank.
+			response.Data[i].Hostname = pick(d.Hostname, d.Name, d.Mac)
+			response.Data[i].Name = pick(d.Name, d.Hostname)
 		}
 		data = append(data, response.Data...)
 	}
@@ -101,17 +105,7 @@ func (u *Unifi) GetDevices(sites []Site) (*Devices, error) {
 		if err := u.GetData(devicePath, &response); err != nil {
 			return nil, err
 		}
-		loopDevices := u.parseDevices(response.Data, site.Desc+" ("+site.Name+")")
-		// Add SiteName to each device asset.
-		for i := range loopDevices.UAPs {
-			loopDevices.UAPs[i].SiteName = site.Desc + " (" + site.Name + ")"
-		}
-		for i := range loopDevices.USGs {
-			loopDevices.USGs[i].SiteName = site.Desc + " (" + site.Name + ")"
-		}
-		for i := range loopDevices.USWs {
-			loopDevices.USWs[i].SiteName = site.Desc + " (" + site.Name + ")"
-		}
+		loopDevices := u.parseDevices(response.Data, site.SiteName)
 		devices.UAPs = append(devices.UAPs, loopDevices.UAPs...)
 		devices.USGs = append(devices.USGs, loopDevices.USGs...)
 		devices.USWs = append(devices.USWs, loopDevices.USWs...)
@@ -127,10 +121,13 @@ func (u *Unifi) GetSites() (Sites, error) {
 	if err := u.GetData(SiteList, &response); err != nil {
 		return nil, err
 	}
-	sites := make([]string, 0)
-	for i := range response.Data {
-		response.Data[i].SiteName = response.Data[i].Desc + " (" + response.Data[i].Name + ")"
-		sites = append(sites, response.Data[i].Name)
+	sites := []string{} // used for debug log only
+	for i, d := range response.Data {
+		// If the human name is missing (description), set it to the cryptic name.
+		response.Data[i].Desc = pick(d.Desc, d.Name)
+		// Add the custom site name to each site. used as a Grafana filter somewhere.
+		response.Data[i].SiteName = d.Desc + " (" + d.Name + ")"
+		sites = append(sites, d.Name) // used for debug log only
 	}
 	u.DebugLog("Found %d site(s): %s", len(sites), strings.Join(sites, ","))
 	return response.Data, nil

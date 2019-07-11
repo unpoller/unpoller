@@ -10,6 +10,13 @@ import (
 // Points generates Unifi Sites' datapoints for InfluxDB.
 // These points can be passed directly to influx.
 func (u Site) Points() ([]*influx.Point, error) {
+	return u.PointsAt(time.Now())
+}
+
+// PointsAt generates Unifi Sites' datapoints for InfluxDB.
+// These points can be passed directly to influx.
+// This is just like Points(), but specify when points were created.
+func (u Site) PointsAt(now time.Time) ([]*influx.Point, error) {
 	points := []*influx.Point{}
 	for _, s := range u.Health {
 		tags := map[string]string{

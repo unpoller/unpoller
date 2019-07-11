@@ -17,19 +17,22 @@ func (u *Unifi) parseDevices(data []json.RawMessage, siteName string) *Devices {
 		// Choose which type to unmarshal into based on the "type" json key.
 		switch assetType { // Unmarshal again into the correct type..
 		case "uap":
-			if uap := (UAP{}); u.unmarshalDevice(assetType, r, &uap) == nil {
-				uap.SiteName = siteName
-				devices.UAPs = append(devices.UAPs, uap)
+			dev := UAP{SiteName: siteName}
+			if u.unmarshalDevice(assetType, r, &dev) == nil {
+				dev.Name = pick(dev.Name, dev.Mac)
+				devices.UAPs = append(devices.UAPs, dev)
 			}
 		case "ugw", "usg": // in case they ever fix the name in the api.
-			if usg := (USG{}); u.unmarshalDevice(assetType, r, &usg) == nil {
-				usg.SiteName = siteName
-				devices.USGs = append(devices.USGs, usg)
+			dev := USG{SiteName: siteName}
+			if u.unmarshalDevice(assetType, r, &dev) == nil {
+				dev.Name = pick(dev.Name, dev.Mac)
+				devices.USGs = append(devices.USGs, dev)
 			}
 		case "usw":
-			if usw := (USW{}); u.unmarshalDevice(assetType, r, &usw) == nil {
-				usw.SiteName = siteName
-				devices.USWs = append(devices.USWs, usw)
+			dev := USW{SiteName: siteName}
+			if u.unmarshalDevice(assetType, r, &dev) == nil {
+				dev.Name = pick(dev.Name, dev.Mac)
+				devices.USWs = append(devices.USWs, dev)
 			}
 		default:
 			u.ErrorLog("unknown asset type - %v - skipping", assetType)
@@ -49,4 +52,15 @@ func (u *Unifi) unmarshalDevice(dev string, data json.RawMessage, v interface{})
 		u.DebugLog("==- https://github.com/golift/unifi/issues/new -==")
 	}
 	return err
+}
+
+// pick returns the first non empty string in a list.
+// used in a few places around this library.
+func pick(strings ...string) string {
+	for _, s := range strings {
+		if s != "" {
+			return s
+		}
+	}
+	return ""
 }
