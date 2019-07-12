@@ -1,5 +1,18 @@
 # UniFi Poller
 
+[![pulls](https://badgen.net/docker/pulls/golift/unifi-poller?icon=docker&label=pulls&color=0066ff "Docker Pulls")](https://hub.docker.com/r/golift/unifi-poller)
+[![DLs](https://img.shields.io/github/downloads/davidnewhall/unifi-poller/total.svg?logo=github&color=0066ff "GitHub Downloads")](https://www.somsubhra.com/github-release-stats/?username=davidnewhall&repository=unifi-poller)
+![stars](https://badgen.net/github/stars/davidnewhall/unifi-poller?icon=github&label=stars&color=0066ff "GitHub Stars")
+![stars](https://badgen.net/badge/UniFi/5.10.x,5.11.x,UAP,USG,USW?list=|&icon=&color=0099ee "GitHub Stars")
+
+[![issues](https://badgen.net/github/closed-issues/davidnewhall/unifi-poller?color=green&icon=github "Closed Issues")](https://github.com/davidnewhall/unifi-poller/issues?q=is%3Aissue+is%3Aclosed)
+[![PRs](https://badgen.net/github/prs/davidnewhall/unifi-poller?icon=github&color=green "Pull Requests")](https://github.com/davidnewhall/unifi-poller/pulls?utf8=✓&q=is%3Apr+)
+[![travis](https://badgen.net/travis/davidnewhall/unifi-poller?icon=travis&label=build "Travis Build")](https://travis-ci.org/davidnewhall/unifi-poller)
+[![license](https://badgen.net/github/license/davidnewhall/unifi-poller?color=green "License")](https://github.com/davidnewhall/unifi-poller/blob/master/LICENSE)
+[![discord](https://badgen.net/badge/icon/Discord?color=0011ff&label&icon=https://simpleicons.now.sh/discord/fff "Discord")](https://discord.gg/DyVsMyt)
+[![twitter](https://badgen.net/twitter/follow/TwitchCaptain?icon=twitter&label=TwitchCaptain&color=0116ff "TwitchCaptain Twitter")](https://twitter.com/TwitchCaptain)
+
+
 Collect your UniFi controller data and send it to an InfluxDB instance.
 [Grafana Dashboards](http://grafana.com/dashboards?search=unifi-poller) included.
 Updated 2019.
