@@ -1,3 +1,4 @@
+# Powered by Application Builder: https://github.com/golift/application-builder
 language: go
 git:
   depth: false

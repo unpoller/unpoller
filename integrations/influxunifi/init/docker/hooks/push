@@ -1,6 +1,8 @@
 #!/bin/bash
 # This post build hook creates multi-architecture docker manifests.
 # It's all a bit complicated for some reason.
+# This is part of Application Builder.
+# https://github.com/golift/application-builder
 
 set -e -o pipefail
 
