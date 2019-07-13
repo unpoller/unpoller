@@ -1,4 +1,6 @@
 #!/bin/bash
+# This is part of Application Builder.
+# https://github.com/golift/application-builder
 
 # https://www.smockle.com/blog/2019/04/22/migrating-from-travis-ci-to-docker-hub-automated-builds/
 

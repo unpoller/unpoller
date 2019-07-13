@@ -1,6 +1,8 @@
 #!/bin/bash
 # The Docker Cloud config must pass in the BUILDS env variable.
 # See README.md (in this dir) and the screenshot for more info.
+# This is part of Application Builder.
+# https://github.com/golift/application-builder
 
 set -e -o pipefail
 
