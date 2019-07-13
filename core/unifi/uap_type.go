@@ -308,7 +308,7 @@ type UAP struct {
 		UplinkMac        string `json:"uplink_mac"`
 		UplinkRemotePort int    `json:"uplink_remote_port"`
 	} `json:"last_uplink"`
-	Stat          *UAPStat      `json:"stat"`
+	Stat          UAPStat       `json:"stat"`
 	TxBytes       FlexInt       `json:"tx_bytes"`
 	RxBytes       FlexInt       `json:"rx_bytes"`
 	Bytes         FlexInt       `json:"bytes"`

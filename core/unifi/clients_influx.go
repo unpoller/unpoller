@@ -8,14 +8,14 @@ import (
 
 // Points generates Unifi Client datapoints for InfluxDB.
 // These points can be passed directly to influx.
-func (c Client) Points() ([]*influx.Point, error) {
+func (c *Client) Points() ([]*influx.Point, error) {
 	return c.PointsAt(time.Now())
 }
 
 // PointsAt generates Unifi Client datapoints for InfluxDB.
 // These points can be passed directly to influx.
 // This is just like Points(), but specify when points were created.
-func (c Client) PointsAt(now time.Time) ([]*influx.Point, error) {
+func (c *Client) PointsAt(now time.Time) ([]*influx.Point, error) {
 	tags := map[string]string{
 		"id":                 c.ID,
 		"mac":                c.Mac,

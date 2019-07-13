@@ -17,20 +17,20 @@ func (u *Unifi) parseDevices(data []json.RawMessage, siteName string) *Devices {
 		// Choose which type to unmarshal into based on the "type" json key.
 		switch assetType { // Unmarshal again into the correct type..
 		case "uap":
-			dev := UAP{SiteName: siteName}
-			if u.unmarshalDevice(assetType, r, &dev) == nil {
+			dev := &UAP{SiteName: siteName}
+			if u.unmarshalDevice(assetType, r, dev) == nil {
 				dev.Name = pick(dev.Name, dev.Mac)
 				devices.UAPs = append(devices.UAPs, dev)
 			}
 		case "ugw", "usg": // in case they ever fix the name in the api.
-			dev := USG{SiteName: siteName}
-			if u.unmarshalDevice(assetType, r, &dev) == nil {
+			dev := &USG{SiteName: siteName}
+			if u.unmarshalDevice(assetType, r, dev) == nil {
 				dev.Name = pick(dev.Name, dev.Mac)
 				devices.USGs = append(devices.USGs, dev)
 			}
 		case "usw":
-			dev := USW{SiteName: siteName}
-			if u.unmarshalDevice(assetType, r, &dev) == nil {
+			dev := &USW{SiteName: siteName}
+			if u.unmarshalDevice(assetType, r, dev) == nil {
 				dev.Name = pick(dev.Name, dev.Mac)
 				devices.USWs = append(devices.USWs, dev)
 			}

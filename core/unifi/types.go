@@ -42,9 +42,9 @@ func DiscardLogs(msg string, v ...interface{}) {
 // Devices contains a list of all the unifi devices from a controller.
 // Contains Access points, security gateways and switches.
 type Devices struct {
-	UAPs []UAP
-	USGs []USG
-	USWs []USW
+	UAPs []*UAP
+	USGs []*USG
+	USWs []*USW
 }
 
 // Unifi is what you get in return for providing a password! Unifi represents

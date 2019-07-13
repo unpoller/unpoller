@@ -8,14 +8,14 @@ import (
 
 // Points generates Unifi Switch datapoints for InfluxDB.
 // These points can be passed directly to influx.
-func (u USW) Points() ([]*influx.Point, error) {
+func (u *USW) Points() ([]*influx.Point, error) {
 	return u.PointsAt(time.Now())
 }
 
 // PointsAt generates Unifi Switch datapoints for InfluxDB.
 // These points can be passed directly to influx.
 // This is just like Points(), but specify when points were created.
-func (u USW) PointsAt(now time.Time) ([]*influx.Point, error) {
+func (u *USW) PointsAt(now time.Time) ([]*influx.Point, error) {
 	tags := map[string]string{
 		"id":                     u.ID,
 		"mac":                    u.Mac,

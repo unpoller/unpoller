@@ -1,7 +1,7 @@
 package unifi
 
 // Clients contains a list that contains all of the unifi clients from a controller.
-type Clients []Client
+type Clients []*Client
 
 // Client defines all the data a connected-network client contains.
 type Client struct {
