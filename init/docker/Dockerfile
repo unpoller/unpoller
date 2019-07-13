@@ -1,5 +1,6 @@
 #
-# building static go binary with Debian golang container
+# This is part of Application Builder.
+# https://github.com/golift/application-builder
 #
 
 ARG ARCH=amd64
@@ -45,7 +46,7 @@ ARG CONFIG_FILE=config.conf
 # Build-time metadata as defined at https://github.com/opencontainers/image-spec/blob/master/annotations.md
 LABEL org.opencontainers.image.created="${BUILD_DATE}" \
       org.opencontainers.image.title="${BINARY}" \
-      org.opencontainers.image.documentation="${URL}/wiki/Docker" \
+      org.opencontainers.image.documentation="https://github.com/${GHREPO}/wiki/Docker" \
       org.opencontainers.image.description="${DESC}" \
       org.opencontainers.image.url="${URL}" \
       org.opencontainers.image.revision="${COMMIT}" \

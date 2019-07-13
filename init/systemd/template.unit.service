@@ -1,4 +1,6 @@
 # Systemd service unit for {{BINARY}}.
+# This is part of Application Builder.
+# https://github.com/golift/application-builder
 
 [Unit]
 Description={{BINARY}} - {{DESC}}
