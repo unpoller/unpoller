@@ -12,7 +12,7 @@ import (
 )
 
 // IDSList contains a list that contains all of the IDS Events on a controller.
-type IDSList []IDS
+type IDSList []*IDS
 
 // IDS holds an Intrusion Prevention System Event.
 type IDS struct {
@@ -87,8 +87,8 @@ type IDS struct {
 
 // GetIDS returns Intrusion Detection Systems events.
 // Returns all events that happened in site between from and to.
-func (u *Unifi) GetIDS(sites []Site, from, to time.Time) ([]IDS, error) {
-	data := []IDS{}
+func (u *Unifi) GetIDS(sites Sites, from, to time.Time) ([]*IDS, error) {
+	data := []*IDS{}
 	for _, site := range sites {
 		u.DebugLog("Polling Controller for IDS/IPS Data, site %s (%s) ", site.Name, site.Desc)
 		ids, err := u.GetSiteIDS(site, from, to)
@@ -102,9 +102,9 @@ func (u *Unifi) GetIDS(sites []Site, from, to time.Time) ([]IDS, error) {
 
 // GetSiteIDS is a helper to offload the for-loop work.
 // This method retreives the Intrusion Detection System Data for 1 Site.
-func (u *Unifi) GetSiteIDS(site Site, from, to time.Time) ([]IDS, error) {
+func (u *Unifi) GetSiteIDS(site *Site, from, to time.Time) ([]*IDS, error) {
 	var response struct {
-		Data []IDS `json:"data"`
+		Data []*IDS `json:"data"`
 	}
 	URIpath := fmt.Sprintf(IPSEvents, site.Name)
 	params := fmt.Sprintf(`{"start":"%v000","end":"%v000","_limit":50000}`, from.Unix(), to.Unix())
@@ -139,13 +139,13 @@ func (u *Unifi) GetSiteIDS(site Site, from, to time.Time) ([]IDS, error) {
 // These events have a timestamp, so that is used instead of any passed-in value.
 // This method generates intrusion detection datapoints for InfluxDB.
 // These points can be passed directly to influx.
-func (i IDS) PointsAt(now time.Time) ([]*influx.Point, error) {
+func (i *IDS) PointsAt(now time.Time) ([]*influx.Point, error) {
 	return i.Points()
 }
 
 // Points generates intrusion detection datapoints for InfluxDB.
 // These points can be passed directly to influx.
-func (i IDS) Points() ([]*influx.Point, error) {
+func (i *IDS) Points() ([]*influx.Point, error) {
 	tags := map[string]string{
 		"in_iface":       i.InIface,
 		"event_type":     i.EventType,

@@ -71,11 +71,11 @@ func (u *Unifi) getServer() error {
 }
 
 // GetClients returns a response full of clients' data from the UniFi Controller.
-func (u *Unifi) GetClients(sites []Site) (Clients, error) {
-	data := make([]Client, 0)
+func (u *Unifi) GetClients(sites Sites) (Clients, error) {
+	data := make([]*Client, 0)
 	for _, site := range sites {
 		var response struct {
-			Data []Client `json:"data"`
+			Data []*Client `json:"data"`
 		}
 		u.DebugLog("Polling Controller, retreiving UniFi Clients, site %s (%s) ", site.Name, site.Desc)
 		clientPath := fmt.Sprintf(ClientPath, site.Name)
@@ -95,7 +95,7 @@ func (u *Unifi) GetClients(sites []Site) (Clients, error) {
 }
 
 // GetDevices returns a response full of devices' data from the UniFi Controller.
-func (u *Unifi) GetDevices(sites []Site) (*Devices, error) {
+func (u *Unifi) GetDevices(sites Sites) (*Devices, error) {
 	devices := new(Devices)
 	for _, site := range sites {
 		var response struct {
@@ -116,7 +116,7 @@ func (u *Unifi) GetDevices(sites []Site) (*Devices, error) {
 // GetSites returns a list of configured sites on the UniFi controller.
 func (u *Unifi) GetSites() (Sites, error) {
 	var response struct {
-		Data []Site `json:"data"`
+		Data []*Site `json:"data"`
 	}
 	if err := u.GetData(SiteList, &response); err != nil {
 		return nil, err

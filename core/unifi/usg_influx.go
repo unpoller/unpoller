@@ -9,14 +9,14 @@ import (
 
 // Points generates Unifi Gateway datapoints for InfluxDB.
 // These points can be passed directly to influx.
-func (u USG) Points() ([]*influx.Point, error) {
+func (u *USG) Points() ([]*influx.Point, error) {
 	return u.PointsAt(time.Now())
 }
 
 // PointsAt generates Unifi Gateway datapoints for InfluxDB.
 // These points can be passed directly to influx.
 // This is just like Points(), but specify when points were created.
-func (u USG) PointsAt(now time.Time) ([]*influx.Point, error) {
+func (u *USG) PointsAt(now time.Time) ([]*influx.Point, error) {
 	tags := map[string]string{
 		"id":                     u.ID,
 		"mac":                    u.Mac,
