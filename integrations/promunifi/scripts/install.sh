@@ -8,6 +8,8 @@
 # ===
 # If you're on redhat, this installs the latest rpm. If you're on Debian, it installs the latest deb package.
 #
+# This is part of application-builder.
+# https://github.com/golift/application-builder
 
 REPO=davidnewhall/unifi-poller
 LATEST=https://api.github.com/repos/${REPO}/releases/latest

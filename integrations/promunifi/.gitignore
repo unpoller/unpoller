@@ -23,3 +23,6 @@ README.html
 /unifi-poller_manual.html
 /homebrew_release_repo
 /.metadata.make
+bitly_token
+github_deploy_key
+.secret_files.tar

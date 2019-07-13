@@ -1,6 +1,6 @@
-# This# This Makefile is written as generic as possible.
+# This Makefile is written as generic as possible.
 # Setting the variables in .metadata.sh and creating the paths in the repo makes this work.
-#
+# See more: https://github.com/golift/application-builder
 
 # Suck in our application information.
 IGNORED:=$(shell bash -c "source .metadata.sh ; env | sed 's/=/:=/;s/^/export /' > .metadata.make")
