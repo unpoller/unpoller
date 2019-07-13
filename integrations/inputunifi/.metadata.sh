@@ -1,5 +1,6 @@
 # Each line must have an export clause.
 # This file is parsed and sourced by the Makefile, Docker and Homebrew builds.
+# Powered by Application Builder: https://github.com/golift/application-builder
 
 # Must match the repo name.
 BINARY="unifi-poller"
@@ -33,7 +34,8 @@ URL="https://github.com/${GHREPO}"
 VERSION_PATH="github.com/${GHREPO}/$(echo ${BINARY} | tr -d -- -).Version"
 
 # Dynamic. Recommend not changing.
-VERSION="$(git tag -l --merged | tail -n1 | tr -d v | grep -E '^\S+$' || echo development)"
+VVERSION=$(git describe --abbrev=0 --tags $(git rev-list --tags --max-count=1))
+VERSION="$(echo $VVERSION | tr -d v | grep -E '^\S+$' || echo development)"
 # This produces a 0 in some envirnoments (like Homebrew), but it's only used for packages.
 ITERATION=$(git rev-list --count --all || echo 0)
 DATE="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
