@@ -23,7 +23,6 @@ func (u *UnifiPoller) DumpJSONPayload() (err error) {
 	u.Unifi.ErrorLog = func(m string, v ...interface{}) {
 		fmt.Fprintf(os.Stderr, "[ERROR] "+m, v...)
 	} // Log all errors to stderr.
-
 	switch sites, err := u.GetFilteredSites(); {
 	case err != nil:
 		return err
@@ -40,7 +39,7 @@ func (u *UnifiPoller) DumpJSONPayload() (err error) {
 	}
 }
 
-func (u *UnifiPoller) dumpSitesJSON(path, name string, sites []unifi.Site) error {
+func (u *UnifiPoller) dumpSitesJSON(path, name string, sites unifi.Sites) error {
 	for _, s := range sites {
 		apiPath := fmt.Sprintf(path, s.Name)
 		_, _ = fmt.Fprintf(os.Stderr, "[INFO] Dumping %s: '%s' JSON for site: %s (%s):\n", name, apiPath, s.Desc, s.Name)
