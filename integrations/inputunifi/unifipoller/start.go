@@ -8,6 +8,7 @@ import (
 	"log"
 	"os"
 	"strings"
+	"time"
 
 	"code.golift.io/unifi"
 	"github.com/BurntSushi/toml"
@@ -96,6 +97,7 @@ func (u *UnifiPoller) Run() (err error) {
 	switch strings.ToLower(u.Mode) {
 	case "influxlambda", "lambdainflux", "lambda_influx", "influx_lambda":
 		u.LogDebugf("Lambda Mode Enabled")
+		u.LastCheck = time.Now()
 		return u.CollectAndReport()
 	default:
 		return u.PollController()

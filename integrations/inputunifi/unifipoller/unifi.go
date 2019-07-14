@@ -48,7 +48,7 @@ FIRST:
 func (u *UnifiPoller) PollController() error {
 	log.Println("[INFO] Everything checks out! Poller started, interval:", u.Interval.Round(time.Second))
 	ticker := time.NewTicker(u.Interval.Round(time.Second))
-	for range ticker.C {
+	for u.LastCheck = range ticker.C {
 		_ = u.CollectAndReport()
 		if u.MaxErrors >= 0 && u.errorCount > u.MaxErrors {
 			return errors.Errorf("reached maximum error count, stopping poller (%d > %d)", u.errorCount, u.MaxErrors)
@@ -60,7 +60,7 @@ func (u *UnifiPoller) PollController() error {
 // CollectAndReport collects measurements and reports them to influxdb.
 // Can be called once or in a ticker loop. This function and all the ones below
 // handle their own logging. An error is returned so the calling function may
-// determine if there was a read or write erorr and act on it. This is currently
+// determine if there was a read or write error and act on it. This is currently
 // called in two places in this library. One returns an error, one does not.
 func (u *UnifiPoller) CollectAndReport() error {
 	metrics, err := u.CollectMetrics()
@@ -78,7 +78,7 @@ func (u *UnifiPoller) CollectAndReport() error {
 // CollectMetrics grabs all the measurements from a UniFi controller and returns them.
 // This also creates an InfluxDB writer, and returns an error if that fails.
 func (u *UnifiPoller) CollectMetrics() (*Metrics, error) {
-	m := &Metrics{TS: time.Now()}
+	m := &Metrics{TS: u.LastCheck} // At this point, it's the Current Check.
 	var err error
 	// Get the sites we care about.
 	m.Sites, err = u.GetFilteredSites()
