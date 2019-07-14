@@ -78,7 +78,7 @@ func (u *UnifiPoller) CollectAndReport() error {
 // CollectMetrics grabs all the measurements from a UniFi controller and returns them.
 // This also creates an InfluxDB writer, and returns an error if that fails.
 func (u *UnifiPoller) CollectMetrics() (*Metrics, error) {
-	m := &Metrics{}
+	m := &Metrics{TS: time.Now()}
 	var err error
 	// Get the sites we care about.
 	m.Sites, err = u.GetFilteredSites()
@@ -188,7 +188,7 @@ func (m *Metrics) processPoints(asset Asset) error {
 	if asset == nil {
 		return nil
 	}
-	points, err := asset.Points()
+	points, err := asset.PointsAt(m.TS)
 	if err != nil || points == nil {
 		return err
 	}
