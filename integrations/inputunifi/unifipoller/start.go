@@ -42,7 +42,7 @@ func (u *UnifiPoller) ParseFlags(args []string) {
 	}
 	u.Flag.StringVarP(&u.DumpJSON, "dumpjson", "j", "",
 		"This debug option prints a json payload and exits. See man page for more.")
-	u.Flag.StringVarP(&u.ConfigFile, "config", "c", defaultConfFile, "Poller Config File (TOML Format)")
+	u.Flag.StringVarP(&u.ConfigFile, "config", "c", DefaultConfFile, "Poller Config File (TOML Format)")
 	u.Flag.BoolVarP(&u.ShowVer, "version", "v", false, "Print the version and exit")
 	_ = u.Flag.Parse(args)
 }
