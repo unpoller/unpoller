@@ -3,7 +3,7 @@ package unifipoller
 import (
 	"time"
 
-	"github.com/golift/unifi"
+	"code.golift.io/unifi"
 	influx "github.com/influxdata/influxdb1-client/v2"
 	"github.com/spf13/pflag"
 )

@@ -5,7 +5,7 @@ import (
 	"os"
 	"strings"
 
-	"github.com/golift/unifi"
+	"code.golift.io/unifi"
 	"github.com/pkg/errors"
 )
 
