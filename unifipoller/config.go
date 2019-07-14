@@ -35,6 +35,7 @@ type UnifiPoller struct {
 	ShowVer    bool
 	Flag       *pflag.FlagSet
 	errorCount int
+	LastCheck  time.Time
 	influx.Client
 	*unifi.Unifi
 	*Config
