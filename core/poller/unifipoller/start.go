@@ -9,8 +9,8 @@ import (
 	"os"
 	"strings"
 
+	"code.golift.io/unifi"
 	"github.com/BurntSushi/toml"
-	"github.com/golift/unifi"
 	influx "github.com/influxdata/influxdb1-client/v2"
 	"github.com/pkg/errors"
 	flag "github.com/spf13/pflag"

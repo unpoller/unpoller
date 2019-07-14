@@ -2,20 +2,20 @@
 
 
 [[projects]]
+  digest = "1:b414adbcdaa6d8a2f2dd02ad8cc94a57b8bb66480a443e68dc10e6d40540c358"
+  name = "code.golift.io/unifi"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "184dbe828623689015fdfa2627f7f6810411b07e"
+  version = "v3.3.0"
+
+[[projects]]
   digest = "1:9f3b30d9f8e0d7040f729b82dcbc8f0dead820a133b3147ce355fc451f32d761"
   name = "github.com/BurntSushi/toml"
   packages = ["."]
   pruneopts = "UT"
   revision = "3012a1dbe2e4bd1391d42b32f0577cb7bbc7f005"
   version = "v0.3.1"
-
-[[projects]]
-  digest = "1:b414adbcdaa6d8a2f2dd02ad8cc94a57b8bb66480a443e68dc10e6d40540c358"
-  name = "github.com/golift/unifi"
-  packages = ["."]
-  pruneopts = "UT"
-  revision = "184dbe828623689015fdfa2627f7f6810411b07e"
-  version = "v3.3.0"
 
 [[projects]]
   branch = "master"
@@ -57,8 +57,8 @@
   analyzer-name = "dep"
   analyzer-version = 1
   input-imports = [
+    "code.golift.io/unifi",
     "github.com/BurntSushi/toml",
-    "github.com/golift/unifi",
     "github.com/influxdata/influxdb1-client/v2",
     "github.com/pkg/errors",
     "github.com/spf13/pflag",
