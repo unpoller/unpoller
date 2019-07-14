@@ -42,6 +42,7 @@ type UnifiPoller struct {
 
 // Metrics contains all the data from the controller and an influx endpoint to send it to.
 type Metrics struct {
+	TS time.Time
 	unifi.Sites
 	unifi.IDSList
 	unifi.Clients
