@@ -170,14 +170,14 @@ type USW struct {
 	LastUplink struct {
 		UplinkMac string `json:"uplink_mac"`
 	} `json:"last_uplink"`
-	UplinkDepth FlexInt  `json:"uplink_depth"`
-	Stat        *USWStat `json:"stat"`
-	TxBytes     FlexInt  `json:"tx_bytes"`
-	RxBytes     FlexInt  `json:"rx_bytes"`
-	Bytes       FlexInt  `json:"bytes"`
-	NumSta      FlexInt  `json:"num_sta"`
-	UserNumSta  FlexInt  `json:"user-num_sta"`
-	GuestNumSta FlexInt  `json:"guest-num_sta"`
+	UplinkDepth FlexInt `json:"uplink_depth"`
+	Stat        USWStat `json:"stat"`
+	TxBytes     FlexInt `json:"tx_bytes"`
+	RxBytes     FlexInt `json:"rx_bytes"`
+	Bytes       FlexInt `json:"bytes"`
+	NumSta      FlexInt `json:"num_sta"`
+	UserNumSta  FlexInt `json:"user-num_sta"`
+	GuestNumSta FlexInt `json:"guest-num_sta"`
 }
 
 // USWStat holds the "stat" data for a switch.

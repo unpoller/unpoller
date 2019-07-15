@@ -233,16 +233,16 @@ type USG struct {
 		MaxSpeed         FlexInt  `json:"max_speed"`
 		Type             string   `json:"type"`
 	} `json:"uplink"`
-	Stat        *USGStat `json:"stat"`
-	TxBytes     FlexInt  `json:"tx_bytes"`
-	RxBytes     FlexInt  `json:"rx_bytes"`
-	Bytes       FlexInt  `json:"bytes"`
-	NumSta      FlexInt  `json:"num_sta"`
-	UserNumSta  FlexInt  `json:"user-num_sta"`
-	GuestNumSta FlexInt  `json:"guest-num_sta"`
-	NumDesktop  FlexInt  `json:"num_desktop"`
-	NumMobile   FlexInt  `json:"num_mobile"`
-	NumHandheld FlexInt  `json:"num_handheld"`
+	Stat        USGStat `json:"stat"`
+	TxBytes     FlexInt `json:"tx_bytes"`
+	RxBytes     FlexInt `json:"rx_bytes"`
+	Bytes       FlexInt `json:"bytes"`
+	NumSta      FlexInt `json:"num_sta"`
+	UserNumSta  FlexInt `json:"user-num_sta"`
+	GuestNumSta FlexInt `json:"guest-num_sta"`
+	NumDesktop  FlexInt `json:"num_desktop"`
+	NumMobile   FlexInt `json:"num_mobile"`
+	NumHandheld FlexInt `json:"num_handheld"`
 }
 
 // USGStat holds the "stat" data for a gateway.
