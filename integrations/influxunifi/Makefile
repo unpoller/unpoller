@@ -1,4 +1,4 @@
-# This Make# This Makefile is written as generic as possible.
+# This Makefile is written as generic as possible.
 # Setting the variables in .metadata.sh and creating the paths in the repo makes this work.
 # See more: https://github.com/golift/application-builder
 
@@ -232,6 +232,7 @@ $(BINARY).rb: v$(VERSION).tar.gz.sha256 init/homebrew/$(FORMULA).rb.tmpl
 		-e "s%{{URL}}%$(URL)%g" \
 		-e "s%{{IMPORT_PATH}}%$(IMPORT_PATH)%g" \
 		-e "s%{{SOURCE_PATH}}%$(SOURCE_PATH)%g" \
+		-e "s%{{SOURCE_URL}}%$(SOURCE_URL)%g" \
 		-e "s%{{CONFIG_FILE}}%$(CONFIG_FILE)%g" \
 		-e "s%{{Class}}%$(shell echo $(BINARY) | perl -pe 's/(?:\b|-)(\p{Ll})/\u$$1/g')%g" \
 		init/homebrew/$(FORMULA).rb.tmpl | tee $(BINARY).rb
