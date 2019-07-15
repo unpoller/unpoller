@@ -1,4 +1,4 @@
-<img width="640px" src="https://raw.githubusercontent.com/wiki/davidnewhall/unifi-poller/images/unifi-poller-logo.png">
+<img width="320px" src="https://raw.githubusercontent.com/wiki/davidnewhall/unifi-poller/images/unifi-poller-logo.png">
 
 
 [![discord](https://badgen.net/badge/icon/Discord?color=0011ff&label&icon=https://simpleicons.now.sh/discord/eee "Captain's Discord")](https://discord.gg/DyVsMyt)
@@ -136,7 +136,7 @@ sites side-by-side. So easy! This screenshot barely does it justice.
 
 
 ## Copyright & License
-<img style="float: right;" align="right" width="320px" src="https://raw.githubusercontent.com/wiki/davidnewhall/unifi-poller/images/unifi-poller-logo.png">
+<img style="float: right;" align="right" width="240px" src="https://raw.githubusercontent.com/wiki/davidnewhall/unifi-poller/images/unifi-poller-logo.png">
 
 -   Copyright © 2016 Garrett Bjerkhoel.
 -   Copyright © 2018-2019 David Newhall II.
