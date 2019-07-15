@@ -67,7 +67,7 @@ if [ "$CMD" = "" ]; then
 fi
 
 # Grab latest release file from github.
-URL=$($CMD ${LATEST} | egrep "browser_download_url.*\.(${ARCH})\.${FILE}\"" | cut -d\" -f 4)
+URL=$($CMD ${LATEST} | egrep "browser_download_url.*(${ARCH})\.${FILE}\"" | cut -d\" -f 4)
 
 if [ "$?" != "0" ] || [ "$URL" = "" ]; then
   echo "Error locating latest release at ${LATEST}"
