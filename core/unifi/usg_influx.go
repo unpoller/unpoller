@@ -17,6 +17,10 @@ func (u *USG) Points() ([]*influx.Point, error) {
 // These points can be passed directly to influx.
 // This is just like Points(), but specify when points were created.
 func (u *USG) PointsAt(now time.Time) ([]*influx.Point, error) {
+	if u.Stat.gw == nil {
+		// Disabled devices lack stats.
+		u.Stat.gw = &gw{}
+	}
 	tags := map[string]string{
 		"id":                     u.ID,
 		"mac":                    u.Mac,
