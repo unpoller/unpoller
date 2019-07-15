@@ -8,6 +8,7 @@ import (
 	"log"
 	"os"
 	"strings"
+	"time"
 
 	"code.golift.io/unifi"
 	"github.com/BurntSushi/toml"
@@ -42,7 +43,7 @@ func (u *UnifiPoller) ParseFlags(args []string) {
 	}
 	u.Flag.StringVarP(&u.DumpJSON, "dumpjson", "j", "",
 		"This debug option prints a json payload and exits. See man page for more.")
-	u.Flag.StringVarP(&u.ConfigFile, "config", "c", defaultConfFile, "Poller Config File (TOML Format)")
+	u.Flag.StringVarP(&u.ConfigFile, "config", "c", DefaultConfFile, "Poller Config File (TOML Format)")
 	u.Flag.BoolVarP(&u.ShowVer, "version", "v", false, "Print the version and exit")
 	_ = u.Flag.Parse(args)
 }
@@ -96,6 +97,7 @@ func (u *UnifiPoller) Run() (err error) {
 	switch strings.ToLower(u.Mode) {
 	case "influxlambda", "lambdainflux", "lambda_influx", "influx_lambda":
 		u.LogDebugf("Lambda Mode Enabled")
+		u.LastCheck = time.Now()
 		return u.CollectAndReport()
 	default:
 		return u.PollController()
