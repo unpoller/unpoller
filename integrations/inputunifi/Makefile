@@ -1,4 +1,4 @@
-# This Makefile is written as generic as possible.
+# This Make# This Makefile is written as generic as possible.
 # Setting the variables in .metadata.sh and creating the paths in the repo makes this work.
 # See more: https://github.com/golift/application-builder
 
@@ -47,7 +47,7 @@ endef
 all: build
 
 # Prepare a release. Called in Travis CI.
-release: clean macos arm windows linux_packages
+release: clean macos windows linux_packages
 	# Prepareing a release!
 	mkdir -p $@
 	mv $(BINARY).*.macos $(BINARY).*.linux $@/
@@ -211,7 +211,8 @@ docker:
 		--build-arg "VENDOR=$(VENDOR)" \
 		--build-arg "AUTHOR=$(MAINT)" \
 		--build-arg "BINARY=$(BINARY)" \
-		--build-arg "GHREPO=$(GHREPO)" \
+		--build-arg "IMPORT_PATH=$(IMPORT_PATH)" \
+		--build-arg "SOURCE_URL=$(SOURCE_URL)" \
 		--build-arg "CONFIG_FILE=$(CONFIG_FILE)" \
 		--tag $(BINARY) .
 
@@ -229,7 +230,8 @@ $(BINARY).rb: v$(VERSION).tar.gz.sha256 init/homebrew/$(FORMULA).rb.tmpl
 		-e "s/{{SHA256}}/$(shell head -c64 $<)/g" \
 		-e "s/{{Desc}}/$(DESC)/g" \
 		-e "s%{{URL}}%$(URL)%g" \
-		-e "s%{{GHREPO}}%$(GHREPO)%g" \
+		-e "s%{{IMPORT_PATH}}%$(IMPORT_PATH)%g" \
+		-e "s%{{SOURCE_PATH}}%$(SOURCE_PATH)%g" \
 		-e "s%{{CONFIG_FILE}}%$(CONFIG_FILE)%g" \
 		-e "s%{{Class}}%$(shell echo $(BINARY) | perl -pe 's/(?:\b|-)(\p{Ll})/\u$$1/g')%g" \
 		init/homebrew/$(FORMULA).rb.tmpl | tee $(BINARY).rb
@@ -260,9 +262,9 @@ deps:
 install: man readme $(BINARY)
 	@echo -  Done Building!  -
 	@echo -  Local installation with the Makefile is only supported on macOS.
-	@echo If you wish to install the application manually on Linux, check out the wiki: https://github.com/$(GHREPO)/wiki/Installation
+	@echo If you wish to install the application manually on Linux, check out the wiki: https://$(SOURCE_URL)/wiki/Installation
 	@echo -  Otherwise, build and install a package: make rpm -or- make deb
-	@echo See the Package Install wiki for more info: https://github.com/$(GHREPO)/wiki/Package-Install
+	@echo See the Package Install wiki for more info: https://$(SOURCE_URL)/wiki/Package-Install
 	@[ "$(shell uname)" = "Darwin" ] || (echo "Unable to continue, not a Mac." && false)
 	@[ "$(PREFIX)" != "" ] || (echo "Unable to continue, PREFIX not set. Use: make install PREFIX=/usr/local ETC=/usr/local/etc" && false)
 	@[ "$(ETC)" != "" ] || (echo "Unable to continue, ETC not set. Use: make install PREFIX=/usr/local ETC=/usr/local/etc" && false)

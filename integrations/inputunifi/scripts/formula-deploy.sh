@@ -21,7 +21,7 @@ if [ -f "bitly_token" ]; then
   API=https://api-ssl.bitly.com/v4/bitlinks
   # Request payload. In single quotes with double quotes escaped. :see_no_evil:
   JSON='{\"domain\": \"bit.ly\",\"title\": \"${BINARY}.v${VERSION}-${ITERATION}.tgz\", \
-    \"tags\": [\"${BINARY}\"], \"long_url\": \"https://codeload.github.com/${GHREPO}/tar.gz/v${VERSION}\"}'
+    \"tags\": [\"${BINARY}\"], \"long_url\": \"${SOURCE_PATH}\"}'
   # Request with headers and data. Using bash -c to hide token from bash -x in travis logs.
   OUT=$(bash -c "curl -s -X POST -H 'Content-type: application/json' ${API} -H \"\$(<bitly_token)\" -d \"${JSON}\"")
   # Extract link from reply.
