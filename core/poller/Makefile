@@ -222,7 +222,7 @@ formula: $(BINARY).rb
 v$(VERSION).tar.gz.sha256:
 	# Calculate the SHA from the Github source file.
 	curl -sL $(URL)/archive/v$(VERSION).tar.gz | openssl dgst -r -sha256 | tee $@
-$(BINARY).rb: v$(VERSION).tar.gz.sha256
+$(BINARY).rb: v$(VERSION).tar.gz.sha256 init/homebrew/$(FORMULA).rb.tmpl
 	# Creating formula from template using sed.
 	sed -e "s/{{Version}}/$(VERSION)/g" \
 		-e "s/{{Iter}}/$(ITERATION)/g" \
@@ -247,7 +247,7 @@ lint:
 
 # This is safe; recommended even.
 dep: vendor
-vendor:
+vendor: Gopkg.*
 	dep ensure --vendor-only
 
 # Don't run this unless you're ready to debug untested vendored dependencies.
