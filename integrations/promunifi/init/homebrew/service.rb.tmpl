@@ -1,12 +1,13 @@
 # Homebrew Formula Template. Built by Makefile: `make fomula`
 # This is part of Application Builder.
 # https://github.com/golift/application-builder
+# This file is used when FORMULA is set to 'service'.
 class {{Class}} < Formula
   desc "{{Desc}}"
   homepage "{{URL}}"
-  url "{{URL}}/archive/v{{Version}}.tar.gz"
+  url "{{SOURCE_PATH}}"
   sha256 "{{SHA256}}"
-  head "{{URL}}"
+  head "{{SOURCE_URL}}"
 
   depends_on "go" => :build
   depends_on "dep"
@@ -14,9 +15,9 @@ class {{Class}} < Formula
   def install
     ENV["GOPATH"] = buildpath
 
-    bin_path = buildpath/"src/github.com/{{GHREPO}}"
+    bin_path = buildpath/"src/{{IMPORT_PATH}}"
     # Copy all files from their current location (GOPATH root)
-    # to $GOPATH/src/github.com/{{GHREPO}}
+    # to $GOPATH/src/{{IMPORT_PATH}}
     bin_path.install Dir["*",".??*"]
     cd bin_path do
       system "dep", "ensure", "--vendor-only"
@@ -49,7 +50,7 @@ class {{Class}} < Formula
          <key>ProgramArguments</key>
          <array>
              <string>#{bin}/#{name}</string>
-             <string>-c</string>
+             <string>--config</string>
              <string>#{etc}/#{name}/{{CONFIG_FILE}}</string>
          </array>
          <key>RunAtLoad</key>
