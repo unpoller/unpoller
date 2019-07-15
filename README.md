@@ -1,14 +1,14 @@
 # UniFi Poller
 
-[![discord](https://badgen.net/badge/icon/Discord?color=0011ff&label&icon=https://simpleicons.now.sh/discord/fff "Discord")](https://discord.gg/DyVsMyt)
-[![twitter](https://badgen.net/twitter/follow/TwitchCaptain?icon=twitter&label=TwitchCaptain&color=0116ff "TwitchCaptain Twitter")](https://twitter.com/TwitchCaptain)
-[![grafana](https://badgen.net/badge/dashboards/5?icon=https://simpleicons.now.sh/grafana/fff&color=0011ff "Grafana Dashboards Available")](http://grafana.com/dashboards?search=unifi-poller)
-[![pulls](https://badgen.net/docker/pulls/golift/unifi-poller?icon=docker&label=pulls&color=0011ff "Docker Pulls")](https://hub.docker.com/r/golift/unifi-poller)
+[![discord](https://badgen.net/badge/icon/Discord?color=0011ff&label&icon=https://simpleicons.now.sh/discord/eee "Discord")](https://discord.gg/DyVsMyt)
+[![twitter](https://badgen.net/twitter/follow/TwitchCaptain?icon=https://simpleicons.now.sh/twitter/0099ff&label=TwitchCaptain&color=0116ff "TwitchCaptain Twitter")](https://twitter.com/TwitchCaptain)
+[![grafana](https://badgen.net/badge/dashboards/5?icon=https://simpleicons.now.sh/grafana/ED7F38&color=0011ff "Grafana Dashboards Available")](http://grafana.com/dashboards?search=unifi-poller)
+[![pulls](https://badgen.net/docker/pulls/golift/unifi-poller?icon=https://simpleicons.now.sh/docker/38B1ED&label=pulls&color=0011ff "Docker Pulls")](https://hub.docker.com/r/golift/unifi-poller)
 [![DLs](https://img.shields.io/github/downloads/davidnewhall/unifi-poller/total.svg?logo=github&color=0116ff "GitHub Downloads")](https://www.somsubhra.com/github-release-stats/?username=davidnewhall&repository=unifi-poller)
 
 [![unifi](https://badgen.net/badge/UniFi/5.10.x,5.11.x,UAP,USG,USW?list=|&icon=https://golift.io/svg/ubiquiti_color.svg&color=0099ee "UniFi Products Supported")](https://github.com/golift/unifi)
 [![builer](https://badgen.net/badge/go/Application%20Builder?label=&icon=https://golift.io/svg/go.svg&color=0099ee "Go Application Builder")](https://github.com/golift/unifi)
-[![stars](https://badgen.net/github/stars/davidnewhall/unifi-poller?icon=github&label=stars&color=0099ee "GitHub Stars")](https://github.com/davidnewhall/unifi-poller)
+[![stars](https://badgen.net/github/stars/davidnewhall/unifi-poller?icon=https://simpleicons.now.sh/macys/fab&label=&color=0099ee "GitHub Stars")](https://github.com/davidnewhall/unifi-poller)
 [![travis](https://badgen.net/travis/davidnewhall/unifi-poller?icon=travis&label=build "Travis Build")](https://travis-ci.org/davidnewhall/unifi-poller)
 
 Collect your UniFi controller data and send it to an InfluxDB instance.
