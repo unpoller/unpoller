@@ -135,7 +135,7 @@ sites side-by-side. So easy! This screenshot barely does it justice.
 
 
 ## Copyright & License
-<img style="float: right;" width="320px" src="https://repository-images.githubusercontent.com/130408606/4a514b80-9bad-11e9-91b6-30d18dde2a9f">
+<img style="float: right;" align="right" width="320px" src="https://repository-images.githubusercontent.com/130408606/4a514b80-9bad-11e9-91b6-30d18dde2a9f">
 
 -   Copyright © 2016 Garrett Bjerkhoel.
 -   Copyright © 2018-2019 David Newhall II.
