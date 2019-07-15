@@ -233,6 +233,7 @@ $(BINARY).rb: v$(VERSION).tar.gz.sha256
 		-e "s%{{CONFIG_FILE}}%$(CONFIG_FILE)%g" \
 		-e "s%{{Class}}%$(shell echo $(BINARY) | perl -pe 's/(?:\b|-)(\p{Ll})/\u$$1/g')%g" \
 		init/homebrew/$(FORMULA).rb.tmpl | tee $(BINARY).rb
+		# That perl line turns hello-world into HelloWorld, etc.
 
 # Extras
 
