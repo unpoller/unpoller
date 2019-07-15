@@ -87,39 +87,39 @@ README.html: md2roff
 # Binaries
 
 build: $(BINARY)
-$(BINARY):
+$(BINARY): *.go */*.go
 	go build -o $(BINARY) -ldflags "-w -s -X $(VERSION_PATH)=$(VERSION)-$(ITERATION)"
 
 linux: $(BINARY).amd64.linux
-$(BINARY).amd64.linux:
+$(BINARY).amd64.linux: *.go */*.go
 	# Building linux 64-bit x86 binary.
 	GOOS=linux GOARCH=amd64 go build -o $@ -ldflags "-w -s -X $(VERSION_PATH)=$(VERSION)-$(ITERATION)"
 
 linux386: $(BINARY).i386.linux
-$(BINARY).i386.linux:
+$(BINARY).i386.linux: *.go */*.go
 	# Building linux 32-bit x86 binary.
 	GOOS=linux GOARCH=386 go build -o $@ -ldflags "-w -s -X $(VERSION_PATH)=$(VERSION)-$(ITERATION)"
 
 arm: arm64 armhf
 
 arm64: $(BINARY).arm64.linux
-$(BINARY).arm64.linux:
+$(BINARY).arm64.linux: *.go */*.go
 	# Building linux 64-bit ARM binary.
 	GOOS=linux GOARCH=arm64 go build -o $@ -ldflags "-w -s -X $(VERSION_PATH)=$(VERSION)-$(ITERATION)"
 
 armhf: $(BINARY).armhf.linux
-$(BINARY).armhf.linux:
+$(BINARY).armhf.linux: *.go */*.go
 	# Building linux 32-bit ARM binary.
 	GOOS=linux GOARCH=arm GOARM=6 go build -o $@ -ldflags "-w -s -X $(VERSION_PATH)=$(VERSION)-$(ITERATION)"
 
 macos: $(BINARY).amd64.macos
-$(BINARY).amd64.macos:
+$(BINARY).amd64.macos: *.go */*.go
 	# Building darwin 64-bit x86 binary.
 	GOOS=darwin GOARCH=amd64 go build -o $@ -ldflags "-w -s -X $(VERSION_PATH)=$(VERSION)-$(ITERATION)"
 
 exe: $(BINARY).amd64.exe
 windows: $(BINARY).amd64.exe
-$(BINARY).amd64.exe:
+$(BINARY).amd64.exe: *.go */*.go
 	# Building windows 64-bit x86 binary.
 	GOOS=windows GOARCH=amd64 go build -o $@ -ldflags "-w -s -X $(VERSION_PATH)=$(VERSION)-$(ITERATION)"
 
