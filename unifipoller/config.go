@@ -13,7 +13,6 @@ var Version = "development"
 
 const (
 	// App defaults in case they're missing from the config.
-	defaultConfFile = "/etc/unifi-poller/up.conf"
 	defaultInterval = 30 * time.Second
 	defaultInfxDb   = "unifi"
 	defaultInfxUser = "unifi"
@@ -26,6 +25,7 @@ const (
 // Asset is used to give all devices and clients a common interface.
 type Asset interface {
 	Points() ([]*influx.Point, error)
+	PointsAt(time.Time) ([]*influx.Point, error)
 }
 
 // UnifiPoller contains the application startup data, and auth info for UniFi & Influx.
@@ -35,6 +35,7 @@ type UnifiPoller struct {
 	ShowVer    bool
 	Flag       *pflag.FlagSet
 	errorCount int
+	LastCheck  time.Time
 	influx.Client
 	*unifi.Unifi
 	*Config
@@ -42,6 +43,7 @@ type UnifiPoller struct {
 
 // Metrics contains all the data from the controller and an influx endpoint to send it to.
 type Metrics struct {
+	TS time.Time
 	unifi.Sites
 	unifi.IDSList
 	unifi.Clients
