@@ -17,7 +17,7 @@ Here's a working example:
 package main
 
 import "log"
-import "github.com/golift/unifi"
+import "code.golift.io/unifi"
 
 func main() {
 	username := "admin"
