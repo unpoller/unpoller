@@ -3,12 +3,12 @@
 
 [![discord](https://badgen.net/badge/icon/Discord?color=0011ff&label&icon=https://simpleicons.now.sh/discord/eee "Captain's Discord")](https://discord.gg/DyVsMyt)
 [![twitter](https://badgen.net/twitter/follow/TwitchCaptain?icon=https://simpleicons.now.sh/twitter/0099ff&label=TwitchCaptain&color=0116ff "TwitchCaptain @ Twitter")](https://twitter.com/TwitchCaptain)
-[![grafana](https://badgen.net/https/code.golift.io/bd/grafana/dashboard-downloads/10414,10415,10416,10417,10418?icon=https://simpleicons.now.sh/grafana/ED7F38&color=0011ff "Grafana Dashboard Downloads")](http://grafana.com/dashboards?search=unifi-poller)
+[![grafana](https://badgen.net/https/golift.io/bd/grafana/dashboard-downloads/10414,10415,10416,10417,10418?icon=https://simpleicons.now.sh/grafana/ED7F38&color=0011ff "Grafana Dashboard Downloads")](http://grafana.com/dashboards?search=unifi-poller)
 [![pulls](https://badgen.net/docker/pulls/golift/unifi-poller?icon=https://simpleicons.now.sh/docker/38B1ED&label=pulls&color=0011ff "Docker Pulls")](https://hub.docker.com/r/golift/unifi-poller)
 [![DLs](https://img.shields.io/github/downloads/davidnewhall/unifi-poller/total.svg?logo=github&color=0116ff "GitHub Downloads")](https://www.somsubhra.com/github-release-stats/?username=davidnewhall&repository=unifi-poller)
 
-[![unifi](https://badgen.net/badge/UniFi/5.10.x,5.11.x,UAP,USG,USW?list=|&icon=https://golift.io/svg/ubiquiti_color.svg&color=0099ee "UniFi Products Supported")](https://github.com/golift/unifi)
-[![builer](https://badgen.net/badge/go/Application%20Builder?label=&icon=https://golift.io/svg/go.svg&color=0099ee "Go Application Builder")](https://github.com/golift/application-builder)
+[![unifi](https://badgen.net/badge/UniFi/5.10.x,5.11.x,UAP,USG,USW?list=|&icon=https://golift.github.io/svg/ubiquiti_color.svg&color=0099ee "UniFi Products Supported")](https://github.com/golift/unifi)
+[![builer](https://badgen.net/badge/go/Application%20Builder?label=&icon=https://golift.github.io/svg/go.svg&color=0099ee "Go Application Builder")](https://github.com/golift/application-builder)
 [![stars](https://badgen.net/github/stars/davidnewhall/unifi-poller?icon=https://simpleicons.now.sh/macys/fab&label=&color=0099ee "GitHub Stars")](https://github.com/davidnewhall/unifi-poller)
 [![travis](https://badgen.net/travis/davidnewhall/unifi-poller?icon=travis&label=build "Travis Build")](https://travis-ci.org/davidnewhall/unifi-poller)
 
@@ -91,7 +91,7 @@ script if you needed to. It's available for macOS, Linux and Docker. It comes wi
 a systemd service unit that allows you automatically start it up on most Linux
 hosts. It works just fine on [Windows](https://github.com/davidnewhall/unifi-poller/wiki/Windows) too.
 
-The unifi data extraction is provided as an [external library](https://godoc.org/github.com/golift/unifi),
+The unifi data extraction is provided as an [external library](https://godoc.org/golift.io/unifi),
 and you can import that code directly without futzing with this application. That
 means, if you wanted to do something like make telegraf collect your data instead
 of UniFi Poller you can achieve that with a little bit of Go code. You could write

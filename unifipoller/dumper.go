@@ -5,8 +5,8 @@ import (
 	"os"
 	"strings"
 
-	"code.golift.io/unifi"
 	"github.com/pkg/errors"
+	"golift.io/unifi"
 )
 
 // DumpJSONPayload prints raw json from the UniFi Controller.
