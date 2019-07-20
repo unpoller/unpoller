@@ -6,9 +6,9 @@ import (
 	"strings"
 	"time"
 
-	"code.golift.io/unifi"
 	influx "github.com/influxdata/influxdb1-client/v2"
 	"github.com/pkg/errors"
+	"golift.io/unifi"
 )
 
 // CheckSites makes sure the list of provided sites exists on the controller.

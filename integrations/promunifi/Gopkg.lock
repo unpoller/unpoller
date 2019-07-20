@@ -2,14 +2,6 @@
 
 
 [[projects]]
-  digest = "1:6a0be013a234fe00d3c080db2b887aee9cd6bc8f3f559b8b7a079150c34ba017"
-  name = "code.golift.io/unifi"
-  packages = ["."]
-  pruneopts = "UT"
-  revision = "c998e559a9b52f7e7859de86e7f69b40582d3e37"
-  version = "v3.3.2"
-
-[[projects]]
   digest = "1:9f3b30d9f8e0d7040f729b82dcbc8f0dead820a133b3147ce355fc451f32d761"
   name = "github.com/BurntSushi/toml"
   packages = ["."]
@@ -46,6 +38,14 @@
   version = "v1.0.3"
 
 [[projects]]
+  digest = "1:6a0be013a234fe00d3c080db2b887aee9cd6bc8f3f559b8b7a079150c34ba017"
+  name = "golift.io/unifi"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "c998e559a9b52f7e7859de86e7f69b40582d3e37"
+  version = "v3.3.2"
+
+[[projects]]
   digest = "1:4d2e5a73dc1500038e504a8d78b986630e3626dc027bc030ba5c75da257cdb96"
   name = "gopkg.in/yaml.v2"
   packages = ["."]
@@ -57,11 +57,11 @@
   analyzer-name = "dep"
   analyzer-version = 1
   input-imports = [
-    "code.golift.io/unifi",
     "github.com/BurntSushi/toml",
     "github.com/influxdata/influxdb1-client/v2",
     "github.com/pkg/errors",
     "github.com/spf13/pflag",
+    "golift.io/unifi",
     "gopkg.in/yaml.v2",
   ]
   solver-name = "gps-cdcl"
