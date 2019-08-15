@@ -48,6 +48,6 @@ COMMIT="$(git rev-parse --short HEAD || echo 0)"
 # Used by homebrew downloads.
 #SOURCE_PATH=https://codeload.${IMPORT_PATH}/tar.gz/v${VERSION}
 # This is a custom download path for homebrew formula.
-SOURCE_PATH=https://code.golift.io/${BINARY}/archive/v${VERSION}.tar.gz
+SOURCE_PATH=https://golift.io/${BINARY}/archive/v${VERSION}.tar.gz
 
 export IMPORT_PATH SOURCE_URL URL VERSION_PATH VVERSION VERSION ITERATION DATE COMMIT SOURCE_PATH
