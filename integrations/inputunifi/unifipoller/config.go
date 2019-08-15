@@ -3,9 +3,9 @@ package unifipoller
 import (
 	"time"
 
-	"code.golift.io/unifi"
 	influx "github.com/influxdata/influxdb1-client/v2"
 	"github.com/spf13/pflag"
+	"golift.io/unifi"
 )
 
 // Version is injected by the Makefile
