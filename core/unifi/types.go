@@ -45,6 +45,7 @@ type Devices struct {
 	UAPs []*UAP
 	USGs []*USG
 	USWs []*USW
+	UDMs []*UDM
 }
 
 // Unifi is what you get in return for providing a password! Unifi represents
