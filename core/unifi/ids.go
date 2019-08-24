@@ -8,7 +8,6 @@ import (
 	"time"
 
 	influx "github.com/influxdata/influxdb1-client/v2"
-	"github.com/pkg/errors"
 )
 
 // IDSList contains a list that contains all of the IDS Events on a controller.
@@ -124,7 +123,7 @@ func (u *Unifi) GetSiteIDS(site *Site, from, to time.Time) ([]*IDS, error) {
 		return nil, err
 	}
 	if resp.StatusCode != http.StatusOK {
-		return nil, errors.Errorf("invalid status code from server %s", resp.Status)
+		return nil, fmt.Errorf("invalid status code from server %s", resp.Status)
 	}
 	if err := json.Unmarshal(body, &response); err != nil {
 		return nil, err
