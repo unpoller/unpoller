@@ -44,26 +44,8 @@ type UAP struct {
 	Model               string   `json:"model"`
 	Name                string   `json:"name"`
 	OutdoorModeOverride string   `json:"outdoor_mode_override"`
-	PortTable           []struct {
-		PortIdx    FlexInt  `json:"port_idx"`
-		OpMode     string   `json:"op_mode"`
-		PortconfID string   `json:"portconf_id"`
-		AttrNoEdit FlexBool `json:"attr_no_edit,omitempty"`
-		Media      string   `json:"media"`
-		Name       string   `json:"name"`
-		PoeCaps    FlexInt  `json:"poe_caps"`
-		PortPoe    FlexBool `json:"port_poe"`
-		TxBytesR   FlexInt  `json:"tx_bytes-r"`
-		RxBytesR   FlexInt  `json:"rx_bytes-r"`
-		BytesR     FlexInt  `json:"bytes-r"`
-		PortDelta  struct {
-			TimeDelta FlexInt `json:"time_delta"`
-		} `json:"port_delta"`
-		Enable       FlexBool `json:"enable"`
-		Masked       FlexBool `json:"masked"`
-		AggregatedBy FlexBool `json:"aggregated_by"`
-	} `json:"port_table"`
-	RadioTable []struct {
+	PortTable           []Port   `json:"port_table"`
+	RadioTable          []struct {
 		Radio              string   `json:"radio"`
 		Name               string   `json:"name"`
 		Channel            FlexInt  `json:"channel"`
@@ -112,27 +94,16 @@ type UAP struct {
 	Locating              FlexBool      `json:"locating"`
 	ConnectRequestIP      string        `json:"connect_request_ip"`
 	ConnectRequestPort    string        `json:"connect_request_port"`
-	SysStats              struct {
-		Loadavg1  float64 `json:"loadavg_1,string"`
-		Loadavg15 float64 `json:"loadavg_15,string"`
-		Loadavg5  float64 `json:"loadavg_5,string"`
-		MemBuffer FlexInt `json:"mem_buffer"`
-		MemTotal  FlexInt `json:"mem_total"`
-		MemUsed   FlexInt `json:"mem_used"`
-	} `json:"sys_stats"`
-	SystemStats struct {
-		CPU    float64 `json:"cpu,string"`
-		Mem    float64 `json:"mem,string"`
-		Uptime float64 `json:"uptime,string"`
-	} `json:"system-stats"`
-	SSHSessionTable  []interface{} `json:"ssh_session_table"`
-	Scanning         FlexBool      `json:"scanning"`
-	SpectrumScanning FlexBool      `json:"spectrum_scanning"`
-	GuestToken       string        `json:"guest_token"`
-	Meshv3PeerMac    string        `json:"meshv3_peer_mac"`
-	Satisfaction     FlexInt       `json:"satisfaction"`
-	Isolated         FlexBool      `json:"isolated"`
-	RadioTableStats  []struct {
+	SysStats              SysStats      `json:"sys_stats"`
+	SystemStats           SystemStats   `json:"system-stats"`
+	SSHSessionTable       []interface{} `json:"ssh_session_table"`
+	Scanning              FlexBool      `json:"scanning"`
+	SpectrumScanning      FlexBool      `json:"spectrum_scanning"`
+	GuestToken            string        `json:"guest_token"`
+	Meshv3PeerMac         string        `json:"meshv3_peer_mac"`
+	Satisfaction          FlexInt       `json:"satisfaction"`
+	Isolated              FlexBool      `json:"isolated"`
+	RadioTableStats       []struct {
 		Name        string      `json:"name"`
 		Channel     FlexInt     `json:"channel"`
 		Radio       string      `json:"radio"`

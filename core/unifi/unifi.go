@@ -16,8 +16,6 @@ import (
 	"net/http"
 	"net/http/cookiejar"
 	"strings"
-
-	"github.com/pkg/errors"
 )
 
 // NewUnifi creates a http.Client with authenticated cookies.
@@ -26,7 +24,7 @@ import (
 func NewUnifi(user, pass, url string, verifySSL bool) (*Unifi, error) {
 	jar, err := cookiejar.New(nil)
 	if err != nil {
-		return nil, errors.Wrap(err, "cookiejar.New(nil)")
+		return nil, err
 	}
 	u := &Unifi{baseURL: strings.TrimRight(url, "/"),
 		Client: &http.Client{
@@ -44,21 +42,24 @@ func (u *Unifi) getController(user, pass string) error {
 	// magic login.
 	req, err := u.UniReq(LoginPath, fmt.Sprintf(`{"username":"%s","password":"%s"}`, user, pass))
 	if err != nil {
-		return errors.Wrap(err, "UniReq(LoginPath, json)")
+		return err
 	}
 	resp, err := u.Do(req)
 	if err != nil {
-		return errors.Wrap(err, "authReq.Do(req)")
+		return err
 	}
 	defer func() {
 		_, _ = io.Copy(ioutil.Discard, resp.Body) // avoid leaking.
 		_ = resp.Body.Close()
 	}()
 	if resp.StatusCode != http.StatusOK {
-		return errors.Errorf("authentication failed (user: %s): %s (status: %s)",
+		return fmt.Errorf("authentication failed (user: %s): %s (status: %s)",
 			user, u.baseURL+LoginPath, resp.Status)
 	}
-	return errors.Wrap(u.getServer(), "unable to get server version")
+	if err := u.getServer(); err != nil {
+		return fmt.Errorf("unable to get server version: %v", err)
+	}
+	return nil
 }
 
 // getServer sets the controller's version and UUID.
@@ -139,8 +140,7 @@ func (u *Unifi) GetData(methodPath string, v interface{}) error {
 	if err != nil {
 		return err
 	}
-	err = json.Unmarshal(body, v)
-	return errors.Wrapf(err, "json.Unmarshal(%s)", methodPath)
+	return json.Unmarshal(body, v)
 }
 
 // UniReq is a small helper function that adds an Accept header.
@@ -164,21 +164,21 @@ func (u *Unifi) UniReq(apiPath string, params string) (req *http.Request, err er
 func (u *Unifi) GetJSON(apiPath string) ([]byte, error) {
 	req, err := u.UniReq(apiPath, "")
 	if err != nil {
-		return []byte{}, errors.Wrapf(err, "c.UniReq(%s)", apiPath)
+		return []byte{}, err
 	}
 	resp, err := u.Do(req)
 	if err != nil {
-		return []byte{}, errors.Wrapf(err, "c.Do(%s)", apiPath)
+		return []byte{}, err
 	}
 	defer func() {
 		_ = resp.Body.Close()
 	}()
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		return body, errors.Wrapf(err, "ioutil.ReadAll(%s)", apiPath)
+		return body, err
 	}
 	if resp.StatusCode != http.StatusOK {
-		err = errors.Errorf("invalid status code from server %s", resp.Status)
+		err = fmt.Errorf("invalid status code from server %s", resp.Status)
 	}
 	return body, err
 }

@@ -2,11 +2,10 @@ package unifi
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"strconv"
 	"strings"
-
-	"github.com/pkg/errors"
 )
 
 // This is a list of unifi API paths.
@@ -45,6 +44,7 @@ type Devices struct {
 	UAPs []*UAP
 	USGs []*USG
 	USWs []*USW
+	UDMs []*UDM
 }
 
 // Unifi is what you get in return for providing a password! Unifi represents
@@ -89,8 +89,12 @@ func (f *FlexInt) UnmarshalJSON(b []byte) error {
 		f.Txt = i
 		f.Val, _ = strconv.ParseFloat(i, 64)
 		return nil
+	case nil:
+		f.Txt = "0"
+		f.Val = 0
+		return nil
 	default:
-		return errors.New("Cannot unmarshal to FlexInt")
+		return fmt.Errorf("cannot unmarshal to FlexInt: %s", b)
 	}
 }
 
