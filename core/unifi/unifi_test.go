@@ -15,7 +15,7 @@ func TestNewUnifi(t *testing.T) {
 	authReq, err := NewUnifi("user1", "pass2", url, false)
 	a.NotNil(err)
 	a.EqualValues(url, authReq.baseURL)
-	a.Contains(err.Error(), "authReq.Do(req):", "an invalid destination should product a .Do(req) error.")
+	a.Contains(err.Error(), "connection refused", "an invalid destination should product a connection error.")
 	/* TODO: OPEN web server, check parameters posted, more. This test is incomplete.
 	a.EqualValues(`{"username": "user1","password": "pass2"}`, string(post_params),
 		"user/pass json parameters improperly encoded")
