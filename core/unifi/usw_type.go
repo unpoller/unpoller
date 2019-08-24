@@ -62,9 +62,9 @@ type USW struct {
 	DeviceID              string      `json:"device_id"`
 	State                 FlexInt     `json:"state"`
 	LastSeen              FlexInt     `json:"last_seen"`
-	Upgradable            FlexBool    `json:"upgradable"`
-	AdoptableWhenUpgraded FlexBool    `json:"adoptable_when_upgraded"`
-	Rollupgrade           FlexBool    `json:"rollupgrade"`
+	Upgradable            FlexBool    `json:"upgradable,omitempty"`
+	AdoptableWhenUpgraded FlexBool    `json:"adoptable_when_upgraded,omitempty"`
+	Rollupgrade           FlexBool    `json:"rollupgrade,omitempty"`
 	KnownCfgversion       string      `json:"known_cfgversion"`
 	Uptime                FlexInt     `json:"uptime"`
 	Locating              FlexBool    `json:"locating"`

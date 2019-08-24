@@ -84,7 +84,6 @@ func (u *USW) PointsAt(now time.Time) ([]*influx.Point, error) {
 		"stat_tx_packets":     u.Stat.TxPackets.Val,
 		"stat_tx_retries":     u.Stat.TxRetries.Val,
 		"uplink_depth":        u.UplinkDepth.Txt,
-		// Add the port stats too.
 	}
 	pt, err := influx.NewPoint("usw", tags, fields, now)
 	if err != nil {
