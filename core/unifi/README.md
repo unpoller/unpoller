@@ -5,9 +5,6 @@ an authenticated http Client you may use to query the device for data. Also
 contains some built-in methods for de-serializing common client and device
 data. The data is provided in a large struct you can consume in your application.
 
-This library also contains methods to export the Unifi data in InfluxDB format,
-and this can be used as an example to base your own metrics collection methods.
-
 If more features are requested, I'll certainly consider them. Do you need to do
 more than just collect data? [Let me know](https://github.com/golift/unifi/issues/new)!
 Pull requests and feedback are welcomed!
@@ -20,16 +17,18 @@ import "log"
 import "golift.io/unifi"
 
 func main() {
-	username := "admin"
-	password := "superSecret1234"
-	URL := "https://127.0.0.1:8443/"
-	uni, err := unifi.NewUnifi(username, password, URL, false)
+	c := *unifi.Config{
+		User: "admin",
+		Pass: "superSecret1234",
+		URL:  "https://127.0.0.1:8443/",
+		// Log with log.Printf or make your own interface that accepts (msg, fmt)
+		ErrorLog: log.Printf,
+		DebugLog: log.Printf,
+	}
+	uni, err := unifi.NewUnifi(c)
 	if err != nil {
 		log.Fatalln("Error:", err)
 	}
-	// Log with log.Printf or make your own interface that accepts (msg, fmt)
-	uni.ErrorLog = log.Printf
-	uni.DebugLog = log.Printf
 
 	sites, err := uni.GetSites()
 	if err != nil {
