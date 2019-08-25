@@ -10,6 +10,9 @@ import (
 // USWPoints generates Unifi Switch datapoints for InfluxDB.
 // These points can be passed directly to influx.
 func USWPoints(u *unifi.USW, now time.Time) ([]*influx.Point, error) {
+	if u.Stat.Sw == nil {
+		u.Stat.Sw = &unifi.Sw{}
+	}
 	tags := map[string]string{
 		"id":                     u.ID,
 		"mac":                    u.Mac,

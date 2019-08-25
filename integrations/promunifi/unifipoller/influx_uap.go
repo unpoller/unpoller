@@ -10,6 +10,9 @@ import (
 // UAPPoints generates Wireless-Access-Point datapoints for InfluxDB.
 // These points can be passed directly to influx.
 func UAPPoints(u *unifi.UAP, now time.Time) ([]*influx.Point, error) {
+	if u.Stat.Ap == nil {
+		u.Stat.Ap = &unifi.Ap{}
+	}
 	tags := map[string]string{
 		"id":                    u.ID,
 		"mac":                   u.Mac,
