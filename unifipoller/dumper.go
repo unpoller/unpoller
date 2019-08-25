@@ -11,7 +11,12 @@ import (
 // DumpJSONPayload prints raw json from the UniFi Controller.
 func (u *UnifiPoller) DumpJSONPayload() (err error) {
 	u.Quiet = true
-	u.Unifi, err = unifi.NewUnifi(u.UnifiUser, u.UnifiPass, u.UnifiBase, u.VerifySSL)
+	u.Unifi, err = unifi.NewUnifi(&unifi.Config{
+		User:      u.UnifiUser,
+		Pass:      u.UnifiPass,
+		URL:       u.UnifiBase,
+		VerifySSL: u.VerifySSL,
+	})
 	if err != nil {
 		return err
 	}
