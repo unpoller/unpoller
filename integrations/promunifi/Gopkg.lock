@@ -22,14 +22,6 @@
   revision = "fc22c7df067eefd070157f157893fbce961d6359"
 
 [[projects]]
-  digest = "1:cf31692c14422fa27c83a05292eb5cbe0fb2775972e8f1f8446a71549bd8980b"
-  name = "github.com/pkg/errors"
-  packages = ["."]
-  pruneopts = "UT"
-  revision = "ba968bfe8b2f7e042a574c888954fccecfa385b4"
-  version = "v0.8.1"
-
-[[projects]]
   digest = "1:c1b1102241e7f645bc8e0c22ae352e8f0dc6484b6cb4d132fa9f24174e0119e2"
   name = "github.com/spf13/pflag"
   packages = ["."]
@@ -59,7 +51,6 @@
   input-imports = [
     "github.com/BurntSushi/toml",
     "github.com/influxdata/influxdb1-client/v2",
-    "github.com/pkg/errors",
     "github.com/spf13/pflag",
     "golift.io/unifi",
     "gopkg.in/yaml.v2",
