@@ -54,6 +54,13 @@ unifi_url: "https://127.0.0.1:8443"
 # Only useful if IDS or IPS are enabled on one of the sites.
 collect_ids: false
 
+# Some controllers or reverse proxy configurations do not allow cookies to be
+# re-user on every request (every interval). This setting provides a workaround
+# That causes the poller to re-auth (login) to the controller on every interval.
+# Only enable this if you get login errors after 30 seconds. This will generate
+# a few more requests to your controller every interval.
+reauthenticate: false
+
 # If your UniFi controller has a valid SSL certificate, you can enable
 # this option to validate it. Otherwise, any SSL certificate is valid.
 verify_ssl: false

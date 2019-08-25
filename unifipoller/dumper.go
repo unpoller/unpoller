@@ -5,7 +5,6 @@ import (
 	"os"
 	"strings"
 
-	"github.com/pkg/errors"
 	"golift.io/unifi"
 )
 
@@ -35,7 +34,7 @@ func (u *UnifiPoller) DumpJSONPayload() (err error) {
 		_, _ = fmt.Fprintf(os.Stderr, "[INFO] Dumping Path '%s':\n", apiPath)
 		return u.PrintRawAPIJSON(apiPath)
 	default:
-		return errors.New("must provide filter: devices, clients, other")
+		return fmt.Errorf("must provide filter: devices, clients, other")
 	}
 }
 
