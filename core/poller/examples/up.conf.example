@@ -5,20 +5,20 @@
 # If the controller has more than one site, specify which sites to poll here.
 # Set this to ["default"] to poll only the first site on the controller.
 # A setting of ["all"] will poll all sites; this works if you only have 1 site too.
-#sites = ["all"]
+sites = ["all"]
 
 # The UniFi Controller only updates traffic stats about every 30 seconds.
 # Setting this to something lower may lead to "zeros" in your data. You've been warned.
-#interval = "30s"
+interval = "30s"
 
 # Turns on line numbers, microsecond logging, and a per-device log.
 # The default is false, but I personally leave this on at home (four devices).
 # This may be noisy if you have a lot of devices. It adds one line per device.
-#debug = false
+debug = false
 
 # Turns off per-interval logs. Only startup and error logs will be emitted.
 # Recommend enabling debug with this setting for better error logging.
-#quiet = false
+quiet = false
 
 # Which mode to run this application in. The default mode is "influx". Providing
 # an invalid mode will also result in "influx". In this default mode the application
@@ -29,32 +29,39 @@
 # Lambda mode makes the application exit after collecting and reporting metrics
 # to InfluxDB one time. This mode requires an external process like an AWS Lambda
 # or a simple crontab to keep the timings accurate on UniFi Poller run intervals.
-#mode = "influx"
+mode = "influx"
 
 # If the poller experiences an error from the UniFi controller or from InfluxDB
 # it will exit. If you do not want it to exit, change max_errors to -1. You can
 # adjust the config to tolerate more errors by setting this to a higher value.
 # Recommend setting this between 0 and 5. See man page for more explanation.
-#max_errors = 0
+max_errors = 0
 
 # InfluxDB does not require auth by default, so the user/password are probably unimportant.
-#influx_url = "http://127.0.0.1:8086"
-#influx_user = "unifi"
-#influx_pass = "unifi"
+influx_url = "http://127.0.0.1:8086"
+influx_user = "unifi"
+influx_pass = "unifi"
 # Be sure to create this database.
-#influx_db = "unifi"
+influx_db = "unifi"
 
 # Make a read-only user in the UniFi Admin Settings.
-#unifi_user = "influxdb"
+unifi_user = "influxdb"
 # You may also set env variable UNIFI_PASSWORD instead of putting this in the config.
 unifi_pass = "4BB9345C-2341-48D7-99F5-E01B583FF77F"
-#unifi_url = "https://127.0.0.1:8443"
+unifi_url = "https://127.0.0.1:8443"
 
 # Enable collection of Intrusion Detection System Data.
 # Only useful if IDS or IPS are enabled on one of the sites.
-#collect_ids = false
+collect_ids = false
 
-# If your UniFi controller has a valid SSL certificate, you can enable
-# this option to validate it. Otherwise, any SSL certificate is valid.
-# If you don't know if you have a valid SSL cert, then you don't have one.
-#verify_ssl = false
+# Some controllers or reverse proxy configurations do not allow cookies to be
+# re-user on every request (every interval). This setting provides a workaround
+# That causes the poller to re-auth (login) to the controller on every interval.
+# Only enable this if you get login errors after 30 seconds. This will generate
+# a few more requests to your controller every interval.
+reauthenticate = false
+
+# If your UniFi controller has a valid SSL certificate (like lets encrypt),
+# you can enable this option to validate it. Otherwise, any SSL certificate is
+# valid. If you don't know if you have a valid SSL cert, then you don't have one.
+verify_ssl = false
