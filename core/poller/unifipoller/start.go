@@ -121,12 +121,17 @@ func (u *UnifiPoller) GetInfluxDB() (err error) {
 // GetUnifi returns a UniFi controller interface.
 func (u *UnifiPoller) GetUnifi() (err error) {
 	// Create an authenticated session to the Unifi Controller.
-	u.Unifi, err = unifi.NewUnifi(u.UnifiUser, u.UnifiPass, u.UnifiBase, u.VerifySSL)
+	u.Unifi, err = unifi.NewUnifi(&unifi.Config{
+		User:      u.UnifiUser,
+		Pass:      u.UnifiPass,
+		URL:       u.UnifiBase,
+		VerifySSL: u.VerifySSL,
+		ErrorLog:  u.LogErrorf, // Log all errors.
+		DebugLog:  u.LogDebugf, // Log debug messages.
+	})
 	if err != nil {
 		return fmt.Errorf("unifi controller: %v", err)
 	}
-	u.Unifi.ErrorLog = u.LogErrorf // Log all errors.
-	u.Unifi.DebugLog = u.LogDebugf // Log debug messages.
 	if err := u.CheckSites(); err != nil {
 		return err
 	}
