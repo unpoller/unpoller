@@ -12,10 +12,9 @@ import (
 
 	"github.com/BurntSushi/toml"
 	influx "github.com/influxdata/influxdb1-client/v2"
-	"github.com/pkg/errors"
-	flag "github.com/spf13/pflag"
+	"github.com/spf13/pflag"
 	"golift.io/unifi"
-	yaml "gopkg.in/yaml.v2"
+	"gopkg.in/yaml.v2"
 )
 
 // Start begins the application from a CLI.
@@ -36,7 +35,7 @@ func Start() error {
 
 // ParseFlags runs the parser.
 func (u *UnifiPoller) ParseFlags(args []string) {
-	u.Flag = flag.NewFlagSet("unifi-poller", flag.ExitOnError)
+	u.Flag = pflag.NewFlagSet("unifi-poller", pflag.ExitOnError)
 	u.Flag.Usage = func() {
 		fmt.Println("Usage: unifi-poller [--config=filepath] [--version]")
 		u.Flag.PrintDefaults()
@@ -91,9 +90,11 @@ func (u *UnifiPoller) Run() (err error) {
 	if err = u.GetUnifi(); err != nil {
 		return err
 	}
+	u.Logf("Polling UniFi Controller at %s v%s as user %s. Sites: %v", u.UnifiBase, u.ServerVersion, u.UnifiUser, u.Sites)
 	if err = u.GetInfluxDB(); err != nil {
 		return err
 	}
+	u.Logf("Logging Measurements to InfluxDB at %s as user %s", u.InfluxURL, u.InfluxUser)
 	switch strings.ToLower(u.Mode) {
 	case "influxlambda", "lambdainflux", "lambda_influx", "influx_lambda":
 		u.LogDebugf("Lambda Mode Enabled")
@@ -112,9 +113,8 @@ func (u *UnifiPoller) GetInfluxDB() (err error) {
 		Password: u.InfluxPass,
 	})
 	if err != nil {
-		return errors.Wrap(err, "influxdb")
+		return fmt.Errorf("influxdb: %v", err)
 	}
-	u.Logf("Logging Measurements to InfluxDB at %s as user %s", u.InfluxURL, u.InfluxUser)
 	return nil
 }
 
@@ -123,14 +123,12 @@ func (u *UnifiPoller) GetUnifi() (err error) {
 	// Create an authenticated session to the Unifi Controller.
 	u.Unifi, err = unifi.NewUnifi(u.UnifiUser, u.UnifiPass, u.UnifiBase, u.VerifySSL)
 	if err != nil {
-		return errors.Wrap(err, "unifi controller")
+		return fmt.Errorf("unifi controller: %v", err)
 	}
 	u.Unifi.ErrorLog = u.LogErrorf // Log all errors.
 	u.Unifi.DebugLog = u.LogDebugf // Log debug messages.
-	u.Logf("Authenticated to UniFi Controller at %s version %s as user %s", u.UnifiBase, u.ServerVersion, u.UnifiUser)
 	if err := u.CheckSites(); err != nil {
 		return err
 	}
-	u.Logf("Polling UniFi Controller Sites: %v", u.Sites)
 	return nil
 }
