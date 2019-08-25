@@ -22,12 +22,6 @@ const (
 	defaultUnifURL  = "https://127.0.0.1:8443"
 )
 
-// Asset is used to give all devices and clients a common interface.
-type Asset interface {
-	Points() ([]*influx.Point, error)
-	PointsAt(time.Time) ([]*influx.Point, error)
-}
-
 // UnifiPoller contains the application startup data, and auth info for UniFi & Influx.
 type UnifiPoller struct {
 	ConfigFile string
