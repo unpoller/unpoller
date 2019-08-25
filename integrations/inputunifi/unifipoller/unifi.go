@@ -167,7 +167,8 @@ func (u *UnifiPoller) ReportMetrics(metrics *Metrics) error {
 // we just log the errors and tally them on a counter. In reality, this never
 // returns any errors because we control the data going in; cool right? But we
 // still check&log it in case the data going is skewed up and causes errors!
-func (m *Metrics) ProcessPoints() (errs []error) {
+func (m *Metrics) ProcessPoints() []error {
+	errs := []error{}
 	processPoints := func(m *Metrics, p []*influx.Point, err error) error {
 		if err != nil || p == nil {
 			return err
@@ -175,6 +176,7 @@ func (m *Metrics) ProcessPoints() (errs []error) {
 		m.BatchPoints.AddPoints(p)
 		return nil
 	}
+
 	for _, asset := range m.Sites {
 		pts, err := SitePoints(asset, m.TS)
 		errs = append(errs, processPoints(m, pts, err))
@@ -187,8 +189,9 @@ func (m *Metrics) ProcessPoints() (errs []error) {
 		pts, err := IDSPoints(asset) // no m.TS.
 		errs = append(errs, processPoints(m, pts, err))
 	}
+
 	if m.Devices == nil {
-		return
+		return errs
 	}
 	for _, asset := range m.UAPs {
 		pts, err := UAPPoints(asset, m.TS)
@@ -202,7 +205,7 @@ func (m *Metrics) ProcessPoints() (errs []error) {
 		pts, err := USWPoints(asset, m.TS)
 		errs = append(errs, processPoints(m, pts, err))
 	}
-	return
+	return errs
 }
 
 // GetFilteredSites returns a list of sites to fetch data for.
