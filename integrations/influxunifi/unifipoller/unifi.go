@@ -168,41 +168,41 @@ func (u *UnifiPoller) ReportMetrics(metrics *Metrics) error {
 // returns any errors because we control the data going in; cool right? But we
 // still check&log it in case the data going is skewed up and causes errors!
 func (m *Metrics) ProcessPoints() (errs []error) {
+	processPoints := func(m *Metrics, p []*influx.Point, err error) error {
+		if err != nil || p == nil {
+			return err
+		}
+		m.BatchPoints.AddPoints(p)
+		return nil
+	}
 	for _, asset := range m.Sites {
-		errs = append(errs, m.processPoints(asset))
+		pts, err := SitePoints(asset, m.TS)
+		errs = append(errs, processPoints(m, pts, err))
 	}
 	for _, asset := range m.Clients {
-		errs = append(errs, m.processPoints(asset))
+		pts, err := ClientPoints(asset, m.TS)
+		errs = append(errs, processPoints(m, pts, err))
 	}
 	for _, asset := range m.IDSList {
-		errs = append(errs, m.processPoints(asset))
+		pts, err := IDSPoints(asset) // no m.TS.
+		errs = append(errs, processPoints(m, pts, err))
 	}
 	if m.Devices == nil {
 		return
 	}
 	for _, asset := range m.UAPs {
-		errs = append(errs, m.processPoints(asset))
+		pts, err := UAPPoints(asset, m.TS)
+		errs = append(errs, processPoints(m, pts, err))
 	}
 	for _, asset := range m.USGs {
-		errs = append(errs, m.processPoints(asset))
+		pts, err := USGPoints(asset, m.TS)
+		errs = append(errs, processPoints(m, pts, err))
 	}
 	for _, asset := range m.USWs {
-		errs = append(errs, m.processPoints(asset))
+		pts, err := USWPoints(asset, m.TS)
+		errs = append(errs, processPoints(m, pts, err))
 	}
 	return
-}
-
-// processPoints is helper function for ProcessPoints.
-func (m *Metrics) processPoints(asset Asset) error {
-	if asset == nil {
-		return nil
-	}
-	points, err := asset.PointsAt(m.TS)
-	if err != nil || points == nil {
-		return err
-	}
-	m.BatchPoints.AddPoints(points)
-	return nil
 }
 
 // GetFilteredSites returns a list of sites to fetch data for.
