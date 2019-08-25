@@ -15,7 +15,7 @@ func UAPPoints(u *unifi.UAP, now time.Time) ([]*influx.Point, error) {
 		"mac":                   u.Mac,
 		"device_type":           u.Stat.O,
 		"device_oid":            u.Stat.Oid,
-		"device_ap":             u.Stat.Ap,
+		"device_ap":             u.Stat.Ap.Ap,
 		"site_id":               u.SiteID,
 		"site_name":             u.SiteName,
 		"name":                  u.Name,

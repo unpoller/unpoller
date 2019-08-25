@@ -51,7 +51,7 @@ func (u *UnifiPoller) PollController() error {
 		var err error
 		if u.ReAuth {
 			// Some users need to re-auth every interval because the cookie times out.
-			if err = u.GetUnifi(); err != nil {
+			if err = u.Login(); err != nil {
 				u.LogError(err, "re-authenticating")
 			}
 		}
