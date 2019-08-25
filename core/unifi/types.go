@@ -47,15 +47,24 @@ type Devices struct {
 	UDMs []*UDM
 }
 
+// Config is the data passed into our library. This configures things and allows
+// us to connect to a controller and write log messages.
+type Config struct {
+	User      string
+	Pass      string
+	URL       string
+	VerifySSL bool
+	ErrorLog  Logger
+	DebugLog  Logger
+}
+
 // Unifi is what you get in return for providing a password! Unifi represents
 // a controller that you can make authenticated requests to. Use this to make
 // additional requests for devices, clients or other custom data. Do not set
 // the loggers to nil. Set them to DiscardLogs if you want no logs.
 type Unifi struct {
 	*http.Client
-	baseURL  string
-	ErrorLog Logger
-	DebugLog Logger
+	*Config
 	*server
 }
 

@@ -10,18 +10,6 @@
   version = "v1.1.1"
 
 [[projects]]
-  branch = "master"
-  digest = "1:50708c8fc92aec981df5c446581cf9f90ba9e2a5692118e0ce75d4534aaa14a2"
-  name = "github.com/influxdata/influxdb1-client"
-  packages = [
-    "models",
-    "pkg/escape",
-    "v2",
-  ]
-  pruneopts = "UT"
-  revision = "fc22c7df067eefd070157f157893fbce961d6359"
-
-[[projects]]
   digest = "1:0028cb19b2e4c3112225cd871870f2d9cf49b9b4276531f03438a88e94be86fe"
   name = "github.com/pmezard/go-difflib"
   packages = ["difflib"]
@@ -48,9 +36,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  input-imports = [
-    "github.com/influxdata/influxdb1-client/v2",
-    "github.com/stretchr/testify/assert",
-  ]
+  input-imports = ["github.com/stretchr/testify/assert"]
   solver-name = "gps-cdcl"
   solver-version = 1

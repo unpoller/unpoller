@@ -294,9 +294,11 @@ type UAP struct {
 // UAPStat holds the "stat" data for an access point.
 // This is split out because of a JSON data format change from 5.10 to 5.11.
 type UAPStat struct {
-	*ap
+	*Ap
 }
-type ap struct {
+
+// Ap is a subtype of UAPStat to make unmarshalling of different controller versions possible.
+type Ap struct {
 	SiteID                        string    `json:"site_id"`
 	O                             string    `json:"o"`
 	Oid                           string    `json:"oid"`
@@ -436,10 +438,10 @@ type ap struct {
 // UnmarshalJSON unmarshalls 5.10 or 5.11 formatted Access Point Stat data.
 func (v *UAPStat) UnmarshalJSON(data []byte) error {
 	var n struct {
-		ap `json:"ap"`
+		Ap `json:"ap"`
 	}
-	v.ap = &n.ap
-	err := json.Unmarshal(data, v.ap) // controller version 5.10.
+	v.Ap = &n.Ap
+	err := json.Unmarshal(data, v.Ap) // controller version 5.10.
 	if err != nil {
 		return json.Unmarshal(data, &n) // controller version 5.11.
 	}

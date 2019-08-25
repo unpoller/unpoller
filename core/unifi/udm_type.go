@@ -180,6 +180,6 @@ type UDM struct {
 // UDMStat holds the "stat" data for a dream machine.
 // A dream machine is a USG + USW + Controller
 type UDMStat struct {
-	*gw
-	*sw
+	*Gw
+	*Sw
 }

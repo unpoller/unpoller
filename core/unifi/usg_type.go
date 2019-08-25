@@ -249,10 +249,11 @@ type SysStats struct {
 // USGStat holds the "stat" data for a gateway.
 // This is split out because of a JSON data format change from 5.10 to 5.11.
 type USGStat struct {
-	*gw
+	*Gw
 }
 
-type gw struct {
+// Gw is a subtype of USGStat to make unmarshalling of different controller versions possible.
+type Gw struct {
 	SiteID       string    `json:"site_id"`
 	O            string    `json:"o"`
 	Oid          string    `json:"oid"`
@@ -276,10 +277,10 @@ type gw struct {
 // UnmarshalJSON unmarshalls 5.10 or 5.11 formatted Gateway Stat data.
 func (v *USGStat) UnmarshalJSON(data []byte) error {
 	var n struct {
-		gw `json:"gw"`
+		Gw `json:"gw"`
 	}
-	v.gw = &n.gw
-	err := json.Unmarshal(data, v.gw) // controller version 5.10.
+	v.Gw = &n.Gw
+	err := json.Unmarshal(data, v.Gw) // controller version 5.10.
 	if err != nil {
 		return json.Unmarshal(data, &n) // controller version 5.11.
 	}

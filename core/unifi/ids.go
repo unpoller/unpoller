@@ -6,8 +6,6 @@ import (
 	"io/ioutil"
 	"net/http"
 	"time"
-
-	influx "github.com/influxdata/influxdb1-client/v2"
 )
 
 // IDSList contains a list that contains all of the IDS Events on a controller.
@@ -132,50 +130,4 @@ func (u *Unifi) GetSiteIDS(site *Site, from, to time.Time) ([]*IDS, error) {
 		response.Data[i].SiteName = site.SiteName
 	}
 	return response.Data, nil
-}
-
-// PointsAt has no usefulness. It is provided to satisfy external interfaces.
-// These events have a timestamp, so that is used instead of any passed-in value.
-// This method generates intrusion detection datapoints for InfluxDB.
-// These points can be passed directly to influx.
-func (i *IDS) PointsAt(now time.Time) ([]*influx.Point, error) {
-	return i.Points()
-}
-
-// Points generates intrusion detection datapoints for InfluxDB.
-// These points can be passed directly to influx.
-func (i *IDS) Points() ([]*influx.Point, error) {
-	tags := map[string]string{
-		"in_iface":       i.InIface,
-		"event_type":     i.EventType,
-		"proto":          i.Proto,
-		"app_proto":      i.AppProto,
-		"usgip":          i.Usgip,
-		"country_code":   i.SrcipGeo.CountryCode,
-		"country_name":   i.SrcipGeo.CountryName,
-		"region":         i.SrcipGeo.Region,
-		"city":           i.SrcipGeo.City,
-		"postal_code":    i.SrcipGeo.PostalCode,
-		"srcipASN":       i.SrcipASN,
-		"usgipASN":       i.UsgipASN,
-		"alert_category": i.InnerAlertCategory,
-		"subsystem":      i.Subsystem,
-		"catname":        i.Catname,
-	}
-	fields := map[string]interface{}{
-		"event_type":   i.EventType,
-		"proto":        i.Proto,
-		"app_proto":    i.AppProto,
-		"usgip":        i.Usgip,
-		"country_name": i.SrcipGeo.CountryName,
-		"city":         i.SrcipGeo.City,
-		"postal_code":  i.SrcipGeo.PostalCode,
-		"srcipASN":     i.SrcipASN,
-		"usgipASN":     i.UsgipASN,
-	}
-	pt, err := influx.NewPoint("intrusion_detect", tags, fields, i.Datetime)
-	if err != nil {
-		return nil, err
-	}
-	return []*influx.Point{pt}, nil
 }

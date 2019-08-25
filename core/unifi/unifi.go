@@ -12,7 +12,6 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
-	"log"
 	"net/http"
 	"net/http/cookiejar"
 	"strings"
@@ -21,26 +20,31 @@ import (
 // NewUnifi creates a http.Client with authenticated cookies.
 // Used to make additional, authenticated requests to the APIs.
 // Start here.
-func NewUnifi(user, pass, url string, verifySSL bool) (*Unifi, error) {
+func NewUnifi(config *Config) (*Unifi, error) {
 	jar, err := cookiejar.New(nil)
 	if err != nil {
 		return nil, err
 	}
-	u := &Unifi{baseURL: strings.TrimRight(url, "/"),
+	config.URL = strings.TrimRight(config.URL, "/")
+	u := &Unifi{Config: config,
 		Client: &http.Client{
-			Transport: &http.Transport{TLSClientConfig: &tls.Config{InsecureSkipVerify: !verifySSL}},
+			Transport: &http.Transport{TLSClientConfig: &tls.Config{InsecureSkipVerify: !config.VerifySSL}},
 			Jar:       jar,
 		},
-		ErrorLog: log.Printf,
-		DebugLog: DiscardLogs,
 	}
-	return u, u.getController(user, pass)
+	if err := u.Login(); err != nil {
+		return u, err
+	}
+	if err := u.GetServerData(); err != nil {
+		return u, fmt.Errorf("unable to get server version: %v", err)
+	}
+	return u, nil
 }
 
-// getController is a helper method to make testsing a bit easier.
-func (u *Unifi) getController(user, pass string) error {
+// Login is a helper method. It can be called to grab a new authentication cookie.
+func (u *Unifi) Login() error {
 	// magic login.
-	req, err := u.UniReq(LoginPath, fmt.Sprintf(`{"username":"%s","password":"%s"}`, user, pass))
+	req, err := u.UniReq(LoginPath, fmt.Sprintf(`{"username":"%s","password":"%s"}`, u.User, u.Pass))
 	if err != nil {
 		return err
 	}
@@ -54,16 +58,14 @@ func (u *Unifi) getController(user, pass string) error {
 	}()
 	if resp.StatusCode != http.StatusOK {
 		return fmt.Errorf("authentication failed (user: %s): %s (status: %s)",
-			user, u.baseURL+LoginPath, resp.Status)
-	}
-	if err := u.getServer(); err != nil {
-		return fmt.Errorf("unable to get server version: %v", err)
+			u.User, u.URL+LoginPath, resp.Status)
 	}
 	return nil
 }
 
-// getServer sets the controller's version and UUID.
-func (u *Unifi) getServer() error {
+// GetServerData sets the controller's version and UUID. Only call this if you
+// previously called Login and suspect the controller version has changed.
+func (u *Unifi) GetServerData() error {
 	var response struct {
 		Data server `json:"meta"`
 	}
@@ -148,7 +150,7 @@ func (u *Unifi) GetData(methodPath string, v interface{}) error {
 // And if you're doing that... sumbut a pull request with your new struct. :)
 // This is a helper method that is exposed for convenience.
 func (u *Unifi) UniReq(apiPath string, params string) (req *http.Request, err error) {
-	switch path := u.baseURL + apiPath; {
+	switch path := u.URL + apiPath; {
 	case params == "":
 		req, err = http.NewRequest("GET", path, nil)
 	default:

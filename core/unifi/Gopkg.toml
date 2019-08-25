@@ -1,7 +1,3 @@
-[[constraint]]
-  branch = "master"
-  name = "github.com/influxdata/influxdb1-client"
-
 [prune]
   go-tests = true
   unused-packages = true

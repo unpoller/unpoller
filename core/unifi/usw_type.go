@@ -160,10 +160,11 @@ type Port struct {
 // USWStat holds the "stat" data for a switch.
 // This is split out because of a JSON data format change from 5.10 to 5.11.
 type USWStat struct {
-	*sw
+	*Sw
 }
 
-type sw struct {
+// GS is a subtype of USWStat to make unmarshalling of different controller versions possible.
+type Sw struct {
 	SiteID            string    `json:"site_id"`
 	O                 string    `json:"o"`
 	Oid               string    `json:"oid"`
@@ -358,10 +359,10 @@ type sw struct {
 // UnmarshalJSON unmarshalls 5.10 or 5.11 formatted Switch Stat data.
 func (v *USWStat) UnmarshalJSON(data []byte) error {
 	var n struct {
-		sw `json:"sw"`
+		Sw `json:"sw"`
 	}
-	v.sw = &n.sw
-	err := json.Unmarshal(data, v.sw) // controller version 5.10.
+	v.Sw = &n.Sw
+	err := json.Unmarshal(data, v.Sw) // controller version 5.10.
 	if err != nil {
 		return json.Unmarshal(data, &n) // controller version 5.11.
 	}
