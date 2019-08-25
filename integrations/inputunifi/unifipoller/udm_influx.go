@@ -11,10 +11,9 @@ import (
 // These points can be passed directly to influx.
 func UDMPoints(u *unifi.UDM, now time.Time) ([]*influx.Point, error) {
 	tags := map[string]string{
-		"id":  u.ID,
-		"mac": u.Mac,
-		//		"device_oid":             u.Stat.gw.Oid,
-		"device_oid":             u.Mac,
+		"id":                     u.ID,
+		"mac":                    u.Mac,
+		"device_oid":             u.Stat.Gw.Oid,
 		"site_id":                u.SiteID,
 		"site_name":              u.SiteName,
 		"adopted":                u.Adopted.Txt,
@@ -141,10 +140,9 @@ func UDMPoints(u *unifi.UDM, now time.Time) ([]*influx.Point, error) {
 	}
 	points := []*influx.Point{pt}
 	tags = map[string]string{
-		"id":         u.ID,
-		"mac":        u.Mac,
-		"device_oid": u.Mac,
-		//		"device_oid":             u.Stat.sw.Oid,
+		"id":                     u.ID,
+		"mac":                    u.Mac,
+		"device_oid":             u.Stat.Sw.Oid,
 		"site_id":                u.SiteID,
 		"site_name":              u.SiteName,
 		"name":                   u.Name,
