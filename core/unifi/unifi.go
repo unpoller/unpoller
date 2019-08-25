@@ -25,6 +25,12 @@ func NewUnifi(config *Config) (*Unifi, error) {
 	if err != nil {
 		return nil, err
 	}
+	if config.ErrorLog == nil {
+		config.ErrorLog = DiscardLogs
+	}
+	if config.DebugLog == nil {
+		config.DebugLog = DiscardLogs
+	}
 	config.URL = strings.TrimRight(config.URL, "/")
 	u := &Unifi{Config: config,
 		Client: &http.Client{
