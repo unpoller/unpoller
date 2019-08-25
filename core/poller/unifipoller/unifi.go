@@ -7,7 +7,6 @@ import (
 	"time"
 
 	influx "github.com/influxdata/influxdb1-client/v2"
-	"github.com/pkg/errors"
 	"golift.io/unifi"
 )
 
@@ -49,9 +48,19 @@ func (u *UnifiPoller) PollController() error {
 	log.Println("[INFO] Everything checks out! Poller started, interval:", u.Interval.Round(time.Second))
 	ticker := time.NewTicker(u.Interval.Round(time.Second))
 	for u.LastCheck = range ticker.C {
-		_ = u.CollectAndReport()
+		var err error
+		if u.ReAuth {
+			// Some users need to re-auth every interval because the cookie times out.
+			if err = u.GetUnifi(); err != nil {
+				u.LogError(err, "re-authenticating")
+			}
+		}
+		if err == nil {
+			// Only run this if the authentication procedure didn't return error.
+			_ = u.CollectAndReport()
+		}
 		if u.MaxErrors >= 0 && u.errorCount > u.MaxErrors {
-			return errors.Errorf("reached maximum error count, stopping poller (%d > %d)", u.errorCount, u.MaxErrors)
+			return fmt.Errorf("reached maximum error count, stopping poller (%d > %d)", u.errorCount, u.MaxErrors)
 		}
 	}
 	return nil
@@ -131,7 +140,7 @@ func (u *UnifiPoller) ReportMetrics(metrics *Metrics) error {
 	}
 	err := u.Write(metrics.BatchPoints)
 	if err != nil {
-		return errors.Wrap(err, "influxdb.Write(points)")
+		return fmt.Errorf("influxdb.Write(points): %v", err)
 	}
 	var fields, points int
 	for _, p := range metrics.Points() {
