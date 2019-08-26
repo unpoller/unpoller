@@ -35,7 +35,7 @@ func Start() error {
 		return err
 	}
 	// Update Config with ENV variable overrides.
-	if err := up.setEnvVarOptions(); err != nil {
+	if err := up.ENVSetConfig(); err != nil {
 		return err
 	}
 	return up.Run()
@@ -49,16 +49,16 @@ func (f *Flag) Parse(args []string) {
 		f.PrintDefaults()
 	}
 	f.StringVarP(&f.DumpJSON, "dumpjson", "j", "",
-		"This debug option prints a json payload and exits. See man page for more.")
-	f.StringVarP(&f.ConfigFile, "config", "c", DefaultConfFile, "Poller Config File (TOML Format)")
-	f.BoolVarP(&f.ShowVer, "version", "v", false, "Print the version and exit")
+		"This debug option prints a json payload and exits. See man page for more info.")
+	f.StringVarP(&f.ConfigFile, "config", "c", DefaultConfFile, "Poller config file path.")
+	f.BoolVarP(&f.ShowVer, "version", "v", false, "Print the version and exit.")
 	_ = f.FlagSet.Parse(args)
 }
 
-// setEnvVarOptions copies environment variables into configuration values.
+// ENVSetConfig copies environment variables into configuration values.
 // This is useful for Docker users that find it easier to pass ENV variables
 // than a specific configuration file. Uses reflection to find struct tags.
-func (u *UnifiPoller) setEnvVarOptions() error {
+func (u *UnifiPoller) ENVSetConfig() error {
 	t := reflect.TypeOf(Config{})
 	// Loop each Config struct member; get reflect tag & env var value; update config.
 	for i := 0; i < t.NumField(); i++ {
@@ -68,6 +68,7 @@ func (u *UnifiPoller) setEnvVarOptions() error {
 		if tag == "" || env == "" {
 			continue
 		}
+
 		// Reflect and update the u.Config struct member at position i.
 		switch c := reflect.ValueOf(u.Config).Elem().Field(i); c.Type().String() {
 		// Handle each member type appropriately (differently).
@@ -77,21 +78,21 @@ func (u *UnifiPoller) setEnvVarOptions() error {
 		case "int":
 			val, err := strconv.Atoi(env)
 			if err != nil {
-				return err
+				return fmt.Errorf("%s: %v", tag, err)
 			}
 			c.Set(reflect.ValueOf(val))
 		case "[]string":
 			c.Set(reflect.ValueOf(strings.Split(env, ",")))
-		case "Duration":
+		case "unifipoller.Duration":
 			val, err := time.ParseDuration(env)
 			if err != nil {
-				return err
+				return fmt.Errorf("%s: %v", tag, err)
 			}
 			c.Set(reflect.ValueOf(Duration{val}))
 		case "bool":
 			val, err := strconv.ParseBool(env)
 			if err != nil {
-				return err
+				return fmt.Errorf("%s: %v", tag, err)
 			}
 			c.SetBool(val)
 		}
