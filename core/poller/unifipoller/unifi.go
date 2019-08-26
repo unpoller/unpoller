@@ -50,6 +50,7 @@ func (u *UnifiPoller) PollController() error {
 	for u.LastCheck = range ticker.C {
 		var err error
 		if u.ReAuth {
+			u.LogDebugf("Re-authenticating to UniFi Controller")
 			// Some users need to re-auth every interval because the cookie times out.
 			if err = u.Login(); err != nil {
 				u.LogError(err, "re-authenticating")
