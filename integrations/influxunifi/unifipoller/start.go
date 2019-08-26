@@ -54,18 +54,19 @@ func (f *Flag) Parse(args []string) {
 // This is useful for Docker users that find it easier to pass ENV variables
 // than a specific configuration file. Uses reflection to find struct tags.
 func (u *UnifiPoller) setEnvVarOptions() {
-	t := reflect.TypeOf(u.Config) // whole struct
-	// Loop each Config struct member and check for a reflect tag / env var setting.
+	t := reflect.TypeOf(Config{})
+	// Loop each Config struct member; get reflect tag & env var value; update config.
 	for i := 0; i < t.NumField(); i++ {
-		tag := t.Field(i).Tag.Get("env") // struct member tag
-		env := os.Getenv(tag)            // value of "tag" env variable
-		if tag == "" || env == "" {
+		// Get the ENV variable name from "env" struct tag then pull value from OS.
+		env := os.Getenv(t.Field(i).Tag.Get("env"))
+		if env == "" {
 			continue
 		}
 		// Reflect and update the u.Config struct member at position i.
 		switch c := reflect.ValueOf(u.Config).Elem().Field(i); c.Type().String() {
 		// Handle each member type appropriately (differently).
 		case "string":
+			// This is a reflect package method to update a struct member by index.
 			c.SetString(env)
 		case "int":
 			val, _ := strconv.Atoi(env)
