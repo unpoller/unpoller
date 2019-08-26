@@ -11,7 +11,7 @@ import (
 func (u *UnifiPoller) LogError(err error, prefix string) {
 	if err != nil {
 		u.errorCount++
-		_ = log.Output(2, fmt.Sprintf("[ERROR] (%v/%v) %v: %v", u.errorCount, u.MaxErrors, prefix, err))
+		_ = log.Output(2, fmt.Sprintf("[ERROR] (%v/%v) %v: %v", u.errorCount, u.Config.MaxErrors, prefix, err))
 	}
 }
 
@@ -27,14 +27,14 @@ func StringInSlice(str string, slice []string) bool {
 
 // Logf prints a log entry if quiet is false.
 func (u *UnifiPoller) Logf(m string, v ...interface{}) {
-	if !u.Quiet {
+	if !u.Config.Quiet {
 		_ = log.Output(2, fmt.Sprintf("[INFO] "+m, v...))
 	}
 }
 
 // LogDebugf prints a debug log entry if debug is true and quite is false
 func (u *UnifiPoller) LogDebugf(m string, v ...interface{}) {
-	if u.Debug && !u.Quiet {
+	if u.Config.Debug && !u.Config.Quiet {
 		_ = log.Output(2, fmt.Sprintf("[DEBUG] "+m, v...))
 	}
 }
