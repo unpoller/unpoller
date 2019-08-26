@@ -22,6 +22,27 @@ const (
 	defaultUnifURL  = "https://127.0.0.1:8443"
 )
 
+// These are environment variables that can be used to override configuration.
+// Useful for Docker users.
+const (
+	ENVConfigMode       = "UP_POLLING_MODE"
+	ENVConfigInfluxDB   = "UP_INFLUX_DB"
+	ENVConfigInfluxUser = "UP_INFLUX_USER"
+	ENVConfigInfluxPass = "UP_INFLUX_PASS"
+	ENVConfigInfluxURL  = "UP_INFLUX_URL"
+	ENVConfigUnifiUser  = "UP_UNIFI_USER"
+	ENVConfigUnifiPass  = "UP_UNIFI_PASS"
+	ENVConfigUnifiBase  = "UP_UNIFI_URL"
+	ENVConfigReAuth     = "UP_REAUTHENTICATE"
+	ENVConfigVerifySSL  = "UP_VERIFY_SSL"
+	ENVConfigCollectIDS = "UP_COLLECT_IDS"
+	ENVConfigQuiet      = "UP_QUIET_MODE"
+	ENVConfigDebug      = "UP_DEBUG_MODE"
+	ENVConfigInterval   = "UP_POLLING_INTERVAL"
+	ENVConfigMaxErrors  = "UP_MAX_ERRORS"
+	ENVConfigSites      = "UP_POLL_SITES"
+)
+
 // UnifiPoller contains the application startup data, and auth info for UniFi & Influx.
 type UnifiPoller struct {
 	Influx     influx.Client
