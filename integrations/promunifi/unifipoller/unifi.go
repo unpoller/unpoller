@@ -62,7 +62,8 @@ func (u *UnifiPoller) PollController() error {
 			_ = u.CollectAndReport()
 		}
 		if u.Config.MaxErrors >= 0 && u.errorCount > u.Config.MaxErrors {
-			return fmt.Errorf("reached maximum error count, stopping poller (%d > %d)", u.errorCount, u.Config.MaxErrors)
+			return fmt.Errorf("reached maximum error count, stopping poller (%d > %d)",
+				u.errorCount, u.Config.MaxErrors)
 		}
 	}
 	return nil
