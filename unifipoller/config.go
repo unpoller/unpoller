@@ -62,8 +62,8 @@ type Config struct {
 	ReAuth     bool     `json:"reauthenticate" toml:"reauthenticate" xml:"reauthenticate" yaml:"reauthenticate" env:"UP_REAUTHENTICATE"`
 	Mode       string   `json:"mode" toml:"mode" xml:"mode" yaml:"mode" env:"UP_POLLING_MODE"`
 	InfluxURL  string   `json:"influx_url,_omitempty" toml:"influx_url,_omitempty" xml:"influx_url" yaml:"influx_url" env:"UP_INFLUX_URL"`
-	InfluxUser string   `json:"influx_user,_omitempty" toml:"influx_user,_omitempty" xml:"influx_user" yaml:"influx_user" env:"UP_INFLUX_USER"`
-	InfluxPass string   `json:"influx_pass,_omitempty" toml:"influx_pass,_omitempty" xml:"influx_pass" yaml:"influx_pass" env:"UP_INFLUX_PASS"`
+	InfluxUser string   `json:"influx_user,_omitempty" toml:"influx_user,_omitempty" xml:"influx_user" yaml:"influx_user" env:"INFLUX_USER"`
+	InfluxPass string   `json:"influx_pass,_omitempty" toml:"influx_pass,_omitempty" xml:"influx_pass" yaml:"influx_pass" env:"INFLUX_PASS"`
 	InfluxDB   string   `json:"influx_db,_omitempty" toml:"influx_db,_omitempty" xml:"influx_db" yaml:"influx_db" env:"UP_INFLUX_DB"`
 	UnifiUser  string   `json:"unifi_user,_omitempty" toml:"unifi_user,_omitempty" xml:"unifi_user" yaml:"unifi_user" env:"UP_UNIFI_USER"`
 	UnifiPass  string   `json:"unifi_pass,_omitempty" toml:"unifi_pass,_omitempty" xml:"unifi_pass" yaml:"unifi_pass" env:"UP_UNIFI_PASS"`
