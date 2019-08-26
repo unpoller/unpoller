@@ -20,7 +20,8 @@ func (u *UnifiPoller) DumpJSONPayload() (err error) {
 	if err != nil {
 		return err
 	}
-	fmt.Fprintln(os.Stderr, "[INFO] Authenticated to UniFi Controller @", u.Config.UnifiBase, "as user", u.Config.UnifiUser)
+	fmt.Fprintf(os.Stderr, "[INFO] Authenticated to UniFi Controller @ %v as user %v",
+		u.Config.UnifiBase, u.Config.UnifiUser)
 	if err := u.CheckSites(); err != nil {
 		return err
 	}
@@ -46,7 +47,8 @@ func (u *UnifiPoller) DumpJSONPayload() (err error) {
 func (u *UnifiPoller) dumpSitesJSON(path, name string, sites unifi.Sites) error {
 	for _, s := range sites {
 		apiPath := fmt.Sprintf(path, s.Name)
-		_, _ = fmt.Fprintf(os.Stderr, "[INFO] Dumping %s: '%s' JSON for site: %s (%s):\n", name, apiPath, s.Desc, s.Name)
+		_, _ = fmt.Fprintf(os.Stderr, "[INFO] Dumping %s: '%s' JSON for site: %s (%s):\n",
+			name, apiPath, s.Desc, s.Name)
 		if err := u.PrintRawAPIJSON(apiPath); err != nil {
 			return err
 		}
