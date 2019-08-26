@@ -7,6 +7,7 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
+	"path"
 	"reflect"
 	"strconv"
 	"strings"
@@ -59,14 +60,13 @@ func (f *Flag) Parse(args []string) {
 // This is useful for Docker users that find it easier to pass ENV variables
 // than a specific configuration file. Uses reflection to find struct tags.
 func (u *UnifiPoller) ENVSetConfig() error {
-	t := reflect.TypeOf(Config{})
+	t := reflect.TypeOf(Config{}) // Get tag names from the Config struct.
 	// Loop each Config struct member; get reflect tag & env var value; update config.
 	for i := 0; i < t.NumField(); i++ {
-		// Get the ENV variable name from "env" struct tag then pull value from OS.
-		tag := t.Field(i).Tag.Get("env")
-		env := os.Getenv(ENVConfigPrefix + tag)
+		tag := t.Field(i).Tag.Get("env")        // Get the ENV variable name from "env" struct tag
+		env := os.Getenv(ENVConfigPrefix + tag) // Then pull value from OS.
 		if tag == "" || env == "" {
-			continue
+			continue // Skip if either are empty.
 		}
 
 		// Reflect and update the u.Config struct member at position i.
@@ -83,7 +83,7 @@ func (u *UnifiPoller) ENVSetConfig() error {
 			c.Set(reflect.ValueOf(val))
 		case "[]string":
 			c.Set(reflect.ValueOf(strings.Split(env, ",")))
-		case "unifipoller.Duration":
+		case path.Base(t.PkgPath()) + ".Duration":
 			val, err := time.ParseDuration(env)
 			if err != nil {
 				return fmt.Errorf("%s: %v", tag, err)
