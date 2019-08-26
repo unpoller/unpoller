@@ -24,15 +24,20 @@ const (
 
 // UnifiPoller contains the application startup data, and auth info for UniFi & Influx.
 type UnifiPoller struct {
+	Influx     influx.Client
+	Unifi      *unifi.Unifi
+	Flag       *Flag
+	Config     *Config
+	errorCount int
+	LastCheck  time.Time
+}
+
+// Flag represents the CLI args available and their settings.
+type Flag struct {
 	ConfigFile string
 	DumpJSON   string
 	ShowVer    bool
-	Flag       *pflag.FlagSet
-	errorCount int
-	LastCheck  time.Time
-	influx.Client
-	*unifi.Unifi
-	*Config
+	*pflag.FlagSet
 }
 
 // Metrics contains all the data from the controller and an influx endpoint to send it to.
