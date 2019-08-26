@@ -46,7 +46,7 @@ influx_pass: "unifi"
 influx_db: "unifi"
 
 # Make a read-only user in the UniFi Admin Settings.
-unifi_user: "influxdb"
+unifi_user: "influx"
 unifi_pass: ""
 unifi_url: "https://127.0.0.1:8443"
 
