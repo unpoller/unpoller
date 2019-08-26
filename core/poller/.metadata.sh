@@ -11,7 +11,7 @@ HBREPO="golift/homebrew-mugs"
 MAINT="David Newhall II <david at sleepers dot pro>"
 VENDOR="Go Lift <code at golift dot io>"
 DESC="Polls a UniFi controller and exports metrics to InfluxDB"
-GOLANGCI_LINT_ARGS="--enable-all -D gochecknoglobals -e dupl -e G101"
+GOLANGCI_LINT_ARGS="--enable-all -D gochecknoglobals -D dupl -D lll -e G101 "
 # Example must exist at examples/$CONFIG_FILE.example
 CONFIG_FILE="up.conf"
 LICENSE="MIT"

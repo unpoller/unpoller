@@ -43,26 +43,3 @@ func (u *UnifiPoller) LogDebugf(m string, v ...interface{}) {
 func (u *UnifiPoller) LogErrorf(m string, v ...interface{}) {
 	_ = log.Output(2, fmt.Sprintf("[ERROR] "+m, v...))
 }
-
-// pick returns the first non empty string in a list.
-// used in a few places around this library.
-func pick(strings ...string) string {
-	for _, s := range strings {
-		if s != "" {
-			return s
-		}
-	}
-	return ""
-}
-
-// parseBool returns true/false if the string is "true" or "false", otherwise returns e value.
-func parseBool(s string, e bool) bool {
-	switch s {
-	case "true", "t":
-		return true
-	case "false", "f":
-		return false
-	default:
-		return e
-	}
-}
