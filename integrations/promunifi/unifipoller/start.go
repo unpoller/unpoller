@@ -7,6 +7,7 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
+	"reflect"
 	"strconv"
 	"strings"
 	"time"
@@ -51,29 +52,33 @@ func (f *Flag) Parse(args []string) {
 
 // setEnvVarOptions copies environment variables into configuration values.
 // This is useful for Docker users that find it easier to pass ENV variables
-// that a specific configuration file.
+// than a specific configuration file. Uses reflection to find struct tags.
 func (u *UnifiPoller) setEnvVarOptions() {
-	u.Config.Mode = pick(os.Getenv(ENVConfigMode), u.Config.Mode)
-	u.Config.InfluxDB = pick(os.Getenv(ENVConfigInfluxDB), u.Config.InfluxDB)
-	u.Config.InfluxUser = pick(os.Getenv(ENVConfigInfluxUser), u.Config.InfluxUser)
-	u.Config.InfluxPass = pick(os.Getenv(ENVConfigInfluxPass), u.Config.InfluxPass)
-	u.Config.InfluxURL = pick(os.Getenv(ENVConfigInfluxURL), u.Config.InfluxURL)
-	u.Config.UnifiUser = pick(os.Getenv(ENVConfigUnifiUser), u.Config.UnifiUser)
-	u.Config.UnifiPass = pick(os.Getenv(ENVConfigUnifiPass), u.Config.UnifiPass)
-	u.Config.UnifiBase = pick(os.Getenv(ENVConfigUnifiBase), u.Config.UnifiBase)
-	u.Config.ReAuth = parseBool(os.Getenv(ENVConfigReAuth), u.Config.ReAuth)
-	u.Config.VerifySSL = parseBool(os.Getenv(ENVConfigVerifySSL), u.Config.VerifySSL)
-	u.Config.CollectIDS = parseBool(os.Getenv(ENVConfigCollectIDS), u.Config.CollectIDS)
-	u.Config.Quiet = parseBool(os.Getenv(ENVConfigQuiet), u.Config.Quiet)
-	u.Config.Debug = parseBool(os.Getenv(ENVConfigDebug), u.Config.Debug)
-	if e := os.Getenv(ENVConfigInterval); e != "" {
-		_ = u.Config.Interval.UnmarshalText([]byte(e))
-	}
-	if e := os.Getenv(ENVConfigMaxErrors); e != "" {
-		u.Config.MaxErrors, _ = strconv.Atoi(e)
-	}
-	if e := os.Getenv(ENVConfigSites); e != "" {
-		u.Config.Sites = strings.Split(e, ",")
+	t := reflect.TypeOf(u.Config) // whole struct
+	// Loop each Config struct member and check for a reflect tag / env var setting.
+	for i := 0; i < t.NumField(); i++ {
+		tag := t.Field(i).Tag.Get("env") // struct member tag
+		env := os.Getenv(tag)            // value of "tag" env variable
+		if tag == "" || env == "" {
+			continue
+		}
+		// Reflect and update the u.Config struct member at position i.
+		switch c := reflect.ValueOf(u.Config).Elem().Field(i); c.Type().String() {
+		// Handle each member type appropriately (differently).
+		case "string":
+			c.SetString(env)
+		case "int":
+			val, _ := strconv.Atoi(env)
+			c.Set(reflect.ValueOf(val))
+		case "[]string":
+			c.Set(reflect.ValueOf(strings.Split(env, ",")))
+		case "Duration":
+			val, _ := time.ParseDuration(env)
+			c.Set(reflect.ValueOf(Duration{val}))
+		case "bool":
+			val, _ := strconv.ParseBool(env)
+			c.SetBool(val)
+		}
 	}
 }
 
