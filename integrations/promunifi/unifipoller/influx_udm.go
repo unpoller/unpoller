@@ -10,6 +10,12 @@ import (
 // UDMPoints generates Unifi Gateway datapoints for InfluxDB.
 // These points can be passed directly to influx.
 func UDMPoints(u *unifi.UDM, now time.Time) ([]*influx.Point, error) {
+	if u.Stat.Sw == nil {
+		u.Stat.Sw = &unifi.Sw{}
+	}
+	if u.Stat.Gw == nil {
+		u.Stat.Gw = &unifi.Gw{}
+	}
 	tags := map[string]string{
 		"id":                     u.ID,
 		"mac":                    u.Mac,
