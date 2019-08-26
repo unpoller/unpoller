@@ -22,6 +22,10 @@ const (
 	defaultUnifURL  = "https://127.0.0.1:8443"
 )
 
+// ENVConfigPrefix is the prefix appended to an env variable tag
+// name before retrieving the value from the OS.
+const ENVConfigPrefix = "UP_"
+
 // UnifiPoller contains the application startup data, and auth info for UniFi & Influx.
 type UnifiPoller struct {
 	Influx     influx.Client
@@ -52,23 +56,24 @@ type Metrics struct {
 
 // Config represents the data needed to poll a controller and report to influxdb.
 // This is all of the data stored in the config file.
+// Any with explicit defaults have _omitempty on json and toml tags.
 type Config struct {
-	MaxErrors  int      `json:"max_errors,_omitempty" toml:"max_errors,_omitempty" xml:"max_errors" yaml:"max_errors" env:"UP_MAX_ERRORS"`
-	Interval   Duration `json:"interval,_omitempty" toml:"interval,_omitempty" xml:"interval" yaml:"interval" env:"UP_POLLING_INTERVAL"`
-	Debug      bool     `json:"debug" toml:"debug" xml:"debug" yaml:"debug" env:"UP_DEBUG_MODE"`
-	Quiet      bool     `json:"quiet,_omitempty" toml:"quiet,_omitempty" xml:"quiet" yaml:"quiet" env:"UP_QUIET_MODE"`
-	VerifySSL  bool     `json:"verify_ssl" toml:"verify_ssl" xml:"verify_ssl" yaml:"verify_ssl" env:"UP_VERIFY_SSL"`
-	CollectIDS bool     `json:"collect_ids" toml:"collect_ids" xml:"collect_ids" yaml:"collect_ids" env:"UP_COLLECT_IDS"`
-	ReAuth     bool     `json:"reauthenticate" toml:"reauthenticate" xml:"reauthenticate" yaml:"reauthenticate" env:"UP_REAUTHENTICATE"`
-	Mode       string   `json:"mode" toml:"mode" xml:"mode" yaml:"mode" env:"UP_POLLING_MODE"`
-	InfluxURL  string   `json:"influx_url,_omitempty" toml:"influx_url,_omitempty" xml:"influx_url" yaml:"influx_url" env:"UP_INFLUX_URL"`
+	MaxErrors  int      `json:"max_errors" toml:"max_errors" xml:"max_errors" yaml:"max_errors" env:"MAX_ERRORS"`
+	Interval   Duration `json:"interval,_omitempty" toml:"interval,_omitempty" xml:"interval" yaml:"interval" env:"POLLING_INTERVAL"`
+	Debug      bool     `json:"debug" toml:"debug" xml:"debug" yaml:"debug" env:"DEBUG_MODE"`
+	Quiet      bool     `json:"quiet,_omitempty" toml:"quiet,_omitempty" xml:"quiet" yaml:"quiet" env:"QUIET_MODE"`
+	VerifySSL  bool     `json:"verify_ssl" toml:"verify_ssl" xml:"verify_ssl" yaml:"verify_ssl" env:"VERIFY_SSL"`
+	CollectIDS bool     `json:"collect_ids" toml:"collect_ids" xml:"collect_ids" yaml:"collect_ids" env:"COLLECT_IDS"`
+	ReAuth     bool     `json:"reauthenticate" toml:"reauthenticate" xml:"reauthenticate" yaml:"reauthenticate" env:"REAUTHENTICATE"`
+	Mode       string   `json:"mode" toml:"mode" xml:"mode" yaml:"mode" env:"POLLING_MODE"`
+	InfluxURL  string   `json:"influx_url,_omitempty" toml:"influx_url,_omitempty" xml:"influx_url" yaml:"influx_url" env:"INFLUX_URL"`
 	InfluxUser string   `json:"influx_user,_omitempty" toml:"influx_user,_omitempty" xml:"influx_user" yaml:"influx_user" env:"INFLUX_USER"`
 	InfluxPass string   `json:"influx_pass,_omitempty" toml:"influx_pass,_omitempty" xml:"influx_pass" yaml:"influx_pass" env:"INFLUX_PASS"`
-	InfluxDB   string   `json:"influx_db,_omitempty" toml:"influx_db,_omitempty" xml:"influx_db" yaml:"influx_db" env:"UP_INFLUX_DB"`
-	UnifiUser  string   `json:"unifi_user,_omitempty" toml:"unifi_user,_omitempty" xml:"unifi_user" yaml:"unifi_user" env:"UP_UNIFI_USER"`
-	UnifiPass  string   `json:"unifi_pass,_omitempty" toml:"unifi_pass,_omitempty" xml:"unifi_pass" yaml:"unifi_pass" env:"UP_UNIFI_PASS"`
-	UnifiBase  string   `json:"unifi_url,_omitempty" toml:"unifi_url,_omitempty" xml:"unifi_url" yaml:"unifi_url" env:"UP_UNIFI_URL"`
-	Sites      []string `json:"sites,_omitempty" toml:"sites,_omitempty" xml:"sites" yaml:"sites" env:"UP_POLL_SITES"`
+	InfluxDB   string   `json:"influx_db,_omitempty" toml:"influx_db,_omitempty" xml:"influx_db" yaml:"influx_db" env:"INFLUX_DB"`
+	UnifiUser  string   `json:"unifi_user,_omitempty" toml:"unifi_user,_omitempty" xml:"unifi_user" yaml:"unifi_user" env:"UNIFI_USER"`
+	UnifiPass  string   `json:"unifi_pass,_omitempty" toml:"unifi_pass,_omitempty" xml:"unifi_pass" yaml:"unifi_pass" env:"UNIFI_PASS"`
+	UnifiBase  string   `json:"unifi_url,_omitempty" toml:"unifi_url,_omitempty" xml:"unifi_url" yaml:"unifi_url" env:"UNIFI_URL"`
+	Sites      []string `json:"sites,_omitempty" toml:"sites,_omitempty" xml:"sites" yaml:"sites" env:"POLL_SITES"`
 }
 
 // Duration is used to UnmarshalTOML into a time.Duration value.

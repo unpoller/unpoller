@@ -29,8 +29,13 @@ func Start() error {
 		fmt.Printf("unifi-poller v%s\n", Version)
 		return nil // don't run anything else w/ version request.
 	}
+	// Parse config file.
 	if err := up.GetConfig(); err != nil {
 		up.Flag.Usage()
+		return err
+	}
+	// Update Config with ENV variable overrides.
+	if err := up.setEnvVarOptions(); err != nil {
 		return err
 	}
 	return up.Run()
@@ -53,13 +58,14 @@ func (f *Flag) Parse(args []string) {
 // setEnvVarOptions copies environment variables into configuration values.
 // This is useful for Docker users that find it easier to pass ENV variables
 // than a specific configuration file. Uses reflection to find struct tags.
-func (u *UnifiPoller) setEnvVarOptions() {
+func (u *UnifiPoller) setEnvVarOptions() error {
 	t := reflect.TypeOf(Config{})
 	// Loop each Config struct member; get reflect tag & env var value; update config.
 	for i := 0; i < t.NumField(); i++ {
 		// Get the ENV variable name from "env" struct tag then pull value from OS.
-		env := os.Getenv(t.Field(i).Tag.Get("env"))
-		if env == "" {
+		tag := t.Field(i).Tag.Get("env")
+		env := os.Getenv(ENVConfigPrefix + tag)
+		if tag == "" || env == "" {
 			continue
 		}
 		// Reflect and update the u.Config struct member at position i.
@@ -69,18 +75,28 @@ func (u *UnifiPoller) setEnvVarOptions() {
 			// This is a reflect package method to update a struct member by index.
 			c.SetString(env)
 		case "int":
-			val, _ := strconv.Atoi(env)
+			val, err := strconv.Atoi(env)
+			if err != nil {
+				return err
+			}
 			c.Set(reflect.ValueOf(val))
 		case "[]string":
 			c.Set(reflect.ValueOf(strings.Split(env, ",")))
 		case "Duration":
-			val, _ := time.ParseDuration(env)
+			val, err := time.ParseDuration(env)
+			if err != nil {
+				return err
+			}
 			c.Set(reflect.ValueOf(Duration{val}))
 		case "bool":
-			val, _ := strconv.ParseBool(env)
+			val, err := strconv.ParseBool(env)
+			if err != nil {
+				return err
+			}
 			c.SetBool(val)
 		}
 	}
+	return nil
 }
 
 // GetConfig parses and returns our configuration data.
@@ -99,7 +115,6 @@ func (u *UnifiPoller) GetConfig() error {
 		Quiet:      u.Flag.DumpJSON != "", //s uppress the following u.Logf line.
 	}
 	u.Logf("Loading Configuration File: %s", u.Flag.ConfigFile)
-	defer u.setEnvVarOptions() // Set env variable overrides when done here.
 	switch buf, err := ioutil.ReadFile(u.Flag.ConfigFile); {
 	case err != nil:
 		return err
