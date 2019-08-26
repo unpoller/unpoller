@@ -13,10 +13,10 @@ import (
 // CheckSites makes sure the list of provided sites exists on the controller.
 // This does not run in Lambda (run-once) mode.
 func (u *UnifiPoller) CheckSites() error {
-	if strings.Contains(strings.ToLower(u.Mode), "lambda") {
+	if strings.Contains(strings.ToLower(u.Config.Mode), "lambda") {
 		return nil // Skip this in lambda mode.
 	}
-	sites, err := u.GetSites()
+	sites, err := u.Unifi.GetSites()
 	if err != nil {
 		return err
 	}
@@ -25,12 +25,12 @@ func (u *UnifiPoller) CheckSites() error {
 		msg = append(msg, site.Name+" ("+site.Desc+")")
 	}
 	u.Logf("Found %d site(s) on controller: %v", len(msg), strings.Join(msg, ", "))
-	if StringInSlice("all", u.Sites) {
-		u.Sites = []string{"all"}
+	if StringInSlice("all", u.Config.Sites) {
+		u.Config.Sites = []string{"all"}
 		return nil
 	}
 FIRST:
-	for _, s := range u.Sites {
+	for _, s := range u.Config.Sites {
 		for _, site := range sites {
 			if s == site.Name {
 				continue FIRST
@@ -45,14 +45,15 @@ FIRST:
 // PollController runs forever, polling UniFi, and pushing to influx.
 // This is started by Run() after everything checks out.
 func (u *UnifiPoller) PollController() error {
-	log.Println("[INFO] Everything checks out! Poller started, interval:", u.Interval.Round(time.Second))
-	ticker := time.NewTicker(u.Interval.Round(time.Second))
+	interval := u.Config.Interval.Round(time.Second)
+	log.Println("[INFO] Everything checks out! Poller started, interval:", interval)
+	ticker := time.NewTicker(interval)
 	for u.LastCheck = range ticker.C {
 		var err error
-		if u.ReAuth {
+		if u.Config.ReAuth {
 			u.LogDebugf("Re-authenticating to UniFi Controller")
 			// Some users need to re-auth every interval because the cookie times out.
-			if err = u.Login(); err != nil {
+			if err = u.Unifi.Login(); err != nil {
 				u.LogError(err, "re-authenticating")
 			}
 		}
@@ -60,8 +61,8 @@ func (u *UnifiPoller) PollController() error {
 			// Only run this if the authentication procedure didn't return error.
 			_ = u.CollectAndReport()
 		}
-		if u.MaxErrors >= 0 && u.errorCount > u.MaxErrors {
-			return fmt.Errorf("reached maximum error count, stopping poller (%d > %d)", u.errorCount, u.MaxErrors)
+		if u.Config.MaxErrors >= 0 && u.errorCount > u.Config.MaxErrors {
+			return fmt.Errorf("reached maximum error count, stopping poller (%d > %d)", u.errorCount, u.Config.MaxErrors)
 		}
 	}
 	return nil
@@ -93,18 +94,18 @@ func (u *UnifiPoller) CollectMetrics() (*Metrics, error) {
 	// Get the sites we care about.
 	m.Sites, err = u.GetFilteredSites()
 	u.LogError(err, "unifi.GetSites()")
-	if u.CollectIDS {
+	if u.Config.CollectIDS {
 		// Check back in time since twice the interval. Dups are discarded by InfluxDB.
-		m.IDSList, err = u.GetIDS(m.Sites, time.Now().Add(2*u.Interval.Duration), time.Now())
+		m.IDSList, err = u.Unifi.GetIDS(m.Sites, time.Now().Add(2*u.Config.Interval.Duration), time.Now())
 		u.LogError(err, "unifi.GetIDS()")
 	}
 	// Get all the points.
-	m.Clients, err = u.GetClients(m.Sites)
+	m.Clients, err = u.Unifi.GetClients(m.Sites)
 	u.LogError(err, "unifi.GetClients()")
-	m.Devices, err = u.GetDevices(m.Sites)
+	m.Devices, err = u.Unifi.GetDevices(m.Sites)
 	u.LogError(err, "unifi.GetDevices()")
 	// Make a new Influx Points Batcher.
-	m.BatchPoints, err = influx.NewBatchPoints(influx.BatchPointsConfig{Database: u.InfluxDB})
+	m.BatchPoints, err = influx.NewBatchPoints(influx.BatchPointsConfig{Database: u.Config.InfluxDB})
 	u.LogError(err, "influx.NewBatchPoints")
 	return m, err
 }
@@ -139,7 +140,7 @@ func (u *UnifiPoller) ReportMetrics(metrics *Metrics) error {
 	for _, err := range metrics.ProcessPoints() {
 		u.LogError(err, "asset.Points()")
 	}
-	err := u.Write(metrics.BatchPoints)
+	err := u.Influx.Write(metrics.BatchPoints)
 	if err != nil {
 		return fmt.Errorf("influxdb.Write(points): %v", err)
 	}
@@ -150,7 +151,7 @@ func (u *UnifiPoller) ReportMetrics(metrics *Metrics) error {
 		fields += len(i)
 	}
 	idsMsg := ""
-	if u.CollectIDS {
+	if u.Config.CollectIDS {
 		idsMsg = fmt.Sprintf("IDS Events: %d, ", len(metrics.IDSList))
 	}
 	u.Logf("UniFi Measurements Recorded. Sites: %d, Clients: %d, "+
@@ -213,16 +214,16 @@ func (m *Metrics) ProcessPoints() []error {
 // Omits requested but unconfigured sites. Grabs the full list from the
 // controller and returns the sites provided in the config file.
 func (u *UnifiPoller) GetFilteredSites() (unifi.Sites, error) {
-	sites, err := u.GetSites()
+	sites, err := u.Unifi.GetSites()
 	if err != nil {
 		return nil, err
-	} else if len(u.Sites) < 1 || StringInSlice("all", u.Sites) {
+	} else if len(u.Config.Sites) < 1 || StringInSlice("all", u.Config.Sites) {
 		return sites, nil
 	}
 	var i int
 	for _, s := range sites {
 		// Only include valid sites in the request filter.
-		if StringInSlice(s.Name, u.Sites) {
+		if StringInSlice(s.Name, u.Config.Sites) {
 			sites[i] = s
 			i++
 		}
