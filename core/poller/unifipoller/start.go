@@ -1,42 +1,49 @@
 package unifipoller
 
 import (
-	"encoding/json"
-	"encoding/xml"
 	"fmt"
-	"io/ioutil"
 	"log"
 	"os"
-	"path"
-	"reflect"
-	"strconv"
 	"strings"
 	"time"
 
-	"github.com/BurntSushi/toml"
 	influx "github.com/influxdata/influxdb1-client/v2"
 	"github.com/spf13/pflag"
 	"golift.io/unifi"
-	"gopkg.in/yaml.v2"
 )
 
 // Start begins the application from a CLI.
 // Parses flags, parses config and executes Run().
 func Start() error {
 	log.SetFlags(log.LstdFlags)
-	up := &UnifiPoller{Flag: &Flag{}}
+	up := &UnifiPoller{Flag: &Flag{},
+		Config: &Config{
+			// Preload our defaults.
+			InfluxURL:  defaultInfxURL,
+			InfluxUser: defaultInfxUser,
+			InfluxPass: defaultInfxPass,
+			InfluxDB:   defaultInfxDb,
+			UnifiUser:  defaultUnifUser,
+			UnifiPass:  os.Getenv("UNIFI_PASSWORD"), // deprecated name.
+			UnifiBase:  defaultUnifURL,
+			Interval:   Duration{defaultInterval},
+			Sites:      []string{"all"},
+		}}
 	up.Flag.Parse(os.Args[1:])
 	if up.Flag.ShowVer {
 		fmt.Printf("unifi-poller v%s\n", Version)
 		return nil // don't run anything else w/ version request.
 	}
+	if up.Flag.DumpJSON == "" { // do not print this when dumping JSON.
+		up.Logf("Loading Configuration File: %s", up.Flag.ConfigFile)
+	}
 	// Parse config file.
-	if err := up.GetConfig(); err != nil {
+	if err := up.Config.ParseFile(up.Flag.ConfigFile); err != nil {
 		up.Flag.Usage()
 		return err
 	}
 	// Update Config with ENV variable overrides.
-	if err := up.ENVSetConfig(); err != nil {
+	if err := up.Config.ParseENV(); err != nil {
 		return err
 	}
 	return up.Run()
@@ -54,80 +61,6 @@ func (f *Flag) Parse(args []string) {
 	f.StringVarP(&f.ConfigFile, "config", "c", DefaultConfFile, "Poller config file path.")
 	f.BoolVarP(&f.ShowVer, "version", "v", false, "Print the version and exit.")
 	_ = f.FlagSet.Parse(args)
-}
-
-// ENVSetConfig copies environment variables into configuration values.
-// This is useful for Docker users that find it easier to pass ENV variables
-// than a specific configuration file. Uses reflection to find struct tags.
-func (u *UnifiPoller) ENVSetConfig() error {
-	t := reflect.TypeOf(Config{}) // Get tag names from the Config struct.
-	// Loop each Config struct member; get reflect tag & env var value; update config.
-	for i := 0; i < t.NumField(); i++ {
-		tag := t.Field(i).Tag.Get("env")        // Get the ENV variable name from "env" struct tag
-		env := os.Getenv(ENVConfigPrefix + tag) // Then pull value from OS.
-		if tag == "" || env == "" {
-			continue // Skip if either are empty.
-		}
-
-		// Reflect and update the u.Config struct member at position i.
-		switch c := reflect.ValueOf(u.Config).Elem().Field(i); c.Type().String() {
-		// Handle each member type appropriately (differently).
-		case "string":
-			// This is a reflect package method to update a struct member by index.
-			c.SetString(env)
-		case "int":
-			val, err := strconv.Atoi(env)
-			if err != nil {
-				return fmt.Errorf("%s: %v", tag, err)
-			}
-			c.Set(reflect.ValueOf(val))
-		case "[]string":
-			c.Set(reflect.ValueOf(strings.Split(env, ",")))
-		case path.Base(t.PkgPath()) + ".Duration":
-			val, err := time.ParseDuration(env)
-			if err != nil {
-				return fmt.Errorf("%s: %v", tag, err)
-			}
-			c.Set(reflect.ValueOf(Duration{val}))
-		case "bool":
-			val, err := strconv.ParseBool(env)
-			if err != nil {
-				return fmt.Errorf("%s: %v", tag, err)
-			}
-			c.SetBool(val)
-		}
-	}
-	return nil
-}
-
-// GetConfig parses and returns our configuration data.
-func (u *UnifiPoller) GetConfig() error {
-	// Preload our defaults.
-	u.Config = &Config{
-		InfluxURL:  defaultInfxURL,
-		InfluxUser: defaultInfxUser,
-		InfluxPass: defaultInfxPass,
-		InfluxDB:   defaultInfxDb,
-		UnifiUser:  defaultUnifUser,
-		UnifiPass:  os.Getenv("UNIFI_PASSWORD"), // deprecated name.
-		UnifiBase:  defaultUnifURL,
-		Interval:   Duration{defaultInterval},
-		Sites:      []string{"default"},
-		Quiet:      u.Flag.DumpJSON != "", //s uppress the following u.Logf line.
-	}
-	u.Logf("Loading Configuration File: %s", u.Flag.ConfigFile)
-	switch buf, err := ioutil.ReadFile(u.Flag.ConfigFile); {
-	case err != nil:
-		return err
-	case strings.Contains(u.Flag.ConfigFile, ".json"):
-		return json.Unmarshal(buf, u.Config)
-	case strings.Contains(u.Flag.ConfigFile, ".xml"):
-		return xml.Unmarshal(buf, u.Config)
-	case strings.Contains(u.Flag.ConfigFile, ".yaml"):
-		return yaml.Unmarshal(buf, u.Config)
-	default:
-		return toml.Unmarshal(buf, u.Config)
-	}
 }
 
 // Run invokes all the application logic and routines.
@@ -186,8 +119,5 @@ func (u *UnifiPoller) GetUnifi() (err error) {
 	if err != nil {
 		return fmt.Errorf("unifi controller: %v", err)
 	}
-	if err := u.CheckSites(); err != nil {
-		return err
-	}
-	return nil
+	return u.CheckSites()
 }

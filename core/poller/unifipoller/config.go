@@ -1,11 +1,22 @@
 package unifipoller
 
 import (
+	"encoding/json"
+	"encoding/xml"
+	"fmt"
+	"io/ioutil"
+	"os"
+	"path"
+	"reflect"
+	"strconv"
+	"strings"
 	"time"
 
+	"github.com/BurntSushi/toml"
 	influx "github.com/influxdata/influxdb1-client/v2"
 	"github.com/spf13/pflag"
 	"golift.io/unifi"
+	"gopkg.in/yaml.v2"
 )
 
 // Version is injected by the Makefile
@@ -83,4 +94,64 @@ type Duration struct{ time.Duration }
 func (d *Duration) UnmarshalText(data []byte) (err error) {
 	d.Duration, err = time.ParseDuration(string(data))
 	return
+}
+
+// ParseFile parses and returns our configuration data.
+func (c *Config) ParseFile(configFile string) error {
+	switch buf, err := ioutil.ReadFile(configFile); {
+	case err != nil:
+		return err
+	case strings.Contains(configFile, ".json"):
+		return json.Unmarshal(buf, c)
+	case strings.Contains(configFile, ".xml"):
+		return xml.Unmarshal(buf, c)
+	case strings.Contains(configFile, ".yaml"):
+		return yaml.Unmarshal(buf, c)
+	default:
+		return toml.Unmarshal(buf, c)
+	}
+}
+
+// ParseENV copies environment variables into configuration values.
+// This is useful for Docker users that find it easier to pass ENV variables
+// than a specific configuration file. Uses reflection to find struct tags.
+func (c *Config) ParseENV() error {
+	t := reflect.TypeOf(Config{}) // Get tag names from the Config struct.
+	// Loop each Config struct member; get reflect tag & env var value; update config.
+	for i := 0; i < t.NumField(); i++ {
+		tag := t.Field(i).Tag.Get("env")        // Get the ENV variable name from "env" struct tag
+		env := os.Getenv(ENVConfigPrefix + tag) // Then pull value from OS.
+		if tag == "" || env == "" {
+			continue // Skip if either are empty.
+		}
+
+		// Reflect and update the u.Config struct member at position i.
+		switch c := reflect.ValueOf(c).Elem().Field(i); c.Type().String() {
+		// Handle each member type appropriately (differently).
+		case "string":
+			// This is a reflect package method to update a struct member by index.
+			c.SetString(env)
+		case "int":
+			val, err := strconv.Atoi(env)
+			if err != nil {
+				return fmt.Errorf("%s: %v", tag, err)
+			}
+			c.Set(reflect.ValueOf(val))
+		case "[]string":
+			c.Set(reflect.ValueOf(strings.Split(env, ",")))
+		case path.Base(t.PkgPath()) + ".Duration":
+			val, err := time.ParseDuration(env)
+			if err != nil {
+				return fmt.Errorf("%s: %v", tag, err)
+			}
+			c.Set(reflect.ValueOf(Duration{val}))
+		case "bool":
+			val, err := strconv.ParseBool(env)
+			if err != nil {
+				return fmt.Errorf("%s: %v", tag, err)
+			}
+			c.SetBool(val)
+		}
+	}
+	return nil
 }
