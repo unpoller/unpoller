@@ -7,6 +7,7 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
+	"strconv"
 	"strings"
 	"time"
 
@@ -48,6 +49,34 @@ func (f *Flag) Parse(args []string) {
 	_ = f.FlagSet.Parse(args)
 }
 
+// setEnvVarOptions copies environment variables into configuration values.
+// This is useful for Docker users that find it easier to pass ENV variables
+// that a specific configuration file.
+func (u *UnifiPoller) setEnvVarOptions() {
+	u.Config.Mode = pick(os.Getenv(ENVConfigMode), u.Config.Mode)
+	u.Config.InfluxDB = pick(os.Getenv(ENVConfigInfluxDB), u.Config.InfluxDB)
+	u.Config.InfluxUser = pick(os.Getenv(ENVConfigInfluxUser), u.Config.InfluxUser)
+	u.Config.InfluxPass = pick(os.Getenv(ENVConfigInfluxPass), u.Config.InfluxPass)
+	u.Config.InfluxURL = pick(os.Getenv(ENVConfigInfluxURL), u.Config.InfluxURL)
+	u.Config.UnifiUser = pick(os.Getenv(ENVConfigUnifiUser), u.Config.UnifiUser)
+	u.Config.UnifiPass = pick(os.Getenv(ENVConfigUnifiPass), u.Config.UnifiPass)
+	u.Config.UnifiBase = pick(os.Getenv(ENVConfigUnifiBase), u.Config.UnifiBase)
+	u.Config.ReAuth = parseBool(os.Getenv(ENVConfigReAuth), u.Config.ReAuth)
+	u.Config.VerifySSL = parseBool(os.Getenv(ENVConfigVerifySSL), u.Config.VerifySSL)
+	u.Config.CollectIDS = parseBool(os.Getenv(ENVConfigCollectIDS), u.Config.CollectIDS)
+	u.Config.Quiet = parseBool(os.Getenv(ENVConfigQuiet), u.Config.Quiet)
+	u.Config.Debug = parseBool(os.Getenv(ENVConfigDebug), u.Config.Debug)
+	if e := os.Getenv(ENVConfigInterval); e != "" {
+		_ = u.Config.Interval.UnmarshalText([]byte(e))
+	}
+	if e := os.Getenv(ENVConfigMaxErrors); e != "" {
+		u.Config.MaxErrors, _ = strconv.Atoi(e)
+	}
+	if e := os.Getenv(ENVConfigSites); e != "" {
+		u.Config.Sites = strings.Split(e, ",")
+	}
+}
+
 // GetConfig parses and returns our configuration data.
 func (u *UnifiPoller) GetConfig() error {
 	// Preload our defaults.
@@ -57,13 +86,14 @@ func (u *UnifiPoller) GetConfig() error {
 		InfluxPass: defaultInfxPass,
 		InfluxDB:   defaultInfxDb,
 		UnifiUser:  defaultUnifUser,
-		UnifiPass:  os.Getenv("UNIFI_PASSWORD"),
+		UnifiPass:  os.Getenv("UNIFI_PASSWORD"), // deprecated name.
 		UnifiBase:  defaultUnifURL,
 		Interval:   Duration{defaultInterval},
 		Sites:      []string{"default"},
-		Quiet:      u.Flag.DumpJSON != "",
+		Quiet:      u.Flag.DumpJSON != "", //s uppress the following u.Logf line.
 	}
 	u.Logf("Loading Configuration File: %s", u.Flag.ConfigFile)
+	defer u.setEnvVarOptions() // Set env variable overrides when done here.
 	switch buf, err := ioutil.ReadFile(u.Flag.ConfigFile); {
 	case err != nil:
 		return err
