@@ -163,7 +163,7 @@ type USWStat struct {
 	*Sw
 }
 
-// GS is a subtype of USWStat to make unmarshalling of different controller versions possible.
+// Sw is a subtype of USWStat to make unmarshalling of different controller versions possible.
 type Sw struct {
 	SiteID            string    `json:"site_id"`
 	O                 string    `json:"o"`
