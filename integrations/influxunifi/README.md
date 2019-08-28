@@ -48,7 +48,7 @@ a UniFi controller, there's no excuse not to install
 You'll have a plethora of data at your fingertips and the ability to craft custom
 graphs to slice the data any way you choose. Good luck!
 
-# Backstory
+## Backstory
 
 Okay, so here's the deal. I found a simple piece of code on GitHub that
 sorta did what I needed; we all know that story. I wanted more data, so
@@ -64,7 +64,7 @@ own two UAP-AC-PROs, one USG-3 and one US-24-250W, but have since upgraded
 a few devices. Many other users have also provided feedback to improve this app,
 and we have reports of it working on nearly every switch, AP and gateway; UDM included.
 
-# What's this data good for?
+## What's this data good for?
 
 I've been trying to get my UAP data into Grafana. Sure, google search that.
 You'll find [this](https://community.ubnt.com/t5/UniFi-Wireless/Grafana-dashboard-for-UniFi-APs-now-available/td-p/1833532). What if you don't want to deal with SNMP?
@@ -75,15 +75,14 @@ to [waterside](https://community.ubnt.com/t5/user/viewprofilepage/user-id/303058
 for making this dashboard; it gave me a fantastic start to making my own dashboards.
 This app is up to five dashboards now!
 
-Update 9/2019:
-
+##### Update 9/2019
 Some new "prometheus exporters" are showing up. I admit I don't know much about
 Prometheus, but so far the prometheus exporting apps I've seen are missing many
 data points. Let me know if Prometheus is something you'd like to see support for.
 
 I've also created [another forum post](https://community.ui.com/questions/Unifi-Poller-Store-Unifi-Controller-Metrics-in-InfluxDB-without-SNMP/58a0ea34-d2b3-41cd-93bb-d95d3896d1a1) you may use to get additional help.
 
-# Development
+## Development
 
 The "What now..." section below used to be a lot longer. I've received a lot of
 support, feedback and assistance from the community. Many thanks! This app is
@@ -107,7 +106,7 @@ library to grab the data from your controller. As a bonus, all of the code in Un
 [also a library](https://godoc.org/github.com/davidnewhall/unifi-poller/unifipoller)
 and can be used in other projects.
 
-# What now...
+## What now...
 
 We are at a point where the application works as intended, and we are trying to
 maintain the status quo. Ubiquiti releases updates, things break, we fix it;
@@ -115,19 +114,19 @@ round and round we go. If you have new hardware or a new controller version, and
 something is not showing up, please open an
 [Issue](https://github.com/davidnewhall/unifi-poller/issues) so we can fix it.
 
-# What's it look like?
+## What's it look like?
 
-Here's a picture of the Client dashboard.
+##### Client Dashboard
 ![UniFi Clients Dashboard Image](https://grafana.com/api/dashboards/10418/images/6660/image)
 
-Here's a picture of the USG dashboard.
+##### USG Dashboard
 ![USG Dashboard Image](https://grafana.com/api/dashboards/10416/images/6663/image)
 
-Here's a picture of the UAP dashboard. This only shows one device, but you can
-select multiple to put specific stats side-by-side.
+##### UAP Dashboard
+This only shows one device, but you can select multiple to put specific stats side-by-side.
 ![UAP Dashboard Image](https://grafana.com/api/dashboards/10415/images/6662/image)
 
-The USW / Switch Dashboard is pretty big with one data-filled section per selected port.
+##### USW / Switch Dashboard
 You can drill down into specific sites, switches, and ports. Compare ports in different
 sites side-by-side. So easy! This screenshot barely does it justice.
 ![USW Dashboard Image](https://grafana.com/api/dashboards/10417/images/6664/image)
