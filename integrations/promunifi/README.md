@@ -20,11 +20,10 @@ included; with screenshots. Updated 2019.
 
 [See the Wiki!](https://github.com/davidnewhall/unifi-poller/wiki/Installation)
 We have a special place for [Docker Users](https://github.com/davidnewhall/unifi-poller/wiki/Docker).
-
 I'm willing to help if you have troubles.
 Open an [Issue](https://github.com/davidnewhall/unifi-poller/issues) and
 we'll figure out how to get things working for you. You can also check out
-my [Discord server](https://discord.gg/DyVsMyt).
+my [Discord server](https://discord.gg/DyVsMyt); sometimes I look at it too!
 
 ## Description
 
@@ -34,7 +33,8 @@ my [Discord server](https://discord.gg/DyVsMyt).
 [controller](https://www.ui.com/download/unifi/) to keep stats and simplify network
 device configuration. This controller can be installed on Windows, macOS and Linux.
 Ubiquiti also provides a dedicated hardware device called a
-[CloudKey](https://www.ui.com/unifi/unifi-cloud-key/) that runs the controller software.
+[CloudKey](https://www.ui.com/unifi/unifi-cloud-key/) that runs the controller software. More recently they've developed the Dream Machine; it's still in
+beta / early access, but UniFi Poller can collect its data!
 
 UniFi Poller is a small Golang application that runs on Windows, macOS, Linux or
 Docker. It polls a UniFi controller every 30 seconds for measurements and exports
@@ -116,6 +116,8 @@ something is not showing up, please open an
 
 ## What's it look like?
 
+There are five total dashboards available. Below you'll find screenshots of a few.
+
 ##### Client Dashboard
 ![UniFi Clients Dashboard Image](https://grafana.com/api/dashboards/10418/images/6660/image)
 
@@ -123,14 +125,12 @@ something is not showing up, please open an
 ![USG Dashboard Image](https://grafana.com/api/dashboards/10416/images/6663/image)
 
 ##### UAP Dashboard
-This only shows one device, but you can select multiple to put specific stats side-by-side.
 ![UAP Dashboard Image](https://grafana.com/api/dashboards/10415/images/6662/image)
 
 ##### USW / Switch Dashboard
 You can drill down into specific sites, switches, and ports. Compare ports in different
 sites side-by-side. So easy! This screenshot barely does it justice.
 ![USW Dashboard Image](https://grafana.com/api/dashboards/10417/images/6664/image)
-
 
 ## Copyright & License
 <img style="float: right;" align="right" width="200px" src="https://raw.githubusercontent.com/wiki/davidnewhall/unifi-poller/images/unifi-poller-logo.png">
