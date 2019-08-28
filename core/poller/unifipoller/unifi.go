@@ -125,6 +125,9 @@ func (u *UnifiPoller) AugmentMetrics(metrics *Metrics) error {
 	for _, r := range metrics.USWs {
 		devices[r.Mac] = r.Name
 	}
+	for _, r := range metrics.UDMs {
+		devices[r.Mac] = r.Name
+	}
 	// These come blank, so set them here.
 	for i, c := range metrics.Clients {
 		metrics.Clients[i].SwName = devices[c.SwMac]
@@ -158,7 +161,7 @@ func (u *UnifiPoller) ReportMetrics(metrics *Metrics) error {
 	u.Logf("UniFi Measurements Recorded. Sites: %d, Clients: %d, "+
 		"Wireless APs: %d, Gateways: %d, Switches: %d, %sPoints: %d, Fields: %d",
 		len(metrics.Sites), len(metrics.Clients), len(metrics.UAPs),
-		len(metrics.USGs), len(metrics.USWs), idsMsg, points, fields)
+		len(metrics.UDMs)+len(metrics.USGs), len(metrics.USWs), idsMsg, points, fields)
 	return nil
 }
 
@@ -196,16 +199,20 @@ func (m *Metrics) ProcessPoints() []error {
 	if m.Devices == nil {
 		return errs
 	}
-	for _, asset := range m.UAPs {
+	for _, asset := range m.Devices.UAPs {
 		pts, err := UAPPoints(asset, m.TS)
 		errs = append(errs, processPoints(m, pts, err))
 	}
-	for _, asset := range m.USGs {
+	for _, asset := range m.Devices.USGs {
 		pts, err := USGPoints(asset, m.TS)
 		errs = append(errs, processPoints(m, pts, err))
 	}
-	for _, asset := range m.USWs {
+	for _, asset := range m.Devices.USWs {
 		pts, err := USWPoints(asset, m.TS)
+		errs = append(errs, processPoints(m, pts, err))
+	}
+	for _, asset := range m.Devices.UDMs {
+		pts, err := UDMPoints(asset, m.TS)
 		errs = append(errs, processPoints(m, pts, err))
 	}
 	return errs
