@@ -12,7 +12,7 @@ type UDM struct {
 	Uptime                FlexInt  `json:"uptime"`
 	Model                 string   `json:"model"`
 	Version               string   `json:"version"`
-	Name                  string   `json:"hostname"`
+	Name                  string   `json:"name"`
 	Default               FlexBool `json:"default"`
 	Locating              FlexBool `json:"locating"`
 	Type                  string   `json:"type"`
