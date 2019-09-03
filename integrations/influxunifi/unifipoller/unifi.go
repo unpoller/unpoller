@@ -176,25 +176,27 @@ func (u *UnifiPoller) ReportMetrics(metrics *Metrics) error {
 // still check&log it in case the data going is skewed up and causes errors!
 func (m *Metrics) ProcessPoints() []error {
 	errs := []error{}
-	processPoints := func(m *Metrics, p []*influx.Point, err error) error {
-		if err != nil || p == nil {
-			return err
+	processPoints := func(m *Metrics, p []*influx.Point, err error) {
+		switch {
+		case err != nil:
+			errs = append(errs, err)
+		case p == nil:
+		default:
+			m.BatchPoints.AddPoints(p)
 		}
-		m.BatchPoints.AddPoints(p)
-		return nil
 	}
 
 	for _, asset := range m.Sites {
 		pts, err := SitePoints(asset, m.TS)
-		errs = append(errs, processPoints(m, pts, err))
+		processPoints(m, pts, err)
 	}
 	for _, asset := range m.Clients {
 		pts, err := ClientPoints(asset, m.TS)
-		errs = append(errs, processPoints(m, pts, err))
+		processPoints(m, pts, err)
 	}
 	for _, asset := range m.IDSList {
 		pts, err := IDSPoints(asset) // no m.TS.
-		errs = append(errs, processPoints(m, pts, err))
+		processPoints(m, pts, err)
 	}
 
 	if m.Devices == nil {
@@ -202,19 +204,19 @@ func (m *Metrics) ProcessPoints() []error {
 	}
 	for _, asset := range m.Devices.UAPs {
 		pts, err := UAPPoints(asset, m.TS)
-		errs = append(errs, processPoints(m, pts, err))
+		processPoints(m, pts, err)
 	}
 	for _, asset := range m.Devices.USGs {
 		pts, err := USGPoints(asset, m.TS)
-		errs = append(errs, processPoints(m, pts, err))
+		processPoints(m, pts, err)
 	}
 	for _, asset := range m.Devices.USWs {
 		pts, err := USWPoints(asset, m.TS)
-		errs = append(errs, processPoints(m, pts, err))
+		processPoints(m, pts, err)
 	}
 	for _, asset := range m.Devices.UDMs {
 		pts, err := UDMPoints(asset, m.TS)
-		errs = append(errs, processPoints(m, pts, err))
+		processPoints(m, pts, err)
 	}
 	return errs
 }
