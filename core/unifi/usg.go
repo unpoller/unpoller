@@ -84,58 +84,18 @@ type USG struct {
 		DNS         []string `json:"dns,omitempty"`
 		Gateway     string   `json:"gateway,omitempty"`
 	} `json:"port_table"`
-	NetworkTable []struct {
-		ID                     string   `json:"_id"`
-		IsNat                  FlexBool `json:"is_nat"`
-		DhcpdDNSEnabled        FlexBool `json:"dhcpd_dns_enabled"`
-		Purpose                string   `json:"purpose"`
-		DhcpdLeasetime         FlexInt  `json:"dhcpd_leasetime"`
-		IgmpSnooping           FlexBool `json:"igmp_snooping"`
-		DhcpguardEnabled       FlexBool `json:"dhcpguard_enabled,omitempty"`
-		DhcpdStart             string   `json:"dhcpd_start"`
-		Enabled                FlexBool `json:"enabled"`
-		DhcpdStop              string   `json:"dhcpd_stop"`
-		DhcpdWinsEnabled       FlexBool `json:"dhcpd_wins_enabled,omitempty"`
-		DomainName             string   `json:"domain_name"`
-		DhcpdEnabled           FlexBool `json:"dhcpd_enabled"`
-		IPSubnet               string   `json:"ip_subnet"`
-		Vlan                   FlexInt  `json:"vlan,omitempty"`
-		Networkgroup           string   `json:"networkgroup"`
-		Name                   string   `json:"name"`
-		SiteID                 string   `json:"site_id"`
-		DhcpdIP1               string   `json:"dhcpd_ip_1,omitempty"`
-		VlanEnabled            FlexBool `json:"vlan_enabled"`
-		DhcpdGatewayEnabled    FlexBool `json:"dhcpd_gateway_enabled"`
-		DhcpdTimeOffsetEnabled FlexBool `json:"dhcpd_time_offset_enabled"`
-		Ipv6InterfaceType      string   `json:"ipv6_interface_type"`
-		DhcpRelayEnabled       FlexBool `json:"dhcp_relay_enabled"`
-		Mac                    string   `json:"mac"`
-		IsGuest                FlexBool `json:"is_guest"`
-		IP                     string   `json:"ip"`
-		Up                     FlexBool `json:"up"`
-		NumSta                 FlexInt  `json:"num_sta"`
-		RxBytes                FlexInt  `json:"rx_bytes"`
-		RxPackets              FlexInt  `json:"rx_packets"`
-		TxBytes                FlexInt  `json:"tx_bytes"`
-		TxPackets              FlexInt  `json:"tx_packets"`
-		DhcpdNtp1              string   `json:"dhcpd_ntp_1,omitempty"`
-		DhcpdNtpEnabled        FlexBool `json:"dhcpd_ntp_enabled,omitempty"`
-		DhcpdUnifiController   string   `json:"dhcpd_unifi_controller,omitempty"`
-		UpnpLanEnabled         FlexBool `json:"upnp_lan_enabled,omitempty"`
-		AttrNoDelete           FlexBool `json:"attr_no_delete,omitempty"`
-		AttrHiddenID           string   `json:"attr_hidden_id,omitempty"`
-	} `json:"network_table"`
-	Uplink      Uplink  `json:"uplink"`
-	Stat        USGStat `json:"stat"`
-	TxBytes     FlexInt `json:"tx_bytes"`
-	RxBytes     FlexInt `json:"rx_bytes"`
-	Bytes       FlexInt `json:"bytes"`
-	NumSta      FlexInt `json:"num_sta"`
-	UserNumSta  FlexInt `json:"user-num_sta"`
-	GuestNumSta FlexInt `json:"guest-num_sta"`
-	NumDesktop  FlexInt `json:"num_desktop"`
-	NumMobile   FlexInt `json:"num_mobile"`
-	NumHandheld FlexInt `json:"num_handheld"`
+	NetworkTable NetworkTable `json:"network_table"`
+	Uplink       Uplink       `json:"uplink"`
+	Stat         USGStat      `json:"stat"`
+	TxBytes      FlexInt      `json:"tx_bytes"`
+	RxBytes      FlexInt      `json:"rx_bytes"`
+	Bytes        FlexInt      `json:"bytes"`
+	NumSta       FlexInt      `json:"num_sta"`
+	UserNumSta   FlexInt      `json:"user-num_sta"`
+	GuestNumSta  FlexInt      `json:"guest-num_sta"`
+	NumDesktop   FlexInt      `json:"num_desktop"`
+	NumMobile    FlexInt      `json:"num_mobile"`
+	NumHandheld  FlexInt      `json:"num_handheld"`
 }
 
 // Uplink is the Internet connection (or uplink) on a UniFi device.
