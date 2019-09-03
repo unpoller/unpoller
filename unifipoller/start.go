@@ -119,5 +119,6 @@ func (u *UnifiPoller) GetUnifi() (err error) {
 	if err != nil {
 		return fmt.Errorf("unifi controller: %v", err)
 	}
+	u.LogDebugf("Authenticated with controller successfully")
 	return u.CheckSites()
 }
