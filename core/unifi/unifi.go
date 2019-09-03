@@ -85,7 +85,7 @@ func (u *Unifi) GetData(methodPath string, v interface{}) error {
 	if err != nil {
 		return err
 	}
-	u.DebugLog("Unmarshaling %s", methodPath)
+	u.DebugLog("Unmarshaling %s (bytes: %d)", methodPath, len(body))
 	return json.Unmarshal(body, v)
 }
 
