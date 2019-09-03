@@ -30,12 +30,12 @@
   version = "v1.0.3"
 
 [[projects]]
-  digest = "1:8a7dc583b5300f5d3f2602769b11127193330f74bb0a31e135d7354a1f96374a"
+  digest = "1:a9c89c9c5c1cb23eec483854438c6c960f6e58cdedcd46b8cbe613c3855bc25f"
   name = "golift.io/unifi"
   packages = ["."]
   pruneopts = "UT"
-  revision = "65d8c5a10faeb8180053a760d20800baf515f01a"
-  version = "v4.0.2"
+  revision = "5de396262e0c5ce475045bfccd658df58c7c3b13"
+  version = "v4.1.0"
 
 [[projects]]
   digest = "1:4d2e5a73dc1500038e504a8d78b986630e3626dc027bc030ba5c75da257cdb96"
