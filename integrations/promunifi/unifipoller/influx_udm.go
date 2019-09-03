@@ -196,19 +196,18 @@ func UDMPoints(u *unifi.UDM, now time.Time) ([]*influx.Point, error) {
 		"cpu":                 u.SystemStats.CPU.Val,
 		"mem":                 u.SystemStats.Mem.Val,
 		"system_uptime":       u.SystemStats.Uptime.Val,
-		"stat_bytes":          u.Stat.Bytes.Val,
-		"stat_rx_bytes":       u.Stat.RxBytes.Val,
-		"stat_rx_crypts":      u.Stat.RxCrypts.Val,
-		"stat_rx_dropped":     u.Stat.RxDropped.Val,
-		"stat_rx_errors":      u.Stat.RxErrors.Val,
-		"stat_rx_frags":       u.Stat.RxFrags.Val,
-		"stat_rx_packets":     u.Stat.TxPackets.Val,
-		"stat_tx_bytes":       u.Stat.TxBytes.Val,
-		"stat_tx_dropped":     u.Stat.TxDropped.Val,
-		"stat_tx_errors":      u.Stat.TxErrors.Val,
-		"stat_tx_packets":     u.Stat.TxPackets.Val,
-		"stat_tx_retries":     u.Stat.TxRetries.Val,
-		"uplink_depth":        "0",
+		"stat_bytes":          u.Stat.Sw.Bytes.Val,
+		"stat_rx_bytes":       u.Stat.Sw.RxBytes.Val,
+		"stat_rx_crypts":      u.Stat.Sw.RxCrypts.Val,
+		"stat_rx_dropped":     u.Stat.Sw.RxDropped.Val,
+		"stat_rx_errors":      u.Stat.Sw.RxErrors.Val,
+		"stat_rx_frags":       u.Stat.Sw.RxFrags.Val,
+		"stat_rx_packets":     u.Stat.Sw.TxPackets.Val,
+		"stat_tx_bytes":       u.Stat.Sw.TxBytes.Val,
+		"stat_tx_dropped":     u.Stat.Sw.TxDropped.Val,
+		"stat_tx_errors":      u.Stat.Sw.TxErrors.Val,
+		"stat_tx_packets":     u.Stat.Sw.TxPackets.Val,
+		"stat_tx_retries":     u.Stat.Sw.TxRetries.Val,
 	}
 	pt, err = influx.NewPoint("usw", tags, fields, now)
 	if err != nil {
@@ -321,5 +320,13 @@ func UDMPoints(u *unifi.UDM, now time.Time) ([]*influx.Point, error) {
 		}
 		points = append(points, pt)
 	}
-	return points, nil
+	if u.Stat.Ap == nil {
+		return points, nil
+		// we're done now. the following code process UDM (non-pro) UAP data.
+	}
+	uapPoints, err := processVAPs(*u.VapTable, *u.RadioTable, *u.RadioTableStats, u.Name, u.ID, u.Mac, u.SiteName, now)
+	if err != nil {
+		return nil, err
+	}
+	return append(points, uapPoints...), nil
 }
