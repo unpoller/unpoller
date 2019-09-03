@@ -79,76 +79,13 @@ func (u *Unifi) GetServerData() error {
 	return u.GetData(StatusPath, &response)
 }
 
-// GetClients returns a response full of clients' data from the UniFi Controller.
-func (u *Unifi) GetClients(sites Sites) (Clients, error) {
-	data := make([]*Client, 0)
-	for _, site := range sites {
-		var response struct {
-			Data []*Client `json:"data"`
-		}
-		u.DebugLog("Polling Controller, retreiving UniFi Clients, site %s (%s) ", site.Name, site.Desc)
-		clientPath := fmt.Sprintf(ClientPath, site.Name)
-		if err := u.GetData(clientPath, &response); err != nil {
-			return nil, err
-		}
-		for i, d := range response.Data {
-			// Add the special "Site Name" to each client. This becomes a Grafana filter somewhere.
-			response.Data[i].SiteName = site.Desc + " (" + site.Name + ")"
-			// Fix name and hostname fields. Sometimes one or the other is blank.
-			response.Data[i].Hostname = pick(d.Hostname, d.Name, d.Mac)
-			response.Data[i].Name = pick(d.Name, d.Hostname)
-		}
-		data = append(data, response.Data...)
-	}
-	return data, nil
-}
-
-// GetDevices returns a response full of devices' data from the UniFi Controller.
-func (u *Unifi) GetDevices(sites Sites) (*Devices, error) {
-	devices := new(Devices)
-	for _, site := range sites {
-		var response struct {
-			Data []json.RawMessage `json:"data"`
-		}
-		devicePath := fmt.Sprintf(DevicePath, site.Name)
-		if err := u.GetData(devicePath, &response); err != nil {
-			return nil, err
-		}
-		loopDevices := u.parseDevices(response.Data, site.SiteName)
-		devices.UAPs = append(devices.UAPs, loopDevices.UAPs...)
-		devices.USGs = append(devices.USGs, loopDevices.USGs...)
-		devices.USWs = append(devices.USWs, loopDevices.USWs...)
-		devices.UDMs = append(devices.UDMs, loopDevices.UDMs...)
-	}
-	return devices, nil
-}
-
-// GetSites returns a list of configured sites on the UniFi controller.
-func (u *Unifi) GetSites() (Sites, error) {
-	var response struct {
-		Data []*Site `json:"data"`
-	}
-	if err := u.GetData(SiteList, &response); err != nil {
-		return nil, err
-	}
-	sites := []string{} // used for debug log only
-	for i, d := range response.Data {
-		// If the human name is missing (description), set it to the cryptic name.
-		response.Data[i].Desc = pick(d.Desc, d.Name)
-		// Add the custom site name to each site. used as a Grafana filter somewhere.
-		response.Data[i].SiteName = d.Desc + " (" + d.Name + ")"
-		sites = append(sites, d.Name) // used for debug log only
-	}
-	u.DebugLog("Found %d site(s): %s", len(sites), strings.Join(sites, ","))
-	return response.Data, nil
-}
-
 // GetData makes a unifi request and unmarshal the response into a provided pointer.
 func (u *Unifi) GetData(methodPath string, v interface{}) error {
 	body, err := u.GetJSON(methodPath)
 	if err != nil {
 		return err
 	}
+	u.DebugLog("Unmarshaling %s", methodPath)
 	return json.Unmarshal(body, v)
 }
 
@@ -157,7 +94,8 @@ func (u *Unifi) GetData(methodPath string, v interface{}) error {
 // And if you're doing that... sumbut a pull request with your new struct. :)
 // This is a helper method that is exposed for convenience.
 func (u *Unifi) UniReq(apiPath string, params string) (req *http.Request, err error) {
-	switch path := u.URL + apiPath; {
+	path := u.URL + apiPath
+	switch {
 	case params == "":
 		req, err = http.NewRequest("GET", path, nil)
 	default:
@@ -166,6 +104,7 @@ func (u *Unifi) UniReq(apiPath string, params string) (req *http.Request, err er
 	if err == nil {
 		req.Header.Add("Accept", "application/json")
 	}
+	u.DebugLog("Downloading %s (params: %v, error: %v)", path, params != "", err != nil)
 	return
 }
 

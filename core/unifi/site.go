@@ -1,5 +1,27 @@
 package unifi
 
+import "strings"
+
+// GetSites returns a list of configured sites on the UniFi controller.
+func (u *Unifi) GetSites() (Sites, error) {
+	var response struct {
+		Data []*Site `json:"data"`
+	}
+	if err := u.GetData(SiteList, &response); err != nil {
+		return nil, err
+	}
+	sites := []string{} // used for debug log only
+	for i, d := range response.Data {
+		// If the human name is missing (description), set it to the cryptic name.
+		response.Data[i].Desc = pick(d.Desc, d.Name)
+		// Add the custom site name to each site. used as a Grafana filter somewhere.
+		response.Data[i].SiteName = d.Desc + " (" + d.Name + ")"
+		sites = append(sites, d.Name) // used for debug log only
+	}
+	u.DebugLog("Found %d site(s): %s", len(sites), strings.Join(sites, ","))
+	return response.Data, nil
+}
+
 // Sites is a struct to match Devices and Clients.
 type Sites []*Site
 

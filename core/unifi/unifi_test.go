@@ -17,6 +17,7 @@ func TestNewUnifi(t *testing.T) {
 		Pass:      "pass2",
 		URL:       u,
 		VerifySSL: false,
+		DebugLog:  DiscardLogs,
 	}
 	authReq, err := NewUnifi(c)
 	a.NotNil(err)
@@ -34,7 +35,7 @@ func TestUniReq(t *testing.T) {
 	p := "/test/path"
 	u := "http://some.url:8443"
 	// Test empty parameters.
-	authReq := &Unifi{Client: &http.Client{}, Config: &Config{URL: u}}
+	authReq := &Unifi{Client: &http.Client{}, Config: &Config{URL: u, DebugLog: DiscardLogs}}
 	r, err := authReq.UniReq(p, "")
 	a.Nil(err, "newrequest must not produce an error")
 	a.EqualValues(p, r.URL.Path,
@@ -45,7 +46,7 @@ func TestUniReq(t *testing.T) {
 
 	// Test with parameters
 	k := "key1=value9&key2=value7"
-	authReq = &Unifi{Client: &http.Client{}, Config: &Config{URL: "http://some.url:8443"}}
+	authReq = &Unifi{Client: &http.Client{}, Config: &Config{URL: "http://some.url:8443", DebugLog: DiscardLogs}}
 	r, err = authReq.UniReq(p, k)
 	a.Nil(err, "newrequest must not produce an error")
 	a.EqualValues(p, r.URL.Path,

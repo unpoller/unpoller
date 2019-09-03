@@ -1,6 +1,29 @@
 package unifi
 
-import "encoding/json"
+import (
+	"encoding/json"
+	"fmt"
+)
+
+// GetDevices returns a response full of devices' data from the UniFi Controller.
+func (u *Unifi) GetDevices(sites Sites) (*Devices, error) {
+	devices := new(Devices)
+	for _, site := range sites {
+		var response struct {
+			Data []json.RawMessage `json:"data"`
+		}
+		devicePath := fmt.Sprintf(DevicePath, site.Name)
+		if err := u.GetData(devicePath, &response); err != nil {
+			return nil, err
+		}
+		loopDevices := u.parseDevices(response.Data, site.SiteName)
+		devices.UAPs = append(devices.UAPs, loopDevices.UAPs...)
+		devices.USGs = append(devices.USGs, loopDevices.USGs...)
+		devices.USWs = append(devices.USWs, loopDevices.USWs...)
+		devices.UDMs = append(devices.UDMs, loopDevices.UDMs...)
+	}
+	return devices, nil
+}
 
 // parseDevices parses the raw JSON from the Unifi Controller into device structures.
 func (u *Unifi) parseDevices(data []json.RawMessage, siteName string) *Devices {
