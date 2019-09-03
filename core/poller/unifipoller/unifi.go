@@ -16,6 +16,7 @@ func (u *UnifiPoller) CheckSites() error {
 	if strings.Contains(strings.ToLower(u.Config.Mode), "lambda") {
 		return nil // Skip this in lambda mode.
 	}
+	u.LogDebugf("Checking Controller Sites List")
 	sites, err := u.Unifi.GetSites()
 	if err != nil {
 		return err
