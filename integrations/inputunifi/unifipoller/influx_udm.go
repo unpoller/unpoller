@@ -324,9 +324,90 @@ func UDMPoints(u *unifi.UDM, now time.Time) ([]*influx.Point, error) {
 		return points, nil
 		// we're done now. the following code process UDM (non-pro) UAP data.
 	}
+	tags = map[string]string{
+		"id":                  u.ID,
+		"ip":                  u.IP,
+		"mac":                 u.Mac,
+		"device_type":         u.Stat.Ap.O,
+		"device_oid":          u.Stat.Ap.Oid,
+		"device_ap":           u.Stat.Ap.Ap,
+		"site_id":             u.SiteID,
+		"site_name":           u.SiteName,
+		"name":                u.Name,
+		"adopted":             u.Adopted.Txt,
+		"cfgversion":          u.Cfgversion,
+		"config_network_ip":   u.ConfigNetwork.IP,
+		"config_network_type": u.ConfigNetwork.Type,
+		"connect_request_ip":  u.ConnectRequestIP,
+		"device_id":           u.DeviceID,
+		"has_eth1":            u.HasEth1.Txt,
+		"inform_ip":           u.InformIP,
+		"known_cfgversion":    u.KnownCfgversion,
+		"model":               u.Model,
+		"serial":              u.Serial,
+		"type":                u.Type,
+	}
+	fields = map[string]interface{}{
+		"ip":            u.IP,
+		"bytes":         u.Bytes.Val,
+		"last_seen":     u.LastSeen.Val,
+		"rx_bytes":      u.RxBytes.Val,
+		"tx_bytes":      u.TxBytes.Val,
+		"uptime":        u.Uptime.Val,
+		"state":         u.State,
+		"user-num_sta":  u.UserNumSta,
+		"guest-num_sta": u.GuestNumSta,
+		"version":       u.Version,
+		"loadavg_1":     u.SysStats.Loadavg1.Val,
+		"loadavg_5":     u.SysStats.Loadavg5.Val,
+		"loadavg_15":    u.SysStats.Loadavg15.Val,
+		"mem_buffer":    u.SysStats.MemBuffer.Val,
+		"mem_total":     u.SysStats.MemTotal.Val,
+		"mem_used":      u.SysStats.MemUsed.Val,
+		"cpu":           u.SystemStats.CPU.Val,
+		"mem":           u.SystemStats.Mem.Val,
+		"system_uptime": u.SystemStats.Uptime.Val,
+		// Accumulative Statistics.
+		"stat_user-rx_packets":  u.Stat.Ap.UserRxPackets.Val,
+		"stat_guest-rx_packets": u.Stat.Ap.GuestRxPackets.Val,
+		"stat_rx_packets":       u.Stat.Ap.RxPackets.Val,
+		"stat_user-rx_bytes":    u.Stat.Ap.UserRxBytes.Val,
+		"stat_guest-rx_bytes":   u.Stat.Ap.GuestRxBytes.Val,
+		"stat_rx_bytes":         u.Stat.Ap.RxBytes.Val,
+		"stat_user-rx_errors":   u.Stat.Ap.UserRxErrors.Val,
+		"stat_guest-rx_errors":  u.Stat.Ap.GuestRxErrors.Val,
+		"stat_rx_errors":        u.Stat.Ap.RxErrors.Val,
+		"stat_user-rx_dropped":  u.Stat.Ap.UserRxDropped.Val,
+		"stat_guest-rx_dropped": u.Stat.Ap.GuestRxDropped.Val,
+		"stat_rx_dropped":       u.Stat.Ap.RxDropped.Val,
+		"stat_user-rx_crypts":   u.Stat.Ap.UserRxCrypts.Val,
+		"stat_guest-rx_crypts":  u.Stat.Ap.GuestRxCrypts.Val,
+		"stat_rx_crypts":        u.Stat.Ap.RxCrypts.Val,
+		"stat_user-rx_frags":    u.Stat.Ap.UserRxFrags.Val,
+		"stat_guest-rx_frags":   u.Stat.Ap.GuestRxFrags.Val,
+		"stat_rx_frags":         u.Stat.Ap.RxFrags.Val,
+		"stat_user-tx_packets":  u.Stat.Ap.UserTxPackets.Val,
+		"stat_guest-tx_packets": u.Stat.Ap.GuestTxPackets.Val,
+		"stat_tx_packets":       u.Stat.Ap.TxPackets.Val,
+		"stat_user-tx_bytes":    u.Stat.Ap.UserTxBytes.Val,
+		"stat_guest-tx_bytes":   u.Stat.Ap.GuestTxBytes.Val,
+		"stat_tx_bytes":         u.Stat.Ap.TxBytes.Val,
+		"stat_user-tx_errors":   u.Stat.Ap.UserTxErrors.Val,
+		"stat_guest-tx_errors":  u.Stat.Ap.GuestTxErrors.Val,
+		"stat_tx_errors":        u.Stat.Ap.TxErrors.Val,
+		"stat_user-tx_dropped":  u.Stat.Ap.UserTxDropped.Val,
+		"stat_guest-tx_dropped": u.Stat.Ap.GuestTxDropped.Val,
+		"stat_tx_dropped":       u.Stat.Ap.TxDropped.Val,
+		"stat_user-tx_retries":  u.Stat.Ap.UserTxRetries.Val,
+		"stat_guest-tx_retries": u.Stat.Ap.GuestTxRetries.Val,
+	}
+	pt, err = influx.NewPoint("uap", tags, fields, now)
+	if err != nil {
+		return nil, err
+	}
 	uapPoints, err := processVAPs(*u.VapTable, *u.RadioTable, *u.RadioTableStats, u.Name, u.ID, u.Mac, u.SiteName, now)
 	if err != nil {
 		return nil, err
 	}
-	return append(points, uapPoints...), nil
+	return append(append(points, pt), uapPoints...), nil
 }
