@@ -39,7 +39,7 @@ services:
       - GF_INSTALL_PLUGINS=${GRAFANA_PLUGINS}
   unifi-poller:
     restart: always
-    image: golift/unifi-poller:latest
+    image: golift/unifi-poller:${UP_BRANCH}
     environment:
       - UP_POLLING_MODE=${UP_POLLING_MODE}
       - UP_INFLUX_DB=${INFLUXDB_USERNAME}
