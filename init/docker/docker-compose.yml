@@ -1,0 +1,63 @@
+version: '2'
+services:
+  influxdb:
+    restart: always
+    image: influxdb:latest
+    ports:
+      - '8086:8086'
+    volumes:
+      - influxdb-storage:/var/lib/influxdb
+    environment:
+      - INFLUXDB_DB=${INFLUXDB_DATABASE}
+      - INFLUXDB_ADMIN_USER=${INFLUXDB_USERNAME}
+      - INFLUXDB_ADMIN_PASSWORD=${INFLUXDB_PASSWORD}
+  chronograf:
+    image: chronograf:latest
+    restart: always
+    ports:
+      - '127.0.0.1:8888:8888'
+    volumes:
+      - chronograf-storage:/var/lib/chronograf
+    depends_on:
+      - influxdb
+    environment:
+      - INFLUXDB_URL=http://influxdb:8086
+      - INFLUXDB_USERNAME=${INFLUXDB_USERNAME}
+      - INFLUXDB_PASSWORD=${INFLUXDB_PASSWORD}
+  grafana:
+    image: grafana/grafana:latest
+    restart: always
+    ports:
+      - '3000:3000'
+    volumes:
+      - grafana-storage:/var/lib/grafana
+    depends_on:
+      - influxdb
+    environment:
+      - GF_SECURITY_ADMIN_USER=${GRAFANA_USERNAME}
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_PASSWORD}
+      - GF_INSTALL_PLUGINS=${GRAFANA_PLUGINS}
+  unifi-poller:
+    restart: always
+    image: golift/unifi-poller:latest
+    environment:
+      - UP_POLLING_MODE=${UP_POLLING_MODE}
+      - UP_INFLUX_DB=${INFLUXDB_USERNAME}
+      - UP_INFLUX_USER=${INFLUXDB_PASSWORD}
+      - UP_INFLUX_PASS=${INFLUXDB_DATABASE}
+      - UP_INFLUX_URL=${UP_INFLUX_URL}
+      - UP_UNIFI_USER=${UP_UNIFI_USER}
+      - UP_UNIFI_PASS=${UP_UNIFI_PASS}
+      - UP_UNIFI_URL=${UP_UNIFI_URL}
+      - UP_REAUTHENTICATE=${UP_REAUTHENTICATE}
+      - UP_VERIFY_SSL=${UP_VERIFY_SSL}
+      - UP_COLLECT_IDS=${UP_COLLECT_IDS}
+      - UP_QUIET_MODE=${UP_QUIET_MODE}
+      - UP_DEBUG_MODE=${UP_DEBUG_MODE}
+      - UP_POLLING_INTERVAL=${UP_POLLING_INTERVAL}
+      - UP_MAX_ERRORS=${UP_MAX_ERRORS}
+      - UP_POLL_SITES=${UP_POLL_SITES}
+volumes:
+  influxdb-storage:
+  chronograf-storage:
+  grafana-storage:
