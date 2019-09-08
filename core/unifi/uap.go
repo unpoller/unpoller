@@ -133,9 +133,9 @@ type UAP struct {
 	Bytes         FlexInt       `json:"bytes"`
 	VwireEnabled  FlexBool      `json:"vwireEnabled"`
 	UplinkTable   []interface{} `json:"uplink_table"`
-	NumSta        int           `json:"num_sta"`
-	UserNumSta    int           `json:"user-num_sta"`
-	GuestNumSta   int           `json:"guest-num_sta"`
+	NumSta        FlexInt       `json:"num_sta"`
+	UserNumSta    FlexInt       `json:"user-num_sta"`
+	GuestNumSta   FlexInt       `json:"guest-num_sta"`
 	TwoPhaseAdopt FlexBool      `json:"two_phase_adopt,omitempty"`
 }
 
