@@ -55,6 +55,7 @@ func ClientPoints(c *unifi.Client, now time.Time) ([]*influx.Point, error) {
 		"ip":                     c.IP,
 		"essid":                  c.Essid,
 		"bssid":                  c.Bssid,
+		"radio_desc":             c.RadioDescription,
 		"hostname":               c.Hostname,
 		"dpi_stats_last_updated": c.DpiStatsLastUpdated,
 		"last_seen_by_uap":       c.LastSeenByUAP,
