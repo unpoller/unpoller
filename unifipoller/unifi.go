@@ -117,8 +117,12 @@ func (u *UnifiPoller) CollectMetrics() (*Metrics, error) {
 // This function currently adds parent device names to client metrics.
 func (u *UnifiPoller) AugmentMetrics(metrics *Metrics) error {
 	devices := make(map[string]string)
+	bssdIDs := make(map[string]string)
 	for _, r := range metrics.UAPs {
 		devices[r.Mac] = r.Name
+		for _, v := range r.VapTable {
+			bssdIDs[v.Bssid] = fmt.Sprintf("%s %s %s:", r.Name, v.Radio, v.RadioName)
+		}
 	}
 	for _, r := range metrics.USGs {
 		devices[r.Mac] = r.Name
@@ -134,6 +138,7 @@ func (u *UnifiPoller) AugmentMetrics(metrics *Metrics) error {
 		metrics.Clients[i].SwName = devices[c.SwMac]
 		metrics.Clients[i].ApName = devices[c.ApMac]
 		metrics.Clients[i].GwName = devices[c.GwMac]
+		metrics.Clients[i].RadioDescription = bssdIDs[metrics.Clients[i].Bssid] + metrics.Clients[i].RadioProto
 	}
 	return nil
 }
