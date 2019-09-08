@@ -89,6 +89,7 @@ type Client struct {
 	Radio               string   `json:"radio"`
 	RadioName           string   `json:"radio_name"`
 	RadioProto          string   `json:"radio_proto"`
+	RadioDescription    string   `json:"-"`
 	RoamCount           int64    `json:"roam_count"`
 	Rssi                int64    `json:"rssi"`
 	RxBytes             int64    `json:"rx_bytes"`
