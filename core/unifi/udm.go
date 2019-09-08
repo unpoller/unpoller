@@ -113,12 +113,12 @@ type UDM struct {
 	RxBytes         FlexInt `json:"rx_bytes"`
 	Bytes           FlexInt `json:"bytes"`
 	NumSta          FlexInt `json:"num_sta"`            // USG
-	WlanNumSta      int     `json:"wlan-num_sta"`       // UAP
+	WlanNumSta      FlexInt `json:"wlan-num_sta"`       // UAP
 	LanNumSta       FlexInt `json:"lan-num_sta"`        // USW
-	UserWlanNumSta  int     `json:"user-wlan-num_sta"`  // UAP
+	UserWlanNumSta  FlexInt `json:"user-wlan-num_sta"`  // UAP
 	UserLanNumSta   FlexInt `json:"user-lan-num_sta"`   // USW
 	UserNumSta      FlexInt `json:"user-num_sta"`       // USG
-	GuestWlanNumSta int     `json:"guest-wlan-num_sta"` // UAP
+	GuestWlanNumSta FlexInt `json:"guest-wlan-num_sta"` // UAP
 	GuestLanNumSta  FlexInt `json:"guest-lan-num_sta"`  // USW
 	GuestNumSta     FlexInt `json:"guest-num_sta"`      // USG
 	NumDesktop      FlexInt `json:"num_desktop"`        // USG
