@@ -16,7 +16,7 @@ import (
 	influx "github.com/influxdata/influxdb1-client/v2"
 	"github.com/spf13/pflag"
 	"golift.io/unifi"
-	"gopkg.in/yaml.v2"
+	yaml "gopkg.in/yaml.v2"
 )
 
 // Version is injected by the Makefile
@@ -24,13 +24,13 @@ var Version = "development"
 
 const (
 	// App defaults in case they're missing from the config.
-	defaultInterval = 30 * time.Second
-	defaultInfxDb   = "unifi"
-	defaultInfxUser = "unifi"
-	defaultInfxPass = "unifi"
-	defaultInfxURL  = "http://127.0.0.1:8086"
-	defaultUnifUser = "influx"
-	defaultUnifURL  = "https://127.0.0.1:8443"
+	defaultInterval   = 30 * time.Second
+	defaultInfluxDB   = "unifi"
+	defaultInfluxUser = "unifi"
+	defaultInfluxPass = "unifi"
+	defaultInfluxURL  = "http://127.0.0.1:8086"
+	defaultUnifiUser  = "influx"
+	defaultUnifiURL   = "https://127.0.0.1:8443"
 )
 
 // ENVConfigPrefix is the prefix appended to an env variable tag
