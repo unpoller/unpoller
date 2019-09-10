@@ -36,27 +36,19 @@ services:
     environment:
       - GF_SECURITY_ADMIN_USER=${GRAFANA_USERNAME}
       - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_PASSWORD}
-      - GF_INSTALL_PLUGINS=${GRAFANA_PLUGINS}
+      - GF_INSTALL_PLUGINS=grafana-clock-panel,natel-discrete-panel,grafana-piechart-panel
   unifi-poller:
     restart: always
     image: golift/unifi-poller:${UP_BRANCH}
     environment:
-      - UP_POLLING_MODE=${UP_POLLING_MODE}
       - UP_INFLUX_DB=${INFLUXDB_USERNAME}
       - UP_INFLUX_USER=${INFLUXDB_PASSWORD}
       - UP_INFLUX_PASS=${INFLUXDB_DATABASE}
-      - UP_INFLUX_URL=${UP_INFLUX_URL}
+      - UP_INFLUX_URL=http://influxdb:8086
       - UP_UNIFI_USER=${UP_UNIFI_USER}
       - UP_UNIFI_PASS=${UP_UNIFI_PASS}
       - UP_UNIFI_URL=${UP_UNIFI_URL}
-      - UP_REAUTHENTICATE=${UP_REAUTHENTICATE}
-      - UP_VERIFY_SSL=${UP_VERIFY_SSL}
-      - UP_COLLECT_IDS=${UP_COLLECT_IDS}
-      - UP_QUIET_MODE=${UP_QUIET_MODE}
       - UP_DEBUG_MODE=${UP_DEBUG_MODE}
-      - UP_POLLING_INTERVAL=${UP_POLLING_INTERVAL}
-      - UP_MAX_ERRORS=${UP_MAX_ERRORS}
-      - UP_POLL_SITES=${UP_POLL_SITES}
 volumes:
   influxdb-storage:
   chronograf-storage:
