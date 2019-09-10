@@ -25,4 +25,4 @@ README.html
 /.metadata.make
 bitly_token
 github_deploy_key
-.secret_files.tar
+.secret-files.tar

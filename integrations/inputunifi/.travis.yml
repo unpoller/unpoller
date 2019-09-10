@@ -27,7 +27,7 @@ install:
   - rvm 2.0.0 do gem install --no-document fpm
 before_script:
   # Create your own deploy key, tar it, and encrypt the file to make this work. Optionally add a bitly_token file to the archive.
-  - openssl aes-256-cbc -K $encrypted_9f3147001275_key -iv $encrypted_9f3147001275_iv -in .secret_files.tar.enc -out .secret_files.tar -d
+  - openssl aes-256-cbc -K $encrypted_e3d3b4b2abab_key -iv $encrypted_e3d3b4b2abab_iv -in .secret-files.tar.enc -out .secret-files.tar -d
   - tar -xf .secret_files.tar
   - source .metadata.sh
   - make vendor
