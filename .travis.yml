@@ -28,7 +28,7 @@ install:
 before_script:
   # Create your own deploy key, tar it, and encrypt the file to make this work. Optionally add a bitly_token file to the archive.
   - openssl aes-256-cbc -K $encrypted_e3d3b4b2abab_key -iv $encrypted_e3d3b4b2abab_iv -in .secret-files.tar.enc -out .secret-files.tar -d
-  - tar -xf .secret_files.tar
+  - tar -xf .secret-files.tar
   - source .metadata.sh
   - make vendor
 script:
