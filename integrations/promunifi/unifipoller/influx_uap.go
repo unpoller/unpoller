@@ -14,172 +14,107 @@ func UAPPoints(u *unifi.UAP, now time.Time) ([]*influx.Point, error) {
 		u.Stat.Ap = &unifi.Ap{}
 	}
 	tags := map[string]string{
-		"id":                    u.ID,
-		"mac":                   u.Mac,
-		"device_type":           u.Stat.O,
-		"device_oid":            u.Stat.Oid,
-		"device_ap":             u.Stat.Ap.Ap,
-		"site_id":               u.SiteID,
-		"site_name":             u.SiteName,
-		"name":                  u.Name,
-		"adopted":               u.Adopted.Txt,
-		"cfgversion":            u.Cfgversion,
-		"config_network_ip":     u.ConfigNetwork.IP,
-		"config_network_type":   u.ConfigNetwork.Type,
-		"connect_request_ip":    u.ConnectRequestIP,
-		"device_id":             u.DeviceID,
-		"has_eth1":              u.HasEth1.Txt,
-		"inform_ip":             u.InformIP,
-		"isolated":              u.Isolated.Txt,
-		"known_cfgversion":      u.KnownCfgversion,
-		"model":                 u.Model,
-		"outdoor_mode_override": u.OutdoorModeOverride,
-		"serial":                u.Serial,
-		"type":                  u.Type,
-		"vwireEnabled":          u.VwireEnabled.Txt,
+		"id":                  u.ID,
+		"ip":                  u.IP,
+		"mac":                 u.Mac,
+		"device_type":         u.Stat.Ap.O,
+		"device_oid":          u.Stat.Ap.Oid,
+		"device_ap":           u.Stat.Ap.Ap,
+		"site_id":             u.SiteID,
+		"site_name":           u.SiteName,
+		"name":                u.Name,
+		"adopted":             u.Adopted.Txt,
+		"cfgversion":          u.Cfgversion,
+		"config_network_ip":   u.ConfigNetwork.IP,
+		"config_network_type": u.ConfigNetwork.Type,
+		"connect_request_ip":  u.ConnectRequestIP,
+		"device_id":           u.DeviceID,
+		"has_eth1":            u.HasEth1.Txt,
+		"inform_ip":           u.InformIP,
+		"known_cfgversion":    u.KnownCfgversion,
+		"model":               u.Model,
+		"serial":              u.Serial,
+		"type":                u.Type,
 	}
 	fields := map[string]interface{}{
-		"ip":                          u.IP,
-		"bytes":                       u.Bytes.Val,
-		"bytes_d":                     u.BytesD.Val,
-		"bytes_r":                     u.BytesR.Val,
-		"last_seen":                   u.LastSeen.Val,
-		"rx_bytes":                    u.RxBytes.Val,
-		"rx_bytes-d":                  u.RxBytesD.Val,
-		"tx_bytes":                    u.TxBytes.Val,
-		"tx_bytes-d":                  u.TxBytesD.Val,
-		"uptime":                      u.Uptime.Val,
-		"scanning":                    u.Scanning.Val,
-		"spectrum_scanning":           u.SpectrumScanning.Val,
-		"roll_upgrade":                u.Rollupgrade.Val,
-		"state":                       u.State,
-		"upgradable":                  u.Upgradable.Val,
-		"user-num_sta":                u.UserNumSta,
-		"guest-num_sta":               u.GuestNumSta,
-		"version":                     u.Version,
-		"loadavg_1":                   u.SysStats.Loadavg1.Val,
-		"loadavg_5":                   u.SysStats.Loadavg5.Val,
-		"loadavg_15":                  u.SysStats.Loadavg15.Val,
-		"mem_buffer":                  u.SysStats.MemBuffer.Val,
-		"mem_total":                   u.SysStats.MemTotal.Val,
-		"mem_used":                    u.SysStats.MemUsed.Val,
-		"cpu":                         u.SystemStats.CPU.Val,
-		"mem":                         u.SystemStats.Mem.Val,
-		"system_uptime":               u.SystemStats.Uptime.Val,
-		"stat_guest-wifi0-rx_packets": u.Stat.GuestWifi0RxPackets.Val,
-		"stat_guest-wifi1-rx_packets": u.Stat.GuestWifi1RxPackets.Val,
-		"stat_user-wifi1-rx_packets":  u.Stat.UserWifi1RxPackets.Val,
-		"stat_user-wifi0-rx_packets":  u.Stat.UserWifi0RxPackets.Val,
-		"stat_user-rx_packets":        u.Stat.UserRxPackets.Val,
-		"stat_guest-rx_packets":       u.Stat.GuestRxPackets.Val,
-		"stat_wifi0-rx_packets":       u.Stat.Wifi0RxPackets.Val,
-		"stat_wifi1-rx_packets":       u.Stat.Wifi1RxPackets.Val,
-		"stat_rx_packets":             u.Stat.RxPackets.Val,
-		"stat_guest-wifi0-rx_bytes":   u.Stat.GuestWifi0RxBytes.Val,
-		"stat_guest-wifi1-rx_bytes":   u.Stat.GuestWifi1RxBytes.Val,
-		"stat_user-wifi1-rx_bytes":    u.Stat.UserWifi1RxBytes.Val,
-		"stat_user-wifi0-rx_bytes":    u.Stat.UserWifi0RxBytes.Val,
-		"stat_user-rx_bytes":          u.Stat.UserRxBytes.Val,
-		"stat_guest-rx_bytes":         u.Stat.GuestRxBytes.Val,
-		"stat_wifi0-rx_bytes":         u.Stat.Wifi0RxBytes.Val,
-		"stat_wifi1-rx_bytes":         u.Stat.Wifi1RxBytes.Val,
-		"stat_rx_bytes":               u.Stat.RxBytes.Val,
-		"stat_guest-wifi0-rx_errors":  u.Stat.GuestWifi0RxErrors.Val,
-		"stat_guest-wifi1-rx_errors":  u.Stat.GuestWifi1RxErrors.Val,
-		"stat_user-wifi1-rx_errors":   u.Stat.UserWifi1RxErrors.Val,
-		"stat_user-wifi0-rx_errors":   u.Stat.UserWifi0RxErrors.Val,
-		"stat_user-rx_errors":         u.Stat.UserRxErrors.Val,
-		"stat_guest-rx_errors":        u.Stat.GuestRxErrors.Val,
-		"stat_wifi0-rx_errors":        u.Stat.Wifi0RxErrors.Val,
-		"stat_wifi1-rx_errors":        u.Stat.Wifi1RxErrors.Val,
-		"stat_rx_errors":              u.Stat.RxErrors.Val,
-		"stat_guest-wifi0-rx_dropped": u.Stat.GuestWifi0RxDropped.Val,
-		"stat_guest-wifi1-rx_dropped": u.Stat.GuestWifi1RxDropped.Val,
-		"stat_user-wifi1-rx_dropped":  u.Stat.UserWifi1RxDropped.Val,
-		"stat_user-wifi0-rx_dropped":  u.Stat.UserWifi0RxDropped.Val,
-		"stat_user-rx_dropped":        u.Stat.UserRxDropped.Val,
-		"stat_guest-rx_dropped":       u.Stat.GuestRxDropped.Val,
-		"stat_wifi0-rx_dropped":       u.Stat.Wifi0RxDropped.Val,
-		"stat_wifi1-rx_dropped":       u.Stat.Wifi1RxDropped.Val,
-		"stat_rx_dropped":             u.Stat.RxDropped.Val,
-		"stat_guest-wifi0-rx_crypts":  u.Stat.GuestWifi0RxCrypts.Val,
-		"stat_guest-wifi1-rx_crypts":  u.Stat.GuestWifi1RxCrypts.Val,
-		"stat_user-wifi1-rx_crypts":   u.Stat.UserWifi1RxCrypts.Val,
-		"stat_user-wifi0-rx_crypts":   u.Stat.UserWifi0RxCrypts.Val,
-		"stat_user-rx_crypts":         u.Stat.UserRxCrypts.Val,
-		"stat_guest-rx_crypts":        u.Stat.GuestRxCrypts.Val,
-		"stat_wifi0-rx_crypts":        u.Stat.Wifi0RxCrypts.Val,
-		"stat_wifi1-rx_crypts":        u.Stat.Wifi1RxCrypts.Val,
-		"stat_rx_crypts":              u.Stat.RxCrypts.Val,
-		"stat_guest-wifi0-rx_frags":   u.Stat.GuestWifi0RxFrags.Val,
-		"stat_guest-wifi1-rx_frags":   u.Stat.GuestWifi1RxFrags.Val,
-		"stat_user-wifi1-rx_frags":    u.Stat.UserWifi1RxFrags.Val,
-		"stat_user-wifi0-rx_frags":    u.Stat.UserWifi0RxFrags.Val,
-		"stat_user-rx_frags":          u.Stat.UserRxFrags.Val,
-		"stat_guest-rx_frags":         u.Stat.GuestRxFrags.Val,
-		"stat_wifi0-rx_frags":         u.Stat.Wifi0RxFrags.Val,
-		"stat_wifi1-rx_frags":         u.Stat.Wifi1RxFrags.Val,
-		"stat_rx_frags":               u.Stat.RxFrags.Val,
-		"stat_guest-wifi0-tx_packets": u.Stat.GuestWifi0TxPackets.Val,
-		"stat_guest-wifi1-tx_packets": u.Stat.GuestWifi1TxPackets.Val,
-		"stat_user-wifi1-tx_packets":  u.Stat.UserWifi1TxPackets.Val,
-		"stat_user-wifi0-tx_packets":  u.Stat.UserWifi0TxPackets.Val,
-		"stat_user-tx_packets":        u.Stat.UserTxPackets.Val,
-		"stat_guest-tx_packets":       u.Stat.GuestTxPackets.Val,
-		"stat_wifi0-tx_packets":       u.Stat.Wifi0TxPackets.Val,
-		"stat_wifi1-tx_packets":       u.Stat.Wifi1TxPackets.Val,
-		"stat_tx_packets":             u.Stat.TxPackets.Val,
-		"stat_guest-wifi0-tx_bytes":   u.Stat.GuestWifi0TxBytes.Val,
-		"stat_guest-wifi1-tx_bytes":   u.Stat.GuestWifi1TxBytes.Val,
-		"stat_user-wifi1-tx_bytes":    u.Stat.UserWifi1TxBytes.Val,
-		"stat_user-wifi0-tx_bytes":    u.Stat.UserWifi0TxBytes.Val,
-		"stat_user-tx_bytes":          u.Stat.UserTxBytes.Val,
-		"stat_guest-tx_bytes":         u.Stat.GuestTxBytes.Val,
-		"stat_wifi0-tx_bytes":         u.Stat.Wifi0TxBytes.Val,
-		"stat_wifi1-tx_bytes":         u.Stat.Wifi1TxBytes.Val,
-		"stat_tx_bytes":               u.Stat.TxBytes.Val,
-		"stat_guest-wifi0-tx_errors":  u.Stat.GuestWifi0TxErrors.Val,
-		"stat_guest-wifi1-tx_errors":  u.Stat.GuestWifi1TxErrors.Val,
-		"stat_user-wifi1-tx_errors":   u.Stat.UserWifi1TxErrors.Val,
-		"stat_user-wifi0-tx_errors":   u.Stat.UserWifi0TxErrors.Val,
-		"stat_user-tx_errors":         u.Stat.UserTxErrors.Val,
-		"stat_guest-tx_errors":        u.Stat.GuestTxErrors.Val,
-		"stat_wifi0-tx_errors":        u.Stat.Wifi0TxErrors.Val,
-		"stat_wifi1-tx_errors":        u.Stat.Wifi1TxErrors.Val,
-		"stat_tx_errors":              u.Stat.TxErrors.Val,
-		"stat_guest-wifi0-tx_dropped": u.Stat.GuestWifi0TxDropped.Val,
-		"stat_guest-wifi1-tx_dropped": u.Stat.GuestWifi1TxDropped.Val,
-		"stat_user-wifi1-tx_dropped":  u.Stat.UserWifi1TxDropped.Val,
-		"stat_user-wifi0-tx_dropped":  u.Stat.UserWifi0TxDropped.Val,
-		"stat_user-tx_dropped":        u.Stat.UserTxDropped.Val,
-		"stat_guest-tx_dropped":       u.Stat.GuestTxDropped.Val,
-		"stat_wifi0-tx_dropped":       u.Stat.Wifi0TxDropped.Val,
-		"stat_wifi1-tx_dropped":       u.Stat.Wifi1TxDropped.Val,
-		"stat_tx_dropped":             u.Stat.TxDropped.Val,
-		"stat_guest-wifi0-tx_retries": u.Stat.GuestWifi0TxRetries.Val,
-		"stat_guest-wifi1-tx_retries": u.Stat.GuestWifi1TxRetries.Val,
-		"stat_user-wifi1-tx_retries":  u.Stat.UserWifi1TxRetries.Val,
-		"stat_user-wifi0-tx_retries":  u.Stat.UserWifi0TxRetries.Val,
-		"stat_user-tx_retries":        u.Stat.UserTxRetries.Val,
-		"stat_guest-tx_retries":       u.Stat.GuestTxRetries.Val,
-		"stat_wifi0-tx_retries":       u.Stat.Wifi0TxRetries.Val,
-		"stat_wifi1-tx_retries":       u.Stat.Wifi1TxRetries.Val,
+		"ip":            u.IP,
+		"bytes":         u.Bytes.Val,
+		"last_seen":     u.LastSeen.Val,
+		"rx_bytes":      u.RxBytes.Val,
+		"tx_bytes":      u.TxBytes.Val,
+		"uptime":        u.Uptime.Val,
+		"state":         u.State,
+		"user-num_sta":  int(u.UserNumSta.Val),
+		"guest-num_sta": int(u.GuestNumSta.Val),
+		"num_sta":       u.NumSta.Val,
+		"version":       u.Version,
+		"loadavg_1":     u.SysStats.Loadavg1.Val,
+		"loadavg_5":     u.SysStats.Loadavg5.Val,
+		"loadavg_15":    u.SysStats.Loadavg15.Val,
+		"mem_buffer":    u.SysStats.MemBuffer.Val,
+		"mem_total":     u.SysStats.MemTotal.Val,
+		"mem_used":      u.SysStats.MemUsed.Val,
+		"cpu":           u.SystemStats.CPU.Val,
+		"mem":           u.SystemStats.Mem.Val,
+		"system_uptime": u.SystemStats.Uptime.Val,
+		// Accumulative Statistics.
+		"stat_user-rx_packets":  u.Stat.Ap.UserRxPackets.Val,
+		"stat_guest-rx_packets": u.Stat.Ap.GuestRxPackets.Val,
+		"stat_rx_packets":       u.Stat.Ap.RxPackets.Val,
+		"stat_user-rx_bytes":    u.Stat.Ap.UserRxBytes.Val,
+		"stat_guest-rx_bytes":   u.Stat.Ap.GuestRxBytes.Val,
+		"stat_rx_bytes":         u.Stat.Ap.RxBytes.Val,
+		"stat_user-rx_errors":   u.Stat.Ap.UserRxErrors.Val,
+		"stat_guest-rx_errors":  u.Stat.Ap.GuestRxErrors.Val,
+		"stat_rx_errors":        u.Stat.Ap.RxErrors.Val,
+		"stat_user-rx_dropped":  u.Stat.Ap.UserRxDropped.Val,
+		"stat_guest-rx_dropped": u.Stat.Ap.GuestRxDropped.Val,
+		"stat_rx_dropped":       u.Stat.Ap.RxDropped.Val,
+		"stat_user-rx_crypts":   u.Stat.Ap.UserRxCrypts.Val,
+		"stat_guest-rx_crypts":  u.Stat.Ap.GuestRxCrypts.Val,
+		"stat_rx_crypts":        u.Stat.Ap.RxCrypts.Val,
+		"stat_user-rx_frags":    u.Stat.Ap.UserRxFrags.Val,
+		"stat_guest-rx_frags":   u.Stat.Ap.GuestRxFrags.Val,
+		"stat_rx_frags":         u.Stat.Ap.RxFrags.Val,
+		"stat_user-tx_packets":  u.Stat.Ap.UserTxPackets.Val,
+		"stat_guest-tx_packets": u.Stat.Ap.GuestTxPackets.Val,
+		"stat_tx_packets":       u.Stat.Ap.TxPackets.Val,
+		"stat_user-tx_bytes":    u.Stat.Ap.UserTxBytes.Val,
+		"stat_guest-tx_bytes":   u.Stat.Ap.GuestTxBytes.Val,
+		"stat_tx_bytes":         u.Stat.Ap.TxBytes.Val,
+		"stat_user-tx_errors":   u.Stat.Ap.UserTxErrors.Val,
+		"stat_guest-tx_errors":  u.Stat.Ap.GuestTxErrors.Val,
+		"stat_tx_errors":        u.Stat.Ap.TxErrors.Val,
+		"stat_user-tx_dropped":  u.Stat.Ap.UserTxDropped.Val,
+		"stat_guest-tx_dropped": u.Stat.Ap.GuestTxDropped.Val,
+		"stat_tx_dropped":       u.Stat.Ap.TxDropped.Val,
+		"stat_user-tx_retries":  u.Stat.Ap.UserTxRetries.Val,
+		"stat_guest-tx_retries": u.Stat.Ap.GuestTxRetries.Val,
 	}
 	pt, err := influx.NewPoint("uap", tags, fields, now)
 	if err != nil {
 		return nil, err
 	}
-	points := []*influx.Point{pt}
+	morePoints, err := processVAPs(u.VapTable, u.RadioTable, u.RadioTableStats, u.Name, u.ID, u.Mac, u.SiteName, now)
+	if err != nil {
+		return nil, err
+	}
+	return append(morePoints, pt), nil
+}
 
-	tags = make(map[string]string)
-	fields = make(map[string]interface{})
+// processVAPs creates points for Wifi Radios. This works with several types of UAP-capable devices.
+func processVAPs(vt unifi.VapTable, rt unifi.RadioTable, rts unifi.RadioTableStats, name, id, mac, sitename string, ts time.Time) ([]*influx.Point, error) {
+	tags := make(map[string]string)
+	fields := make(map[string]interface{})
+	points := []*influx.Point{}
+
 	// Loop each virtual AP (ESSID) and extract data for it
 	// from radio_tables and radio_table_stats.
-	for _, s := range u.VapTable {
-		tags["device_name"] = u.Name
-		tags["device_id"] = u.ID
-		tags["device_mac"] = u.Mac
-		tags["site_name"] = u.SiteName
+	for _, s := range vt {
+		tags["device_name"] = name
+		tags["device_id"] = id
+		tags["device_mac"] = mac
+		tags["site_name"] = sitename
 		tags["ap_mac"] = s.ApMac
 		tags["bssid"] = s.Bssid
 		tags["id"] = s.ID
@@ -232,7 +167,7 @@ func UAPPoints(u *unifi.UAP, now time.Time) ([]*influx.Point, error) {
 		fields["wifi_tx_latency_mov_total"] = s.WifiTxLatencyMov.Total.Val
 		fields["wifi_tx_latency_mov_cuont"] = s.WifiTxLatencyMov.TotalCount.Val
 
-		for _, p := range u.RadioTable {
+		for _, p := range rt {
 			if p.Name != s.RadioName {
 				continue
 			}
@@ -249,7 +184,7 @@ func UAPPoints(u *unifi.UAP, now time.Time) ([]*influx.Point, error) {
 			fields["tx_power"] = p.TxPower.Val
 		}
 
-		for _, p := range u.RadioTableStats {
+		for _, p := range rts {
 			if p.Name != s.RadioName {
 				continue
 			}
@@ -269,7 +204,7 @@ func UAPPoints(u *unifi.UAP, now time.Time) ([]*influx.Point, error) {
 			fields["user-num_sta"] = p.UserNumSta.Val
 		}
 
-		pt, err := influx.NewPoint("uap_vaps", tags, fields, now)
+		pt, err := influx.NewPoint("uap_vaps", tags, fields, ts)
 		if err != nil {
 			return points, err
 		}
