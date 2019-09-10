@@ -16,16 +16,17 @@ import (
 // Parses flags, parses config and executes Run().
 func Start() error {
 	log.SetFlags(log.LstdFlags)
-	up := &UnifiPoller{Flag: &Flag{},
+	up := &UnifiPoller{
+		Flag: &Flag{},
 		Config: &Config{
 			// Preload our defaults.
-			InfluxURL:  defaultInfxURL,
-			InfluxUser: defaultInfxUser,
-			InfluxPass: defaultInfxPass,
-			InfluxDB:   defaultInfxDb,
-			UnifiUser:  defaultUnifUser,
+			InfluxURL:  defaultInfluxURL,
+			InfluxUser: defaultInfluxUser,
+			InfluxPass: defaultInfluxPass,
+			InfluxDB:   defaultInfluxDB,
+			UnifiUser:  defaultUnifiUser,
 			UnifiPass:  os.Getenv("UNIFI_PASSWORD"), // deprecated name.
-			UnifiBase:  defaultUnifURL,
+			UnifiBase:  defaultUnifiURL,
 			Interval:   Duration{defaultInterval},
 			Sites:      []string{"all"},
 		}}
@@ -53,14 +54,14 @@ func Start() error {
 func (f *Flag) Parse(args []string) {
 	f.FlagSet = pflag.NewFlagSet("unifi-poller", pflag.ExitOnError)
 	f.Usage = func() {
-		fmt.Println("Usage: unifi-poller [--config=filepath] [--version]")
+		fmt.Println("Usage: unifi-poller [--config=/path/to/up.conf] [--version]")
 		f.PrintDefaults()
 	}
 	f.StringVarP(&f.DumpJSON, "dumpjson", "j", "",
 		"This debug option prints a json payload and exits. See man page for more info.")
 	f.StringVarP(&f.ConfigFile, "config", "c", DefaultConfFile, "Poller config file path.")
 	f.BoolVarP(&f.ShowVer, "version", "v", false, "Print the version and exit.")
-	_ = f.FlagSet.Parse(args)
+	_ = f.FlagSet.Parse(args) // pflag.ExitOnError means this will never return error.
 }
 
 // Run invokes all the application logic and routines.
@@ -119,5 +120,6 @@ func (u *UnifiPoller) GetUnifi() (err error) {
 	if err != nil {
 		return fmt.Errorf("unifi controller: %v", err)
 	}
+	u.LogDebugf("Authenticated with controller successfully")
 	return u.CheckSites()
 }
