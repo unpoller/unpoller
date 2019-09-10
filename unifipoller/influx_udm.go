@@ -356,7 +356,7 @@ func UDMPoints(u *unifi.UDM, now time.Time) ([]*influx.Point, error) {
 		"rx_bytes":      u.RxBytes.Val,
 		"tx_bytes":      u.TxBytes.Val,
 		"uptime":        u.Uptime.Val,
-		"state":         u.State,
+		"state":         int(u.State.Val),
 		"user-num_sta":  int(u.UserWlanNumSta.Val),
 		"guest-num_sta": int(u.GuestWlanNumSta.Val),
 		"num_sta":       u.WlanNumSta.Val,
