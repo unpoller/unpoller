@@ -36,7 +36,7 @@ type UDM struct {
 	JumboframeEnabled      FlexBool      `json:"jumboframe_enabled"`
 	FlowctrlEnabled        FlexBool      `json:"flowctrl_enabled"`
 	StpVersion             string        `json:"stp_version"`
-	StpPriority            string        `json:"stp_priority"`
+	StpPriority            FlexInt       `json:"stp_priority"`
 	PowerSourceCtrlEnabled FlexBool      `json:"power_source_ctrl_enabled"`
 	LicenseState           string        `json:"license_state"`
 	ID                     string        `json:"_id"`

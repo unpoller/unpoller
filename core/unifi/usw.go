@@ -42,14 +42,14 @@ type USW struct {
 		PortIdx    FlexInt `json:"port_idx"`
 		PortconfID string  `json:"portconf_id"`
 	} `json:"port_overrides"`
-	PortTable       []Port `json:"port_table"`
-	Serial          string `json:"serial"`
-	SiteID          string `json:"site_id"`
-	StpPriority     string `json:"stp_priority"`
-	StpVersion      string `json:"stp_version"`
-	Type            string `json:"type"`
-	Version         string `json:"version"`
-	RequiredVersion string `json:"required_version"`
+	PortTable       []Port  `json:"port_table"`
+	Serial          string  `json:"serial"`
+	SiteID          string  `json:"site_id"`
+	StpPriority     FlexInt `json:"stp_priority"`
+	StpVersion      string  `json:"stp_version"`
+	Type            string  `json:"type"`
+	Version         string  `json:"version"`
+	RequiredVersion string  `json:"required_version"`
 	SwitchCaps      struct {
 		FeatureCaps          FlexInt `json:"feature_caps"`
 		MaxMirrorSessions    FlexInt `json:"max_mirror_sessions"`
