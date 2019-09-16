@@ -383,7 +383,7 @@ type RadioTable []struct {
 	HasDfs             FlexBool `json:"has_dfs"`
 	HasFccdfs          FlexBool `json:"has_fccdfs"`
 	HasHt160           FlexBool `json:"has_ht160"`
-	Ht                 string   `json:"ht"`
+	Ht                 FlexInt  `json:"ht"`
 	Is11Ac             FlexBool `json:"is_11ac"`
 	MaxTxpower         FlexInt  `json:"max_txpower"`
 	MinRssi            FlexInt  `json:"min_rssi,omitempty"`
