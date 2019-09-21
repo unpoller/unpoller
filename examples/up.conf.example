@@ -43,6 +43,8 @@ influx_user = "unifi"
 influx_pass = "unifi"
 # Be sure to create this database.
 influx_db = "unifi"
+# If your InfluxDB uses an invalid SSL cert, set this to true.
+influx_insecure_ssl = false
 
 # Make a read-only user in the UniFi Admin Settings.
 unifi_user = "influx"
