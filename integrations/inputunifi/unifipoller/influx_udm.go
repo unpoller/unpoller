@@ -169,7 +169,6 @@ func UDMPoints(u *unifi.UDM, now time.Time) ([]*influx.Point, error) {
 		"has_fan":                u.HasFan.Txt,
 		"has_temperature":        u.HasTemperature.Txt,
 		"jumboframe_enabled":     u.JumboframeEnabled.Txt,
-		"stp_priority":           u.StpPriority,
 		"stp_version":            u.StpVersion,
 	}
 	fields = map[string]interface{}{
@@ -198,6 +197,7 @@ func UDMPoints(u *unifi.UDM, now time.Time) ([]*influx.Point, error) {
 		"cpu":                 u.SystemStats.CPU.Val,
 		"mem":                 u.SystemStats.Mem.Val,
 		"system_uptime":       u.SystemStats.Uptime.Val,
+		"stp_priority":        u.StpPriority.Val,
 		"stat_bytes":          u.Stat.Sw.Bytes.Val,
 		"stat_rx_bytes":       u.Stat.Sw.RxBytes.Val,
 		"stat_rx_crypts":      u.Stat.Sw.RxCrypts.Val,
