@@ -9,6 +9,7 @@
  "influx_user": "unifi",
  "influx_pass": "unifi",
  "influx_db": "unifi",
+ "influx_insecure_ssl": false,
  "unifi_user": "influx",
  "unifi_pass": "",
  "unifi_url": "https://127.0.0.1:8443",
