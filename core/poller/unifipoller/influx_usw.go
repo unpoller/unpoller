@@ -36,7 +36,6 @@ func USWPoints(u *unifi.USW, now time.Time) ([]*influx.Point, error) {
 		"has_fan":                u.HasFan.Txt,
 		"has_temperature":        u.HasTemperature.Txt,
 		"jumboframe_enabled":     u.JumboframeEnabled.Txt,
-		"stp_priority":           u.StpPriority,
 		"stp_version":            u.StpVersion,
 	}
 	fields := map[string]interface{}{
@@ -63,6 +62,7 @@ func USWPoints(u *unifi.USW, now time.Time) ([]*influx.Point, error) {
 		"mem_total":           u.SysStats.MemTotal.Val,
 		"cpu":                 u.SystemStats.CPU.Val,
 		"mem":                 u.SystemStats.Mem.Val,
+		"stp_priority":        u.StpPriority.Val,
 		"system_uptime":       u.SystemStats.Uptime.Val,
 		"stat_bytes":          u.Stat.Bytes.Val,
 		"stat_rx_bytes":       u.Stat.RxBytes.Val,
