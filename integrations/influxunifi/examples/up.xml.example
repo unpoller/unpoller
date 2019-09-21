@@ -63,7 +63,10 @@
   <influx_pass>unifi</influx_pass>
   <influx_url>http://127.0.0.1:8086</influx_url>
   <influx_user>unifi</influx_user>
-
+  <!--
+  # If your InfluxDB uses an invalid SSL cert, set this to true.
+  -->
+  <influx_insecure_ssl>false</influx_insecure_ssl>
 
   <!--
   # Make a read-only user in the UniFi Admin Settings.

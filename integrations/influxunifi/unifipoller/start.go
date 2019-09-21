@@ -1,6 +1,7 @@
 package unifipoller
 
 import (
+	"crypto/tls"
 	"fmt"
 	"log"
 	"os"
@@ -96,9 +97,10 @@ func (u *UnifiPoller) Run() (err error) {
 // GetInfluxDB returns an InfluxDB interface.
 func (u *UnifiPoller) GetInfluxDB() (err error) {
 	u.Influx, err = influx.NewHTTPClient(influx.HTTPConfig{
-		Addr:     u.Config.InfluxURL,
-		Username: u.Config.InfluxUser,
-		Password: u.Config.InfluxPass,
+		Addr:      u.Config.InfluxURL,
+		Username:  u.Config.InfluxUser,
+		Password:  u.Config.InfluxPass,
+		TLSConfig: &tls.Config{InsecureSkipVerify: u.Config.InfxBadSSL},
 	})
 	if err != nil {
 		return fmt.Errorf("influxdb: %v", err)
