@@ -65,7 +65,7 @@ is provided so the application can be easily adapted to any environment.
 
 `Config File Parameters`
 
-    sites           default: ["all"]
+    sites                  default: ["all"]
         This list of strings should represent the names of sites on the UniFi
         controller that will be polled for data. Pass `all` in the list to
         poll all sites. On startup, the application prints out all site names
@@ -73,20 +73,20 @@ is provided so the application can be easily adapted to any environment.
         next to them. The cryptic names go into the config file `sites` list.
         The controller's first site is not cryptic and is named `default`.
 
-    interval        default: 30s
+    interval               default: 30s
         How often to poll the controller for updated client and device data.
         The UniFi Controller only updates traffic stats about every 30 seconds.
 
-    debug           default: false
+    debug                  default: false
         This turns on time stamps and line numbers in logs, outputs a few extra
         lines of information while processing.
 
-    quiet           default: false
+    quiet                  default: false
         Setting this to true will turn off per-device and per-interval logs. Only
         errors will be logged. Using this with debug=true adds line numbers to
         any error logs.
 
-    mode            default: "influx"
+    mode                   default: "influx"
         * Value: influx
         This default mode runs this application as a daemon. It will poll
         the controller at the configured interval. Providing an invalid value
@@ -101,7 +101,7 @@ is provided so the application can be easily adapted to any environment.
         This mode can also be combined with a "test database" in InfluxDB to
         give yourself a "test config file" you may run ad-hoc to test changes.
 
-    max_errors      default: 0
+    max_errors             default: 0
         If you restart the UniFI controller, the poller will lose access until
         it is restarted. Specifying a number greater than -1 for max_errors will
         cause the poller to exit when it reaches the error count specified.
@@ -113,16 +113,16 @@ is provided so the application can be easily adapted to any environment.
         docker or launchd. The default setting of 0 will cause an exit after
         just 1 error. Recommended values are 0-5.
 
-    influx_url      default: http://127.0.0.1:8086
+    influx_url             default: http://127.0.0.1:8086
         This is the URL where the Influx web server is available.
 
-    influx_user     default: unifi
+    influx_user            default: unifi
         Username used to authenticate with InfluxDB.
 
-    influx_pass     default: unifi
+    influx_pass            default: unifi
         Password used to authenticate with InfluxDB.
 
-    influx_db       default: unifi
+    influx_db              default: unifi
         Custom database created in InfluxDB to use with this application.
         On first setup, log into InfluxDB and create access:
         $ influx -host localhost -port 8086
@@ -130,30 +130,33 @@ is provided so the application can be easily adapted to any environment.
         CREATE USER unifi WITH PASSWORD 'unifi' WITH ALL PRIVILEGES
         GRANT ALL ON unifi TO unifi
 
-    unifi_url       default: https://127.0.0.1:8443
+    influx_insecure_ssl    default: false
+        Setting this to true will allow use of InfluxDB with an invalid SSL certificate.
+
+    unifi_url              default: https://127.0.0.1:8443
         This is the URL where the UniFi Controller is available.
 
-    unifi_user      default: influxdb
+    unifi_user             default: influxdb
         Username used to authenticate with UniFi controller. This should be a
         special service account created on the control with read-only access.
 
-    unifi_user      no default   ENV: UNIFI_PASSWORD
+    unifi_user             no default   ENV: UNIFI_PASSWORD
         Password used to authenticate with UniFi controller. This can also be
         set in an environment variable instead of a configuration file.
 
-    collect_ids     default: false
+    collect_ids            default: false
         Setting this parameter to true will enable collection of Intrusion
         Detection System data. IDS and IPS are the same data set. This is off
         by default because most controllers do not have this enabled. It also
         creates a lot of new metrics from controllers with a lot of IDS entries.
 
-    reauthenticate  default: false
+    reauthenticate         default: false
         Setting this parameter to true will make UniFi Poller send a new login
         request on every interval. This generates a new cookie. Some controller
         or reverse proxy configurations require this. Do not enable it unless
         your configuration causes the poller to be logged out after some time.
 
-    verify_ssl      default: false
+    verify_ssl             default: false
         If your UniFi controller has a valid SSL certificate, you can enable
         this option to validate it. Otherwise, any SSL certificate is valid.
 
