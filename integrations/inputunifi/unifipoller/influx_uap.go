@@ -175,7 +175,7 @@ func processVAPs(vt unifi.VapTable, rt unifi.RadioTable, rts unifi.RadioTableSta
 			tags["channel"] = p.Channel.Txt
 			tags["radio"] = p.Radio
 			fields["current_antenna_gain"] = p.CurrentAntennaGain.Val
-			fields["ht"] = p.Ht
+			fields["ht"] = p.Ht.Txt
 			fields["max_txpower"] = p.MaxTxpower.Val
 			fields["min_rssi_enabled"] = p.MinRssiEnabled.Val
 			fields["min_txpower"] = p.MinTxpower.Val
