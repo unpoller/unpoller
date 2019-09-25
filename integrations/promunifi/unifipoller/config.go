@@ -69,7 +69,6 @@ type Metrics struct {
 // This is all of the data stored in the config file.
 // Any with explicit defaults have _omitempty on json and toml tags.
 type Config struct {
-	MaxErrors  int      `json:"max_errors" toml:"max_errors" xml:"max_errors" yaml:"max_errors" env:"MAX_ERRORS"`
 	Interval   Duration `json:"interval,_omitempty" toml:"interval,_omitempty" xml:"interval" yaml:"interval" env:"POLLING_INTERVAL"`
 	Debug      bool     `json:"debug" toml:"debug" xml:"debug" yaml:"debug" env:"DEBUG_MODE"`
 	Quiet      bool     `json:"quiet,_omitempty" toml:"quiet,_omitempty" xml:"quiet" yaml:"quiet" env:"QUIET_MODE"`
