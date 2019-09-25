@@ -11,7 +11,7 @@ import (
 func (u *UnifiPoller) LogError(err error, prefix string) {
 	if err != nil {
 		u.errorCount++
-		_ = log.Output(2, fmt.Sprintf("[ERROR] (%v/%v) %v: %v", u.errorCount, u.Config.MaxErrors, prefix, err))
+		_ = log.Output(2, fmt.Sprintf("[ERROR] %v: %v", prefix, err))
 	}
 }
 
