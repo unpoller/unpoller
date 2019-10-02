@@ -62,9 +62,8 @@ func (u *UnifiPoller) PollController() error {
 			// Only run this if the authentication procedure didn't return error.
 			_ = u.CollectAndReport()
 		}
-		if u.Config.MaxErrors >= 0 && u.errorCount > u.Config.MaxErrors {
-			return fmt.Errorf("reached maximum error count, stopping poller (%d > %d)",
-				u.errorCount, u.Config.MaxErrors)
+		if u.errorCount > 0 {
+			return fmt.Errorf("controller or influxdb errors, stopping poller")
 		}
 	}
 	return nil
@@ -116,6 +115,9 @@ func (u *UnifiPoller) CollectMetrics() (*Metrics, error) {
 // This is where we can manipuate the returned data or make arbitrary decisions.
 // This function currently adds parent device names to client metrics.
 func (u *UnifiPoller) AugmentMetrics(metrics *Metrics) error {
+	if metrics == nil || metrics.Devices == nil || metrics.Clients == nil {
+		return fmt.Errorf("nil metrics, augment impossible")
+	}
 	devices := make(map[string]string)
 	bssdIDs := make(map[string]string)
 	for _, r := range metrics.UAPs {
