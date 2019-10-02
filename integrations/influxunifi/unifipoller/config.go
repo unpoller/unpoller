@@ -67,25 +67,24 @@ type Metrics struct {
 
 // Config represents the data needed to poll a controller and report to influxdb.
 // This is all of the data stored in the config file.
-// Any with explicit defaults have _omitempty on json and toml tags.
+// Any with explicit defaults have omitempty on json and toml tags.
 type Config struct {
-	MaxErrors  int      `json:"max_errors" toml:"max_errors" xml:"max_errors" yaml:"max_errors" env:"MAX_ERRORS"`
-	Interval   Duration `json:"interval,_omitempty" toml:"interval,_omitempty" xml:"interval" yaml:"interval" env:"POLLING_INTERVAL"`
+	Interval   Duration `json:"interval,omitempty" toml:"interval,omitempty" xml:"interval" yaml:"interval" env:"POLLING_INTERVAL"`
 	Debug      bool     `json:"debug" toml:"debug" xml:"debug" yaml:"debug" env:"DEBUG_MODE"`
-	Quiet      bool     `json:"quiet,_omitempty" toml:"quiet,_omitempty" xml:"quiet" yaml:"quiet" env:"QUIET_MODE"`
+	Quiet      bool     `json:"quiet,omitempty" toml:"quiet,omitempty" xml:"quiet" yaml:"quiet" env:"QUIET_MODE"`
 	VerifySSL  bool     `json:"verify_ssl" toml:"verify_ssl" xml:"verify_ssl" yaml:"verify_ssl" env:"VERIFY_SSL"`
 	CollectIDS bool     `json:"collect_ids" toml:"collect_ids" xml:"collect_ids" yaml:"collect_ids" env:"COLLECT_IDS"`
 	ReAuth     bool     `json:"reauthenticate" toml:"reauthenticate" xml:"reauthenticate" yaml:"reauthenticate" env:"REAUTHENTICATE"`
 	InfxBadSSL bool     `json:"influx_insecure_ssl" toml:"influx_insecure_ssl" xml:"influx_insecure_ssl" yaml:"influx_insecure_ssl" env:"INFLUX_INSECURE_SSL"`
 	Mode       string   `json:"mode" toml:"mode" xml:"mode" yaml:"mode" env:"POLLING_MODE"`
-	InfluxURL  string   `json:"influx_url,_omitempty" toml:"influx_url,_omitempty" xml:"influx_url" yaml:"influx_url" env:"INFLUX_URL"`
-	InfluxUser string   `json:"influx_user,_omitempty" toml:"influx_user,_omitempty" xml:"influx_user" yaml:"influx_user" env:"INFLUX_USER"`
-	InfluxPass string   `json:"influx_pass,_omitempty" toml:"influx_pass,_omitempty" xml:"influx_pass" yaml:"influx_pass" env:"INFLUX_PASS"`
-	InfluxDB   string   `json:"influx_db,_omitempty" toml:"influx_db,_omitempty" xml:"influx_db" yaml:"influx_db" env:"INFLUX_DB"`
-	UnifiUser  string   `json:"unifi_user,_omitempty" toml:"unifi_user,_omitempty" xml:"unifi_user" yaml:"unifi_user" env:"UNIFI_USER"`
-	UnifiPass  string   `json:"unifi_pass,_omitempty" toml:"unifi_pass,_omitempty" xml:"unifi_pass" yaml:"unifi_pass" env:"UNIFI_PASS"`
-	UnifiBase  string   `json:"unifi_url,_omitempty" toml:"unifi_url,_omitempty" xml:"unifi_url" yaml:"unifi_url" env:"UNIFI_URL"`
-	Sites      []string `json:"sites,_omitempty" toml:"sites,_omitempty" xml:"sites" yaml:"sites" env:"POLL_SITES"`
+	InfluxURL  string   `json:"influx_url,omitempty" toml:"influx_url,omitempty" xml:"influx_url" yaml:"influx_url" env:"INFLUX_URL"`
+	InfluxUser string   `json:"influx_user,omitempty" toml:"influx_user,omitempty" xml:"influx_user" yaml:"influx_user" env:"INFLUX_USER"`
+	InfluxPass string   `json:"influx_pass,omitempty" toml:"influx_pass,omitempty" xml:"influx_pass" yaml:"influx_pass" env:"INFLUX_PASS"`
+	InfluxDB   string   `json:"influx_db,omitempty" toml:"influx_db,omitempty" xml:"influx_db" yaml:"influx_db" env:"INFLUX_DB"`
+	UnifiUser  string   `json:"unifi_user,omitempty" toml:"unifi_user,omitempty" xml:"unifi_user" yaml:"unifi_user" env:"UNIFI_USER"`
+	UnifiPass  string   `json:"unifi_pass,omitempty" toml:"unifi_pass,omitempty" xml:"unifi_pass" yaml:"unifi_pass" env:"UNIFI_PASS"`
+	UnifiBase  string   `json:"unifi_url,omitempty" toml:"unifi_url,omitempty" xml:"unifi_url" yaml:"unifi_url" env:"UNIFI_URL"`
+	Sites      []string `json:"sites,omitempty" toml:"sites,omitempty" xml:"sites" yaml:"sites" env:"POLL_SITES"`
 }
 
 // Duration is used to UnmarshalTOML into a time.Duration value.
