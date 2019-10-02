@@ -32,12 +32,6 @@ quiet: false
 # or a simple crontab to keep the timings accurate on UniFi Poller run intervals.
 mode: "influx"
 
-# If the poller experiences an error from the UniFi controller or from InfluxDB
-# it will exit. If you do not want it to exit, change max_errors to -1. You can
-# adjust the config to tolerate more errors by setting this to a higher value.
-# Recommend setting this between 0 and 5. See man page for more explanation.
-max_errors: 0
-
 # InfluxDB does not require auth by default, so the user/password are probably unimportant.
 influx_url: "http://127.0.0.1:8086"
 influx_user: "unifi"
