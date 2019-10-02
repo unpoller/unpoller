@@ -101,18 +101,6 @@ is provided so the application can be easily adapted to any environment.
         This mode can also be combined with a "test database" in InfluxDB to
         give yourself a "test config file" you may run ad-hoc to test changes.
 
-    max_errors             default: 0
-        If you restart the UniFI controller, the poller will lose access until
-        it is restarted. Specifying a number greater than -1 for max_errors will
-        cause the poller to exit when it reaches the error count specified.
-        This problematic condition can be triggered by InfluxDB having issues
-        too. Generally only 1 error per interval is created, but if more than one
-        backend is having issues > 1 error could be generated per interval. Once
-        the poller exits, it is expected that something will restart it
-        automatically so it gets back in line; something is usually systemd,
-        docker or launchd. The default setting of 0 will cause an exit after
-        just 1 error. Recommended values are 0-5.
-
     influx_url             default: http://127.0.0.1:8086
         This is the URL where the Influx web server is available.
 
