@@ -60,6 +60,7 @@ LABEL org.opencontainers.image.created="${BUILD_DATE}" \
 
 COPY --from=builder /go/src/${IMPORT_PATH}/${BINARY}.${ARCH}.${OS} /image
 COPY --from=builder /go/src/${IMPORT_PATH}/examples/${CONFIG_FILE}.example /etc/${BINARY}/${CONFIG_FILE}
+COPY --from=builder /etc/ssl /etc/ssl
 
 VOLUME [ "/etc/${BINARY}" ]
 ENTRYPOINT [ "/image" ]
