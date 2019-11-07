@@ -4,7 +4,7 @@
 #
 # Use it like this:  (sudo is optional)
 # ===
-#   curl https://raw.githubusercontent.com/this/repo/master/scripts/install.sh | sudo bash
+#   curl https://raw.githubusercontent.com/davidnewhall/unifi-poller/master/scripts/install.sh | sudo bash
 # ===
 # If you're on redhat, this installs the latest rpm. If you're on Debian, it installs the latest deb package.
 #
