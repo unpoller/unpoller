@@ -1,4 +1,4 @@
-package pollerunifi
+package poller
 
 import (
 	"fmt"
@@ -6,8 +6,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/davidnewhall/unifi-poller/pollerinflux"
-	influx "github.com/influxdata/influxdb1-client/v2"
+	"github.com/davidnewhall/unifi-poller/influx"
+	client "github.com/influxdata/influxdb1-client/v2"
 	"golift.io/unifi"
 )
 
@@ -47,7 +47,7 @@ FIRST:
 // PollController runs forever, polling UniFi
 // and pushing to influx OR exporting for prometheus.
 // This is started by Run() after everything checks out.
-func (u *UnifiPoller) PollController(process func(*Metrics) error) error {
+func (u *UnifiPoller) PollController(process func(*influx.Metrics) error) error {
 	interval := u.Config.Interval.Round(time.Second)
 	log.Printf("[INFO] Everything checks out! Poller started in %v mode, interval: %v", u.Config.Mode, interval)
 	ticker := time.NewTicker(interval)
@@ -77,7 +77,7 @@ func (u *UnifiPoller) PollController(process func(*Metrics) error) error {
 // handle their own logging. An error is returned so the calling function may
 // determine if there was a read or write error and act on it. This is currently
 // called in two places in this library. One returns an error, one does not.
-func (u *UnifiPoller) CollectAndProcess(process func(*Metrics) error) error {
+func (u *UnifiPoller) CollectAndProcess(process func(*influx.Metrics) error) error {
 	metrics, err := u.CollectMetrics()
 	if err != nil {
 		return err
@@ -92,8 +92,8 @@ func (u *UnifiPoller) CollectAndProcess(process func(*Metrics) error) error {
 
 // CollectMetrics grabs all the measurements from a UniFi controller and returns them.
 // This also creates an InfluxDB writer, and returns an error if that fails.
-func (u *UnifiPoller) CollectMetrics() (*Metrics, error) {
-	m := &Metrics{TS: u.LastCheck} // At this point, it's the Current Check.
+func (u *UnifiPoller) CollectMetrics() (*influx.Metrics, error) {
+	m := &influx.Metrics{TS: u.LastCheck} // At this point, it's the Current Check.
 	var err error
 	// Get the sites we care about.
 	m.Sites, err = u.GetFilteredSites()
@@ -109,7 +109,7 @@ func (u *UnifiPoller) CollectMetrics() (*Metrics, error) {
 	m.Devices, err = u.Unifi.GetDevices(m.Sites)
 	u.LogError(err, "unifi.GetDevices()")
 	// Make a new Influx Points Batcher.
-	m.BatchPoints, err = influx.NewBatchPoints(influx.BatchPointsConfig{Database: u.Config.InfluxDB})
+	m.BatchPoints, err = client.NewBatchPoints(client.BatchPointsConfig{Database: u.Config.InfluxDB})
 	u.LogError(err, "influx.NewBatchPoints")
 	return m, err
 }
@@ -117,7 +117,7 @@ func (u *UnifiPoller) CollectMetrics() (*Metrics, error) {
 // AugmentMetrics is our middleware layer between collecting metrics and writing them.
 // This is where we can manipuate the returned data or make arbitrary decisions.
 // This function currently adds parent device names to client metrics.
-func (u *UnifiPoller) AugmentMetrics(metrics *Metrics) error {
+func (u *UnifiPoller) AugmentMetrics(metrics *influx.Metrics) error {
 	if metrics == nil || metrics.Devices == nil || metrics.Clients == nil {
 		return fmt.Errorf("nil metrics, augment impossible")
 	}
@@ -150,7 +150,7 @@ func (u *UnifiPoller) AugmentMetrics(metrics *Metrics) error {
 
 // ExportMetrics updates the internal metrics provided via
 // HTTP at /metrics for prometheus collection.
-func (u *UnifiPoller) ExportMetrics(metrics *Metrics) error {
+func (u *UnifiPoller) ExportMetrics(metrics *influx.Metrics) error {
 	/*
 	 This is where it gets complicated, and probably deserves its own package.
 	*/
@@ -159,10 +159,10 @@ func (u *UnifiPoller) ExportMetrics(metrics *Metrics) error {
 
 // ReportMetrics batches all the metrics and writes them to InfluxDB.
 // Returns an error if the write to influx fails.
-func (u *UnifiPoller) ReportMetrics(metrics *Metrics) error {
+func (u *UnifiPoller) ReportMetrics(metrics *influx.Metrics) error {
 	// Batch (and send) all the points.
 	for _, err := range metrics.ProcessPoints() {
-		u.LogError(err, "asset.Points()")
+		u.LogError(err, "metrics.ProcessPoints")
 	}
 	err := u.Influx.Write(metrics.BatchPoints)
 	if err != nil {
@@ -183,61 +183,6 @@ func (u *UnifiPoller) ReportMetrics(metrics *Metrics) error {
 		len(metrics.Sites), len(metrics.Clients), len(metrics.UAPs),
 		len(metrics.UDMs)+len(metrics.USGs), len(metrics.USWs), idsMsg, points, fields)
 	return nil
-}
-
-// ProcessPoints batches all device and client data into influxdb data points.
-// Call this after you've collected all the data you care about.
-// This function is sorta weird and returns a slice of errors. The reasoning is
-// that some points may process while others fail, so we attempt to process them
-// all. This is (usually) run in a loop, so we can't really exit on error,
-// we just log the errors and tally them on a counter. In reality, this never
-// returns any errors because we control the data going in; cool right? But we
-// still check&log it in case the data going is skewed up and causes errors!
-func (m *Metrics) ProcessPoints() []error {
-	errs := []error{}
-	processPoints := func(m *Metrics, p []*influx.Point, err error) {
-		switch {
-		case err != nil:
-			errs = append(errs, err)
-		case p == nil:
-		default:
-			m.BatchPoints.AddPoints(p)
-		}
-	}
-
-	for _, asset := range m.Sites {
-		pts, err := pollerinflux.SitePoints(asset, m.TS)
-		processPoints(m, pts, err)
-	}
-	for _, asset := range m.Clients {
-		pts, err := pollerinflux.ClientPoints(asset, m.TS)
-		processPoints(m, pts, err)
-	}
-	for _, asset := range m.IDSList {
-		pts, err := pollerinflux.IDSPoints(asset) // no m.TS.
-		processPoints(m, pts, err)
-	}
-
-	if m.Devices == nil {
-		return errs
-	}
-	for _, asset := range m.Devices.UAPs {
-		pts, err := pollerinflux.UAPPoints(asset, m.TS)
-		processPoints(m, pts, err)
-	}
-	for _, asset := range m.Devices.USGs {
-		pts, err := pollerinflux.USGPoints(asset, m.TS)
-		processPoints(m, pts, err)
-	}
-	for _, asset := range m.Devices.USWs {
-		pts, err := pollerinflux.USWPoints(asset, m.TS)
-		processPoints(m, pts, err)
-	}
-	for _, asset := range m.Devices.UDMs {
-		pts, err := pollerinflux.UDMPoints(asset, m.TS)
-		processPoints(m, pts, err)
-	}
-	return errs
 }
 
 // GetFilteredSites returns a list of sites to fetch data for.
