@@ -84,16 +84,17 @@ func (u *UnifiPoller) Run() (err error) {
 	}
 	u.Logf("Polling UniFi Controller at %s v%s as user %s. Sites: %v",
 		u.Config.UnifiBase, u.Unifi.ServerVersion, u.Config.UnifiUser, u.Config.Sites)
-	if err = u.GetInfluxDB(); err != nil {
-		return err
-	}
 
 	switch strings.ToLower(u.Config.Mode) {
 	case "influxlambda", "lambdainflux", "lambda_influx", "influx_lambda":
+		if err = u.GetInfluxDB(); err != nil {
+			return err
+		}
 		u.Logf("Logging Measurements to InfluxDB at %s as user %s one time (lambda mode)",
 			u.Config.InfluxURL, u.Config.InfluxUser)
 		u.LastCheck = time.Now()
 		return u.CollectAndProcess(u.ReportMetrics)
+
 	case "prometheus", "exporter":
 		u.Logf("Exporting Measurements at https://%s/metrics for Prometheus", u.Config.HTTPListen)
 		u.Config.Mode = "http exporter"
@@ -105,7 +106,11 @@ func (u *UnifiPoller) Run() (err error) {
 			}
 		}()
 		return u.PollController(u.ExportMetrics)
+
 	default:
+		if err = u.GetInfluxDB(); err != nil {
+			return err
+		}
 		u.Logf("Logging Measurements to InfluxDB at %s as user %s", u.Config.InfluxURL, u.Config.InfluxUser)
 		u.Config.Mode = "influx poller"
 		return u.PollController(u.ReportMetrics)
