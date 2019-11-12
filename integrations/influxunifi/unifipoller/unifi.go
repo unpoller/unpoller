@@ -43,11 +43,12 @@ FIRST:
 	return nil
 }
 
-// PollController runs forever, polling UniFi, and pushing to influx.
+// PollController runs forever, polling UniFi
+// and pushing to influx OR exporting for prometheus.
 // This is started by Run() after everything checks out.
-func (u *UnifiPoller) PollController() error {
+func (u *UnifiPoller) PollController(process func(*Metrics) error) error {
 	interval := u.Config.Interval.Round(time.Second)
-	log.Println("[INFO] Everything checks out! Poller started, interval:", interval)
+	log.Printf("[INFO] Everything checks out! Poller started in %v mode, interval: %v", u.Config.Mode, interval)
 	ticker := time.NewTicker(interval)
 	for u.LastCheck = range ticker.C {
 		var err error
@@ -60,7 +61,7 @@ func (u *UnifiPoller) PollController() error {
 		}
 		if err == nil {
 			// Only run this if the authentication procedure didn't return error.
-			_ = u.CollectAndReport()
+			_ = u.CollectAndProcess(process)
 		}
 		if u.errorCount > 0 {
 			return fmt.Errorf("controller or influxdb errors, stopping poller")
@@ -69,12 +70,13 @@ func (u *UnifiPoller) PollController() error {
 	return nil
 }
 
-// CollectAndReport collects measurements and reports them to influxdb.
+// CollectAndProcess collects measurements and then passese them into the
+// provided method. The method is either an http exporter or an influxdb update.
 // Can be called once or in a ticker loop. This function and all the ones below
 // handle their own logging. An error is returned so the calling function may
 // determine if there was a read or write error and act on it. This is currently
 // called in two places in this library. One returns an error, one does not.
-func (u *UnifiPoller) CollectAndReport() error {
+func (u *UnifiPoller) CollectAndProcess(process func(*Metrics) error) error {
 	metrics, err := u.CollectMetrics()
 	if err != nil {
 		return err
@@ -82,8 +84,8 @@ func (u *UnifiPoller) CollectAndReport() error {
 	if err := u.AugmentMetrics(metrics); err != nil {
 		return err
 	}
-	err = u.ReportMetrics(metrics)
-	u.LogError(err, "reporting metrics")
+	err = process(metrics)
+	u.LogError(err, "processing metrics")
 	return err
 }
 
@@ -142,6 +144,15 @@ func (u *UnifiPoller) AugmentMetrics(metrics *Metrics) error {
 		metrics.Clients[i].GwName = devices[c.GwMac]
 		metrics.Clients[i].RadioDescription = bssdIDs[metrics.Clients[i].Bssid] + metrics.Clients[i].RadioProto
 	}
+	return nil
+}
+
+// ExportMetrics updates the internal metrics provided via
+// HTTP at /metrics for prometheus collection.
+func (u *UnifiPoller) ExportMetrics(metrics *Metrics) error {
+	/*
+	 This is where it gets complicated, and probably deserves its own package.
+	*/
 	return nil
 }
 
