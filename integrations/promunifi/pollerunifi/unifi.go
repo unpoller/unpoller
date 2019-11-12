@@ -6,6 +6,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/davidnewhall/unifi-poller/pollerinflux"
 	influx "github.com/influxdata/influxdb1-client/v2"
 	"golift.io/unifi"
 )
@@ -205,15 +206,15 @@ func (m *Metrics) ProcessPoints() []error {
 	}
 
 	for _, asset := range m.Sites {
-		pts, err := SitePoints(asset, m.TS)
+		pts, err := pollerinflux.SitePoints(asset, m.TS)
 		processPoints(m, pts, err)
 	}
 	for _, asset := range m.Clients {
-		pts, err := ClientPoints(asset, m.TS)
+		pts, err := pollerinflux.ClientPoints(asset, m.TS)
 		processPoints(m, pts, err)
 	}
 	for _, asset := range m.IDSList {
-		pts, err := IDSPoints(asset) // no m.TS.
+		pts, err := pollerinflux.IDSPoints(asset) // no m.TS.
 		processPoints(m, pts, err)
 	}
 
@@ -221,19 +222,19 @@ func (m *Metrics) ProcessPoints() []error {
 		return errs
 	}
 	for _, asset := range m.Devices.UAPs {
-		pts, err := UAPPoints(asset, m.TS)
+		pts, err := pollerinflux.UAPPoints(asset, m.TS)
 		processPoints(m, pts, err)
 	}
 	for _, asset := range m.Devices.USGs {
-		pts, err := USGPoints(asset, m.TS)
+		pts, err := pollerinflux.USGPoints(asset, m.TS)
 		processPoints(m, pts, err)
 	}
 	for _, asset := range m.Devices.USWs {
-		pts, err := USWPoints(asset, m.TS)
+		pts, err := pollerinflux.USWPoints(asset, m.TS)
 		processPoints(m, pts, err)
 	}
 	for _, asset := range m.Devices.UDMs {
-		pts, err := UDMPoints(asset, m.TS)
+		pts, err := pollerinflux.UDMPoints(asset, m.TS)
 		processPoints(m, pts, err)
 	}
 	return errs
