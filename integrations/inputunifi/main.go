@@ -3,12 +3,12 @@ package main
 import (
 	"log"
 
-	"github.com/davidnewhall/unifi-poller/unifipoller"
+	"github.com/davidnewhall/unifi-poller/pollerunifi"
 )
 
 // Keep it simple.
 func main() {
-	if err := unifipoller.Start(); err != nil {
+	if err := pollerunifi.Start(); err != nil {
 		log.Fatalln("[ERROR]", err)
 	}
 }
