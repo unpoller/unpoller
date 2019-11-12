@@ -1,4 +1,4 @@
-package unifipoller
+package pollerunifi
 
 import (
 	"time"
