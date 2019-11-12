@@ -1,4 +1,5 @@
-package pollerunifi
+// Package poller provides the CLI interface to setup unifi-poller.
+package poller
 
 import (
 	"crypto/tls"
@@ -9,7 +10,7 @@ import (
 	"strings"
 	"time"
 
-	influx "github.com/influxdata/influxdb1-client/v2"
+	client "github.com/influxdata/influxdb1-client/v2"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/spf13/pflag"
 	"golift.io/unifi"
@@ -113,7 +114,7 @@ func (u *UnifiPoller) Run() (err error) {
 
 // GetInfluxDB returns an InfluxDB interface.
 func (u *UnifiPoller) GetInfluxDB() (err error) {
-	u.Influx, err = influx.NewHTTPClient(influx.HTTPConfig{
+	u.Influx, err = client.NewHTTPClient(client.HTTPConfig{
 		Addr:      u.Config.InfluxURL,
 		Username:  u.Config.InfluxUser,
 		Password:  u.Config.InfluxPass,
