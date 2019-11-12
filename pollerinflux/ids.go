@@ -1,4 +1,4 @@
-package pollerunifi
+package pollerinflux
 
 import (
 	influx "github.com/influxdata/influxdb1-client/v2"
