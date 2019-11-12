@@ -1,4 +1,4 @@
-package pollerunifi
+package poller
 
 import (
 	"fmt"
@@ -20,14 +20,17 @@ func (u *UnifiPoller) DumpJSONPayload() (err error) {
 	if err != nil {
 		return err
 	}
+
 	fmt.Fprintf(os.Stderr, "[INFO] Authenticated to UniFi Controller @ %v as user %v",
 		u.Config.UnifiBase, u.Config.UnifiUser)
 	if err := u.CheckSites(); err != nil {
 		return err
 	}
+
 	u.Unifi.ErrorLog = func(m string, v ...interface{}) {
 		fmt.Fprintf(os.Stderr, "[ERROR] "+m, v...)
 	} // Log all errors to stderr.
+
 	switch sites, err := u.GetFilteredSites(); {
 	case err != nil:
 		return err
