@@ -3,19 +3,13 @@
 package influx
 
 import (
-	"time"
-
+	"github.com/davidnewhall/unifi-poller/metrics"
 	client "github.com/influxdata/influxdb1-client/v2"
-	"golift.io/unifi"
 )
 
 // Metrics contains all the data from the controller and an influx endpoint to send it to.
 type Metrics struct {
-	TS time.Time
-	unifi.Sites
-	unifi.IDSList
-	unifi.Clients
-	*unifi.Devices
+	*metrics.Metrics
 	client.BatchPoints
 }
 
@@ -35,7 +29,7 @@ func (m *Metrics) ProcessPoints() []error {
 			errs = append(errs, err)
 		case p == nil:
 		default:
-			m.BatchPoints.AddPoints(p)
+			m.AddPoints(p)
 		}
 	}
 
