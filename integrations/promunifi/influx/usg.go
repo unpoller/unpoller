@@ -1,4 +1,4 @@
-package pollerinflux
+package influx
 
 import (
 	"strings"

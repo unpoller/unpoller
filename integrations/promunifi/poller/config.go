@@ -1,4 +1,4 @@
-package pollerunifi
+package poller
 
 import (
 	"encoding/json"
@@ -54,16 +54,6 @@ type Flag struct {
 	DumpJSON   string
 	ShowVer    bool
 	*pflag.FlagSet
-}
-
-// Metrics contains all the data from the controller and an influx endpoint to send it to.
-type Metrics struct {
-	TS time.Time
-	unifi.Sites
-	unifi.IDSList
-	unifi.Clients
-	*unifi.Devices
-	influx.BatchPoints
 }
 
 // Config represents the data needed to poll a controller and report to influxdb.

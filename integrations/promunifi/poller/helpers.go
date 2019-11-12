@@ -1,4 +1,4 @@
-package pollerunifi
+package poller
 
 import (
 	"fmt"
