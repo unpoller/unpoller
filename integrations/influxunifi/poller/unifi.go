@@ -7,6 +7,8 @@ import (
 	"time"
 
 	"github.com/davidnewhall/unifi-poller/influx"
+	"github.com/davidnewhall/unifi-poller/metrics"
+	"github.com/davidnewhall/unifi-poller/prometheus"
 	client "github.com/influxdata/influxdb1-client/v2"
 	"golift.io/unifi"
 )
@@ -47,7 +49,7 @@ FIRST:
 // PollController runs forever, polling UniFi
 // and pushing to influx OR exporting for prometheus.
 // This is started by Run() after everything checks out.
-func (u *UnifiPoller) PollController(process func(*influx.Metrics) error) error {
+func (u *UnifiPoller) PollController(process func(*metrics.Metrics) error) error {
 	interval := u.Config.Interval.Round(time.Second)
 	log.Printf("[INFO] Everything checks out! Poller started in %v mode, interval: %v", u.Config.Mode, interval)
 	ticker := time.NewTicker(interval)
@@ -65,7 +67,7 @@ func (u *UnifiPoller) PollController(process func(*influx.Metrics) error) error 
 			_ = u.CollectAndProcess(process)
 		}
 		if u.errorCount > 0 {
-			return fmt.Errorf("controller or influxdb errors, stopping poller")
+			return fmt.Errorf("too many errors, stopping poller")
 		}
 	}
 	return nil
@@ -77,7 +79,7 @@ func (u *UnifiPoller) PollController(process func(*influx.Metrics) error) error 
 // handle their own logging. An error is returned so the calling function may
 // determine if there was a read or write error and act on it. This is currently
 // called in two places in this library. One returns an error, one does not.
-func (u *UnifiPoller) CollectAndProcess(process func(*influx.Metrics) error) error {
+func (u *UnifiPoller) CollectAndProcess(process func(*metrics.Metrics) error) error {
 	metrics, err := u.CollectMetrics()
 	if err != nil {
 		return err
@@ -91,9 +93,8 @@ func (u *UnifiPoller) CollectAndProcess(process func(*influx.Metrics) error) err
 }
 
 // CollectMetrics grabs all the measurements from a UniFi controller and returns them.
-// This also creates an InfluxDB writer, and returns an error if that fails.
-func (u *UnifiPoller) CollectMetrics() (*influx.Metrics, error) {
-	m := &influx.Metrics{TS: u.LastCheck} // At this point, it's the Current Check.
+func (u *UnifiPoller) CollectMetrics() (*metrics.Metrics, error) {
+	m := &metrics.Metrics{TS: u.LastCheck} // At this point, it's the Current Check.
 	var err error
 	// Get the sites we care about.
 	m.Sites, err = u.GetFilteredSites()
@@ -108,16 +109,13 @@ func (u *UnifiPoller) CollectMetrics() (*influx.Metrics, error) {
 	u.LogError(err, "unifi.GetClients()")
 	m.Devices, err = u.Unifi.GetDevices(m.Sites)
 	u.LogError(err, "unifi.GetDevices()")
-	// Make a new Influx Points Batcher.
-	m.BatchPoints, err = client.NewBatchPoints(client.BatchPointsConfig{Database: u.Config.InfluxDB})
-	u.LogError(err, "influx.NewBatchPoints")
 	return m, err
 }
 
 // AugmentMetrics is our middleware layer between collecting metrics and writing them.
 // This is where we can manipuate the returned data or make arbitrary decisions.
 // This function currently adds parent device names to client metrics.
-func (u *UnifiPoller) AugmentMetrics(metrics *influx.Metrics) error {
+func (u *UnifiPoller) AugmentMetrics(metrics *metrics.Metrics) error {
 	if metrics == nil || metrics.Devices == nil || metrics.Clients == nil {
 		return fmt.Errorf("nil metrics, augment impossible")
 	}
@@ -150,39 +148,64 @@ func (u *UnifiPoller) AugmentMetrics(metrics *influx.Metrics) error {
 
 // ExportMetrics updates the internal metrics provided via
 // HTTP at /metrics for prometheus collection.
-func (u *UnifiPoller) ExportMetrics(metrics *influx.Metrics) error {
-	/*
-	 This is where it gets complicated, and probably deserves its own package.
-	*/
+func (u *UnifiPoller) ExportMetrics(metrics *metrics.Metrics) error {
+	m := &prometheus.Metrics{Metrics: metrics}
+	for _, err := range m.ProcessExports() {
+		u.LogError(err, "prometheus.ProcessExports")
+	}
+	u.LogExportReport(m)
 	return nil
 }
 
-// ReportMetrics batches all the metrics and writes them to InfluxDB.
-// Returns an error if the write to influx fails.
-func (u *UnifiPoller) ReportMetrics(metrics *influx.Metrics) error {
-	// Batch (and send) all the points.
-	for _, err := range metrics.ProcessPoints() {
-		u.LogError(err, "metrics.ProcessPoints")
+// LogExportReport writes a log line after exporting metrics via HTTP.
+func (u *UnifiPoller) LogExportReport(m *prometheus.Metrics) {
+	idsMsg := ""
+	if u.Config.CollectIDS {
+		idsMsg = fmt.Sprintf(", IDS Events: %d, ", len(m.IDSList))
 	}
-	err := u.Influx.Write(metrics.BatchPoints)
+	u.Logf("UniFi Measurements Exported. Sites: %d, Clients: %d, "+
+		"Wireless APs: %d, Gateways: %d, Switches: %d%s",
+		len(m.Sites), len(m.Clients), len(m.UAPs),
+		len(m.UDMs)+len(m.USGs), len(m.USWs), idsMsg)
+}
+
+// ReportMetrics batches all the metrics and writes them to InfluxDB.
+// This creates an InfluxDB writer, and returns an error if the write fails.
+func (u *UnifiPoller) ReportMetrics(metrics *metrics.Metrics) error {
+	// Batch (and send) all the points.
+	m := &influx.Metrics{Metrics: metrics}
+	// Make a new Influx Points Batcher.
+	var err error
+	m.BatchPoints, err = client.NewBatchPoints(client.BatchPointsConfig{Database: u.Config.InfluxDB})
 	if err != nil {
+		return fmt.Errorf("influx.NewBatchPoints: %v", err)
+	}
+	for _, err := range m.ProcessPoints() {
+		u.LogError(err, "influx.ProcessPoints")
+	}
+	if err = u.Influx.Write(m.BatchPoints); err != nil {
 		return fmt.Errorf("influxdb.Write(points): %v", err)
 	}
+	u.LogInfluxReport(m)
+	return nil
+}
+
+// LogInfluxReport writes a log message after exporting to influxdb.
+func (u *UnifiPoller) LogInfluxReport(m *influx.Metrics) {
 	var fields, points int
-	for _, p := range metrics.Points() {
+	for _, p := range m.Points() {
 		points++
 		i, _ := p.Fields()
 		fields += len(i)
 	}
 	idsMsg := ""
 	if u.Config.CollectIDS {
-		idsMsg = fmt.Sprintf("IDS Events: %d, ", len(metrics.IDSList))
+		idsMsg = fmt.Sprintf("IDS Events: %d, ", len(m.IDSList))
 	}
 	u.Logf("UniFi Measurements Recorded. Sites: %d, Clients: %d, "+
 		"Wireless APs: %d, Gateways: %d, Switches: %d, %sPoints: %d, Fields: %d",
-		len(metrics.Sites), len(metrics.Clients), len(metrics.UAPs),
-		len(metrics.UDMs)+len(metrics.USGs), len(metrics.USWs), idsMsg, points, fields)
-	return nil
+		len(m.Sites), len(m.Clients), len(m.UAPs),
+		len(m.UDMs)+len(m.USGs), len(m.USWs), idsMsg, points, fields)
 }
 
 // GetFilteredSites returns a list of sites to fetch data for.
