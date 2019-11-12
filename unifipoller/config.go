@@ -31,6 +31,7 @@ const (
 	defaultInfluxURL  = "http://127.0.0.1:8086"
 	defaultUnifiUser  = "influx"
 	defaultUnifiURL   = "https://127.0.0.1:8443"
+	defaultHTTPListen = ":61317"
 )
 
 // ENVConfigPrefix is the prefix appended to an env variable tag
@@ -77,6 +78,7 @@ type Config struct {
 	ReAuth     bool     `json:"reauthenticate" toml:"reauthenticate" xml:"reauthenticate" yaml:"reauthenticate" env:"REAUTHENTICATE"`
 	InfxBadSSL bool     `json:"influx_insecure_ssl" toml:"influx_insecure_ssl" xml:"influx_insecure_ssl" yaml:"influx_insecure_ssl" env:"INFLUX_INSECURE_SSL"`
 	Mode       string   `json:"mode" toml:"mode" xml:"mode" yaml:"mode" env:"POLLING_MODE"`
+	HTTPListen string   `json:"http_listen" toml:"http_listen" xml:"http_listen" yaml:"http_listen" env:"HTTP_LISTEN"`
 	InfluxURL  string   `json:"influx_url,omitempty" toml:"influx_url,omitempty" xml:"influx_url" yaml:"influx_url" env:"INFLUX_URL"`
 	InfluxUser string   `json:"influx_user,omitempty" toml:"influx_user,omitempty" xml:"influx_user" yaml:"influx_user" env:"INFLUX_USER"`
 	InfluxPass string   `json:"influx_pass,omitempty" toml:"influx_pass,omitempty" xml:"influx_pass" yaml:"influx_pass" env:"INFLUX_PASS"`
