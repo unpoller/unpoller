@@ -47,123 +47,123 @@ func descClient(ns string) *client {
 
 	return &client{
 		Anomalies: prometheus.NewDesc(
-			prometheus.BuildFQName(ns, ns2, "anomalies"),
+			prometheus.BuildFQName(ns, ns2, "Anomalies"),
 			"Client Anomalies", labels, nil,
 		),
 		BytesR: prometheus.NewDesc(
-			prometheus.BuildFQName(ns, ns2, "bytesr"),
+			prometheus.BuildFQName(ns, ns2, "BytesR"),
 			"Client Data Rate", labels, nil,
 		),
 		CCQ: prometheus.NewDesc(
-			prometheus.BuildFQName(ns, ns2, "ccq"),
+			prometheus.BuildFQName(ns, ns2, "CCQ"),
 			"Client Connection Quality", labels, nil,
 		),
 		Noise: prometheus.NewDesc(
-			prometheus.BuildFQName(ns, ns2, "noise"),
+			prometheus.BuildFQName(ns, ns2, "Noise"),
 			"Client AP Noise", labels, nil,
 		),
 		RoamCount: prometheus.NewDesc(
-			prometheus.BuildFQName(ns, ns2, "roamcount"),
+			prometheus.BuildFQName(ns, ns2, "RoamCount"),
 			"Client Roam Counter", labels, nil,
 		),
 		RSSI: prometheus.NewDesc(
-			prometheus.BuildFQName(ns, ns2, "rssi"),
+			prometheus.BuildFQName(ns, ns2, "RSSI"),
 			"Client RSSI", labels, nil,
 		),
 		RxBytes: prometheus.NewDesc(
-			prometheus.BuildFQName(ns, ns2, "rxbytes"),
+			prometheus.BuildFQName(ns, ns2, "RxBytes"),
 			"Client Receive Bytes", labels, nil,
 		),
 		RxBytesR: prometheus.NewDesc(
-			prometheus.BuildFQName(ns, ns2, "rxbytesr"),
+			prometheus.BuildFQName(ns, ns2, "RxBytesR"),
 			"Client Receive Data Rate", labels, nil,
 		),
 		RxPackets: prometheus.NewDesc(
-			prometheus.BuildFQName(ns, ns2, "rxpackets"),
+			prometheus.BuildFQName(ns, ns2, "RxPackets"),
 			"Client Receive Packets", labels, nil,
 		),
 		RxRate: prometheus.NewDesc(
-			prometheus.BuildFQName(ns, ns2, "rxrate"),
+			prometheus.BuildFQName(ns, ns2, "RxRate"),
 			"Client Receive Rate", labels, nil,
 		),
 		Signal: prometheus.NewDesc(
-			prometheus.BuildFQName(ns, ns2, "signal"),
+			prometheus.BuildFQName(ns, ns2, "Signal"),
 			"Client Signal Strength", labels, nil,
 		),
 		TxBytes: prometheus.NewDesc(
-			prometheus.BuildFQName(ns, ns2, "txbytes"),
+			prometheus.BuildFQName(ns, ns2, "TxBytes"),
 			"Client Transmit Bytes", labels, nil,
 		),
 		TxBytesR: prometheus.NewDesc(
-			prometheus.BuildFQName(ns, ns2, "txbytesr"),
+			prometheus.BuildFQName(ns, ns2, "TxBytesR"),
 			"Client Transmit Data Rate", labels, nil,
 		),
 		TxPackets: prometheus.NewDesc(
-			prometheus.BuildFQName(ns, ns2, "txpackets"),
+			prometheus.BuildFQName(ns, ns2, "TxPackets"),
 			"Client Transmit Packets", labels, nil,
 		),
 		TxPower: prometheus.NewDesc(
-			prometheus.BuildFQName(ns, ns2, "txpower"),
+			prometheus.BuildFQName(ns, ns2, "TxPower"),
 			"Client Transmit Power", labels, nil,
 		),
 		TxRate: prometheus.NewDesc(
-			prometheus.BuildFQName(ns, ns2, "txrate"),
+			prometheus.BuildFQName(ns, ns2, "TxRate"),
 			"Client Transmit Rate", labels, nil,
 		),
 		Uptime: prometheus.NewDesc(
-			prometheus.BuildFQName(ns, ns2, "uptime"),
+			prometheus.BuildFQName(ns, ns2, "Uptime"),
 			"Client Uptime", labels, nil,
 		),
 		WifiTxAttempts: prometheus.NewDesc(
-			prometheus.BuildFQName(ns, ns2, "wifitxattempts"),
+			prometheus.BuildFQName(ns, ns2, "WifiTxAttempts"),
 			"Client Wifi Transmit Attempts", labels, nil,
 		),
 		WiredRxBytes: prometheus.NewDesc(
-			prometheus.BuildFQName(ns, ns2, "wiredrxbytes"),
+			prometheus.BuildFQName(ns, ns2, "WiredRxBytes"),
 			"Client Wired Receive Bytes", labels, nil,
 		),
 		WiredRxBytesR: prometheus.NewDesc(
-			prometheus.BuildFQName(ns, ns2, "wiredrxbytesr"),
+			prometheus.BuildFQName(ns, ns2, "WiredRxBytesR"),
 			"Client Wired Receive Data Rate", labels, nil,
 		),
 		WiredRxPackets: prometheus.NewDesc(
-			prometheus.BuildFQName(ns, ns2, "wiredrxpackets"),
+			prometheus.BuildFQName(ns, ns2, "WiredRxPackets"),
 			"Client Wired Receive Packets", labels, nil,
 		),
 		WiredTxBytes: prometheus.NewDesc(
-			prometheus.BuildFQName(ns, ns2, "wiredtxbytes"),
+			prometheus.BuildFQName(ns, ns2, "WiredTxBytes"),
 			"Client Wired Transmit Bytes", labels, nil,
 		),
 		WiredTxBytesR: prometheus.NewDesc(
-			prometheus.BuildFQName(ns, ns2, "wiredtxbytesr"),
+			prometheus.BuildFQName(ns, ns2, "WiredTxBytesR"),
 			"Client Wired Data Rate", labels, nil,
 		),
 		WiredTxPackets: prometheus.NewDesc(
-			prometheus.BuildFQName(ns, ns2, "wiredtxpackets"),
+			prometheus.BuildFQName(ns, ns2, "WiredTxPackets"),
 			"Client Wired Transmit Packets", labels, nil,
 		),
 		DpiStatsApp: prometheus.NewDesc(
-			prometheus.BuildFQName(ns, ns2, "dpistatsapp"),
+			prometheus.BuildFQName(ns, ns2, "DpiStatsApp"),
 			"Client DPI Stats App", labels, nil,
 		),
 		DpiStatsCat: prometheus.NewDesc(
-			prometheus.BuildFQName(ns, ns2, "dpistatscat"),
+			prometheus.BuildFQName(ns, ns2, "DpiStatsCat"),
 			"Client DPI Stats Cat", labels, nil,
 		),
 		DpiStatsRxBytes: prometheus.NewDesc(
-			prometheus.BuildFQName(ns, ns2, "dpistatsrxbytes"),
+			prometheus.BuildFQName(ns, ns2, "DpiStatsRxBytes"),
 			"Client DPI Stats Receive Bytes", labels, nil,
 		),
 		DpiStatsRxPackets: prometheus.NewDesc(
-			prometheus.BuildFQName(ns, ns2, "dpistatsrxpackets"),
+			prometheus.BuildFQName(ns, ns2, "DpiStatsRxPackets"),
 			"Client DPI Stats Receive Packets", labels, nil,
 		),
 		DpiStatsTxBytes: prometheus.NewDesc(
-			prometheus.BuildFQName(ns, ns2, "dpistatstxbytes"),
+			prometheus.BuildFQName(ns, ns2, "DpiStatsTxBytes"),
 			"Client DPI Stats Transmit Bytes", labels, nil,
 		),
 		DpiStatsTxPackets: prometheus.NewDesc(
-			prometheus.BuildFQName(ns, ns2, "dpistatstxpackets"),
+			prometheus.BuildFQName(ns, ns2, "DpiStatsTxPackets"),
 			"Client DPI Stats Transmit Packets", labels, nil,
 		),
 	}
