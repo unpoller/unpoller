@@ -34,7 +34,6 @@ quiet = false
 # /metrics for polling collection by a prometheus server. This disables influxdb.
 mode = "influx"
 
-
 # This controls on which ip and port /metrics is exported when mode is "prometheus".
 # This has no effect in other modes. Must contain a colon and port.
 http_listen = "0.0.0.0:61317"
