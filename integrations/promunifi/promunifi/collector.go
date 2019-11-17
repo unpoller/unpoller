@@ -7,6 +7,7 @@ import (
 
 	"github.com/davidnewhall/unifi-poller/metrics"
 	"github.com/prometheus/client_golang/prometheus"
+	"golift.io/unifi"
 )
 
 // UnifiCollectorCnfg defines the data needed to collect and report UniFi Metrics.
@@ -127,12 +128,12 @@ func (u *unifiCollector) Collect(ch chan<- prometheus.Metric) {
 	}
 }
 
+/*
 func (u *unifiCollector) export(ch chan<- prometheus.Metric, exports []*metricExports, ts time.Time) {
 	for _, e := range exports {
 		v, ok := e.Value.(float64)
 		if !ok {
 			j, ok := e.Value.(int64)
-			v = float64(j)
 			if !ok {
 				//			log.Printf("not a number: %v %v", e.Value, e.Desc.String())
 				if u.Config.ReportErrors {
@@ -140,7 +141,29 @@ func (u *unifiCollector) export(ch chan<- prometheus.Metric, exports []*metricEx
 				}
 				continue
 			}
+			v = float64(j)
 		}
 		ch <- prometheus.NewMetricWithTimestamp(ts, prometheus.MustNewConstMetric(e.Desc, e.ValueType, v, e.Labels...))
 	}
+}*/
+
+func (u *unifiCollector) export(ch chan<- prometheus.Metric, exports []*metricExports, ts time.Time) {
+	for _, e := range exports {
+		var val float64
+		switch v := e.Value.(type) {
+		case float64:
+			val = v
+		case int64:
+			val = float64(v)
+		case unifi.FlexInt:
+			val = v.Val
+		default:
+			if u.Config.ReportErrors {
+				ch <- prometheus.NewInvalidMetric(e.Desc, fmt.Errorf("not a number: %v", e.Value))
+			}
+			continue
+		}
+		ch <- prometheus.NewMetricWithTimestamp(ts, prometheus.MustNewConstMetric(e.Desc, e.ValueType, val, e.Labels...))
+	}
+
 }
