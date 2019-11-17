@@ -101,10 +101,11 @@ func (u *UnifiPoller) Run() (err error) {
 		u.Logf("Exporting Measurements at https://%s/metrics for Prometheus", u.Config.HTTPListen)
 		http.Handle("/metrics", promhttp.Handler())
 		prometheus.MustRegister(promunifi.NewUnifiCollector(promunifi.UnifiCollectorCnfg{
-			Namespace:    "unifi",
+			Namespace:    defaultNamespace, // XXX: pass this in from config.
 			CollectFn:    u.ExportMetrics,
-			ReportErrors: true,
-			CollectIDS:   true,
+			LoggerFn:     u.LogExportReport,
+			CollectIDS:   u.Config.CollectIDS,
+			ReportErrors: true, // XXX: Does this need to be configurable?
 		}))
 		return http.ListenAndServe(u.Config.HTTPListen, nil)
 
