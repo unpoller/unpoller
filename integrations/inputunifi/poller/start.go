@@ -95,7 +95,7 @@ func (u *UnifiPoller) Run() (err error) {
 		u.Logf("Logging Measurements to InfluxDB at %s as user %s one time (lambda mode)",
 			u.Config.InfluxURL, u.Config.InfluxUser)
 		u.LastCheck = time.Now()
-		return u.CollectAndProcess(u.ReportMetrics)
+		return u.CollectAndProcess()
 
 	case "prometheus", "exporter":
 		u.Logf("Exporting Measurements at https://%s/metrics for Prometheus", u.Config.HTTPListen)
@@ -115,7 +115,7 @@ func (u *UnifiPoller) Run() (err error) {
 
 		u.Logf("Logging Measurements to InfluxDB at %s as user %s", u.Config.InfluxURL, u.Config.InfluxUser)
 		u.Config.Mode = "influx poller"
-		return u.PollController(u.ReportMetrics)
+		return u.PollController()
 	}
 }
 
