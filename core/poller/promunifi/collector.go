@@ -24,7 +24,7 @@ type UnifiCollectorCnfg struct {
 	// function to retreive the latest UniFi
 	CollectFn func() (*metrics.Metrics, error)
 	// provide a logger function if you want to run a routine *after* prometheus checks in.
-	LoggerFn func(*metrics.Metrics, int64)
+	LoggingFn func(*metrics.Metrics, int64)
 	// Setting this to true will enable IDS exports.
 	CollectIDS bool
 }
@@ -98,8 +98,13 @@ func (u *unifiCollector) Collect(ch chan<- prometheus.Metric) {
 	var count int64
 	m, err := u.Config.CollectFn()
 	if err != nil {
-		ch <- prometheus.NewInvalidMetric(prometheus.NewInvalidDesc(fmt.Errorf("metric fetch failed")), err)
+		ch <- prometheus.NewInvalidMetric(
+			prometheus.NewInvalidDesc(fmt.Errorf("metric fetch failed")), err)
 		return
+	}
+
+	if u.Config.LoggingFn != nil {
+		defer func() { u.Config.LoggingFn(m, count) }()
 	}
 
 	for _, asset := range m.Clients {
@@ -114,23 +119,21 @@ func (u *unifiCollector) Collect(ch chan<- prometheus.Metric) {
 		}
 	}
 
-	if m.Devices != nil {
-		for _, asset := range m.Devices.UAPs {
-			count += u.export(ch, u.exportUAP(asset), m.TS)
-		}
-		for _, asset := range m.Devices.USGs {
-			count += u.export(ch, u.exportUSG(asset), m.TS)
-		}
-		for _, asset := range m.Devices.USWs {
-			count += u.export(ch, u.exportUSW(asset), m.TS)
-		}
-		for _, asset := range m.Devices.UDMs {
-			count += u.export(ch, u.exportUDM(asset), m.TS)
-		}
+	if m.Devices == nil {
+		return
 	}
 
-	if u.Config.LoggerFn != nil {
-		u.Config.LoggerFn(m, count)
+	for _, asset := range m.Devices.UAPs {
+		count += u.export(ch, u.exportUAP(asset), m.TS)
+	}
+	for _, asset := range m.Devices.USGs {
+		count += u.export(ch, u.exportUSG(asset), m.TS)
+	}
+	for _, asset := range m.Devices.USWs {
+		count += u.export(ch, u.exportUSW(asset), m.TS)
+	}
+	for _, asset := range m.Devices.UDMs {
+		count += u.export(ch, u.exportUDM(asset), m.TS)
 	}
 }
 
