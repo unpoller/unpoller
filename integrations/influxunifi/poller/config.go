@@ -145,5 +145,6 @@ func (c *Config) ParseENV() error {
 			c.SetBool(val)
 		}
 	}
+
 	return nil
 }
