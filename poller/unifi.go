@@ -6,11 +6,36 @@ import (
 	"strings"
 	"time"
 
-	"github.com/davidnewhall/unifi-poller/influxunifi"
 	"github.com/davidnewhall/unifi-poller/metrics"
-	client "github.com/influxdata/influxdb1-client/v2"
 	"golift.io/unifi"
 )
+
+// PollController runs forever, polling UniFi
+// and pushing to influx OR exporting for prometheus.
+// This is started by Run() after everything checks out.
+func (u *UnifiPoller) PollController(process func(*metrics.Metrics) error) error {
+	interval := u.Config.Interval.Round(time.Second)
+	log.Printf("[INFO] Everything checks out! Poller started in %v mode, interval: %v", u.Config.Mode, interval)
+	ticker := time.NewTicker(interval)
+	for u.LastCheck = range ticker.C {
+		var err error
+		if u.Config.ReAuth {
+			u.LogDebugf("Re-authenticating to UniFi Controller")
+			// Some users need to re-auth every interval because the cookie times out.
+			if err = u.Unifi.Login(); err != nil {
+				u.LogError(err, "re-authenticating")
+			}
+		}
+		if err == nil {
+			// Only run this if the authentication procedure didn't return error.
+			_ = u.CollectAndProcess(process)
+		}
+		if u.errorCount > 0 {
+			return fmt.Errorf("too many errors, stopping poller")
+		}
+	}
+	return nil
+}
 
 // CheckSites makes sure the list of provided sites exists on the controller.
 // This does not run in Lambda (run-once) mode.
@@ -45,33 +70,6 @@ FIRST:
 	return nil
 }
 
-// PollController runs forever, polling UniFi
-// and pushing to influx OR exporting for prometheus.
-// This is started by Run() after everything checks out.
-func (u *UnifiPoller) PollController(process func(*metrics.Metrics) error) error {
-	interval := u.Config.Interval.Round(time.Second)
-	log.Printf("[INFO] Everything checks out! Poller started in %v mode, interval: %v", u.Config.Mode, interval)
-	ticker := time.NewTicker(interval)
-	for u.LastCheck = range ticker.C {
-		var err error
-		if u.Config.ReAuth {
-			u.LogDebugf("Re-authenticating to UniFi Controller")
-			// Some users need to re-auth every interval because the cookie times out.
-			if err = u.Unifi.Login(); err != nil {
-				u.LogError(err, "re-authenticating")
-			}
-		}
-		if err == nil {
-			// Only run this if the authentication procedure didn't return error.
-			_ = u.CollectAndProcess(process)
-		}
-		if u.errorCount > 0 {
-			return fmt.Errorf("too many errors, stopping poller")
-		}
-	}
-	return nil
-}
-
 // CollectAndProcess collects measurements and then passese them into the
 // provided method. The method is either an http exporter or an influxdb update.
 // Can be called once or in a ticker loop. This function and all the ones below
@@ -87,37 +85,6 @@ func (u *UnifiPoller) CollectAndProcess(process func(*metrics.Metrics) error) er
 	err = process(metrics)
 	u.LogError(err, "processing metrics")
 	return err
-}
-
-// ExportMetrics updates the internal metrics provided via
-// HTTP at /metrics for prometheus collection. This is run by Prometheus.
-func (u *UnifiPoller) ExportMetrics() *metrics.Metrics {
-	if u.Config.ReAuth {
-		u.LogDebugf("Re-authenticating to UniFi Controller")
-		// Some users need to re-auth every interval because the cookie times out.
-		if err := u.Unifi.Login(); err != nil {
-			u.LogError(err, "re-authenticating")
-			return nil
-		}
-	}
-	u.LastCheck = time.Now()
-	m, err := u.CollectMetrics()
-	if err != nil {
-		u.LogErrorf("collecting metrics: %v", err)
-		return nil
-	}
-	u.AugmentMetrics(m)
-
-	idsMsg := ""
-	if u.Config.CollectIDS {
-		idsMsg = fmt.Sprintf(", IDS Events: %d, ", len(m.IDSList))
-	}
-	u.Logf("UniFi Measurements Exported. Sites: %d, Clients: %d, "+
-		"Wireless APs: %d, Gateways: %d, Switches: %d%s",
-		len(m.Sites), len(m.Clients), len(m.UAPs),
-		len(m.UDMs)+len(m.USGs), len(m.USWs), idsMsg)
-
-	return m
 }
 
 // CollectMetrics grabs all the measurements from a UniFi controller and returns them.
@@ -171,45 +138,6 @@ func (u *UnifiPoller) AugmentMetrics(metrics *metrics.Metrics) {
 		metrics.Clients[i].GwName = devices[c.GwMac]
 		metrics.Clients[i].RadioDescription = bssdIDs[metrics.Clients[i].Bssid] + metrics.Clients[i].RadioProto
 	}
-}
-
-// ReportMetrics batches all the metrics and writes them to InfluxDB.
-// This creates an InfluxDB writer, and returns an error if the write fails.
-func (u *UnifiPoller) ReportMetrics(metrics *metrics.Metrics) error {
-	// Batch (and send) all the points.
-	m := &influxunifi.Metrics{Metrics: metrics}
-	// Make a new Influx Points Batcher.
-	var err error
-	m.BatchPoints, err = client.NewBatchPoints(client.BatchPointsConfig{Database: u.Config.InfluxDB})
-	if err != nil {
-		return fmt.Errorf("influx.NewBatchPoints: %v", err)
-	}
-	for _, err := range m.ProcessPoints() {
-		u.LogError(err, "influx.ProcessPoints")
-	}
-	if err = u.Influx.Write(m.BatchPoints); err != nil {
-		return fmt.Errorf("influxdb.Write(points): %v", err)
-	}
-	u.LogInfluxReport(m)
-	return nil
-}
-
-// LogInfluxReport writes a log message after exporting to influxdb.
-func (u *UnifiPoller) LogInfluxReport(m *influxunifi.Metrics) {
-	var fields, points int
-	for _, p := range m.Points() {
-		points++
-		i, _ := p.Fields()
-		fields += len(i)
-	}
-	idsMsg := ""
-	if u.Config.CollectIDS {
-		idsMsg = fmt.Sprintf("IDS Events: %d, ", len(m.IDSList))
-	}
-	u.Logf("UniFi Measurements Recorded. Sites: %d, Clients: %d, "+
-		"Wireless APs: %d, Gateways: %d, Switches: %d, %sPoints: %d, Fields: %d",
-		len(m.Sites), len(m.Clients), len(m.UAPs),
-		len(m.UDMs)+len(m.USGs), len(m.USWs), idsMsg, points, fields)
 }
 
 // GetFilteredSites returns a list of sites to fetch data for.

@@ -9,8 +9,8 @@ import (
 	"github.com/prometheus/client_golang/prometheus"
 )
 
-// UnifiCollectorOpts defines the data needed to collect and report UniFi Metrics.
-type UnifiCollectorOpts struct {
+// UnifiCollectorCnfg defines the data needed to collect and report UniFi Metrics.
+type UnifiCollectorCnfg struct {
 	// If non-empty, each of the collected metrics is prefixed by the
 	// provided string and an underscore ("_").
 	Namespace string
@@ -27,7 +27,7 @@ type UnifiCollectorOpts struct {
 }
 
 type unifiCollector struct {
-	opts   UnifiCollectorOpts
+	Config UnifiCollectorCnfg
 	Client *client
 	UAP    *uap
 	USG    *usg
@@ -46,13 +46,13 @@ type metricExports struct {
 
 // NewUnifiCollector returns a prometheus collector that will export any available
 // UniFi metrics. You must provide a collection function in the opts.
-func NewUnifiCollector(opts UnifiCollectorOpts) prometheus.Collector {
+func NewUnifiCollector(opts UnifiCollectorCnfg) prometheus.Collector {
 	if opts.CollectFn == nil {
 		panic("nil collector function")
 	}
 
 	return &unifiCollector{
-		opts:   opts,
+		Config: opts,
 		Client: descClient(opts.Namespace),
 		UAP:    descUAP(opts.Namespace),
 		USG:    descUSG(opts.Namespace),
@@ -84,7 +84,7 @@ func (u *unifiCollector) Describe(ch chan<- *prometheus.Desc) {
 	describe(u.USW)
 	describe(u.UDM)
 	describe(u.Site)
-	if u.opts.CollectIDS {
+	if u.Config.CollectIDS {
 		describe(u.IDS)
 	}
 }
@@ -92,7 +92,7 @@ func (u *unifiCollector) Describe(ch chan<- *prometheus.Desc) {
 // Collect satisifes the prometheus Collector. This runs the input method to get
 // the current metrics (from another package) then exports them for prometheus.
 func (u *unifiCollector) Collect(ch chan<- prometheus.Metric) {
-	m := u.opts.CollectFn()
+	m := u.Config.CollectFn()
 	if m == nil {
 		return
 	}
@@ -103,7 +103,7 @@ func (u *unifiCollector) Collect(ch chan<- prometheus.Metric) {
 	for _, asset := range m.Sites {
 		u.export(ch, u.exportSite(asset), m.TS)
 	}
-	if u.opts.CollectIDS {
+	if u.Config.CollectIDS {
 		for _, asset := range m.IDSList {
 			u.export(ch, u.exportIDS(asset), m.TS)
 		}
@@ -131,7 +131,7 @@ func (u *unifiCollector) export(ch chan<- prometheus.Metric, exports []*metricEx
 	for _, e := range exports {
 		v, ok := e.Value.(float64)
 		if !ok {
-			if u.opts.ReportErrors {
+			if u.Config.ReportErrors {
 				ch <- prometheus.NewInvalidMetric(e.Desc, fmt.Errorf("not a number"))
 			}
 			return

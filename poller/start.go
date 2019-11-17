@@ -11,7 +11,7 @@ import (
 	"time"
 
 	"github.com/davidnewhall/unifi-poller/promunifi"
-	client "github.com/influxdata/influxdb1-client/v2"
+	influx "github.com/influxdata/influxdb1-client/v2"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/spf13/pflag"
@@ -100,7 +100,7 @@ func (u *UnifiPoller) Run() (err error) {
 	case "prometheus", "exporter":
 		u.Logf("Exporting Measurements at https://%s/metrics for Prometheus", u.Config.HTTPListen)
 		http.Handle("/metrics", promhttp.Handler())
-		prometheus.MustRegister(promunifi.NewUnifiCollector(promunifi.UnifiCollectorOpts{
+		prometheus.MustRegister(promunifi.NewUnifiCollector(promunifi.UnifiCollectorCnfg{
 			Namespace:    "unifi",
 			CollectFn:    u.ExportMetrics,
 			ReportErrors: true,
@@ -121,7 +121,7 @@ func (u *UnifiPoller) Run() (err error) {
 
 // GetInfluxDB returns an InfluxDB interface.
 func (u *UnifiPoller) GetInfluxDB() (err error) {
-	u.Influx, err = client.NewHTTPClient(client.HTTPConfig{
+	u.Influx, err = influx.NewHTTPClient(influx.HTTPConfig{
 		Addr:      u.Config.InfluxURL,
 		Username:  u.Config.InfluxUser,
 		Password:  u.Config.InfluxPass,
