@@ -179,7 +179,6 @@ func (u *unifiCollector) exportClient(c *unifi.Client) []*metricExports {
 
 	return []*metricExports{
 		{u.Client.Anomalies, prometheus.CounterValue, c.Anomalies, labels},
-		{u.Client.Anomalies, prometheus.CounterValue, c.Anomalies, labels},
 		{u.Client.BytesR, prometheus.GaugeValue, c.BytesR, labels},
 		{u.Client.CCQ, prometheus.GaugeValue, c.Ccq, labels},
 		{u.Client.Noise, prometheus.GaugeValue, c.Noise, labels},
@@ -203,11 +202,11 @@ func (u *unifiCollector) exportClient(c *unifi.Client) []*metricExports {
 		{u.Client.WiredTxBytes, prometheus.CounterValue, c.TxRate, labels},
 		{u.Client.WiredTxBytesR, prometheus.GaugeValue, c.WiredTxBytesR, labels},
 		{u.Client.WiredTxPackets, prometheus.CounterValue, c.WiredTxPackets, labels},
-		{u.Client.DpiStatsApp, prometheus.GaugeValue, c.DpiStats.App, labels},
-		{u.Client.DpiStatsCat, prometheus.GaugeValue, c.DpiStats.Cat, labels},
-		{u.Client.DpiStatsRxBytes, prometheus.CounterValue, c.DpiStats.RxBytes, labels},
-		{u.Client.DpiStatsRxPackets, prometheus.CounterValue, c.DpiStats.RxPackets, labels},
-		{u.Client.DpiStatsTxBytes, prometheus.CounterValue, c.DpiStats.TxBytes, labels},
-		{u.Client.DpiStatsTxPackets, prometheus.CounterValue, c.DpiStats.TxPackets, labels},
+		{u.Client.DpiStatsApp, prometheus.GaugeValue, c.DpiStats.App.Val, labels},
+		{u.Client.DpiStatsCat, prometheus.GaugeValue, c.DpiStats.Cat.Val, labels},
+		{u.Client.DpiStatsRxBytes, prometheus.CounterValue, c.DpiStats.RxBytes.Val, labels},
+		{u.Client.DpiStatsRxPackets, prometheus.CounterValue, c.DpiStats.RxPackets.Val, labels},
+		{u.Client.DpiStatsTxBytes, prometheus.CounterValue, c.DpiStats.TxBytes.Val, labels},
+		{u.Client.DpiStatsTxPackets, prometheus.CounterValue, c.DpiStats.TxPackets.Val, labels},
 	}
 }
