@@ -99,19 +99,14 @@ func (u *UnifiPoller) Run() (err error) {
 
 	case "prometheus", "exporter":
 		u.Logf("Exporting Measurements at https://%s/metrics for Prometheus", u.Config.HTTPListen)
-		u.Config.Mode = "http exporter"
-		http.Handle("/metrics", http.HandlerFunc(u.PromHandler))
+		http.Handle("/metrics", promhttp.Handler())
 		prometheus.MustRegister(promunifi.NewUnifiCollector(promunifi.UnifiCollectorOpts{
+			Namespace:    "unifi",
 			CollectFn:    u.ExportMetrics,
 			ReportErrors: true,
-			Namespace:    "unifi",
 			CollectIDS:   true,
 		}))
-		err = http.ListenAndServe(u.Config.HTTPListen, nil)
-		if err != http.ErrServerClosed {
-			return err
-		}
-		return nil
+		return http.ListenAndServe(u.Config.HTTPListen, nil)
 
 	default:
 		if err = u.GetInfluxDB(); err != nil {
@@ -137,12 +132,6 @@ func (u *UnifiPoller) GetInfluxDB() (err error) {
 	}
 
 	return nil
-}
-
-// PromHandler logs /metrics requests and serves them with the prometheus handler.
-func (u *UnifiPoller) PromHandler(w http.ResponseWriter, r *http.Request) {
-	u.LogDebugf("/metrics endpoint polled by %v", r.RemoteAddr)
-	promhttp.Handler().ServeHTTP(w, r)
 }
 
 // GetUnifi returns a UniFi controller interface.
