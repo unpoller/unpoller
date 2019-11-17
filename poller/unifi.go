@@ -6,7 +6,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/davidnewhall/unifi-poller/influx"
+	"github.com/davidnewhall/unifi-poller/influxunifi"
 	"github.com/davidnewhall/unifi-poller/metrics"
 	client "github.com/influxdata/influxdb1-client/v2"
 	"golift.io/unifi"
@@ -90,7 +90,7 @@ func (u *UnifiPoller) CollectAndProcess(process func(*metrics.Metrics) error) er
 }
 
 // ExportMetrics updates the internal metrics provided via
-// HTTP at /metrics for prometheus collection.
+// HTTP at /metrics for prometheus collection. This is run by Prometheus.
 func (u *UnifiPoller) ExportMetrics() *metrics.Metrics {
 	if u.Config.ReAuth {
 		u.LogDebugf("Re-authenticating to UniFi Controller")
@@ -100,7 +100,7 @@ func (u *UnifiPoller) ExportMetrics() *metrics.Metrics {
 			return nil
 		}
 	}
-
+	u.LastCheck = time.Now()
 	m, err := u.CollectMetrics()
 	if err != nil {
 		u.LogErrorf("collecting metrics: %v", err)
@@ -177,7 +177,7 @@ func (u *UnifiPoller) AugmentMetrics(metrics *metrics.Metrics) {
 // This creates an InfluxDB writer, and returns an error if the write fails.
 func (u *UnifiPoller) ReportMetrics(metrics *metrics.Metrics) error {
 	// Batch (and send) all the points.
-	m := &influx.Metrics{Metrics: metrics}
+	m := &influxunifi.Metrics{Metrics: metrics}
 	// Make a new Influx Points Batcher.
 	var err error
 	m.BatchPoints, err = client.NewBatchPoints(client.BatchPointsConfig{Database: u.Config.InfluxDB})
@@ -195,7 +195,7 @@ func (u *UnifiPoller) ReportMetrics(metrics *metrics.Metrics) error {
 }
 
 // LogInfluxReport writes a log message after exporting to influxdb.
-func (u *UnifiPoller) LogInfluxReport(m *influx.Metrics) {
+func (u *UnifiPoller) LogInfluxReport(m *influxunifi.Metrics) {
 	var fields, points int
 	for _, p := range m.Points() {
 		points++
