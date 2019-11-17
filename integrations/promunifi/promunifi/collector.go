@@ -29,12 +29,12 @@ type UnifiCollectorOpts struct {
 type unifiCollector struct {
 	opts   UnifiCollectorOpts
 	Client *client
-	//	UAP *UAP
-	//	USG *USG
-	//	USW *USW
-	//	UDM *UDM
-	//	IDS *IDS
-	//	Site *Site
+	UAP    *uap
+	USG    *usg
+	USW    *usw
+	UDM    *udm
+	IDS    *ids
+	Site   *site
 }
 
 type metricExports struct {
@@ -53,12 +53,12 @@ func NewUnifiCollector(opts UnifiCollectorOpts) prometheus.Collector {
 	return &unifiCollector{
 		opts:   opts,
 		Client: descClient(opts.Namespace),
-		//		UAP:    descUAP(opts.Namespace),
-		//		USG:    descUSG(opts.Namespace),
-		//    USW:    descUSW(opts.Namespace),
-		//		UDM:    descUDM(opts.Namespace),
-		//		Site:   descSite(opts.Namespace),
-		//		IDS:    descIDS(opts.Namespace),
+		UAP:    descUAP(opts.Namespace),
+		USG:    descUSG(opts.Namespace),
+		USW:    descUSW(opts.Namespace),
+		UDM:    descUDM(opts.Namespace),
+		Site:   descSite(opts.Namespace),
+		IDS:    descIDS(opts.Namespace),
 	}
 }
 
@@ -66,7 +66,8 @@ func NewUnifiCollector(opts UnifiCollectorOpts) prometheus.Collector {
 // metric descriptions that this packages produces.
 func (u *unifiCollector) Describe(ch chan<- *prometheus.Desc) {
 	describe := func(from interface{}) {
-		v := reflect.ValueOf(from)
+		v := reflect.Indirect(reflect.ValueOf(from))
+
 		// Loop each struct member and send it to the provided channel.
 		for i := 0; i < v.NumField(); i++ {
 			desc, ok := v.Field(i).Interface().(*prometheus.Desc)
@@ -76,20 +77,23 @@ func (u *unifiCollector) Describe(ch chan<- *prometheus.Desc) {
 		}
 	}
 	describe(u.Client)
-	//	describe(u.UAP)
-	//	describe(u.USG)
-	//	describe(u.USW)
-	//	describe(u.UDM)
-	//	describe(u.Site)
-	// if u.opts.CollectIDS {
-	//	describe(u.IDS)
-	// }
+	describe(u.UAP)
+	describe(u.USG)
+	describe(u.USW)
+	describe(u.UDM)
+	describe(u.Site)
+	if u.opts.CollectIDS {
+		describe(u.IDS)
+	}
 }
 
 // Collect satisifes the prometheus Collector. This runs the input method to get
 // the current metrics (from another package) then exports them for prometheus.
 func (u *unifiCollector) Collect(ch chan<- prometheus.Metric) {
 	m := u.opts.CollectFn()
+	if m == nil {
+		return
+	}
 
 	for _, asset := range m.Clients {
 		u.export(ch, u.exportClient(asset), m.TS)
