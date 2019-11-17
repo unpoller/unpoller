@@ -47,7 +47,7 @@ func descUSW(ns string) *usw {
 	labels := []string{"site_name", "mac", "model", "name", "serial", "site_id",
 		"type", "version", "device_id", "oid"}
 	// Copy labels, and replace last four with different names.
-	labelP := append(append([]string(nil), labels[:6]...),
+	labelP := append(append([]string{}, labels[:6]...),
 		"port_num", "port_name", "port_mac", "port_ip")
 
 	return &usw{
@@ -107,7 +107,7 @@ func (u *unifiCollector) exportUSW(s *unifi.USW) []*metricExports {
 	// Per-port data on the switch
 	for _, p := range s.PortTable {
 		// Copy labels, and replace last four with different data.
-		l := append(append([]string(nil), labels[:6]...), p.PortIdx.Txt, p.Name, p.Mac, p.IP)
+		l := append(append([]string{}, labels[:6]...), p.PortIdx.Txt, p.Name, p.Mac, p.IP)
 		m = append(m, &metricExports{u.USW.PoeCurrent, prometheus.GaugeValue, p.PoeCurrent, l})
 		m = append(m, &metricExports{u.USW.PoePower, prometheus.GaugeValue, p.PoePower, l})
 		m = append(m, &metricExports{u.USW.PoeVoltage, prometheus.GaugeValue, p.PoeVoltage, l})

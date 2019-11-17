@@ -103,7 +103,7 @@ func (u *UnifiPoller) Run() (err error) {
 		prometheus.MustRegister(promunifi.NewUnifiCollector(promunifi.UnifiCollectorCnfg{
 			Namespace:    defaultNamespace, // XXX: pass this in from config.
 			CollectFn:    u.ExportMetrics,
-			LoggerFn:     u.LogExportReport,
+			LoggingFn:    u.LogExportReport,
 			CollectIDS:   u.Config.CollectIDS,
 			ReportErrors: true, // XXX: Does this need to be configurable?
 		}))
@@ -113,7 +113,6 @@ func (u *UnifiPoller) Run() (err error) {
 		if err = u.GetInfluxDB(); err != nil {
 			return err
 		}
-
 		u.Logf("Logging Measurements to InfluxDB at %s as user %s", u.Config.InfluxURL, u.Config.InfluxUser)
 		u.Config.Mode = "influx poller"
 		return u.PollController()
