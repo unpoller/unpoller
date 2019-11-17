@@ -104,7 +104,7 @@ is provided so the application can be easily adapted to any environment.
         * Value: prometheus
         In this mode the application opens an http interface and exports the
         measurements at /metrics for collection by prometheus. Enabling this
-        mode disables InfluxDB usage entirely.
+        mode disables InfluxDB usage entirely. This is BETA.
 
     http_listen            default: 0.0.0.0:61317
         This option controls the IP and port the http listener uses when the
