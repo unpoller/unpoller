@@ -131,10 +131,15 @@ func (u *unifiCollector) export(ch chan<- prometheus.Metric, exports []*metricEx
 	for _, e := range exports {
 		v, ok := e.Value.(float64)
 		if !ok {
-			if u.Config.ReportErrors {
-				ch <- prometheus.NewInvalidMetric(e.Desc, fmt.Errorf("not a number"))
+			j, ok := e.Value.(int64)
+			v = float64(j)
+			if !ok {
+				//			log.Printf("not a number: %v %v", e.Value, e.Desc.String())
+				if u.Config.ReportErrors {
+					ch <- prometheus.NewInvalidMetric(e.Desc, fmt.Errorf("not a number: %v", e.Value))
+				}
+				continue
 			}
-			return
 		}
 		ch <- prometheus.NewMetricWithTimestamp(ts, prometheus.MustNewConstMetric(e.Desc, e.ValueType, v, e.Labels...))
 	}
