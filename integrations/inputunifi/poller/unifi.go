@@ -100,18 +100,14 @@ func (u *UnifiPoller) ExportMetrics() *metrics.Metrics {
 			return nil
 		}
 	}
-	metrics, err := u.CollectMetrics()
+
+	m, err := u.CollectMetrics()
 	if err != nil {
 		u.LogErrorf("collecting metrics: %v", err)
 		return nil
 	}
-	u.AugmentMetrics(metrics)
-	u.LogExportReport(metrics)
-	return metrics
-}
+	u.AugmentMetrics(m)
 
-// LogExportReport writes a log line after exporting metrics via HTTP.
-func (u *UnifiPoller) LogExportReport(m *metrics.Metrics) {
 	idsMsg := ""
 	if u.Config.CollectIDS {
 		idsMsg = fmt.Sprintf(", IDS Events: %d, ", len(m.IDSList))
@@ -120,6 +116,8 @@ func (u *UnifiPoller) LogExportReport(m *metrics.Metrics) {
 		"Wireless APs: %d, Gateways: %d, Switches: %d%s",
 		len(m.Sites), len(m.Clients), len(m.UAPs),
 		len(m.UDMs)+len(m.USGs), len(m.USWs), idsMsg)
+
+	return m
 }
 
 // CollectMetrics grabs all the measurements from a UniFi controller and returns them.
