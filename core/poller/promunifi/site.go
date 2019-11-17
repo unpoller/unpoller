@@ -34,106 +34,37 @@ type site struct {
 
 // XXX: The help values can be more verbose.
 func descSite(ns string) *site {
+	if ns += "_site_"; ns == "_site_" {
+		ns = "site_"
+	}
+
 	labels := []string{"name", "desc", "site_name", "subsystem", "status", "gwversion"}
-	ns2 := "site"
 
 	return &site{
-		NumUser: prometheus.NewDesc(
-			prometheus.BuildFQName(ns, ns2, "NumUser"),
-			"NumUser", labels, nil,
-		),
-		NumGuest: prometheus.NewDesc(
-			prometheus.BuildFQName(ns, ns2, "NumGuest"),
-			"NumGuest", labels, nil,
-		),
-		NumIot: prometheus.NewDesc(
-			prometheus.BuildFQName(ns, ns2, "NumIot"),
-			"NumIot", labels, nil,
-		),
-		TxBytesR: prometheus.NewDesc(
-			prometheus.BuildFQName(ns, ns2, "TxBytesR"),
-			"TxBytesR", labels, nil,
-		),
-		RxBytesR: prometheus.NewDesc(
-			prometheus.BuildFQName(ns, ns2, "RxBytesR"),
-			"RxBytesR", labels, nil,
-		),
-		NumAp: prometheus.NewDesc(
-			prometheus.BuildFQName(ns, ns2, "NumAp"),
-			"NumAp", labels, nil,
-		),
-		NumAdopted: prometheus.NewDesc(
-			prometheus.BuildFQName(ns, ns2, "NumAdopted"),
-			"NumAdopted", labels, nil,
-		),
-		NumDisabled: prometheus.NewDesc(
-			prometheus.BuildFQName(ns, ns2, "NumDisabled"),
-			"NumDisabled", labels, nil,
-		),
-		NumDisconnected: prometheus.NewDesc(
-			prometheus.BuildFQName(ns, ns2, "NumDisconnected"),
-			"NumDisconnected", labels, nil,
-		),
-		NumPending: prometheus.NewDesc(
-			prometheus.BuildFQName(ns, ns2, "NumPending"),
-			"NumPending", labels, nil,
-		),
-		NumGw: prometheus.NewDesc(
-			prometheus.BuildFQName(ns, ns2, "NumGw"),
-			"NumGw", labels, nil,
-		),
-		NumSw: prometheus.NewDesc(
-			prometheus.BuildFQName(ns, ns2, "NumSw"),
-			"NumSw", labels, nil,
-		),
-		NumSta: prometheus.NewDesc(
-			prometheus.BuildFQName(ns, ns2, "NumSta"),
-			"NumSta", labels, nil,
-		),
-		Latency: prometheus.NewDesc(
-			prometheus.BuildFQName(ns, ns2, "Latency"),
-			"Latency", labels, nil,
-		),
-		Drops: prometheus.NewDesc(
-			prometheus.BuildFQName(ns, ns2, "Drops"),
-			"Drops", labels, nil,
-		),
-		XputUp: prometheus.NewDesc(
-			prometheus.BuildFQName(ns, ns2, "XputUp"),
-			"XputUp", labels, nil,
-		),
-		XputDown: prometheus.NewDesc(
-			prometheus.BuildFQName(ns, ns2, "XputDown"),
-			"XputDown", labels, nil,
-		),
-		SpeedtestPing: prometheus.NewDesc(
-			prometheus.BuildFQName(ns, ns2, "SpeedtestPing"),
-			"SpeedtestPing", labels, nil,
-		),
-		RemoteUserNumActive: prometheus.NewDesc(
-			prometheus.BuildFQName(ns, ns2, "RemoteUserNumActive"),
-			"RemoteUserNumActive", labels, nil,
-		),
-		RemoteUserNumInactive: prometheus.NewDesc(
-			prometheus.BuildFQName(ns, ns2, "RemoteUserNumInactive"),
-			"RemoteUserNumInactive", labels, nil,
-		),
-		RemoteUserRxBytes: prometheus.NewDesc(
-			prometheus.BuildFQName(ns, ns2, "RemoteUserRxBytes"),
-			"RemoteUserRxBytes", labels, nil,
-		),
-		RemoteUserTxBytes: prometheus.NewDesc(
-			prometheus.BuildFQName(ns, ns2, "RemoteUserTxBytes"),
-			"RemoteUserTxBytes", labels, nil,
-		),
-		RemoteUserRxPackets: prometheus.NewDesc(
-			prometheus.BuildFQName(ns, ns2, "RemoteUserRxPackets"),
-			"RemoteUserRxPackets", labels, nil,
-		),
-		RemoteUserTxPackets: prometheus.NewDesc(
-			prometheus.BuildFQName(ns, ns2, "RemoteUserTxPackets"),
-			"RemoteUserTxPackets", labels, nil,
-		),
+		NumUser:               prometheus.NewDesc(ns+"NumUser", "NumUser", labels, nil),
+		NumGuest:              prometheus.NewDesc(ns+"NumGuest", "NumGuest", labels, nil),
+		NumIot:                prometheus.NewDesc(ns+"NumIot", "NumIot", labels, nil),
+		TxBytesR:              prometheus.NewDesc(ns+"TxBytesR", "TxBytesR", labels, nil),
+		RxBytesR:              prometheus.NewDesc(ns+"RxBytesR", "RxBytesR", labels, nil),
+		NumAp:                 prometheus.NewDesc(ns+"NumAp", "NumAp", labels, nil),
+		NumAdopted:            prometheus.NewDesc(ns+"NumAdopted", "NumAdopted", labels, nil),
+		NumDisabled:           prometheus.NewDesc(ns+"NumDisabled", "NumDisabled", labels, nil),
+		NumDisconnected:       prometheus.NewDesc(ns+"NumDisconnected", "NumDisconnected", labels, nil),
+		NumPending:            prometheus.NewDesc(ns+"NumPending", "NumPending", labels, nil),
+		NumGw:                 prometheus.NewDesc(ns+"NumGw", "NumGw", labels, nil),
+		NumSw:                 prometheus.NewDesc(ns+"NumSw", "NumSw", labels, nil),
+		NumSta:                prometheus.NewDesc(ns+"NumSta", "NumSta", labels, nil),
+		Latency:               prometheus.NewDesc(ns+"Latency", "Latency", labels, nil),
+		Drops:                 prometheus.NewDesc(ns+"Drops", "Drops", labels, nil),
+		XputUp:                prometheus.NewDesc(ns+"XputUp", "XputUp", labels, nil),
+		XputDown:              prometheus.NewDesc(ns+"XputDown", "XputDown", labels, nil),
+		SpeedtestPing:         prometheus.NewDesc(ns+"SpeedtestPing", "SpeedtestPing", labels, nil),
+		RemoteUserNumActive:   prometheus.NewDesc(ns+"RemoteUserNumActive", "RemoteUserNumActive", labels, nil),
+		RemoteUserNumInactive: prometheus.NewDesc(ns+"RemoteUserNumInactive", "RemoteUserNumInactive", labels, nil),
+		RemoteUserRxBytes:     prometheus.NewDesc(ns+"RemoteUserRxBytes", "RemoteUserRxBytes", labels, nil),
+		RemoteUserTxBytes:     prometheus.NewDesc(ns+"RemoteUserTxBytes", "RemoteUserTxBytes", labels, nil),
+		RemoteUserRxPackets:   prometheus.NewDesc(ns+"RemoteUserRxPackets", "RemoteUserRxPackets", labels, nil),
+		RemoteUserTxPackets:   prometheus.NewDesc(ns+"RemoteUserTxPackets", "RemoteUserTxPackets", labels, nil),
 	}
 }
 
