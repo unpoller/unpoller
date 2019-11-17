@@ -8,7 +8,7 @@ import (
 )
 
 // ExportMetrics updates the internal metrics provided via
-// HTTP at /metrics for prometheus collection. This is run by Prometheus.
+// HTTP at /metrics for prometheus collection. This is run by Prometheus CollectFn.
 func (u *UnifiPoller) ExportMetrics() (*metrics.Metrics, error) {
 	if u.Config.ReAuth {
 		u.LogDebugf("Re-authenticating to UniFi Controller")
@@ -28,7 +28,7 @@ func (u *UnifiPoller) ExportMetrics() (*metrics.Metrics, error) {
 	return m, nil
 }
 
-// LogExportReport is called after prometheus exports metrics. This is run by Prometheus.
+// LogExportReport is called after prometheus exports metrics. This is run by Prometheus as LoggingFn
 func (u *UnifiPoller) LogExportReport(m *metrics.Metrics, count int64) {
 	idsMsg := ""
 	if u.Config.CollectIDS {
