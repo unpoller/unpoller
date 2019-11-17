@@ -22,7 +22,9 @@ type UnifiCollectorCnfg struct {
 	ReportErrors bool
 	// This function is passed to the Collect() method. The Collect method runs This
 	// function to retreive the latest UniFi
-	CollectFn func() *metrics.Metrics
+	CollectFn func() (*metrics.Metrics, error)
+	// provide a logger function if you want to run a routine *after* prometheus checks in.
+	LoggerFn func(*metrics.Metrics, int64)
 	// Setting this to true will enable IDS exports.
 	CollectIDS bool
 }
@@ -93,61 +95,46 @@ func (u *unifiCollector) Describe(ch chan<- *prometheus.Desc) {
 // Collect satisifes the prometheus Collector. This runs the input method to get
 // the current metrics (from another package) then exports them for prometheus.
 func (u *unifiCollector) Collect(ch chan<- prometheus.Metric) {
-	m := u.Config.CollectFn()
-	if m == nil {
+	var count int64
+	m, err := u.Config.CollectFn()
+	if err != nil {
+		ch <- prometheus.NewInvalidMetric(prometheus.NewInvalidDesc(fmt.Errorf("metric fetch failed")), err)
 		return
 	}
 
 	for _, asset := range m.Clients {
-		u.export(ch, u.exportClient(asset), m.TS)
+		count += u.export(ch, u.exportClient(asset), m.TS)
 	}
 	for _, asset := range m.Sites {
-		u.export(ch, u.exportSite(asset), m.TS)
+		count += u.export(ch, u.exportSite(asset), m.TS)
 	}
 	if u.Config.CollectIDS {
 		for _, asset := range m.IDSList {
-			u.export(ch, u.exportIDS(asset), m.TS)
+			count += u.export(ch, u.exportIDS(asset), m.TS)
 		}
 	}
 
-	if m.Devices == nil {
-		return
+	if m.Devices != nil {
+		for _, asset := range m.Devices.UAPs {
+			count += u.export(ch, u.exportUAP(asset), m.TS)
+		}
+		for _, asset := range m.Devices.USGs {
+			count += u.export(ch, u.exportUSG(asset), m.TS)
+		}
+		for _, asset := range m.Devices.USWs {
+			count += u.export(ch, u.exportUSW(asset), m.TS)
+		}
+		for _, asset := range m.Devices.UDMs {
+			count += u.export(ch, u.exportUDM(asset), m.TS)
+		}
 	}
 
-	for _, asset := range m.Devices.UAPs {
-		u.export(ch, u.exportUAP(asset), m.TS)
-	}
-	for _, asset := range m.Devices.USGs {
-		u.export(ch, u.exportUSG(asset), m.TS)
-	}
-	for _, asset := range m.Devices.USWs {
-		u.export(ch, u.exportUSW(asset), m.TS)
-	}
-	for _, asset := range m.Devices.UDMs {
-		u.export(ch, u.exportUDM(asset), m.TS)
+	if u.Config.LoggerFn != nil {
+		u.Config.LoggerFn(m, count)
 	}
 }
 
-/*
-func (u *unifiCollector) export(ch chan<- prometheus.Metric, exports []*metricExports, ts time.Time) {
-	for _, e := range exports {
-		v, ok := e.Value.(float64)
-		if !ok {
-			j, ok := e.Value.(int64)
-			if !ok {
-				//			log.Printf("not a number: %v %v", e.Value, e.Desc.String())
-				if u.Config.ReportErrors {
-					ch <- prometheus.NewInvalidMetric(e.Desc, fmt.Errorf("not a number: %v", e.Value))
-				}
-				continue
-			}
-			v = float64(j)
-		}
-		ch <- prometheus.NewMetricWithTimestamp(ts, prometheus.MustNewConstMetric(e.Desc, e.ValueType, v, e.Labels...))
-	}
-}*/
-
-func (u *unifiCollector) export(ch chan<- prometheus.Metric, exports []*metricExports, ts time.Time) {
+func (u *unifiCollector) export(ch chan<- prometheus.Metric, exports []*metricExports, ts time.Time) (count int64) {
 	for _, e := range exports {
 		var val float64
 		switch v := e.Value.(type) {
@@ -163,7 +150,8 @@ func (u *unifiCollector) export(ch chan<- prometheus.Metric, exports []*metricEx
 			}
 			continue
 		}
+		count++
 		ch <- prometheus.NewMetricWithTimestamp(ts, prometheus.MustNewConstMetric(e.Desc, e.ValueType, val, e.Labels...))
 	}
-
+	return
 }

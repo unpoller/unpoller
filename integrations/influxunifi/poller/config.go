@@ -24,6 +24,7 @@ var Version = "development"
 
 const (
 	// App defaults in case they're missing from the config.
+	defaultNamespace  = "unifi"
 	defaultInterval   = 30 * time.Second
 	defaultInfluxDB   = "unifi"
 	defaultInfluxUser = "unifi"
