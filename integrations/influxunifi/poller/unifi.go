@@ -13,7 +13,7 @@ import (
 // PollController runs forever, polling UniFi
 // and pushing to influx OR exporting for prometheus.
 // This is started by Run() after everything checks out.
-func (u *UnifiPoller) PollController(process func(*metrics.Metrics) error) error {
+func (u *UnifiPoller) PollController() error {
 	interval := u.Config.Interval.Round(time.Second)
 	log.Printf("[INFO] Everything checks out! Poller started in %v mode, interval: %v", u.Config.Mode, interval)
 	ticker := time.NewTicker(interval)
@@ -28,7 +28,7 @@ func (u *UnifiPoller) PollController(process func(*metrics.Metrics) error) error
 		}
 		if err == nil {
 			// Only run this if the authentication procedure didn't return error.
-			_ = u.CollectAndProcess(process)
+			_ = u.CollectAndProcess()
 		}
 		if u.errorCount > 0 {
 			return fmt.Errorf("too many errors, stopping poller")
@@ -68,23 +68,6 @@ FIRST:
 		u.LogErrorf("configured site not found on controller: %v", s)
 	}
 	return nil
-}
-
-// CollectAndProcess collects measurements and then passese them into the
-// provided method. The method is either an http exporter or an influxdb update.
-// Can be called once or in a ticker loop. This function and all the ones below
-// handle their own logging. An error is returned so the calling function may
-// determine if there was a read or write error and act on it. This is currently
-// called in two places in this library. One returns an error, one does not.
-func (u *UnifiPoller) CollectAndProcess(process func(*metrics.Metrics) error) error {
-	metrics, err := u.CollectMetrics()
-	if err != nil {
-		return err
-	}
-	u.AugmentMetrics(metrics)
-	err = process(metrics)
-	u.LogError(err, "processing metrics")
-	return err
 }
 
 // CollectMetrics grabs all the measurements from a UniFi controller and returns them.
