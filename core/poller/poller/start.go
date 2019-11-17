@@ -10,7 +10,9 @@ import (
 	"strings"
 	"time"
 
+	"github.com/davidnewhall/unifi-poller/promunifi"
 	client "github.com/influxdata/influxdb1-client/v2"
+	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/spf13/pflag"
 	"golift.io/unifi"
@@ -98,19 +100,24 @@ func (u *UnifiPoller) Run() (err error) {
 	case "prometheus", "exporter":
 		u.Logf("Exporting Measurements at https://%s/metrics for Prometheus", u.Config.HTTPListen)
 		u.Config.Mode = "http exporter"
-		http.Handle("/metrics", promhttp.Handler())
-		go func() {
-			err = http.ListenAndServe(u.Config.HTTPListen, nil)
-			if err != http.ErrServerClosed {
-				log.Fatalf("[ERROR] http server: %v", err)
-			}
-		}()
-		return u.PollController(u.ExportMetrics)
+		http.Handle("/metrics", http.HandlerFunc(u.PromHandler))
+		prometheus.MustRegister(promunifi.NewUnifiCollector(promunifi.UnifiCollectorOpts{
+			CollectFn:    u.ExportMetrics,
+			ReportErrors: true,
+			Namespace:    "unifi",
+			CollectIDS:   true,
+		}))
+		err = http.ListenAndServe(u.Config.HTTPListen, nil)
+		if err != http.ErrServerClosed {
+			return err
+		}
+		return nil
 
 	default:
 		if err = u.GetInfluxDB(); err != nil {
 			return err
 		}
+
 		u.Logf("Logging Measurements to InfluxDB at %s as user %s", u.Config.InfluxURL, u.Config.InfluxUser)
 		u.Config.Mode = "influx poller"
 		return u.PollController(u.ReportMetrics)
@@ -128,7 +135,14 @@ func (u *UnifiPoller) GetInfluxDB() (err error) {
 	if err != nil {
 		return fmt.Errorf("influxdb: %v", err)
 	}
+
 	return nil
+}
+
+// PromHandler logs /metrics requests and serves them with the prometheus handler.
+func (u *UnifiPoller) PromHandler(w http.ResponseWriter, r *http.Request) {
+	u.LogDebugf("/metrics endpoint polled by %v", r.RemoteAddr)
+	promhttp.Handler().ServeHTTP(w, r)
 }
 
 // GetUnifi returns a UniFi controller interface.
