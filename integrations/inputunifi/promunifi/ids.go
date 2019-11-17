@@ -4,7 +4,7 @@ import (
 	"golift.io/unifi"
 )
 
-/* The IDS data goes into prometheus cleanly. This probably wont happen. */
+/* The IDS data does not go into prometheus cleanly. This probably wont happen. */
 
 type ids struct {
 }
