@@ -8,7 +8,6 @@ import (
 
 	"github.com/davidnewhall/unifi-poller/influx"
 	"github.com/davidnewhall/unifi-poller/metrics"
-	"github.com/davidnewhall/unifi-poller/prometheus"
 	client "github.com/influxdata/influxdb1-client/v2"
 	"golift.io/unifi"
 )
@@ -84,12 +83,43 @@ func (u *UnifiPoller) CollectAndProcess(process func(*metrics.Metrics) error) er
 	if err != nil {
 		return err
 	}
-	if err := u.AugmentMetrics(metrics); err != nil {
-		return err
-	}
+	u.AugmentMetrics(metrics)
 	err = process(metrics)
 	u.LogError(err, "processing metrics")
 	return err
+}
+
+// ExportMetrics updates the internal metrics provided via
+// HTTP at /metrics for prometheus collection.
+func (u *UnifiPoller) ExportMetrics() *metrics.Metrics {
+	if u.Config.ReAuth {
+		u.LogDebugf("Re-authenticating to UniFi Controller")
+		// Some users need to re-auth every interval because the cookie times out.
+		if err := u.Unifi.Login(); err != nil {
+			u.LogError(err, "re-authenticating")
+			return nil
+		}
+	}
+	metrics, err := u.CollectMetrics()
+	if err != nil {
+		u.LogErrorf("collecting metrics: %v", err)
+		return nil
+	}
+	u.AugmentMetrics(metrics)
+	u.LogExportReport(metrics)
+	return metrics
+}
+
+// LogExportReport writes a log line after exporting metrics via HTTP.
+func (u *UnifiPoller) LogExportReport(m *metrics.Metrics) {
+	idsMsg := ""
+	if u.Config.CollectIDS {
+		idsMsg = fmt.Sprintf(", IDS Events: %d, ", len(m.IDSList))
+	}
+	u.Logf("UniFi Measurements Exported. Sites: %d, Clients: %d, "+
+		"Wireless APs: %d, Gateways: %d, Switches: %d%s",
+		len(m.Sites), len(m.Clients), len(m.UAPs),
+		len(m.UDMs)+len(m.USGs), len(m.USWs), idsMsg)
 }
 
 // CollectMetrics grabs all the measurements from a UniFi controller and returns them.
@@ -115,9 +145,9 @@ func (u *UnifiPoller) CollectMetrics() (*metrics.Metrics, error) {
 // AugmentMetrics is our middleware layer between collecting metrics and writing them.
 // This is where we can manipuate the returned data or make arbitrary decisions.
 // This function currently adds parent device names to client metrics.
-func (u *UnifiPoller) AugmentMetrics(metrics *metrics.Metrics) error {
+func (u *UnifiPoller) AugmentMetrics(metrics *metrics.Metrics) {
 	if metrics == nil || metrics.Devices == nil || metrics.Clients == nil {
-		return fmt.Errorf("nil metrics, augment impossible")
+		return
 	}
 	devices := make(map[string]string)
 	bssdIDs := make(map[string]string)
@@ -143,30 +173,6 @@ func (u *UnifiPoller) AugmentMetrics(metrics *metrics.Metrics) error {
 		metrics.Clients[i].GwName = devices[c.GwMac]
 		metrics.Clients[i].RadioDescription = bssdIDs[metrics.Clients[i].Bssid] + metrics.Clients[i].RadioProto
 	}
-	return nil
-}
-
-// ExportMetrics updates the internal metrics provided via
-// HTTP at /metrics for prometheus collection.
-func (u *UnifiPoller) ExportMetrics(metrics *metrics.Metrics) error {
-	m := &prometheus.Metrics{Metrics: metrics}
-	for _, err := range m.ProcessExports() {
-		u.LogError(err, "prometheus.ProcessExports")
-	}
-	u.LogExportReport(m)
-	return nil
-}
-
-// LogExportReport writes a log line after exporting metrics via HTTP.
-func (u *UnifiPoller) LogExportReport(m *prometheus.Metrics) {
-	idsMsg := ""
-	if u.Config.CollectIDS {
-		idsMsg = fmt.Sprintf(", IDS Events: %d, ", len(m.IDSList))
-	}
-	u.Logf("UniFi Measurements Exported. Sites: %d, Clients: %d, "+
-		"Wireless APs: %d, Gateways: %d, Switches: %d%s",
-		len(m.Sites), len(m.Clients), len(m.UAPs),
-		len(m.UDMs)+len(m.USGs), len(m.USWs), idsMsg)
 }
 
 // ReportMetrics batches all the metrics and writes them to InfluxDB.
