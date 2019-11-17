@@ -1,6 +1,6 @@
 // Package influx provides the methods to turn UniFi measurements into influx
 // data-points with appropriate tags and fields.
-package influx
+package influxunifi
 
 import (
 	"github.com/davidnewhall/unifi-poller/metrics"

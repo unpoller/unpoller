@@ -50,6 +50,7 @@ func NewUnifiCollector(opts UnifiCollectorOpts) prometheus.Collector {
 	if opts.CollectFn == nil {
 		panic("nil collector function")
 	}
+
 	return &unifiCollector{
 		opts:   opts,
 		Client: descClient(opts.Namespace),
@@ -76,6 +77,7 @@ func (u *unifiCollector) Describe(ch chan<- *prometheus.Desc) {
 			}
 		}
 	}
+
 	describe(u.Client)
 	describe(u.UAP)
 	describe(u.USG)
