@@ -6,36 +6,36 @@ import (
 )
 
 type usw struct {
-	Uptime        *prometheus.Desc `json:"uptime"`
-	Temperature   *prometheus.Desc `json:"general_temperature"`
-	TotalMaxPower *prometheus.Desc `json:"total_max_power"`
-	FanLevel      *prometheus.Desc `json:"fan_level"`
-	TotalTxBytes  *prometheus.Desc `json:"total_tx_bytes"`
-	TotalRxBytes  *prometheus.Desc `json:"total_rx_bytes"`
-	TotalBytes    *prometheus.Desc `json:"bytes"`
-	NumSta        *prometheus.Desc `json:"num_sta"`
-	UserNumSta    *prometheus.Desc `json:"user-num_sta"`
-	GuestNumSta   *prometheus.Desc `json:"guest-num_sta"`
+	Uptime        *prometheus.Desc
+	Temperature   *prometheus.Desc
+	TotalMaxPower *prometheus.Desc
+	FanLevel      *prometheus.Desc
+	TotalTxBytes  *prometheus.Desc
+	TotalRxBytes  *prometheus.Desc
+	TotalBytes    *prometheus.Desc
+	NumSta        *prometheus.Desc
+	UserNumSta    *prometheus.Desc
+	GuestNumSta   *prometheus.Desc
 	// Port data.
-	PoeCurrent   *prometheus.Desc `json:"poe_current,omitempty"`
-	PoePower     *prometheus.Desc `json:"poe_power,omitempty"`
-	PoeVoltage   *prometheus.Desc `json:"poe_voltage,omitempty"`
-	RxBroadcast  *prometheus.Desc `json:"rx_broadcast"`
-	RxBytes      *prometheus.Desc `json:"rx_bytes"`
-	RxBytesR     *prometheus.Desc `json:"rx_bytes-r"`
-	RxDropped    *prometheus.Desc `json:"rx_dropped"`
-	RxErrors     *prometheus.Desc `json:"rx_errors"`
-	RxMulticast  *prometheus.Desc `json:"rx_multicast"`
-	RxPackets    *prometheus.Desc `json:"rx_packets"`
-	Satisfaction *prometheus.Desc `json:"satisfaction,omitempty"`
-	Speed        *prometheus.Desc `json:"speed"`
-	TxBroadcast  *prometheus.Desc `json:"tx_broadcast"`
-	TxBytes      *prometheus.Desc `json:"tx_bytes"`
-	TxBytesR     *prometheus.Desc `json:"tx_bytes-r"`
-	TxDropped    *prometheus.Desc `json:"tx_dropped"`
-	TxErrors     *prometheus.Desc `json:"tx_errors"`
-	TxMulticast  *prometheus.Desc `json:"tx_multicast"`
-	TxPackets    *prometheus.Desc `json:"tx_packets"`
+	PoeCurrent   *prometheus.Desc
+	PoePower     *prometheus.Desc
+	PoeVoltage   *prometheus.Desc
+	RxBroadcast  *prometheus.Desc
+	RxBytes      *prometheus.Desc
+	RxBytesR     *prometheus.Desc
+	RxDropped    *prometheus.Desc
+	RxErrors     *prometheus.Desc
+	RxMulticast  *prometheus.Desc
+	RxPackets    *prometheus.Desc
+	Satisfaction *prometheus.Desc
+	Speed        *prometheus.Desc
+	TxBroadcast  *prometheus.Desc
+	TxBytes      *prometheus.Desc
+	TxBytesR     *prometheus.Desc
+	TxDropped    *prometheus.Desc
+	TxErrors     *prometheus.Desc
+	TxMulticast  *prometheus.Desc
+	TxPackets    *prometheus.Desc
 }
 
 func descUSW(ns string) *usw {
@@ -52,36 +52,36 @@ func descUSW(ns string) *usw {
 
 	return &usw{
 		// switch data
-		Uptime:        prometheus.NewDesc(ns+"Uptime", "Uptime", labels, nil),
-		Temperature:   prometheus.NewDesc(ns+"Temperature", "Temperature", labels, nil),
-		TotalMaxPower: prometheus.NewDesc(ns+"TotalMaxPower", "TotalMaxPower", labels, nil),
-		FanLevel:      prometheus.NewDesc(ns+"FanLevel", "FanLevel", labels, nil),
-		TotalTxBytes:  prometheus.NewDesc(ns+"TxBytes", "TxBytes", labels, nil),
-		TotalRxBytes:  prometheus.NewDesc(ns+"RxBytes", "RxBytes", labels, nil),
-		TotalBytes:    prometheus.NewDesc(ns+"Bytes", "Bytes", labels, nil),
-		NumSta:        prometheus.NewDesc(ns+"NumSta", "NumSta", labels, nil),
-		UserNumSta:    prometheus.NewDesc(ns+"UserNumSta", "UserNumSta", labels, nil),
-		GuestNumSta:   prometheus.NewDesc(ns+"GuestNumSta", "GuestNumSta", labels, nil),
+		Uptime:        prometheus.NewDesc(ns+"uptime", "Uptime", labels, nil),
+		Temperature:   prometheus.NewDesc(ns+"temperature", "Temperature", labels, nil),
+		TotalMaxPower: prometheus.NewDesc(ns+"max_power_total", "TotalMaxPower", labels, nil),
+		FanLevel:      prometheus.NewDesc(ns+"fan_level", "FanLevel", labels, nil),
+		TotalTxBytes:  prometheus.NewDesc(ns+"tx_bytes_total", "TxBytes", labels, nil),
+		TotalRxBytes:  prometheus.NewDesc(ns+"rx_bytes_total", "RxBytes", labels, nil),
+		TotalBytes:    prometheus.NewDesc(ns+"bytes_total", "Bytes", labels, nil),
+		NumSta:        prometheus.NewDesc(ns+"stations_total", "NumSta", labels, nil),
+		UserNumSta:    prometheus.NewDesc(ns+"stations_user_total", "UserNumSta", labels, nil),
+		GuestNumSta:   prometheus.NewDesc(ns+"stations_guest_total", "GuestNumSta", labels, nil),
 		// per-port data
-		PoeCurrent:   prometheus.NewDesc(pns+"PoeCurrent", "PoeCurrent", labelP, nil),
-		PoePower:     prometheus.NewDesc(pns+"PoePower", "PoePower", labelP, nil),
-		PoeVoltage:   prometheus.NewDesc(pns+"PoeVoltage", "PoeVoltage", labelP, nil),
-		RxBroadcast:  prometheus.NewDesc(pns+"RxBroadcast", "RxBroadcast", labelP, nil),
-		RxBytes:      prometheus.NewDesc(pns+"RxBytes", "RxBytes", labelP, nil),
-		RxBytesR:     prometheus.NewDesc(pns+"RxBytesR", "RxBytesR", labelP, nil),
-		RxDropped:    prometheus.NewDesc(pns+"RxDropped", "RxDropped", labelP, nil),
-		RxErrors:     prometheus.NewDesc(pns+"RxErrors", "RxErrors", labelP, nil),
-		RxMulticast:  prometheus.NewDesc(pns+"RxMulticast", "RxMulticast", labelP, nil),
-		RxPackets:    prometheus.NewDesc(pns+"RxPackets", "RxPackets", labelP, nil),
-		Satisfaction: prometheus.NewDesc(pns+"Satisfaction", "Satisfaction", labelP, nil),
-		Speed:        prometheus.NewDesc(pns+"Speed", "Speed", labelP, nil),
-		TxBroadcast:  prometheus.NewDesc(pns+"TxBroadcast", "TxBroadcast", labelP, nil),
-		TxBytes:      prometheus.NewDesc(pns+"TxBytes", "TxBytes", labelP, nil),
-		TxBytesR:     prometheus.NewDesc(pns+"TxBytesR", "TxBytesR", labelP, nil),
-		TxDropped:    prometheus.NewDesc(pns+"TxDropped", "TxDropped", labelP, nil),
-		TxErrors:     prometheus.NewDesc(pns+"TxErrors", "TxErrors", labelP, nil),
-		TxMulticast:  prometheus.NewDesc(pns+"TxMulticast", "TxMulticast", labelP, nil),
-		TxPackets:    prometheus.NewDesc(pns+"TxPackets", "TxPackets", labelP, nil),
+		PoeCurrent:   prometheus.NewDesc(pns+"poe_current", "PoeCurrent", labelP, nil),
+		PoePower:     prometheus.NewDesc(pns+"poe_power", "PoePower", labelP, nil),
+		PoeVoltage:   prometheus.NewDesc(pns+"poe_voltage", "PoeVoltage", labelP, nil),
+		RxBroadcast:  prometheus.NewDesc(pns+"rx_broadcast_total", "RxBroadcast", labelP, nil),
+		RxBytes:      prometheus.NewDesc(pns+"rx_bytes_total", "RxBytes", labelP, nil),
+		RxBytesR:     prometheus.NewDesc(pns+"rx_bytes_rate", "RxBytesR", labelP, nil),
+		RxDropped:    prometheus.NewDesc(pns+"rx_dropped_total", "RxDropped", labelP, nil),
+		RxErrors:     prometheus.NewDesc(pns+"rx_errors_total", "RxErrors", labelP, nil),
+		RxMulticast:  prometheus.NewDesc(pns+"rx_multicast_total", "RxMulticast", labelP, nil),
+		RxPackets:    prometheus.NewDesc(pns+"rx_packets_total", "RxPackets", labelP, nil),
+		Satisfaction: prometheus.NewDesc(pns+"satisfaction", "Satisfaction", labelP, nil),
+		Speed:        prometheus.NewDesc(pns+"speed", "Speed", labelP, nil),
+		TxBroadcast:  prometheus.NewDesc(pns+"tx_broadcast_total", "TxBroadcast", labelP, nil),
+		TxBytes:      prometheus.NewDesc(pns+"tx_bytes_total", "TxBytes", labelP, nil),
+		TxBytesR:     prometheus.NewDesc(pns+"tx_bytes_rate", "TxBytesR", labelP, nil),
+		TxDropped:    prometheus.NewDesc(pns+"tx_dropped_total", "TxDropped", labelP, nil),
+		TxErrors:     prometheus.NewDesc(pns+"tx_errors_total", "TxErrors", labelP, nil),
+		TxMulticast:  prometheus.NewDesc(pns+"tx_multicast_total", "TxMulticast", labelP, nil),
+		TxPackets:    prometheus.NewDesc(pns+"tx_packets_total", "TxPackets", labelP, nil),
 	}
 }
 
