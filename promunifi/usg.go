@@ -59,7 +59,7 @@ func descUSG(ns string) *usg {
 		ns = "usg_"
 	}
 	labels := []string{"site_name", "mac", "model", "name", "serial", "site_id",
-		"type", "version", "device_id", "oid"}
+		"type", "version", "device_id", "ip"}
 	labelWan := append([]string{"port"}, labels...)
 
 	return &usg{
@@ -113,7 +113,7 @@ func descUSG(ns string) *usg {
 // uplink and port tables structs are ignored. that data should be in other exported fields.
 func (u *unifiCollector) exportUSG(s *unifi.USG) []*metricExports {
 	labels := []string{s.SiteName, s.Mac, s.Model, s.Name, s.Serial, s.SiteID,
-		s.Type, s.Version, s.DeviceID, s.Stat.Gw.Oid}
+		s.Type, s.Version, s.DeviceID, s.IP}
 	labelWan := append([]string{"all"}, labels...)
 
 	// Gateway System Data.
