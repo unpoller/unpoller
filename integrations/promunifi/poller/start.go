@@ -104,7 +104,6 @@ func (u *UnifiPoller) Run() (err error) {
 			Namespace:    defaultNamespace, // XXX: pass this in from config.
 			CollectFn:    u.ExportMetrics,
 			LoggingFn:    u.LogExportReport,
-			CollectIDS:   u.Config.CollectIDS,
 			ReportErrors: true, // XXX: Does this need to be configurable?
 		}))
 		return http.ListenAndServe(u.Config.HTTPListen, nil)
