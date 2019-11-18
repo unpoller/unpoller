@@ -103,31 +103,31 @@ func descUAP(ns string) *uap {
 }
 
 // exportUAP exports Access Point Data
-func (u *unifiCollector) exportUAP(s *unifi.UAP) []*metricExports {
-	labels := []string{s.SiteName, s.Mac, s.Model, s.Name, s.Serial, s.SiteID,
-		s.Type, s.Version, s.DeviceID, s.IP}
+func (u *unifiCollector) exportUAP(a *unifi.UAP) []*metricExports {
+	labels := []string{a.SiteName, a.Mac, a.Model, a.Name, a.Serial, a.SiteID,
+		a.Type, a.Version, a.DeviceID, a.IP}
 
 	// Switch data.
-	m := []*metricExports{
-		{u.UAP.Uptime, prometheus.GaugeValue, s.Uptime, labels},
-		{u.UAP.TotalTxBytes, prometheus.CounterValue, s.TxBytes, labels},
-		{u.UAP.TotalRxBytes, prometheus.CounterValue, s.RxBytes, labels},
-		{u.UAP.TotalBytes, prometheus.CounterValue, s.Bytes, labels},
-		{u.UAP.BytesD, prometheus.CounterValue, s.BytesD, labels}, // not sure if these 3 Ds are counters or gauges.
-		{u.UAP.TxBytesD, prometheus.CounterValue, s.TxBytesD, labels},
-		{u.UAP.RxBytesD, prometheus.CounterValue, s.RxBytesD, labels},
-		{u.UAP.BytesR, prometheus.GaugeValue, s.BytesR, labels},
-		{u.UAP.NumSta, prometheus.GaugeValue, s.NumSta, labels},
-		{u.UAP.UserNumSta, prometheus.GaugeValue, s.UserNumSta, labels},
-		{u.UAP.GuestNumSta, prometheus.GaugeValue, s.GuestNumSta, labels},
-		{u.UAP.Loadavg1, prometheus.GaugeValue, s.SysStats.Loadavg1, labels},
-		{u.UAP.Loadavg5, prometheus.GaugeValue, s.SysStats.Loadavg5, labels},
-		{u.UAP.Loadavg15, prometheus.GaugeValue, s.SysStats.Loadavg15, labels},
-		{u.UAP.MemUsed, prometheus.GaugeValue, s.SysStats.MemUsed, labels},
-		{u.UAP.MemTotal, prometheus.GaugeValue, s.SysStats.MemTotal, labels},
-		{u.UAP.MemBuffer, prometheus.GaugeValue, s.SysStats.MemBuffer, labels},
-		{u.UAP.CPU, prometheus.GaugeValue, s.SystemStats.CPU, labels},
-		{u.UAP.Mem, prometheus.GaugeValue, s.SystemStats.Mem, labels},
+	metrics := []*metricExports{
+		{u.UAP.Uptime, prometheus.GaugeValue, a.Uptime, labels},
+		{u.UAP.TotalTxBytes, prometheus.CounterValue, a.TxBytes, labels},
+		{u.UAP.TotalRxBytes, prometheus.CounterValue, a.RxBytes, labels},
+		{u.UAP.TotalBytes, prometheus.CounterValue, a.Bytes, labels},
+		{u.UAP.BytesD, prometheus.CounterValue, a.BytesD, labels}, // not sure if these 3 Ds are counters or gauges.
+		{u.UAP.TxBytesD, prometheus.CounterValue, a.TxBytesD, labels},
+		{u.UAP.RxBytesD, prometheus.CounterValue, a.RxBytesD, labels},
+		{u.UAP.BytesR, prometheus.GaugeValue, a.BytesR, labels},
+		{u.UAP.NumSta, prometheus.GaugeValue, a.NumSta, labels},
+		{u.UAP.UserNumSta, prometheus.GaugeValue, a.UserNumSta, labels},
+		{u.UAP.GuestNumSta, prometheus.GaugeValue, a.GuestNumSta, labels},
+		{u.UAP.Loadavg1, prometheus.GaugeValue, a.SysStats.Loadavg1, labels},
+		{u.UAP.Loadavg5, prometheus.GaugeValue, a.SysStats.Loadavg5, labels},
+		{u.UAP.Loadavg15, prometheus.GaugeValue, a.SysStats.Loadavg15, labels},
+		{u.UAP.MemUsed, prometheus.GaugeValue, a.SysStats.MemUsed, labels},
+		{u.UAP.MemTotal, prometheus.GaugeValue, a.SysStats.MemTotal, labels},
+		{u.UAP.MemBuffer, prometheus.GaugeValue, a.SysStats.MemBuffer, labels},
+		{u.UAP.CPU, prometheus.GaugeValue, a.SystemStats.CPU, labels},
+		{u.UAP.Mem, prometheus.GaugeValue, a.SystemStats.Mem, labels},
 	}
-	return m
+	return metrics
 }
