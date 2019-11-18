@@ -47,6 +47,7 @@ type usg struct {
 	WanTxDropped   *prometheus.Desc
 	WanTxErrors    *prometheus.Desc
 	WanTxMulticast *prometheus.Desc
+	WanBytesR      *prometheus.Desc
 }
 
 func descUSG(ns string) *usg {
@@ -75,7 +76,7 @@ func descUSG(ns string) *usg {
 		MemTotal:       prometheus.NewDesc(ns+"memory_installed", "System Installed Memory", labels, nil),
 		MemBuffer:      prometheus.NewDesc(ns+"memory_buffer", "System Memory Buffer", labels, nil),
 		CPU:            prometheus.NewDesc(ns+"cpu_utilization", "System CPU % Utilized", labels, nil),
-		Mem:            prometheus.NewDesc(ns+"memory", "System Memory % Utilized", labels, nil), // this may not be %.
+		Mem:            prometheus.NewDesc(ns+"memory_utilization", "System Memory % Utilized", labels, nil), // this may not be %.
 		WanRxPackets:   prometheus.NewDesc(ns+"wan_rx_packets_total", "WAN Receive Packets Total", labelWan, nil),
 		WanRxBytes:     prometheus.NewDesc(ns+"wan_rx_bytes_total", "WAN Receive Bytes Total", labelWan, nil),
 		WanRxDropped:   prometheus.NewDesc(ns+"wan_rx_dropped_total", "WAN Receive Dropped Total", labelWan, nil),
@@ -91,6 +92,7 @@ func descUSG(ns string) *usg {
 		WanTxDropped:   prometheus.NewDesc(ns+"wan_tx_dropped_total", "WAN Transmit Dropped Total", labelWan, nil),
 		WanTxErrors:    prometheus.NewDesc(ns+"wan_tx_errors_total", "WAN Transmit Errors Total", labelWan, nil),
 		WanTxMulticast: prometheus.NewDesc(ns+"wan_tx_multicast_total", "WAN Transmit Multicast Total", labelWan, nil),
+		WanBytesR:      prometheus.NewDesc(ns+"wan_bytes_rate", "WAN Transfer Rate", labelWan, nil),
 		LanRxPackets:   prometheus.NewDesc(ns+"lan_rx_packets_total", "LAN Receive Packets Total", labels, nil),
 		LanRxBytes:     prometheus.NewDesc(ns+"lan_rx_bytes_total", "LAN Receive Bytes Total", labels, nil),
 		LanRxDropped:   prometheus.NewDesc(ns+"lan_rx_dropped_total", "LAN Receive Dropped Total", labels, nil),
@@ -137,30 +139,33 @@ func (u *unifiCollector) exportUSG(s *unifi.USG) []*metricExports {
 		{u.USG.LanTxPackets, prometheus.CounterValue, s.Stat.Gw.LanTxPackets, labels},
 		{u.USG.LanTxBytes, prometheus.CounterValue, s.Stat.Gw.LanTxBytes, labels},
 		{u.USG.LanRxDropped, prometheus.CounterValue, s.Stat.Gw.LanRxDropped, labels},
-		// speed test status in a struct too, get that.
+		// speed test status in a struct too, get that?
 	}
 
-	for _, j := range []unifi.Wan{s.Wan1, s.Wan2} {
-		if !j.Up.Val {
+	for _, wan := range []unifi.Wan{s.Wan1, s.Wan2} {
+		if !wan.Up.Val {
 			continue // only record UP interfaces.
 		}
-		labelWan := append([]string{j.Name}, labels...)
+		labelWan := append([]string{wan.Name}, labels...)
+
 		m = append(m, []*metricExports{
-			{u.USG.WanRxPackets, prometheus.CounterValue, j.RxPackets, labelWan},
-			{u.USG.WanRxBytes, prometheus.CounterValue, j.RxBytes, labelWan},
-			{u.USG.WanRxDropped, prometheus.CounterValue, j.RxDropped, labelWan},
-			{u.USG.WanRxErrors, prometheus.CounterValue, j.RxErrors, labelWan},
-			{u.USG.WanTxPackets, prometheus.CounterValue, j.TxPackets, labelWan},
-			{u.USG.WanTxBytes, prometheus.CounterValue, j.TxBytes, labelWan},
-			{u.USG.WanRxBroadcast, prometheus.CounterValue, j.RxBroadcast, labelWan},
-			{u.USG.WanRxMulticast, prometheus.CounterValue, j.RxMulticast, labelWan},
-			{u.USG.WanSpeed, prometheus.CounterValue, j.Speed, labelWan},
-			{u.USG.WanTxBroadcast, prometheus.CounterValue, j.TxBroadcast, labelWan},
-			{u.USG.WanTxBytesR, prometheus.CounterValue, j.TxBytesR, labelWan},
-			{u.USG.WanTxDropped, prometheus.CounterValue, j.TxDropped, labelWan},
-			{u.USG.WanTxErrors, prometheus.CounterValue, j.TxErrors, labelWan},
-			{u.USG.WanTxMulticast, prometheus.CounterValue, j.TxMulticast, labelWan},
+			{u.USG.WanRxPackets, prometheus.CounterValue, wan.RxPackets, labelWan},
+			{u.USG.WanRxBytes, prometheus.CounterValue, wan.RxBytes, labelWan},
+			{u.USG.WanRxDropped, prometheus.CounterValue, wan.RxDropped, labelWan},
+			{u.USG.WanRxErrors, prometheus.CounterValue, wan.RxErrors, labelWan},
+			{u.USG.WanTxPackets, prometheus.CounterValue, wan.TxPackets, labelWan},
+			{u.USG.WanTxBytes, prometheus.CounterValue, wan.TxBytes, labelWan},
+			{u.USG.WanRxBroadcast, prometheus.CounterValue, wan.RxBroadcast, labelWan},
+			{u.USG.WanRxMulticast, prometheus.CounterValue, wan.RxMulticast, labelWan},
+			{u.USG.WanSpeed, prometheus.CounterValue, wan.Speed, labelWan},
+			{u.USG.WanTxBroadcast, prometheus.CounterValue, wan.TxBroadcast, labelWan},
+			{u.USG.WanTxBytesR, prometheus.CounterValue, wan.TxBytesR, labelWan},
+			{u.USG.WanTxDropped, prometheus.CounterValue, wan.TxDropped, labelWan},
+			{u.USG.WanTxErrors, prometheus.CounterValue, wan.TxErrors, labelWan},
+			{u.USG.WanTxMulticast, prometheus.CounterValue, wan.TxMulticast, labelWan},
+			{u.USG.WanBytesR, prometheus.GaugeValue, wan.BytesR, labelWan},
 		}...)
 	}
+
 	return m
 }
