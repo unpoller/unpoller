@@ -70,11 +70,10 @@ func descUSW(ns string) *usw {
 	}
 	pns := ns + "port_"
 	// The first five labels for switch are shared with (the same as) switch ports.
-	labels := []string{"site_name", "mac", "model", "name", "serial", "site_id",
-		"type", "version", "device_id", "ip"}
-	// Copy labels, and replace last four with different names.
-	labelP := append(append([]string{}, labels[:6]...),
-		"port_num", "port_name", "port_mac", "port_ip")
+	labels := []string{"type", "version", "device_id", "ip",
+		"site_name", "mac", "model", "name", "serial", "site_id"}
+	// Copy labels, and replace first four with different names.
+	labelP := append([]string{"port_num", "port_name", "port_mac", "port_ip"}, labels[5:]...)
 
 	return &usw{
 		// switch data
@@ -139,8 +138,8 @@ func descUSW(ns string) *usw {
 
 // exportUSW exports Network Switch Data
 func (u *unifiCollector) exportUSW(s *unifi.USW) []*metricExports {
-	labels := []string{s.SiteName, s.Mac, s.Model, s.Name, s.Serial, s.SiteID,
-		s.Type, s.Version, s.DeviceID, s.IP}
+	labels := []string{s.Type, s.Version, s.DeviceID, s.IP,
+		s.SiteName, s.Mac, s.Model, s.Name, s.Serial, s.SiteID}
 
 	// Switch data.
 	return append([]*metricExports{
@@ -178,7 +177,7 @@ func (u *unifiCollector) exportUSW(s *unifi.USW) []*metricExports {
 		{u.USW.SwTxMulticast, prometheus.CounterValue, s.Stat.Sw.TxMulticast, labels},
 		{u.USW.SwTxBroadcast, prometheus.CounterValue, s.Stat.Sw.TxBroadcast, labels},
 		{u.USW.SwBytes, prometheus.CounterValue, s.Stat.Sw.Bytes, labels},
-	}, u.exportPortTable(s.PortTable, labels[:6])...)
+	}, u.exportPortTable(s.PortTable, labels[5:])...)
 }
 
 func (u *unifiCollector) exportPortTable(pt []unifi.Port, labels []string) []*metricExports {
@@ -186,7 +185,7 @@ func (u *unifiCollector) exportPortTable(pt []unifi.Port, labels []string) []*me
 	// Per-port data on a switch
 	for _, p := range pt {
 		// Copy labels, and add four new ones.
-		l := append(append([]string{}, labels...), p.PortIdx.Txt, p.Name, p.Mac, p.IP)
+		l := append([]string{p.PortIdx.Txt, p.Name, p.Mac, p.IP}, labels...)
 
 		metrics = append(metrics, []*metricExports{
 			{u.USW.PoeCurrent, prometheus.GaugeValue, p.PoeCurrent, l},
