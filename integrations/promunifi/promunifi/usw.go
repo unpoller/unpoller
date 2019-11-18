@@ -74,7 +74,7 @@ func descUSW(ns string) *usw {
 		Loadavg1:      prometheus.NewDesc(ns+"load_average_1", "System Load Average 1 Minute", labels, nil),
 		Loadavg5:      prometheus.NewDesc(ns+"load_average_5", "System Load Average 5 Minutes", labels, nil),
 		Loadavg15:     prometheus.NewDesc(ns+"load_average_15", "System Load Average 15 Minutes", labels, nil),
-		MemUsed:       prometheus.NewDesc(ns+"memory_used", "System Memory Used", labels, nil),
+		MemUsed:       prometheus.NewDesc(ns+"memory_utilization", "System Memory Used", labels, nil),
 		MemTotal:      prometheus.NewDesc(ns+"memory_installed", "System Installed Memory", labels, nil),
 		MemBuffer:     prometheus.NewDesc(ns+"memory_buffer", "System Memory Buffer", labels, nil),
 		CPU:           prometheus.NewDesc(ns+"cpu_utilization", "System CPU % Utilized", labels, nil),
@@ -133,25 +133,26 @@ func (u *unifiCollector) exportUSW(s *unifi.USW) []*metricExports {
 	for _, p := range s.PortTable {
 		// Copy labels, and replace last four with different data.
 		l := append(append([]string{}, labels[:6]...), p.PortIdx.Txt, p.Name, p.Mac, p.IP)
-		m = append(m, &metricExports{u.USW.PoeCurrent, prometheus.GaugeValue, p.PoeCurrent, l})
-		m = append(m, &metricExports{u.USW.PoePower, prometheus.GaugeValue, p.PoePower, l})
-		m = append(m, &metricExports{u.USW.PoeVoltage, prometheus.GaugeValue, p.PoeVoltage, l})
-		m = append(m, &metricExports{u.USW.RxBroadcast, prometheus.CounterValue, p.RxBroadcast, l})
-		m = append(m, &metricExports{u.USW.RxBytes, prometheus.CounterValue, p.RxBytes, l})
-		m = append(m, &metricExports{u.USW.RxBytesR, prometheus.GaugeValue, p.RxBytesR, l})
-		m = append(m, &metricExports{u.USW.RxDropped, prometheus.CounterValue, p.RxDropped, l})
-		m = append(m, &metricExports{u.USW.RxErrors, prometheus.CounterValue, p.RxErrors, l})
-		m = append(m, &metricExports{u.USW.RxMulticast, prometheus.CounterValue, p.RxMulticast, l})
-		m = append(m, &metricExports{u.USW.RxPackets, prometheus.CounterValue, p.RxPackets, l})
-		m = append(m, &metricExports{u.USW.Satisfaction, prometheus.GaugeValue, p.Satisfaction, l})
-		m = append(m, &metricExports{u.USW.Speed, prometheus.GaugeValue, p.Speed, l})
-		m = append(m, &metricExports{u.USW.TxBroadcast, prometheus.CounterValue, p.TxBroadcast, l})
-		m = append(m, &metricExports{u.USW.TxBytes, prometheus.CounterValue, p.TxBytes, l})
-		m = append(m, &metricExports{u.USW.TxBytesR, prometheus.GaugeValue, p.TxBytesR, l})
-		m = append(m, &metricExports{u.USW.TxDropped, prometheus.CounterValue, p.TxDropped, l})
-		m = append(m, &metricExports{u.USW.TxErrors, prometheus.CounterValue, p.TxErrors, l})
-		m = append(m, &metricExports{u.USW.TxMulticast, prometheus.CounterValue, p.TxMulticast, l})
+		m = append(m, []*metricExports{
+			{u.USW.PoeCurrent, prometheus.GaugeValue, p.PoeCurrent, l},
+			{u.USW.PoePower, prometheus.GaugeValue, p.PoePower, l},
+			{u.USW.PoeVoltage, prometheus.GaugeValue, p.PoeVoltage, l},
+			{u.USW.RxBroadcast, prometheus.CounterValue, p.RxBroadcast, l},
+			{u.USW.RxBytes, prometheus.CounterValue, p.RxBytes, l},
+			{u.USW.RxBytesR, prometheus.GaugeValue, p.RxBytesR, l},
+			{u.USW.RxDropped, prometheus.CounterValue, p.RxDropped, l},
+			{u.USW.RxErrors, prometheus.CounterValue, p.RxErrors, l},
+			{u.USW.RxMulticast, prometheus.CounterValue, p.RxMulticast, l},
+			{u.USW.RxPackets, prometheus.CounterValue, p.RxPackets, l},
+			{u.USW.Satisfaction, prometheus.GaugeValue, p.Satisfaction, l},
+			{u.USW.Speed, prometheus.GaugeValue, p.Speed, l},
+			{u.USW.TxBroadcast, prometheus.CounterValue, p.TxBroadcast, l},
+			{u.USW.TxBytes, prometheus.CounterValue, p.TxBytes, l},
+			{u.USW.TxBytesR, prometheus.GaugeValue, p.TxBytesR, l},
+			{u.USW.TxDropped, prometheus.CounterValue, p.TxDropped, l},
+			{u.USW.TxErrors, prometheus.CounterValue, p.TxErrors, l},
+			{u.USW.TxMulticast, prometheus.CounterValue, p.TxMulticast, l},
+		}...)
 	}
-
 	return m
 }
