@@ -48,6 +48,10 @@ type usg struct {
 	WanTxErrors    *prometheus.Desc
 	WanTxMulticast *prometheus.Desc
 	WanBytesR      *prometheus.Desc
+	Latency        *prometheus.Desc
+	Runtime        *prometheus.Desc
+	XputDownload   *prometheus.Desc
+	XputUpload     *prometheus.Desc
 }
 
 func descUSG(ns string) *usg {
@@ -98,6 +102,10 @@ func descUSG(ns string) *usg {
 		LanRxDropped:   prometheus.NewDesc(ns+"lan_rx_dropped_total", "LAN Receive Dropped Total", labels, nil),
 		LanTxPackets:   prometheus.NewDesc(ns+"lan_tx_packets_total", "LAN Transmit Packets Total", labels, nil),
 		LanTxBytes:     prometheus.NewDesc(ns+"lan_tx_bytes_total", "LAN Transmit Bytes Total", labels, nil),
+		Latency:        prometheus.NewDesc(ns+"speedtest_latency", "Speedtest Latency", labels, nil),
+		Runtime:        prometheus.NewDesc(ns+"speedtest_runtime", "Speedtest Run Time", labels, nil),
+		XputDownload:   prometheus.NewDesc(ns+"speedtest_download_rate", "Speedtest Download Rate", labels, nil),
+		XputUpload:     prometheus.NewDesc(ns+"speedtest_upload_rate", "Speedtest Upload Rate", labels, nil),
 	}
 }
 
@@ -128,6 +136,7 @@ func (u *unifiCollector) exportUSG(s *unifi.USG) []*metricExports {
 		{u.USG.MemBuffer, prometheus.GaugeValue, s.SysStats.MemBuffer, labels},
 		{u.USG.CPU, prometheus.GaugeValue, s.SystemStats.CPU, labels},
 		{u.USG.Mem, prometheus.GaugeValue, s.SystemStats.Mem, labels},
+		// Combined Port Stats
 		{u.USG.WanRxPackets, prometheus.CounterValue, s.Stat.Gw.WanRxPackets, labelWan},
 		{u.USG.WanRxBytes, prometheus.CounterValue, s.Stat.Gw.WanRxBytes, labelWan},
 		{u.USG.WanRxDropped, prometheus.CounterValue, s.Stat.Gw.WanRxDropped, labelWan},
@@ -139,9 +148,14 @@ func (u *unifiCollector) exportUSG(s *unifi.USG) []*metricExports {
 		{u.USG.LanTxPackets, prometheus.CounterValue, s.Stat.Gw.LanTxPackets, labels},
 		{u.USG.LanTxBytes, prometheus.CounterValue, s.Stat.Gw.LanTxBytes, labels},
 		{u.USG.LanRxDropped, prometheus.CounterValue, s.Stat.Gw.LanRxDropped, labels},
-		// speed test status in a struct too, get that?
+		// Speed Test Stats
+		{u.USG.Latency, prometheus.GaugeValue, s.SpeedtestStatus.Latency, labels},
+		{u.USG.Runtime, prometheus.GaugeValue, s.SpeedtestStatus.Runtime, labels},
+		{u.USG.XputDownload, prometheus.GaugeValue, s.SpeedtestStatus.XputDownload, labels},
+		{u.USG.XputUpload, prometheus.GaugeValue, s.SpeedtestStatus.XputUpload, labels},
 	}
 
+	// WAN Ports' Stats
 	for _, wan := range []unifi.Wan{s.Wan1, s.Wan2} {
 		if !wan.Up.Val {
 			continue // only record UP interfaces.
