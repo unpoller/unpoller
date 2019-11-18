@@ -65,9 +65,9 @@ func descUSW(ns string) *usw {
 		Temperature:   prometheus.NewDesc(ns+"temperature", "Temperature", labels, nil),
 		TotalMaxPower: prometheus.NewDesc(ns+"max_power_total", "Total Max Power", labels, nil),
 		FanLevel:      prometheus.NewDesc(ns+"fan_level", "Fan Level", labels, nil),
-		TotalTxBytes:  prometheus.NewDesc(ns+"tx_bytes_total", "Transmit Bytes", labels, nil),
-		TotalRxBytes:  prometheus.NewDesc(ns+"rx_bytes_total", "Receive Bytes", labels, nil),
-		TotalBytes:    prometheus.NewDesc(ns+"bytes_total", "Total Bytes", labels, nil),
+		TotalTxBytes:  prometheus.NewDesc(ns+"tx_bytes_total", "Total Transmitted Bytes", labels, nil),
+		TotalRxBytes:  prometheus.NewDesc(ns+"rx_bytes_total", "Total Received Bytes", labels, nil),
+		TotalBytes:    prometheus.NewDesc(ns+"bytes_total", "Total Bytes Transfered", labels, nil),
 		NumSta:        prometheus.NewDesc(ns+"stations_total", "Number of Stations", labels, nil),
 		UserNumSta:    prometheus.NewDesc(ns+"stations_user_total", "Number of User Stations", labels, nil),
 		GuestNumSta:   prometheus.NewDesc(ns+"stations_guest_total", "Number of Guest Stations", labels, nil),
@@ -78,7 +78,7 @@ func descUSW(ns string) *usw {
 		MemTotal:      prometheus.NewDesc(ns+"memory_installed", "System Installed Memory", labels, nil),
 		MemBuffer:     prometheus.NewDesc(ns+"memory_buffer", "System Memory Buffer", labels, nil),
 		CPU:           prometheus.NewDesc(ns+"cpu_utilization", "System CPU % Utilized", labels, nil),
-		Mem:           prometheus.NewDesc(ns+"memory", "System Memory % Utilized", labels, nil), // this may not be right.
+		Mem:           prometheus.NewDesc(ns+"memory", "System Memory % Utilized", labels, nil), // this may not be %.
 		// per-port data
 		PoeCurrent:   prometheus.NewDesc(pns+"poe_current", "POE Current", labelP, nil),
 		PoePower:     prometheus.NewDesc(pns+"poe_power", "POE Power", labelP, nil),
