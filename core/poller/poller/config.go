@@ -24,7 +24,7 @@ var Version = "development"
 
 const (
 	// App defaults in case they're missing from the config.
-	defaultNamespace  = "unifi"
+	appName           = "unifi-poller"
 	defaultInterval   = 30 * time.Second
 	defaultInfluxDB   = "unifi"
 	defaultInfluxUser = "unifi"
@@ -70,6 +70,7 @@ type Config struct {
 	InfxBadSSL bool     `json:"influx_insecure_ssl" toml:"influx_insecure_ssl" xml:"influx_insecure_ssl" yaml:"influx_insecure_ssl" env:"INFLUX_INSECURE_SSL"`
 	Mode       string   `json:"mode" toml:"mode" xml:"mode" yaml:"mode" env:"POLLING_MODE"`
 	HTTPListen string   `json:"http_listen" toml:"http_listen" xml:"http_listen" yaml:"http_listen" env:"HTTP_LISTEN"`
+	Namespace  string   `json:"namespace" toml:"namespace" xml:"namespace" yaml:"namespace" env:"NAMESPACE"`
 	InfluxURL  string   `json:"influx_url,omitempty" toml:"influx_url,omitempty" xml:"influx_url" yaml:"influx_url" env:"INFLUX_URL"`
 	InfluxUser string   `json:"influx_user,omitempty" toml:"influx_user,omitempty" xml:"influx_user" yaml:"influx_user" env:"INFLUX_USER"`
 	InfluxPass string   `json:"influx_pass,omitempty" toml:"influx_pass,omitempty" xml:"influx_pass" yaml:"influx_pass" env:"INFLUX_PASS"`
