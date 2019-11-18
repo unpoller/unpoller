@@ -37,8 +37,7 @@ func descSite(ns string) *site {
 	if ns += "_site_"; ns == "_site_" {
 		ns = "site_"
 	}
-
-	labels := []string{"name", "desc", "site_name", "subsystem", "status", "gwversion"}
+	labels := []string{"subsystem", "status", "gwversion", "name", "desc", "site_name"}
 
 	return &site{
 		NumUser:               prometheus.NewDesc(ns+"user_total", "Number of Users", labels, nil),
@@ -71,10 +70,13 @@ func descSite(ns string) *site {
 // exportSite exports Network Site Data
 func (u *unifiCollector) exportSite(s *unifi.Site) []*metricExports {
 	labels := []string{s.Name, s.Desc, s.SiteName}
-	var m []*metricExports
+	var metrics []*metricExports
+
 	for _, h := range s.Health {
-		l := append(labels, h.Subsystem, h.Status, h.GwVersion)
-		m = append(m, []*metricExports{
+		l := append([]string{h.Subsystem, h.Status, h.GwVersion}, labels...)
+
+		// XXX: More of these are subsystem specific (like the vpn/remote user stuff below)
+		metrics = append(metrics, []*metricExports{
 			{u.Site.NumUser, prometheus.CounterValue, h.NumUser.Val, l},
 			{u.Site.NumGuest, prometheus.CounterValue, h.NumGuest.Val, l},
 			{u.Site.NumIot, prometheus.CounterValue, h.NumIot.Val, l},
@@ -94,8 +96,9 @@ func (u *unifiCollector) exportSite(s *unifi.Site) []*metricExports {
 			{u.Site.XputDown, prometheus.GaugeValue, h.XputDown.Val, l},
 			{u.Site.SpeedtestPing, prometheus.GaugeValue, h.SpeedtestPing.Val, l},
 		}...)
+
 		if h.Subsystem == "vpn" {
-			m = append(m, []*metricExports{
+			metrics = append(metrics, []*metricExports{
 				{u.Site.RemoteUserNumActive, prometheus.CounterValue, h.RemoteUserNumActive.Val, l},
 				{u.Site.RemoteUserNumInactive, prometheus.CounterValue, h.RemoteUserNumInactive.Val, l},
 				{u.Site.RemoteUserRxBytes, prometheus.CounterValue, h.RemoteUserRxBytes.Val, l},
@@ -105,5 +108,6 @@ func (u *unifiCollector) exportSite(s *unifi.Site) []*metricExports {
 			}...)
 		}
 	}
-	return m
+
+	return metrics
 }
