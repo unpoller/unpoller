@@ -98,7 +98,7 @@ func descUAP(ns string) *uap {
 		MemTotal:     prometheus.NewDesc(ns+"memory_installed", "System Installed Memory", labels, nil),
 		MemBuffer:    prometheus.NewDesc(ns+"memory_buffer", "System Memory Buffer", labels, nil),
 		CPU:          prometheus.NewDesc(ns+"cpu_utilization", "System CPU % Utilized", labels, nil),
-		Mem:          prometheus.NewDesc(ns+"memory", "System Memory % Utilized", labels, nil),
+		Mem:          prometheus.NewDesc(ns+"memory_utilization", "System Memory % Utilized", labels, nil),
 	}
 }
 
