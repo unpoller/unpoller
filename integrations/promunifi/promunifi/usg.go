@@ -76,9 +76,9 @@ func descUSG(ns string) *usg {
 		Loadavg1:       prometheus.NewDesc(ns+"load_average_1", "System Load Average 1 Minute", labels, nil),
 		Loadavg5:       prometheus.NewDesc(ns+"load_average_5", "System Load Average 5 Minutes", labels, nil),
 		Loadavg15:      prometheus.NewDesc(ns+"load_average_15", "System Load Average 15 Minutes", labels, nil),
-		MemUsed:        prometheus.NewDesc(ns+"memory_used", "System Memory Used", labels, nil),
-		MemTotal:       prometheus.NewDesc(ns+"memory_installed", "System Installed Memory", labels, nil),
-		MemBuffer:      prometheus.NewDesc(ns+"memory_buffer", "System Memory Buffer", labels, nil),
+		MemUsed:        prometheus.NewDesc(ns+"memory_used_bytes", "System Memory Used", labels, nil),
+		MemTotal:       prometheus.NewDesc(ns+"memory_installed_bytes", "System Installed Memory", labels, nil),
+		MemBuffer:      prometheus.NewDesc(ns+"memory_buffer_bytes", "System Memory Buffer", labels, nil),
 		CPU:            prometheus.NewDesc(ns+"cpu_utilization", "System CPU % Utilized", labels, nil),
 		Mem:            prometheus.NewDesc(ns+"memory_utilization", "System Memory % Utilized", labels, nil), // this may not be %.
 		WanRxPackets:   prometheus.NewDesc(ns+"wan_packets_rx_total", "WAN Receive Packets Total", labelWan, nil),
