@@ -16,6 +16,15 @@ type usw struct {
 	NumSta        *prometheus.Desc
 	UserNumSta    *prometheus.Desc
 	GuestNumSta   *prometheus.Desc
+	// System Stats
+	Loadavg1  *prometheus.Desc
+	Loadavg5  *prometheus.Desc
+	Loadavg15 *prometheus.Desc
+	MemBuffer *prometheus.Desc
+	MemTotal  *prometheus.Desc
+	MemUsed   *prometheus.Desc
+	CPU       *prometheus.Desc
+	Mem       *prometheus.Desc
 	// Port data.
 	PoeCurrent   *prometheus.Desc
 	PoePower     *prometheus.Desc
@@ -62,6 +71,14 @@ func descUSW(ns string) *usw {
 		NumSta:        prometheus.NewDesc(ns+"stations_total", "Number of Stations", labels, nil),
 		UserNumSta:    prometheus.NewDesc(ns+"stations_user_total", "Number of User Stations", labels, nil),
 		GuestNumSta:   prometheus.NewDesc(ns+"stations_guest_total", "Number of Guest Stations", labels, nil),
+		Loadavg1:      prometheus.NewDesc(ns+"load_average_1", "System Load Average 1 Minute", labels, nil),
+		Loadavg5:      prometheus.NewDesc(ns+"load_average_5", "System Load Average 5 Minutes", labels, nil),
+		Loadavg15:     prometheus.NewDesc(ns+"load_average_15", "System Load Average 15 Minutes", labels, nil),
+		MemUsed:       prometheus.NewDesc(ns+"memory_used", "System Memory Used", labels, nil),
+		MemTotal:      prometheus.NewDesc(ns+"memory_installed", "System Installed Memory", labels, nil),
+		MemBuffer:     prometheus.NewDesc(ns+"memory_buffer", "System Memory Buffer", labels, nil),
+		CPU:           prometheus.NewDesc(ns+"cpu_utilization", "System CPU % Utilized", labels, nil),
+		Mem:           prometheus.NewDesc(ns+"memory", "System Memory % Utilized", labels, nil), // this may not be right.
 		// per-port data
 		PoeCurrent:   prometheus.NewDesc(pns+"poe_current", "POE Current", labelP, nil),
 		PoePower:     prometheus.NewDesc(pns+"poe_power", "POE Power", labelP, nil),
@@ -102,6 +119,14 @@ func (u *unifiCollector) exportUSW(s *unifi.USW) []*metricExports {
 		{u.USW.NumSta, prometheus.GaugeValue, s.NumSta, labels},
 		{u.USW.UserNumSta, prometheus.GaugeValue, s.UserNumSta, labels},
 		{u.USW.GuestNumSta, prometheus.GaugeValue, s.GuestNumSta, labels},
+		{u.USW.Loadavg1, prometheus.GaugeValue, s.SysStats.Loadavg1, labels},
+		{u.USW.Loadavg5, prometheus.GaugeValue, s.SysStats.Loadavg5, labels},
+		{u.USW.Loadavg15, prometheus.GaugeValue, s.SysStats.Loadavg15, labels},
+		{u.USW.MemUsed, prometheus.GaugeValue, s.SysStats.MemUsed, labels},
+		{u.USW.MemTotal, prometheus.GaugeValue, s.SysStats.MemTotal, labels},
+		{u.USW.MemBuffer, prometheus.GaugeValue, s.SysStats.MemBuffer, labels},
+		{u.USW.CPU, prometheus.GaugeValue, s.SystemStats.CPU, labels},
+		{u.USW.Mem, prometheus.GaugeValue, s.SystemStats.Mem, labels},
 	}
 
 	// Per-port data on the switch
