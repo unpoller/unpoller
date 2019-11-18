@@ -36,10 +36,11 @@ func Start() error {
 			Interval:   Duration{defaultInterval},
 			Sites:      []string{"all"},
 			HTTPListen: defaultHTTPListen,
+			Namespace:  appName,
 		}}
 	up.Flag.Parse(os.Args[1:])
 	if up.Flag.ShowVer {
-		fmt.Printf("unifi-poller v%s\n", Version)
+		fmt.Printf("%s v%s\n", appName, Version)
 		return nil // don't run anything else w/ version request.
 	}
 	if up.Flag.DumpJSON == "" { // do not print this when dumping JSON.
@@ -59,9 +60,9 @@ func Start() error {
 
 // Parse turns CLI arguments into data structures. Called by Start() on startup.
 func (f *Flag) Parse(args []string) {
-	f.FlagSet = pflag.NewFlagSet("unifi-poller", pflag.ExitOnError)
+	f.FlagSet = pflag.NewFlagSet(appName, pflag.ExitOnError)
 	f.Usage = func() {
-		fmt.Println("Usage: unifi-poller [--config=/path/to/up.conf] [--version]")
+		fmt.Printf("Usage: %s [--config=/path/to/up.conf] [--version]", appName)
 		f.PrintDefaults()
 	}
 	f.StringVarP(&f.DumpJSON, "dumpjson", "j", "",
@@ -101,7 +102,7 @@ func (u *UnifiPoller) Run() (err error) {
 		u.Logf("Exporting Measurements at https://%s/metrics for Prometheus", u.Config.HTTPListen)
 		http.Handle("/metrics", promhttp.Handler())
 		prometheus.MustRegister(promunifi.NewUnifiCollector(promunifi.UnifiCollectorCnfg{
-			Namespace:    defaultNamespace, // XXX: pass this in from config.
+			Namespace:    strings.Replace(u.Config.Namespace, "-", "", -1),
 			CollectFn:    u.ExportMetrics,
 			LoggingFn:    u.LogExportReport,
 			ReportErrors: true, // XXX: Does this need to be configurable?
