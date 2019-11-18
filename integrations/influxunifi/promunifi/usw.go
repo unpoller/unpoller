@@ -182,12 +182,13 @@ func (u *unifiCollector) exportUSW(s *unifi.USW) []*metricExports {
 }
 
 func (u *unifiCollector) exportPortTable(pt []unifi.Port, labels []string) []*metricExports {
-	var m []*metricExports
+	var metrics []*metricExports
 	// Per-port data on a switch
 	for _, p := range pt {
 		// Copy labels, and add four new ones.
 		l := append(append([]string{}, labels...), p.PortIdx.Txt, p.Name, p.Mac, p.IP)
-		m = append(m, []*metricExports{
+
+		metrics = append(metrics, []*metricExports{
 			{u.USW.PoeCurrent, prometheus.GaugeValue, p.PoeCurrent, l},
 			{u.USW.PoePower, prometheus.GaugeValue, p.PoePower, l},
 			{u.USW.PoeVoltage, prometheus.GaugeValue, p.PoeVoltage, l},
@@ -208,5 +209,6 @@ func (u *unifiCollector) exportPortTable(pt []unifi.Port, labels []string) []*me
 			{u.USW.TxMulticast, prometheus.CounterValue, p.TxMulticast, l},
 		}...)
 	}
-	return m
+
+	return metrics
 }

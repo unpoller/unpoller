@@ -157,14 +157,14 @@ func (u *unifiCollector) exportUSG(s *unifi.USG) []*metricExports {
 }
 
 func (u *unifiCollector) exportWANPorts(labels []string, wans ...unifi.Wan) []*metricExports {
-	var m []*metricExports
+	var metrics []*metricExports
 	for _, wan := range wans {
 		if !wan.Up.Val {
 			continue // only record UP interfaces.
 		}
 		l := append([]string{wan.Name}, labels...)
 
-		m = append(m, []*metricExports{
+		metrics = append(metrics, []*metricExports{
 			{u.USG.WanRxPackets, prometheus.CounterValue, wan.RxPackets, l},
 			{u.USG.WanRxBytes, prometheus.CounterValue, wan.RxBytes, l},
 			{u.USG.WanRxDropped, prometheus.CounterValue, wan.RxDropped, l},
@@ -183,5 +183,5 @@ func (u *unifiCollector) exportWANPorts(labels []string, wans ...unifi.Wan) []*m
 		}...)
 	}
 
-	return m
+	return metrics
 }
