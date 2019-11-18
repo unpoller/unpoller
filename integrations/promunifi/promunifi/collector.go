@@ -17,13 +17,13 @@ type UnifiCollectorCnfg struct {
 	Namespace string
 	// If true, any error encountered during collection is reported as an
 	// invalid metric (see NewInvalidMetric). Otherwise, errors are ignored
-	// and the collected metrics will be incomplete. (Possibly, no metrics
-	// will be collected at all.)
+	// and the collected metrics will be incomplete. Possibly, no metrics
+	// will be collected at all.
 	ReportErrors bool
 	// This function is passed to the Collect() method. The Collect method runs This
 	// function to retreive the latest UniFi
 	CollectFn func() (*metrics.Metrics, error)
-	// provide a logger function if you want to run a routine *after* prometheus checks in.
+	// Provide a logger function if you want to run a routine *after* prometheus checks in.
 	LoggingFn func(*Report)
 }
 
