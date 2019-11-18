@@ -143,7 +143,7 @@ func (u *unifiCollector) exportUSW(s *unifi.USW) []*metricExports {
 		s.Type, s.Version, s.DeviceID, s.IP}
 
 	// Switch data.
-	m := []*metricExports{
+	return append([]*metricExports{
 		{u.USW.Uptime, prometheus.GaugeValue, s.Uptime, labels},
 		{u.USW.Temperature, prometheus.GaugeValue, s.GeneralTemperature, labels},
 		{u.USW.TotalMaxPower, prometheus.GaugeValue, s.TotalMaxPower, labels},
@@ -178,10 +178,7 @@ func (u *unifiCollector) exportUSW(s *unifi.USW) []*metricExports {
 		{u.USW.SwTxMulticast, prometheus.CounterValue, s.Stat.Sw.TxMulticast, labels},
 		{u.USW.SwTxBroadcast, prometheus.CounterValue, s.Stat.Sw.TxBroadcast, labels},
 		{u.USW.SwBytes, prometheus.CounterValue, s.Stat.Sw.Bytes, labels},
-	}
-	// Remove last four labels.
-	m = append(m, u.exportPortTable(s.PortTable, labels[:6])...)
-	return m
+	}, u.exportPortTable(s.PortTable, labels[:6])...)
 }
 
 func (u *unifiCollector) exportPortTable(pt []unifi.Port, labels []string) []*metricExports {
