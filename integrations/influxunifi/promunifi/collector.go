@@ -24,7 +24,7 @@ type UnifiCollectorCnfg struct {
 	// function to retreive the latest UniFi
 	CollectFn func() (*metrics.Metrics, error)
 	// provide a logger function if you want to run a routine *after* prometheus checks in.
-	LoggingFn func(*metrics.Metrics, int64)
+	LoggingFn func(*Report)
 	// Setting this to true will enable IDS exports.
 	CollectIDS bool
 }
@@ -45,6 +45,15 @@ type metricExports struct {
 	ValueType prometheus.ValueType
 	Value     interface{}
 	Labels    []string
+}
+
+// Report is passed into LoggingFn to log the export metrics to stdout (outside this package).
+type Report struct {
+	Total   int
+	Errors  int
+	Descs   int
+	Metrics *metrics.Metrics
+	Elapsed time.Duration
 }
 
 // NewUnifiCollector returns a prometheus collector that will export any available
@@ -95,7 +104,7 @@ func (u *unifiCollector) Describe(ch chan<- *prometheus.Desc) {
 // Collect satisifes the prometheus Collector. This runs the input method to get
 // the current metrics (from another package) then exports them for prometheus.
 func (u *unifiCollector) Collect(ch chan<- prometheus.Metric) {
-	var count int64
+	start := time.Now()
 	m, err := u.Config.CollectFn()
 	if err != nil {
 		ch <- prometheus.NewInvalidMetric(
@@ -103,19 +112,34 @@ func (u *unifiCollector) Collect(ch chan<- prometheus.Metric) {
 		return
 	}
 
+	descs := make(map[*prometheus.Desc]bool) // used as a counter
+	r := &Report{Metrics: m}
 	if u.Config.LoggingFn != nil {
-		defer func() { u.Config.LoggingFn(m, count) }()
+		defer func() {
+			r.Elapsed = time.Since(start)
+			r.Descs = len(descs)
+			u.Config.LoggingFn(r)
+		}()
+	}
+
+	process := func(m []*metricExports, ts time.Time) {
+		count, errors := u.export(ch, m, ts)
+		r.Total += count
+		r.Errors += errors
+		for _, d := range m {
+			descs[d.Desc] = true
+		}
 	}
 
 	for _, asset := range m.Clients {
-		count += u.export(ch, u.exportClient(asset), m.TS)
+		process(u.exportClient(asset), m.TS)
 	}
 	for _, asset := range m.Sites {
-		count += u.export(ch, u.exportSite(asset), m.TS)
+		process(u.exportSite(asset), m.TS)
 	}
 	if u.Config.CollectIDS {
 		for _, asset := range m.IDSList {
-			count += u.export(ch, u.exportIDS(asset), m.TS)
+			process(u.exportIDS(asset), m.TS)
 		}
 	}
 
@@ -124,20 +148,20 @@ func (u *unifiCollector) Collect(ch chan<- prometheus.Metric) {
 	}
 
 	for _, asset := range m.Devices.UAPs {
-		count += u.export(ch, u.exportUAP(asset), m.TS)
+		process(u.exportUAP(asset), m.TS)
 	}
 	for _, asset := range m.Devices.USGs {
-		count += u.export(ch, u.exportUSG(asset), m.TS)
+		process(u.exportUSG(asset), m.TS)
 	}
 	for _, asset := range m.Devices.USWs {
-		count += u.export(ch, u.exportUSW(asset), m.TS)
+		process(u.exportUSW(asset), m.TS)
 	}
 	for _, asset := range m.Devices.UDMs {
-		count += u.export(ch, u.exportUDM(asset), m.TS)
+		process(u.exportUDM(asset), m.TS)
 	}
 }
 
-func (u *unifiCollector) export(ch chan<- prometheus.Metric, exports []*metricExports, ts time.Time) (count int64) {
+func (u *unifiCollector) export(ch chan<- prometheus.Metric, exports []*metricExports, ts time.Time) (count, errors int) {
 	for _, e := range exports {
 		var val float64
 		switch v := e.Value.(type) {
@@ -148,6 +172,7 @@ func (u *unifiCollector) export(ch chan<- prometheus.Metric, exports []*metricEx
 		case unifi.FlexInt:
 			val = v.Val
 		default:
+			errors++
 			if u.Config.ReportErrors {
 				ch <- prometheus.NewInvalidMetric(e.Desc, fmt.Errorf("not a number: %v", e.Value))
 			}
