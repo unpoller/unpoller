@@ -32,7 +32,7 @@ const (
 	defaultInfluxURL  = "http://127.0.0.1:8086"
 	defaultUnifiUser  = "influx"
 	defaultUnifiURL   = "https://127.0.0.1:8443"
-	defaultHTTPListen = ":61317"
+	defaultHTTPListen = "0.0.0.0:9130"
 )
 
 // ENVConfigPrefix is the prefix appended to an env variable tag
