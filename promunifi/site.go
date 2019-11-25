@@ -67,9 +67,9 @@ func descSite(ns string) *site {
 	}
 }
 
-func (u *unifiCollector) exportSites(sites unifi.Sites) (e []*metricExports) {
+func (u *unifiCollector) exportSites(sites unifi.Sites, ch chan []*metricExports) (e []*metricExports) {
 	for _, s := range sites {
-		e = append(e, u.exportSite(s)...)
+		ch <- u.exportSite(s)
 	}
 	return
 }
