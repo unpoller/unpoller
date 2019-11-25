@@ -3,6 +3,7 @@ package promunifi
 import (
 	"fmt"
 	"reflect"
+	"sync"
 	"time"
 
 	"github.com/davidnewhall/unifi-poller/metrics"
@@ -51,6 +52,9 @@ type Report struct {
 	Descs   int
 	Metrics *metrics.Metrics
 	Elapsed time.Duration
+	Start   time.Time
+	ch      chan []*metricExports
+	wait    sync.WaitGroup
 }
 
 // NewUnifiCollector returns a prometheus collector that will export any available
@@ -97,83 +101,65 @@ func (u *unifiCollector) Describe(ch chan<- *prometheus.Desc) {
 // Collect satisifes the prometheus Collector. This runs the input method to get
 // the current metrics (from another package) then exports them for prometheus.
 func (u *unifiCollector) Collect(ch chan<- prometheus.Metric) {
-	start := time.Now()
-	unifiMetrics, err := u.Config.CollectFn()
-	if err != nil {
+	var err error
+	r := &Report{Start: time.Now(), ch: make(chan []*metricExports)}
+	defer func() {
+		r.wait.Wait()
+		close(r.ch)
+	}()
+
+	if r.Metrics, err = u.Config.CollectFn(); err != nil {
 		ch <- prometheus.NewInvalidMetric(
 			prometheus.NewInvalidDesc(fmt.Errorf("metric fetch failed")), err)
 		return
 	}
 
-	descs := make(map[*prometheus.Desc]bool) // used as a counter
-	r := &Report{Metrics: unifiMetrics}
-	if u.Config.LoggingFn != nil {
-		defer func() {
-			r.Elapsed = time.Since(start)
-			r.Descs = len(descs)
-			u.Config.LoggingFn(r)
-		}()
-	}
+	go u.exportMetrics(ch, r)
 
-	export := func(metrics []*metricExports) {
-		count, errors := u.export(ch, metrics)
-		r.Total += count
-		r.Errors += errors
-		for _, d := range metrics {
-			descs[d.Desc] = true
-		}
-	}
-
-	for _, asset := range r.Metrics.Clients {
-		export(u.exportClient(asset))
-	}
-	for _, asset := range r.Metrics.Sites {
-		export(u.exportSite(asset))
-	}
+	r.wait.Add(2)
+	go func() { r.ch <- u.exportClients(r.Metrics.Clients) }()
+	go func() { r.ch <- u.exportSites(r.Metrics.Sites) }()
 
 	if r.Metrics.Devices == nil {
 		return
 	}
 
-	for _, asset := range r.Metrics.Devices.UAPs {
-		export(u.exportUAP(asset))
-	}
-	for _, asset := range r.Metrics.Devices.USGs {
-		export(u.exportUSG(asset))
-	}
-	for _, asset := range r.Metrics.Devices.USWs {
-		export(u.exportUSW(asset))
-	}
-	for _, asset := range r.Metrics.Devices.UDMs {
-		export(u.exportUDM(asset))
-	}
+	r.wait.Add(4)
+	go func() { r.ch <- u.exportUAPs(r.Metrics.Devices.UAPs) }()
+	go func() { r.ch <- u.exportUSGs(r.Metrics.Devices.USGs) }()
+	go func() { r.ch <- u.exportUSWs(r.Metrics.Devices.USWs) }()
+	go func() { r.ch <- u.exportUDMs(r.Metrics.Devices.UDMs) }()
 }
 
-func (u *unifiCollector) export(ch chan<- prometheus.Metric, exports []*metricExports) (count, errors int) {
-	for _, e := range exports {
-		var val float64
+// Call this once (at least as-is). It sets all the counters and runs the logging function.
+func (u *unifiCollector) exportMetrics(ch chan<- prometheus.Metric, r *Report) {
+	descs := make(map[*prometheus.Desc]bool) // used as a counter
+	for newMetrics := range r.ch {
+		for _, m := range newMetrics {
+			r.Total++
+			descs[m.Desc] = true
 
-		switch v := e.Value.(type) {
-		case float64:
-			val = v
+			switch v := m.Value.(type) {
+			case float64:
+				ch <- prometheus.MustNewConstMetric(m.Desc, m.ValueType, v, m.Labels...)
+			case int64:
+				ch <- prometheus.MustNewConstMetric(m.Desc, m.ValueType, float64(v), m.Labels...)
+			case unifi.FlexInt:
+				ch <- prometheus.MustNewConstMetric(m.Desc, m.ValueType, v.Val, m.Labels...)
 
-		case int64:
-			val = float64(v)
-
-		case unifi.FlexInt:
-			val = v.Val
-
-		default:
-			errors++
-			if u.Config.ReportErrors {
-				ch <- prometheus.NewInvalidMetric(e.Desc, fmt.Errorf("not a number: %v", e.Value))
+			default:
+				r.Errors++
+				if u.Config.ReportErrors {
+					ch <- prometheus.NewInvalidMetric(m.Desc, fmt.Errorf("not a number: %v", m.Value))
+				}
 			}
-			continue
 		}
-
-		count++
-		ch <- prometheus.MustNewConstMetric(e.Desc, e.ValueType, val, e.Labels...)
+		r.wait.Done()
 	}
 
-	return
+	if u.Config.LoggingFn == nil {
+		return
+	}
+	r.Descs, r.Elapsed = len(descs), time.Since(r.Start)
+	u.Config.LoggingFn(r)
 }

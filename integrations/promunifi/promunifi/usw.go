@@ -136,6 +136,13 @@ func descUSW(ns string) *usw {
 	}
 }
 
+func (u *unifiCollector) exportUSWs(usws []*unifi.USW) (e []*metricExports) {
+	for _, sw := range usws {
+		e = append(e, u.exportUSW(sw)...)
+	}
+	return
+}
+
 // exportUSW exports Network Switch Data
 func (u *unifiCollector) exportUSW(s *unifi.USW) []*metricExports {
 	labels := []string{s.Type, s.Version, s.DeviceID, s.IP,

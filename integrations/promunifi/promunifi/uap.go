@@ -102,6 +102,13 @@ func descUAP(ns string) *uap {
 	}
 }
 
+func (u *unifiCollector) exportUAPs(uaps []*unifi.UAP) (e []*metricExports) {
+	for _, a := range uaps {
+		e = append(e, u.exportUAP(a)...)
+	}
+	return
+}
+
 // exportUAP exports Access Point Data
 func (u *unifiCollector) exportUAP(a *unifi.UAP) []*metricExports {
 	labels := []string{a.SiteName, a.Mac, a.Model, a.Name, a.Serial, a.SiteID,

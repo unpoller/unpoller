@@ -67,6 +67,13 @@ func descSite(ns string) *site {
 	}
 }
 
+func (u *unifiCollector) exportSites(sites unifi.Sites) (e []*metricExports) {
+	for _, s := range sites {
+		e = append(e, u.exportSite(s)...)
+	}
+	return
+}
+
 // exportSite exports Network Site Data
 func (u *unifiCollector) exportSite(s *unifi.Site) []*metricExports {
 	labels := []string{s.Name, s.Desc, s.SiteName}
