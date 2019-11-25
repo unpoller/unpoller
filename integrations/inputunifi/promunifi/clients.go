@@ -5,7 +5,7 @@ import (
 	"golift.io/unifi"
 )
 
-type client struct {
+type uclient struct {
 	Anomalies         *prometheus.Desc
 	BytesR            *prometheus.Desc
 	CCQ               *prometheus.Desc
@@ -38,7 +38,7 @@ type client struct {
 	DpiStatsTxPackets *prometheus.Desc
 }
 
-func descClient(ns string) *client {
+func descClient(ns string) *uclient {
 	if ns += "_client_"; ns == "_client_" {
 		ns = "client_"
 	}
@@ -48,7 +48,7 @@ func descClient(ns string) *client {
 		"sw_name", "radio_name", "radio", "radio_proto", "name", "channel",
 		"vlan", "ip", "essid", "bssid", "radio_desc"}
 
-	return &client{
+	return &uclient{
 		Anomalies:         prometheus.NewDesc(ns+"anomalies_total", "Client Anomalies", labels, nil),
 		BytesR:            prometheus.NewDesc(ns+"bytes_rate", "Client Data Rate", labels, nil),
 		CCQ:               prometheus.NewDesc(ns+"ccq", "Client Connection Quality", labels, nil),
