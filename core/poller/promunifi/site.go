@@ -67,17 +67,16 @@ func descSite(ns string) *site {
 	}
 }
 
-func (u *unifiCollector) exportSites(sites unifi.Sites, ch chan []*metricExports) (e []*metricExports) {
+func (u *unifiCollector) exportSites(sites unifi.Sites, ch chan []*metricExports) {
 	for _, s := range sites {
 		ch <- u.exportSite(s)
 	}
-	return
 }
 
 // exportSite exports Network Site Data
 func (u *unifiCollector) exportSite(s *unifi.Site) []*metricExports {
 	labels := []string{s.Name, s.Desc, s.SiteName}
-	var metrics []*metricExports
+	metrics := []*metricExports{}
 
 	for _, h := range s.Health {
 		l := append([]string{h.Subsystem, h.Status, h.GwVersion}, labels...)
