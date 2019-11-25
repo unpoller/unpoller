@@ -82,6 +82,13 @@ func descClient(ns string) *uclient {
 	}
 }
 
+func (u *unifiCollector) exportClients(clients []*unifi.Client) (e []*metricExports) {
+	for _, c := range clients {
+		e = append(e, u.exportClient(c)...)
+	}
+	return
+}
+
 // CollectClient exports Clients' Data
 func (u *unifiCollector) exportClient(c *unifi.Client) []*metricExports {
 	labels := []string{c.ID, c.Mac, c.UserID, c.SiteID, c.SiteName,
