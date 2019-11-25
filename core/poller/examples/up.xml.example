@@ -46,7 +46,7 @@
   # to InfluxDB one time. This mode requires an external process like an AWS Lambda
   # or a simple crontab to keep the timings accurate on UniFi Poller run intervals.
   #
-  # Prometheus mode opens an HTTP server on port 61317 and exports the metrics at
+  # Prometheus mode opens an HTTP server on port 9130 and exports the metrics at
   # /metrics for polling collection by a prometheus server. This disables influxdb.
   # IMPORTANT: The prometheus mode is still beta and doesn't work very well.
   -->
@@ -56,7 +56,7 @@
   # This controls on which ip and port /metrics is exported when mode is "prometheus".
   # This has no effect in other modes. Must contain a colon and port.
   -->
-  <http_listen>0.0.0.0:61317</http_listen>
+  <http_listen>0.0.0.0:9130</http_listen>
 
   <!--
   # InfluxDB does not require auth by default, so the user/password are probably unimportant.
