@@ -22,7 +22,7 @@ type UnifiCollectorCnfg struct {
 	// will be collected at all.
 	ReportErrors bool
 	// This function is passed to the Collect() method. The Collect method runs
-	// this function to retreive the latest UniFi measurements and export them.
+	// this function to retrieve the latest UniFi measurements and export them.
 	CollectFn func() (*metrics.Metrics, error)
 	// Provide a logger function if you want to run a routine *after* prometheus checks in.
 	LoggingFn func(*Report)
@@ -98,7 +98,7 @@ func (u *unifiCollector) Describe(ch chan<- *prometheus.Desc) {
 	describe(u.Site)
 }
 
-// Collect satisifes the prometheus Collector. This runs the input method to get
+// Collect satisfies the prometheus Collector. This runs the input method to get
 // the current metrics (from another package) then exports them for prometheus.
 func (u *unifiCollector) Collect(ch chan<- prometheus.Metric) {
 	var err error
