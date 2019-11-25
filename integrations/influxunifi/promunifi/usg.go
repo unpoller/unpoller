@@ -109,6 +109,13 @@ func descUSG(ns string) *usg {
 	}
 }
 
+func (u *unifiCollector) exportUSGs(usgs []*unifi.USG) (e []*metricExports) {
+	for _, sg := range usgs {
+		e = append(e, u.exportUSG(sg)...)
+	}
+	return
+}
+
 // exportUSG Exports Security Gateway Data
 // uplink and port tables structs are ignored. that data should be in other exported fields.
 func (u *unifiCollector) exportUSG(s *unifi.USG) []*metricExports {
