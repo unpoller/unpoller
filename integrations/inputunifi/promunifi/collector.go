@@ -54,7 +54,7 @@ type Report struct {
 	Elapsed time.Duration
 	Start   time.Time
 	ch      chan []*metricExports
-	wait    sync.WaitGroup
+	wg      sync.WaitGroup
 }
 
 // NewUnifiCollector returns a prometheus collector that will export any available
@@ -104,7 +104,7 @@ func (u *unifiCollector) Collect(ch chan<- prometheus.Metric) {
 	var err error
 	r := &Report{Start: time.Now(), ch: make(chan []*metricExports)}
 	defer func() {
-		r.wait.Wait()
+		r.wg.Wait()
 		close(r.ch)
 	}()
 
@@ -116,22 +116,23 @@ func (u *unifiCollector) Collect(ch chan<- prometheus.Metric) {
 
 	go u.exportMetrics(ch, r)
 
-	r.wait.Add(2)
-	go func() { r.ch <- u.exportClients(r.Metrics.Clients) }()
-	go func() { r.ch <- u.exportSites(r.Metrics.Sites) }()
+	r.wg.Add(len(r.Metrics.Clients) + len(r.Metrics.Sites))
+	go u.exportClients(r.Metrics.Clients, r.ch)
+	go u.exportSites(r.Metrics.Sites, r.ch)
 
 	if r.Metrics.Devices == nil {
 		return
 	}
 
-	r.wait.Add(4)
-	go func() { r.ch <- u.exportUAPs(r.Metrics.Devices.UAPs) }()
-	go func() { r.ch <- u.exportUSGs(r.Metrics.Devices.USGs) }()
-	go func() { r.ch <- u.exportUSWs(r.Metrics.Devices.USWs) }()
-	go func() { r.ch <- u.exportUDMs(r.Metrics.Devices.UDMs) }()
+	r.wg.Add(len(r.Metrics.Devices.UAPs) + len(r.Metrics.Devices.USGs) + len(r.Metrics.Devices.USWs) + len(r.Metrics.Devices.UDMs))
+	go u.exportUAPs(r.Metrics.Devices.UAPs, r.ch)
+	go u.exportUSGs(r.Metrics.Devices.USGs, r.ch)
+	go u.exportUSWs(r.Metrics.Devices.USWs, r.ch)
+	go u.exportUDMs(r.Metrics.Devices.UDMs, r.ch)
 }
 
-// Call this once (at least as-is). It sets all the counters and runs the logging function.
+// This is closely tied to the method above with a sync.WaitGroup.
+// This method runs in a go routine and exits when the channel closes.
 func (u *unifiCollector) exportMetrics(ch chan<- prometheus.Metric, r *Report) {
 	descs := make(map[*prometheus.Desc]bool) // used as a counter
 	for newMetrics := range r.ch {
@@ -154,7 +155,7 @@ func (u *unifiCollector) exportMetrics(ch chan<- prometheus.Metric, r *Report) {
 				}
 			}
 		}
-		r.wait.Done()
+		r.wg.Done()
 	}
 
 	if u.Config.LoggingFn == nil {

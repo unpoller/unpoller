@@ -11,11 +11,10 @@ func descUDM(ns string) *udm {
 	return &udm{}
 }
 
-func (u *unifiCollector) exportUDMs(udms []*unifi.UDM) (e []*metricExports) {
+func (u *unifiCollector) exportUDMs(udms []*unifi.UDM, ch chan []*metricExports) {
 	for _, d := range udms {
-		e = append(e, u.exportUDM(d)...)
+		ch <- u.exportUDM(d)
 	}
-	return
 }
 
 // exportUDM exports UniFi Dream Machine (and Pro) Data

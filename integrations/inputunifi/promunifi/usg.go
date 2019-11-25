@@ -109,11 +109,10 @@ func descUSG(ns string) *usg {
 	}
 }
 
-func (u *unifiCollector) exportUSGs(usgs []*unifi.USG) (e []*metricExports) {
+func (u *unifiCollector) exportUSGs(usgs []*unifi.USG, ch chan []*metricExports) {
 	for _, sg := range usgs {
-		e = append(e, u.exportUSG(sg)...)
+		ch <- u.exportUSG(sg)
 	}
-	return
 }
 
 // exportUSG Exports Security Gateway Data
@@ -122,6 +121,7 @@ func (u *unifiCollector) exportUSG(s *unifi.USG) []*metricExports {
 	labels := []string{s.SiteName, s.Mac, s.Model, s.Name, s.Serial, s.SiteID,
 		s.Type, s.Version, s.DeviceID, s.IP}
 	labelWan := append([]string{"all"}, labels...)
+	//	r.wait.Add(1) // closed by channel receiver.
 
 	// Gateway System Data.
 	return append([]*metricExports{

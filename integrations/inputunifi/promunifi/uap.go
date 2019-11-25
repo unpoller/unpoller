@@ -102,11 +102,10 @@ func descUAP(ns string) *uap {
 	}
 }
 
-func (u *unifiCollector) exportUAPs(uaps []*unifi.UAP) (e []*metricExports) {
+func (u *unifiCollector) exportUAPs(uaps []*unifi.UAP, ch chan []*metricExports) {
 	for _, a := range uaps {
-		e = append(e, u.exportUAP(a)...)
+		ch <- u.exportUAP(a)
 	}
-	return
 }
 
 // exportUAP exports Access Point Data
