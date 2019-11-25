@@ -66,7 +66,7 @@ func descUSG(ns string) *usg {
 		Uptime:         prometheus.NewDesc(ns+"uptime", "Uptime", labels, nil),
 		TotalTxBytes:   prometheus.NewDesc(ns+"bytes_tx_total", "Total Transmitted Bytes", labels, nil),
 		TotalRxBytes:   prometheus.NewDesc(ns+"bytes_rx_total", "Total Received Bytes", labels, nil),
-		TotalBytes:     prometheus.NewDesc(ns+"bytes_total", "Total Bytes Transfered", labels, nil),
+		TotalBytes:     prometheus.NewDesc(ns+"bytes_total", "Total Bytes Transferred", labels, nil),
 		NumSta:         prometheus.NewDesc(ns+"stations_total", "Number of Stations", labels, nil),
 		UserNumSta:     prometheus.NewDesc(ns+"stations_user_total", "Number of User Stations", labels, nil),
 		GuestNumSta:    prometheus.NewDesc(ns+"stations_guest_total", "Number of Guest Stations", labels, nil),
@@ -164,7 +164,7 @@ func (u *unifiCollector) exportUSG(s *unifi.USG) []*metricExports {
 }
 
 func (u *unifiCollector) exportWANPorts(labels []string, wans ...unifi.Wan) []*metricExports {
-	var metrics []*metricExports
+	metrics := []*metricExports{}
 	for _, wan := range wans {
 		if !wan.Up.Val {
 			continue // only record UP interfaces.

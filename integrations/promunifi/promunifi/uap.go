@@ -83,7 +83,7 @@ func descUAP(ns string) *uap {
 		Uptime:       prometheus.NewDesc(ns+"uptime", "Uptime", labels, nil),
 		TotalTxBytes: prometheus.NewDesc(ns+"bytes_tx_total", "Total Transmitted Bytes", labels, nil),
 		TotalRxBytes: prometheus.NewDesc(ns+"bytes_rx_total", "Total Received Bytes", labels, nil),
-		TotalBytes:   prometheus.NewDesc(ns+"bytes_total", "Total Bytes Transfered", labels, nil),
+		TotalBytes:   prometheus.NewDesc(ns+"bytes_total", "Total Bytes Transferred", labels, nil),
 		BytesD:       prometheus.NewDesc(ns+"bytes_d_total", "Total Bytes D???", labels, nil),
 		TxBytesD:     prometheus.NewDesc(ns+"bytes_d_tx", "Transmit Bytes D???", labels, nil),
 		RxBytesD:     prometheus.NewDesc(ns+"bytes_d_rx", "Receive Bytes D???", labels, nil),
