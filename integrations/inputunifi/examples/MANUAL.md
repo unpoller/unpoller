@@ -106,10 +106,10 @@ is provided so the application can be easily adapted to any environment.
         measurements at /metrics for collection by prometheus. Enabling this
         mode disables InfluxDB usage entirely. This is BETA.
 
-    http_listen            default: 0.0.0.0:61317
+    http_listen            default: 0.0.0.0:9130
         This option controls the IP and port the http listener uses when the
         mode is set to prometheus. This setting has no effect when other modes
-        are in use.
+        are in use. Metrics become available at the /metrics URI.
 
     influx_url             default: http://127.0.0.1:8086
         This is the URL where the Influx web server is available.

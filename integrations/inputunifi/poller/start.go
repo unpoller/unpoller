@@ -18,43 +18,57 @@ import (
 	"golift.io/unifi"
 )
 
-// Start begins the application from a CLI.
-// Parses flags, parses config and executes Run().
-func Start() error {
-	log.SetFlags(log.LstdFlags)
-	up := &UnifiPoller{
-		Flag: &Flag{},
+// New returns a new poller struct preloaded with default values.
+// No need to call this if you call Start.c
+func New() *UnifiPoller {
+	return &UnifiPoller{
 		Config: &Config{
-			// Preload our defaults.
 			InfluxURL:  defaultInfluxURL,
 			InfluxUser: defaultInfluxUser,
 			InfluxPass: defaultInfluxPass,
 			InfluxDB:   defaultInfluxDB,
 			UnifiUser:  defaultUnifiUser,
-			UnifiPass:  os.Getenv("UNIFI_PASSWORD"), // deprecated name.
+			UnifiPass:  defaultUnifiUser,
 			UnifiBase:  defaultUnifiURL,
 			Interval:   Duration{defaultInterval},
 			Sites:      []string{"all"},
 			HTTPListen: defaultHTTPListen,
 			Namespace:  appName,
-		}}
+		}, Flag: &Flag{},
+	}
+}
+
+// Start begins the application from a CLI.
+// Parses flags, parses config and executes Run().
+func (u *UnifiPoller) Start() error {
+	log.SetFlags(log.LstdFlags)
+	up := New()
 	up.Flag.Parse(os.Args[1:])
+
 	if up.Flag.ShowVer {
 		fmt.Printf("%s v%s\n", appName, Version)
 		return nil // don't run anything else w/ version request.
 	}
+
 	if up.Flag.DumpJSON == "" { // do not print this when dumping JSON.
 		up.Logf("Loading Configuration File: %s", up.Flag.ConfigFile)
 	}
+
 	// Parse config file.
 	if err := up.Config.ParseFile(up.Flag.ConfigFile); err != nil {
 		up.Flag.Usage()
 		return err
 	}
+
 	// Update Config with ENV variable overrides.
 	if err := up.Config.ParseENV(); err != nil {
 		return err
 	}
+
+	if up.Flag.DumpJSON != "" {
+		return up.DumpJSONPayload()
+	}
+
 	return up.Run()
 }
 
@@ -65,6 +79,7 @@ func (f *Flag) Parse(args []string) {
 		fmt.Printf("Usage: %s [--config=/path/to/up.conf] [--version]", appName)
 		f.PrintDefaults()
 	}
+
 	f.StringVarP(&f.DumpJSON, "dumpjson", "j", "",
 		"This debug option prints a json payload and exits. See man page for more info.")
 	f.StringVarP(&f.ConfigFile, "config", "c", DefaultConfFile, "Poller config file path.")
@@ -74,17 +89,16 @@ func (f *Flag) Parse(args []string) {
 
 // Run invokes all the application logic and routines.
 func (u *UnifiPoller) Run() (err error) {
-	if u.Flag.DumpJSON != "" {
-		return u.DumpJSONPayload()
-	}
 	if u.Config.Debug {
 		log.SetFlags(log.Lshortfile | log.Lmicroseconds | log.Ldate)
 		u.LogDebugf("Debug Logging Enabled")
 	}
+
 	log.Printf("[INFO] UniFi Poller v%v Starting Up! PID: %d", Version, os.Getpid())
 	if err = u.GetUnifi(); err != nil {
 		return err
 	}
+
 	u.Logf("Polling UniFi Controller at %s v%s as user %s. Sites: %v",
 		u.Config.UnifiBase, u.Unifi.ServerVersion, u.Config.UnifiUser, u.Config.Sites)
 
@@ -149,5 +163,6 @@ func (u *UnifiPoller) GetUnifi() (err error) {
 		return fmt.Errorf("unifi controller: %v", err)
 	}
 	u.LogDebugf("Authenticated with controller successfully")
+
 	return u.CheckSites()
 }
