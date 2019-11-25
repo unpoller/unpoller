@@ -83,7 +83,7 @@ func descUSW(ns string) *usw {
 		FanLevel:      prometheus.NewDesc(ns+"fan_level", "Fan Level", labels, nil),
 		TotalTxBytes:  prometheus.NewDesc(ns+"bytes_tx_total", "Total Transmitted Bytes", labels, nil),
 		TotalRxBytes:  prometheus.NewDesc(ns+"bytes_rx_total", "Total Received Bytes", labels, nil),
-		TotalBytes:    prometheus.NewDesc(ns+"bytes_total", "Total Bytes Transfered", labels, nil),
+		TotalBytes:    prometheus.NewDesc(ns+"bytes_total", "Total Bytes Transferred", labels, nil),
 		NumSta:        prometheus.NewDesc(ns+"stations_total", "Number of Stations", labels, nil),
 		UserNumSta:    prometheus.NewDesc(ns+"stations_user_total", "Number of User Stations", labels, nil),
 		GuestNumSta:   prometheus.NewDesc(ns+"stations_guest_total", "Number of Guest Stations", labels, nil),
@@ -111,7 +111,7 @@ func descUSW(ns string) *usw {
 		SwRxBroadcast: prometheus.NewDesc(ns+"switch_broadcast_rx_total", "Switch Broadcast Receive Total", labels, nil),
 		SwTxMulticast: prometheus.NewDesc(ns+"switch_multicast_tx_total", "Switch Multicast Transmit Total", labels, nil),
 		SwTxBroadcast: prometheus.NewDesc(ns+"switch_broadcast_tx_total", "Switch Broadcast Transmit Total", labels, nil),
-		SwBytes:       prometheus.NewDesc(ns+"switch_bytes_total", "Switch Bytes Transfered Total", labels, nil),
+		SwBytes:       prometheus.NewDesc(ns+"switch_bytes_total", "Switch Bytes Transferred Total", labels, nil),
 
 		// per-port data
 		PoeCurrent:   prometheus.NewDesc(pns+"poe_current", "POE Current", labelP, nil),
@@ -187,7 +187,7 @@ func (u *unifiCollector) exportUSW(s *unifi.USW) []*metricExports {
 }
 
 func (u *unifiCollector) exportPortTable(pt []unifi.Port, labels []string) []*metricExports {
-	var metrics []*metricExports
+	metrics := []*metricExports{}
 	// Per-port data on a switch
 	for _, p := range pt {
 		// Copy labels, and add four new ones.

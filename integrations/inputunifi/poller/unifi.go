@@ -78,8 +78,7 @@ func (u *UnifiPoller) CollectMetrics() (*metrics.Metrics, error) {
 	m.Sites, err = u.GetFilteredSites()
 	u.LogError(err, "unifi.GetSites()")
 	if u.Config.CollectIDS {
-		// Check back in time since twice the interval. Dups are discarded by InfluxDB.
-		m.IDSList, err = u.Unifi.GetIDS(m.Sites, time.Now().Add(2*u.Config.Interval.Duration), time.Now())
+		m.IDSList, err = u.Unifi.GetIDS(m.Sites, time.Now().Add(u.Config.Interval.Duration), time.Now())
 		u.LogError(err, "unifi.GetIDS()")
 	}
 	// Get all the points.
