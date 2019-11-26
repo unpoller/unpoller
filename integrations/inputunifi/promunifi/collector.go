@@ -1,3 +1,4 @@
+// Package promunifi provides the bridge between unifi metrics and prometheus.
 package promunifi
 
 import (
@@ -117,18 +118,18 @@ func (u *unifiCollector) Collect(ch chan<- prometheus.Metric) {
 	go u.exportMetrics(ch, r)
 
 	r.wg.Add(len(r.Metrics.Clients) + len(r.Metrics.Sites))
-	go u.exportClients(r.Metrics.Clients, r.ch)
-	go u.exportSites(r.Metrics.Sites, r.ch)
+	go u.exportClients(r.Metrics.Clients, r)
+	go u.exportSites(r.Metrics.Sites, r)
 
 	if r.Metrics.Devices == nil {
 		return
 	}
 
-	r.wg.Add(len(r.Metrics.Devices.UAPs) + len(r.Metrics.Devices.USGs) + len(r.Metrics.Devices.USWs) + len(r.Metrics.Devices.UDMs))
-	go u.exportUAPs(r.Metrics.Devices.UAPs, r.ch)
-	go u.exportUSGs(r.Metrics.Devices.USGs, r.ch)
-	go u.exportUSWs(r.Metrics.Devices.USWs, r.ch)
-	go u.exportUDMs(r.Metrics.Devices.UDMs, r.ch)
+	r.wg.Add(len(r.Metrics.UAPs) + len(r.Metrics.USWs) + len(r.Metrics.USGs) + len(r.Metrics.UDMs))
+	go u.exportUAPs(r.Metrics.UAPs, r)
+	go u.exportUSWs(r.Metrics.USWs, r)
+	go u.exportUSGs(r.Metrics.USGs, r)
+	u.exportUDMs(r.Metrics.UDMs, r)
 }
 
 // This is closely tied to the method above with a sync.WaitGroup.
@@ -140,14 +141,14 @@ func (u *unifiCollector) exportMetrics(ch chan<- prometheus.Metric, r *Report) {
 			r.Total++
 			descs[m.Desc] = true
 			switch v := m.Value.(type) {
+			case unifi.FlexInt:
+				ch <- prometheus.MustNewConstMetric(m.Desc, m.ValueType, v.Val, m.Labels...)
 			case float64:
 				ch <- prometheus.MustNewConstMetric(m.Desc, m.ValueType, v, m.Labels...)
 			case int64:
 				ch <- prometheus.MustNewConstMetric(m.Desc, m.ValueType, float64(v), m.Labels...)
 			case int:
 				ch <- prometheus.MustNewConstMetric(m.Desc, m.ValueType, float64(v), m.Labels...)
-			case unifi.FlexInt:
-				ch <- prometheus.MustNewConstMetric(m.Desc, m.ValueType, v.Val, m.Labels...)
 
 			default:
 				r.Errors++

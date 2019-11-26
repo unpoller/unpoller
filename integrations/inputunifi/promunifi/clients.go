@@ -82,50 +82,45 @@ func descClient(ns string) *uclient {
 	}
 }
 
-func (u *unifiCollector) exportClients(clients []*unifi.Client, ch chan []*metricExports) {
+func (u *unifiCollector) exportClients(clients []*unifi.Client, r *Report) {
 	for _, c := range clients {
-		ch <- u.exportClient(c)
-	}
-}
+		labels := []string{c.ID, c.Mac, c.UserID, c.SiteID, c.SiteName,
+			c.NetworkID, c.ApMac, c.GwMac, c.SwMac, c.ApName, c.GwName,
+			c.SwName, c.RadioName, c.Radio, c.RadioProto, c.Name, c.Channel.Txt,
+			c.Vlan.Txt, c.IP, c.Essid, c.Bssid, c.RadioDescription,
+		}
 
-// CollectClient exports Clients' Data
-func (u *unifiCollector) exportClient(c *unifi.Client) []*metricExports {
-	labels := []string{c.ID, c.Mac, c.UserID, c.SiteID, c.SiteName,
-		c.NetworkID, c.ApMac, c.GwMac, c.SwMac, c.ApName, c.GwName,
-		c.SwName, c.RadioName, c.Radio, c.RadioProto, c.Name, c.Channel.Txt,
-		c.Vlan.Txt, c.IP, c.Essid, c.Bssid, c.RadioDescription,
-	}
-
-	return []*metricExports{
-		{u.Client.Anomalies, prometheus.CounterValue, c.Anomalies, labels},
-		{u.Client.BytesR, prometheus.GaugeValue, c.BytesR, labels},
-		{u.Client.CCQ, prometheus.GaugeValue, c.Ccq, labels},
-		{u.Client.Noise, prometheus.GaugeValue, c.Noise, labels},
-		{u.Client.RoamCount, prometheus.CounterValue, c.RoamCount, labels},
-		{u.Client.RSSI, prometheus.GaugeValue, c.Rssi, labels},
-		{u.Client.RxBytes, prometheus.CounterValue, c.RxBytes, labels},
-		{u.Client.RxBytesR, prometheus.GaugeValue, c.RxBytesR, labels},
-		{u.Client.RxPackets, prometheus.CounterValue, c.RxPackets, labels},
-		{u.Client.RxRate, prometheus.GaugeValue, c.RxRate, labels},
-		{u.Client.Signal, prometheus.GaugeValue, c.Signal, labels},
-		{u.Client.TxBytes, prometheus.CounterValue, c.TxBytes, labels},
-		{u.Client.TxBytesR, prometheus.GaugeValue, c.TxBytesR, labels},
-		{u.Client.TxPackets, prometheus.CounterValue, c.TxPackets, labels},
-		{u.Client.TxPower, prometheus.GaugeValue, c.TxPower, labels},
-		{u.Client.TxRate, prometheus.GaugeValue, c.TxRate, labels},
-		{u.Client.Uptime, prometheus.GaugeValue, c.Uptime, labels},
-		{u.Client.WifiTxAttempts, prometheus.CounterValue, c.WifiTxAttempts, labels},
-		{u.Client.WiredRxBytes, prometheus.CounterValue, c.WiredRxBytes, labels},
-		{u.Client.WiredRxBytesR, prometheus.GaugeValue, c.WiredRxBytesR, labels},
-		{u.Client.WiredRxPackets, prometheus.CounterValue, c.WiredRxPackets, labels},
-		{u.Client.WiredTxBytes, prometheus.CounterValue, c.WiredTxBytes, labels},
-		{u.Client.WiredTxBytesR, prometheus.GaugeValue, c.WiredTxBytesR, labels},
-		{u.Client.WiredTxPackets, prometheus.CounterValue, c.WiredTxPackets, labels},
-		{u.Client.DpiStatsApp, prometheus.GaugeValue, c.DpiStats.App.Val, labels},
-		{u.Client.DpiStatsCat, prometheus.GaugeValue, c.DpiStats.Cat.Val, labels},
-		{u.Client.DpiStatsRxBytes, prometheus.CounterValue, c.DpiStats.RxBytes.Val, labels},
-		{u.Client.DpiStatsRxPackets, prometheus.CounterValue, c.DpiStats.RxPackets.Val, labels},
-		{u.Client.DpiStatsTxBytes, prometheus.CounterValue, c.DpiStats.TxBytes.Val, labels},
-		{u.Client.DpiStatsTxPackets, prometheus.CounterValue, c.DpiStats.TxPackets.Val, labels},
+		r.ch <- []*metricExports{
+			{u.Client.Anomalies, prometheus.CounterValue, c.Anomalies, labels},
+			{u.Client.BytesR, prometheus.GaugeValue, c.BytesR, labels},
+			{u.Client.CCQ, prometheus.GaugeValue, c.Ccq, labels},
+			{u.Client.Noise, prometheus.GaugeValue, c.Noise, labels},
+			{u.Client.RoamCount, prometheus.CounterValue, c.RoamCount, labels},
+			{u.Client.RSSI, prometheus.GaugeValue, c.Rssi, labels},
+			{u.Client.RxBytes, prometheus.CounterValue, c.RxBytes, labels},
+			{u.Client.RxBytesR, prometheus.GaugeValue, c.RxBytesR, labels},
+			{u.Client.RxPackets, prometheus.CounterValue, c.RxPackets, labels},
+			{u.Client.RxRate, prometheus.GaugeValue, c.RxRate, labels},
+			{u.Client.Signal, prometheus.GaugeValue, c.Signal, labels},
+			{u.Client.TxBytes, prometheus.CounterValue, c.TxBytes, labels},
+			{u.Client.TxBytesR, prometheus.GaugeValue, c.TxBytesR, labels},
+			{u.Client.TxPackets, prometheus.CounterValue, c.TxPackets, labels},
+			{u.Client.TxPower, prometheus.GaugeValue, c.TxPower, labels},
+			{u.Client.TxRate, prometheus.GaugeValue, c.TxRate, labels},
+			{u.Client.Uptime, prometheus.GaugeValue, c.Uptime, labels},
+			{u.Client.WifiTxAttempts, prometheus.CounterValue, c.WifiTxAttempts, labels},
+			{u.Client.WiredRxBytes, prometheus.CounterValue, c.WiredRxBytes, labels},
+			{u.Client.WiredRxBytesR, prometheus.GaugeValue, c.WiredRxBytesR, labels},
+			{u.Client.WiredRxPackets, prometheus.CounterValue, c.WiredRxPackets, labels},
+			{u.Client.WiredTxBytes, prometheus.CounterValue, c.WiredTxBytes, labels},
+			{u.Client.WiredTxBytesR, prometheus.GaugeValue, c.WiredTxBytesR, labels},
+			{u.Client.WiredTxPackets, prometheus.CounterValue, c.WiredTxPackets, labels},
+			{u.Client.DpiStatsApp, prometheus.GaugeValue, c.DpiStats.App, labels},
+			{u.Client.DpiStatsCat, prometheus.GaugeValue, c.DpiStats.Cat, labels},
+			{u.Client.DpiStatsRxBytes, prometheus.CounterValue, c.DpiStats.RxBytes, labels},
+			{u.Client.DpiStatsRxPackets, prometheus.CounterValue, c.DpiStats.RxPackets, labels},
+			{u.Client.DpiStatsTxBytes, prometheus.CounterValue, c.DpiStats.TxBytes, labels},
+			{u.Client.DpiStatsTxPackets, prometheus.CounterValue, c.DpiStats.TxPackets, labels},
+		}
 	}
 }
