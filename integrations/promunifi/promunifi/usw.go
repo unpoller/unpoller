@@ -136,54 +136,49 @@ func descUSW(ns string) *usw {
 	}
 }
 
-func (u *unifiCollector) exportUSWs(usws []*unifi.USW, ch chan []*metricExports) {
-	for _, sw := range usws {
-		ch <- u.exportUSW(sw)
+func (u *unifiCollector) exportUSWs(usws []*unifi.USW, r *Report) {
+	for _, s := range usws {
+		labels := []string{s.Type, s.Version, s.DeviceID, s.IP,
+			s.SiteName, s.Mac, s.Model, s.Name, s.Serial, s.SiteID}
+
+		// Switch data.
+		r.ch <- append([]*metricExports{
+			{u.USW.Uptime, prometheus.GaugeValue, s.Uptime, labels},
+			{u.USW.Temperature, prometheus.GaugeValue, s.GeneralTemperature, labels},
+			{u.USW.TotalMaxPower, prometheus.GaugeValue, s.TotalMaxPower, labels},
+			{u.USW.FanLevel, prometheus.GaugeValue, s.FanLevel, labels},
+			{u.USW.TotalTxBytes, prometheus.CounterValue, s.TxBytes, labels},
+			{u.USW.TotalRxBytes, prometheus.CounterValue, s.RxBytes, labels},
+			{u.USW.TotalBytes, prometheus.CounterValue, s.Bytes, labels},
+			{u.USW.NumSta, prometheus.GaugeValue, s.NumSta, labels},
+			{u.USW.UserNumSta, prometheus.GaugeValue, s.UserNumSta, labels},
+			{u.USW.GuestNumSta, prometheus.GaugeValue, s.GuestNumSta, labels},
+			{u.USW.Loadavg1, prometheus.GaugeValue, s.SysStats.Loadavg1, labels},
+			{u.USW.Loadavg5, prometheus.GaugeValue, s.SysStats.Loadavg5, labels},
+			{u.USW.Loadavg15, prometheus.GaugeValue, s.SysStats.Loadavg15, labels},
+			{u.USW.MemUsed, prometheus.GaugeValue, s.SysStats.MemUsed, labels},
+			{u.USW.MemTotal, prometheus.GaugeValue, s.SysStats.MemTotal, labels},
+			{u.USW.MemBuffer, prometheus.GaugeValue, s.SysStats.MemBuffer, labels},
+			{u.USW.CPU, prometheus.GaugeValue, s.SystemStats.CPU, labels},
+			{u.USW.Mem, prometheus.GaugeValue, s.SystemStats.Mem, labels},
+			{u.USW.SwRxPackets, prometheus.CounterValue, s.Stat.Sw.RxPackets, labels},
+			{u.USW.SwRxBytes, prometheus.CounterValue, s.Stat.Sw.RxBytes, labels},
+			{u.USW.SwRxErrors, prometheus.CounterValue, s.Stat.Sw.RxErrors, labels},
+			{u.USW.SwRxDropped, prometheus.CounterValue, s.Stat.Sw.RxDropped, labels},
+			{u.USW.SwRxCrypts, prometheus.CounterValue, s.Stat.Sw.RxCrypts, labels},
+			{u.USW.SwRxFrags, prometheus.CounterValue, s.Stat.Sw.RxFrags, labels},
+			{u.USW.SwTxPackets, prometheus.CounterValue, s.Stat.Sw.TxPackets, labels},
+			{u.USW.SwTxBytes, prometheus.CounterValue, s.Stat.Sw.TxBytes, labels},
+			{u.USW.SwTxErrors, prometheus.CounterValue, s.Stat.Sw.TxErrors, labels},
+			{u.USW.SwTxDropped, prometheus.CounterValue, s.Stat.Sw.TxDropped, labels},
+			{u.USW.SwTxRetries, prometheus.CounterValue, s.Stat.Sw.TxRetries, labels},
+			{u.USW.SwRxMulticast, prometheus.CounterValue, s.Stat.Sw.RxMulticast, labels},
+			{u.USW.SwRxBroadcast, prometheus.CounterValue, s.Stat.Sw.RxBroadcast, labels},
+			{u.USW.SwTxMulticast, prometheus.CounterValue, s.Stat.Sw.TxMulticast, labels},
+			{u.USW.SwTxBroadcast, prometheus.CounterValue, s.Stat.Sw.TxBroadcast, labels},
+			{u.USW.SwBytes, prometheus.CounterValue, s.Stat.Sw.Bytes, labels},
+		}, u.exportPortTable(s.PortTable, labels[5:])...)
 	}
-}
-
-// exportUSW exports Network Switch Data
-func (u *unifiCollector) exportUSW(s *unifi.USW) []*metricExports {
-	labels := []string{s.Type, s.Version, s.DeviceID, s.IP,
-		s.SiteName, s.Mac, s.Model, s.Name, s.Serial, s.SiteID}
-
-	// Switch data.
-	return append([]*metricExports{
-		{u.USW.Uptime, prometheus.GaugeValue, s.Uptime, labels},
-		{u.USW.Temperature, prometheus.GaugeValue, s.GeneralTemperature, labels},
-		{u.USW.TotalMaxPower, prometheus.GaugeValue, s.TotalMaxPower, labels},
-		{u.USW.FanLevel, prometheus.GaugeValue, s.FanLevel, labels},
-		{u.USW.TotalTxBytes, prometheus.CounterValue, s.TxBytes, labels},
-		{u.USW.TotalRxBytes, prometheus.CounterValue, s.RxBytes, labels},
-		{u.USW.TotalBytes, prometheus.CounterValue, s.Bytes, labels},
-		{u.USW.NumSta, prometheus.GaugeValue, s.NumSta, labels},
-		{u.USW.UserNumSta, prometheus.GaugeValue, s.UserNumSta, labels},
-		{u.USW.GuestNumSta, prometheus.GaugeValue, s.GuestNumSta, labels},
-		{u.USW.Loadavg1, prometheus.GaugeValue, s.SysStats.Loadavg1, labels},
-		{u.USW.Loadavg5, prometheus.GaugeValue, s.SysStats.Loadavg5, labels},
-		{u.USW.Loadavg15, prometheus.GaugeValue, s.SysStats.Loadavg15, labels},
-		{u.USW.MemUsed, prometheus.GaugeValue, s.SysStats.MemUsed, labels},
-		{u.USW.MemTotal, prometheus.GaugeValue, s.SysStats.MemTotal, labels},
-		{u.USW.MemBuffer, prometheus.GaugeValue, s.SysStats.MemBuffer, labels},
-		{u.USW.CPU, prometheus.GaugeValue, s.SystemStats.CPU, labels},
-		{u.USW.Mem, prometheus.GaugeValue, s.SystemStats.Mem, labels},
-		{u.USW.SwRxPackets, prometheus.CounterValue, s.Stat.Sw.RxPackets, labels},
-		{u.USW.SwRxBytes, prometheus.CounterValue, s.Stat.Sw.RxBytes, labels},
-		{u.USW.SwRxErrors, prometheus.CounterValue, s.Stat.Sw.RxErrors, labels},
-		{u.USW.SwRxDropped, prometheus.CounterValue, s.Stat.Sw.RxDropped, labels},
-		{u.USW.SwRxCrypts, prometheus.CounterValue, s.Stat.Sw.RxCrypts, labels},
-		{u.USW.SwRxFrags, prometheus.CounterValue, s.Stat.Sw.RxFrags, labels},
-		{u.USW.SwTxPackets, prometheus.CounterValue, s.Stat.Sw.TxPackets, labels},
-		{u.USW.SwTxBytes, prometheus.CounterValue, s.Stat.Sw.TxBytes, labels},
-		{u.USW.SwTxErrors, prometheus.CounterValue, s.Stat.Sw.TxErrors, labels},
-		{u.USW.SwTxDropped, prometheus.CounterValue, s.Stat.Sw.TxDropped, labels},
-		{u.USW.SwTxRetries, prometheus.CounterValue, s.Stat.Sw.TxRetries, labels},
-		{u.USW.SwRxMulticast, prometheus.CounterValue, s.Stat.Sw.RxMulticast, labels},
-		{u.USW.SwRxBroadcast, prometheus.CounterValue, s.Stat.Sw.RxBroadcast, labels},
-		{u.USW.SwTxMulticast, prometheus.CounterValue, s.Stat.Sw.TxMulticast, labels},
-		{u.USW.SwTxBroadcast, prometheus.CounterValue, s.Stat.Sw.TxBroadcast, labels},
-		{u.USW.SwBytes, prometheus.CounterValue, s.Stat.Sw.Bytes, labels},
-	}, u.exportPortTable(s.PortTable, labels[5:])...)
 }
 
 func (u *unifiCollector) exportPortTable(pt []unifi.Port, labels []string) []*metricExports {
@@ -192,7 +187,6 @@ func (u *unifiCollector) exportPortTable(pt []unifi.Port, labels []string) []*me
 	for _, p := range pt {
 		// Copy labels, and add four new ones.
 		l := append([]string{p.PortIdx.Txt, p.Name, p.Mac, p.IP}, labels...)
-
 		metrics = append(metrics, []*metricExports{
 			{u.USW.PoeCurrent, prometheus.GaugeValue, p.PoeCurrent, l},
 			{u.USW.PoePower, prometheus.GaugeValue, p.PoePower, l},
@@ -214,6 +208,5 @@ func (u *unifiCollector) exportPortTable(pt []unifi.Port, labels []string) []*me
 			{u.USW.TxMulticast, prometheus.CounterValue, p.TxMulticast, l},
 		}...)
 	}
-
 	return metrics
 }
