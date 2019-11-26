@@ -139,7 +139,6 @@ func (u *unifiCollector) exportMetrics(ch chan<- prometheus.Metric, r *Report) {
 		for _, m := range newMetrics {
 			r.Total++
 			descs[m.Desc] = true
-
 			switch v := m.Value.(type) {
 			case float64:
 				ch <- prometheus.MustNewConstMetric(m.Desc, m.ValueType, v, m.Labels...)
