@@ -145,6 +145,8 @@ func (u *unifiCollector) exportMetrics(ch chan<- prometheus.Metric, r *Report) {
 				ch <- prometheus.MustNewConstMetric(m.Desc, m.ValueType, v, m.Labels...)
 			case int64:
 				ch <- prometheus.MustNewConstMetric(m.Desc, m.ValueType, float64(v), m.Labels...)
+			case int:
+				ch <- prometheus.MustNewConstMetric(m.Desc, m.ValueType, float64(v), m.Labels...)
 			case unifi.FlexInt:
 				ch <- prometheus.MustNewConstMetric(m.Desc, m.ValueType, v.Val, m.Labels...)
 
