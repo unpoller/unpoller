@@ -212,45 +212,43 @@ func descUAP(ns string) *uap {
 	}
 }
 
-func (u *unifiCollector) exportUAPs(uaps []*unifi.UAP, ch chan []*metricExports) {
+func (u *unifiCollector) exportUAPs(uaps []*unifi.UAP, r *Report) {
 	for _, a := range uaps {
-		ch <- u.exportUAP(a)
+		labels := []string{a.IP, a.SiteName, a.Mac, a.Model, a.Name, a.Serial, a.SiteID,
+			a.Type, a.Version, a.DeviceID}
+
+		// AP data.
+		r.ch <- append(append([]*metricExports{
+			{u.UAP.Uptime, prometheus.GaugeValue, a.Uptime, labels},
+			{u.UAP.TotalTxBytes, prometheus.CounterValue, a.TxBytes, labels},
+			{u.UAP.TotalRxBytes, prometheus.CounterValue, a.RxBytes, labels},
+			{u.UAP.TotalBytes, prometheus.CounterValue, a.Bytes, labels},
+			{u.UAP.BytesD, prometheus.CounterValue, a.BytesD, labels},     // not sure if these 3 Ds are counters or gauges.
+			{u.UAP.TxBytesD, prometheus.CounterValue, a.TxBytesD, labels}, // not sure if these 3 Ds are counters or gauges.
+			{u.UAP.RxBytesD, prometheus.CounterValue, a.RxBytesD, labels}, // not sure if these 3 Ds are counters or gauges.
+			{u.UAP.BytesR, prometheus.GaugeValue, a.BytesR, labels},
+			{u.UAP.NumSta, prometheus.GaugeValue, a.NumSta, labels},
+			{u.UAP.UserNumSta, prometheus.GaugeValue, a.UserNumSta, labels},
+			{u.UAP.GuestNumSta, prometheus.GaugeValue, a.GuestNumSta, labels},
+			{u.UAP.Loadavg1, prometheus.GaugeValue, a.SysStats.Loadavg1, labels},
+			{u.UAP.Loadavg5, prometheus.GaugeValue, a.SysStats.Loadavg5, labels},
+			{u.UAP.Loadavg15, prometheus.GaugeValue, a.SysStats.Loadavg15, labels},
+			{u.UAP.MemUsed, prometheus.GaugeValue, a.SysStats.MemUsed, labels},
+			{u.UAP.MemTotal, prometheus.GaugeValue, a.SysStats.MemTotal, labels},
+			{u.UAP.MemBuffer, prometheus.GaugeValue, a.SysStats.MemBuffer, labels},
+			{u.UAP.CPU, prometheus.GaugeValue, a.SystemStats.CPU, labels},
+			{u.UAP.Mem, prometheus.GaugeValue, a.SystemStats.Mem, labels},
+		},
+			u.exportUAPstat(labels[2:], a.Stat.Ap)...),
+			u.exportVAPtable(labels[2:], a.VapTable, a.RadioTable, a.RadioTableStats)...)
 	}
-}
-
-// exportUAP exports Access Point Data
-func (u *unifiCollector) exportUAP(a *unifi.UAP) []*metricExports {
-	labels := []string{a.IP, a.SiteName, a.Mac, a.Model, a.Name, a.Serial, a.SiteID,
-		a.Type, a.Version, a.DeviceID}
-
-	// Switch data.
-	return append(append([]*metricExports{
-		{u.UAP.Uptime, prometheus.GaugeValue, a.Uptime, labels},
-		{u.UAP.TotalTxBytes, prometheus.CounterValue, a.TxBytes, labels},
-		{u.UAP.TotalRxBytes, prometheus.CounterValue, a.RxBytes, labels},
-		{u.UAP.TotalBytes, prometheus.CounterValue, a.Bytes, labels},
-		{u.UAP.BytesD, prometheus.CounterValue, a.BytesD, labels},     // not sure if these 3 Ds are counters or gauges.
-		{u.UAP.TxBytesD, prometheus.CounterValue, a.TxBytesD, labels}, // not sure if these 3 Ds are counters or gauges.
-		{u.UAP.RxBytesD, prometheus.CounterValue, a.RxBytesD, labels}, // not sure if these 3 Ds are counters or gauges.
-		{u.UAP.BytesR, prometheus.GaugeValue, a.BytesR, labels},
-		{u.UAP.NumSta, prometheus.GaugeValue, a.NumSta, labels},
-		{u.UAP.UserNumSta, prometheus.GaugeValue, a.UserNumSta, labels},
-		{u.UAP.GuestNumSta, prometheus.GaugeValue, a.GuestNumSta, labels},
-		{u.UAP.Loadavg1, prometheus.GaugeValue, a.SysStats.Loadavg1, labels},
-		{u.UAP.Loadavg5, prometheus.GaugeValue, a.SysStats.Loadavg5, labels},
-		{u.UAP.Loadavg15, prometheus.GaugeValue, a.SysStats.Loadavg15, labels},
-		{u.UAP.MemUsed, prometheus.GaugeValue, a.SysStats.MemUsed, labels},
-		{u.UAP.MemTotal, prometheus.GaugeValue, a.SysStats.MemTotal, labels},
-		{u.UAP.MemBuffer, prometheus.GaugeValue, a.SysStats.MemBuffer, labels},
-		{u.UAP.CPU, prometheus.GaugeValue, a.SystemStats.CPU, labels},
-		{u.UAP.Mem, prometheus.GaugeValue, a.SystemStats.Mem, labels},
-	}, u.exportUAPstat(labels[2:], a.Stat.Ap)...), u.exportVAPtable(labels[2:], a.VapTable, a.RadioTable, a.RadioTableStats)...)
 }
 
 func (u *unifiCollector) exportUAPstat(labels []string, a *unifi.Ap) []*metricExports {
 	labelA := append([]string{"all"}, labels...)
 	labelU := append([]string{"user"}, labels...)
 	labelG := append([]string{"guest"}, labels...)
+
 	return []*metricExports{
 		// all
 		{u.UAP.ApWifiTxDropped, prometheus.CounterValue, a.WifiTxDropped, labelA},
@@ -301,11 +299,12 @@ func (u *unifiCollector) exportUAPstat(labels []string, a *unifi.Ap) []*metricEx
 }
 
 func (u *unifiCollector) exportVAPtable(labels []string, vt unifi.VapTable, rt unifi.RadioTable, rts unifi.RadioTableStats) []*metricExports {
-	m := []*metricExports{}
+	metrics := []*metricExports{}
 
+	// vap table stats
 	for _, v := range vt {
 		labelV := append([]string{v.Name, v.Bssid, v.RadioName, v.Essid}, labels...)
-		m = append(m, []*metricExports{
+		metrics = append(metrics, []*metricExports{
 			{u.UAP.VAPCcq, prometheus.GaugeValue, v.Ccq, labelV},
 			{u.UAP.VAPMacFilterRejections, prometheus.CounterValue, v.MacFilterRejections, labelV},
 			{u.UAP.VAPNumSatisfactionSta, prometheus.GaugeValue, v.NumSatisfactionSta, labelV},
@@ -345,9 +344,10 @@ func (u *unifiCollector) exportVAPtable(labels []string, vt unifi.VapTable, rt u
 		}...)
 	}
 
+	// radio table
 	for _, p := range rt {
 		labelR := append([]string{p.Name, p.Radio, p.WlangroupID}, labels...)
-		m = append(m, []*metricExports{
+		metrics = append(metrics, []*metricExports{
 			{u.UAP.RadioCurrentAntennaGain, prometheus.GaugeValue, p.CurrentAntennaGain, labelR},
 			{u.UAP.RadioHt, prometheus.GaugeValue, p.Ht, labelR},
 			{u.UAP.RadioMaxTxpower, prometheus.GaugeValue, p.MaxTxpower, labelR},
@@ -361,7 +361,7 @@ func (u *unifiCollector) exportVAPtable(labels []string, vt unifi.VapTable, rt u
 			if t.Name != p.Name {
 				continue
 			}
-			m = append(m, []*metricExports{
+			metrics = append(metrics, []*metricExports{
 				{u.UAP.RadioTxPower, prometheus.GaugeValue, t.TxPower, labelR},
 				{u.UAP.RadioAstBeXmit, prometheus.GaugeValue, t.AstBeXmit, labelR},
 				{u.UAP.RadioChannel, prometheus.GaugeValue, t.Channel, labelR},
@@ -376,8 +376,7 @@ func (u *unifiCollector) exportVAPtable(labels []string, vt unifi.VapTable, rt u
 				{u.UAP.RadioTxPackets, prometheus.CounterValue, t.TxPackets, labelR},
 				{u.UAP.RadioTxRetries, prometheus.CounterValue, t.TxRetries, labelR},
 			}...)
-
 		}
 	}
-	return m
+	return metrics
 }

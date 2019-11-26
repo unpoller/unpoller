@@ -109,58 +109,51 @@ func descUSG(ns string) *usg {
 	}
 }
 
-func (u *unifiCollector) exportUSGs(usgs []*unifi.USG, ch chan []*metricExports) {
-	for _, sg := range usgs {
-		ch <- u.exportUSG(sg)
+func (u *unifiCollector) exportUSGs(usgs []*unifi.USG, r *Report) {
+	for _, s := range usgs {
+		labels := []string{s.SiteName, s.Mac, s.Model, s.Name, s.Serial, s.SiteID,
+			s.Type, s.Version, s.DeviceID, s.IP}
+		labelWan := append([]string{"all"}, labels...)
+
+		// Gateway System Data.
+		r.ch <- append([]*metricExports{
+			{u.USG.Uptime, prometheus.GaugeValue, s.Uptime, labels},
+			{u.USG.TotalTxBytes, prometheus.CounterValue, s.TxBytes, labels},
+			{u.USG.TotalRxBytes, prometheus.CounterValue, s.RxBytes, labels},
+			{u.USG.TotalBytes, prometheus.CounterValue, s.Bytes, labels},
+			{u.USG.NumSta, prometheus.GaugeValue, s.NumSta, labels},
+			{u.USG.UserNumSta, prometheus.GaugeValue, s.UserNumSta, labels},
+			{u.USG.GuestNumSta, prometheus.GaugeValue, s.GuestNumSta, labels},
+			{u.USG.NumDesktop, prometheus.CounterValue, s.NumDesktop, labels},
+			{u.USG.NumMobile, prometheus.CounterValue, s.NumMobile, labels},
+			{u.USG.NumHandheld, prometheus.CounterValue, s.NumHandheld, labels},
+			{u.USG.Loadavg1, prometheus.GaugeValue, s.SysStats.Loadavg1, labels},
+			{u.USG.Loadavg5, prometheus.GaugeValue, s.SysStats.Loadavg5, labels},
+			{u.USG.Loadavg15, prometheus.GaugeValue, s.SysStats.Loadavg15, labels},
+			{u.USG.MemUsed, prometheus.GaugeValue, s.SysStats.MemUsed, labels},
+			{u.USG.MemTotal, prometheus.GaugeValue, s.SysStats.MemTotal, labels},
+			{u.USG.MemBuffer, prometheus.GaugeValue, s.SysStats.MemBuffer, labels},
+			{u.USG.CPU, prometheus.GaugeValue, s.SystemStats.CPU, labels},
+			{u.USG.Mem, prometheus.GaugeValue, s.SystemStats.Mem, labels},
+			// Combined Port Stats
+			{u.USG.WanRxPackets, prometheus.CounterValue, s.Stat.Gw.WanRxPackets, labelWan},
+			{u.USG.WanRxBytes, prometheus.CounterValue, s.Stat.Gw.WanRxBytes, labelWan},
+			{u.USG.WanRxDropped, prometheus.CounterValue, s.Stat.Gw.WanRxDropped, labelWan},
+			{u.USG.WanTxPackets, prometheus.CounterValue, s.Stat.Gw.WanTxPackets, labelWan},
+			{u.USG.WanTxBytes, prometheus.CounterValue, s.Stat.Gw.WanTxBytes, labelWan},
+			{u.USG.WanRxErrors, prometheus.CounterValue, s.Stat.Gw.WanRxErrors, labelWan},
+			{u.USG.LanRxPackets, prometheus.CounterValue, s.Stat.Gw.LanRxPackets, labels},
+			{u.USG.LanRxBytes, prometheus.CounterValue, s.Stat.Gw.LanRxBytes, labels},
+			{u.USG.LanTxPackets, prometheus.CounterValue, s.Stat.Gw.LanTxPackets, labels},
+			{u.USG.LanTxBytes, prometheus.CounterValue, s.Stat.Gw.LanTxBytes, labels},
+			{u.USG.LanRxDropped, prometheus.CounterValue, s.Stat.Gw.LanRxDropped, labels},
+			// Speed Test Stats
+			{u.USG.Latency, prometheus.GaugeValue, s.SpeedtestStatus.Latency, labels},
+			{u.USG.Runtime, prometheus.GaugeValue, s.SpeedtestStatus.Runtime, labels},
+			{u.USG.XputDownload, prometheus.GaugeValue, s.SpeedtestStatus.XputDownload, labels},
+			{u.USG.XputUpload, prometheus.GaugeValue, s.SpeedtestStatus.XputUpload, labels},
+		}, u.exportWANPorts(labels, s.Wan1, s.Wan2)...)
 	}
-}
-
-// exportUSG Exports Security Gateway Data
-// uplink and port tables structs are ignored. that data should be in other exported fields.
-func (u *unifiCollector) exportUSG(s *unifi.USG) []*metricExports {
-	labels := []string{s.SiteName, s.Mac, s.Model, s.Name, s.Serial, s.SiteID,
-		s.Type, s.Version, s.DeviceID, s.IP}
-	labelWan := append([]string{"all"}, labels...)
-	//	r.wait.Add(1) // closed by channel receiver.
-
-	// Gateway System Data.
-	return append([]*metricExports{
-		{u.USG.Uptime, prometheus.GaugeValue, s.Uptime, labels},
-		{u.USG.TotalTxBytes, prometheus.CounterValue, s.TxBytes, labels},
-		{u.USG.TotalRxBytes, prometheus.CounterValue, s.RxBytes, labels},
-		{u.USG.TotalBytes, prometheus.CounterValue, s.Bytes, labels},
-		{u.USG.NumSta, prometheus.GaugeValue, s.NumSta, labels},
-		{u.USG.UserNumSta, prometheus.GaugeValue, s.UserNumSta, labels},
-		{u.USG.GuestNumSta, prometheus.GaugeValue, s.GuestNumSta, labels},
-		{u.USG.NumDesktop, prometheus.CounterValue, s.NumDesktop, labels},
-		{u.USG.NumMobile, prometheus.CounterValue, s.NumMobile, labels},
-		{u.USG.NumHandheld, prometheus.CounterValue, s.NumHandheld, labels},
-		{u.USG.Loadavg1, prometheus.GaugeValue, s.SysStats.Loadavg1, labels},
-		{u.USG.Loadavg5, prometheus.GaugeValue, s.SysStats.Loadavg5, labels},
-		{u.USG.Loadavg15, prometheus.GaugeValue, s.SysStats.Loadavg15, labels},
-		{u.USG.MemUsed, prometheus.GaugeValue, s.SysStats.MemUsed, labels},
-		{u.USG.MemTotal, prometheus.GaugeValue, s.SysStats.MemTotal, labels},
-		{u.USG.MemBuffer, prometheus.GaugeValue, s.SysStats.MemBuffer, labels},
-		{u.USG.CPU, prometheus.GaugeValue, s.SystemStats.CPU, labels},
-		{u.USG.Mem, prometheus.GaugeValue, s.SystemStats.Mem, labels},
-		// Combined Port Stats
-		{u.USG.WanRxPackets, prometheus.CounterValue, s.Stat.Gw.WanRxPackets, labelWan},
-		{u.USG.WanRxBytes, prometheus.CounterValue, s.Stat.Gw.WanRxBytes, labelWan},
-		{u.USG.WanRxDropped, prometheus.CounterValue, s.Stat.Gw.WanRxDropped, labelWan},
-		{u.USG.WanTxPackets, prometheus.CounterValue, s.Stat.Gw.WanTxPackets, labelWan},
-		{u.USG.WanTxBytes, prometheus.CounterValue, s.Stat.Gw.WanTxBytes, labelWan},
-		{u.USG.WanRxErrors, prometheus.CounterValue, s.Stat.Gw.WanRxErrors, labelWan},
-		{u.USG.LanRxPackets, prometheus.CounterValue, s.Stat.Gw.LanRxPackets, labels},
-		{u.USG.LanRxBytes, prometheus.CounterValue, s.Stat.Gw.LanRxBytes, labels},
-		{u.USG.LanTxPackets, prometheus.CounterValue, s.Stat.Gw.LanTxPackets, labels},
-		{u.USG.LanTxBytes, prometheus.CounterValue, s.Stat.Gw.LanTxBytes, labels},
-		{u.USG.LanRxDropped, prometheus.CounterValue, s.Stat.Gw.LanRxDropped, labels},
-		// Speed Test Stats
-		{u.USG.Latency, prometheus.GaugeValue, s.SpeedtestStatus.Latency, labels},
-		{u.USG.Runtime, prometheus.GaugeValue, s.SpeedtestStatus.Runtime, labels},
-		{u.USG.XputDownload, prometheus.GaugeValue, s.SpeedtestStatus.XputDownload, labels},
-		{u.USG.XputUpload, prometheus.GaugeValue, s.SpeedtestStatus.XputUpload, labels},
-	}, u.exportWANPorts(labels, s.Wan1, s.Wan2)...)
 }
 
 func (u *unifiCollector) exportWANPorts(labels []string, wans ...unifi.Wan) []*metricExports {
@@ -189,6 +182,5 @@ func (u *unifiCollector) exportWANPorts(labels []string, wans ...unifi.Wan) []*m
 			{u.USG.WanBytesR, prometheus.GaugeValue, wan.BytesR, l},
 		}...)
 	}
-
 	return metrics
 }
