@@ -32,7 +32,6 @@ type site struct {
 	RemoteUserTxPackets   *prometheus.Desc
 }
 
-// XXX: The help values can be more verbose.
 func descSite(ns string) *site {
 	if ns += "_site_"; ns == "_site_" {
 		ns = "site_"
@@ -67,53 +66,46 @@ func descSite(ns string) *site {
 	}
 }
 
-func (u *unifiCollector) exportSites(sites unifi.Sites, ch chan []*metricExports) {
+func (u *unifiCollector) exportSites(sites unifi.Sites, r *Report) {
 	for _, s := range sites {
-		ch <- u.exportSite(s)
-	}
-}
+		metrics := []*metricExports{}
+		labels := []string{s.Name, s.Desc, s.SiteName}
+		for _, h := range s.Health {
+			l := append([]string{h.Subsystem, h.Status, h.GwVersion}, labels...)
 
-// exportSite exports Network Site Data
-func (u *unifiCollector) exportSite(s *unifi.Site) []*metricExports {
-	labels := []string{s.Name, s.Desc, s.SiteName}
-	metrics := []*metricExports{}
-
-	for _, h := range s.Health {
-		l := append([]string{h.Subsystem, h.Status, h.GwVersion}, labels...)
-
-		// XXX: More of these are subsystem specific (like the vpn/remote user stuff below)
-		metrics = append(metrics, []*metricExports{
-			{u.Site.NumUser, prometheus.CounterValue, h.NumUser.Val, l},
-			{u.Site.NumGuest, prometheus.CounterValue, h.NumGuest.Val, l},
-			{u.Site.NumIot, prometheus.CounterValue, h.NumIot.Val, l},
-			{u.Site.TxBytesR, prometheus.GaugeValue, h.TxBytesR.Val, l},
-			{u.Site.RxBytesR, prometheus.GaugeValue, h.RxBytesR.Val, l},
-			{u.Site.NumAp, prometheus.CounterValue, h.NumAp.Val, l},
-			{u.Site.NumAdopted, prometheus.CounterValue, h.NumAdopted.Val, l},
-			{u.Site.NumDisabled, prometheus.CounterValue, h.NumDisabled.Val, l},
-			{u.Site.NumDisconnected, prometheus.CounterValue, h.NumDisconnected.Val, l},
-			{u.Site.NumPending, prometheus.CounterValue, h.NumPending.Val, l},
-			{u.Site.NumGw, prometheus.CounterValue, h.NumGw.Val, l},
-			{u.Site.NumSw, prometheus.CounterValue, h.NumSw.Val, l},
-			{u.Site.NumSta, prometheus.CounterValue, h.NumSta.Val, l},
-			{u.Site.Latency, prometheus.GaugeValue, h.Latency.Val, l},
-			{u.Site.Drops, prometheus.CounterValue, h.Drops.Val, l},
-			{u.Site.XputUp, prometheus.GaugeValue, h.XputUp.Val, l},
-			{u.Site.XputDown, prometheus.GaugeValue, h.XputDown.Val, l},
-			{u.Site.SpeedtestPing, prometheus.GaugeValue, h.SpeedtestPing.Val, l},
-		}...)
-
-		if h.Subsystem == "vpn" {
+			// XXX: More of these are subsystem specific (like the vpn/remote user stuff below)
 			metrics = append(metrics, []*metricExports{
-				{u.Site.RemoteUserNumActive, prometheus.CounterValue, h.RemoteUserNumActive.Val, l},
-				{u.Site.RemoteUserNumInactive, prometheus.CounterValue, h.RemoteUserNumInactive.Val, l},
-				{u.Site.RemoteUserRxBytes, prometheus.CounterValue, h.RemoteUserRxBytes.Val, l},
-				{u.Site.RemoteUserTxBytes, prometheus.CounterValue, h.RemoteUserTxBytes.Val, l},
-				{u.Site.RemoteUserRxPackets, prometheus.CounterValue, h.RemoteUserRxPackets.Val, l},
-				{u.Site.RemoteUserTxPackets, prometheus.CounterValue, h.RemoteUserTxPackets.Val, l},
+				{u.Site.NumUser, prometheus.CounterValue, h.NumUser.Val, l},
+				{u.Site.NumGuest, prometheus.CounterValue, h.NumGuest.Val, l},
+				{u.Site.NumIot, prometheus.CounterValue, h.NumIot.Val, l},
+				{u.Site.TxBytesR, prometheus.GaugeValue, h.TxBytesR.Val, l},
+				{u.Site.RxBytesR, prometheus.GaugeValue, h.RxBytesR.Val, l},
+				{u.Site.NumAp, prometheus.CounterValue, h.NumAp.Val, l},
+				{u.Site.NumAdopted, prometheus.CounterValue, h.NumAdopted.Val, l},
+				{u.Site.NumDisabled, prometheus.CounterValue, h.NumDisabled.Val, l},
+				{u.Site.NumDisconnected, prometheus.CounterValue, h.NumDisconnected.Val, l},
+				{u.Site.NumPending, prometheus.CounterValue, h.NumPending.Val, l},
+				{u.Site.NumGw, prometheus.CounterValue, h.NumGw.Val, l},
+				{u.Site.NumSw, prometheus.CounterValue, h.NumSw.Val, l},
+				{u.Site.NumSta, prometheus.CounterValue, h.NumSta.Val, l},
+				{u.Site.Latency, prometheus.GaugeValue, h.Latency.Val, l},
+				{u.Site.Drops, prometheus.CounterValue, h.Drops.Val, l},
+				{u.Site.XputUp, prometheus.GaugeValue, h.XputUp.Val, l},
+				{u.Site.XputDown, prometheus.GaugeValue, h.XputDown.Val, l},
+				{u.Site.SpeedtestPing, prometheus.GaugeValue, h.SpeedtestPing.Val, l},
 			}...)
-		}
-	}
 
-	return metrics
+			if h.Subsystem == "vpn" {
+				metrics = append(metrics, []*metricExports{
+					{u.Site.RemoteUserNumActive, prometheus.CounterValue, h.RemoteUserNumActive.Val, l},
+					{u.Site.RemoteUserNumInactive, prometheus.CounterValue, h.RemoteUserNumInactive.Val, l},
+					{u.Site.RemoteUserRxBytes, prometheus.CounterValue, h.RemoteUserRxBytes.Val, l},
+					{u.Site.RemoteUserTxBytes, prometheus.CounterValue, h.RemoteUserTxBytes.Val, l},
+					{u.Site.RemoteUserRxPackets, prometheus.CounterValue, h.RemoteUserRxPackets.Val, l},
+					{u.Site.RemoteUserTxPackets, prometheus.CounterValue, h.RemoteUserTxPackets.Val, l},
+				}...)
+			}
+		}
+		r.ch <- metrics
+	}
 }
