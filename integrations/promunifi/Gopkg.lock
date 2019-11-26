@@ -78,7 +78,7 @@
   version = "v0.7.0"
 
 [[projects]]
-  digest = "1:3e363393b80d8f142984a811464eb7e34064700626cc111887373ea76f8ea0bf"
+  digest = "1:ec0ff4bd619a67065e34d6477711ed0117e335f99059a4c508e0fe21cfe7b304"
   name = "github.com/prometheus/procfs"
   packages = [
     ".",
@@ -86,8 +86,8 @@
     "internal/util",
   ]
   pruneopts = "UT"
-  revision = "8a055596020d692cf491851e47ba3e302d9f90ce"
-  version = "v0.0.6"
+  revision = "6d489fc7f1d9cd890a250f3ea3431b1744b9623f"
+  version = "v0.0.8"
 
 [[projects]]
   digest = "1:524b71991fc7d9246cc7dc2d9e0886ccb97648091c63e30eef619e6862c955dd"
@@ -99,11 +99,11 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:71b15a23c3c47b97dd98f97c6afde8da4de9f21dec38c34e2ac2e04dc7b09167"
+  digest = "1:19e1afd323e654bc3ca747ce0cb0613353f74273154bc5a4d27e7e6910f7b49b"
   name = "golang.org/x/sys"
   packages = ["windows"]
   pruneopts = "UT"
-  revision = "d32e6e3b99c40f2bfaea45ea9596ed539eed1c0d"
+  revision = "bd437916bb0eb726b873ee8e9b2dcf212d32e2fd"
 
 [[projects]]
   digest = "1:e74d5f03545d51228b9539aaffc5eb8a692fcb22f38fa60253437b1fc063a73b"
@@ -114,12 +114,12 @@
   version = "v4.1.3"
 
 [[projects]]
-  digest = "1:4d2e5a73dc1500038e504a8d78b986630e3626dc027bc030ba5c75da257cdb96"
+  digest = "1:b75b3deb2bce8bc079e16bb2aecfe01eb80098f5650f9e93e5643ca8b7b73737"
   name = "gopkg.in/yaml.v2"
   packages = ["."]
   pruneopts = "UT"
-  revision = "51d6538a90f86fe93ac480b35f37b2be17fef232"
-  version = "v2.2.2"
+  revision = "1f64d6156d11335c3f22d9330b0ad14fc1e789ce"
+  version = "v2.2.7"
 
 [solve-meta]
   analyzer-name = "dep"
