@@ -52,7 +52,7 @@ func descClient(ns string) *uclient {
 		Anomalies:         prometheus.NewDesc(ns+"anomalies_total", "Client Anomalies", labels, nil),
 		BytesR:            prometheus.NewDesc(ns+"bytes_rate", "Client Data Rate", labels, nil),
 		CCQ:               prometheus.NewDesc(ns+"ccq", "Client Connection Quality", labels, nil),
-		Noise:             prometheus.NewDesc(ns+"noise", "Client AP Noise", labels, nil),
+		Noise:             prometheus.NewDesc(ns+"noise_db", "Client AP Noise", labels, nil),
 		RoamCount:         prometheus.NewDesc(ns+"roam_total", "Client Roam Counter", labels, nil),
 		RSSI:              prometheus.NewDesc(ns+"rssi", "Client RSSI", labels, nil),
 		RxBytes:           prometheus.NewDesc(ns+"bytes_rx_total", "Client Receive Bytes", labels, nil),
