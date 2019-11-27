@@ -32,7 +32,8 @@ quiet = false
 #
 # Prometheus mode opens an HTTP server on port 9130 and exports the metrics at
 # /metrics for polling collection by a prometheus server. This disables influxdb.
-# IMPORTANT: The prometheus mode is still beta and doesn't work very well.
+# IMPORTANT: The prometheus mode is still beta and isn't tested very well.
+# Please help us test and provide your feedback on the github repo!
 mode = "influx"
 
 # This controls on which ip and port /metrics is exported when mode is "prometheus".
