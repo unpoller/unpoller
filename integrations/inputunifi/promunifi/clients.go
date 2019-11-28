@@ -55,7 +55,7 @@ func descClient(ns string) *uclient {
 		CCQ:            prometheus.NewDesc(ns+"ccq_percent", "Client Connection Quality", labelWireless, wireless),
 		Noise:          prometheus.NewDesc(ns+"noise_db", "Client AP Noise", labelWireless, wireless),
 		RoamCount:      prometheus.NewDesc(ns+"roam_count_total", "Client Roam Counter", labelWireless, wireless),
-		RSSI:           prometheus.NewDesc(ns+"rssi", "Client RSSI", labelWireless, wireless),
+		RSSI:           prometheus.NewDesc(ns+"rssi_db", "Client RSSI", labelWireless, wireless),
 		RxBytes:        prometheus.NewDesc(ns+"receive_bytes_total", "Client Receive Bytes", labelWireless, wireless),
 		RxBytesR:       prometheus.NewDesc(ns+"receive_rate_bytes", "Client Receive Data Rate", labelWireless, wireless),
 		RxPackets:      prometheus.NewDesc(ns+"receive_packets_total", "Client Receive Packets", labelWireless, wireless),
