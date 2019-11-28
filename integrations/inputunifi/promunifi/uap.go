@@ -49,6 +49,7 @@ type uap struct {
 	VAPAvgClientSignal       *prometheus.Desc
 	VAPSatisfaction          *prometheus.Desc
 	VAPSatisfactionNow       *prometheus.Desc
+	VAPDNSAvgLatency         *prometheus.Desc
 	VAPRxBytes               *prometheus.Desc
 	VAPRxCrypts              *prometheus.Desc
 	VAPRxDropped             *prometheus.Desc
@@ -106,11 +107,10 @@ func descUAP(ns string) *uap {
 	if ns += "_uap_"; ns == "_uap_" {
 		ns = "uap_"
 	}
-	labels := []string{"ip", "site_name", "mac", "model", "name", "serial", "site_id",
-		"type", "version", "device_id"}
+	labels := []string{"ip", "site_name", "mac", "model", "name", "serial", "type", "version"}
 	labelA := append([]string{"stat"}, labels[2:]...)
-	labelV := append([]string{"vap_name", "bssid", "radio_name", "essid"}, labels[2:]...)
-	labelR := append([]string{"radio_name", "radio", "wlan_group_id"}, labels[2:]...)
+	labelV := append([]string{"vap_name", "bssid", "radio_name", "essid", "usage"}, labels[2:]...)
+	labelR := append([]string{"radio_name", "radio"}, labels[2:]...)
 
 	return &uap{
 		Uptime:       prometheus.NewDesc(ns+"uptime", "Uptime", labels, nil),
@@ -121,9 +121,9 @@ func descUAP(ns string) *uap {
 		TxBytesD:     prometheus.NewDesc(ns+"d_tranmsit_bytes", "Transmit Bytes D???", labels, nil),
 		RxBytesD:     prometheus.NewDesc(ns+"d_receive_bytes", "Receive Bytes D???", labels, nil),
 		BytesR:       prometheus.NewDesc(ns+"rate_bytes", "Transfer Rate", labels, nil),
-		NumSta:       prometheus.NewDesc(ns+"num_stations_total", "Number of Stations", labels, nil),
-		UserNumSta:   prometheus.NewDesc(ns+"num_stations_user_total", "Number of User Stations", labels, nil),
-		GuestNumSta:  prometheus.NewDesc(ns+"num_stations_guest_total", "Number of Guest Stations", labels, nil),
+		NumSta:       prometheus.NewDesc(ns+"num_stations", "Number of Stations", labels, nil),
+		UserNumSta:   prometheus.NewDesc(ns+"num_stations_user", "Number of User Stations", labels, nil),
+		GuestNumSta:  prometheus.NewDesc(ns+"num_stations_guest", "Number of Guest Stations", labels, nil),
 		Loadavg1:     prometheus.NewDesc(ns+"load_average_1", "System Load Average 1 Minute", labels, nil),
 		Loadavg5:     prometheus.NewDesc(ns+"load_average_5", "System Load Average 5 Minutes", labels, nil),
 		Loadavg15:    prometheus.NewDesc(ns+"load_average_15", "System Load Average 15 Minutes", labels, nil),
@@ -155,8 +155,9 @@ func descUAP(ns string) *uap {
 		VAPMacFilterRejections:   prometheus.NewDesc(ns+"vap_mac_filter_rejects_total", "VAP MAC Filter Rejections", labelV, nil),
 		VAPNumSatisfactionSta:    prometheus.NewDesc(ns+"vap_num_satisfaction_stations", "VAP Number Satisifaction Stations", labelV, nil),
 		VAPAvgClientSignal:       prometheus.NewDesc(ns+"vap_average_client_signal", "VAP Average Client Signal", labelV, nil),
-		VAPSatisfaction:          prometheus.NewDesc(ns+"vap_satisfaction", "VAP Satisfaction", labelV, nil),
-		VAPSatisfactionNow:       prometheus.NewDesc(ns+"vap_satisfaction_now", "VAP Satisfaction Now", labelV, nil),
+		VAPSatisfaction:          prometheus.NewDesc(ns+"vap_satisfaction_percent", "VAP Satisfaction", labelV, nil),
+		VAPSatisfactionNow:       prometheus.NewDesc(ns+"vap_satisfaction_now_percent", "VAP Satisfaction Now", labelV, nil),
+		VAPDNSAvgLatency:         prometheus.NewDesc(ns+"vap_dns_latency_average_seconds", "VAP DNS Latency Average", labelV, nil),
 		VAPRxBytes:               prometheus.NewDesc(ns+"vap_receive_bytes_total", "VAP Bytes Received", labelV, nil),
 		VAPRxCrypts:              prometheus.NewDesc(ns+"vap_receive_crypts_total", "VAP Crypts Received", labelV, nil),
 		VAPRxDropped:             prometheus.NewDesc(ns+"vap_receive_dropped_total", "VAP Dropped Received", labelV, nil),
@@ -172,20 +173,20 @@ func descUAP(ns string) *uap {
 		VAPTxRetries:             prometheus.NewDesc(ns+"vap_transmit_retries_total", "VAP Retries Transmitted", labelV, nil),
 		VAPTxCombinedRetries:     prometheus.NewDesc(ns+"vap_transmit_retries_combined_total", "VAP Retries Combined Transmitted", labelV, nil),
 		VAPTxDataMpduBytes:       prometheus.NewDesc(ns+"vap_data_mpdu_transmit_bytes_total", "VAP Data MPDU Bytes Transmitted", labelV, nil),
-		VAPTxRtsRetries:          prometheus.NewDesc(ns+"vap_trnamsit_rts_retries_total", "VAP RTS Retries Transmitted", labelV, nil),
+		VAPTxRtsRetries:          prometheus.NewDesc(ns+"vap_transmit_rts_retries_total", "VAP RTS Retries Transmitted", labelV, nil),
 		VAPTxSuccess:             prometheus.NewDesc(ns+"vap_transmit_success_total", "VAP Success Transmits", labelV, nil),
 		VAPTxTotal:               prometheus.NewDesc(ns+"vap_transmit_total", "VAP Transmit Total", labelV, nil),
 		VAPTxGoodbytes:           prometheus.NewDesc(ns+"vap_transmit_goodbyes", "VAP Goodbyes Transmitted", labelV, nil),
-		VAPTxLatAvg:              prometheus.NewDesc(ns+"vap_transmit_latency_average", "VAP Latency Average Transmit", labelV, nil),
-		VAPTxLatMax:              prometheus.NewDesc(ns+"vap_transmit_latency_maximum", "VAP Latency Maximum Transmit", labelV, nil),
-		VAPTxLatMin:              prometheus.NewDesc(ns+"vap_transmit_latency_minimum", "VAP Latency Minimum Transmit", labelV, nil),
+		VAPTxLatAvg:              prometheus.NewDesc(ns+"vap_transmit_latency_average_seconds", "VAP Latency Average Transmit", labelV, nil),
+		VAPTxLatMax:              prometheus.NewDesc(ns+"vap_transmit_latency_maximum_seconds", "VAP Latency Maximum Transmit", labelV, nil),
+		VAPTxLatMin:              prometheus.NewDesc(ns+"vap_transmit_latency_minimum_seconds", "VAP Latency Minimum Transmit", labelV, nil),
 		VAPRxGoodbytes:           prometheus.NewDesc(ns+"vap_receive_goodbyes", "VAP Goodbyes Received", labelV, nil),
-		VAPRxLatAvg:              prometheus.NewDesc(ns+"vap_receive_latency_average", "VAP Latency Average Receive", labelV, nil),
-		VAPRxLatMax:              prometheus.NewDesc(ns+"vap_receive_latency_maximum", "VAP Latency Maximum Receive", labelV, nil),
-		VAPRxLatMin:              prometheus.NewDesc(ns+"vap_receive_latency_minimum", "VAP Latency Minimum Receive", labelV, nil),
-		VAPWifiTxLatencyMovAvg:   prometheus.NewDesc(ns+"vap_transmit_latency_moving_avg", "VAP Latency Moving Average Tramsit", labelV, nil),
-		VAPWifiTxLatencyMovMax:   prometheus.NewDesc(ns+"vap_transmit_latency_moving_max", "VAP Latency Moving Maximum Tramsit", labelV, nil),
-		VAPWifiTxLatencyMovMin:   prometheus.NewDesc(ns+"vap_transmit_latency_moving_min", "VAP Latency Moving Minimum Tramsit", labelV, nil),
+		VAPRxLatAvg:              prometheus.NewDesc(ns+"vap_receive_latency_average_seconds", "VAP Latency Average Receive", labelV, nil),
+		VAPRxLatMax:              prometheus.NewDesc(ns+"vap_receive_latency_maximum_seconds", "VAP Latency Maximum Receive", labelV, nil),
+		VAPRxLatMin:              prometheus.NewDesc(ns+"vap_receive_latency_minimum_seconds", "VAP Latency Minimum Receive", labelV, nil),
+		VAPWifiTxLatencyMovAvg:   prometheus.NewDesc(ns+"vap_transmit_latency_moving_avg_seconds", "VAP Latency Moving Average Tramsit", labelV, nil),
+		VAPWifiTxLatencyMovMax:   prometheus.NewDesc(ns+"vap_transmit_latency_moving_max_seconds", "VAP Latency Moving Maximum Tramsit", labelV, nil),
+		VAPWifiTxLatencyMovMin:   prometheus.NewDesc(ns+"vap_transmit_latency_moving_min_seconds", "VAP Latency Moving Minimum Tramsit", labelV, nil),
 		VAPWifiTxLatencyMovTotal: prometheus.NewDesc(ns+"vap_transmit_latency_moving_total", "VAP Latency Moving Total Tramsit", labelV, nil),
 		VAPWifiTxLatencyMovCount: prometheus.NewDesc(ns+"vap_transmit_latency_moving_count", "VAP Latency Moving Count Tramsit", labelV, nil),
 
@@ -204,52 +205,62 @@ func descUAP(ns string) *uap {
 		RadioCuTotal:            prometheus.NewDesc(ns+"radio_channel_utilization_total", "Radio Channel Utilization", labelR, nil),
 		RadioExtchannel:         prometheus.NewDesc(ns+"radio_ext_channel", "Radio Ext Channel", labelR, nil),
 		RadioGain:               prometheus.NewDesc(ns+"radio_gain", "Radio Gain", labelR, nil),
-		RadioGuestNumSta:        prometheus.NewDesc(ns+"radio_num_guest_stations_total", "Radio Guest Station Count", labelR, nil),
-		RadioNumSta:             prometheus.NewDesc(ns+"radio_num_stations_total", "Radio Total Station Count", labelR, nil),
-		RadioUserNumSta:         prometheus.NewDesc(ns+"radio_num_user_stations_total", "Radio User Station Count", labelR, nil),
+		RadioGuestNumSta:        prometheus.NewDesc(ns+"radio_num_guest_stations", "Radio Guest Station Count", labelR, nil),
+		RadioNumSta:             prometheus.NewDesc(ns+"radio_num_stations", "Radio Total Station Count", labelR, nil),
+		RadioUserNumSta:         prometheus.NewDesc(ns+"radio_num_user_stations", "Radio User Station Count", labelR, nil),
 		RadioTxPackets:          prometheus.NewDesc(ns+"radio_transmit_packets_total", "Radio Transmitted Packets", labelR, nil),
 		RadioTxRetries:          prometheus.NewDesc(ns+"radio_transmit_retries_total", "Radio Transmit Retries", labelR, nil),
 	}
 }
 
-func (u *unifiCollector) exportUAPs(uaps []*unifi.UAP, r *Report) {
-	for _, a := range uaps {
-		labels := []string{a.IP, a.SiteName, a.Mac, a.Model, a.Name, a.Serial, a.SiteID,
-			a.Type, a.Version, a.DeviceID}
-
-		// AP data.
-		r.ch <- append(append([]*metricExports{
-			{u.UAP.Uptime, prometheus.GaugeValue, a.Uptime, labels},
-			{u.UAP.TotalTxBytes, prometheus.CounterValue, a.TxBytes, labels},
-			{u.UAP.TotalRxBytes, prometheus.CounterValue, a.RxBytes, labels},
-			{u.UAP.TotalBytes, prometheus.CounterValue, a.Bytes, labels},
-			{u.UAP.BytesD, prometheus.CounterValue, a.BytesD, labels},     // not sure if these 3 Ds are counters or gauges.
-			{u.UAP.TxBytesD, prometheus.CounterValue, a.TxBytesD, labels}, // not sure if these 3 Ds are counters or gauges.
-			{u.UAP.RxBytesD, prometheus.CounterValue, a.RxBytesD, labels}, // not sure if these 3 Ds are counters or gauges.
-			{u.UAP.BytesR, prometheus.GaugeValue, a.BytesR, labels},
-			{u.UAP.NumSta, prometheus.GaugeValue, a.NumSta, labels},
-			{u.UAP.UserNumSta, prometheus.GaugeValue, a.UserNumSta, labels},
-			{u.UAP.GuestNumSta, prometheus.GaugeValue, a.GuestNumSta, labels},
-			{u.UAP.Loadavg1, prometheus.GaugeValue, a.SysStats.Loadavg1, labels},
-			{u.UAP.Loadavg5, prometheus.GaugeValue, a.SysStats.Loadavg5, labels},
-			{u.UAP.Loadavg15, prometheus.GaugeValue, a.SysStats.Loadavg15, labels},
-			{u.UAP.MemUsed, prometheus.GaugeValue, a.SysStats.MemUsed, labels},
-			{u.UAP.MemTotal, prometheus.GaugeValue, a.SysStats.MemTotal, labels},
-			{u.UAP.MemBuffer, prometheus.GaugeValue, a.SysStats.MemBuffer, labels},
-			{u.UAP.CPU, prometheus.GaugeValue, a.SystemStats.CPU, labels},
-			{u.UAP.Mem, prometheus.GaugeValue, a.SystemStats.Mem, labels},
-		},
-			u.exportUAPstat(labels[2:], a.Stat.Ap)...),
-			u.exportVAPtable(labels[2:], a.VapTable, a.RadioTable, a.RadioTableStats)...)
+func (u *unifiCollector) exportUAPs(r *Report) {
+	if r.Metrics == nil || r.Metrics.Devices == nil || len(r.Metrics.Devices.UAPs) < 1 {
+		return
 	}
+	r.wg.Add(1)
+	go func() {
+		defer r.wg.Done()
+		for _, a := range r.Metrics.Devices.UAPs {
+			u.exportUAP(r, a)
+		}
+	}()
 }
 
-func (u *unifiCollector) exportUAPstat(labels []string, a *unifi.Ap) []*metricExports {
+func (u *unifiCollector) exportUAP(r *Report, a *unifi.UAP) {
+	labels := []string{a.IP, a.SiteName, a.Mac, a.Model, a.Name, a.Serial, a.Type, a.Version}
+
+	// AP data.
+	r.send([]*metricExports{
+		{u.UAP.Uptime, prometheus.GaugeValue, a.Uptime, labels},
+		{u.UAP.TotalTxBytes, prometheus.CounterValue, a.TxBytes, labels},
+		{u.UAP.TotalRxBytes, prometheus.CounterValue, a.RxBytes, labels},
+		{u.UAP.TotalBytes, prometheus.CounterValue, a.Bytes, labels},
+		{u.UAP.BytesD, prometheus.CounterValue, a.BytesD, labels},     // not sure if these 3 Ds are counters or gauges.
+		{u.UAP.TxBytesD, prometheus.CounterValue, a.TxBytesD, labels}, // not sure if these 3 Ds are counters or gauges.
+		{u.UAP.RxBytesD, prometheus.CounterValue, a.RxBytesD, labels}, // not sure if these 3 Ds are counters or gauges.
+		{u.UAP.BytesR, prometheus.GaugeValue, a.BytesR, labels},
+		{u.UAP.NumSta, prometheus.GaugeValue, a.NumSta, labels},
+		{u.UAP.UserNumSta, prometheus.GaugeValue, a.UserNumSta, labels},
+		{u.UAP.GuestNumSta, prometheus.GaugeValue, a.GuestNumSta, labels},
+		{u.UAP.Loadavg1, prometheus.GaugeValue, a.SysStats.Loadavg1, labels},
+		{u.UAP.Loadavg5, prometheus.GaugeValue, a.SysStats.Loadavg5, labels},
+		{u.UAP.Loadavg15, prometheus.GaugeValue, a.SysStats.Loadavg15, labels},
+		{u.UAP.MemUsed, prometheus.GaugeValue, a.SysStats.MemUsed, labels},
+		{u.UAP.MemTotal, prometheus.GaugeValue, a.SysStats.MemTotal, labels},
+		{u.UAP.MemBuffer, prometheus.GaugeValue, a.SysStats.MemBuffer, labels},
+		{u.UAP.CPU, prometheus.GaugeValue, a.SystemStats.CPU, labels},
+		{u.UAP.Mem, prometheus.GaugeValue, a.SystemStats.Mem, labels},
+	})
+	u.exportUAPstat(r, labels[2:], a.Stat.Ap)
+	u.exportVAPtable(r, labels[2:], a.VapTable, a.RadioTable, a.RadioTableStats)
+}
+
+func (u *unifiCollector) exportUAPstat(r *Report, labels []string, a *unifi.Ap) {
 	labelA := append([]string{"all"}, labels...)
 	labelU := append([]string{"user"}, labels...)
 	labelG := append([]string{"guest"}, labels...)
 
-	return []*metricExports{
+	r.send([]*metricExports{
 		// all
 		{u.UAP.ApWifiTxDropped, prometheus.CounterValue, a.WifiTxDropped, labelA},
 		{u.UAP.ApRxErrors, prometheus.CounterValue, a.RxErrors, labelA},
@@ -295,22 +306,25 @@ func (u *unifiCollector) exportUAPstat(labels []string, a *unifi.Ap) []*metricEx
 		{u.UAP.ApRxBytes, prometheus.CounterValue, a.GuestRxBytes, labelG},
 		{u.UAP.WifiTxAttempts, prometheus.CounterValue, a.GuestWifiTxAttempts, labelG},
 		{u.UAP.MacFilterRejections, prometheus.CounterValue, a.GuestMacFilterRejections, labelG},
-	}
+	})
 }
 
-func (u *unifiCollector) exportVAPtable(labels []string, vt unifi.VapTable, rt unifi.RadioTable, rts unifi.RadioTableStats) []*metricExports {
-	metrics := []*metricExports{}
+func (u *unifiCollector) exportVAPtable(r *Report, labels []string, vt unifi.VapTable, rt unifi.RadioTable, rts unifi.RadioTableStats) {
 
 	// vap table stats
 	for _, v := range vt {
-		labelV := append([]string{v.Name, v.Bssid, v.RadioName, v.Essid}, labels...)
-		metrics = append(metrics, []*metricExports{
+		if !v.Up.Val {
+			continue
+		}
+		labelV := append([]string{v.Name, v.Bssid, v.RadioName, v.Essid, v.Usage}, labels...)
+		r.send([]*metricExports{
 			{u.UAP.VAPCcq, prometheus.GaugeValue, v.Ccq, labelV},
 			{u.UAP.VAPMacFilterRejections, prometheus.CounterValue, v.MacFilterRejections, labelV},
 			{u.UAP.VAPNumSatisfactionSta, prometheus.GaugeValue, v.NumSatisfactionSta, labelV},
 			{u.UAP.VAPAvgClientSignal, prometheus.GaugeValue, v.AvgClientSignal, labelV},
 			{u.UAP.VAPSatisfaction, prometheus.GaugeValue, v.Satisfaction, labelV},
 			{u.UAP.VAPSatisfactionNow, prometheus.GaugeValue, v.SatisfactionNow, labelV},
+			{u.UAP.VAPDNSAvgLatency, prometheus.GaugeValue, v.DNSAvgLatency.Val / 1000, labelV},
 			{u.UAP.VAPRxBytes, prometheus.CounterValue, v.RxBytes, labelV},
 			{u.UAP.VAPRxCrypts, prometheus.CounterValue, v.RxCrypts, labelV},
 			{u.UAP.VAPRxDropped, prometheus.CounterValue, v.RxDropped, labelV},
@@ -329,39 +343,39 @@ func (u *unifiCollector) exportVAPtable(labels []string, vt unifi.VapTable, rt u
 			{u.UAP.VAPTxRtsRetries, prometheus.CounterValue, v.TxRtsRetries, labelV},
 			{u.UAP.VAPTxTotal, prometheus.CounterValue, v.TxTotal, labelV},
 			{u.UAP.VAPTxGoodbytes, prometheus.CounterValue, v.TxTCPStats.Goodbytes, labelV},
-			{u.UAP.VAPTxLatAvg, prometheus.GaugeValue, v.TxTCPStats.LatAvg, labelV},
-			{u.UAP.VAPTxLatMax, prometheus.GaugeValue, v.TxTCPStats.LatMax, labelV},
-			{u.UAP.VAPTxLatMin, prometheus.GaugeValue, v.TxTCPStats.LatMin, labelV},
+			{u.UAP.VAPTxLatAvg, prometheus.GaugeValue, v.TxTCPStats.LatAvg.Val / 1000, labelV},
+			{u.UAP.VAPTxLatMax, prometheus.GaugeValue, v.TxTCPStats.LatMax.Val / 1000, labelV},
+			{u.UAP.VAPTxLatMin, prometheus.GaugeValue, v.TxTCPStats.LatMin.Val / 1000, labelV},
 			{u.UAP.VAPRxGoodbytes, prometheus.CounterValue, v.RxTCPStats.Goodbytes, labelV},
-			{u.UAP.VAPRxLatAvg, prometheus.GaugeValue, v.RxTCPStats.LatAvg, labelV},
-			{u.UAP.VAPRxLatMax, prometheus.GaugeValue, v.RxTCPStats.LatMax, labelV},
-			{u.UAP.VAPRxLatMin, prometheus.GaugeValue, v.RxTCPStats.LatMin, labelV},
-			{u.UAP.VAPWifiTxLatencyMovAvg, prometheus.GaugeValue, v.WifiTxLatencyMov.Avg, labelV},
-			{u.UAP.VAPWifiTxLatencyMovMax, prometheus.GaugeValue, v.WifiTxLatencyMov.Max, labelV},
-			{u.UAP.VAPWifiTxLatencyMovMin, prometheus.GaugeValue, v.WifiTxLatencyMov.Min, labelV},
+			{u.UAP.VAPRxLatAvg, prometheus.GaugeValue, v.RxTCPStats.LatAvg.Val / 1000, labelV},
+			{u.UAP.VAPRxLatMax, prometheus.GaugeValue, v.RxTCPStats.LatMax.Val / 1000, labelV},
+			{u.UAP.VAPRxLatMin, prometheus.GaugeValue, v.RxTCPStats.LatMin.Val / 1000, labelV},
+			{u.UAP.VAPWifiTxLatencyMovAvg, prometheus.GaugeValue, v.WifiTxLatencyMov.Avg.Val / 1000, labelV},
+			{u.UAP.VAPWifiTxLatencyMovMax, prometheus.GaugeValue, v.WifiTxLatencyMov.Max.Val / 1000, labelV},
+			{u.UAP.VAPWifiTxLatencyMovMin, prometheus.GaugeValue, v.WifiTxLatencyMov.Min.Val / 1000, labelV},
 			{u.UAP.VAPWifiTxLatencyMovTotal, prometheus.CounterValue, v.WifiTxLatencyMov.Total, labelV},      // not sure if gauge or counter.
 			{u.UAP.VAPWifiTxLatencyMovCount, prometheus.CounterValue, v.WifiTxLatencyMov.TotalCount, labelV}, // not sure if gauge or counter.
-		}...)
+		})
 	}
 
 	// radio table
 	for _, p := range rt {
-		labelR := append([]string{p.Name, p.Radio, p.WlangroupID}, labels...)
-		metrics = append(metrics, []*metricExports{
+		labelR := append([]string{p.Name, p.Radio}, labels...)
+		r.send([]*metricExports{
 			{u.UAP.RadioCurrentAntennaGain, prometheus.GaugeValue, p.CurrentAntennaGain, labelR},
 			{u.UAP.RadioHt, prometheus.GaugeValue, p.Ht, labelR},
 			{u.UAP.RadioMaxTxpower, prometheus.GaugeValue, p.MaxTxpower, labelR},
 			{u.UAP.RadioMinTxpower, prometheus.GaugeValue, p.MinTxpower, labelR},
 			{u.UAP.RadioNss, prometheus.GaugeValue, p.Nss, labelR},
 			{u.UAP.RadioRadioCaps, prometheus.GaugeValue, p.RadioCaps, labelR},
-		}...)
+		})
 
 		// combine radio table with radio stats table.
 		for _, t := range rts {
 			if t.Name != p.Name {
 				continue
 			}
-			metrics = append(metrics, []*metricExports{
+			r.send([]*metricExports{
 				{u.UAP.RadioTxPower, prometheus.GaugeValue, t.TxPower, labelR},
 				{u.UAP.RadioAstBeXmit, prometheus.GaugeValue, t.AstBeXmit, labelR},
 				{u.UAP.RadioChannel, prometheus.GaugeValue, t.Channel, labelR},
@@ -375,8 +389,7 @@ func (u *unifiCollector) exportVAPtable(labels []string, vt unifi.VapTable, rt u
 				{u.UAP.RadioUserNumSta, prometheus.GaugeValue, t.UserNumSta, labelR},
 				{u.UAP.RadioTxPackets, prometheus.CounterValue, t.TxPackets, labelR},
 				{u.UAP.RadioTxRetries, prometheus.CounterValue, t.TxRetries, labelR},
-			}...)
+			})
 		}
 	}
-	return metrics
 }
