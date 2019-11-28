@@ -61,7 +61,7 @@ func descUSG(ns string) *usg {
 	labelWan := append([]string{"port"}, labels...)
 
 	return &usg{
-		Uptime:         prometheus.NewDesc(ns+"uptime", "Uptime", labels, nil),
+		Uptime:         prometheus.NewDesc(ns+"uptime_seconds", "Uptime", labels, nil),
 		TotalTxBytes:   prometheus.NewDesc(ns+"transmit_bytes_total", "Total Transmitted Bytes", labels, nil),
 		TotalRxBytes:   prometheus.NewDesc(ns+"receive_bytes_total", "Total Received Bytes", labels, nil),
 		TotalBytes:     prometheus.NewDesc(ns+"transferred_bytes_total", "Total Bytes Transferred", labels, nil),
