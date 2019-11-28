@@ -48,7 +48,7 @@ services:
       - UP_UNIFI_USER=${UP_UNIFI_USER}
       - UP_UNIFI_PASS=${UP_UNIFI_PASS}
       - UP_UNIFI_URL=${UP_UNIFI_URL}
-      - UP_DEBUG_MODE=${UP_DEBUG_MODE}
+      - UP_DEBUG=${UP_DEBUG}
 volumes:
   influxdb-storage:
   chronograf-storage:
