@@ -5,6 +5,8 @@ import (
 	"golift.io/unifi"
 )
 
+// Each site has five subsystems.
+// Some of them share data, but generally each one has its own data set.
 const (
 	subsystemLAN  = "lan"
 	subsystemVPN  = "vpn"
@@ -80,6 +82,7 @@ func (u *unifiCollector) exportSites(sites unifi.Sites, r *Report) {
 	for _, s := range sites {
 		metrics := []*metricExports{}
 		labels := []string{s.Name, s.Desc, s.SiteName}
+
 		for _, h := range s.Health {
 			l := append([]string{h.Subsystem, h.Status}, labels...)
 
@@ -146,6 +149,7 @@ func (u *unifiCollector) exportSites(sites unifi.Sites, r *Report) {
 				}
 			}
 		}
+
 		r.ch <- metrics
 	}
 }
