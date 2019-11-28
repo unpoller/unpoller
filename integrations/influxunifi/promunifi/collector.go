@@ -104,7 +104,7 @@ func (u *unifiCollector) Describe(ch chan<- *prometheus.Desc) {
 // the current metrics (from another package) then exports them for prometheus.
 func (u *unifiCollector) Collect(ch chan<- prometheus.Metric) {
 	var err error
-	r := &Report{Start: time.Now(), ch: make(chan []*metricExports)}
+	r := &Report{Start: time.Now(), ch: make(chan []*metricExports, 50)}
 	defer func() {
 		r.wg.Wait()
 		close(r.ch)
@@ -116,26 +116,18 @@ func (u *unifiCollector) Collect(ch chan<- prometheus.Metric) {
 		return
 	}
 
-	go u.exportMetrics(ch, r)
-
-	r.wg.Add(len(r.Metrics.Clients) + len(r.Metrics.Sites))
-	go u.exportClients(r.Metrics.Clients, r)
-	go u.exportSites(r.Metrics.Sites, r)
-
-	if r.Metrics.Devices == nil {
-		return
-	}
-
-	r.wg.Add(len(r.Metrics.UAPs) + len(r.Metrics.USWs) + len(r.Metrics.USGs) + len(r.Metrics.UDMs))
-	go u.exportUAPs(r.Metrics.UAPs, r)
-	go u.exportUSWs(r.Metrics.USWs, r)
-	go u.exportUSGs(r.Metrics.USGs, r)
-	u.exportUDMs(r.Metrics.UDMs, r)
+	go u.exportMetrics(r, ch)
+	u.exportClients(r)
+	u.exportSites(r)
+	u.exportUAPs(r)
+	u.exportUSWs(r)
+	u.exportUSGs(r)
+	u.exportUDMs(r)
 }
 
 // This is closely tied to the method above with a sync.WaitGroup.
 // This method runs in a go routine and exits when the channel closes.
-func (u *unifiCollector) exportMetrics(ch chan<- prometheus.Metric, r *Report) {
+func (u *unifiCollector) exportMetrics(r *Report, ch chan<- prometheus.Metric) {
 	descs := make(map[*prometheus.Desc]bool) // used as a counter
 	for newMetrics := range r.ch {
 		for _, m := range newMetrics {
@@ -173,4 +165,9 @@ func (u *unifiCollector) exportMetrics(ch chan<- prometheus.Metric, r *Report) {
 	}
 	r.Descs, r.Elapsed = len(descs), time.Since(r.Start)
 	u.Config.LoggingFn(r)
+}
+
+func (r *Report) send(m []*metricExports) {
+	r.wg.Add(1)
+	r.ch <- m
 }
