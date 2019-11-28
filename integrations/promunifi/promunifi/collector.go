@@ -12,6 +12,12 @@ import (
 	"golift.io/unifi"
 )
 
+// satisfy gomnd
+const one = 1
+
+// channel buffer, fits at least one batch.
+const buffer = 50
+
 // UnifiCollectorCnfg defines the data needed to collect and report UniFi Metrics.
 type UnifiCollectorCnfg struct {
 	// If non-empty, each of the collected metrics is prefixed by the
@@ -104,7 +110,7 @@ func (u *unifiCollector) Describe(ch chan<- *prometheus.Desc) {
 // the current metrics (from another package) then exports them for prometheus.
 func (u *unifiCollector) Collect(ch chan<- prometheus.Metric) {
 	var err error
-	r := &Report{Start: time.Now(), ch: make(chan []*metricExports, 50)}
+	r := &Report{Start: time.Now(), ch: make(chan []*metricExports, buffer)}
 	defer func() {
 		r.wg.Wait()
 		close(r.ch)
@@ -168,6 +174,6 @@ func (u *unifiCollector) exportMetrics(r *Report, ch chan<- prometheus.Metric) {
 }
 
 func (r *Report) send(m []*metricExports) {
-	r.wg.Add(1)
+	r.wg.Add(one)
 	r.ch <- m
 }
