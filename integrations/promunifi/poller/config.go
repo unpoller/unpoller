@@ -61,24 +61,24 @@ type Flag struct {
 // This is all of the data stored in the config file.
 // Any with explicit defaults have omitempty on json and toml tags.
 type Config struct {
-	Interval   Duration `json:"interval,omitempty" toml:"interval,omitempty" xml:"interval" yaml:"interval" env:"POLLING_INTERVAL"`
-	Debug      bool     `json:"debug" toml:"debug" xml:"debug" yaml:"debug" env:"DEBUG_MODE"`
-	Quiet      bool     `json:"quiet,omitempty" toml:"quiet,omitempty" xml:"quiet" yaml:"quiet" env:"QUIET_MODE"`
-	VerifySSL  bool     `json:"verify_ssl" toml:"verify_ssl" xml:"verify_ssl" yaml:"verify_ssl" env:"VERIFY_SSL"`
-	CollectIDS bool     `json:"collect_ids" toml:"collect_ids" xml:"collect_ids" yaml:"collect_ids" env:"COLLECT_IDS"`
-	ReAuth     bool     `json:"reauthenticate" toml:"reauthenticate" xml:"reauthenticate" yaml:"reauthenticate" env:"REAUTHENTICATE"`
-	InfxBadSSL bool     `json:"influx_insecure_ssl" toml:"influx_insecure_ssl" xml:"influx_insecure_ssl" yaml:"influx_insecure_ssl" env:"INFLUX_INSECURE_SSL"`
-	Mode       string   `json:"mode" toml:"mode" xml:"mode" yaml:"mode" env:"POLLING_MODE"`
-	HTTPListen string   `json:"http_listen" toml:"http_listen" xml:"http_listen" yaml:"http_listen" env:"HTTP_LISTEN"`
-	Namespace  string   `json:"namespace" toml:"namespace" xml:"namespace" yaml:"namespace" env:"NAMESPACE"`
-	InfluxURL  string   `json:"influx_url,omitempty" toml:"influx_url,omitempty" xml:"influx_url" yaml:"influx_url" env:"INFLUX_URL"`
-	InfluxUser string   `json:"influx_user,omitempty" toml:"influx_user,omitempty" xml:"influx_user" yaml:"influx_user" env:"INFLUX_USER"`
-	InfluxPass string   `json:"influx_pass,omitempty" toml:"influx_pass,omitempty" xml:"influx_pass" yaml:"influx_pass" env:"INFLUX_PASS"`
-	InfluxDB   string   `json:"influx_db,omitempty" toml:"influx_db,omitempty" xml:"influx_db" yaml:"influx_db" env:"INFLUX_DB"`
-	UnifiUser  string   `json:"unifi_user,omitempty" toml:"unifi_user,omitempty" xml:"unifi_user" yaml:"unifi_user" env:"UNIFI_USER"`
-	UnifiPass  string   `json:"unifi_pass,omitempty" toml:"unifi_pass,omitempty" xml:"unifi_pass" yaml:"unifi_pass" env:"UNIFI_PASS"`
-	UnifiBase  string   `json:"unifi_url,omitempty" toml:"unifi_url,omitempty" xml:"unifi_url" yaml:"unifi_url" env:"UNIFI_URL"`
-	Sites      []string `json:"sites,omitempty" toml:"sites,omitempty" xml:"sites" yaml:"sites" env:"POLL_SITES"`
+	Interval   Duration `json:"interval,omitempty" toml:"interval,omitempty" xml:"interval" yaml:"interval"`
+	Debug      bool     `json:"debug" toml:"debug" xml:"debug" yaml:"debug"`
+	Quiet      bool     `json:"quiet,omitempty" toml:"quiet,omitempty" xml:"quiet" yaml:"quiet"`
+	VerifySSL  bool     `json:"verify_ssl" toml:"verify_ssl" xml:"verify_ssl" yaml:"verify_ssl"`
+	CollectIDS bool     `json:"collect_ids" toml:"collect_ids" xml:"collect_ids" yaml:"collect_ids"`
+	ReAuth     bool     `json:"reauthenticate" toml:"reauthenticate" xml:"reauthenticate" yaml:"reauthenticate"`
+	InfxBadSSL bool     `json:"influx_insecure_ssl" toml:"influx_insecure_ssl" xml:"influx_insecure_ssl" yaml:"influx_insecure_ssl"`
+	Mode       string   `json:"mode" toml:"mode" xml:"mode" yaml:"mode"`
+	HTTPListen string   `json:"http_listen" toml:"http_listen" xml:"http_listen" yaml:"http_listen"`
+	Namespace  string   `json:"namespace" toml:"namespace" xml:"namespace" yaml:"namespace"`
+	InfluxURL  string   `json:"influx_url,omitempty" toml:"influx_url,omitempty" xml:"influx_url" yaml:"influx_url"`
+	InfluxUser string   `json:"influx_user,omitempty" toml:"influx_user,omitempty" xml:"influx_user" yaml:"influx_user"`
+	InfluxPass string   `json:"influx_pass,omitempty" toml:"influx_pass,omitempty" xml:"influx_pass" yaml:"influx_pass"`
+	InfluxDB   string   `json:"influx_db,omitempty" toml:"influx_db,omitempty" xml:"influx_db" yaml:"influx_db"`
+	UnifiUser  string   `json:"unifi_user,omitempty" toml:"unifi_user,omitempty" xml:"unifi_user" yaml:"unifi_user"`
+	UnifiPass  string   `json:"unifi_pass,omitempty" toml:"unifi_pass,omitempty" xml:"unifi_pass" yaml:"unifi_pass"`
+	UnifiBase  string   `json:"unifi_url,omitempty" toml:"unifi_url,omitempty" xml:"unifi_url" yaml:"unifi_url"`
+	Sites      []string `json:"sites,omitempty" toml:"sites,omitempty" xml:"sites" yaml:"sites"`
 }
 
 // Duration is used to UnmarshalTOML into a time.Duration value.
@@ -113,8 +113,8 @@ func (c *Config) ParseENV() error {
 	t := reflect.TypeOf(Config{}) // Get tag names from the Config struct.
 	// Loop each Config struct member; get reflect tag & env var value; update config.
 	for i := 0; i < t.NumField(); i++ {
-		tag := t.Field(i).Tag.Get("env")        // Get the ENV variable name from "env" struct tag
-		env := os.Getenv(ENVConfigPrefix + tag) // Then pull value from OS.
+		tag := strings.ToUpper(t.Field(i).Tag.Get("json")) // Get the ENV variable name from "env" struct tag
+		env := os.Getenv(ENVConfigPrefix + tag)            // Then pull value from OS.
 		if tag == "" || env == "" {
 			continue // Skip if either are empty.
 		}
