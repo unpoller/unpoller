@@ -31,21 +31,22 @@ type Clients []*Client
 
 // Client defines all the data a connected-network client contains.
 type Client struct {
-	Anomalies   int64   `json:"anomalies,omitempty"`
-	ApMac       string  `json:"ap_mac"`
-	ApName      string  `json:"-"`
-	AssocTime   int64   `json:"assoc_time"`
-	Blocked     bool    `json:"blocked,omitempty"`
-	Bssid       string  `json:"bssid"`
-	BytesR      int64   `json:"bytes-r"`
-	Ccq         int64   `json:"ccq"`
-	Channel     FlexInt `json:"channel"`
-	DevCat      FlexInt `json:"dev_cat"`
-	DevFamily   FlexInt `json:"dev_family"`
-	DevID       FlexInt `json:"dev_id"`
-	DevVendor   FlexInt `json:"dev_vendor,omitempty"`
-	DhcpendTime int     `json:"dhcpend_time,omitempty"`
-	DpiStats    struct {
+	Anomalies    int64   `json:"anomalies,omitempty"`
+	ApMac        string  `json:"ap_mac"`
+	ApName       string  `json:"-"`
+	AssocTime    int64   `json:"assoc_time"`
+	Blocked      bool    `json:"blocked,omitempty"`
+	Bssid        string  `json:"bssid"`
+	BytesR       int64   `json:"bytes-r"`
+	Ccq          int64   `json:"ccq"`
+	Channel      FlexInt `json:"channel"`
+	DevCat       FlexInt `json:"dev_cat"`
+	DevFamily    FlexInt `json:"dev_family"`
+	DevID        FlexInt `json:"dev_id"`
+	DevVendor    FlexInt `json:"dev_vendor,omitempty"`
+	DhcpendTime  int     `json:"dhcpend_time,omitempty"`
+	Satisfaction FlexInt `json:"satisfaction,omitempty"`
+	DpiStats     struct {
 		App       FlexInt
 		Cat       FlexInt
 		RxBytes   FlexInt
@@ -106,6 +107,7 @@ type Client struct {
 	TxBytes             int64    `json:"tx_bytes"`
 	TxBytesR            int64    `json:"tx_bytes-r"`
 	TxPackets           int64    `json:"tx_packets"`
+	TxRetries           int64    `json:"tx_retries"`
 	TxPower             int64    `json:"tx_power"`
 	TxRate              int64    `json:"tx_rate"`
 	Uptime              int64    `json:"uptime"`
