@@ -70,7 +70,7 @@ func descUSW(ns string) *usw {
 	}
 	pns := ns + "port_"
 	// The first five labels for switch are shared with (the same as) switch ports.
-	labels := []string{"type", "version", "device_id", "ip",
+	labels := []string{"type", "version", "ip",
 		"site_name", "mac", "model", "name", "serial", "site_id"}
 	// Copy labels, and replace first four with different names.
 	labelP := append([]string{"port_num", "port_name", "port_mac", "port_ip"}, labels[5:]...)
@@ -138,15 +138,21 @@ func descUSW(ns string) *usw {
 
 func (u *unifiCollector) exportUSWs(usws []*unifi.USW, r *Report) {
 	for _, s := range usws {
-		labels := []string{s.Type, s.Version, s.DeviceID, s.IP,
+		labels := []string{s.Type, s.Version, s.IP,
 			s.SiteName, s.Mac, s.Model, s.Name, s.Serial, s.SiteID}
 
+		metrics := []*metricExports{}
+		if s.HasTemperature.Val {
+			metrics = append(metrics, &metricExports{u.USW.Temperature, prometheus.GaugeValue, s.GeneralTemperature, labels})
+		}
+		if s.HasFan.Val {
+			metrics = append(metrics, &metricExports{u.USW.FanLevel, prometheus.GaugeValue, s.FanLevel, labels})
+		}
+
 		// Switch data.
-		r.ch <- append([]*metricExports{
+		r.ch <- append(metrics, append([]*metricExports{
 			{u.USW.Uptime, prometheus.GaugeValue, s.Uptime, labels},
-			{u.USW.Temperature, prometheus.GaugeValue, s.GeneralTemperature, labels},
 			{u.USW.TotalMaxPower, prometheus.GaugeValue, s.TotalMaxPower, labels},
-			{u.USW.FanLevel, prometheus.GaugeValue, s.FanLevel, labels},
 			{u.USW.TotalTxBytes, prometheus.CounterValue, s.TxBytes, labels},
 			{u.USW.TotalRxBytes, prometheus.CounterValue, s.RxBytes, labels},
 			{u.USW.TotalBytes, prometheus.CounterValue, s.Bytes, labels},
@@ -177,7 +183,7 @@ func (u *unifiCollector) exportUSWs(usws []*unifi.USW, r *Report) {
 			{u.USW.SwTxMulticast, prometheus.CounterValue, s.Stat.Sw.TxMulticast, labels},
 			{u.USW.SwTxBroadcast, prometheus.CounterValue, s.Stat.Sw.TxBroadcast, labels},
 			{u.USW.SwBytes, prometheus.CounterValue, s.Stat.Sw.Bytes, labels},
-		}, u.exportPortTable(s.PortTable, labels[5:])...)
+		}, u.exportPortTable(s.PortTable, labels[5:])...)...)
 	}
 }
 
@@ -187,10 +193,14 @@ func (u *unifiCollector) exportPortTable(pt []unifi.Port, labels []string) []*me
 	for _, p := range pt {
 		// Copy labels, and add four new ones.
 		l := append([]string{p.PortIdx.Txt, p.Name, p.Mac, p.IP}, labels...)
+		if p.PoeEnable.Val && p.PortPoe.Val {
+			metrics = append(metrics, []*metricExports{
+				{u.USW.PoeCurrent, prometheus.GaugeValue, p.PoeCurrent, l},
+				{u.USW.PoePower, prometheus.GaugeValue, p.PoePower, l},
+				{u.USW.PoeVoltage, prometheus.GaugeValue, p.PoeVoltage, l},
+			}...)
+		}
 		metrics = append(metrics, []*metricExports{
-			{u.USW.PoeCurrent, prometheus.GaugeValue, p.PoeCurrent, l},
-			{u.USW.PoePower, prometheus.GaugeValue, p.PoePower, l},
-			{u.USW.PoeVoltage, prometheus.GaugeValue, p.PoeVoltage, l},
 			{u.USW.RxBroadcast, prometheus.CounterValue, p.RxBroadcast, l},
 			{u.USW.RxBytes, prometheus.CounterValue, p.RxBytes, l},
 			{u.USW.RxBytesR, prometheus.GaugeValue, p.RxBytesR, l},
