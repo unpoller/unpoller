@@ -75,7 +75,7 @@ func descClient(ns string) *uclient {
 		WiredTxBytesR:  prometheus.NewDesc(ns+"wired_transmit_rate_bytes", "Client Wired Data Rate", labelWired, wired),
 		WiredTxPackets: prometheus.NewDesc(ns+"wired_transmit_packets_total", "Client Wired Transmit Packets", labelWired, wired),
 
-		Uptime: prometheus.NewDesc(ns+"uptime", "Client Uptime", labels, nil),
+		Uptime: prometheus.NewDesc(ns+"uptime_seconds", "Client Uptime", labels, nil),
 		/* needs more "looking into"
 		DpiStatsApp:       prometheus.NewDesc(ns+"dpi_stats_app", "Client DPI Stats App", labels, nil),
 		DpiStatsCat:       prometheus.NewDesc(ns+"dpi_stats_cat", "Client DPI Stats Cat", labels, nil),

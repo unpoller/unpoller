@@ -76,7 +76,7 @@ func descUSW(ns string) *usw {
 
 	return &usw{
 		// switch data
-		Uptime:        prometheus.NewDesc(ns+"uptime", "Uptime", labels, nil),
+		Uptime:        prometheus.NewDesc(ns+"uptime_seconds", "Uptime", labels, nil),
 		Temperature:   prometheus.NewDesc(ns+"temperature_celsius", "Temperature", labels, nil),
 		TotalMaxPower: prometheus.NewDesc(ns+"max_power_total", "Total Max Power", labels, nil),
 		FanLevel:      prometheus.NewDesc(ns+"fan_level", "Fan Level", labels, nil),
@@ -84,8 +84,8 @@ func descUSW(ns string) *usw {
 		TotalRxBytes:  prometheus.NewDesc(ns+"bytes_rx_total", "Total Received Bytes", labels, nil),
 		TotalBytes:    prometheus.NewDesc(ns+"bytes_total", "Total Bytes Transferred", labels, nil),
 		NumSta:        prometheus.NewDesc(ns+"stations", "Number of Stations", labels, nil),
-		UserNumSta:    prometheus.NewDesc(ns+"stations_user", "Number of User Stations", labels, nil),
-		GuestNumSta:   prometheus.NewDesc(ns+"stations_guest", "Number of Guest Stations", labels, nil),
+		UserNumSta:    prometheus.NewDesc(ns+"user_stations", "Number of User Stations", labels, nil),
+		GuestNumSta:   prometheus.NewDesc(ns+"guest_stations", "Number of Guest Stations", labels, nil),
 		Loadavg1:      prometheus.NewDesc(ns+"load_average_1", "System Load Average 1 Minute", labels, nil),
 		Loadavg5:      prometheus.NewDesc(ns+"load_average_5", "System Load Average 5 Minutes", labels, nil),
 		Loadavg15:     prometheus.NewDesc(ns+"load_average_15", "System Load Average 15 Minutes", labels, nil),
@@ -113,9 +113,9 @@ func descUSW(ns string) *usw {
 		SwBytes:       prometheus.NewDesc(ns+"switch_bytes_total", "Switch Bytes Transferred Total", labels, nil),
 
 		// per-port data
-		PoeCurrent:   prometheus.NewDesc(pns+"poe_current", "POE Current", labelP, nil),
-		PoePower:     prometheus.NewDesc(pns+"poe_power", "POE Power", labelP, nil),
-		PoeVoltage:   prometheus.NewDesc(pns+"poe_voltage", "POE Voltage", labelP, nil),
+		PoeCurrent:   prometheus.NewDesc(pns+"poe_amperes", "POE Current", labelP, nil),
+		PoePower:     prometheus.NewDesc(pns+"poe_watts", "POE Power", labelP, nil),
+		PoeVoltage:   prometheus.NewDesc(pns+"poe_volts", "POE Voltage", labelP, nil),
 		RxBroadcast:  prometheus.NewDesc(pns+"receive_broadcast_total", "Receive Broadcast", labelP, nil),
 		RxBytes:      prometheus.NewDesc(pns+"receive_bytes_total", "Total Receive Bytes", labelP, nil),
 		RxBytesR:     prometheus.NewDesc(pns+"receive_rate_bytes", "Receive Bytes Rate", labelP, nil),
