@@ -7,7 +7,6 @@ import (
 
 type usg struct {
 	Uptime         *prometheus.Desc
-	Temperature    *prometheus.Desc
 	TotalMaxPower  *prometheus.Desc
 	FanLevel       *prometheus.Desc
 	TotalTxBytes   *prometheus.Desc
@@ -66,12 +65,12 @@ func descUSG(ns string) *usg {
 		TotalTxBytes:   prometheus.NewDesc(ns+"transmit_bytes_total", "Total Transmitted Bytes", labels, nil),
 		TotalRxBytes:   prometheus.NewDesc(ns+"receive_bytes_total", "Total Received Bytes", labels, nil),
 		TotalBytes:     prometheus.NewDesc(ns+"transferred_bytes_total", "Total Bytes Transferred", labels, nil),
-		NumSta:         prometheus.NewDesc(ns+"num_stations", "Number of Stations", labels, nil),
-		UserNumSta:     prometheus.NewDesc(ns+"num_stations_user", "Number of User Stations", labels, nil),
-		GuestNumSta:    prometheus.NewDesc(ns+"num_stations_guest", "Number of Guest Stations", labels, nil),
-		NumDesktop:     prometheus.NewDesc(ns+"num_desktops", "Number of Desktops", labels, nil),
-		NumMobile:      prometheus.NewDesc(ns+"num_mobile", "Number of Mobiles", labels, nil),
-		NumHandheld:    prometheus.NewDesc(ns+"num_handheld", "Number of Handhelds", labels, nil),
+		NumSta:         prometheus.NewDesc(ns+"stations", "Number of Stations", labels, nil),
+		UserNumSta:     prometheus.NewDesc(ns+"stations_user", "Number of User Stations", labels, nil),
+		GuestNumSta:    prometheus.NewDesc(ns+"stations_guest", "Number of Guest Stations", labels, nil),
+		NumDesktop:     prometheus.NewDesc(ns+"desktops", "Number of Desktops", labels, nil),
+		NumMobile:      prometheus.NewDesc(ns+"mobile", "Number of Mobiles", labels, nil),
+		NumHandheld:    prometheus.NewDesc(ns+"handheld", "Number of Handhelds", labels, nil),
 		Loadavg1:       prometheus.NewDesc(ns+"load_average_1", "System Load Average 1 Minute", labels, nil),
 		Loadavg5:       prometheus.NewDesc(ns+"load_average_5", "System Load Average 5 Minutes", labels, nil),
 		Loadavg15:      prometheus.NewDesc(ns+"load_average_15", "System Load Average 15 Minutes", labels, nil),
@@ -124,7 +123,6 @@ func (u *unifiCollector) exportUSGs(r *Report) {
 func (u *unifiCollector) exportUSG(r *Report, s *unifi.USG) {
 	labels := []string{s.SiteName, s.Mac, s.Model, s.Name, s.Serial, s.Type, s.Version, s.IP}
 	labelWan := append([]string{"all"}, labels...)
-
 	// Gateway System Data.
 	r.send([]*metricExports{
 		{u.USG.Uptime, prometheus.GaugeValue, s.Uptime, labels},
