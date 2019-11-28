@@ -77,7 +77,7 @@ func descUSW(ns string) *usw {
 	return &usw{
 		// switch data
 		Uptime:        prometheus.NewDesc(ns+"uptime", "Uptime", labels, nil),
-		Temperature:   prometheus.NewDesc(ns+"temperature", "Temperature", labels, nil),
+		Temperature:   prometheus.NewDesc(ns+"temperature_celsius", "Temperature", labels, nil),
 		TotalMaxPower: prometheus.NewDesc(ns+"max_power_total", "Total Max Power", labels, nil),
 		FanLevel:      prometheus.NewDesc(ns+"fan_level", "Fan Level", labels, nil),
 		TotalTxBytes:  prometheus.NewDesc(ns+"bytes_tx_total", "Total Transmitted Bytes", labels, nil),
