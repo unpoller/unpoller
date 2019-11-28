@@ -82,7 +82,7 @@ func (u *unifiCollector) exportSites(r *Report) {
 	if r.Metrics == nil || len(r.Metrics.Sites) < 1 {
 		return
 	}
-	r.wg.Add(1)
+	r.wg.Add(one)
 	go func() {
 		defer r.wg.Done()
 		for _, s := range r.Metrics.Sites {
