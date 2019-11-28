@@ -59,7 +59,7 @@ func descUSG(ns string) *usg {
 		ns = "usg_"
 	}
 	labels := []string{"site_name", "mac", "model", "name", "serial", "site_id",
-		"type", "version", "device_id", "ip"}
+		"type", "version", "ip"}
 	labelWan := append([]string{"port"}, labels...)
 
 	return &usg{
@@ -112,7 +112,7 @@ func descUSG(ns string) *usg {
 func (u *unifiCollector) exportUSGs(usgs []*unifi.USG, r *Report) {
 	for _, s := range usgs {
 		labels := []string{s.SiteName, s.Mac, s.Model, s.Name, s.Serial, s.SiteID,
-			s.Type, s.Version, s.DeviceID, s.IP}
+			s.Type, s.Version, s.IP}
 		labelWan := append([]string{"all"}, labels...)
 
 		// Gateway System Data.
