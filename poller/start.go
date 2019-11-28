@@ -2,20 +2,13 @@
 package poller
 
 import (
-	"crypto/tls"
 	"fmt"
 	"log"
-	"net/http"
 	"os"
 	"strings"
 	"time"
 
-	"github.com/davidnewhall/unifi-poller/promunifi"
-	influx "github.com/influxdata/influxdb1-client/v2"
-	"github.com/prometheus/client_golang/prometheus"
-	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/spf13/pflag"
-	"golift.io/unifi"
 )
 
 // New returns a new poller struct preloaded with default values.
@@ -40,7 +33,7 @@ func New() *UnifiPoller {
 
 // Start begins the application from a CLI.
 // Parses cli flags, parses config file, parses env vars, sets up logging, then:
-// - dumps a json payload OR - authenticates unifi controller and executes Run().
+// - dumps a json payload OR - executes Run().
 func (u *UnifiPoller) Start() error {
 	log.SetFlags(log.LstdFlags)
 	u.Flag.Parse(os.Args[1:])
@@ -75,10 +68,6 @@ func (u *UnifiPoller) Start() error {
 	}
 
 	log.Printf("[INFO] UniFi Poller v%v Starting Up! PID: %d", Version, os.Getpid())
-	if err := u.GetUnifi(); err != nil {
-		return err
-	}
-
 	return u.Run()
 }
 
@@ -102,6 +91,9 @@ func (f *Flag) Parse(args []string) {
 // 2. Run the collector one time and report the metrics to influxdb. (lambda)
 // 3. Start a web server and wait for Prometheus to poll the application for metrics.
 func (u *UnifiPoller) Run() error {
+	if err := u.GetUnifi(); err != nil {
+		return err
+	}
 	u.Logf("Polling UniFi Controller at %s v%s as user %s. Sites: %v",
 		u.Config.UnifiBase, u.Unifi.ServerVersion, u.Config.UnifiUser, u.Config.Sites)
 
@@ -110,62 +102,43 @@ func (u *UnifiPoller) Run() error {
 		if err := u.GetInfluxDB(); err != nil {
 			return err
 		}
-		u.Logf("Logging Measurements to InfluxDB at %s as user %s", u.Config.InfluxURL, u.Config.InfluxUser)
-		u.Config.Mode = "influx poller"
 		return u.PollController()
 
 	case "influxlambda", "lambdainflux", "lambda_influx", "influx_lambda":
 		if err := u.GetInfluxDB(); err != nil {
 			return err
 		}
-		u.Logf("Logging Measurements to InfluxDB at %s as user %s one time (lambda mode)",
-			u.Config.InfluxURL, u.Config.InfluxUser)
 		u.LastCheck = time.Now()
 		return u.CollectAndProcess()
 
 	case "prometheus", "exporter":
-		u.Logf("Exporting Measurements at https://%s/metrics for Prometheus", u.Config.HTTPListen)
-		http.Handle("/metrics", promhttp.Handler())
-		prometheus.MustRegister(promunifi.NewUnifiCollector(promunifi.UnifiCollectorCnfg{
-			Namespace:    strings.Replace(u.Config.Namespace, "-", "", -1),
-			CollectFn:    u.ExportMetrics,
-			LoggingFn:    u.LogExportReport,
-			ReportErrors: true, // XXX: Does this need to be configurable?
-		}))
-		return http.ListenAndServe(u.Config.HTTPListen, nil)
+		return u.RunPrometheus()
 	}
 }
 
-// GetInfluxDB returns an InfluxDB interface.
-func (u *UnifiPoller) GetInfluxDB() (err error) {
-	u.Influx, err = influx.NewHTTPClient(influx.HTTPConfig{
-		Addr:      u.Config.InfluxURL,
-		Username:  u.Config.InfluxUser,
-		Password:  u.Config.InfluxPass,
-		TLSConfig: &tls.Config{InsecureSkipVerify: u.Config.InfxBadSSL},
-	})
-	if err != nil {
-		return fmt.Errorf("influxdb: %v", err)
+// PollController runs forever, polling UniFi and pushing to InfluxDB
+// This is started by Run() after everything checks out.
+func (u *UnifiPoller) PollController() error {
+	interval := u.Config.Interval.Round(time.Second)
+	log.Printf("[INFO] Everything checks out! Poller started, interval: %v", interval)
+	ticker := time.NewTicker(interval)
+	defer ticker.Stop()
+	for u.LastCheck = range ticker.C {
+		var err error
+		if u.Config.ReAuth {
+			u.LogDebugf("Re-authenticating to UniFi Controller")
+			// Some users need to re-auth every interval because the cookie times out.
+			if err = u.Unifi.Login(); err != nil {
+				u.LogError(err, "re-authenticating")
+			}
+		}
+		if err == nil {
+			// Only run this if the authentication procedure didn't return error.
+			_ = u.CollectAndProcess()
+		}
+		if u.errorCount > 0 {
+			return fmt.Errorf("too many errors, stopping poller")
+		}
 	}
-
 	return nil
-}
-
-// GetUnifi returns a UniFi controller interface.
-func (u *UnifiPoller) GetUnifi() (err error) {
-	// Create an authenticated session to the Unifi Controller.
-	u.Unifi, err = unifi.NewUnifi(&unifi.Config{
-		User:      u.Config.UnifiUser,
-		Pass:      u.Config.UnifiPass,
-		URL:       u.Config.UnifiBase,
-		VerifySSL: u.Config.VerifySSL,
-		ErrorLog:  u.LogErrorf, // Log all errors.
-		DebugLog:  u.LogDebugf, // Log debug messages.
-	})
-	if err != nil {
-		return fmt.Errorf("unifi controller: %v", err)
-	}
-	u.LogDebugf("Authenticated with controller successfully")
-
-	return u.CheckSites()
 }

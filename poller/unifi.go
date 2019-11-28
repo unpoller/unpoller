@@ -2,7 +2,6 @@ package poller
 
 import (
 	"fmt"
-	"log"
 	"strings"
 	"time"
 
@@ -10,31 +9,23 @@ import (
 	"golift.io/unifi"
 )
 
-// PollController runs forever, polling UniFi
-// and pushing to influx OR exporting for prometheus.
-// This is started by Run() after everything checks out.
-func (u *UnifiPoller) PollController() error {
-	interval := u.Config.Interval.Round(time.Second)
-	log.Printf("[INFO] Everything checks out! Poller started in %v mode, interval: %v", u.Config.Mode, interval)
-	ticker := time.NewTicker(interval)
-	for u.LastCheck = range ticker.C {
-		var err error
-		if u.Config.ReAuth {
-			u.LogDebugf("Re-authenticating to UniFi Controller")
-			// Some users need to re-auth every interval because the cookie times out.
-			if err = u.Unifi.Login(); err != nil {
-				u.LogError(err, "re-authenticating")
-			}
-		}
-		if err == nil {
-			// Only run this if the authentication procedure didn't return error.
-			_ = u.CollectAndProcess()
-		}
-		if u.errorCount > 0 {
-			return fmt.Errorf("too many errors, stopping poller")
-		}
+// GetUnifi returns a UniFi controller interface.
+func (u *UnifiPoller) GetUnifi() (err error) {
+	// Create an authenticated session to the Unifi Controller.
+	u.Unifi, err = unifi.NewUnifi(&unifi.Config{
+		User:      u.Config.UnifiUser,
+		Pass:      u.Config.UnifiPass,
+		URL:       u.Config.UnifiBase,
+		VerifySSL: u.Config.VerifySSL,
+		ErrorLog:  u.LogErrorf, // Log all errors.
+		DebugLog:  u.LogDebugf, // Log debug messages.
+	})
+	if err != nil {
+		return fmt.Errorf("unifi controller: %v", err)
 	}
-	return nil
+	u.LogDebugf("Authenticated with controller successfully")
+
+	return u.CheckSites()
 }
 
 // CheckSites makes sure the list of provided sites exists on the controller.

@@ -1,12 +1,28 @@
 package poller
 
 import (
+	"crypto/tls"
 	"fmt"
 
 	"github.com/davidnewhall/unifi-poller/influxunifi"
 	"github.com/davidnewhall/unifi-poller/metrics"
-	client "github.com/influxdata/influxdb1-client/v2"
+	influx "github.com/influxdata/influxdb1-client/v2"
 )
+
+// GetInfluxDB returns an InfluxDB interface.
+func (u *UnifiPoller) GetInfluxDB() (err error) {
+	u.Influx, err = influx.NewHTTPClient(influx.HTTPConfig{
+		Addr:      u.Config.InfluxURL,
+		Username:  u.Config.InfluxUser,
+		Password:  u.Config.InfluxPass,
+		TLSConfig: &tls.Config{InsecureSkipVerify: u.Config.InfxBadSSL},
+	})
+	if err != nil {
+		return fmt.Errorf("influxdb: %v", err)
+	}
+	u.Logf("Logging Measurements to InfluxDB at %s as user %s", u.Config.InfluxURL, u.Config.InfluxUser)
+	return nil
+}
 
 // CollectAndProcess collects measurements and then reports them to InfluxDB
 // Can be called once or in a ticker loop. This function and all the ones below
@@ -31,7 +47,7 @@ func (u *UnifiPoller) ReportMetrics(metrics *metrics.Metrics) error {
 	m := &influxunifi.Metrics{Metrics: metrics}
 	// Make a new Influx Points Batcher.
 	var err error
-	m.BatchPoints, err = client.NewBatchPoints(client.BatchPointsConfig{Database: u.Config.InfluxDB})
+	m.BatchPoints, err = influx.NewBatchPoints(influx.BatchPointsConfig{Database: u.Config.InfluxDB})
 	if err != nil {
 		return fmt.Errorf("influx.NewBatchPoints: %v", err)
 	}
