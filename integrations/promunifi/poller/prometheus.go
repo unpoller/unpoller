@@ -2,11 +2,28 @@ package poller
 
 import (
 	"fmt"
+	"net/http"
+	"strings"
 	"time"
 
 	"github.com/davidnewhall/unifi-poller/metrics"
 	"github.com/davidnewhall/unifi-poller/promunifi"
+	"github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
+
+// RunPrometheus starts the web server and registers the collector.
+func (u *UnifiPoller) RunPrometheus() error {
+	u.Logf("Exporting Measurements at https://%s/metrics for Prometheus", u.Config.HTTPListen)
+	http.Handle("/metrics", promhttp.Handler())
+	prometheus.MustRegister(promunifi.NewUnifiCollector(promunifi.UnifiCollectorCnfg{
+		Namespace:    strings.Replace(u.Config.Namespace, "-", "", -1),
+		CollectFn:    u.ExportMetrics,
+		LoggingFn:    u.LogExportReport,
+		ReportErrors: true, // XXX: Does this need to be configurable?
+	}))
+	return http.ListenAndServe(u.Config.HTTPListen, nil)
+}
 
 // ExportMetrics updates the internal metrics provided via
 // HTTP at /metrics for prometheus collection.
