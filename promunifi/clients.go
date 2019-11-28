@@ -64,7 +64,7 @@ func descClient(ns string) *uclient {
 		TxBytes:        prometheus.NewDesc(ns+"transmit_bytes_total", "Client Transmit Bytes", labelWireless, wireless),
 		TxBytesR:       prometheus.NewDesc(ns+"transmit_rate_bytes", "Client Transmit Data Rate", labelWireless, wireless),
 		TxPackets:      prometheus.NewDesc(ns+"transmit_packets_total", "Client Transmit Packets", labelWireless, wireless),
-		TxPower:        prometheus.NewDesc(ns+"radio_transmit_power", "Client Transmit Power", labelWireless, wireless),
+		TxPower:        prometheus.NewDesc(ns+"radio_transmit_power_dbm", "Client Transmit Power", labelWireless, wireless),
 		TxRate:         prometheus.NewDesc(ns+"radio_transmit_rate_bps", "Client Transmit Rate", labelWireless, wireless),
 		WifiTxAttempts: prometheus.NewDesc(ns+"wifi_attempts_transmit_total", "Client Wifi Transmit Attempts", labelWireless, wireless),
 
