@@ -217,7 +217,7 @@ func (u *unifiCollector) exportUAPs(r *Report) {
 	if r.Metrics == nil || r.Metrics.Devices == nil || len(r.Metrics.Devices.UAPs) < 1 {
 		return
 	}
-	r.wg.Add(1)
+	r.wg.Add(one)
 	go func() {
 		defer r.wg.Done()
 		for _, a := range r.Metrics.Devices.UAPs {
@@ -310,7 +310,6 @@ func (u *unifiCollector) exportUAPstat(r *Report, labels []string, a *unifi.Ap) 
 }
 
 func (u *unifiCollector) exportVAPtable(r *Report, labels []string, vt unifi.VapTable, rt unifi.RadioTable, rts unifi.RadioTableStats) {
-
 	// vap table stats
 	for _, v := range vt {
 		if !v.Up.Val {

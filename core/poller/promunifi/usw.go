@@ -139,7 +139,7 @@ func (u *unifiCollector) exportUSWs(r *Report) {
 	if r.Metrics == nil || r.Metrics.Devices == nil || len(r.Metrics.Devices.USWs) < 1 {
 		return
 	}
-	r.wg.Add(1)
+	r.wg.Add(one)
 	go func() {
 		defer r.wg.Done()
 		for _, s := range r.Metrics.Devices.USWs {
@@ -220,7 +220,7 @@ func (u *unifiCollector) exportPortTable(r *Report, pt []unifi.Port, labels []st
 			{u.USW.RxMulticast, prometheus.CounterValue, p.RxMulticast, l},
 			{u.USW.RxPackets, prometheus.CounterValue, p.RxPackets, l},
 			{u.USW.Satisfaction, prometheus.GaugeValue, p.Satisfaction, l},
-			{u.USW.Speed, prometheus.GaugeValue, p.Speed * 1000000, l},
+			{u.USW.Speed, prometheus.GaugeValue, p.Speed.Val * 1000000, l},
 			{u.USW.TxBroadcast, prometheus.CounterValue, p.TxBroadcast, l},
 			{u.USW.TxBytes, prometheus.CounterValue, p.TxBytes, l},
 			{u.USW.TxBytesR, prometheus.GaugeValue, p.TxBytesR, l},
