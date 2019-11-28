@@ -50,6 +50,7 @@ type metricExports struct {
 type Report struct {
 	Total   int
 	Errors  int
+	Zeros   int
 	Descs   int
 	Metrics *metrics.Metrics
 	Elapsed time.Duration
@@ -140,22 +141,29 @@ func (u *unifiCollector) exportMetrics(ch chan<- prometheus.Metric, r *Report) {
 		for _, m := range newMetrics {
 			r.Total++
 			descs[m.Desc] = true
+			var value float64
 			switch v := m.Value.(type) {
 			case unifi.FlexInt:
-				ch <- prometheus.MustNewConstMetric(m.Desc, m.ValueType, v.Val, m.Labels...)
+				value = v.Val
 			case float64:
-				ch <- prometheus.MustNewConstMetric(m.Desc, m.ValueType, v, m.Labels...)
+				value = v
 			case int64:
-				ch <- prometheus.MustNewConstMetric(m.Desc, m.ValueType, float64(v), m.Labels...)
+				value = float64(v)
 			case int:
-				ch <- prometheus.MustNewConstMetric(m.Desc, m.ValueType, float64(v), m.Labels...)
+				value = float64(v)
 
 			default:
 				r.Errors++
 				if u.Config.ReportErrors {
 					ch <- prometheus.NewInvalidMetric(m.Desc, fmt.Errorf("not a number: %v", m.Value))
 				}
+				continue
 			}
+
+			if value == 0 {
+				r.Zeros++
+			}
+			ch <- prometheus.MustNewConstMetric(m.Desc, m.ValueType, value, m.Labels...)
 		}
 		r.wg.Done()
 	}

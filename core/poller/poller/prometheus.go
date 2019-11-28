@@ -42,8 +42,8 @@ func (u *UnifiPoller) LogExportReport(report *promunifi.Report) {
 
 	u.Logf("UniFi Measurements Exported. Sites: %d, Clients: %d, "+
 		"Wireless APs: %d, Gateways: %d, Switches: %d%s, Descs: %d, "+
-		"Metrics: %d, Errors: %d, Elapsed: %v",
+		"Metrics: %d, Errors: %d, Zeros: %d, Elapsed: %v",
 		len(m.Sites), len(m.Clients), len(m.UAPs), len(m.UDMs)+len(m.USGs),
 		len(m.USWs), idsMsg, report.Descs, report.Total, report.Errors,
-		report.Elapsed.Round(time.Millisecond))
+		report.Zeros, report.Elapsed.Round(time.Millisecond))
 }
