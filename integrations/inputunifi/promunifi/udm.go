@@ -13,7 +13,7 @@ func (u *unifiCollector) exportUDMs(r *Report) {
 	if r.Metrics == nil || r.Metrics.Devices == nil || len(r.Metrics.Devices.UDMs) < 1 {
 		return
 	}
-	r.wg.Add(1)
+	r.wg.Add(one)
 	go func() {
 		defer r.wg.Done()
 		for _, d := range r.Metrics.Devices.UDMs {
