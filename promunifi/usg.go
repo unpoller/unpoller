@@ -111,7 +111,7 @@ func (u *unifiCollector) exportUSGs(r *Report) {
 	if r.Metrics == nil || r.Metrics.Devices == nil || len(r.Metrics.Devices.USGs) < 1 {
 		return
 	}
-	r.wg.Add(1)
+	r.wg.Add(one)
 	go func() {
 		defer r.wg.Done()
 		for _, s := range r.Metrics.Devices.USGs {
@@ -179,7 +179,7 @@ func (u *unifiCollector) exportWANPorts(r *Report, labels []string, wans ...unif
 			{u.USG.WanTxBytes, prometheus.CounterValue, wan.TxBytes, l},
 			{u.USG.WanRxBroadcast, prometheus.CounterValue, wan.RxBroadcast, l},
 			{u.USG.WanRxMulticast, prometheus.CounterValue, wan.RxMulticast, l},
-			{u.USG.WanSpeed, prometheus.CounterValue, wan.Speed * 1000000, l},
+			{u.USG.WanSpeed, prometheus.CounterValue, wan.Speed.Val * 1000000, l},
 			{u.USG.WanTxBroadcast, prometheus.CounterValue, wan.TxBroadcast, l},
 			{u.USG.WanTxBytesR, prometheus.CounterValue, wan.TxBytesR, l},
 			{u.USG.WanTxDropped, prometheus.CounterValue, wan.TxDropped, l},

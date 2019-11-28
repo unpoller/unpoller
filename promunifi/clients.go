@@ -91,7 +91,7 @@ func (u *unifiCollector) exportClients(r *Report) {
 	if r.Metrics == nil || len(r.Metrics.Clients) < 1 {
 		return
 	}
-	r.wg.Add(1)
+	r.wg.Add(one)
 	go func() {
 		defer r.wg.Done()
 		for _, c := range r.Metrics.Clients {
