@@ -102,7 +102,7 @@ func (u *unifiCollector) exportClient(r report, c *unifi.Client) {
 		labels[len(labels)-1] = "false"
 		r.send([]*metricExports{
 			{u.Client.Anomalies, prometheus.CounterValue, c.Anomalies, labels},
-			{u.Client.CCQ, prometheus.GaugeValue, c.Ccq, labels},
+			{u.Client.CCQ, prometheus.GaugeValue, c.Ccq / 10, labels},
 			{u.Client.Noise, prometheus.GaugeValue, c.Noise, labels},
 			{u.Client.RoamCount, prometheus.CounterValue, c.RoamCount, labels},
 			{u.Client.RSSI, prometheus.GaugeValue, c.Rssi, labels},
