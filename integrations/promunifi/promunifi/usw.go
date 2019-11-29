@@ -142,63 +142,63 @@ func (u *unifiCollector) exportUSWs(r *Report) {
 	r.wg.Add(one)
 	go func() {
 		defer r.wg.Done()
-		for _, s := range r.Metrics.Devices.USWs {
-			u.exportUSW(r, s)
+		for _, d := range r.Metrics.Devices.USWs {
+			u.exportUSW(r, d)
 		}
 	}()
 }
 
-func (u *unifiCollector) exportUSW(r *Report, s *unifi.USW) {
-	labels := []string{s.IP, s.Type, s.Version, s.SiteName, s.Mac, s.Model, s.Name, s.Serial}
+func (u *unifiCollector) exportUSW(r *Report, d *unifi.USW) {
+	labels := []string{d.IP, d.Type, d.Version, d.SiteName, d.Mac, d.Model, d.Name, d.Serial}
 
-	if s.HasTemperature.Val {
-		r.send([]*metricExports{{u.USW.Temperature, prometheus.GaugeValue, s.GeneralTemperature, labels}})
+	if d.HasTemperature.Val {
+		r.send([]*metricExports{{u.USW.Temperature, prometheus.GaugeValue, d.GeneralTemperature, labels}})
 	}
-	if s.HasFan.Val {
-		r.send([]*metricExports{{u.USW.FanLevel, prometheus.GaugeValue, s.FanLevel, labels}})
+	if d.HasFan.Val {
+		r.send([]*metricExports{{u.USW.FanLevel, prometheus.GaugeValue, d.FanLevel, labels}})
 	}
 
 	// Switch data.
 	r.send([]*metricExports{
-		{u.USW.Uptime, prometheus.GaugeValue, s.Uptime, labels},
-		{u.USW.TotalMaxPower, prometheus.GaugeValue, s.TotalMaxPower, labels},
-		{u.USW.TotalTxBytes, prometheus.CounterValue, s.TxBytes, labels},
-		{u.USW.TotalRxBytes, prometheus.CounterValue, s.RxBytes, labels},
-		{u.USW.TotalBytes, prometheus.CounterValue, s.Bytes, labels},
-		{u.USW.NumSta, prometheus.GaugeValue, s.NumSta, labels},
-		{u.USW.UserNumSta, prometheus.GaugeValue, s.UserNumSta, labels},
-		{u.USW.GuestNumSta, prometheus.GaugeValue, s.GuestNumSta, labels},
-		{u.USW.Loadavg1, prometheus.GaugeValue, s.SysStats.Loadavg1, labels},
-		{u.USW.Loadavg5, prometheus.GaugeValue, s.SysStats.Loadavg5, labels},
-		{u.USW.Loadavg15, prometheus.GaugeValue, s.SysStats.Loadavg15, labels},
-		{u.USW.MemUsed, prometheus.GaugeValue, s.SysStats.MemUsed, labels},
-		{u.USW.MemTotal, prometheus.GaugeValue, s.SysStats.MemTotal, labels},
-		{u.USW.MemBuffer, prometheus.GaugeValue, s.SysStats.MemBuffer, labels},
-		{u.USW.CPU, prometheus.GaugeValue, s.SystemStats.CPU, labels},
-		{u.USW.Mem, prometheus.GaugeValue, s.SystemStats.Mem, labels},
+		{u.USW.Uptime, prometheus.GaugeValue, d.Uptime, labels},
+		{u.USW.TotalMaxPower, prometheus.GaugeValue, d.TotalMaxPower, labels},
+		{u.USW.TotalTxBytes, prometheus.CounterValue, d.TxBytes, labels},
+		{u.USW.TotalRxBytes, prometheus.CounterValue, d.RxBytes, labels},
+		{u.USW.TotalBytes, prometheus.CounterValue, d.Bytes, labels},
+		{u.USW.NumSta, prometheus.GaugeValue, d.NumSta, labels},
+		{u.USW.UserNumSta, prometheus.GaugeValue, d.UserNumSta, labels},
+		{u.USW.GuestNumSta, prometheus.GaugeValue, d.GuestNumSta, labels},
+		{u.USW.Loadavg1, prometheus.GaugeValue, d.SysStats.Loadavg1, labels},
+		{u.USW.Loadavg5, prometheus.GaugeValue, d.SysStats.Loadavg5, labels},
+		{u.USW.Loadavg15, prometheus.GaugeValue, d.SysStats.Loadavg15, labels},
+		{u.USW.MemUsed, prometheus.GaugeValue, d.SysStats.MemUsed, labels},
+		{u.USW.MemTotal, prometheus.GaugeValue, d.SysStats.MemTotal, labels},
+		{u.USW.MemBuffer, prometheus.GaugeValue, d.SysStats.MemBuffer, labels},
+		{u.USW.CPU, prometheus.GaugeValue, d.SystemStats.CPU, labels},
+		{u.USW.Mem, prometheus.GaugeValue, d.SystemStats.Mem, labels},
 	})
-	u.exportPortTable(r, s.PortTable, labels[4:])
-	u.exportUSWstats(r, s.Stat.Sw, labels)
+	u.exportPortTable(r, d.PortTable, labels[4:])
+	u.exportUSWstats(r, d.Stat.Sw, labels)
 }
 
-func (u *unifiCollector) exportUSWstats(r *Report, s *unifi.Sw, labels []string) {
+func (u *unifiCollector) exportUSWstats(r *Report, sw *unifi.Sw, labels []string) {
 	r.send([]*metricExports{
-		{u.USW.SwRxPackets, prometheus.CounterValue, s.RxPackets, labels},
-		{u.USW.SwRxBytes, prometheus.CounterValue, s.RxBytes, labels},
-		{u.USW.SwRxErrors, prometheus.CounterValue, s.RxErrors, labels},
-		{u.USW.SwRxDropped, prometheus.CounterValue, s.RxDropped, labels},
-		{u.USW.SwRxCrypts, prometheus.CounterValue, s.RxCrypts, labels},
-		{u.USW.SwRxFrags, prometheus.CounterValue, s.RxFrags, labels},
-		{u.USW.SwTxPackets, prometheus.CounterValue, s.TxPackets, labels},
-		{u.USW.SwTxBytes, prometheus.CounterValue, s.TxBytes, labels},
-		{u.USW.SwTxErrors, prometheus.CounterValue, s.TxErrors, labels},
-		{u.USW.SwTxDropped, prometheus.CounterValue, s.TxDropped, labels},
-		{u.USW.SwTxRetries, prometheus.CounterValue, s.TxRetries, labels},
-		{u.USW.SwRxMulticast, prometheus.CounterValue, s.RxMulticast, labels},
-		{u.USW.SwRxBroadcast, prometheus.CounterValue, s.RxBroadcast, labels},
-		{u.USW.SwTxMulticast, prometheus.CounterValue, s.TxMulticast, labels},
-		{u.USW.SwTxBroadcast, prometheus.CounterValue, s.TxBroadcast, labels},
-		{u.USW.SwBytes, prometheus.CounterValue, s.Bytes, labels},
+		{u.USW.SwRxPackets, prometheus.CounterValue, sw.RxPackets, labels},
+		{u.USW.SwRxBytes, prometheus.CounterValue, sw.RxBytes, labels},
+		{u.USW.SwRxErrors, prometheus.CounterValue, sw.RxErrors, labels},
+		{u.USW.SwRxDropped, prometheus.CounterValue, sw.RxDropped, labels},
+		{u.USW.SwRxCrypts, prometheus.CounterValue, sw.RxCrypts, labels},
+		{u.USW.SwRxFrags, prometheus.CounterValue, sw.RxFrags, labels},
+		{u.USW.SwTxPackets, prometheus.CounterValue, sw.TxPackets, labels},
+		{u.USW.SwTxBytes, prometheus.CounterValue, sw.TxBytes, labels},
+		{u.USW.SwTxErrors, prometheus.CounterValue, sw.TxErrors, labels},
+		{u.USW.SwTxDropped, prometheus.CounterValue, sw.TxDropped, labels},
+		{u.USW.SwTxRetries, prometheus.CounterValue, sw.TxRetries, labels},
+		{u.USW.SwRxMulticast, prometheus.CounterValue, sw.RxMulticast, labels},
+		{u.USW.SwRxBroadcast, prometheus.CounterValue, sw.RxBroadcast, labels},
+		{u.USW.SwTxMulticast, prometheus.CounterValue, sw.TxMulticast, labels},
+		{u.USW.SwTxBroadcast, prometheus.CounterValue, sw.TxBroadcast, labels},
+		{u.USW.SwBytes, prometheus.CounterValue, sw.Bytes, labels},
 	})
 }
 
