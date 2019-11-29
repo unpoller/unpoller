@@ -227,7 +227,7 @@ func (u *unifiCollector) exportUAPs(r *Report) {
 }
 
 func (u *unifiCollector) exportUAP(r *Report, a *unifi.UAP) {
-	labels := []string{a.IP, a.SiteName, a.Mac, a.Model, a.Name, a.Serial, a.Type, a.Version}
+	labels := []string{a.IP, a.Type, a.Version, a.SiteName, a.Mac, a.Model, a.Name, a.Serial}
 
 	// AP data.
 	r.send([]*metricExports{
@@ -251,11 +251,11 @@ func (u *unifiCollector) exportUAP(r *Report, a *unifi.UAP) {
 		{u.UAP.CPU, prometheus.GaugeValue, a.SystemStats.CPU, labels},
 		{u.UAP.Mem, prometheus.GaugeValue, a.SystemStats.Mem, labels},
 	})
-	u.exportUAPstat(r, labels[2:], a.Stat.Ap)
+	u.exportUAPstats(r, labels[2:], a.Stat.Ap)
 	u.exportVAPtable(r, labels[2:], a.VapTable, a.RadioTable, a.RadioTableStats)
 }
 
-func (u *unifiCollector) exportUAPstat(r *Report, labels []string, a *unifi.Ap) {
+func (u *unifiCollector) exportUAPstats(r *Report, labels []string, a *unifi.Ap) {
 	labelA := append([]string{"all"}, labels...)
 	labelU := append([]string{"user"}, labels...)
 	labelG := append([]string{"guest"}, labels...)
