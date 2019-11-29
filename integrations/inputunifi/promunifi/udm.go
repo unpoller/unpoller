@@ -36,7 +36,7 @@ type unifiDevice struct {
 }
 
 func descDevice(ns string) *unifiDevice {
-	labels := []string{"ip", "site_name", "mac", "model", "name", "serial", "type", "version"}
+	labels := []string{"ip", "type", "version", "site_name", "mac", "model", "name", "serial"}
 	return &unifiDevice{
 		Uptime:        prometheus.NewDesc(ns+"uptime", "Uptime", labels, nil),
 		Temperature:   prometheus.NewDesc(ns+"temperature_celsius", "Temperature", labels, nil),
