@@ -36,7 +36,7 @@ type unifiDevice struct {
 }
 
 func descDevice(ns string) *unifiDevice {
-	labels := []string{"ip", "type", "version", "site_name", "mac", "model", "name", "serial"}
+	labels := []string{"ip", "version", "model", "serial", "type", "mac", "site_name", "name"}
 	return &unifiDevice{
 		Uptime:        prometheus.NewDesc(ns+"uptime", "Uptime", labels, nil),
 		Temperature:   prometheus.NewDesc(ns+"temperature_celsius", "Temperature", labels, nil),
@@ -82,7 +82,7 @@ func (u *unifiCollector) exportUDMs(r report) {
 
 // UDM is a collection of stats from USG, USW and UAP. It has no unique stats.
 func (u *unifiCollector) exportUDM(r report, d *unifi.UDM) {
-	labels := []string{d.IP, d.Type, d.Version, d.SiteName, d.Mac, d.Model, d.Name, d.Serial}
+	labels := []string{d.IP, d.Version, d.Model, d.Serial, d.Type, d.Mac, d.SiteName, d.Name}
 	// Gateway System Data.
 	r.send([]*metricExports{
 		{u.Device.Uptime, prometheus.GaugeValue, d.Uptime, labels},
@@ -105,7 +105,7 @@ func (u *unifiCollector) exportUDM(r report, d *unifi.UDM) {
 		{u.Device.Mem, prometheus.GaugeValue, d.SystemStats.Mem, labels},
 	})
 	u.exportUSWstats(r, labels, d.Stat.Sw)
-	u.exportUSGstats(r, labels, d.Stat.Gw, d.SpeedtestStatus)
+	u.exportUSGstats(r, labels, d.SpeedtestStatus)
 	u.exportWANPorts(r, labels, d.Wan1, d.Wan2)
 	u.exportPortTable(r, labels, d.PortTable)
 	if d.Stat.Ap != nil && d.VapTable != nil {

@@ -34,8 +34,8 @@ type usg struct {
 }
 
 func descUSG(ns string) *usg {
-	labels := []string{"ip", "type", "version", "site_name", "mac", "model", "name", "serial"}
-	labelWan := append([]string{"port"}, labels...)
+	labels := []string{"ip", "version", "model", "serial", "type", "mac", "site_name", "name"}
+	labelWan := append([]string{"port"}, labels[6:]...)
 	return &usg{
 		WanRxPackets:   prometheus.NewDesc(ns+"wan_receive_packets_total", "WAN Receive Packets Total", labelWan, nil),
 		WanRxBytes:     prometheus.NewDesc(ns+"wan_receive_bytes_total", "WAN Receive Bytes Total", labelWan, nil),
@@ -58,10 +58,10 @@ func descUSG(ns string) *usg {
 		LanRxDropped:   prometheus.NewDesc(ns+"lan_receive_dropped_total", "LAN Receive Dropped Total", labels, nil),
 		LanTxPackets:   prometheus.NewDesc(ns+"lan_transmit_packets_total", "LAN Transmit Packets Total", labels, nil),
 		LanTxBytes:     prometheus.NewDesc(ns+"lan_transmit_bytes_total", "LAN Transmit Bytes Total", labels, nil),
-		Latency:        prometheus.NewDesc(ns+"speedtest_latency_seconds", "Speedtest Latency", labels, nil),
-		Runtime:        prometheus.NewDesc(ns+"speedtest_runtime", "Speedtest Run Time", labels, nil),
-		XputDownload:   prometheus.NewDesc(ns+"speedtest_download", "Speedtest Download Rate", labels, nil),
-		XputUpload:     prometheus.NewDesc(ns+"speedtest_upload", "Speedtest Upload Rate", labels, nil),
+		Latency:        prometheus.NewDesc(ns+"speedtest_latency_seconds", "Speedtest Latency", labelWan, nil),
+		Runtime:        prometheus.NewDesc(ns+"speedtest_runtime", "Speedtest Run Time", labelWan, nil),
+		XputDownload:   prometheus.NewDesc(ns+"speedtest_download", "Speedtest Download Rate", labelWan, nil),
+		XputUpload:     prometheus.NewDesc(ns+"speedtest_upload", "Speedtest Upload Rate", labelWan, nil),
 	}
 }
 
@@ -79,7 +79,7 @@ func (u *unifiCollector) exportUSGs(r report) {
 }
 
 func (u *unifiCollector) exportUSG(r report, d *unifi.USG) {
-	labels := []string{d.IP, d.Type, d.Version, d.SiteName, d.Mac, d.Model, d.Name, d.Serial}
+	labels := []string{d.IP, d.Version, d.Model, d.Serial, d.Type, d.Mac, d.SiteName, d.Name}
 	// Gateway System Data.
 	r.send([]*metricExports{
 		{u.Device.Uptime, prometheus.GaugeValue, d.Uptime, labels},
@@ -102,13 +102,13 @@ func (u *unifiCollector) exportUSG(r report, d *unifi.USG) {
 		{u.Device.Mem, prometheus.GaugeValue, d.SystemStats.Mem, labels},
 	})
 	u.exportWANPorts(r, labels, d.Wan1, d.Wan2)
-	u.exportUSGstats(r, labels, d.Stat.Gw, d.SpeedtestStatus)
+	u.exportUSGstats(r, labels, d.SpeedtestStatus)
 }
 
-func (u *unifiCollector) exportUSGstats(r report, labels []string, gw *unifi.Gw, st unifi.SpeedtestStatus) {
-	labelWan := append([]string{"all"}, labels...)
+func (u *unifiCollector) exportUSGstats(r report, labels []string, st unifi.SpeedtestStatus) {
+	labelWan := append([]string{"all"}, labels[6:]...)
 	r.send([]*metricExports{
-		// Combined Port Stats
+		/* // Combined Port Stats
 		{u.USG.WanRxPackets, prometheus.CounterValue, gw.WanRxPackets, labelWan},
 		{u.USG.WanRxBytes, prometheus.CounterValue, gw.WanRxBytes, labelWan},
 		{u.USG.WanRxDropped, prometheus.CounterValue, gw.WanRxDropped, labelWan},
@@ -120,11 +120,12 @@ func (u *unifiCollector) exportUSGstats(r report, labels []string, gw *unifi.Gw,
 		{u.USG.LanTxPackets, prometheus.CounterValue, gw.LanTxPackets, labels},
 		{u.USG.LanTxBytes, prometheus.CounterValue, gw.LanTxBytes, labels},
 		{u.USG.LanRxDropped, prometheus.CounterValue, gw.LanRxDropped, labels},
+		*/
 		// Speed Test Stats
-		{u.USG.Latency, prometheus.GaugeValue, st.Latency.Val / 1000, labels},
-		{u.USG.Runtime, prometheus.GaugeValue, st.Runtime, labels},
-		{u.USG.XputDownload, prometheus.GaugeValue, st.XputDownload, labels},
-		{u.USG.XputUpload, prometheus.GaugeValue, st.XputUpload, labels},
+		{u.USG.Latency, prometheus.GaugeValue, st.Latency.Val / 1000, labelWan},
+		{u.USG.Runtime, prometheus.GaugeValue, st.Runtime, labelWan},
+		{u.USG.XputDownload, prometheus.GaugeValue, st.XputDownload, labelWan},
+		{u.USG.XputUpload, prometheus.GaugeValue, st.XputUpload, labelWan},
 	})
 }
 
@@ -133,7 +134,7 @@ func (u *unifiCollector) exportWANPorts(r report, labels []string, wans ...unifi
 		if !wan.Up.Val {
 			continue // only record UP interfaces.
 		}
-		l := append([]string{wan.Name}, labels...)
+		l := append([]string{wan.Name}, labels[6:]...)
 		r.send([]*metricExports{
 			{u.USG.WanRxPackets, prometheus.CounterValue, wan.RxPackets, l},
 			{u.USG.WanRxBytes, prometheus.CounterValue, wan.RxBytes, l},
