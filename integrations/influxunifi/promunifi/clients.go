@@ -39,10 +39,6 @@ type uclient struct {
 }
 
 func descClient(ns string) *uclient {
-	if ns += "_client_"; ns == "_client_" {
-		ns = "client_"
-	}
-
 	labels := []string{"name", "mac", "site_name", "gw_mac", "gw_name", "sw_mac", "sw_name", "vlan", "ip", "oui", "network"}
 	labelWired := append([]string{"sw_port"}, labels...)
 	labelWireless := append([]string{"ap_mac", "ap_name", "radio_name", "radio", "radio_proto", "channel", "essid", "bssid", "radio_desc"}, labels...)
@@ -67,15 +63,13 @@ func descClient(ns string) *uclient {
 		TxPower:        prometheus.NewDesc(ns+"radio_transmit_power_dbm", "Client Transmit Power", labelWireless, wireless),
 		TxRate:         prometheus.NewDesc(ns+"radio_transmit_rate_bps", "Client Transmit Rate", labelWireless, wireless),
 		WifiTxAttempts: prometheus.NewDesc(ns+"wifi_attempts_transmit_total", "Client Wifi Transmit Attempts", labelWireless, wireless),
-
 		WiredRxBytes:   prometheus.NewDesc(ns+"wired_receive_bytes_total", "Client Wired Receive Bytes", labelWired, wired),
 		WiredRxBytesR:  prometheus.NewDesc(ns+"wired_receive_rate_bytes", "Client Wired Receive Data Rate", labelWired, wired),
 		WiredRxPackets: prometheus.NewDesc(ns+"wired_receive_packets_total", "Client Wired Receive Packets", labelWired, wired),
 		WiredTxBytes:   prometheus.NewDesc(ns+"wired_transmit_bytes_total", "Client Wired Transmit Bytes", labelWired, wired),
 		WiredTxBytesR:  prometheus.NewDesc(ns+"wired_transmit_rate_bytes", "Client Wired Data Rate", labelWired, wired),
 		WiredTxPackets: prometheus.NewDesc(ns+"wired_transmit_packets_total", "Client Wired Transmit Packets", labelWired, wired),
-
-		Uptime: prometheus.NewDesc(ns+"uptime_seconds", "Client Uptime", labels, nil),
+		Uptime:         prometheus.NewDesc(ns+"uptime_seconds", "Client Uptime", labels, nil),
 		/* needs more "looking into"
 		DpiStatsApp:       prometheus.NewDesc(ns+"dpi_stats_app", "Client DPI Stats App", labels, nil),
 		DpiStatsCat:       prometheus.NewDesc(ns+"dpi_stats_cat", "Client DPI Stats Cat", labels, nil),
