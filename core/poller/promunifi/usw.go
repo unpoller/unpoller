@@ -91,20 +91,20 @@ func descUSW(ns string) *usw {
 	}
 }
 
-func (u *unifiCollector) exportUSWs(r *Report) {
-	if r.Metrics == nil || r.Metrics.Devices == nil || len(r.Metrics.Devices.USWs) < 1 {
+func (u *unifiCollector) exportUSWs(r report) {
+	if r.metrics() == nil || r.metrics().Devices == nil || len(r.metrics().Devices.USWs) < 1 {
 		return
 	}
-	r.wg.Add(one)
+	r.add()
 	go func() {
-		defer r.wg.Done()
-		for _, d := range r.Metrics.Devices.USWs {
+		defer r.done()
+		for _, d := range r.metrics().Devices.USWs {
 			u.exportUSW(r, d)
 		}
 	}()
 }
 
-func (u *unifiCollector) exportUSW(r *Report, d *unifi.USW) {
+func (u *unifiCollector) exportUSW(r report, d *unifi.USW) {
 	labels := []string{d.IP, d.Type, d.Version, d.SiteName, d.Mac, d.Model, d.Name, d.Serial}
 	if d.HasTemperature.Val {
 		r.send([]*metricExports{{u.Device.Temperature, prometheus.GaugeValue, d.GeneralTemperature, labels}})
@@ -132,11 +132,11 @@ func (u *unifiCollector) exportUSW(r *Report, d *unifi.USW) {
 		{u.Device.CPU, prometheus.GaugeValue, d.SystemStats.CPU, labels},
 		{u.Device.Mem, prometheus.GaugeValue, d.SystemStats.Mem, labels},
 	})
-	u.exportPortTable(r, d.PortTable, labels[4:])
-	u.exportUSWstats(r, d.Stat.Sw, labels)
+	u.exportPortTable(r, labels, d.PortTable)
+	u.exportUSWstats(r, labels, d.Stat.Sw)
 }
 
-func (u *unifiCollector) exportUSWstats(r *Report, sw *unifi.Sw, labels []string) {
+func (u *unifiCollector) exportUSWstats(r report, labels []string, sw *unifi.Sw) {
 	r.send([]*metricExports{
 		{u.USW.SwRxPackets, prometheus.CounterValue, sw.RxPackets, labels},
 		{u.USW.SwRxBytes, prometheus.CounterValue, sw.RxBytes, labels},
@@ -157,14 +157,14 @@ func (u *unifiCollector) exportUSWstats(r *Report, sw *unifi.Sw, labels []string
 	})
 }
 
-func (u *unifiCollector) exportPortTable(r *Report, pt []unifi.Port, labels []string) {
+func (u *unifiCollector) exportPortTable(r report, labels []string, pt []unifi.Port) {
 	// Per-port data on a switch
 	for _, p := range pt {
 		if !p.Up.Val {
 			continue
 		}
 		// Copy labels, and add four new ones.
-		l := append([]string{p.PortIdx.Txt, p.Name, p.Mac, p.IP}, labels...)
+		l := append([]string{p.PortIdx.Txt, p.Name, p.Mac, p.IP}, labels[4:]...)
 		if p.PoeEnable.Val && p.PortPoe.Val {
 			r.send([]*metricExports{
 				{u.USW.PoeCurrent, prometheus.GaugeValue, p.PoeCurrent, l},

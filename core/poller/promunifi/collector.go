@@ -4,6 +4,7 @@ package promunifi
 import (
 	"fmt"
 	"reflect"
+	"strings"
 	"sync"
 	"time"
 
@@ -11,9 +12,6 @@ import (
 	"github.com/prometheus/client_golang/prometheus"
 	"golift.io/unifi"
 )
-
-// satisfy gomnd
-const one = 1
 
 // channel buffer, fits at least one batch.
 const buffer = 50
@@ -65,13 +63,21 @@ type Report struct {
 	wg      sync.WaitGroup
 }
 
+// internal interface used to "process metrics" - can be mocked and overridden for tests.
+type report interface {
+	send([]*metricExports)
+	add()
+	done()
+	metrics() *metrics.Metrics
+}
+
 // NewUnifiCollector returns a prometheus collector that will export any available
 // UniFi metrics. You must provide a collection function in the opts.
 func NewUnifiCollector(opts UnifiCollectorCnfg) prometheus.Collector {
 	if opts.CollectFn == nil {
 		panic("nil collector function")
 	}
-	if opts.Namespace += "_"; opts.Namespace == "_" {
+	if opts.Namespace = strings.Trim(opts.Namespace, "_") + "_"; opts.Namespace == "_" {
 		opts.Namespace = ""
 	}
 	return &unifiCollector{
@@ -173,6 +179,21 @@ func (u *unifiCollector) exportMetrics(r *Report, ch chan<- prometheus.Metric) {
 	}
 	r.Descs, r.Elapsed = len(descs), time.Since(r.Start)
 	u.Config.LoggingFn(r)
+}
+
+func (r *Report) metrics() *metrics.Metrics {
+	return r.Metrics
+}
+
+// satisfy gomnd
+const one = 1
+
+func (r *Report) add() {
+	r.wg.Add(one)
+}
+
+func (r *Report) done() {
+	r.wg.Done()
 }
 
 func (r *Report) send(m []*metricExports) {

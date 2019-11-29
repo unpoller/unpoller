@@ -67,21 +67,21 @@ func descDevice(ns string) *unifiDevice {
 	}
 }
 
-func (u *unifiCollector) exportUDMs(r *Report) {
-	if r.Metrics == nil || r.Metrics.Devices == nil || len(r.Metrics.Devices.UDMs) < 1 {
+func (u *unifiCollector) exportUDMs(r report) {
+	if r.metrics() == nil || r.metrics().Devices == nil || len(r.metrics().Devices.UDMs) < 1 {
 		return
 	}
-	r.wg.Add(one)
+	r.add()
 	go func() {
-		defer r.wg.Done()
-		for _, d := range r.Metrics.Devices.UDMs {
+		defer r.done()
+		for _, d := range r.metrics().Devices.UDMs {
 			u.exportUDM(r, d)
 		}
 	}()
 }
 
 // UDM is a collection of stats from USG, USW and UAP. It has no unique stats.
-func (u *unifiCollector) exportUDM(r *Report, d *unifi.UDM) {
+func (u *unifiCollector) exportUDM(r report, d *unifi.UDM) {
 	labels := []string{d.IP, d.Type, d.Version, d.SiteName, d.Mac, d.Model, d.Name, d.Serial}
 	// Gateway System Data.
 	r.send([]*metricExports{
@@ -104,14 +104,14 @@ func (u *unifiCollector) exportUDM(r *Report, d *unifi.UDM) {
 		{u.Device.CPU, prometheus.GaugeValue, d.SystemStats.CPU, labels},
 		{u.Device.Mem, prometheus.GaugeValue, d.SystemStats.Mem, labels},
 	})
-	u.exportUSWstats(r, d.Stat.Sw, labels)
-	u.exportUSGstats(r, d.Stat.Gw, d.SpeedtestStatus, labels)
+	u.exportUSWstats(r, labels, d.Stat.Sw)
+	u.exportUSGstats(r, labels, d.Stat.Gw, d.SpeedtestStatus)
 	u.exportWANPorts(r, labels, d.Wan1, d.Wan2)
-	u.exportPortTable(r, d.PortTable, labels[4:])
+	u.exportPortTable(r, labels, d.PortTable)
 	if d.Stat.Ap != nil && d.VapTable != nil {
 		// UDM Pro does not have these. UDM non-Pro does.
-		u.exportUAPstats(r, labels[2:], d.Stat.Ap)
-		u.exportVAPtable(r, labels[2:], *d.VapTable)
-		u.exportRadtable(r, labels[2:], *d.RadioTable, *d.RadioTableStats)
+		u.exportUAPstats(r, labels, d.Stat.Ap)
+		u.exportVAPtable(r, labels, *d.VapTable)
+		u.exportRadtable(r, labels, *d.RadioTable, *d.RadioTableStats)
 	}
 }
