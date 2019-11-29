@@ -48,26 +48,27 @@ type usw struct {
 func descUSW(ns string) *usw {
 	pns := ns + "port_"
 	// The first five labels for switch are shared with (the same as) switch ports.
-	labels := []string{"ip", "type", "version", "site_name", "mac", "model", "name", "serial"}
+	// labels := []string{"ip", "version", "model", "serial", "type", "mac", "site_name", "name"}
+	labelS := []string{"site_name", "name"} // labels[6:]
 	// Copy labels, and replace first four with different names.
-	labelP := append([]string{"port_num", "port_name", "port_mac", "port_ip"}, labels[4:]...)
+	labelP := append([]string{"port_num", "port_name", "port_mac", "port_ip"}, labelS...)
 	return &usw{
-		SwRxPackets:   prometheus.NewDesc(ns+"switch_receive_packets_total", "Switch Packets Received Total", labels, nil),
-		SwRxBytes:     prometheus.NewDesc(ns+"switch_receive_bytes_total", "Switch Bytes Received Total", labels, nil),
-		SwRxErrors:    prometheus.NewDesc(ns+"switch_receive_errors_total", "Switch Errors Received Total", labels, nil),
-		SwRxDropped:   prometheus.NewDesc(ns+"switch_receive_dropped_total", "Switch Dropped Received Total", labels, nil),
-		SwRxCrypts:    prometheus.NewDesc(ns+"switch_receive_crypts_total", "Switch Crypts Received Total", labels, nil),
-		SwRxFrags:     prometheus.NewDesc(ns+"switch_receive_frags_total", "Switch Frags Received Total", labels, nil),
-		SwTxPackets:   prometheus.NewDesc(ns+"switch_transmit_packets_total", "Switch Packets Transmit Total", labels, nil),
-		SwTxBytes:     prometheus.NewDesc(ns+"switch_transmit_bytes_total", "Switch Bytes Transmit Total", labels, nil),
-		SwTxErrors:    prometheus.NewDesc(ns+"switch_transmit_errors_total", "Switch Errors Transmit Total", labels, nil),
-		SwTxDropped:   prometheus.NewDesc(ns+"switch_transmit_dropped_total", "Switch Dropped Transmit Total", labels, nil),
-		SwTxRetries:   prometheus.NewDesc(ns+"switch_transmit_retries_total", "Switch Retries Transmit Total", labels, nil),
-		SwRxMulticast: prometheus.NewDesc(ns+"switch_receive_multicast_total", "Switch Multicast Receive Total", labels, nil),
-		SwRxBroadcast: prometheus.NewDesc(ns+"switch_receive_broadcast_total", "Switch Broadcast Receive Total", labels, nil),
-		SwTxMulticast: prometheus.NewDesc(ns+"switch_transmit_multicast_total", "Switch Multicast Transmit Total", labels, nil),
-		SwTxBroadcast: prometheus.NewDesc(ns+"switch_transmit_broadcast_total", "Switch Broadcast Transmit Total", labels, nil),
-		SwBytes:       prometheus.NewDesc(ns+"switch_bytes_total", "Switch Bytes Transferred Total", labels, nil),
+		SwRxPackets:   prometheus.NewDesc(ns+"switch_receive_packets_total", "Switch Packets Received Total", labelS, nil),
+		SwRxBytes:     prometheus.NewDesc(ns+"switch_receive_bytes_total", "Switch Bytes Received Total", labelS, nil),
+		SwRxErrors:    prometheus.NewDesc(ns+"switch_receive_errors_total", "Switch Errors Received Total", labelS, nil),
+		SwRxDropped:   prometheus.NewDesc(ns+"switch_receive_dropped_total", "Switch Dropped Received Total", labelS, nil),
+		SwRxCrypts:    prometheus.NewDesc(ns+"switch_receive_crypts_total", "Switch Crypts Received Total", labelS, nil),
+		SwRxFrags:     prometheus.NewDesc(ns+"switch_receive_frags_total", "Switch Frags Received Total", labelS, nil),
+		SwTxPackets:   prometheus.NewDesc(ns+"switch_transmit_packets_total", "Switch Packets Transmit Total", labelS, nil),
+		SwTxBytes:     prometheus.NewDesc(ns+"switch_transmit_bytes_total", "Switch Bytes Transmit Total", labelS, nil),
+		SwTxErrors:    prometheus.NewDesc(ns+"switch_transmit_errors_total", "Switch Errors Transmit Total", labelS, nil),
+		SwTxDropped:   prometheus.NewDesc(ns+"switch_transmit_dropped_total", "Switch Dropped Transmit Total", labelS, nil),
+		SwTxRetries:   prometheus.NewDesc(ns+"switch_transmit_retries_total", "Switch Retries Transmit Total", labelS, nil),
+		SwRxMulticast: prometheus.NewDesc(ns+"switch_receive_multicast_total", "Switch Multicast Receive Total", labelS, nil),
+		SwRxBroadcast: prometheus.NewDesc(ns+"switch_receive_broadcast_total", "Switch Broadcast Receive Total", labelS, nil),
+		SwTxMulticast: prometheus.NewDesc(ns+"switch_transmit_multicast_total", "Switch Multicast Transmit Total", labelS, nil),
+		SwTxBroadcast: prometheus.NewDesc(ns+"switch_transmit_broadcast_total", "Switch Broadcast Transmit Total", labelS, nil),
+		SwBytes:       prometheus.NewDesc(ns+"switch_bytes_total", "Switch Bytes Transferred Total", labelS, nil),
 		// per-port data
 		PoeCurrent:   prometheus.NewDesc(pns+"poe_amperes", "POE Current", labelP, nil),
 		PoePower:     prometheus.NewDesc(pns+"poe_watts", "POE Power", labelP, nil),
@@ -105,7 +106,7 @@ func (u *unifiCollector) exportUSWs(r report) {
 }
 
 func (u *unifiCollector) exportUSW(r report, d *unifi.USW) {
-	labels := []string{d.IP, d.Type, d.Version, d.SiteName, d.Mac, d.Model, d.Name, d.Serial}
+	labels := []string{d.IP, d.Version, d.Model, d.Serial, d.Type, d.Mac, d.SiteName, d.Name}
 	if d.HasTemperature.Val {
 		r.send([]*metricExports{{u.Device.Temperature, prometheus.GaugeValue, d.GeneralTemperature, labels}})
 	}
@@ -137,23 +138,24 @@ func (u *unifiCollector) exportUSW(r report, d *unifi.USW) {
 }
 
 func (u *unifiCollector) exportUSWstats(r report, labels []string, sw *unifi.Sw) {
+	labelS := labels[6:]
 	r.send([]*metricExports{
-		{u.USW.SwRxPackets, prometheus.CounterValue, sw.RxPackets, labels},
-		{u.USW.SwRxBytes, prometheus.CounterValue, sw.RxBytes, labels},
-		{u.USW.SwRxErrors, prometheus.CounterValue, sw.RxErrors, labels},
-		{u.USW.SwRxDropped, prometheus.CounterValue, sw.RxDropped, labels},
-		{u.USW.SwRxCrypts, prometheus.CounterValue, sw.RxCrypts, labels},
-		{u.USW.SwRxFrags, prometheus.CounterValue, sw.RxFrags, labels},
-		{u.USW.SwTxPackets, prometheus.CounterValue, sw.TxPackets, labels},
-		{u.USW.SwTxBytes, prometheus.CounterValue, sw.TxBytes, labels},
-		{u.USW.SwTxErrors, prometheus.CounterValue, sw.TxErrors, labels},
-		{u.USW.SwTxDropped, prometheus.CounterValue, sw.TxDropped, labels},
-		{u.USW.SwTxRetries, prometheus.CounterValue, sw.TxRetries, labels},
-		{u.USW.SwRxMulticast, prometheus.CounterValue, sw.RxMulticast, labels},
-		{u.USW.SwRxBroadcast, prometheus.CounterValue, sw.RxBroadcast, labels},
-		{u.USW.SwTxMulticast, prometheus.CounterValue, sw.TxMulticast, labels},
-		{u.USW.SwTxBroadcast, prometheus.CounterValue, sw.TxBroadcast, labels},
-		{u.USW.SwBytes, prometheus.CounterValue, sw.Bytes, labels},
+		{u.USW.SwRxPackets, prometheus.CounterValue, sw.RxPackets, labelS},
+		{u.USW.SwRxBytes, prometheus.CounterValue, sw.RxBytes, labelS},
+		{u.USW.SwRxErrors, prometheus.CounterValue, sw.RxErrors, labelS},
+		{u.USW.SwRxDropped, prometheus.CounterValue, sw.RxDropped, labelS},
+		{u.USW.SwRxCrypts, prometheus.CounterValue, sw.RxCrypts, labelS},
+		{u.USW.SwRxFrags, prometheus.CounterValue, sw.RxFrags, labelS},
+		{u.USW.SwTxPackets, prometheus.CounterValue, sw.TxPackets, labelS},
+		{u.USW.SwTxBytes, prometheus.CounterValue, sw.TxBytes, labelS},
+		{u.USW.SwTxErrors, prometheus.CounterValue, sw.TxErrors, labelS},
+		{u.USW.SwTxDropped, prometheus.CounterValue, sw.TxDropped, labelS},
+		{u.USW.SwTxRetries, prometheus.CounterValue, sw.TxRetries, labelS},
+		{u.USW.SwRxMulticast, prometheus.CounterValue, sw.RxMulticast, labelS},
+		{u.USW.SwRxBroadcast, prometheus.CounterValue, sw.RxBroadcast, labelS},
+		{u.USW.SwTxMulticast, prometheus.CounterValue, sw.TxMulticast, labelS},
+		{u.USW.SwTxBroadcast, prometheus.CounterValue, sw.TxBroadcast, labelS},
+		{u.USW.SwBytes, prometheus.CounterValue, sw.Bytes, labelS},
 	})
 }
 
@@ -164,7 +166,7 @@ func (u *unifiCollector) exportPortTable(r report, labels []string, pt []unifi.P
 			continue
 		}
 		// Copy labels, and add four new ones.
-		l := append([]string{p.PortIdx.Txt, p.Name, p.Mac, p.IP}, labels[4:]...)
+		l := append([]string{p.PortIdx.Txt, p.Name, p.Mac, p.IP}, labels[6:]...)
 		if p.PoeEnable.Val && p.PortPoe.Val {
 			r.send([]*metricExports{
 				{u.USW.PoeCurrent, prometheus.GaugeValue, p.PoeCurrent, l},
