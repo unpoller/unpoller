@@ -5,16 +5,6 @@ import (
 	"golift.io/unifi"
 )
 
-// Each site has five subsystems.
-// Some of them share data, but generally each one has its own data set.
-const (
-	subsystemLAN  = "lan"
-	subsystemVPN  = "vpn"
-	subsystemWWW  = "www"
-	subsystemWLAN = "wlan"
-	subsystemWAN  = "wan"
-)
-
 type site struct {
 	NumUser               *prometheus.Desc
 	NumGuest              *prometheus.Desc
@@ -44,11 +34,7 @@ type site struct {
 }
 
 func descSite(ns string) *site {
-	if ns += "_site_"; ns == "_site_" {
-		ns = "site_"
-	}
 	labels := []string{"subsystem", "status", "name", "desc", "site_name"}
-
 	return &site{
 		NumUser:               prometheus.NewDesc(ns+"users", "Number of Users", labels, nil),
 		NumGuest:              prometheus.NewDesc(ns+"guests", "Number of Guests", labels, nil),
@@ -95,13 +81,58 @@ func (u *unifiCollector) exportSite(r *Report, s *unifi.Site) {
 	labels := []string{s.Name, s.Desc, s.SiteName}
 	for _, h := range s.Health {
 		l := append([]string{h.Subsystem, h.Status}, labels...)
-
-		if h.Subsystem != subsystemVPN {
+		switch h.Subsystem {
+		case "www":
 			r.send([]*metricExports{
 				{u.Site.TxBytesR, prometheus.GaugeValue, h.TxBytesR, l},
 				{u.Site.RxBytesR, prometheus.GaugeValue, h.RxBytesR, l},
+				{u.Site.Uptime, prometheus.GaugeValue, h.Latency, l},
+				{u.Site.Latency, prometheus.GaugeValue, h.Latency.Val / 1000, l},
+				{u.Site.XputUp, prometheus.GaugeValue, h.XputUp, l},
+				{u.Site.XputDown, prometheus.GaugeValue, h.XputDown, l},
+				{u.Site.SpeedtestPing, prometheus.GaugeValue, h.SpeedtestPing, l},
+				{u.Site.Drops, prometheus.CounterValue, h.Drops, l},
 			})
-		} else {
+
+		case "wlan":
+			r.send([]*metricExports{
+				{u.Site.TxBytesR, prometheus.GaugeValue, h.TxBytesR, l},
+				{u.Site.RxBytesR, prometheus.GaugeValue, h.RxBytesR, l},
+				{u.Site.NumAdopted, prometheus.GaugeValue, h.NumAdopted, l},
+				{u.Site.NumDisconnected, prometheus.GaugeValue, h.NumDisconnected, l},
+				{u.Site.NumPending, prometheus.GaugeValue, h.NumPending, l},
+				{u.Site.NumUser, prometheus.GaugeValue, h.NumUser, l},
+				{u.Site.NumGuest, prometheus.GaugeValue, h.NumGuest, l},
+				{u.Site.NumIot, prometheus.GaugeValue, h.NumIot, l},
+				{u.Site.NumAp, prometheus.GaugeValue, h.NumAp, l},
+				{u.Site.NumDisabled, prometheus.GaugeValue, h.NumDisabled, l},
+			})
+
+		case "wan":
+			r.send([]*metricExports{
+				{u.Site.TxBytesR, prometheus.GaugeValue, h.TxBytesR, l},
+				{u.Site.RxBytesR, prometheus.GaugeValue, h.RxBytesR, l},
+				{u.Site.NumAdopted, prometheus.GaugeValue, h.NumAdopted, l},
+				{u.Site.NumDisconnected, prometheus.GaugeValue, h.NumDisconnected, l},
+				{u.Site.NumPending, prometheus.GaugeValue, h.NumPending, l},
+				{u.Site.NumGw, prometheus.GaugeValue, h.NumGw, l},
+				{u.Site.NumSta, prometheus.GaugeValue, h.NumSta, l},
+			})
+
+		case "lan":
+			r.send([]*metricExports{
+				{u.Site.TxBytesR, prometheus.GaugeValue, h.TxBytesR, l},
+				{u.Site.RxBytesR, prometheus.GaugeValue, h.RxBytesR, l},
+				{u.Site.NumAdopted, prometheus.GaugeValue, h.NumAdopted, l},
+				{u.Site.NumDisconnected, prometheus.GaugeValue, h.NumDisconnected, l},
+				{u.Site.NumPending, prometheus.GaugeValue, h.NumPending, l},
+				{u.Site.NumUser, prometheus.GaugeValue, h.NumUser, l},
+				{u.Site.NumGuest, prometheus.GaugeValue, h.NumGuest, l},
+				{u.Site.NumIot, prometheus.GaugeValue, h.NumIot, l},
+				{u.Site.NumSw, prometheus.GaugeValue, h.NumSw, l},
+			})
+
+		case "vpn":
 			r.send([]*metricExports{
 				{u.Site.RemoteUserNumActive, prometheus.GaugeValue, h.RemoteUserNumActive, l},
 				{u.Site.RemoteUserNumInactive, prometheus.GaugeValue, h.RemoteUserNumInactive, l},
@@ -110,53 +141,6 @@ func (u *unifiCollector) exportSite(r *Report, s *unifi.Site) {
 				{u.Site.RemoteUserRxPackets, prometheus.CounterValue, h.RemoteUserRxPackets, l},
 				{u.Site.RemoteUserTxPackets, prometheus.CounterValue, h.RemoteUserTxPackets, l},
 			})
-		}
-
-		if h.Subsystem == subsystemWWW {
-			r.send([]*metricExports{
-				{u.Site.Uptime, prometheus.GaugeValue, h.Latency, l},
-				{u.Site.Latency, prometheus.GaugeValue, h.Latency.Val / 1000, l},
-				{u.Site.XputUp, prometheus.GaugeValue, h.XputUp, l},
-				{u.Site.XputDown, prometheus.GaugeValue, h.XputDown, l},
-				{u.Site.SpeedtestPing, prometheus.GaugeValue, h.SpeedtestPing, l},
-				{u.Site.Drops, prometheus.CounterValue, h.Drops, l},
-			})
-		}
-
-		if h.Subsystem == subsystemLAN || h.Subsystem == subsystemWLAN || h.Subsystem == subsystemWAN {
-			r.send([]*metricExports{
-				{u.Site.NumAdopted, prometheus.GaugeValue, h.NumAdopted, l},
-				{u.Site.NumDisconnected, prometheus.GaugeValue, h.NumDisconnected, l},
-				{u.Site.NumPending, prometheus.GaugeValue, h.NumPending, l},
-			})
-
-			if h.Subsystem == subsystemLAN || h.Subsystem == subsystemWLAN {
-				r.send([]*metricExports{
-					{u.Site.NumUser, prometheus.GaugeValue, h.NumUser, l},
-					{u.Site.NumGuest, prometheus.GaugeValue, h.NumGuest, l},
-					{u.Site.NumIot, prometheus.GaugeValue, h.NumIot, l},
-				})
-			}
-
-			if h.Subsystem == subsystemWLAN {
-				r.send([]*metricExports{
-					{u.Site.NumAp, prometheus.GaugeValue, h.NumAp, l},
-					{u.Site.NumDisabled, prometheus.GaugeValue, h.NumDisabled, l},
-				})
-			}
-
-			if h.Subsystem == subsystemWAN {
-				r.send([]*metricExports{
-					{u.Site.NumGw, prometheus.GaugeValue, h.NumGw, l},
-					{u.Site.NumSta, prometheus.GaugeValue, h.NumSta, l},
-				})
-			}
-
-			if h.Subsystem == subsystemLAN {
-				r.send([]*metricExports{
-					{u.Site.NumSw, prometheus.GaugeValue, h.NumSw, l},
-				})
-			}
 		}
 	}
 }
