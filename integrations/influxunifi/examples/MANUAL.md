@@ -75,7 +75,8 @@ is provided so the application can be easily adapted to any environment.
 
     interval               default: 30s
         How often to poll the controller for updated client and device data.
-        The UniFi Controller only updates traffic stats about every 30 seconds.
+        The UniFi Controller only updates traffic stats about every 30-60 seconds.
+        Only works if "mode" (below) is "influx" - other modes do not use interval.
 
     debug                  default: false
         This turns on time stamps and line numbers in logs, outputs a few extra
@@ -104,7 +105,7 @@ is provided so the application can be easily adapted to any environment.
         * Value: prometheus
         In this mode the application opens an http interface and exports the
         measurements at /metrics for collection by prometheus. Enabling this
-        mode disables InfluxDB usage entirely. This is BETA.
+        mode disables InfluxDB usage entirely.
 
     http_listen            default: 0.0.0.0:9130
         This option controls the IP and port the http listener uses when the

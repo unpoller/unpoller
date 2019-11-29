@@ -18,7 +18,8 @@
 
   <!--
   # The UniFi Controller only updates traffic stats about every 30 seconds.
-  # Setting this to something lower may lead to "zeros" in your data. You've been warned.
+  # Setting this to something lower may lead to "zeros" in your data.
+  # If you're getting zeros now, set this to "1m"
   -->
   <interval>30s</interval>
 
@@ -42,13 +43,14 @@
   #
   # There are two other options at this time: "influxlambda" and "prometheus"
   #
-  # Lambda mode makes the application exit after collecting and reporting metrics
+  # Mode "influxlambda" makes the application exit after collecting and reporting metrics
   # to InfluxDB one time. This mode requires an external process like an AWS Lambda
   # or a simple crontab to keep the timings accurate on UniFi Poller run intervals.
   #
-  # Prometheus mode opens an HTTP server on port 9130 and exports the metrics at
+  # Mode "prometheus" opens an HTTP server on port 9130 and exports the metrics at
   # /metrics for polling collection by a prometheus server. This disables influxdb.
-  # IMPORTANT: The prometheus mode is still beta and isn't tested very well.
+  # IMPORTANT: The prometheus mode is still beta.
+  # Please help us test and provide your feedback on the github repo!
   -->
   <mode>influx</mode>
 
