@@ -88,24 +88,17 @@ func (u *unifiCollector) exportClient(r report, c *unifi.Client) {
 	labels := []string{c.Name, c.Mac, c.SiteName, c.GwMac, c.GwName, c.SwMac, c.SwName, c.Vlan.Txt, c.IP, c.Oui, c.Network, c.SwPort.Txt,
 		c.ApMac, c.ApName, c.RadioName, c.Radio, c.RadioProto, c.Channel.Txt, c.Essid, c.Bssid, c.RadioDescription, "false"}
 
-	r.send([]*metricExports{
-		{u.Client.Uptime, prometheus.GaugeValue, c.Uptime, labels},
-		{u.Client.RxBytes, prometheus.CounterValue, c.WiredRxBytes, labels},
-		{u.Client.RxBytesR, prometheus.GaugeValue, c.WiredRxBytesR, labels},
-		{u.Client.RxPackets, prometheus.CounterValue, c.WiredRxPackets, labels},
-		{u.Client.TxBytes, prometheus.CounterValue, c.WiredTxBytes, labels},
-		{u.Client.TxBytesR, prometheus.GaugeValue, c.WiredTxBytesR, labels},
-		{u.Client.TxPackets, prometheus.CounterValue, c.WiredTxPackets, labels},
-		/* needs more "looking into"
-		{u.Client.DpiStatsApp, prometheus.GaugeValue, c.DpiStats.App, labels},
-		{u.Client.DpiStatsCat, prometheus.GaugeValue, c.DpiStats.Cat, labels},
-		{u.Client.DpiStatsRxBytes, prometheus.CounterValue, c.DpiStats.RxBytes, labels},
-		{u.Client.DpiStatsRxPackets, prometheus.CounterValue, c.DpiStats.RxPackets, labels},
-		{u.Client.DpiStatsTxBytes, prometheus.CounterValue, c.DpiStats.TxBytes, labels},
-		{u.Client.DpiStatsTxPackets, prometheus.CounterValue, c.DpiStats.TxPackets, labels},
-		*/
-	})
-	if !c.IsWired.Val {
+	if c.IsWired.Val {
+		labels[len(labels)-1] = "true"
+		r.send([]*metricExports{
+			{u.Client.RxBytes, prometheus.CounterValue, c.WiredRxBytes, labels},
+			{u.Client.RxBytesR, prometheus.GaugeValue, c.WiredRxBytesR, labels},
+			{u.Client.RxPackets, prometheus.CounterValue, c.WiredRxPackets, labels},
+			{u.Client.TxBytes, prometheus.CounterValue, c.WiredTxBytes, labels},
+			{u.Client.TxBytesR, prometheus.GaugeValue, c.WiredTxBytesR, labels},
+			{u.Client.TxPackets, prometheus.CounterValue, c.WiredTxPackets, labels},
+		})
+	} else {
 		labels[len(labels)-1] = "false"
 		r.send([]*metricExports{
 			{u.Client.Anomalies, prometheus.CounterValue, c.Anomalies, labels},
@@ -118,8 +111,24 @@ func (u *unifiCollector) exportClient(r report, c *unifi.Client) {
 			{u.Client.TxRate, prometheus.GaugeValue, c.TxRate * 1000, labels},
 			{u.Client.WifiTxAttempts, prometheus.CounterValue, c.WifiTxAttempts, labels},
 			{u.Client.RxRate, prometheus.GaugeValue, c.RxRate * 1000, labels},
+			{u.Client.TxBytes, prometheus.CounterValue, c.TxBytes, labels},
+			{u.Client.TxBytesR, prometheus.GaugeValue, c.TxBytesR, labels},
+			{u.Client.TxPackets, prometheus.CounterValue, c.TxPackets, labels},
+			{u.Client.RxBytes, prometheus.CounterValue, c.RxBytes, labels},
+			{u.Client.RxBytesR, prometheus.GaugeValue, c.RxBytesR, labels},
+			{u.Client.RxPackets, prometheus.CounterValue, c.RxPackets, labels},
 			{u.Client.BytesR, prometheus.GaugeValue, c.BytesR, labels},
 		})
 	}
-
+	r.send([]*metricExports{
+		{u.Client.Uptime, prometheus.GaugeValue, c.Uptime, labels},
+		/* needs more "looking into"
+		{u.Client.DpiStatsApp, prometheus.GaugeValue, c.DpiStats.App, labels},
+		{u.Client.DpiStatsCat, prometheus.GaugeValue, c.DpiStats.Cat, labels},
+		{u.Client.DpiStatsRxBytes, prometheus.CounterValue, c.DpiStats.RxBytes, labels},
+		{u.Client.DpiStatsRxPackets, prometheus.CounterValue, c.DpiStats.RxPackets, labels},
+		{u.Client.DpiStatsTxBytes, prometheus.CounterValue, c.DpiStats.TxBytes, labels},
+		{u.Client.DpiStatsTxPackets, prometheus.CounterValue, c.DpiStats.TxPackets, labels},
+		*/
+	})
 }
