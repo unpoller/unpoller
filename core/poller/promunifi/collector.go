@@ -41,7 +41,6 @@ type unifiCollector struct {
 	UAP    *uap
 	USG    *usg
 	USW    *usw
-	UDM    *udm
 	Site   *site
 }
 
@@ -78,7 +77,6 @@ func NewUnifiCollector(opts UnifiCollectorCnfg) prometheus.Collector {
 		UAP:    descUAP(opts.Namespace),
 		USG:    descUSG(opts.Namespace),
 		USW:    descUSW(opts.Namespace),
-		UDM:    descUDM(opts.Namespace),
 		Site:   descSite(opts.Namespace),
 	}
 }
@@ -102,7 +100,6 @@ func (u *unifiCollector) Describe(ch chan<- *prometheus.Desc) {
 	describe(u.UAP)
 	describe(u.USG)
 	describe(u.USW)
-	describe(u.UDM)
 	describe(u.Site)
 }
 
