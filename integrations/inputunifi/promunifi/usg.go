@@ -57,7 +57,7 @@ func descUSG(ns string) *usg {
 	if ns += "_usg_"; ns == "_usg_" {
 		ns = "usg_"
 	}
-	labels := []string{"site_name", "mac", "model", "name", "serial", "type", "version", "ip"}
+	labels := []string{"ip", "type", "version", "site_name", "mac", "model", "name", "serial"}
 	labelWan := append([]string{"port"}, labels...)
 
 	return &usg{
@@ -121,8 +121,7 @@ func (u *unifiCollector) exportUSGs(r *Report) {
 }
 
 func (u *unifiCollector) exportUSG(r *Report, s *unifi.USG) {
-	labels := []string{s.SiteName, s.Mac, s.Model, s.Name, s.Serial, s.Type, s.Version, s.IP}
-	labelWan := append([]string{"all"}, labels...)
+	labels := []string{s.IP, s.Type, s.Version, s.SiteName, s.Mac, s.Model, s.Name, s.Serial}
 	// Gateway System Data.
 	r.send([]*metricExports{
 		{u.USG.Uptime, prometheus.GaugeValue, s.Uptime, labels},
@@ -143,25 +142,32 @@ func (u *unifiCollector) exportUSG(r *Report, s *unifi.USG) {
 		{u.USG.MemBuffer, prometheus.GaugeValue, s.SysStats.MemBuffer, labels},
 		{u.USG.CPU, prometheus.GaugeValue, s.SystemStats.CPU, labels},
 		{u.USG.Mem, prometheus.GaugeValue, s.SystemStats.Mem, labels},
-		// Combined Port Stats
-		{u.USG.WanRxPackets, prometheus.CounterValue, s.Stat.Gw.WanRxPackets, labelWan},
-		{u.USG.WanRxBytes, prometheus.CounterValue, s.Stat.Gw.WanRxBytes, labelWan},
-		{u.USG.WanRxDropped, prometheus.CounterValue, s.Stat.Gw.WanRxDropped, labelWan},
-		{u.USG.WanTxPackets, prometheus.CounterValue, s.Stat.Gw.WanTxPackets, labelWan},
-		{u.USG.WanTxBytes, prometheus.CounterValue, s.Stat.Gw.WanTxBytes, labelWan},
-		{u.USG.WanRxErrors, prometheus.CounterValue, s.Stat.Gw.WanRxErrors, labelWan},
-		{u.USG.LanRxPackets, prometheus.CounterValue, s.Stat.Gw.LanRxPackets, labels},
-		{u.USG.LanRxBytes, prometheus.CounterValue, s.Stat.Gw.LanRxBytes, labels},
-		{u.USG.LanTxPackets, prometheus.CounterValue, s.Stat.Gw.LanTxPackets, labels},
-		{u.USG.LanTxBytes, prometheus.CounterValue, s.Stat.Gw.LanTxBytes, labels},
-		{u.USG.LanRxDropped, prometheus.CounterValue, s.Stat.Gw.LanRxDropped, labels},
-		// Speed Test Stats
-		{u.USG.Latency, prometheus.GaugeValue, s.SpeedtestStatus.Latency.Val / 1000, labels},
-		{u.USG.Runtime, prometheus.GaugeValue, s.SpeedtestStatus.Runtime, labels},
-		{u.USG.XputDownload, prometheus.GaugeValue, s.SpeedtestStatus.XputDownload, labels},
-		{u.USG.XputUpload, prometheus.GaugeValue, s.SpeedtestStatus.XputUpload, labels},
 	})
 	u.exportWANPorts(r, labels, s.Wan1, s.Wan2)
+	u.exportUSGstats(r, s.Stat.Gw, s.SpeedtestStatus, labels)
+}
+
+func (u *unifiCollector) exportUSGstats(r *Report, s *unifi.Gw, st unifi.SpeedtestStatus, labels []string) {
+	labelWan := append([]string{"all"}, labels...)
+	r.send([]*metricExports{
+		// Combined Port Stats
+		{u.USG.WanRxPackets, prometheus.CounterValue, s.WanRxPackets, labelWan},
+		{u.USG.WanRxBytes, prometheus.CounterValue, s.WanRxBytes, labelWan},
+		{u.USG.WanRxDropped, prometheus.CounterValue, s.WanRxDropped, labelWan},
+		{u.USG.WanTxPackets, prometheus.CounterValue, s.WanTxPackets, labelWan},
+		{u.USG.WanTxBytes, prometheus.CounterValue, s.WanTxBytes, labelWan},
+		{u.USG.WanRxErrors, prometheus.CounterValue, s.WanRxErrors, labelWan},
+		{u.USG.LanRxPackets, prometheus.CounterValue, s.LanRxPackets, labels},
+		{u.USG.LanRxBytes, prometheus.CounterValue, s.LanRxBytes, labels},
+		{u.USG.LanTxPackets, prometheus.CounterValue, s.LanTxPackets, labels},
+		{u.USG.LanTxBytes, prometheus.CounterValue, s.LanTxBytes, labels},
+		{u.USG.LanRxDropped, prometheus.CounterValue, s.LanRxDropped, labels},
+		// Speed Test Stats
+		{u.USG.Latency, prometheus.GaugeValue, st.Latency.Val / 1000, labels},
+		{u.USG.Runtime, prometheus.GaugeValue, st.Runtime, labels},
+		{u.USG.XputDownload, prometheus.GaugeValue, st.XputDownload, labels},
+		{u.USG.XputUpload, prometheus.GaugeValue, st.XputUpload, labels},
+	})
 }
 
 func (u *unifiCollector) exportWANPorts(r *Report, labels []string, wans ...unifi.Wan) {
