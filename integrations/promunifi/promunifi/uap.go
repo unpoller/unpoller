@@ -85,7 +85,7 @@ type uap struct {
 func descUAP(ns string) *uap {
 	labels := []string{"ip", "type", "version", "site_name", "mac", "model", "name", "serial"}
 	labelA := append([]string{"stat"}, labels[2:]...)
-	labelV := append([]string{"vap_name", "bssid", "radio_name", "essid", "usage"}, labels[2:]...)
+	labelV := append([]string{"vap_name", "bssid", "radio", "radio_name", "essid", "usage"}, labels[2:]...)
 	labelR := append([]string{"radio_name", "radio"}, labels[2:]...)
 	return &uap{
 		// 3x each - stat table: total, guest, user
@@ -266,7 +266,8 @@ func (u *unifiCollector) exportVAPtable(r report, labels []string, vt unifi.VapT
 		if !v.Up.Val {
 			continue
 		}
-		labelV := append([]string{v.Name, v.Bssid, v.RadioName, v.Essid, v.Usage}, labels[2:]...)
+		labelV := append([]string{v.Name, v.Bssid, v.Radio, v.RadioName, v.Essid, v.Usage}, labels[2:]...)
+
 		r.send([]*metricExports{
 			{u.UAP.VAPCcq, prometheus.GaugeValue, v.Ccq, labelV},
 			{u.UAP.VAPMacFilterRejections, prometheus.CounterValue, v.MacFilterRejections, labelV},
