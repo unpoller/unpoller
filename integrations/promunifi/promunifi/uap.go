@@ -208,11 +208,11 @@ func (u *unifiCollector) exportUAP(r report, d *unifi.UAP) {
 }
 
 func (u *unifiCollector) exportUAPstats(r report, labels []string, ap *unifi.Ap) {
-	labelA := append([]string{"all"}, labels[2:]...)
+	//	labelA := append([]string{"all"}, labels[2:]...)
 	labelU := append([]string{"user"}, labels[2:]...)
 	labelG := append([]string{"guest"}, labels[2:]...)
 	r.send([]*metricExports{
-		// all
+		/* // all
 		{u.UAP.ApWifiTxDropped, prometheus.CounterValue, ap.WifiTxDropped, labelA},
 		{u.UAP.ApRxErrors, prometheus.CounterValue, ap.RxErrors, labelA},
 		{u.UAP.ApRxDropped, prometheus.CounterValue, ap.RxDropped, labelA},
@@ -227,6 +227,7 @@ func (u *unifiCollector) exportUAPstats(r report, labels []string, ap *unifi.Ap)
 		{u.UAP.ApRxBytes, prometheus.CounterValue, ap.RxBytes, labelA},
 		{u.UAP.WifiTxAttempts, prometheus.CounterValue, ap.WifiTxAttempts, labelA},
 		{u.UAP.MacFilterRejections, prometheus.CounterValue, ap.MacFilterRejections, labelA},
+		*/
 		// user
 		{u.UAP.ApWifiTxDropped, prometheus.CounterValue, ap.UserWifiTxDropped, labelU},
 		{u.UAP.ApRxErrors, prometheus.CounterValue, ap.UserRxErrors, labelU},
