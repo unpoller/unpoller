@@ -39,37 +39,27 @@ type uclient struct {
 }
 
 func descClient(ns string) *uclient {
-	labels := []string{"name", "mac", "site_name", "gw_mac", "gw_name", "sw_mac", "sw_name", "vlan", "ip", "oui", "network"}
-	labelWired := append([]string{"sw_port"}, labels...)
+	labels := []string{"name", "mac", "site_name", "gw_mac", "gw_name", "sw_mac", "sw_name", "vlan", "ip", "oui", "network", "sw_port", "wired"}
 	labelWireless := append([]string{"ap_mac", "ap_name", "radio_name", "radio", "radio_proto", "channel", "essid", "bssid", "radio_desc"}, labels...)
-	wireless := prometheus.Labels{"wired": "false"}
-	wired := prometheus.Labels{"wired": "true"}
-
 	return &uclient{
-		Anomalies:      prometheus.NewDesc(ns+"anomalies_total", "Client Anomalies", labelWireless, wireless),
-		BytesR:         prometheus.NewDesc(ns+"transfer_rate_bytes", "Client Data Rate", labelWireless, wireless),
-		CCQ:            prometheus.NewDesc(ns+"ccq_percent", "Client Connection Quality", labelWireless, wireless),
-		Noise:          prometheus.NewDesc(ns+"noise_db", "Client AP Noise", labelWireless, wireless),
-		RoamCount:      prometheus.NewDesc(ns+"roam_count_total", "Client Roam Counter", labelWireless, wireless),
-		RSSI:           prometheus.NewDesc(ns+"rssi_db", "Client RSSI", labelWireless, wireless),
-		RxBytes:        prometheus.NewDesc(ns+"receive_bytes_total", "Client Receive Bytes", labelWireless, wireless),
-		RxBytesR:       prometheus.NewDesc(ns+"receive_rate_bytes", "Client Receive Data Rate", labelWireless, wireless),
-		RxPackets:      prometheus.NewDesc(ns+"receive_packets_total", "Client Receive Packets", labelWireless, wireless),
-		RxRate:         prometheus.NewDesc(ns+"radio_receive_rate_bps", "Client Receive Rate", labelWireless, wireless),
-		Signal:         prometheus.NewDesc(ns+"radio_signal_db", "Client Signal Strength", labelWireless, wireless),
-		TxBytes:        prometheus.NewDesc(ns+"transmit_bytes_total", "Client Transmit Bytes", labelWireless, wireless),
-		TxBytesR:       prometheus.NewDesc(ns+"transmit_rate_bytes", "Client Transmit Data Rate", labelWireless, wireless),
-		TxPackets:      prometheus.NewDesc(ns+"transmit_packets_total", "Client Transmit Packets", labelWireless, wireless),
-		TxPower:        prometheus.NewDesc(ns+"radio_transmit_power_dbm", "Client Transmit Power", labelWireless, wireless),
-		TxRate:         prometheus.NewDesc(ns+"radio_transmit_rate_bps", "Client Transmit Rate", labelWireless, wireless),
-		WifiTxAttempts: prometheus.NewDesc(ns+"wifi_attempts_transmit_total", "Client Wifi Transmit Attempts", labelWireless, wireless),
-		WiredRxBytes:   prometheus.NewDesc(ns+"wired_receive_bytes_total", "Client Wired Receive Bytes", labelWired, wired),
-		WiredRxBytesR:  prometheus.NewDesc(ns+"wired_receive_rate_bytes", "Client Wired Receive Data Rate", labelWired, wired),
-		WiredRxPackets: prometheus.NewDesc(ns+"wired_receive_packets_total", "Client Wired Receive Packets", labelWired, wired),
-		WiredTxBytes:   prometheus.NewDesc(ns+"wired_transmit_bytes_total", "Client Wired Transmit Bytes", labelWired, wired),
-		WiredTxBytesR:  prometheus.NewDesc(ns+"wired_transmit_rate_bytes", "Client Wired Data Rate", labelWired, wired),
-		WiredTxPackets: prometheus.NewDesc(ns+"wired_transmit_packets_total", "Client Wired Transmit Packets", labelWired, wired),
-		Uptime:         prometheus.NewDesc(ns+"uptime_seconds", "Client Uptime", labels, nil),
+		Anomalies:      prometheus.NewDesc(ns+"anomalies_total", "Client Anomalies", labelWireless, nil),
+		BytesR:         prometheus.NewDesc(ns+"transfer_rate_bytes", "Client Data Rate", labelWireless, nil),
+		CCQ:            prometheus.NewDesc(ns+"ccq_percent", "Client Connection Quality", labelWireless, nil),
+		Noise:          prometheus.NewDesc(ns+"noise_db", "Client AP Noise", labelWireless, nil),
+		RoamCount:      prometheus.NewDesc(ns+"roam_count_total", "Client Roam Counter", labelWireless, nil),
+		RSSI:           prometheus.NewDesc(ns+"rssi_db", "Client RSSI", labelWireless, nil),
+		RxBytes:        prometheus.NewDesc(ns+"receive_bytes_total", "Client Receive Bytes", labels, nil),
+		RxBytesR:       prometheus.NewDesc(ns+"receive_rate_bytes", "Client Receive Data Rate", labels, nil),
+		RxPackets:      prometheus.NewDesc(ns+"receive_packets_total", "Client Receive Packets", labels, nil),
+		RxRate:         prometheus.NewDesc(ns+"radio_receive_rate_bps", "Client Receive Rate", labelWireless, nil),
+		Signal:         prometheus.NewDesc(ns+"radio_signal_db", "Client Signal Strength", labelWireless, nil),
+		TxBytes:        prometheus.NewDesc(ns+"transmit_bytes_total", "Client Transmit Bytes", labels, nil),
+		TxBytesR:       prometheus.NewDesc(ns+"transmit_rate_bytes", "Client Transmit Data Rate", labels, nil),
+		TxPackets:      prometheus.NewDesc(ns+"transmit_packets_total", "Client Transmit Packets", labels, nil),
+		TxPower:        prometheus.NewDesc(ns+"radio_transmit_power_dbm", "Client Transmit Power", labelWireless, nil),
+		TxRate:         prometheus.NewDesc(ns+"radio_transmit_rate_bps", "Client Transmit Rate", labelWireless, nil),
+		WifiTxAttempts: prometheus.NewDesc(ns+"wifi_attempts_transmit_total", "Client Wifi Transmit Attempts", labelWireless, nil),
+		Uptime:         prometheus.NewDesc(ns+"uptime_seconds", "Client Uptime", labelWireless, nil),
 		/* needs more "looking into"
 		DpiStatsApp:       prometheus.NewDesc(ns+"dpi_stats_app", "Client DPI Stats App", labels, nil),
 		DpiStatsCat:       prometheus.NewDesc(ns+"dpi_stats_cat", "Client DPI Stats Cat", labels, nil),
@@ -95,20 +85,23 @@ func (u *unifiCollector) exportClients(r report) {
 }
 
 func (u *unifiCollector) exportClient(r report, c *unifi.Client) {
-	labels := []string{c.Name, c.Mac, c.SiteName, c.GwMac, c.GwName, c.SwMac, c.SwName, c.Vlan.Txt, c.IP, c.Oui, c.Network}
-	labelWired := append([]string{c.SwPort.Txt}, labels...)
+	labels := []string{c.Name, c.Mac, c.SiteName, c.GwMac, c.GwName, c.SwMac, c.SwName, c.Vlan.Txt, c.IP, c.Oui, c.Network, c.SwPort.Txt, "false"}
 	labelWireless := append([]string{c.ApMac, c.ApName, c.RadioName, c.Radio, c.RadioProto, c.Channel.Txt, c.Essid, c.Bssid, c.RadioDescription}, labels...)
 
 	if c.IsWired.Val {
+		labels[len(labels)-1] = "true"
+		labelWireless[len(labelWireless)-1] = "true"
 		r.send([]*metricExports{
-			{u.Client.WiredRxBytes, prometheus.CounterValue, c.WiredRxBytes, labelWired},
-			{u.Client.WiredRxBytesR, prometheus.GaugeValue, c.WiredRxBytesR, labelWired},
-			{u.Client.WiredRxPackets, prometheus.CounterValue, c.WiredRxPackets, labelWired},
-			{u.Client.WiredTxBytes, prometheus.CounterValue, c.WiredTxBytes, labelWired},
-			{u.Client.WiredTxBytesR, prometheus.GaugeValue, c.WiredTxBytesR, labelWired},
-			{u.Client.WiredTxPackets, prometheus.CounterValue, c.WiredTxPackets, labelWired},
+			{u.Client.RxBytes, prometheus.CounterValue, c.WiredRxBytes, labels},
+			{u.Client.RxBytesR, prometheus.GaugeValue, c.WiredRxBytesR, labels},
+			{u.Client.RxPackets, prometheus.CounterValue, c.WiredRxPackets, labels},
+			{u.Client.TxBytes, prometheus.CounterValue, c.WiredTxBytes, labels},
+			{u.Client.TxBytesR, prometheus.GaugeValue, c.WiredTxBytesR, labels},
+			{u.Client.TxPackets, prometheus.CounterValue, c.WiredTxPackets, labels},
 		})
 	} else {
+		labels[len(labels)-1] = "false"
+		labelWireless[len(labelWireless)-1] = "false"
 		r.send([]*metricExports{
 			{u.Client.Anomalies, prometheus.CounterValue, c.Anomalies, labelWireless},
 			{u.Client.CCQ, prometheus.GaugeValue, c.Ccq, labelWireless},
@@ -120,17 +113,17 @@ func (u *unifiCollector) exportClient(r report, c *unifi.Client) {
 			{u.Client.TxRate, prometheus.GaugeValue, c.TxRate * 1000, labelWireless},
 			{u.Client.WifiTxAttempts, prometheus.CounterValue, c.WifiTxAttempts, labelWireless},
 			{u.Client.RxRate, prometheus.GaugeValue, c.RxRate * 1000, labelWireless},
-			{u.Client.TxBytes, prometheus.CounterValue, c.TxBytes, labelWireless},
-			{u.Client.TxBytesR, prometheus.GaugeValue, c.TxBytesR, labelWireless},
-			{u.Client.TxPackets, prometheus.CounterValue, c.TxPackets, labelWireless},
-			{u.Client.RxBytes, prometheus.CounterValue, c.RxBytes, labelWireless},
-			{u.Client.RxBytesR, prometheus.GaugeValue, c.RxBytesR, labelWireless},
-			{u.Client.RxPackets, prometheus.CounterValue, c.RxPackets, labelWireless},
+			{u.Client.TxBytes, prometheus.CounterValue, c.TxBytes, labels},
+			{u.Client.TxBytesR, prometheus.GaugeValue, c.TxBytesR, labels},
+			{u.Client.TxPackets, prometheus.CounterValue, c.TxPackets, labels},
+			{u.Client.RxBytes, prometheus.CounterValue, c.RxBytes, labels},
+			{u.Client.RxBytesR, prometheus.GaugeValue, c.RxBytesR, labels},
+			{u.Client.RxPackets, prometheus.CounterValue, c.RxPackets, labels},
 			{u.Client.BytesR, prometheus.GaugeValue, c.BytesR, labelWireless},
 		})
 	}
 	r.send([]*metricExports{
-		{u.Client.Uptime, prometheus.GaugeValue, c.Uptime, labels},
+		{u.Client.Uptime, prometheus.GaugeValue, c.Uptime, labelWireless},
 		/* needs more "looking into"
 		{u.Client.DpiStatsApp, prometheus.GaugeValue, c.DpiStats.App, labels},
 		{u.Client.DpiStatsCat, prometheus.GaugeValue, c.DpiStats.Cat, labels},
