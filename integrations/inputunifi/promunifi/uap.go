@@ -165,20 +165,20 @@ func descUAP(ns string) *uap {
 	}
 }
 
-func (u *unifiCollector) exportUAPs(r *Report) {
-	if r.Metrics == nil || r.Metrics.Devices == nil || len(r.Metrics.Devices.UAPs) < 1 {
+func (u *unifiCollector) exportUAPs(r report) {
+	if r.metrics() == nil || r.metrics().Devices == nil || len(r.metrics().Devices.UAPs) < 1 {
 		return
 	}
-	r.wg.Add(one)
+	r.add()
 	go func() {
-		defer r.wg.Done()
-		for _, d := range r.Metrics.Devices.UAPs {
+		defer r.done()
+		for _, d := range r.metrics().Devices.UAPs {
 			u.exportUAP(r, d)
 		}
 	}()
 }
 
-func (u *unifiCollector) exportUAP(r *Report, d *unifi.UAP) {
+func (u *unifiCollector) exportUAP(r report, d *unifi.UAP) {
 	labels := []string{d.IP, d.Type, d.Version, d.SiteName, d.Mac, d.Model, d.Name, d.Serial}
 	// AP data.
 	r.send([]*metricExports{
@@ -202,15 +202,15 @@ func (u *unifiCollector) exportUAP(r *Report, d *unifi.UAP) {
 		{u.Device.CPU, prometheus.GaugeValue, d.SystemStats.CPU, labels},
 		{u.Device.Mem, prometheus.GaugeValue, d.SystemStats.Mem, labels},
 	})
-	u.exportUAPstats(r, labels[2:], d.Stat.Ap)
-	u.exportVAPtable(r, labels[2:], d.VapTable)
-	u.exportRadtable(r, labels[2:], d.RadioTable, d.RadioTableStats)
+	u.exportUAPstats(r, labels, d.Stat.Ap)
+	u.exportVAPtable(r, labels, d.VapTable)
+	u.exportRadtable(r, labels, d.RadioTable, d.RadioTableStats)
 }
 
-func (u *unifiCollector) exportUAPstats(r *Report, labels []string, ap *unifi.Ap) {
-	labelA := append([]string{"all"}, labels...)
-	labelU := append([]string{"user"}, labels...)
-	labelG := append([]string{"guest"}, labels...)
+func (u *unifiCollector) exportUAPstats(r report, labels []string, ap *unifi.Ap) {
+	labelA := append([]string{"all"}, labels[2:]...)
+	labelU := append([]string{"user"}, labels[2:]...)
+	labelG := append([]string{"guest"}, labels[2:]...)
 	r.send([]*metricExports{
 		// all
 		{u.UAP.ApWifiTxDropped, prometheus.CounterValue, ap.WifiTxDropped, labelA},
@@ -260,13 +260,13 @@ func (u *unifiCollector) exportUAPstats(r *Report, labels []string, ap *unifi.Ap
 	})
 }
 
-func (u *unifiCollector) exportVAPtable(r *Report, labels []string, vt unifi.VapTable) {
+func (u *unifiCollector) exportVAPtable(r report, labels []string, vt unifi.VapTable) {
 	// vap table stats
 	for _, v := range vt {
 		if !v.Up.Val {
 			continue
 		}
-		labelV := append([]string{v.Name, v.Bssid, v.RadioName, v.Essid, v.Usage}, labels...)
+		labelV := append([]string{v.Name, v.Bssid, v.RadioName, v.Essid, v.Usage}, labels[2:]...)
 		r.send([]*metricExports{
 			{u.UAP.VAPCcq, prometheus.GaugeValue, v.Ccq, labelV},
 			{u.UAP.VAPMacFilterRejections, prometheus.CounterValue, v.MacFilterRejections, labelV},
@@ -309,10 +309,10 @@ func (u *unifiCollector) exportVAPtable(r *Report, labels []string, vt unifi.Vap
 	}
 }
 
-func (u *unifiCollector) exportRadtable(r *Report, labels []string, rt unifi.RadioTable, rts unifi.RadioTableStats) {
+func (u *unifiCollector) exportRadtable(r report, labels []string, rt unifi.RadioTable, rts unifi.RadioTableStats) {
 	// radio table
 	for _, p := range rt {
-		labelR := append([]string{p.Name, p.Radio}, labels...)
+		labelR := append([]string{p.Name, p.Radio}, labels[2:]...)
 		r.send([]*metricExports{
 			{u.UAP.RadioCurrentAntennaGain, prometheus.GaugeValue, p.CurrentAntennaGain, labelR},
 			{u.UAP.RadioHt, prometheus.GaugeValue, p.Ht, labelR},

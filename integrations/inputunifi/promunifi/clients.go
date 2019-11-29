@@ -87,20 +87,20 @@ func descClient(ns string) *uclient {
 	}
 }
 
-func (u *unifiCollector) exportClients(r *Report) {
-	if r.Metrics == nil || len(r.Metrics.Clients) < 1 {
+func (u *unifiCollector) exportClients(r report) {
+	if r.metrics() == nil || len(r.metrics().Clients) < 1 {
 		return
 	}
-	r.wg.Add(one)
+	r.add()
 	go func() {
-		defer r.wg.Done()
-		for _, c := range r.Metrics.Clients {
+		defer r.done()
+		for _, c := range r.metrics().Clients {
 			u.exportClient(r, c)
 		}
 	}()
 }
 
-func (u *unifiCollector) exportClient(r *Report, c *unifi.Client) {
+func (u *unifiCollector) exportClient(r report, c *unifi.Client) {
 	labels := []string{c.Name, c.Mac, c.SiteName, c.GwMac, c.GwName, c.SwMac, c.SwName, c.Vlan.Txt, c.IP, c.Oui, c.Network}
 	labelWired := append([]string{c.SwPort.Txt}, labels...)
 	labelWireless := append([]string{c.ApMac, c.ApName, c.RadioName, c.Radio, c.RadioProto, c.Channel.Txt, c.Essid, c.Bssid, c.RadioDescription}, labels...)
