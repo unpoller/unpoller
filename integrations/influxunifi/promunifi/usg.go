@@ -65,20 +65,20 @@ func descUSG(ns string) *usg {
 	}
 }
 
-func (u *unifiCollector) exportUSGs(r *Report) {
-	if r.Metrics == nil || r.Metrics.Devices == nil || len(r.Metrics.Devices.USGs) < 1 {
+func (u *unifiCollector) exportUSGs(r report) {
+	if r.metrics() == nil || r.metrics().Devices == nil || len(r.metrics().Devices.USGs) < 1 {
 		return
 	}
-	r.wg.Add(one)
+	r.add()
 	go func() {
-		defer r.wg.Done()
-		for _, d := range r.Metrics.Devices.USGs {
+		defer r.done()
+		for _, d := range r.metrics().Devices.USGs {
 			u.exportUSG(r, d)
 		}
 	}()
 }
 
-func (u *unifiCollector) exportUSG(r *Report, d *unifi.USG) {
+func (u *unifiCollector) exportUSG(r report, d *unifi.USG) {
 	labels := []string{d.IP, d.Type, d.Version, d.SiteName, d.Mac, d.Model, d.Name, d.Serial}
 	// Gateway System Data.
 	r.send([]*metricExports{
@@ -102,10 +102,10 @@ func (u *unifiCollector) exportUSG(r *Report, d *unifi.USG) {
 		{u.Device.Mem, prometheus.GaugeValue, d.SystemStats.Mem, labels},
 	})
 	u.exportWANPorts(r, labels, d.Wan1, d.Wan2)
-	u.exportUSGstats(r, d.Stat.Gw, d.SpeedtestStatus, labels)
+	u.exportUSGstats(r, labels, d.Stat.Gw, d.SpeedtestStatus)
 }
 
-func (u *unifiCollector) exportUSGstats(r *Report, gw *unifi.Gw, st unifi.SpeedtestStatus, labels []string) {
+func (u *unifiCollector) exportUSGstats(r report, labels []string, gw *unifi.Gw, st unifi.SpeedtestStatus) {
 	labelWan := append([]string{"all"}, labels...)
 	r.send([]*metricExports{
 		// Combined Port Stats
@@ -128,7 +128,7 @@ func (u *unifiCollector) exportUSGstats(r *Report, gw *unifi.Gw, st unifi.Speedt
 	})
 }
 
-func (u *unifiCollector) exportWANPorts(r *Report, labels []string, wans ...unifi.Wan) {
+func (u *unifiCollector) exportWANPorts(r report, labels []string, wans ...unifi.Wan) {
 	for _, wan := range wans {
 		if !wan.Up.Val {
 			continue // only record UP interfaces.

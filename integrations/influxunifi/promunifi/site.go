@@ -64,20 +64,20 @@ func descSite(ns string) *site {
 	}
 }
 
-func (u *unifiCollector) exportSites(r *Report) {
-	if r.Metrics == nil || len(r.Metrics.Sites) < 1 {
+func (u *unifiCollector) exportSites(r report) {
+	if r.metrics() == nil || len(r.metrics().Sites) < 1 {
 		return
 	}
-	r.wg.Add(one)
+	r.add()
 	go func() {
-		defer r.wg.Done()
-		for _, s := range r.Metrics.Sites {
+		defer r.done()
+		for _, s := range r.metrics().Sites {
 			u.exportSite(r, s)
 		}
 	}()
 }
 
-func (u *unifiCollector) exportSite(r *Report, s *unifi.Site) {
+func (u *unifiCollector) exportSite(r report, s *unifi.Site) {
 	labels := []string{s.Name, s.Desc, s.SiteName}
 	for _, h := range s.Health {
 		l := append([]string{h.Subsystem, h.Status}, labels...)
