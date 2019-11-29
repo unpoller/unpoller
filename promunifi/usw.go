@@ -6,25 +6,6 @@ import (
 )
 
 type usw struct {
-	Uptime        *prometheus.Desc
-	Temperature   *prometheus.Desc
-	TotalMaxPower *prometheus.Desc
-	FanLevel      *prometheus.Desc
-	TotalTxBytes  *prometheus.Desc
-	TotalRxBytes  *prometheus.Desc
-	TotalBytes    *prometheus.Desc
-	NumSta        *prometheus.Desc
-	UserNumSta    *prometheus.Desc
-	GuestNumSta   *prometheus.Desc
-	// System Stats
-	Loadavg1  *prometheus.Desc
-	Loadavg5  *prometheus.Desc
-	Loadavg15 *prometheus.Desc
-	MemBuffer *prometheus.Desc
-	MemTotal  *prometheus.Desc
-	MemUsed   *prometheus.Desc
-	CPU       *prometheus.Desc
-	Mem       *prometheus.Desc
 	// Switch "total" traffic stats
 	SwRxPackets   *prometheus.Desc
 	SwRxBytes     *prometheus.Desc
@@ -65,36 +46,12 @@ type usw struct {
 }
 
 func descUSW(ns string) *usw {
-	if ns += "_usw_"; ns == "_usw_" {
-		ns = "usw_"
-	}
 	pns := ns + "port_"
 	// The first five labels for switch are shared with (the same as) switch ports.
 	labels := []string{"ip", "type", "version", "site_name", "mac", "model", "name", "serial"}
 	// Copy labels, and replace first four with different names.
 	labelP := append([]string{"port_num", "port_name", "port_mac", "port_ip"}, labels[4:]...)
-
 	return &usw{
-		// switch data
-		Uptime:        prometheus.NewDesc(ns+"uptime_seconds", "Uptime", labels, nil),
-		Temperature:   prometheus.NewDesc(ns+"temperature_celsius", "Temperature", labels, nil),
-		TotalMaxPower: prometheus.NewDesc(ns+"max_power_total", "Total Max Power", labels, nil),
-		FanLevel:      prometheus.NewDesc(ns+"fan_level", "Fan Level", labels, nil),
-		TotalTxBytes:  prometheus.NewDesc(ns+"bytes_tx_total", "Total Transmitted Bytes", labels, nil),
-		TotalRxBytes:  prometheus.NewDesc(ns+"bytes_rx_total", "Total Received Bytes", labels, nil),
-		TotalBytes:    prometheus.NewDesc(ns+"bytes_total", "Total Bytes Transferred", labels, nil),
-		NumSta:        prometheus.NewDesc(ns+"stations", "Number of Stations", labels, nil),
-		UserNumSta:    prometheus.NewDesc(ns+"user_stations", "Number of User Stations", labels, nil),
-		GuestNumSta:   prometheus.NewDesc(ns+"guest_stations", "Number of Guest Stations", labels, nil),
-		Loadavg1:      prometheus.NewDesc(ns+"load_average_1", "System Load Average 1 Minute", labels, nil),
-		Loadavg5:      prometheus.NewDesc(ns+"load_average_5", "System Load Average 5 Minutes", labels, nil),
-		Loadavg15:     prometheus.NewDesc(ns+"load_average_15", "System Load Average 15 Minutes", labels, nil),
-		MemUsed:       prometheus.NewDesc(ns+"memory_used_bytes", "System Memory Used", labels, nil),
-		MemTotal:      prometheus.NewDesc(ns+"memory_installed_bytes", "System Installed Memory", labels, nil),
-		MemBuffer:     prometheus.NewDesc(ns+"memory_buffer_bytes", "System Memory Buffer", labels, nil),
-		CPU:           prometheus.NewDesc(ns+"cpu_utilization_percent", "System CPU % Utilized", labels, nil),
-		Mem:           prometheus.NewDesc(ns+"memory_utilization_percent", "System Memory % Utilized", labels, nil),
-
 		SwRxPackets:   prometheus.NewDesc(ns+"switch_receive_packets_total", "Switch Packets Received Total", labels, nil),
 		SwRxBytes:     prometheus.NewDesc(ns+"switch_receive_bytes_total", "Switch Bytes Received Total", labels, nil),
 		SwRxErrors:    prometheus.NewDesc(ns+"switch_receive_errors_total", "Switch Errors Received Total", labels, nil),
@@ -111,7 +68,6 @@ func descUSW(ns string) *usw {
 		SwTxMulticast: prometheus.NewDesc(ns+"switch_transmit_multicast_total", "Switch Multicast Transmit Total", labels, nil),
 		SwTxBroadcast: prometheus.NewDesc(ns+"switch_transmit_broadcast_total", "Switch Broadcast Transmit Total", labels, nil),
 		SwBytes:       prometheus.NewDesc(ns+"switch_bytes_total", "Switch Bytes Transferred Total", labels, nil),
-
 		// per-port data
 		PoeCurrent:   prometheus.NewDesc(pns+"poe_amperes", "POE Current", labelP, nil),
 		PoePower:     prometheus.NewDesc(pns+"poe_watts", "POE Power", labelP, nil),
@@ -150,32 +106,31 @@ func (u *unifiCollector) exportUSWs(r *Report) {
 
 func (u *unifiCollector) exportUSW(r *Report, d *unifi.USW) {
 	labels := []string{d.IP, d.Type, d.Version, d.SiteName, d.Mac, d.Model, d.Name, d.Serial}
-
 	if d.HasTemperature.Val {
-		r.send([]*metricExports{{u.USW.Temperature, prometheus.GaugeValue, d.GeneralTemperature, labels}})
+		r.send([]*metricExports{{u.Device.Temperature, prometheus.GaugeValue, d.GeneralTemperature, labels}})
 	}
 	if d.HasFan.Val {
-		r.send([]*metricExports{{u.USW.FanLevel, prometheus.GaugeValue, d.FanLevel, labels}})
+		r.send([]*metricExports{{u.Device.FanLevel, prometheus.GaugeValue, d.FanLevel, labels}})
 	}
 
 	// Switch data.
 	r.send([]*metricExports{
-		{u.USW.Uptime, prometheus.GaugeValue, d.Uptime, labels},
-		{u.USW.TotalMaxPower, prometheus.GaugeValue, d.TotalMaxPower, labels},
-		{u.USW.TotalTxBytes, prometheus.CounterValue, d.TxBytes, labels},
-		{u.USW.TotalRxBytes, prometheus.CounterValue, d.RxBytes, labels},
-		{u.USW.TotalBytes, prometheus.CounterValue, d.Bytes, labels},
-		{u.USW.NumSta, prometheus.GaugeValue, d.NumSta, labels},
-		{u.USW.UserNumSta, prometheus.GaugeValue, d.UserNumSta, labels},
-		{u.USW.GuestNumSta, prometheus.GaugeValue, d.GuestNumSta, labels},
-		{u.USW.Loadavg1, prometheus.GaugeValue, d.SysStats.Loadavg1, labels},
-		{u.USW.Loadavg5, prometheus.GaugeValue, d.SysStats.Loadavg5, labels},
-		{u.USW.Loadavg15, prometheus.GaugeValue, d.SysStats.Loadavg15, labels},
-		{u.USW.MemUsed, prometheus.GaugeValue, d.SysStats.MemUsed, labels},
-		{u.USW.MemTotal, prometheus.GaugeValue, d.SysStats.MemTotal, labels},
-		{u.USW.MemBuffer, prometheus.GaugeValue, d.SysStats.MemBuffer, labels},
-		{u.USW.CPU, prometheus.GaugeValue, d.SystemStats.CPU, labels},
-		{u.USW.Mem, prometheus.GaugeValue, d.SystemStats.Mem, labels},
+		{u.Device.Uptime, prometheus.GaugeValue, d.Uptime, labels},
+		{u.Device.TotalMaxPower, prometheus.GaugeValue, d.TotalMaxPower, labels},
+		{u.Device.TotalTxBytes, prometheus.CounterValue, d.TxBytes, labels},
+		{u.Device.TotalRxBytes, prometheus.CounterValue, d.RxBytes, labels},
+		{u.Device.TotalBytes, prometheus.CounterValue, d.Bytes, labels},
+		{u.Device.NumSta, prometheus.GaugeValue, d.NumSta, labels},
+		{u.Device.UserNumSta, prometheus.GaugeValue, d.UserNumSta, labels},
+		{u.Device.GuestNumSta, prometheus.GaugeValue, d.GuestNumSta, labels},
+		{u.Device.Loadavg1, prometheus.GaugeValue, d.SysStats.Loadavg1, labels},
+		{u.Device.Loadavg5, prometheus.GaugeValue, d.SysStats.Loadavg5, labels},
+		{u.Device.Loadavg15, prometheus.GaugeValue, d.SysStats.Loadavg15, labels},
+		{u.Device.MemUsed, prometheus.GaugeValue, d.SysStats.MemUsed, labels},
+		{u.Device.MemTotal, prometheus.GaugeValue, d.SysStats.MemTotal, labels},
+		{u.Device.MemBuffer, prometheus.GaugeValue, d.SysStats.MemBuffer, labels},
+		{u.Device.CPU, prometheus.GaugeValue, d.SystemStats.CPU, labels},
+		{u.Device.Mem, prometheus.GaugeValue, d.SystemStats.Mem, labels},
 	})
 	u.exportPortTable(r, d.PortTable, labels[4:])
 	u.exportUSWstats(r, d.Stat.Sw, labels)
@@ -217,6 +172,7 @@ func (u *unifiCollector) exportPortTable(r *Report, pt []unifi.Port, labels []st
 				{u.USW.PoeVoltage, prometheus.GaugeValue, p.PoeVoltage, l},
 			})
 		}
+
 		r.send([]*metricExports{
 			{u.USW.RxBroadcast, prometheus.CounterValue, p.RxBroadcast, l},
 			{u.USW.RxBytes, prometheus.CounterValue, p.RxBytes, l},

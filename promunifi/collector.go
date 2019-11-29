@@ -38,6 +38,7 @@ type UnifiCollectorCnfg struct {
 type unifiCollector struct {
 	Config UnifiCollectorCnfg
 	Client *uclient
+	Device *unifiDevice
 	UAP    *uap
 	USG    *usg
 	USW    *usw
@@ -70,14 +71,17 @@ func NewUnifiCollector(opts UnifiCollectorCnfg) prometheus.Collector {
 	if opts.CollectFn == nil {
 		panic("nil collector function")
 	}
-
+	if opts.Namespace += "_"; opts.Namespace == "_" {
+		opts.Namespace = ""
+	}
 	return &unifiCollector{
 		Config: opts,
-		Client: descClient(opts.Namespace),
-		UAP:    descUAP(opts.Namespace),
-		USG:    descUSG(opts.Namespace),
-		USW:    descUSW(opts.Namespace),
-		Site:   descSite(opts.Namespace),
+		Client: descClient(opts.Namespace + "client_"),
+		Device: descDevice(opts.Namespace + "device_"), // stats for all device types.
+		UAP:    descUAP(opts.Namespace + "device_"),
+		USG:    descUSG(opts.Namespace + "device_"),
+		USW:    descUSW(opts.Namespace + "device_"),
+		Site:   descSite(opts.Namespace + "site_"),
 	}
 }
 
@@ -97,6 +101,7 @@ func (u *unifiCollector) Describe(ch chan<- *prometheus.Desc) {
 	}
 
 	describe(u.Client)
+	describe(u.Device)
 	describe(u.UAP)
 	describe(u.USG)
 	describe(u.USW)

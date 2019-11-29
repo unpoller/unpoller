@@ -6,27 +6,6 @@ import (
 )
 
 type uap struct {
-	Uptime       *prometheus.Desc
-	TotalTxBytes *prometheus.Desc
-	TotalRxBytes *prometheus.Desc
-	TotalBytes   *prometheus.Desc
-	BytesD       *prometheus.Desc
-	TxBytesD     *prometheus.Desc
-	RxBytesD     *prometheus.Desc
-	BytesR       *prometheus.Desc
-	NumSta       *prometheus.Desc
-	UserNumSta   *prometheus.Desc
-	GuestNumSta  *prometheus.Desc
-	// System Stats
-	Loadavg1  *prometheus.Desc
-	Loadavg5  *prometheus.Desc
-	Loadavg15 *prometheus.Desc
-	MemBuffer *prometheus.Desc
-	MemTotal  *prometheus.Desc
-	MemUsed   *prometheus.Desc
-	CPU       *prometheus.Desc
-	Mem       *prometheus.Desc
-	ApBytes   *prometheus.Desc
 	// Ap Traffic Stats
 	ApWifiTxDropped     *prometheus.Desc
 	ApRxErrors          *prometheus.Desc
@@ -104,36 +83,11 @@ type uap struct {
 }
 
 func descUAP(ns string) *uap {
-	if ns += "_uap_"; ns == "_uap_" {
-		ns = "uap_"
-	}
 	labels := []string{"ip", "site_name", "mac", "model", "name", "serial", "type", "version"}
 	labelA := append([]string{"stat"}, labels[2:]...)
 	labelV := append([]string{"vap_name", "bssid", "radio_name", "essid", "usage"}, labels[2:]...)
 	labelR := append([]string{"radio_name", "radio"}, labels[2:]...)
-
 	return &uap{
-		Uptime:       prometheus.NewDesc(ns+"uptime", "Uptime", labels, nil),
-		TotalTxBytes: prometheus.NewDesc(ns+"transmit_bytes_total", "Total Transmitted Bytes", labels, nil),
-		TotalRxBytes: prometheus.NewDesc(ns+"receive_bytes_total", "Total Received Bytes", labels, nil),
-		TotalBytes:   prometheus.NewDesc(ns+"bytes_total", "Total Bytes Transferred", labels, nil),
-		BytesD:       prometheus.NewDesc(ns+"d_bytes", "Total Bytes D???", labels, nil),
-		TxBytesD:     prometheus.NewDesc(ns+"d_tranmsit_bytes", "Transmit Bytes D???", labels, nil),
-		RxBytesD:     prometheus.NewDesc(ns+"d_receive_bytes", "Receive Bytes D???", labels, nil),
-		BytesR:       prometheus.NewDesc(ns+"rate_bytes", "Transfer Rate", labels, nil),
-		NumSta:       prometheus.NewDesc(ns+"stations", "Number of Stations", labels, nil),
-		UserNumSta:   prometheus.NewDesc(ns+"user_stations", "Number of User Stations", labels, nil),
-		GuestNumSta:  prometheus.NewDesc(ns+"guest_stations", "Number of Guest Stations", labels, nil),
-		Loadavg1:     prometheus.NewDesc(ns+"load_average_1", "System Load Average 1 Minute", labels, nil),
-		Loadavg5:     prometheus.NewDesc(ns+"load_average_5", "System Load Average 5 Minutes", labels, nil),
-		Loadavg15:    prometheus.NewDesc(ns+"load_average_15", "System Load Average 15 Minutes", labels, nil),
-		MemUsed:      prometheus.NewDesc(ns+"memory_used_bytes", "System Memory Used", labels, nil),
-		MemTotal:     prometheus.NewDesc(ns+"memory_installed_bytes", "System Installed Memory", labels, nil),
-		MemBuffer:    prometheus.NewDesc(ns+"memory_buffer_bytes", "System Memory Buffer", labels, nil),
-		CPU:          prometheus.NewDesc(ns+"cpu_utilization_percent", "System CPU % Utilized", labels, nil),
-		Mem:          prometheus.NewDesc(ns+"memory_utilization_percent", "System Memory % Utilized", labels, nil),
-		ApBytes:      prometheus.NewDesc(ns+"transferred_bytes_total", "Total Bytes Moved", labels, nil),
-
 		// 3x each - stat table: total, guest, user
 		ApWifiTxDropped:     prometheus.NewDesc(ns+"stat_wifi_transmt_dropped_total", "Wifi Transmissions Dropped", labelA, nil),
 		ApRxErrors:          prometheus.NewDesc(ns+"stat_receive_errors_total", "Receive Errors", labelA, nil),
@@ -149,7 +103,6 @@ func descUAP(ns string) *uap {
 		ApRxBytes:           prometheus.NewDesc(ns+"stat_receive_bytes_total", "Receive Bytes", labelA, nil),
 		WifiTxAttempts:      prometheus.NewDesc(ns+"stat_wifi_transmit_attempts_total", "Wifi Transmission Attempts", labelA, nil),
 		MacFilterRejections: prometheus.NewDesc(ns+"stat_mac_filter_rejects_total", "MAC Filter Rejections", labelA, nil),
-
 		// N each - 1 per Virtual AP (VAP)
 		VAPCcq:                   prometheus.NewDesc(ns+"vap_ccq", "VAP Client Connection Quality", labelV, nil),
 		VAPMacFilterRejections:   prometheus.NewDesc(ns+"vap_mac_filter_rejects_total", "VAP MAC Filter Rejections", labelV, nil),
@@ -189,7 +142,6 @@ func descUAP(ns string) *uap {
 		VAPWifiTxLatencyMovMin:   prometheus.NewDesc(ns+"vap_transmit_latency_moving_min_seconds", "VAP Latency Moving Minimum Tramsit", labelV, nil),
 		VAPWifiTxLatencyMovTotal: prometheus.NewDesc(ns+"vap_transmit_latency_moving_total", "VAP Latency Moving Total Tramsit", labelV, nil),
 		VAPWifiTxLatencyMovCount: prometheus.NewDesc(ns+"vap_transmit_latency_moving_count", "VAP Latency Moving Count Tramsit", labelV, nil),
-
 		// N each - 1 per Radio. 1-4 radios per AP usually
 		RadioCurrentAntennaGain: prometheus.NewDesc(ns+"radio_current_antenna_gain", "Radio Current Antenna Gain", labelR, nil),
 		RadioHt:                 prometheus.NewDesc(ns+"radio_ht", "Radio HT", labelR, nil),
@@ -228,28 +180,27 @@ func (u *unifiCollector) exportUAPs(r *Report) {
 
 func (u *unifiCollector) exportUAP(r *Report, d *unifi.UAP) {
 	labels := []string{d.IP, d.Type, d.Version, d.SiteName, d.Mac, d.Model, d.Name, d.Serial}
-
 	// AP data.
 	r.send([]*metricExports{
-		{u.UAP.Uptime, prometheus.GaugeValue, d.Uptime, labels},
-		{u.UAP.TotalTxBytes, prometheus.CounterValue, d.TxBytes, labels},
-		{u.UAP.TotalRxBytes, prometheus.CounterValue, d.RxBytes, labels},
-		{u.UAP.TotalBytes, prometheus.CounterValue, d.Bytes, labels},
-		{u.UAP.BytesD, prometheus.CounterValue, d.BytesD, labels},     // not sure if these 3 Ds are counters or gauges.
-		{u.UAP.TxBytesD, prometheus.CounterValue, d.TxBytesD, labels}, // not sure if these 3 Ds are counters or gauges.
-		{u.UAP.RxBytesD, prometheus.CounterValue, d.RxBytesD, labels}, // not sure if these 3 Ds are counters or gauges.
-		{u.UAP.BytesR, prometheus.GaugeValue, d.BytesR, labels},
-		{u.UAP.NumSta, prometheus.GaugeValue, d.NumSta, labels},
-		{u.UAP.UserNumSta, prometheus.GaugeValue, d.UserNumSta, labels},
-		{u.UAP.GuestNumSta, prometheus.GaugeValue, d.GuestNumSta, labels},
-		{u.UAP.Loadavg1, prometheus.GaugeValue, d.SysStats.Loadavg1, labels},
-		{u.UAP.Loadavg5, prometheus.GaugeValue, d.SysStats.Loadavg5, labels},
-		{u.UAP.Loadavg15, prometheus.GaugeValue, d.SysStats.Loadavg15, labels},
-		{u.UAP.MemUsed, prometheus.GaugeValue, d.SysStats.MemUsed, labels},
-		{u.UAP.MemTotal, prometheus.GaugeValue, d.SysStats.MemTotal, labels},
-		{u.UAP.MemBuffer, prometheus.GaugeValue, d.SysStats.MemBuffer, labels},
-		{u.UAP.CPU, prometheus.GaugeValue, d.SystemStats.CPU, labels},
-		{u.UAP.Mem, prometheus.GaugeValue, d.SystemStats.Mem, labels},
+		{u.Device.Uptime, prometheus.GaugeValue, d.Uptime, labels},
+		{u.Device.TotalTxBytes, prometheus.CounterValue, d.TxBytes, labels},
+		{u.Device.TotalRxBytes, prometheus.CounterValue, d.RxBytes, labels},
+		{u.Device.TotalBytes, prometheus.CounterValue, d.Bytes, labels},
+		{u.Device.BytesD, prometheus.CounterValue, d.BytesD, labels},     // not sure if these 3 Ds are counters or gauges.
+		{u.Device.TxBytesD, prometheus.CounterValue, d.TxBytesD, labels}, // not sure if these 3 Ds are counters or gauges.
+		{u.Device.RxBytesD, prometheus.CounterValue, d.RxBytesD, labels}, // not sure if these 3 Ds are counters or gauges.
+		{u.Device.BytesR, prometheus.GaugeValue, d.BytesR, labels},
+		{u.Device.NumSta, prometheus.GaugeValue, d.NumSta, labels},
+		{u.Device.UserNumSta, prometheus.GaugeValue, d.UserNumSta, labels},
+		{u.Device.GuestNumSta, prometheus.GaugeValue, d.GuestNumSta, labels},
+		{u.Device.Loadavg1, prometheus.GaugeValue, d.SysStats.Loadavg1, labels},
+		{u.Device.Loadavg5, prometheus.GaugeValue, d.SysStats.Loadavg5, labels},
+		{u.Device.Loadavg15, prometheus.GaugeValue, d.SysStats.Loadavg15, labels},
+		{u.Device.MemUsed, prometheus.GaugeValue, d.SysStats.MemUsed, labels},
+		{u.Device.MemTotal, prometheus.GaugeValue, d.SysStats.MemTotal, labels},
+		{u.Device.MemBuffer, prometheus.GaugeValue, d.SysStats.MemBuffer, labels},
+		{u.Device.CPU, prometheus.GaugeValue, d.SystemStats.CPU, labels},
+		{u.Device.Mem, prometheus.GaugeValue, d.SystemStats.Mem, labels},
 	})
 	u.exportUAPstats(r, labels[2:], d.Stat.Ap)
 	u.exportVAPtable(r, labels[2:], d.VapTable)
@@ -260,7 +211,6 @@ func (u *unifiCollector) exportUAPstats(r *Report, labels []string, ap *unifi.Ap
 	labelA := append([]string{"all"}, labels...)
 	labelU := append([]string{"user"}, labels...)
 	labelG := append([]string{"guest"}, labels...)
-
 	r.send([]*metricExports{
 		// all
 		{u.UAP.ApWifiTxDropped, prometheus.CounterValue, ap.WifiTxDropped, labelA},
