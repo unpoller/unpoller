@@ -75,7 +75,8 @@ is provided so the application can be easily adapted to any environment.
 
     interval               default: 30s
         How often to poll the controller for updated client and device data.
-        The UniFi Controller only updates traffic stats about every 30 seconds.
+        The UniFi Controller only updates traffic stats about every 30-60 seconds.
+        Only works if "mode" (below) is "influx" - other modes do not use interval.
 
     debug                  default: false
         This turns on time stamps and line numbers in logs, outputs a few extra
@@ -89,10 +90,10 @@ is provided so the application can be easily adapted to any environment.
     mode                   default: "influx"
         * Value: influx
         This default mode runs this application as a daemon. It will poll
-        the controller at the configured interval. Providing an invalid value
-        will run in this default mode.
+        the controller at the configured interval and report measurements to
+        InfluxDB. Providing an invalid value will run in this default mode.
 
-        * Value: influxlambda  -  (the only other available option right now)
+        * Value: influxlambda
         Setting this value will invoke a run-once mode where the application
         immediately polls the controller and reports the metrics to InfluxDB.
         Then it exits. This mode is useful in an AWS Lambda or a crontab where
@@ -100,6 +101,16 @@ is provided so the application can be easily adapted to any environment.
         to run in other collector scripts and apps like telegraf or diamond.
         This mode can also be combined with a "test database" in InfluxDB to
         give yourself a "test config file" you may run ad-hoc to test changes.
+
+        * Value: prometheus
+        In this mode the application opens an http interface and exports the
+        measurements at /metrics for collection by prometheus. Enabling this
+        mode disables InfluxDB usage entirely.
+
+    http_listen            default: 0.0.0.0:9130
+        This option controls the IP and port the http listener uses when the
+        mode is set to prometheus. This setting has no effect when other modes
+        are in use. Metrics become available at the /metrics URI.
 
     influx_url             default: http://127.0.0.1:8086
         This is the URL where the Influx web server is available.
