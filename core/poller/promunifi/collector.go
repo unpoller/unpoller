@@ -33,7 +33,7 @@ type UnifiCollectorCnfg struct {
 	LoggingFn func(*Report)
 }
 
-type unifiCollector struct {
+type promUnifi struct {
 	Config UnifiCollectorCnfg
 	Client *uclient
 	Device *unifiDevice
@@ -74,7 +74,7 @@ func NewUnifiCollector(opts UnifiCollectorCnfg) prometheus.Collector {
 	if opts.Namespace = strings.Trim(opts.Namespace, "_") + "_"; opts.Namespace == "_" {
 		opts.Namespace = ""
 	}
-	return &unifiCollector{
+	return &promUnifi{
 		Config: opts,
 		Client: descClient(opts.Namespace + "client_"),
 		Device: descDevice(opts.Namespace + "device_"), // stats for all device types.
@@ -87,7 +87,7 @@ func NewUnifiCollector(opts UnifiCollectorCnfg) prometheus.Collector {
 
 // Describe satisfies the prometheus Collector. This returns all of the
 // metric descriptions that this packages produces.
-func (u *unifiCollector) Describe(ch chan<- *prometheus.Desc) {
+func (u *promUnifi) Describe(ch chan<- *prometheus.Desc) {
 	for _, f := range []interface{}{u.Client, u.Device, u.UAP, u.USG, u.USW, u.Site} {
 		v := reflect.Indirect(reflect.ValueOf(f))
 		// Loop each struct member and send it to the provided channel.
@@ -102,7 +102,7 @@ func (u *unifiCollector) Describe(ch chan<- *prometheus.Desc) {
 
 // Collect satisfies the prometheus Collector. This runs the input method to get
 // the current metrics (from another package) then exports them for prometheus.
-func (u *unifiCollector) Collect(ch chan<- prometheus.Metric) {
+func (u *promUnifi) Collect(ch chan<- prometheus.Metric) {
 	var err error
 	r := &Report{cf: u.Config, ch: make(chan []*metric, buffer), Start: time.Now()}
 	defer r.close()
@@ -126,7 +126,7 @@ func (u *unifiCollector) Collect(ch chan<- prometheus.Metric) {
 
 // This is closely tied to the method above with a sync.WaitGroup.
 // This method runs in a go routine and exits when the channel closes.
-func (u *unifiCollector) exportMetrics(r report, ch chan<- prometheus.Metric) {
+func (u *promUnifi) exportMetrics(r report, ch chan<- prometheus.Metric) {
 	descs := make(map[*prometheus.Desc]bool) // used as a counter
 	defer r.report(descs)
 	for newMetrics := range r.channel() {
