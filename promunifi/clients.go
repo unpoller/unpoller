@@ -9,6 +9,7 @@ type uclient struct {
 	Anomalies         *prometheus.Desc
 	BytesR            *prometheus.Desc
 	CCQ               *prometheus.Desc
+	Satisfaction      *prometheus.Desc
 	Noise             *prometheus.Desc
 	RoamCount         *prometheus.Desc
 	RSSI              *prometheus.Desc
@@ -20,6 +21,7 @@ type uclient struct {
 	TxBytes           *prometheus.Desc
 	TxBytesR          *prometheus.Desc
 	TxPackets         *prometheus.Desc
+	TxRetries         *prometheus.Desc
 	TxPower           *prometheus.Desc
 	TxRate            *prometheus.Desc
 	Uptime            *prometheus.Desc
@@ -45,6 +47,7 @@ func descClient(ns string) *uclient {
 		Anomalies:      prometheus.NewDesc(ns+"anomalies_total", "Client Anomalies", labelW, nil),
 		BytesR:         prometheus.NewDesc(ns+"transfer_rate_bytes", "Client Data Rate", labelW, nil),
 		CCQ:            prometheus.NewDesc(ns+"ccq_percent", "Client Connection Quality", labelW, nil),
+		Satisfaction:   prometheus.NewDesc(ns+"satisfaction_percent", "Client Satisfaction", labelW, nil),
 		Noise:          prometheus.NewDesc(ns+"noise_db", "Client AP Noise", labelW, nil),
 		RoamCount:      prometheus.NewDesc(ns+"roam_count_total", "Client Roam Counter", labelW, nil),
 		RSSI:           prometheus.NewDesc(ns+"rssi_db", "Client RSSI", labelW, nil),
@@ -56,6 +59,7 @@ func descClient(ns string) *uclient {
 		TxBytes:        prometheus.NewDesc(ns+"transmit_bytes_total", "Client Transmit Bytes", labels, nil),
 		TxBytesR:       prometheus.NewDesc(ns+"transmit_rate_bytes", "Client Transmit Data Rate", labels, nil),
 		TxPackets:      prometheus.NewDesc(ns+"transmit_packets_total", "Client Transmit Packets", labels, nil),
+		TxRetries:      prometheus.NewDesc(ns+"transmit_retries_total", "Client Transmit Retries", labels, nil),
 		TxPower:        prometheus.NewDesc(ns+"radio_transmit_power_dbm", "Client Transmit Power", labelW, nil),
 		TxRate:         prometheus.NewDesc(ns+"radio_transmit_rate_bps", "Client Transmit Rate", labelW, nil),
 		WifiTxAttempts: prometheus.NewDesc(ns+"wifi_attempts_transmit_total", "Client Wifi Transmit Attempts", labelW, nil),
@@ -92,6 +96,7 @@ func (u *promUnifi) exportClient(r report, c *unifi.Client) {
 		r.send([]*metric{
 			{u.Client.Anomalies, prometheus.CounterValue, c.Anomalies, labelW},
 			{u.Client.CCQ, prometheus.GaugeValue, c.Ccq / 10, labelW},
+			{u.Client.Satisfaction, prometheus.GaugeValue, c.Satisfaction, labelW},
 			{u.Client.Noise, prometheus.GaugeValue, c.Noise, labelW},
 			{u.Client.RoamCount, prometheus.CounterValue, c.RoamCount, labelW},
 			{u.Client.RSSI, prometheus.GaugeValue, c.Rssi, labelW},
@@ -100,6 +105,7 @@ func (u *promUnifi) exportClient(r report, c *unifi.Client) {
 			{u.Client.TxRate, prometheus.GaugeValue, c.TxRate * 1000, labelW},
 			{u.Client.WifiTxAttempts, prometheus.CounterValue, c.WifiTxAttempts, labelW},
 			{u.Client.RxRate, prometheus.GaugeValue, c.RxRate * 1000, labelW},
+			{u.Client.TxRetries, prometheus.CounterValue, c.TxRetries, labels},
 			{u.Client.TxBytes, prometheus.CounterValue, c.TxBytes, labels},
 			{u.Client.TxBytesR, prometheus.GaugeValue, c.TxBytesR, labels},
 			{u.Client.TxPackets, prometheus.CounterValue, c.TxPackets, labels},
