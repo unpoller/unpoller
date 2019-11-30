@@ -14,16 +14,15 @@ func USWPoints(u *unifi.USW, now time.Time) ([]*influx.Point, error) {
 		u.Stat.Sw = &unifi.Sw{}
 	}
 	tags := map[string]string{
-		"id":              u.ID,
-		"mac":             u.Mac,
-		"site_id":         u.SiteID,
-		"site_name":       u.SiteName,
-		"name":            u.Name,
-		"model":           u.Model,
-		"serial":          u.Serial,
-		"type":            u.Type,
-		"has_fan":         u.HasFan.Txt,
-		"has_temperature": u.HasTemperature.Txt,
+		"ip":         u.IP,
+		"mac":        u.Mac,
+		"site_id":    u.SiteID,
+		"site_name":  u.SiteName,
+		"name":       u.Name,
+		"cfgversion": u.Cfgversion,
+		"model":      u.Model,
+		"serial":     u.Serial,
+		"type":       u.Type,
 	}
 	fields := map[string]interface{}{
 		"fw_caps":             u.FwCaps.Val,
