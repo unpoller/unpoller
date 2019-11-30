@@ -6,6 +6,7 @@ import (
 
 	"github.com/davidnewhall/unifi-poller/metrics"
 	"github.com/prometheus/client_golang/prometheus"
+	"golift.io/unifi"
 )
 
 // This file contains the report interface.
@@ -40,6 +41,9 @@ func (r *Report) send(m []*metricExports) {
 }
 
 func (r *Report) metrics() *metrics.Metrics {
+	if r.Metrics == nil {
+		return &metrics.Metrics{Devices: &unifi.Devices{}}
+	}
 	return r.Metrics
 }
 
@@ -51,7 +55,7 @@ func (r *Report) report(descs map[*prometheus.Desc]bool) {
 	if r.cf.LoggingFn == nil {
 		return
 	}
-	r.Descs, r.Elapsed = len(descs), time.Since(r.Start)
+	r.Descs = len(descs)
 	r.cf.LoggingFn(r)
 }
 
@@ -68,4 +72,11 @@ func (r *Report) error(ch chan<- prometheus.Metric, d *prometheus.Desc, v interf
 	if r.cf.ReportErrors {
 		ch <- prometheus.NewInvalidMetric(d, fmt.Errorf("error: %v", v))
 	}
+}
+
+// finish is not part of the interface.
+func (r *Report) finish() {
+	r.wg.Wait()
+	r.Elapsed = time.Since(r.Start)
+	close(r.ch)
 }
