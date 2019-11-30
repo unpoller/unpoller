@@ -67,19 +67,6 @@ func descDevice(ns string) *unifiDevice {
 	}
 }
 
-func (u *unifiCollector) exportUDMs(r report) {
-	if r.metrics() == nil || r.metrics().Devices == nil || len(r.metrics().Devices.UDMs) < 1 {
-		return
-	}
-	r.add()
-	go func() {
-		defer r.done()
-		for _, d := range r.metrics().Devices.UDMs {
-			u.exportUDM(r, d)
-		}
-	}()
-}
-
 // UDM is a collection of stats from USG, USW and UAP. It has no unique stats.
 func (u *unifiCollector) exportUDM(r report, d *unifi.UDM) {
 	labels := []string{d.IP, d.Version, d.Model, d.Serial, d.Type, d.Mac, d.SiteName, d.Name}
@@ -105,7 +92,7 @@ func (u *unifiCollector) exportUDM(r report, d *unifi.UDM) {
 		{u.Device.Mem, prometheus.GaugeValue, d.SystemStats.Mem, labels},
 	})
 	u.exportUSWstats(r, labels, d.Stat.Sw)
-	u.exportUSGstats(r, labels, d.SpeedtestStatus)
+	u.exportUSGstats(r, labels, d.Stat.Gw, d.SpeedtestStatus)
 	u.exportWANPorts(r, labels, d.Wan1, d.Wan2)
 	u.exportPortTable(r, labels, d.PortTable)
 	if d.Stat.Ap != nil && d.VapTable != nil {
