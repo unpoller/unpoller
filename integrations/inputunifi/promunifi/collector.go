@@ -58,6 +58,7 @@ type Report struct {
 	Descs   int
 	Metrics *metrics.Metrics
 	Elapsed time.Duration
+	Fetch   time.Duration
 	Start   time.Time
 	ch      chan []*metricExports
 	wg      sync.WaitGroup
@@ -121,12 +122,13 @@ func (u *unifiCollector) Collect(ch chan<- prometheus.Metric) {
 	}()
 
 	var err error
-	if r.Metrics, err = u.Config.CollectFn(); err != nil {
-		ch <- prometheus.NewInvalidMetric(
-			prometheus.NewInvalidDesc(fmt.Errorf("metric fetch failed")), err)
+	if r.Metrics, err = r.cf.CollectFn(); err != nil {
+		r.error(ch, prometheus.NewInvalidDesc(fmt.Errorf("metric fetch failed")), err)
 		return
 	}
+	r.Fetch = time.Since(r.Start)
 
+	// Pass Report interface into our collecting and reporting methods.
 	go u.exportMetrics(r, ch)
 	// in loops.go.
 	u.loopClients(r)
@@ -155,7 +157,7 @@ func (u *unifiCollector) exportMetrics(r report, ch chan<- prometheus.Metric) {
 			case int:
 				ch <- r.export(m, float64(v))
 			default:
-				r.error(ch, m.Desc, m.Value)
+				r.error(ch, m.Desc, fmt.Sprintf("not a number: %v", m.Value))
 			}
 		}
 		r.done()

@@ -72,11 +72,12 @@ func descClient(ns string) *uclient {
 }
 
 func (u *unifiCollector) exportClient(r report, c *unifi.Client) {
-	labels := []string{c.Name, c.Mac, c.SiteName, c.GwName, c.SwName, c.Vlan.Txt, c.IP, c.Oui, c.Network, c.SwPort.Txt, c.ApName, "false"}
+	labels := []string{c.Name, c.Mac, c.SiteName, c.GwName, c.SwName, c.Vlan.Txt, c.IP, c.Oui, c.Network, c.SwPort.Txt, c.ApName, ""}
 	labelW := append([]string{c.RadioName, c.Radio, c.RadioProto, c.Channel.Txt, c.Essid, c.Bssid, c.RadioDescription}, labels...)
 
 	if c.IsWired.Val {
 		labels[len(labels)-1] = "true"
+		labelW[len(labelW)-1] = "true"
 		r.send([]*metricExports{
 			{u.Client.RxBytes, prometheus.CounterValue, c.WiredRxBytes, labels},
 			{u.Client.RxBytesR, prometheus.GaugeValue, c.WiredRxBytesR, labels},
@@ -87,6 +88,7 @@ func (u *unifiCollector) exportClient(r report, c *unifi.Client) {
 		})
 	} else {
 		labels[len(labels)-1] = "false"
+		labelW[len(labelW)-1] = "false"
 		r.send([]*metricExports{
 			{u.Client.Anomalies, prometheus.CounterValue, c.Anomalies, labelW},
 			{u.Client.CCQ, prometheus.GaugeValue, c.Ccq / 10, labelW},
