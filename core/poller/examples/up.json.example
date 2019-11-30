@@ -4,6 +4,7 @@
  "debug": false,
  "quiet": false,
  "mode": "influx",
+ "http_listen": "0.0.0.0:9130",
  "influx_url": "http://127.0.0.1:8086",
  "influx_user": "unifi",
  "influx_pass": "unifi",
