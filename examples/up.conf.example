@@ -56,7 +56,7 @@ unifi_user = "influx"
 unifi_pass = "4BB9345C-2341-48D7-99F5-E01B583FF77F"
 unifi_url = "https://127.0.0.1:8443"
 
-# Enable collection of Intrusion Detection System Data.
+# Enable collection of Intrusion Detection System Data (InfluxDB only).
 # Only useful if IDS or IPS are enabled on one of the sites.
 collect_ids = false
 
