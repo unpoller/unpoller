@@ -12,6 +12,8 @@ import (
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
+const oneDecimalPoint = 10
+
 // RunPrometheus starts the web server and registers the collector.
 func (u *UnifiPoller) RunPrometheus() error {
 	u.Logf("Exporting Measurements at https://%s/metrics for Prometheus", u.Config.HTTPListen)
@@ -57,10 +59,11 @@ func (u *UnifiPoller) LogExportReport(report *promunifi.Report) {
 		idsMsg = fmt.Sprintf(", IDS Events: %d, ", len(m.IDSList))
 	}
 
-	u.Logf("UniFi Measurements Exported. Sites: %d, Clients: %d, "+
-		"Wireless APs: %d, Gateways: %d, Switches: %d%s, Descs: %d, "+
-		"Metrics: %d, Errors: %d, Zeros: %d, Elapsed: %v",
-		len(m.Sites), len(m.Clients), len(m.UAPs), len(m.UDMs)+len(m.USGs),
-		len(m.USWs), idsMsg, report.Descs, report.Total, report.Errors,
-		report.Zeros, report.Elapsed.Round(time.Millisecond))
+	u.Logf("UniFi Measurements Exported. Site: %d, Client: %d, "+
+		"UAP: %d, USG/UDM: %d, USW: %d%s, Descs: %d, "+
+		"Metrics: %d, Errs: %d, 0s: %d, Reqs/Total: %v/%v",
+		len(m.Sites), len(m.Clients), len(m.UAPs), len(m.UDMs)+len(m.USGs), len(m.USWs),
+		idsMsg, report.Descs, report.Total, report.Errors, report.Zeros,
+		report.Fetch.Round(time.Millisecond/oneDecimalPoint),
+		report.Elapsed.Round(time.Millisecond/oneDecimalPoint))
 }

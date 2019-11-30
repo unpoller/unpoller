@@ -9,22 +9,43 @@ import (
 )
 
 // This file contains the report interface.
-// This interface can be mocked and overrridden for tests.
+// This interface can be mocked and overridden for tests.
 
 // report is an internal interface used to "process metrics"
 type report interface {
-	send([]*metricExports)
 	add()
 	done()
+	send([]*metricExports)
 	metrics() *metrics.Metrics
+	channel() chan []*metricExports
 	report(descs map[*prometheus.Desc]bool)
 	export(m *metricExports, v float64) prometheus.Metric
-	channel() chan []*metricExports
 	error(ch chan<- prometheus.Metric, d *prometheus.Desc, v interface{})
 }
 
 // satisfy gomnd
 const one = 1
+
+func (r *Report) add() {
+	r.wg.Add(one)
+}
+
+func (r *Report) done() {
+	r.wg.Add(-one)
+}
+
+func (r *Report) send(m []*metricExports) {
+	r.wg.Add(one)
+	r.ch <- m
+}
+
+func (r *Report) metrics() *metrics.Metrics {
+	return r.Metrics
+}
+
+func (r *Report) channel() chan []*metricExports {
+	return r.ch
+}
 
 func (r *Report) report(descs map[*prometheus.Desc]bool) {
 	if r.cf.LoggingFn == nil {
@@ -42,30 +63,9 @@ func (r *Report) export(m *metricExports, v float64) prometheus.Metric {
 	return prometheus.MustNewConstMetric(m.Desc, m.ValueType, v, m.Labels...)
 }
 
-func (r *Report) metrics() *metrics.Metrics {
-	return r.Metrics
-}
-
-func (r *Report) channel() chan []*metricExports {
-	return r.ch
-}
-
 func (r *Report) error(ch chan<- prometheus.Metric, d *prometheus.Desc, v interface{}) {
 	r.Errors++
 	if r.cf.ReportErrors {
-		ch <- prometheus.NewInvalidMetric(d, fmt.Errorf("not a number: %v", v))
+		ch <- prometheus.NewInvalidMetric(d, fmt.Errorf("error: %v", v))
 	}
-}
-
-func (r *Report) add() {
-	r.wg.Add(one)
-}
-
-func (r *Report) done() {
-	r.wg.Add(-one)
-}
-
-func (r *Report) send(m []*metricExports) {
-	r.wg.Add(one)
-	r.ch <- m
 }

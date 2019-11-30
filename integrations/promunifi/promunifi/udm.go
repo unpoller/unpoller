@@ -70,7 +70,7 @@ func descDevice(ns string) *unifiDevice {
 // UDM is a collection of stats from USG, USW and UAP. It has no unique stats.
 func (u *unifiCollector) exportUDM(r report, d *unifi.UDM) {
 	labels := []string{d.IP, d.Version, d.Model, d.Serial, d.Type, d.Mac, d.SiteName, d.Name}
-	// Gateway System Data.
+	// Dream Machine System Data.
 	r.send([]*metricExports{
 		{u.Device.Uptime, prometheus.GaugeValue, d.Uptime, labels},
 		{u.Device.TotalTxBytes, prometheus.CounterValue, d.TxBytes, labels},
@@ -91,12 +91,15 @@ func (u *unifiCollector) exportUDM(r report, d *unifi.UDM) {
 		{u.Device.CPU, prometheus.GaugeValue, d.SystemStats.CPU, labels},
 		{u.Device.Mem, prometheus.GaugeValue, d.SystemStats.Mem, labels},
 	})
+
+	// Switch Data
 	u.exportUSWstats(r, labels, d.Stat.Sw)
+	u.exportPortTable(r, labels, d.PortTable)
+	// Gateway Data
 	u.exportUSGstats(r, labels, d.Stat.Gw, d.SpeedtestStatus)
 	u.exportWANPorts(r, labels, d.Wan1, d.Wan2)
-	u.exportPortTable(r, labels, d.PortTable)
+	// Wireless Data - UDM (non-pro) only
 	if d.Stat.Ap != nil && d.VapTable != nil {
-		// UDM Pro does not have these. UDM non-Pro does.
 		u.exportUAPstats(r, labels, d.Stat.Ap)
 		u.exportVAPtable(r, labels, *d.VapTable)
 		u.exportRadtable(r, labels, *d.RadioTable, *d.RadioTableStats)
