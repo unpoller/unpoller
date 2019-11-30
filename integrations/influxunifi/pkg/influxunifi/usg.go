@@ -15,21 +15,15 @@ func USGPoints(u *unifi.USG, now time.Time) ([]*influx.Point, error) {
 		u.Stat.Gw = &unifi.Gw{}
 	}
 	tags := map[string]string{
-		"id":               u.ID,
-		"mac":              u.Mac,
-		"device_type":      u.Stat.O,
-		"site_id":          u.SiteID,
-		"site_name":        u.SiteName,
-		"name":             u.Name,
-		"cfgversion":       u.Cfgversion,
-		"device_id":        u.DeviceID,
-		"known_cfgversion": u.KnownCfgversion,
-		"model":            u.Model,
-		"serial":           u.Serial,
-		"type":             u.Type,
-		"usg_caps":         u.UsgCaps.Txt,
-		"wan1_up":          u.Wan1.Up.Txt,
-		"wan2_up":          u.Wan2.Up.Txt,
+		"ip":         u.IP,
+		"mac":        u.Mac,
+		"site_id":    u.SiteID,
+		"site_name":  u.SiteName,
+		"name":       u.Name,
+		"cfgversion": u.Cfgversion,
+		"model":      u.Model,
+		"serial":     u.Serial,
+		"type":       u.Type,
 	}
 	fields := map[string]interface{}{
 		"ip":                             u.IP,

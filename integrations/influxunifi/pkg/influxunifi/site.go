@@ -1,7 +1,6 @@
 package influxunifi
 
 import (
-	"strings"
 	"time"
 
 	influx "github.com/influxdata/influxdb1-client/v2"
@@ -14,20 +13,16 @@ func SitePoints(u *unifi.Site, now time.Time) ([]*influx.Point, error) {
 	points := []*influx.Point{}
 	for _, s := range u.Health {
 		tags := map[string]string{
-			"name":           u.Name,
-			"site_name":      u.SiteName,
-			"desc":           u.Desc,
-			"status":         s.Status,
-			"subsystem":      s.Subsystem,
-			"wan_ip":         s.WanIP,
-			"netmask":        s.Netmask,
-			"gw_name":        s.GwName,
-			"gw_mac":         s.GwMac,
-			"gw_version":     s.GwVersion,
-			"lan_ip":         s.LanIP,
-			"nameservers":    strings.Join(s.Nameservers, ","),
-			"gateways":       strings.Join(s.Gateways, ","),
-			"num_new_alarms": u.NumNewAlarms.Txt,
+			"name":      u.Name,
+			"site_name": u.SiteName,
+			"desc":      u.Desc,
+			"status":    s.Status,
+			"subsystem": s.Subsystem,
+			"wan_ip":    s.WanIP,
+			"netmask":   s.Netmask,
+			"gw_name":   s.GwName,
+			"gw_mac":    s.GwMac,
+			"lan_ip":    s.LanIP,
 		}
 		fields := map[string]interface{}{
 			"num_user":                 s.NumUser.Val,
@@ -61,8 +56,6 @@ func SitePoints(u *unifi.Site, now time.Time) ([]*influx.Point, error) {
 			"remote_user_rx_packets":   s.RemoteUserRxPackets.Val,
 			"remote_user_tx_packets":   s.RemoteUserTxPackets.Val,
 			"num_new_alarms":           u.NumNewAlarms.Val,
-			"nameservers":              len(s.Nameservers),
-			"gateways":                 len(s.Gateways),
 		}
 		pt, err := influx.NewPoint("subsystems", tags, fields, time.Now())
 		if err != nil {

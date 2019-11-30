@@ -1,73 +1,28 @@
+########################################################
 # UniFi Poller primary configuration file. YAML FORMAT #
-# provided values are defaults                         #
+# provided values are defaults. See up.conf.example!   #
 ########################################################
 ---
-# If the controller has more than one site, specify which sites to poll here.
-# Set this to "default" to poll only the first site on the controller.
-# A setting of "all" will poll all sites; this works if you only have 1 site too.
 sites:
   - all
-
-# The UniFi Controller only updates traffic stats about every 30 seconds.
-# Setting this to something lower may lead to "zeros" in your data.
-# If you're getting zeros now, set this to "1m"
-# Only has effect if "mode" (below) is "influx" - other modes do not use interval.
 interval: "30s"
 
-# Turns on line numbers, microsecond logging, and a per-device log.
-# The default is false, but I personally leave this on at home (four devices).
-# This may be noisy if you have a lot of devices. It adds one line per device.
 debug: false
-
-# Turns off per-interval logs. Only startup and error logs will be emitted.
-# Recommend enabling debug with this setting for better error logging.
 quiet: false
 
-# Which mode to run this application in. The default mode is "influx". Providing
-# an invalid mode will also result in "influx". In this default mode the application
-# runs as a daemon and polls the controller at the configured interval.
-#
-# There are two other options at this time: "influxlambda" and "prometheus"
-#
-# Mode "influxlambda" makes the application exit after collecting and reporting metrics
-# to InfluxDB one time. This mode requires an external process like an AWS Lambda
-# or a simple crontab to keep the timings accurate on UniFi Poller run intervals.
-#
-# Mode "prometheus" opens an HTTP server on port 9130 and exports the metrics at
-# /metrics for polling collection by a prometheus server. This disables influxdb.
-# IMPORTANT: The prometheus mode is still beta.
-# Please help us test and provide your feedback on the github repo!
 mode: "influx"
-
-# This controls on which ip and port /metrics is exported when mode is "prometheus".
-# This has no effect in other modes. Must contain a colon and port.
 http_listen: "0.0.0.0:9130"
 
-# InfluxDB does not require auth by default, so the user/password are probably unimportant.
 influx_url: "http://127.0.0.1:8086"
 influx_user: "unifi"
 influx_pass: "unifi"
-# Be sure to create this database.
 influx_db: "unifi"
-# If your InfluxDB uses an invalid SSL cert, set this to true.
 influx_insecure_ssl: false
 
-# Make a read-only user in the UniFi Admin Settings.
 unifi_user: "influx"
 unifi_pass: ""
 unifi_url: "https://127.0.0.1:8443"
-
-# Enable collection of Intrusion Detection System Data (InfluxDB only).
-# Only useful if IDS or IPS are enabled on one of the sites.
-collect_ids: false
-
-# Some controllers or reverse proxy configurations do not allow cookies to be
-# re-user on every request (every interval). This setting provides a workaround
-# That causes the poller to re-auth (login) to the controller on every interval.
-# Only enable this if you get login errors after 30 seconds. This will generate
-# a few more requests to your controller every interval.
 reauthenticate: false
-
-# If your UniFi controller has a valid SSL certificate, you can enable
-# this option to validate it. Otherwise, any SSL certificate is valid.
 verify_ssl: false
+save_ids: false
+save_sites: true

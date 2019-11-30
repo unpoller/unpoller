@@ -70,7 +70,7 @@ func (u *UnifiPoller) LogInfluxReport(m *influxunifi.Metrics) {
 		fields += len(i)
 	}
 	idsMsg := ""
-	if u.Config.CollectIDS {
+	if u.Config.SaveIDS {
 		idsMsg = fmt.Sprintf("IDS Events: %d, ", len(m.IDSList))
 	}
 	u.Logf("UniFi Measurements Recorded. Sites: %d, Clients: %d, "+
