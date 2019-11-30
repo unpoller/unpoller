@@ -69,7 +69,7 @@ func (u *unifiCollector) exportSite(r report, s *unifi.Site) {
 		labels := []string{h.Subsystem, h.Status, s.SiteName}
 		switch h.Subsystem {
 		case "www":
-			r.send([]*metricExports{
+			r.send([]*metric{
 				{u.Site.TxBytesR, prometheus.GaugeValue, h.TxBytesR, labels},
 				{u.Site.RxBytesR, prometheus.GaugeValue, h.RxBytesR, labels},
 				{u.Site.Uptime, prometheus.GaugeValue, h.Latency, labels},
@@ -81,7 +81,7 @@ func (u *unifiCollector) exportSite(r report, s *unifi.Site) {
 			})
 
 		case "wlan":
-			r.send([]*metricExports{
+			r.send([]*metric{
 				{u.Site.TxBytesR, prometheus.GaugeValue, h.TxBytesR, labels},
 				{u.Site.RxBytesR, prometheus.GaugeValue, h.RxBytesR, labels},
 				{u.Site.NumAdopted, prometheus.GaugeValue, h.NumAdopted, labels},
@@ -95,7 +95,7 @@ func (u *unifiCollector) exportSite(r report, s *unifi.Site) {
 			})
 
 		case "wan":
-			r.send([]*metricExports{
+			r.send([]*metric{
 				{u.Site.TxBytesR, prometheus.GaugeValue, h.TxBytesR, labels},
 				{u.Site.RxBytesR, prometheus.GaugeValue, h.RxBytesR, labels},
 				{u.Site.NumAdopted, prometheus.GaugeValue, h.NumAdopted, labels},
@@ -106,7 +106,7 @@ func (u *unifiCollector) exportSite(r report, s *unifi.Site) {
 			})
 
 		case "lan":
-			r.send([]*metricExports{
+			r.send([]*metric{
 				{u.Site.TxBytesR, prometheus.GaugeValue, h.TxBytesR, labels},
 				{u.Site.RxBytesR, prometheus.GaugeValue, h.RxBytesR, labels},
 				{u.Site.NumAdopted, prometheus.GaugeValue, h.NumAdopted, labels},
@@ -119,7 +119,7 @@ func (u *unifiCollector) exportSite(r report, s *unifi.Site) {
 			})
 
 		case "vpn":
-			r.send([]*metricExports{
+			r.send([]*metric{
 				{u.Site.RemoteUserNumActive, prometheus.GaugeValue, h.RemoteUserNumActive, labels},
 				{u.Site.RemoteUserNumInactive, prometheus.GaugeValue, h.RemoteUserNumInactive, labels},
 				{u.Site.RemoteUserRxBytes, prometheus.CounterValue, h.RemoteUserRxBytes, labels},

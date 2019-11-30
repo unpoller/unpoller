@@ -168,7 +168,7 @@ func descUAP(ns string) *uap {
 func (u *unifiCollector) exportUAP(r report, d *unifi.UAP) {
 	labels := []string{d.IP, d.Version, d.Model, d.Serial, d.Type, d.Mac, d.SiteName, d.Name}
 	// Wireless System Data.
-	r.send([]*metricExports{
+	r.send([]*metric{
 		{u.Device.Uptime, prometheus.GaugeValue, d.Uptime, labels},
 		{u.Device.TotalTxBytes, prometheus.CounterValue, d.TxBytes, labels},
 		{u.Device.TotalRxBytes, prometheus.CounterValue, d.RxBytes, labels},
@@ -199,7 +199,7 @@ func (u *unifiCollector) exportUAPstats(r report, labels []string, ap *unifi.Ap)
 	//	labelA := append([]string{"all"}, labels[2:]...)
 	labelU := append([]string{"user"}, labels[6:]...)
 	labelG := append([]string{"guest"}, labels[6:]...)
-	r.send([]*metricExports{
+	r.send([]*metric{
 		/* // all
 		{u.UAP.ApWifiTxDropped, prometheus.CounterValue, ap.WifiTxDropped, labelA},
 		{u.UAP.ApRxErrors, prometheus.CounterValue, ap.RxErrors, labelA},
@@ -257,7 +257,7 @@ func (u *unifiCollector) exportVAPtable(r report, labels []string, vt unifi.VapT
 		}
 		labelV := append([]string{v.Name, v.Bssid, v.Radio, v.RadioName, v.Essid, v.Usage}, labels[6:]...)
 
-		r.send([]*metricExports{
+		r.send([]*metric{
 			{u.UAP.VAPCcq, prometheus.GaugeValue, v.Ccq / 10, labelV},
 			{u.UAP.VAPMacFilterRejections, prometheus.CounterValue, v.MacFilterRejections, labelV},
 			{u.UAP.VAPNumSatisfactionSta, prometheus.GaugeValue, v.NumSatisfactionSta, labelV},
@@ -303,7 +303,7 @@ func (u *unifiCollector) exportRadtable(r report, labels []string, rt unifi.Radi
 	// radio table
 	for _, p := range rt {
 		labelR := append([]string{p.Name, p.Radio}, labels[6:]...)
-		r.send([]*metricExports{
+		r.send([]*metric{
 			{u.UAP.RadioCurrentAntennaGain, prometheus.GaugeValue, p.CurrentAntennaGain, labelR},
 			{u.UAP.RadioHt, prometheus.GaugeValue, p.Ht, labelR},
 			{u.UAP.RadioMaxTxpower, prometheus.GaugeValue, p.MaxTxpower, labelR},
@@ -317,7 +317,7 @@ func (u *unifiCollector) exportRadtable(r report, labels []string, rt unifi.Radi
 			if t.Name != p.Name {
 				continue
 			}
-			r.send([]*metricExports{
+			r.send([]*metric{
 				{u.UAP.RadioTxPower, prometheus.GaugeValue, t.TxPower, labelR},
 				{u.UAP.RadioAstBeXmit, prometheus.GaugeValue, t.AstBeXmit, labelR},
 				{u.UAP.RadioChannel, prometheus.GaugeValue, t.Channel, labelR},
