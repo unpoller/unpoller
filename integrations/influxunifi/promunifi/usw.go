@@ -92,19 +92,6 @@ func descUSW(ns string) *usw {
 	}
 }
 
-func (u *unifiCollector) exportUSWs(r report) {
-	if r.metrics() == nil || r.metrics().Devices == nil || len(r.metrics().Devices.USWs) < 1 {
-		return
-	}
-	r.add()
-	go func() {
-		defer r.done()
-		for _, d := range r.metrics().Devices.USWs {
-			u.exportUSW(r, d)
-		}
-	}()
-}
-
 func (u *unifiCollector) exportUSW(r report, d *unifi.USW) {
 	labels := []string{d.IP, d.Version, d.Model, d.Serial, d.Type, d.Mac, d.SiteName, d.Name}
 	if d.HasTemperature.Val {
@@ -166,31 +153,31 @@ func (u *unifiCollector) exportPortTable(r report, labels []string, pt []unifi.P
 			continue
 		}
 		// Copy labels, and add four new ones.
-		l := append([]string{p.PortIdx.Txt, p.Name, p.Mac, p.IP}, labels[6:]...)
+		labelP := []string{p.PortIdx.Txt, p.Name, p.Mac, p.IP, labels[6], labels[7]}
 		if p.PoeEnable.Val && p.PortPoe.Val {
 			r.send([]*metricExports{
-				{u.USW.PoeCurrent, prometheus.GaugeValue, p.PoeCurrent, l},
-				{u.USW.PoePower, prometheus.GaugeValue, p.PoePower, l},
-				{u.USW.PoeVoltage, prometheus.GaugeValue, p.PoeVoltage, l},
+				{u.USW.PoeCurrent, prometheus.GaugeValue, p.PoeCurrent, labelP},
+				{u.USW.PoePower, prometheus.GaugeValue, p.PoePower, labelP},
+				{u.USW.PoeVoltage, prometheus.GaugeValue, p.PoeVoltage, labelP},
 			})
 		}
 
 		r.send([]*metricExports{
-			{u.USW.RxBroadcast, prometheus.CounterValue, p.RxBroadcast, l},
-			{u.USW.RxBytes, prometheus.CounterValue, p.RxBytes, l},
-			{u.USW.RxBytesR, prometheus.GaugeValue, p.RxBytesR, l},
-			{u.USW.RxDropped, prometheus.CounterValue, p.RxDropped, l},
-			{u.USW.RxErrors, prometheus.CounterValue, p.RxErrors, l},
-			{u.USW.RxMulticast, prometheus.CounterValue, p.RxMulticast, l},
-			{u.USW.RxPackets, prometheus.CounterValue, p.RxPackets, l},
-			{u.USW.Satisfaction, prometheus.GaugeValue, p.Satisfaction, l},
-			{u.USW.Speed, prometheus.GaugeValue, p.Speed.Val * 1000000, l},
-			{u.USW.TxBroadcast, prometheus.CounterValue, p.TxBroadcast, l},
-			{u.USW.TxBytes, prometheus.CounterValue, p.TxBytes, l},
-			{u.USW.TxBytesR, prometheus.GaugeValue, p.TxBytesR, l},
-			{u.USW.TxDropped, prometheus.CounterValue, p.TxDropped, l},
-			{u.USW.TxErrors, prometheus.CounterValue, p.TxErrors, l},
-			{u.USW.TxMulticast, prometheus.CounterValue, p.TxMulticast, l},
+			{u.USW.RxBroadcast, prometheus.CounterValue, p.RxBroadcast, labelP},
+			{u.USW.RxBytes, prometheus.CounterValue, p.RxBytes, labelP},
+			{u.USW.RxBytesR, prometheus.GaugeValue, p.RxBytesR, labelP},
+			{u.USW.RxDropped, prometheus.CounterValue, p.RxDropped, labelP},
+			{u.USW.RxErrors, prometheus.CounterValue, p.RxErrors, labelP},
+			{u.USW.RxMulticast, prometheus.CounterValue, p.RxMulticast, labelP},
+			{u.USW.RxPackets, prometheus.CounterValue, p.RxPackets, labelP},
+			{u.USW.Satisfaction, prometheus.GaugeValue, p.Satisfaction, labelP},
+			{u.USW.Speed, prometheus.GaugeValue, p.Speed.Val * 1000000, labelP},
+			{u.USW.TxBroadcast, prometheus.CounterValue, p.TxBroadcast, labelP},
+			{u.USW.TxBytes, prometheus.CounterValue, p.TxBytes, labelP},
+			{u.USW.TxBytesR, prometheus.GaugeValue, p.TxBytesR, labelP},
+			{u.USW.TxDropped, prometheus.CounterValue, p.TxDropped, labelP},
+			{u.USW.TxErrors, prometheus.CounterValue, p.TxErrors, labelP},
+			{u.USW.TxMulticast, prometheus.CounterValue, p.TxMulticast, labelP},
 		})
 	}
 }
