@@ -1,5 +1,4 @@
-<img width="320px" src="https://raw.githubusercontent.com/wiki/davidnewhall/unifi-poller/images/unifi-poller-logo.png"> now with <img width="30px" src="https://prometheus.io/assets/prometheus_logo_grey.svg"> Prometheus support!
-
+<img width="320px" src="https://raw.githubusercontent.com/wiki/davidnewhall/unifi-poller/images/unifi-poller-logo.png"> 
 
 [![discord](https://badgen.net/badge/icon/Discord?color=0011ff&label&icon=https://simpleicons.now.sh/discord/eee "Ubiquiti Discord")](https://discord.gg/KnyKYt2)
 [![twitter](https://badgen.net/twitter/follow/TwitchCaptain?icon=https://simpleicons.now.sh/twitter/0099ff&label=TwitchCaptain&color=0116ff "TwitchCaptain @ Twitter")](https://twitter.com/TwitchCaptain)
