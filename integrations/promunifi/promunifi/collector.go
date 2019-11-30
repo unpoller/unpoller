@@ -88,9 +88,8 @@ func NewUnifiCollector(opts UnifiCollectorCnfg) prometheus.Collector {
 // Describe satisfies the prometheus Collector. This returns all of the
 // metric descriptions that this packages produces.
 func (u *unifiCollector) Describe(ch chan<- *prometheus.Desc) {
-	describe := func(from interface{}) {
-		v := reflect.Indirect(reflect.ValueOf(from))
-
+	for _, f := range []interface{}{u.Client, u.Device, u.UAP, u.USG, u.USW, u.Site} {
+		v := reflect.Indirect(reflect.ValueOf(f))
 		// Loop each struct member and send it to the provided channel.
 		for i := 0; i < v.NumField(); i++ {
 			desc, ok := v.Field(i).Interface().(*prometheus.Desc)
@@ -99,44 +98,32 @@ func (u *unifiCollector) Describe(ch chan<- *prometheus.Desc) {
 			}
 		}
 	}
-
-	describe(u.Client)
-	describe(u.Device)
-	describe(u.UAP)
-	describe(u.USG)
-	describe(u.USW)
-	describe(u.Site)
 }
 
 // Collect satisfies the prometheus Collector. This runs the input method to get
 // the current metrics (from another package) then exports them for prometheus.
 func (u *unifiCollector) Collect(ch chan<- prometheus.Metric) {
-	r := &Report{
-		cf:    u.Config,
-		Start: time.Now(),
-		ch:    make(chan []*metricExports, buffer),
-	}
-	defer func() {
-		r.wg.Wait()
-		close(r.ch)
-	}()
-
 	var err error
+	r := &Report{cf: u.Config, ch: make(chan []*metricExports, buffer)}
+	defer r.finish()
+
+	r.Start = time.Now()
 	if r.Metrics, err = r.cf.CollectFn(); err != nil {
 		r.error(ch, prometheus.NewInvalidDesc(fmt.Errorf("metric fetch failed")), err)
 		return
 	}
 	r.Fetch = time.Since(r.Start)
+	if r.Metrics.Devices == nil {
+		r.Metrics.Devices = &unifi.Devices{}
+	}
 
 	// Pass Report interface into our collecting and reporting methods.
 	go u.exportMetrics(r, ch)
 	// in loops.go.
-	u.loopClients(r)
-	u.loopSites(r)
-	u.loopUAPs(r)
-	u.loopUSWs(r)
-	u.loopUSGs(r)
-	u.loopUDMs(r)
+	for _, f := range []func(report){u.loopClients, u.loopSites, u.loopUAPs, u.loopUSWs, u.loopUSGs, u.loopUDMs} {
+		r.add()
+		go f(r)
+	}
 }
 
 // This is closely tied to the method above with a sync.WaitGroup.
