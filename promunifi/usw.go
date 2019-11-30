@@ -99,7 +99,7 @@ func (u *unifiCollector) exportUSW(r report, d *unifi.USW) {
 		r.send([]*metricExports{{u.Device.FanLevel, prometheus.GaugeValue, d.FanLevel, labels}})
 	}
 
-	// Switch data.
+	// Switch System Data.
 	r.send([]*metricExports{
 		{u.Device.Uptime, prometheus.GaugeValue, d.Uptime, labels},
 		{u.Device.TotalMaxPower, prometheus.GaugeValue, d.TotalMaxPower, labels},
