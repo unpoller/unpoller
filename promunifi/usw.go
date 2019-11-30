@@ -47,11 +47,9 @@ type usw struct {
 
 func descUSW(ns string) *usw {
 	pns := ns + "port_"
-	// The first five labels for switch are shared with (the same as) switch ports.
 	// labels := []string{"ip", "version", "model", "serial", "type", "mac", "site_name", "name"}
 	labelS := []string{"site_name", "name"} // labels[6:]
-	// Copy labels, and replace first four with different names.
-	labelP := append([]string{"port_num", "port_name", "port_mac", "port_ip"}, labelS...)
+	labelP := []string{"port_num", "port_name", "port_mac", "port_ip", "site_name", "name"}
 	return &usw{
 		SwRxPackets:   prometheus.NewDesc(ns+"switch_receive_packets_total", "Switch Packets Received Total", labelS, nil),
 		SwRxBytes:     prometheus.NewDesc(ns+"switch_receive_bytes_total", "Switch Bytes Received Total", labelS, nil),
