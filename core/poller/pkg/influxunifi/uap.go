@@ -14,27 +14,15 @@ func UAPPoints(u *unifi.UAP, now time.Time) ([]*influx.Point, error) {
 		u.Stat.Ap = &unifi.Ap{}
 	}
 	tags := map[string]string{
-		"id":                  u.ID,
-		"ip":                  u.IP,
-		"mac":                 u.Mac,
-		"device_type":         u.Stat.Ap.O,
-		"device_oid":          u.Stat.Ap.Oid,
-		"device_ap":           u.Stat.Ap.Ap,
-		"site_id":             u.SiteID,
-		"site_name":           u.SiteName,
-		"name":                u.Name,
-		"adopted":             u.Adopted.Txt,
-		"cfgversion":          u.Cfgversion,
-		"config_network_ip":   u.ConfigNetwork.IP,
-		"config_network_type": u.ConfigNetwork.Type,
-		"connect_request_ip":  u.ConnectRequestIP,
-		"device_id":           u.DeviceID,
-		"has_eth1":            u.HasEth1.Txt,
-		"inform_ip":           u.InformIP,
-		"known_cfgversion":    u.KnownCfgversion,
-		"model":               u.Model,
-		"serial":              u.Serial,
-		"type":                u.Type,
+		"ip":         u.IP,
+		"mac":        u.Mac,
+		"site_id":    u.SiteID,
+		"site_name":  u.SiteName,
+		"name":       u.Name,
+		"cfgversion": u.Cfgversion,
+		"model":      u.Model,
+		"serial":     u.Serial,
+		"type":       u.Type,
 	}
 	fields := map[string]interface{}{
 		"ip":            u.IP,
@@ -47,7 +35,6 @@ func UAPPoints(u *unifi.UAP, now time.Time) ([]*influx.Point, error) {
 		"user-num_sta":  int(u.UserNumSta.Val),
 		"guest-num_sta": int(u.GuestNumSta.Val),
 		"num_sta":       u.NumSta.Val,
-		"version":       u.Version,
 		"loadavg_1":     u.SysStats.Loadavg1.Val,
 		"loadavg_5":     u.SysStats.Loadavg5.Val,
 		"loadavg_15":    u.SysStats.Loadavg15.Val,
@@ -95,7 +82,7 @@ func UAPPoints(u *unifi.UAP, now time.Time) ([]*influx.Point, error) {
 	if err != nil {
 		return nil, err
 	}
-	morePoints, err := processVAPs(u.VapTable, u.RadioTable, u.RadioTableStats, u.Name, u.ID, u.Mac, u.SiteName, now)
+	morePoints, err := processVAPs(u.VapTable, u.RadioTable, u.RadioTableStats, u.Name, u.Mac, u.SiteName, now)
 	if err != nil {
 		return nil, err
 	}
@@ -103,7 +90,7 @@ func UAPPoints(u *unifi.UAP, now time.Time) ([]*influx.Point, error) {
 }
 
 // processVAPs creates points for Wifi Radios. This works with several types of UAP-capable devices.
-func processVAPs(vt unifi.VapTable, rt unifi.RadioTable, rts unifi.RadioTableStats, name, id, mac, sitename string, ts time.Time) ([]*influx.Point, error) {
+func processVAPs(vt unifi.VapTable, rt unifi.RadioTable, rts unifi.RadioTableStats, name, mac, sitename string, ts time.Time) ([]*influx.Point, error) {
 	tags := make(map[string]string)
 	fields := make(map[string]interface{})
 	points := []*influx.Point{}
@@ -112,7 +99,6 @@ func processVAPs(vt unifi.VapTable, rt unifi.RadioTable, rts unifi.RadioTableSta
 	// from radio_tables and radio_table_stats.
 	for _, s := range vt {
 		tags["device_name"] = name
-		tags["device_id"] = id
 		tags["device_mac"] = mac
 		tags["site_name"] = sitename
 		tags["ap_mac"] = s.ApMac
@@ -120,13 +106,11 @@ func processVAPs(vt unifi.VapTable, rt unifi.RadioTable, rts unifi.RadioTableSta
 		tags["id"] = s.ID
 		tags["name"] = s.Name
 		tags["radio_name"] = s.RadioName
-		tags["wlanconf_id"] = s.WlanconfID
 		tags["essid"] = s.Essid
 		tags["site_id"] = s.SiteID
 		tags["usage"] = s.Usage
 		tags["state"] = s.State
 		tags["is_guest"] = s.IsGuest.Txt
-		tags["is_wep"] = s.IsWep.Txt
 
 		fields["ccq"] = s.Ccq
 		fields["extchannel"] = s.Extchannel
@@ -171,13 +155,11 @@ func processVAPs(vt unifi.VapTable, rt unifi.RadioTable, rts unifi.RadioTableSta
 			if p.Name != s.RadioName {
 				continue
 			}
-			tags["wlangroup_id"] = p.WlangroupID
 			tags["channel"] = p.Channel.Txt
 			tags["radio"] = p.Radio
 			fields["current_antenna_gain"] = p.CurrentAntennaGain.Val
 			fields["ht"] = p.Ht.Txt
 			fields["max_txpower"] = p.MaxTxpower.Val
-			fields["min_rssi_enabled"] = p.MinRssiEnabled.Val
 			fields["min_txpower"] = p.MinTxpower.Val
 			fields["nss"] = p.Nss.Val
 			fields["radio_caps"] = p.RadioCaps.Val
