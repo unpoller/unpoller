@@ -93,14 +93,14 @@ func descUSW(ns string) *usw {
 func (u *unifiCollector) exportUSW(r report, d *unifi.USW) {
 	labels := []string{d.IP, d.Version, d.Model, d.Serial, d.Type, d.Mac, d.SiteName, d.Name}
 	if d.HasTemperature.Val {
-		r.send([]*metricExports{{u.Device.Temperature, prometheus.GaugeValue, d.GeneralTemperature, labels}})
+		r.send([]*metric{{u.Device.Temperature, prometheus.GaugeValue, d.GeneralTemperature, labels}})
 	}
 	if d.HasFan.Val {
-		r.send([]*metricExports{{u.Device.FanLevel, prometheus.GaugeValue, d.FanLevel, labels}})
+		r.send([]*metric{{u.Device.FanLevel, prometheus.GaugeValue, d.FanLevel, labels}})
 	}
 
 	// Switch System Data.
-	r.send([]*metricExports{
+	r.send([]*metric{
 		{u.Device.Uptime, prometheus.GaugeValue, d.Uptime, labels},
 		{u.Device.TotalMaxPower, prometheus.GaugeValue, d.TotalMaxPower, labels},
 		{u.Device.TotalTxBytes, prometheus.CounterValue, d.TxBytes, labels},
@@ -124,7 +124,7 @@ func (u *unifiCollector) exportUSW(r report, d *unifi.USW) {
 
 func (u *unifiCollector) exportUSWstats(r report, labels []string, sw *unifi.Sw) {
 	labelS := labels[6:]
-	r.send([]*metricExports{
+	r.send([]*metric{
 		{u.USW.SwRxPackets, prometheus.CounterValue, sw.RxPackets, labelS},
 		{u.USW.SwRxBytes, prometheus.CounterValue, sw.RxBytes, labelS},
 		{u.USW.SwRxErrors, prometheus.CounterValue, sw.RxErrors, labelS},
@@ -153,14 +153,14 @@ func (u *unifiCollector) exportPortTable(r report, labels []string, pt []unifi.P
 		// Copy labels, and add four new ones.
 		labelP := []string{p.PortIdx.Txt, p.Name, p.Mac, p.IP, labels[6], labels[7]}
 		if p.PoeEnable.Val && p.PortPoe.Val {
-			r.send([]*metricExports{
+			r.send([]*metric{
 				{u.USW.PoeCurrent, prometheus.GaugeValue, p.PoeCurrent, labelP},
 				{u.USW.PoePower, prometheus.GaugeValue, p.PoePower, labelP},
 				{u.USW.PoeVoltage, prometheus.GaugeValue, p.PoeVoltage, labelP},
 			})
 		}
 
-		r.send([]*metricExports{
+		r.send([]*metric{
 			{u.USW.RxBroadcast, prometheus.CounterValue, p.RxBroadcast, labelP},
 			{u.USW.RxBytes, prometheus.CounterValue, p.RxBytes, labelP},
 			{u.USW.RxBytesR, prometheus.GaugeValue, p.RxBytesR, labelP},
