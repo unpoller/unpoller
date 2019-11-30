@@ -71,7 +71,7 @@ func descClient(ns string) *uclient {
 	}
 }
 
-func (u *unifiCollector) exportClient(r report, c *unifi.Client) {
+func (u *promUnifi) exportClient(r report, c *unifi.Client) {
 	labels := []string{c.Name, c.Mac, c.SiteName, c.GwName, c.SwName, c.Vlan.Txt, c.IP, c.Oui, c.Network, c.SwPort.Txt, c.ApName, ""}
 	labelW := append([]string{c.RadioName, c.Radio, c.RadioProto, c.Channel.Txt, c.Essid, c.Bssid, c.RadioDescription}, labels...)
 

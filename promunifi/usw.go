@@ -90,7 +90,7 @@ func descUSW(ns string) *usw {
 	}
 }
 
-func (u *unifiCollector) exportUSW(r report, d *unifi.USW) {
+func (u *promUnifi) exportUSW(r report, d *unifi.USW) {
 	labels := []string{d.IP, d.Version, d.Model, d.Serial, d.Type, d.Mac, d.SiteName, d.Name}
 	if d.HasTemperature.Val {
 		r.send([]*metric{{u.Device.Temperature, prometheus.GaugeValue, d.GeneralTemperature, labels}})
@@ -122,7 +122,7 @@ func (u *unifiCollector) exportUSW(r report, d *unifi.USW) {
 	u.exportUSWstats(r, labels, d.Stat.Sw)
 }
 
-func (u *unifiCollector) exportUSWstats(r report, labels []string, sw *unifi.Sw) {
+func (u *promUnifi) exportUSWstats(r report, labels []string, sw *unifi.Sw) {
 	labelS := labels[6:]
 	r.send([]*metric{
 		{u.USW.SwRxPackets, prometheus.CounterValue, sw.RxPackets, labelS},
@@ -144,7 +144,7 @@ func (u *unifiCollector) exportUSWstats(r report, labels []string, sw *unifi.Sw)
 	})
 }
 
-func (u *unifiCollector) exportPortTable(r report, labels []string, pt []unifi.Port) {
+func (u *promUnifi) exportPortTable(r report, labels []string, pt []unifi.Port) {
 	// Per-port data on a switch
 	for _, p := range pt {
 		if !p.Up.Val {
