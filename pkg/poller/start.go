@@ -25,6 +25,7 @@ func New() *UnifiPoller {
 			UnifiBase:  defaultUnifiURL,
 			Interval:   Duration{defaultInterval},
 			Sites:      []string{"all"},
+			SaveSites:  true,
 			HTTPListen: defaultHTTPListen,
 			Namespace:  appName,
 		}, Flag: &Flag{},
