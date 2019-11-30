@@ -61,14 +61,7 @@ type Report struct {
 	Start   time.Time
 	ch      chan []*metricExports
 	wg      sync.WaitGroup
-}
-
-// internal interface used to "process metrics" - can be mocked and overridden for tests.
-type report interface {
-	send([]*metricExports)
-	add()
-	done()
-	metrics() *metrics.Metrics
+	cf      UnifiCollectorCnfg
 }
 
 // NewUnifiCollector returns a prometheus collector that will export any available
@@ -117,13 +110,17 @@ func (u *unifiCollector) Describe(ch chan<- *prometheus.Desc) {
 // Collect satisfies the prometheus Collector. This runs the input method to get
 // the current metrics (from another package) then exports them for prometheus.
 func (u *unifiCollector) Collect(ch chan<- prometheus.Metric) {
-	var err error
-	r := &Report{Start: time.Now(), ch: make(chan []*metricExports, buffer)}
+	r := &Report{
+		cf:    u.Config,
+		Start: time.Now(),
+		ch:    make(chan []*metricExports, buffer),
+	}
 	defer func() {
 		r.wg.Wait()
 		close(r.ch)
 	}()
 
+	var err error
 	if r.Metrics, err = u.Config.CollectFn(); err != nil {
 		ch <- prometheus.NewInvalidMetric(
 			prometheus.NewInvalidDesc(fmt.Errorf("metric fetch failed")), err)
@@ -131,72 +128,36 @@ func (u *unifiCollector) Collect(ch chan<- prometheus.Metric) {
 	}
 
 	go u.exportMetrics(r, ch)
-	u.exportClients(r)
-	u.exportSites(r)
-	u.exportUAPs(r)
-	u.exportUSWs(r)
-	u.exportUSGs(r)
-	u.exportUDMs(r)
+	// in loops.go.
+	u.loopClients(r)
+	u.loopSites(r)
+	u.loopUAPs(r)
+	u.loopUSWs(r)
+	u.loopUSGs(r)
+	u.loopUDMs(r)
 }
 
 // This is closely tied to the method above with a sync.WaitGroup.
 // This method runs in a go routine and exits when the channel closes.
-func (u *unifiCollector) exportMetrics(r *Report, ch chan<- prometheus.Metric) {
+func (u *unifiCollector) exportMetrics(r report, ch chan<- prometheus.Metric) {
 	descs := make(map[*prometheus.Desc]bool) // used as a counter
-	for newMetrics := range r.ch {
+	defer r.report(descs)
+	for newMetrics := range r.channel() {
 		for _, m := range newMetrics {
-			r.Total++
 			descs[m.Desc] = true
-			var value float64
 			switch v := m.Value.(type) {
 			case unifi.FlexInt:
-				value = v.Val
+				ch <- r.export(m, v.Val)
 			case float64:
-				value = v
+				ch <- r.export(m, v)
 			case int64:
-				value = float64(v)
+				ch <- r.export(m, float64(v))
 			case int:
-				value = float64(v)
-
+				ch <- r.export(m, float64(v))
 			default:
-				r.Errors++
-				if u.Config.ReportErrors {
-					ch <- prometheus.NewInvalidMetric(m.Desc, fmt.Errorf("not a number: %v", m.Value))
-				}
-				continue
+				r.error(ch, m.Desc, m.Value)
 			}
-
-			if value == 0 {
-				r.Zeros++
-			}
-			ch <- prometheus.MustNewConstMetric(m.Desc, m.ValueType, value, m.Labels...)
 		}
-		r.wg.Done()
+		r.done()
 	}
-
-	if u.Config.LoggingFn == nil {
-		return
-	}
-	r.Descs, r.Elapsed = len(descs), time.Since(r.Start)
-	u.Config.LoggingFn(r)
-}
-
-func (r *Report) metrics() *metrics.Metrics {
-	return r.Metrics
-}
-
-// satisfy gomnd
-const one = 1
-
-func (r *Report) add() {
-	r.wg.Add(one)
-}
-
-func (r *Report) done() {
-	r.wg.Done()
-}
-
-func (r *Report) send(m []*metricExports) {
-	r.wg.Add(one)
-	r.ch <- m
 }
