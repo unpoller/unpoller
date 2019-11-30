@@ -5,78 +5,84 @@ package promunifi
 // they usually all change at once since they're pretty much the same code.
 
 func (u *unifiCollector) loopSites(r report) {
-	if r.metrics() == nil || len(r.metrics().Sites) < 1 {
+	m := r.metrics()
+	if m == nil || len(m.Sites) < 1 {
 		return
 	}
 	r.add()
 	go func() {
 		defer r.done()
-		for _, s := range r.metrics().Sites {
+		for _, s := range m.Sites {
 			u.exportSite(r, s)
 		}
 	}()
 }
 
 func (u *unifiCollector) loopUAPs(r report) {
-	if r.metrics() == nil || r.metrics().Devices == nil || len(r.metrics().Devices.UAPs) < 1 {
+	m := r.metrics()
+	if m == nil || m.Devices == nil || len(m.Devices.UAPs) < 1 {
 		return
 	}
 	r.add()
 	go func() {
 		defer r.done()
-		for _, d := range r.metrics().Devices.UAPs {
+		for _, d := range m.Devices.UAPs {
 			u.exportUAP(r, d)
 		}
 	}()
 }
 
 func (u *unifiCollector) loopUDMs(r report) {
-	if r.metrics() == nil || r.metrics().Devices == nil || len(r.metrics().Devices.UDMs) < 1 {
+	m := r.metrics()
+	if m == nil || m.Devices == nil || len(m.Devices.UDMs) < 1 {
 		return
 	}
 	r.add()
 	go func() {
 		defer r.done()
-		for _, d := range r.metrics().Devices.UDMs {
+		for _, d := range m.Devices.UDMs {
 			u.exportUDM(r, d)
 		}
 	}()
 }
 
 func (u *unifiCollector) loopUSGs(r report) {
-	if r.metrics() == nil || r.metrics().Devices == nil || len(r.metrics().Devices.USGs) < 1 {
+	m := r.metrics()
+	if m == nil || m.Devices == nil || len(m.Devices.USGs) < 1 {
 		return
 	}
 	r.add()
 	go func() {
 		defer r.done()
-		for _, d := range r.metrics().Devices.USGs {
+		for _, d := range m.Devices.USGs {
 			u.exportUSG(r, d)
 		}
 	}()
 }
 
 func (u *unifiCollector) loopUSWs(r report) {
-	if r.metrics() == nil || r.metrics().Devices == nil || len(r.metrics().Devices.USWs) < 1 {
+	m := r.metrics()
+	if m == nil || m.Devices == nil || len(m.Devices.USWs) < 1 {
 		return
 	}
 	r.add()
 	go func() {
 		defer r.done()
-		for _, d := range r.metrics().Devices.USWs {
+		for _, d := range m.Devices.USWs {
 			u.exportUSW(r, d)
 		}
 	}()
 }
 
 func (u *unifiCollector) loopClients(r report) {
-	if r.metrics() == nil || len(r.metrics().Clients) < 1 {
+	m := r.metrics()
+	if m == nil || len(m.Clients) < 1 {
 		return
 	}
 	r.add()
 	go func() {
 		defer r.done()
-		for _, c := range r.metrics().Clients {
+		for _, c := range m.Clients {
 			u.exportClient(r, c)
 		}
 	}()
