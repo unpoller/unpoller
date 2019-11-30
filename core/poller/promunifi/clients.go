@@ -44,7 +44,7 @@ func descClient(ns string) *uclient {
 	labels := []string{"name", "mac", "site_name", "gw_name", "sw_name", "vlan", "ip", "oui", "network", "sw_port", "ap_name", "wired"}
 	labelW := append([]string{"radio_name", "radio", "radio_proto", "channel", "essid", "bssid", "radio_desc"}, labels...)
 	return &uclient{
-		Anomalies:      prometheus.NewDesc(ns+"anomalies_total", "Client Anomalies", labelW, nil),
+		Anomalies:      prometheus.NewDesc(ns+"anomalies", "Client Anomalies", labelW, nil),
 		BytesR:         prometheus.NewDesc(ns+"transfer_rate_bytes", "Client Data Rate", labelW, nil),
 		CCQ:            prometheus.NewDesc(ns+"ccq_percent", "Client Connection Quality", labelW, nil),
 		Satisfaction:   prometheus.NewDesc(ns+"satisfaction_percent", "Client Satisfaction", labelW, nil),
