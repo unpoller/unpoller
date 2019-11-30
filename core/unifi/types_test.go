@@ -15,10 +15,11 @@ func TestFlexInt(t *testing.T) {
 		Seven   FlexInt `json:"seven"`
 		Auto    FlexInt `json:"auto"`
 		Channel FlexInt `json:"channel"`
+		Nil     FlexInt `json:"nil"`
 	}
 	var r testReply
 	// test unmarshalling the custom type three times with different values.
-	a.Nil(json.Unmarshal([]byte(`{"five": "5", "seven": 7, "auto": "auto"}`), &r))
+	a.Nil(json.Unmarshal([]byte(`{"five": "5", "seven": 7, "auto": "auto", "nil": null}`), &r))
 
 	// test number in string.
 	a.EqualValues(5, r.Five.Val)
@@ -33,4 +34,7 @@ func TestFlexInt(t *testing.T) {
 	a.NotNil(json.Unmarshal([]byte(`{"channel": {}}`), &r),
 		"a non-string and non-number must produce an error.")
 	a.EqualValues(0, r.Channel.Val)
+	// test null.
+	a.EqualValues(0, r.Nil.Val)
+	a.EqualValues("0", r.Nil.Txt)
 }

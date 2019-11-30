@@ -93,18 +93,16 @@ func (f *FlexInt) UnmarshalJSON(b []byte) error {
 	case float64:
 		f.Val = i
 		f.Txt = strconv.FormatFloat(i, 'f', -1, 64)
-		return nil
 	case string:
 		f.Txt = i
 		f.Val, _ = strconv.ParseFloat(i, 64)
-		return nil
 	case nil:
 		f.Txt = "0"
 		f.Val = 0
-		return nil
 	default:
 		return fmt.Errorf("cannot unmarshal to FlexInt: %s", b)
 	}
+	return nil
 }
 
 // FlexBool provides a container and unmarshalling for fields that may be
