@@ -8,7 +8,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/davidnewhall/unifi-poller/metrics"
+	"github.com/davidnewhall/unifi-poller/pkg/metrics"
 	"github.com/prometheus/client_golang/prometheus"
 	"golift.io/unifi"
 )

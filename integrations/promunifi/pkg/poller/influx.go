@@ -4,8 +4,8 @@ import (
 	"crypto/tls"
 	"fmt"
 
-	"github.com/davidnewhall/unifi-poller/influxunifi"
-	"github.com/davidnewhall/unifi-poller/metrics"
+	"github.com/davidnewhall/unifi-poller/pkg/influxunifi"
+	"github.com/davidnewhall/unifi-poller/pkg/metrics"
 	influx "github.com/influxdata/influxdb1-client/v2"
 )
 
