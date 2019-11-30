@@ -83,10 +83,10 @@ type uap struct {
 }
 
 func descUAP(ns string) *uap {
-	labels := []string{"ip", "version", "model", "serial", "type", "mac", "site_name", "name"}
-	labelA := append([]string{"stat"}, labels[6:]...)
-	labelV := append([]string{"vap_name", "bssid", "radio", "radio_name", "essid", "usage"}, labels[6:]...)
-	labelR := append([]string{"radio_name", "radio"}, labels[6:]...)
+	//	labels := []string{"ip", "version", "model", "serial", "type", "mac", "site_name", "name"}
+	labelA := []string{"stat", "site_name", "name"} // stat + labels[6:]
+	labelV := []string{"vap_name", "bssid", "radio", "radio_name", "essid", "usage", "site_name", "name"}
+	labelR := []string{"radio_name", "radio", "site_name", "name"}
 	return &uap{
 		// 3x each - stat table: total, guest, user
 		ApWifiTxDropped:     prometheus.NewDesc(ns+"stat_wifi_transmt_dropped_total", "Wifi Transmissions Dropped", labelA, nil),
@@ -163,19 +163,6 @@ func descUAP(ns string) *uap {
 		RadioTxPackets:          prometheus.NewDesc(ns+"radio_transmit_packets_total", "Radio Transmitted Packets", labelR, nil),
 		RadioTxRetries:          prometheus.NewDesc(ns+"radio_transmit_retries_total", "Radio Transmit Retries", labelR, nil),
 	}
-}
-
-func (u *unifiCollector) exportUAPs(r report) {
-	if r.metrics() == nil || r.metrics().Devices == nil || len(r.metrics().Devices.UAPs) < 1 {
-		return
-	}
-	r.add()
-	go func() {
-		defer r.done()
-		for _, d := range r.metrics().Devices.UAPs {
-			u.exportUAP(r, d)
-		}
-	}()
 }
 
 func (u *unifiCollector) exportUAP(r report, d *unifi.UAP) {

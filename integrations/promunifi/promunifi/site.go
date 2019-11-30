@@ -34,7 +34,7 @@ type site struct {
 }
 
 func descSite(ns string) *site {
-	labels := []string{"subsystem", "status", "name", "desc", "site_name"}
+	labels := []string{"subsystem", "status", "site_name"}
 	return &site{
 		NumUser:               prometheus.NewDesc(ns+"users", "Number of Users", labels, nil),
 		NumGuest:              prometheus.NewDesc(ns+"guests", "Number of Guests", labels, nil),
@@ -64,82 +64,68 @@ func descSite(ns string) *site {
 	}
 }
 
-func (u *unifiCollector) exportSites(r report) {
-	if r.metrics() == nil || len(r.metrics().Sites) < 1 {
-		return
-	}
-	r.add()
-	go func() {
-		defer r.done()
-		for _, s := range r.metrics().Sites {
-			u.exportSite(r, s)
-		}
-	}()
-}
-
 func (u *unifiCollector) exportSite(r report, s *unifi.Site) {
-	labels := []string{s.Name, s.Desc, s.SiteName}
 	for _, h := range s.Health {
-		l := append([]string{h.Subsystem, h.Status}, labels...)
+		labels := []string{h.Subsystem, h.Status, s.SiteName}
 		switch h.Subsystem {
 		case "www":
 			r.send([]*metricExports{
-				{u.Site.TxBytesR, prometheus.GaugeValue, h.TxBytesR, l},
-				{u.Site.RxBytesR, prometheus.GaugeValue, h.RxBytesR, l},
-				{u.Site.Uptime, prometheus.GaugeValue, h.Latency, l},
-				{u.Site.Latency, prometheus.GaugeValue, h.Latency.Val / 1000, l},
-				{u.Site.XputUp, prometheus.GaugeValue, h.XputUp, l},
-				{u.Site.XputDown, prometheus.GaugeValue, h.XputDown, l},
-				{u.Site.SpeedtestPing, prometheus.GaugeValue, h.SpeedtestPing, l},
-				{u.Site.Drops, prometheus.CounterValue, h.Drops, l},
+				{u.Site.TxBytesR, prometheus.GaugeValue, h.TxBytesR, labels},
+				{u.Site.RxBytesR, prometheus.GaugeValue, h.RxBytesR, labels},
+				{u.Site.Uptime, prometheus.GaugeValue, h.Latency, labels},
+				{u.Site.Latency, prometheus.GaugeValue, h.Latency.Val / 1000, labels},
+				{u.Site.XputUp, prometheus.GaugeValue, h.XputUp, labels},
+				{u.Site.XputDown, prometheus.GaugeValue, h.XputDown, labels},
+				{u.Site.SpeedtestPing, prometheus.GaugeValue, h.SpeedtestPing, labels},
+				{u.Site.Drops, prometheus.CounterValue, h.Drops, labels},
 			})
 
 		case "wlan":
 			r.send([]*metricExports{
-				{u.Site.TxBytesR, prometheus.GaugeValue, h.TxBytesR, l},
-				{u.Site.RxBytesR, prometheus.GaugeValue, h.RxBytesR, l},
-				{u.Site.NumAdopted, prometheus.GaugeValue, h.NumAdopted, l},
-				{u.Site.NumDisconnected, prometheus.GaugeValue, h.NumDisconnected, l},
-				{u.Site.NumPending, prometheus.GaugeValue, h.NumPending, l},
-				{u.Site.NumUser, prometheus.GaugeValue, h.NumUser, l},
-				{u.Site.NumGuest, prometheus.GaugeValue, h.NumGuest, l},
-				{u.Site.NumIot, prometheus.GaugeValue, h.NumIot, l},
-				{u.Site.NumAp, prometheus.GaugeValue, h.NumAp, l},
-				{u.Site.NumDisabled, prometheus.GaugeValue, h.NumDisabled, l},
+				{u.Site.TxBytesR, prometheus.GaugeValue, h.TxBytesR, labels},
+				{u.Site.RxBytesR, prometheus.GaugeValue, h.RxBytesR, labels},
+				{u.Site.NumAdopted, prometheus.GaugeValue, h.NumAdopted, labels},
+				{u.Site.NumDisconnected, prometheus.GaugeValue, h.NumDisconnected, labels},
+				{u.Site.NumPending, prometheus.GaugeValue, h.NumPending, labels},
+				{u.Site.NumUser, prometheus.GaugeValue, h.NumUser, labels},
+				{u.Site.NumGuest, prometheus.GaugeValue, h.NumGuest, labels},
+				{u.Site.NumIot, prometheus.GaugeValue, h.NumIot, labels},
+				{u.Site.NumAp, prometheus.GaugeValue, h.NumAp, labels},
+				{u.Site.NumDisabled, prometheus.GaugeValue, h.NumDisabled, labels},
 			})
 
 		case "wan":
 			r.send([]*metricExports{
-				{u.Site.TxBytesR, prometheus.GaugeValue, h.TxBytesR, l},
-				{u.Site.RxBytesR, prometheus.GaugeValue, h.RxBytesR, l},
-				{u.Site.NumAdopted, prometheus.GaugeValue, h.NumAdopted, l},
-				{u.Site.NumDisconnected, prometheus.GaugeValue, h.NumDisconnected, l},
-				{u.Site.NumPending, prometheus.GaugeValue, h.NumPending, l},
-				{u.Site.NumGw, prometheus.GaugeValue, h.NumGw, l},
-				{u.Site.NumSta, prometheus.GaugeValue, h.NumSta, l},
+				{u.Site.TxBytesR, prometheus.GaugeValue, h.TxBytesR, labels},
+				{u.Site.RxBytesR, prometheus.GaugeValue, h.RxBytesR, labels},
+				{u.Site.NumAdopted, prometheus.GaugeValue, h.NumAdopted, labels},
+				{u.Site.NumDisconnected, prometheus.GaugeValue, h.NumDisconnected, labels},
+				{u.Site.NumPending, prometheus.GaugeValue, h.NumPending, labels},
+				{u.Site.NumGw, prometheus.GaugeValue, h.NumGw, labels},
+				{u.Site.NumSta, prometheus.GaugeValue, h.NumSta, labels},
 			})
 
 		case "lan":
 			r.send([]*metricExports{
-				{u.Site.TxBytesR, prometheus.GaugeValue, h.TxBytesR, l},
-				{u.Site.RxBytesR, prometheus.GaugeValue, h.RxBytesR, l},
-				{u.Site.NumAdopted, prometheus.GaugeValue, h.NumAdopted, l},
-				{u.Site.NumDisconnected, prometheus.GaugeValue, h.NumDisconnected, l},
-				{u.Site.NumPending, prometheus.GaugeValue, h.NumPending, l},
-				{u.Site.NumUser, prometheus.GaugeValue, h.NumUser, l},
-				{u.Site.NumGuest, prometheus.GaugeValue, h.NumGuest, l},
-				{u.Site.NumIot, prometheus.GaugeValue, h.NumIot, l},
-				{u.Site.NumSw, prometheus.GaugeValue, h.NumSw, l},
+				{u.Site.TxBytesR, prometheus.GaugeValue, h.TxBytesR, labels},
+				{u.Site.RxBytesR, prometheus.GaugeValue, h.RxBytesR, labels},
+				{u.Site.NumAdopted, prometheus.GaugeValue, h.NumAdopted, labels},
+				{u.Site.NumDisconnected, prometheus.GaugeValue, h.NumDisconnected, labels},
+				{u.Site.NumPending, prometheus.GaugeValue, h.NumPending, labels},
+				{u.Site.NumUser, prometheus.GaugeValue, h.NumUser, labels},
+				{u.Site.NumGuest, prometheus.GaugeValue, h.NumGuest, labels},
+				{u.Site.NumIot, prometheus.GaugeValue, h.NumIot, labels},
+				{u.Site.NumSw, prometheus.GaugeValue, h.NumSw, labels},
 			})
 
 		case "vpn":
 			r.send([]*metricExports{
-				{u.Site.RemoteUserNumActive, prometheus.GaugeValue, h.RemoteUserNumActive, l},
-				{u.Site.RemoteUserNumInactive, prometheus.GaugeValue, h.RemoteUserNumInactive, l},
-				{u.Site.RemoteUserRxBytes, prometheus.CounterValue, h.RemoteUserRxBytes, l},
-				{u.Site.RemoteUserTxBytes, prometheus.CounterValue, h.RemoteUserTxBytes, l},
-				{u.Site.RemoteUserRxPackets, prometheus.CounterValue, h.RemoteUserRxPackets, l},
-				{u.Site.RemoteUserTxPackets, prometheus.CounterValue, h.RemoteUserTxPackets, l},
+				{u.Site.RemoteUserNumActive, prometheus.GaugeValue, h.RemoteUserNumActive, labels},
+				{u.Site.RemoteUserNumInactive, prometheus.GaugeValue, h.RemoteUserNumInactive, labels},
+				{u.Site.RemoteUserRxBytes, prometheus.CounterValue, h.RemoteUserRxBytes, labels},
+				{u.Site.RemoteUserTxBytes, prometheus.CounterValue, h.RemoteUserTxBytes, labels},
+				{u.Site.RemoteUserRxPackets, prometheus.CounterValue, h.RemoteUserRxPackets, labels},
+				{u.Site.RemoteUserTxPackets, prometheus.CounterValue, h.RemoteUserTxPackets, labels},
 			})
 		}
 	}
