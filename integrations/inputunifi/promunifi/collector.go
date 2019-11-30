@@ -43,7 +43,7 @@ type unifiCollector struct {
 	Site   *site
 }
 
-type metricExports struct {
+type metric struct {
 	Desc      *prometheus.Desc
 	ValueType prometheus.ValueType
 	Value     interface{}
@@ -52,15 +52,15 @@ type metricExports struct {
 
 // Report is passed into LoggingFn to log the export metrics to stdout (outside this package).
 type Report struct {
-	Total   int
-	Errors  int
-	Zeros   int
-	Descs   int
-	Metrics *metrics.Metrics
-	Elapsed time.Duration
-	Fetch   time.Duration
-	Start   time.Time
-	ch      chan []*metricExports
+	Total   int              // Total count of metrics recorded.
+	Errors  int              // Total count of errors recording metrics.
+	Zeros   int              // Total count of metrics equal to zero.
+	Descs   int              // Total count of unique metrics descriptions.
+	Metrics *metrics.Metrics // Metrics collected and recorded.
+	Elapsed time.Duration    // Duration elapsed collecting and exporting.
+	Fetch   time.Duration    // Duration elapsed making controller requests.
+	Start   time.Time        // Time collection began.
+	ch      chan []*metric
 	wg      sync.WaitGroup
 	cf      UnifiCollectorCnfg
 }
@@ -104,10 +104,9 @@ func (u *unifiCollector) Describe(ch chan<- *prometheus.Desc) {
 // the current metrics (from another package) then exports them for prometheus.
 func (u *unifiCollector) Collect(ch chan<- prometheus.Metric) {
 	var err error
-	r := &Report{cf: u.Config, ch: make(chan []*metricExports, buffer)}
-	defer r.finish()
+	r := &Report{cf: u.Config, ch: make(chan []*metric, buffer), Start: time.Now()}
+	defer r.close()
 
-	r.Start = time.Now()
 	if r.Metrics, err = r.cf.CollectFn(); err != nil {
 		r.error(ch, prometheus.NewInvalidDesc(fmt.Errorf("metric fetch failed")), err)
 		return
@@ -119,10 +118,9 @@ func (u *unifiCollector) Collect(ch chan<- prometheus.Metric) {
 
 	// Pass Report interface into our collecting and reporting methods.
 	go u.exportMetrics(r, ch)
-	// in loops.go.
 	for _, f := range []func(report){u.loopClients, u.loopSites, u.loopUAPs, u.loopUSWs, u.loopUSGs, u.loopUDMs} {
 		r.add()
-		go f(r)
+		go f(r) // in loops.go.
 	}
 }
 

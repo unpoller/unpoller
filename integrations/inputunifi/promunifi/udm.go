@@ -71,7 +71,7 @@ func descDevice(ns string) *unifiDevice {
 func (u *unifiCollector) exportUDM(r report, d *unifi.UDM) {
 	labels := []string{d.IP, d.Version, d.Model, d.Serial, d.Type, d.Mac, d.SiteName, d.Name}
 	// Dream Machine System Data.
-	r.send([]*metricExports{
+	r.send([]*metric{
 		{u.Device.Uptime, prometheus.GaugeValue, d.Uptime, labels},
 		{u.Device.TotalTxBytes, prometheus.CounterValue, d.TxBytes, labels},
 		{u.Device.TotalRxBytes, prometheus.CounterValue, d.RxBytes, labels},
