@@ -148,6 +148,7 @@ is provided so the application can be easily adapted to any environment.
         Detection System data. IDS and IPS are the same data set. This is off
         by default because most controllers do not have this enabled. It also
         creates a lot of new metrics from controllers with a lot of IDS entries.
+        IDS data does not contain metrics, so this doesn't work with Prometheus.
 
     reauthenticate         default: false
         Setting this parameter to true will make UniFi Poller send a new login

@@ -6,8 +6,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/davidnewhall/unifi-poller/metrics"
-	"github.com/davidnewhall/unifi-poller/promunifi"
+	"github.com/davidnewhall/unifi-poller/pkg/metrics"
+	"github.com/davidnewhall/unifi-poller/pkg/promunifi"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 )

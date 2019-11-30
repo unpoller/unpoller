@@ -3,7 +3,7 @@
 package influxunifi
 
 import (
-	"github.com/davidnewhall/unifi-poller/metrics"
+	"github.com/davidnewhall/unifi-poller/pkg/metrics"
 	client "github.com/influxdata/influxdb1-client/v2"
 )
 
