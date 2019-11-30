@@ -68,7 +68,7 @@ func descDevice(ns string) *unifiDevice {
 }
 
 // UDM is a collection of stats from USG, USW and UAP. It has no unique stats.
-func (u *unifiCollector) exportUDM(r report, d *unifi.UDM) {
+func (u *promUnifi) exportUDM(r report, d *unifi.UDM) {
 	labels := []string{d.IP, d.Version, d.Model, d.Serial, d.Type, d.Mac, d.SiteName, d.Name}
 	// Dream Machine System Data.
 	r.send([]*metric{
