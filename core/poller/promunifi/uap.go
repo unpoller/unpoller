@@ -167,7 +167,7 @@ func descUAP(ns string) *uap {
 
 func (u *unifiCollector) exportUAP(r report, d *unifi.UAP) {
 	labels := []string{d.IP, d.Version, d.Model, d.Serial, d.Type, d.Mac, d.SiteName, d.Name}
-	// AP data.
+	// Wireless System Data.
 	r.send([]*metricExports{
 		{u.Device.Uptime, prometheus.GaugeValue, d.Uptime, labels},
 		{u.Device.TotalTxBytes, prometheus.CounterValue, d.TxBytes, labels},
@@ -189,6 +189,7 @@ func (u *unifiCollector) exportUAP(r report, d *unifi.UAP) {
 		{u.Device.CPU, prometheus.GaugeValue, d.SystemStats.CPU, labels},
 		{u.Device.Mem, prometheus.GaugeValue, d.SystemStats.Mem, labels},
 	})
+
 	u.exportUAPstats(r, labels, d.Stat.Ap)
 	u.exportVAPtable(r, labels, d.VapTable)
 	u.exportRadtable(r, labels, d.RadioTable, d.RadioTableStats)
