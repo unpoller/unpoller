@@ -1,4 +1,4 @@
-<img width="320px" src="https://raw.githubusercontent.com/wiki/davidnewhall/unifi-poller/images/unifi-poller-logo.png"> 
+<img width="320px" src="https://raw.githubusercontent.com/wiki/davidnewhall/unifi-poller/images/unifi-poller-logo.png"> now with <img width="30px" src="https://prometheus.io/assets/prometheus_logo.png"> Prometheus support!
 
 [![discord](https://badgen.net/badge/icon/Discord?color=0011ff&label&icon=https://simpleicons.now.sh/discord/eee "Ubiquiti Discord")](https://discord.gg/KnyKYt2)
 [![twitter](https://badgen.net/twitter/follow/TwitchCaptain?icon=https://simpleicons.now.sh/twitter/0099ff&label=TwitchCaptain&color=0116ff "TwitchCaptain @ Twitter")](https://twitter.com/TwitchCaptain)
@@ -20,7 +20,6 @@ included; with screenshots. Five for InfluxDB and two for Prometheus, although
 three more Prometheus dashboards are coming!
 
 ## Installation
-
 [See the Wiki!](https://github.com/davidnewhall/unifi-poller/wiki/Installation)
 We have a special place for [Docker Users](https://github.com/davidnewhall/unifi-poller/wiki/Docker).
 I'm willing to help if you have troubles.
@@ -30,7 +29,6 @@ the #unifi-poller channel on the [Ubiquiti Discord server](https://discord.gg/Kn
 I've also [provided a forum post](https://community.ui.com/questions/Unifi-Poller-Store-Unifi-Controller-Metrics-in-InfluxDB-without-SNMP/58a0ea34-d2b3-41cd-93bb-d95d3896d1a1) you may use to get additional help.
 
 ## Description
-
 [Ubiquiti](https://www.ui.com) makes networking devices like switches, gateways
 (routers) and wireless access points. They have a line of equipment named
 [UniFi](https://www.ui.com/products/#unifi) that uses a
@@ -55,7 +53,6 @@ You'll have a plethora of data at your fingertips and the ability to craft custo
 graphs to slice the data any way you choose. Good luck!
 
 ## Backstory
-
 I found a simple piece of code on GitHub that sorta did what I needed;
 we all know that story. I wanted more data, so I added more data collection.
 I believe I've completely rewritten every piece of original code, except the
@@ -80,9 +77,9 @@ for making this dashboard; it gave me a fantastic start to making my own dashboa
 
 ## Operation
 You can control this app with puppet, chef, saltstack, homebrew or a simple bash
-script if you needed to. It's available for macOS, Linux and Docker. It comes with
-a systemd service unit that allows you automatically start it up on most Linux
-hosts. It works just fine on [Windows](https://github.com/davidnewhall/unifi-poller/wiki/Windows) too.
+script if you needed to. Packages are available for macOS, Linux and Docker.
+It comes with a systemd service unit that allows you automatically start it up on most Linux hosts.
+It works just fine on [Windows](https://github.com/davidnewhall/unifi-poller/wiki/Windows) too.
 Most people prefer Docker, and this app is right at home in that environment.
 
 ## Development
