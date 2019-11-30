@@ -35,7 +35,7 @@ URL="${SOURCE_URL}"
 # This parameter is passed in as -X to go build. Used to override the Version variable in a package.
 # This makes a path like github.com/user/hello-world/helloworld.Version=1.3.3
 # Name the Version-containing library the same as the github repo, without dashes.
-VERSION_PATH="${IMPORT_PATH}/poller.Version"
+VERSION_PATH="${IMPORT_PATH}/pkg/poller.Version"
 
 # Dynamic. Recommend not changing.
 VVERSION=$(git describe --abbrev=0 --tags $(git rev-list --tags --max-count=1))
