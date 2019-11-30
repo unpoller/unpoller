@@ -97,7 +97,7 @@ func (u *unifiCollector) exportUSGstats(r report, labels []string, gw *unifi.Gw,
 	labelLan := []string{"lan", labels[6], labels[7]}
 	labelWan := []string{"all", labels[6], labels[7]}
 	r.send([]*metricExports{
-		/* // Combined Port Stats
+		/* // Combined Port Stats - not really needed. sum() the others instead.
 		{u.USG.WanRxPackets, prometheus.CounterValue, gw.WanRxPackets, labelWan},
 		{u.USG.WanRxBytes, prometheus.CounterValue, gw.WanRxBytes, labelWan},
 		{u.USG.WanRxDropped, prometheus.CounterValue, gw.WanRxDropped, labelWan},
