@@ -78,7 +78,7 @@ func (u *unifiCollector) exportClient(r report, c *unifi.Client) {
 	if c.IsWired.Val {
 		labels[len(labels)-1] = "true"
 		labelW[len(labelW)-1] = "true"
-		r.send([]*metricExports{
+		r.send([]*metric{
 			{u.Client.RxBytes, prometheus.CounterValue, c.WiredRxBytes, labels},
 			{u.Client.RxBytesR, prometheus.GaugeValue, c.WiredRxBytesR, labels},
 			{u.Client.RxPackets, prometheus.CounterValue, c.WiredRxPackets, labels},
@@ -89,7 +89,7 @@ func (u *unifiCollector) exportClient(r report, c *unifi.Client) {
 	} else {
 		labels[len(labels)-1] = "false"
 		labelW[len(labelW)-1] = "false"
-		r.send([]*metricExports{
+		r.send([]*metric{
 			{u.Client.Anomalies, prometheus.CounterValue, c.Anomalies, labelW},
 			{u.Client.CCQ, prometheus.GaugeValue, c.Ccq / 10, labelW},
 			{u.Client.Noise, prometheus.GaugeValue, c.Noise, labelW},
@@ -109,7 +109,7 @@ func (u *unifiCollector) exportClient(r report, c *unifi.Client) {
 			{u.Client.BytesR, prometheus.GaugeValue, c.BytesR, labelW},
 		})
 	}
-	r.send([]*metricExports{
+	r.send([]*metric{
 		{u.Client.Uptime, prometheus.GaugeValue, c.Uptime, labelW},
 		/* needs more "looking into"
 		{u.Client.DpiStatsApp, prometheus.GaugeValue, c.DpiStats.App, labels},
