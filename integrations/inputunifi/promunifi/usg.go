@@ -66,7 +66,7 @@ func descUSG(ns string) *usg {
 	}
 }
 
-func (u *unifiCollector) exportUSG(r report, d *unifi.USG) {
+func (u *promUnifi) exportUSG(r report, d *unifi.USG) {
 	labels := []string{d.IP, d.Version, d.Model, d.Serial, d.Type, d.Mac, d.SiteName, d.Name}
 	// Gateway System Data.
 	r.send([]*metric{
@@ -93,7 +93,7 @@ func (u *unifiCollector) exportUSG(r report, d *unifi.USG) {
 	u.exportUSGstats(r, labels, d.Stat.Gw, d.SpeedtestStatus)
 }
 
-func (u *unifiCollector) exportUSGstats(r report, labels []string, gw *unifi.Gw, st unifi.SpeedtestStatus) {
+func (u *promUnifi) exportUSGstats(r report, labels []string, gw *unifi.Gw, st unifi.SpeedtestStatus) {
 	labelLan := []string{"lan", labels[6], labels[7]}
 	labelWan := []string{"all", labels[6], labels[7]}
 	r.send([]*metric{
@@ -118,7 +118,7 @@ func (u *unifiCollector) exportUSGstats(r report, labels []string, gw *unifi.Gw,
 	})
 }
 
-func (u *unifiCollector) exportWANPorts(r report, labels []string, wans ...unifi.Wan) {
+func (u *promUnifi) exportWANPorts(r report, labels []string, wans ...unifi.Wan) {
 	for _, wan := range wans {
 		if !wan.Up.Val {
 			continue // only record UP interfaces.

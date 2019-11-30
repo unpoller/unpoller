@@ -165,7 +165,7 @@ func descUAP(ns string) *uap {
 	}
 }
 
-func (u *unifiCollector) exportUAP(r report, d *unifi.UAP) {
+func (u *promUnifi) exportUAP(r report, d *unifi.UAP) {
 	labels := []string{d.IP, d.Version, d.Model, d.Serial, d.Type, d.Mac, d.SiteName, d.Name}
 	// Wireless System Data.
 	r.send([]*metric{
@@ -195,7 +195,7 @@ func (u *unifiCollector) exportUAP(r report, d *unifi.UAP) {
 	u.exportRadtable(r, labels, d.RadioTable, d.RadioTableStats)
 }
 
-func (u *unifiCollector) exportUAPstats(r report, labels []string, ap *unifi.Ap) {
+func (u *promUnifi) exportUAPstats(r report, labels []string, ap *unifi.Ap) {
 	//	labelA := append([]string{"all"}, labels[2:]...)
 	labelU := append([]string{"user"}, labels[6:]...)
 	labelG := append([]string{"guest"}, labels[6:]...)
@@ -249,7 +249,7 @@ func (u *unifiCollector) exportUAPstats(r report, labels []string, ap *unifi.Ap)
 	})
 }
 
-func (u *unifiCollector) exportVAPtable(r report, labels []string, vt unifi.VapTable) {
+func (u *promUnifi) exportVAPtable(r report, labels []string, vt unifi.VapTable) {
 	// vap table stats
 	for _, v := range vt {
 		if !v.Up.Val {
@@ -299,7 +299,7 @@ func (u *unifiCollector) exportVAPtable(r report, labels []string, vt unifi.VapT
 	}
 }
 
-func (u *unifiCollector) exportRadtable(r report, labels []string, rt unifi.RadioTable, rts unifi.RadioTableStats) {
+func (u *promUnifi) exportRadtable(r report, labels []string, rt unifi.RadioTable, rts unifi.RadioTableStats) {
 	// radio table
 	for _, p := range rt {
 		labelR := append([]string{p.Name, p.Radio}, labels[6:]...)

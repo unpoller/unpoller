@@ -64,7 +64,7 @@ func descSite(ns string) *site {
 	}
 }
 
-func (u *unifiCollector) exportSite(r report, s *unifi.Site) {
+func (u *promUnifi) exportSite(r report, s *unifi.Site) {
 	for _, h := range s.Health {
 		labels := []string{h.Subsystem, h.Status, s.SiteName}
 		switch h.Subsystem {
