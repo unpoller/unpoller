@@ -5,7 +5,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/davidnewhall/unifi-poller/metrics"
+	"github.com/davidnewhall/unifi-poller/pkg/metrics"
 	"golift.io/unifi"
 )
 
