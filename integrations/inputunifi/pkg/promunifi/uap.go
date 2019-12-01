@@ -72,7 +72,6 @@ type uap struct {
 	RadioChannel            *prometheus.Desc
 	RadioCuSelfRx           *prometheus.Desc
 	RadioCuSelfTx           *prometheus.Desc
-	RadioCuTotal            *prometheus.Desc
 	RadioExtchannel         *prometheus.Desc
 	RadioGain               *prometheus.Desc
 	RadioGuestNumSta        *prometheus.Desc
@@ -152,9 +151,8 @@ func descUAP(ns string) *uap {
 		RadioTxPower:            prometheus.NewDesc(ns+"radio_transmit_power", "Radio Transmit Power", labelR, nil),
 		RadioAstBeXmit:          prometheus.NewDesc(ns+"radio_ast_be_xmit", "Radio AstBe Transmit", labelR, nil),
 		RadioChannel:            prometheus.NewDesc(ns+"radio_channel", "Radio Channel", labelR, nil),
-		RadioCuSelfRx:           prometheus.NewDesc(ns+"radio_channel_utilization_receive", "Radio Channel Utilization Receive", labelR, nil),
-		RadioCuSelfTx:           prometheus.NewDesc(ns+"radio_channel_utilization_transmit", "Radio Channel Utilization Transmit", labelR, nil),
-		RadioCuTotal:            prometheus.NewDesc(ns+"radio_channel_utilization_total", "Radio Channel Utilization", labelR, nil),
+		RadioCuSelfRx:           prometheus.NewDesc(ns+"radio_channel_utilization_receive_percent", "Radio Channel Utilization Receive", labelR, nil),
+		RadioCuSelfTx:           prometheus.NewDesc(ns+"radio_channel_utilization_transmit_percent", "Radio Channel Utilization Transmit", labelR, nil),
 		RadioExtchannel:         prometheus.NewDesc(ns+"radio_ext_channel", "Radio Ext Channel", labelR, nil),
 		RadioGain:               prometheus.NewDesc(ns+"radio_gain", "Radio Gain", labelR, nil),
 		RadioGuestNumSta:        prometheus.NewDesc(ns+"radio_guest_stations", "Radio Guest Station Count", labelR, nil),
@@ -323,7 +321,6 @@ func (u *promUnifi) exportRadtable(r report, labels []string, rt unifi.RadioTabl
 				{u.UAP.RadioChannel, prometheus.GaugeValue, t.Channel, labelR},
 				{u.UAP.RadioCuSelfRx, prometheus.GaugeValue, t.CuSelfRx, labelR},
 				{u.UAP.RadioCuSelfTx, prometheus.GaugeValue, t.CuSelfTx, labelR},
-				{u.UAP.RadioCuTotal, prometheus.GaugeValue, t.CuTotal, labelR},
 				{u.UAP.RadioExtchannel, prometheus.GaugeValue, t.Extchannel, labelR},
 				{u.UAP.RadioGain, prometheus.GaugeValue, t.Gain, labelR},
 				{u.UAP.RadioGuestNumSta, prometheus.GaugeValue, t.GuestNumSta, labelR},
