@@ -34,6 +34,7 @@ func (u *InfluxUnifi) batchUSG(r report, s *unifi.USG) {
 		"num_desktop":                    s.NumDesktop.Val,
 		"num_handheld":                   s.NumHandheld.Val,
 		"uplink_latency":                 s.Uplink.Latency.Val,
+		"uplink_speed":                   s.Uplink.Speed.Val,
 		"num_mobile":                     s.NumMobile.Val,
 		"speedtest-status_latency":       s.SpeedtestStatus.Latency.Val,
 		"speedtest-status_runtime":       s.SpeedtestStatus.Runtime.Val,

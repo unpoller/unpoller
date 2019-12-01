@@ -28,6 +28,8 @@ type usg struct {
 	WanTxMulticast *prometheus.Desc
 	WanBytesR      *prometheus.Desc
 	Latency        *prometheus.Desc
+	UplinkLatency  *prometheus.Desc
+	UplinkSpeed    *prometheus.Desc
 	Runtime        *prometheus.Desc
 	XputDownload   *prometheus.Desc
 	XputUpload     *prometheus.Desc
@@ -60,6 +62,8 @@ func descUSG(ns string) *usg {
 		LanTxPackets:   prometheus.NewDesc(ns+"lan_transmit_packets_total", "LAN Transmit Packets Total", labels, nil),
 		LanTxBytes:     prometheus.NewDesc(ns+"lan_transmit_bytes_total", "LAN Transmit Bytes Total", labels, nil),
 		Latency:        prometheus.NewDesc(ns+"speedtest_latency_seconds", "Speedtest Latency", labels, nil),
+		UplinkLatency:  prometheus.NewDesc(ns+"uplink_latency_seconds", "Uplink Latency", labels, nil),
+		UplinkSpeed:    prometheus.NewDesc(ns+"uplink_speed_mbps", "Uplink Speed", labels, nil),
 		Runtime:        prometheus.NewDesc(ns+"speedtest_runtime", "Speedtest Run Time", labels, nil),
 		XputDownload:   prometheus.NewDesc(ns+"speedtest_download", "Speedtest Download Rate", labels, nil),
 		XputUpload:     prometheus.NewDesc(ns+"speedtest_upload", "Speedtest Upload Rate", labels, nil),
@@ -90,10 +94,10 @@ func (u *promUnifi) exportUSG(r report, d *unifi.USG) {
 		{u.Device.Mem, prometheus.GaugeValue, d.SystemStats.Mem, labels},
 	})
 	u.exportWANPorts(r, labels, d.Wan1, d.Wan2)
-	u.exportUSGstats(r, labels, d.Stat.Gw, d.SpeedtestStatus)
+	u.exportUSGstats(r, labels, d.Stat.Gw, d.SpeedtestStatus, d.Uplink)
 }
 
-func (u *promUnifi) exportUSGstats(r report, labels []string, gw *unifi.Gw, st unifi.SpeedtestStatus) {
+func (u *promUnifi) exportUSGstats(r report, labels []string, gw *unifi.Gw, st unifi.SpeedtestStatus, ul unifi.Uplink) {
 	labelLan := []string{"lan", labels[6], labels[7]}
 	labelWan := []string{"all", labels[6], labels[7]}
 	r.send([]*metric{
@@ -110,6 +114,8 @@ func (u *promUnifi) exportUSGstats(r report, labels []string, gw *unifi.Gw, st u
 		{u.USG.LanTxPackets, prometheus.CounterValue, gw.LanTxPackets, labelLan},
 		{u.USG.LanTxBytes, prometheus.CounterValue, gw.LanTxBytes, labelLan},
 		{u.USG.LanRxDropped, prometheus.CounterValue, gw.LanRxDropped, labelLan},
+		{u.USG.UplinkLatency, prometheus.GaugeValue, ul.Latency.Val / 1000, labelWan},
+		{u.USG.UplinkSpeed, prometheus.GaugeValue, ul.Speed, labelWan},
 		// Speed Test Stats
 		{u.USG.Latency, prometheus.GaugeValue, st.Latency.Val / 1000, labelWan},
 		{u.USG.Runtime, prometheus.GaugeValue, st.Runtime, labelWan},
