@@ -62,8 +62,8 @@ func descDevice(ns string) *unifiDevice {
 		MemUsed:       prometheus.NewDesc(ns+"memory_used_bytes", "System Memory Used", labels, nil),
 		MemTotal:      prometheus.NewDesc(ns+"memory_installed_bytes", "System Installed Memory", labels, nil),
 		MemBuffer:     prometheus.NewDesc(ns+"memory_buffer_bytes", "System Memory Buffer", labels, nil),
-		CPU:           prometheus.NewDesc(ns+"cpu_utilization_percent", "System CPU % Utilized", labels, nil),
-		Mem:           prometheus.NewDesc(ns+"memory_utilization_percent", "System Memory % Utilized", labels, nil),
+		CPU:           prometheus.NewDesc(ns+"cpu_utilization_ratio", "System CPU % Utilized", labels, nil),
+		Mem:           prometheus.NewDesc(ns+"memory_utilization_ratio", "System Memory % Utilized", labels, nil),
 	}
 }
 
@@ -88,8 +88,8 @@ func (u *promUnifi) exportUDM(r report, d *unifi.UDM) {
 		{u.Device.MemUsed, prometheus.GaugeValue, d.SysStats.MemUsed, labels},
 		{u.Device.MemTotal, prometheus.GaugeValue, d.SysStats.MemTotal, labels},
 		{u.Device.MemBuffer, prometheus.GaugeValue, d.SysStats.MemBuffer, labels},
-		{u.Device.CPU, prometheus.GaugeValue, d.SystemStats.CPU, labels},
-		{u.Device.Mem, prometheus.GaugeValue, d.SystemStats.Mem, labels},
+		{u.Device.CPU, prometheus.GaugeValue, d.SystemStats.CPU.Val / 100.0, labels},
+		{u.Device.Mem, prometheus.GaugeValue, d.SystemStats.Mem.Val / 100.0, labels},
 	})
 
 	// Switch Data
