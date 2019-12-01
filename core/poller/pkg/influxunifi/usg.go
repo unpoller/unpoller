@@ -45,6 +45,7 @@ func (u *InfluxUnifi) batchUSG(r report, s *unifi.USG) {
 		"lan-rx_packets":                 s.Stat.Gw.LanRxPackets.Val,
 		"lan-tx_bytes":                   s.Stat.Gw.LanTxBytes.Val,
 		"lan-tx_packets":                 s.Stat.Gw.LanTxPackets.Val,
+		"lan-rx_dropped":                 s.Stat.Gw.LanRxDropped.Val,
 	}, u.batchSysStats(s.SysStats, s.SystemStats))
 	r.send(&metric{Table: "usg", Tags: tags, Fields: fields})
 	u.batchNetTable(r, tags, s.NetworkTable)
@@ -105,6 +106,7 @@ func (u *InfluxUnifi) batchUSGwans(r report, tags map[string]string, wans ...uni
 			"rx_bytes-r":   wan.RxBytesR.Val,
 			"rx_dropped":   wan.RxDropped.Val,
 			"rx_errors":    wan.RxErrors.Val,
+			"rx_broadcast": wan.RxBroadcast.Val,
 			"rx_multicast": wan.RxMulticast.Val,
 			"rx_packets":   wan.RxPackets.Val,
 			"speed":        wan.Speed.Val,
@@ -113,6 +115,8 @@ func (u *InfluxUnifi) batchUSGwans(r report, tags map[string]string, wans ...uni
 			"tx_dropped":   wan.TxDropped.Val,
 			"tx_errors":    wan.TxErrors.Val,
 			"tx_packets":   wan.TxPackets.Val,
+			"tx_broadcast": wan.TxBroadcast.Val,
+			"tx_multicast": wan.TxMulticast.Val,
 		}
 		r.send(&metric{Table: "usg_wan_ports", Tags: tags, Fields: fields})
 	}

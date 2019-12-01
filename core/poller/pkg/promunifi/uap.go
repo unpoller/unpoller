@@ -152,16 +152,16 @@ func descUAP(ns string) *uap {
 		RadioTxPower:            prometheus.NewDesc(ns+"radio_transmit_power", "Radio Transmit Power", labelR, nil),
 		RadioAstBeXmit:          prometheus.NewDesc(ns+"radio_ast_be_xmit", "Radio AstBe Transmit", labelR, nil),
 		RadioChannel:            prometheus.NewDesc(ns+"radio_channel", "Radio Channel", labelR, nil),
-		RadioCuSelfRx:           prometheus.NewDesc(ns+"radio_channel_utilization_receive", "Radio Channel Utilization Receive", labelR, nil),
-		RadioCuSelfTx:           prometheus.NewDesc(ns+"radio_channel_utilization_transmit", "Radio Channel Utilization Transmit", labelR, nil),
-		RadioCuTotal:            prometheus.NewDesc(ns+"radio_channel_utilization_total", "Radio Channel Utilization", labelR, nil),
+		RadioCuSelfRx:           prometheus.NewDesc(ns+"radio_channel_utilization_receive_percent", "Radio Channel Utilization Receive", labelR, nil),
+		RadioCuSelfTx:           prometheus.NewDesc(ns+"radio_channel_utilization_transmit_percent", "Radio Channel Utilization Transmit", labelR, nil),
+		RadioCuTotal:            prometheus.NewDesc(ns+"radio_channel_utilization_percent", "Radio Channel Utilization", labelR, nil),
 		RadioExtchannel:         prometheus.NewDesc(ns+"radio_ext_channel", "Radio Ext Channel", labelR, nil),
 		RadioGain:               prometheus.NewDesc(ns+"radio_gain", "Radio Gain", labelR, nil),
 		RadioGuestNumSta:        prometheus.NewDesc(ns+"radio_guest_stations", "Radio Guest Station Count", labelR, nil),
 		RadioNumSta:             prometheus.NewDesc(ns+"radio_stations", "Radio Total Station Count", labelR, nil),
 		RadioUserNumSta:         prometheus.NewDesc(ns+"radio_user_stations", "Radio User Station Count", labelR, nil),
-		RadioTxPackets:          prometheus.NewDesc(ns+"radio_transmit_packets_total", "Radio Transmitted Packets", labelR, nil),
-		RadioTxRetries:          prometheus.NewDesc(ns+"radio_transmit_retries_total", "Radio Transmit Retries", labelR, nil),
+		RadioTxPackets:          prometheus.NewDesc(ns+"radio_transmit_packets", "Radio Transmitted Packets", labelR, nil),
+		RadioTxRetries:          prometheus.NewDesc(ns+"radio_transmit_retries", "Radio Transmit Retries", labelR, nil),
 	}
 }
 
