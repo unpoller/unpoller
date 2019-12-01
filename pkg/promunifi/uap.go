@@ -158,8 +158,8 @@ func descUAP(ns string) *uap {
 		RadioGuestNumSta:        prometheus.NewDesc(ns+"radio_guest_stations", "Radio Guest Station Count", labelR, nil),
 		RadioNumSta:             prometheus.NewDesc(ns+"radio_stations", "Radio Total Station Count", labelR, nil),
 		RadioUserNumSta:         prometheus.NewDesc(ns+"radio_user_stations", "Radio User Station Count", labelR, nil),
-		RadioTxPackets:          prometheus.NewDesc(ns+"radio_transmit_packets_total", "Radio Transmitted Packets", labelR, nil),
-		RadioTxRetries:          prometheus.NewDesc(ns+"radio_transmit_retries_total", "Radio Transmit Retries", labelR, nil),
+		RadioTxPackets:          prometheus.NewDesc(ns+"radio_transmit_packets", "Radio Transmitted Packets", labelR, nil),
+		RadioTxRetries:          prometheus.NewDesc(ns+"radio_transmit_retries", "Radio Transmit Retries", labelR, nil),
 	}
 }
 
@@ -326,8 +326,8 @@ func (u *promUnifi) exportRadtable(r report, labels []string, rt unifi.RadioTabl
 				{u.UAP.RadioGuestNumSta, prometheus.GaugeValue, t.GuestNumSta, labelR},
 				{u.UAP.RadioNumSta, prometheus.GaugeValue, t.NumSta, labelR},
 				{u.UAP.RadioUserNumSta, prometheus.GaugeValue, t.UserNumSta, labelR},
-				{u.UAP.RadioTxPackets, prometheus.CounterValue, t.TxPackets, labelR},
-				{u.UAP.RadioTxRetries, prometheus.CounterValue, t.TxRetries, labelR},
+				{u.UAP.RadioTxPackets, prometheus.GaugeValue, t.TxPackets, labelR},
+				{u.UAP.RadioTxRetries, prometheus.GaugeValue, t.TxRetries, labelR},
 			})
 		}
 	}
