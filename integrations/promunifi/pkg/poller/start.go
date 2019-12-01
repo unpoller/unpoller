@@ -21,14 +21,14 @@ func New() *UnifiPoller {
 			InfluxPass: defaultInfluxPass,
 			InfluxDB:   defaultInfluxDB,
 			UnifiUser:  defaultUnifiUser,
-			UnifiPass:  defaultUnifiUser,
+			UnifiPass:  "",
 			UnifiBase:  defaultUnifiURL,
 			Interval:   Duration{defaultInterval},
 			Sites:      []string{"all"},
 			SaveSites:  true,
 			HTTPListen: defaultHTTPListen,
 			Namespace:  appName,
-		}, Flag: &Flag{},
+		}, Flag: &Flag{ConfigFile: DefaultConfFile},
 	}
 }
 
