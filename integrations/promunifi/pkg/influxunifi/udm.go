@@ -16,7 +16,7 @@ func Combine(in ...map[string]interface{}) map[string]interface{} {
 }
 
 // batchSysStats is used by all device types.
-func (u *InfluxUnifi) batchSysStats(r report, s unifi.SysStats, ss unifi.SystemStats) map[string]interface{} {
+func (u *InfluxUnifi) batchSysStats(s unifi.SysStats, ss unifi.SystemStats) map[string]interface{} {
 	return map[string]interface{}{
 		"loadavg_1":     s.Loadavg1.Val,
 		"loadavg_5":     s.Loadavg5.Val,
@@ -72,7 +72,7 @@ func (u *InfluxUnifi) batchUDM(r report, s *unifi.UDM) {
 		"lan-rx_packets":                 s.Stat.Gw.LanRxPackets.Val,
 		"lan-tx_bytes":                   s.Stat.Gw.LanTxBytes.Val,
 		"lan-tx_packets":                 s.Stat.Gw.LanTxPackets.Val,
-	}, u.batchSysStats(r, s.SysStats, s.SystemStats))
+	}, u.batchSysStats(s.SysStats, s.SystemStats))
 	r.send(&metric{Table: "usg", Tags: tags, Fields: fields})
 	u.batchNetworkTable(r, tags, s.NetworkTable)
 	u.batchUSGwans(r, tags, s.Wan1, s.Wan2)
@@ -124,7 +124,7 @@ func (u *InfluxUnifi) batchUDM(r report, s *unifi.UDM) {
 		"serial":    s.Serial,
 		"type":      s.Type,
 	}
-	fields = u.processUAPstats(r, s.Stat.Ap)
+	fields = u.processUAPstats(s.Stat.Ap)
 	fields["ip"] = s.IP
 	fields["bytes"] = s.Bytes.Val
 	fields["last_seen"] = s.LastSeen.Val

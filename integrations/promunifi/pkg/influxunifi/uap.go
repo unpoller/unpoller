@@ -19,7 +19,7 @@ func (u *InfluxUnifi) batchUAP(r report, s *unifi.UAP) {
 		"serial":    s.Serial,
 		"type":      s.Type,
 	}
-	fields := Combine(u.processUAPstats(r, s.Stat.Ap), u.batchSysStats(r, s.SysStats, s.SystemStats))
+	fields := Combine(u.processUAPstats(s.Stat.Ap), u.batchSysStats(s.SysStats, s.SystemStats))
 	fields["ip"] = s.IP
 	fields["bytes"] = s.Bytes.Val
 	fields["last_seen"] = s.LastSeen.Val
@@ -34,7 +34,7 @@ func (u *InfluxUnifi) batchUAP(r report, s *unifi.UAP) {
 	u.processVAPs(r, tags, s.VapTable, s.RadioTable, s.RadioTableStats)
 }
 
-func (u *InfluxUnifi) processUAPstats(r report, ap *unifi.Ap) map[string]interface{} {
+func (u *InfluxUnifi) processUAPstats(ap *unifi.Ap) map[string]interface{} {
 	// Accumulative Statistics.
 	return map[string]interface{}{
 		"stat_user-rx_packets":  ap.UserRxPackets.Val,

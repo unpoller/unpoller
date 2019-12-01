@@ -8,7 +8,6 @@ import (
 	"time"
 
 	"github.com/davidnewhall/unifi-poller/pkg/metrics"
-	_ "github.com/influxdata/influxdb1-client"
 	influx "github.com/influxdata/influxdb1-client/v2"
 )
 
@@ -60,6 +59,7 @@ func (u *InfluxUnifi) ReportMetrics(m *metrics.Metrics) (*Report, error) {
 	go u.collect(r, r.ch)
 	// Batch all the points.
 	u.loopPoints(r)
+	r.wg.Wait() // wait for all points to finish batching!
 
 	// Send all the points.
 	if err = u.influx.Write(r.bp); err != nil {
@@ -139,5 +139,4 @@ func (u *InfluxUnifi) loopPoints(r report) {
 			u.batchUDM(r, s)
 		}
 	}()
-	r.wait()
 }
