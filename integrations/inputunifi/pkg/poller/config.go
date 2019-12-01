@@ -13,7 +13,7 @@ import (
 	"time"
 
 	"github.com/BurntSushi/toml"
-	influx "github.com/influxdata/influxdb1-client/v2"
+	"github.com/davidnewhall/unifi-poller/pkg/influxunifi"
 	"github.com/spf13/pflag"
 	"golift.io/unifi"
 	yaml "gopkg.in/yaml.v2"
@@ -41,7 +41,7 @@ const ENVConfigPrefix = "UP_"
 
 // UnifiPoller contains the application startup data, and auth info for UniFi & Influx.
 type UnifiPoller struct {
-	Influx     influx.Client
+	Influx     *influxunifi.InfluxUnifi
 	Unifi      *unifi.Unifi
 	Flag       *Flag
 	Config     *Config

@@ -2,143 +2,118 @@ package influxunifi
 
 import (
 	"strings"
-	"time"
 
-	influx "github.com/influxdata/influxdb1-client/v2"
 	"golift.io/unifi"
 )
 
-// USGPoints generates Unifi Gateway datapoints for InfluxDB.
+// batchUSG generates Unifi Gateway datapoints for InfluxDB.
 // These points can be passed directly to influx.
-func USGPoints(u *unifi.USG, now time.Time) ([]*influx.Point, error) {
-	if u.Stat.Gw == nil {
-		u.Stat.Gw = &unifi.Gw{}
+func (u *InfluxUnifi) batchUSG(r report, s *unifi.USG) {
+	if s.Stat.Gw == nil {
+		s.Stat.Gw = &unifi.Gw{}
 	}
 	tags := map[string]string{
-		"ip":         u.IP,
-		"mac":        u.Mac,
-		"site_id":    u.SiteID,
-		"site_name":  u.SiteName,
-		"name":       u.Name,
-		"cfgversion": u.Cfgversion,
-		"model":      u.Model,
-		"serial":     u.Serial,
-		"type":       u.Type,
+		"mac":       s.Mac,
+		"site_name": s.SiteName,
+		"name":      s.Name,
+		"version":   s.Version,
+		"model":     s.Model,
+		"serial":    s.Serial,
+		"type":      s.Type,
 	}
 	fields := map[string]interface{}{
-		"ip":                             u.IP,
-		"bytes":                          u.Bytes.Val,
-		"last_seen":                      u.LastSeen.Val,
-		"license_state":                  u.LicenseState,
-		"fw_caps":                        u.FwCaps.Val,
-		"guest-num_sta":                  u.GuestNumSta.Val,
-		"rx_bytes":                       u.RxBytes.Val,
-		"tx_bytes":                       u.TxBytes.Val,
-		"uptime":                         u.Uptime.Val,
-		"roll_upgrade":                   u.Rollupgrade.Val,
-		"state":                          u.State.Val,
-		"upgradable":                     u.Upgradable.Val,
-		"user-num_sta":                   u.UserNumSta.Val,
-		"version":                        u.Version,
-		"num_desktop":                    u.NumDesktop.Val,
-		"num_handheld":                   u.NumHandheld.Val,
-		"num_mobile":                     u.NumMobile.Val,
-		"speedtest-status_latency":       u.SpeedtestStatus.Latency.Val,
-		"speedtest-status_rundate":       u.SpeedtestStatus.Rundate.Val,
-		"speedtest-status_runtime":       u.SpeedtestStatus.Runtime.Val,
-		"speedtest-status_download":      u.SpeedtestStatus.StatusDownload.Val,
-		"speedtest-status_ping":          u.SpeedtestStatus.StatusPing.Val,
-		"speedtest-status_summary":       u.SpeedtestStatus.StatusSummary.Val,
-		"speedtest-status_upload":        u.SpeedtestStatus.StatusUpload.Val,
-		"speedtest-status_xput_download": u.SpeedtestStatus.XputDownload.Val,
-		"speedtest-status_xput_upload":   u.SpeedtestStatus.XputUpload.Val,
-		"config_network_wan_type":        u.ConfigNetwork.Type,
-		"wan1_bytes-r":                   u.Wan1.BytesR.Val,
-		"wan1_enable":                    u.Wan1.Enable.Val,
-		"wan1_full_duplex":               u.Wan1.FullDuplex.Val,
-		"wan1_gateway":                   u.Wan1.Gateway,
-		"wan1_ifname":                    u.Wan1.Ifname,
-		"wan1_ip":                        u.Wan1.IP,
-		"wan1_mac":                       u.Wan1.Mac,
-		"wan1_max_speed":                 u.Wan1.MaxSpeed.Val,
-		"wan1_name":                      u.Wan1.Name,
-		"wan1_netmask":                   u.Wan1.Netmask,
-		"wan1_rx_bytes":                  u.Wan1.RxBytes.Val,
-		"wan1_rx_bytes-r":                u.Wan1.RxBytesR.Val,
-		"wan1_rx_dropped":                u.Wan1.RxDropped.Val,
-		"wan1_rx_errors":                 u.Wan1.RxErrors.Val,
-		"wan1_rx_multicast":              u.Wan1.RxMulticast.Val,
-		"wan1_rx_packets":                u.Wan1.RxPackets.Val,
-		"wan1_type":                      u.Wan1.Type,
-		"wan1_speed":                     u.Wan1.Speed.Val,
-		"wan1_up":                        u.Wan1.Up.Val,
-		"wan1_tx_bytes":                  u.Wan1.TxBytes.Val,
-		"wan1_tx_bytes-r":                u.Wan1.TxBytesR.Val,
-		"wan1_tx_dropped":                u.Wan1.TxDropped.Val,
-		"wan1_tx_errors":                 u.Wan1.TxErrors.Val,
-		"wan1_tx_packets":                u.Wan1.TxPackets.Val,
-		"wan2_bytes-r":                   u.Wan2.BytesR.Val,
-		"wan2_enable":                    u.Wan2.Enable.Val,
-		"wan2_full_duplex":               u.Wan2.FullDuplex.Val,
-		"wan2_gateway":                   u.Wan2.Gateway,
-		"wan2_ifname":                    u.Wan2.Ifname,
-		"wan2_ip":                        u.Wan2.IP,
-		"wan2_mac":                       u.Wan2.Mac,
-		"wan2_max_speed":                 u.Wan2.MaxSpeed.Val,
-		"wan2_name":                      u.Wan2.Name,
-		"wan2_netmask":                   u.Wan2.Netmask,
-		"wan2_rx_bytes":                  u.Wan2.RxBytes.Val,
-		"wan2_rx_bytes-r":                u.Wan2.RxBytesR.Val,
-		"wan2_rx_dropped":                u.Wan2.RxDropped.Val,
-		"wan2_rx_errors":                 u.Wan2.RxErrors.Val,
-		"wan2_rx_multicast":              u.Wan2.RxMulticast.Val,
-		"wan2_rx_packets":                u.Wan2.RxPackets.Val,
-		"wan2_type":                      u.Wan2.Type,
-		"wan2_speed":                     u.Wan2.Speed.Val,
-		"wan2_up":                        u.Wan2.Up.Val,
-		"wan2_tx_bytes":                  u.Wan2.TxBytes.Val,
-		"wan2_tx_bytes-r":                u.Wan2.TxBytesR.Val,
-		"wan2_tx_dropped":                u.Wan2.TxDropped.Val,
-		"wan2_tx_errors":                 u.Wan2.TxErrors.Val,
-		"wan2_tx_packets":                u.Wan2.TxPackets.Val,
-		"loadavg_1":                      u.SysStats.Loadavg1.Val,
-		"loadavg_5":                      u.SysStats.Loadavg5.Val,
-		"loadavg_15":                     u.SysStats.Loadavg15.Val,
-		"mem_used":                       u.SysStats.MemUsed.Val,
-		"mem_buffer":                     u.SysStats.MemBuffer.Val,
-		"mem_total":                      u.SysStats.MemTotal.Val,
-		"cpu":                            u.SystemStats.CPU.Val,
-		"mem":                            u.SystemStats.Mem.Val,
-		"system_uptime":                  u.SystemStats.Uptime.Val,
-		"stat_duration":                  u.Stat.Duration.Val,
-		"stat_datetime":                  u.Stat.Datetime,
-		"gw":                             u.Stat.Gw,
-		"lan-rx_bytes":                   u.Stat.LanRxBytes.Val,
-		"lan-rx_packets":                 u.Stat.LanRxPackets.Val,
-		"lan-tx_bytes":                   u.Stat.LanTxBytes.Val,
-		"lan-tx_packets":                 u.Stat.LanTxPackets.Val,
-		"wan-rx_bytes":                   u.Stat.WanRxBytes.Val,
-		"wan-rx_dropped":                 u.Stat.WanRxDropped.Val,
-		"wan-rx_packets":                 u.Stat.WanRxPackets.Val,
-		"wan-tx_bytes":                   u.Stat.WanTxBytes.Val,
-		"wan-tx_packets":                 u.Stat.WanTxPackets.Val,
-		"uplink_name":                    u.Uplink.Name,
-		"uplink_latency":                 u.Uplink.Latency.Val,
-		"uplink_speed":                   u.Uplink.Speed.Val,
-		"uplink_num_ports":               u.Uplink.NumPort.Val,
-		"uplink_max_speed":               u.Uplink.MaxSpeed.Val,
+		"ip":                             s.IP,
+		"bytes":                          s.Bytes.Val,
+		"last_seen":                      s.LastSeen.Val,
+		"license_state":                  s.LicenseState,
+		"guest-num_sta":                  s.GuestNumSta.Val,
+		"rx_bytes":                       s.RxBytes.Val,
+		"tx_bytes":                       s.TxBytes.Val,
+		"uptime":                         s.Uptime.Val,
+		"state":                          s.State.Val,
+		"user-num_sta":                   s.UserNumSta.Val,
+		"version":                        s.Version,
+		"num_desktop":                    s.NumDesktop.Val,
+		"num_handheld":                   s.NumHandheld.Val,
+		"num_mobile":                     s.NumMobile.Val,
+		"speedtest-status_latency":       s.SpeedtestStatus.Latency.Val,
+		"speedtest-status_runtime":       s.SpeedtestStatus.Runtime.Val,
+		"speedtest-status_ping":          s.SpeedtestStatus.StatusPing.Val,
+		"speedtest-status_xput_download": s.SpeedtestStatus.XputDownload.Val,
+		"speedtest-status_xput_upload":   s.SpeedtestStatus.XputUpload.Val,
+		"wan1_bytes-r":                   s.Wan1.BytesR.Val,
+		"wan1_enable":                    s.Wan1.Enable.Val,
+		"wan1_full_duplex":               s.Wan1.FullDuplex.Val,
+		"wan1_gateway":                   s.Wan1.Gateway,
+		"wan1_ifname":                    s.Wan1.Ifname,
+		"wan1_ip":                        s.Wan1.IP,
+		"wan1_mac":                       s.Wan1.Mac,
+		"wan1_max_speed":                 s.Wan1.MaxSpeed.Val,
+		"wan1_name":                      s.Wan1.Name,
+		"wan1_rx_bytes":                  s.Wan1.RxBytes.Val,
+		"wan1_rx_bytes-r":                s.Wan1.RxBytesR.Val,
+		"wan1_rx_dropped":                s.Wan1.RxDropped.Val,
+		"wan1_rx_errors":                 s.Wan1.RxErrors.Val,
+		"wan1_rx_multicast":              s.Wan1.RxMulticast.Val,
+		"wan1_rx_packets":                s.Wan1.RxPackets.Val,
+		"wan1_type":                      s.Wan1.Type,
+		"wan1_speed":                     s.Wan1.Speed.Val,
+		"wan1_up":                        s.Wan1.Up.Val,
+		"wan1_tx_bytes":                  s.Wan1.TxBytes.Val,
+		"wan1_tx_bytes-r":                s.Wan1.TxBytesR.Val,
+		"wan1_tx_dropped":                s.Wan1.TxDropped.Val,
+		"wan1_tx_errors":                 s.Wan1.TxErrors.Val,
+		"wan1_tx_packets":                s.Wan1.TxPackets.Val,
+		"wan2_bytes-r":                   s.Wan2.BytesR.Val,
+		"wan2_enable":                    s.Wan2.Enable.Val,
+		"wan2_full_duplex":               s.Wan2.FullDuplex.Val,
+		"wan2_gateway":                   s.Wan2.Gateway,
+		"wan2_ifname":                    s.Wan2.Ifname,
+		"wan2_ip":                        s.Wan2.IP,
+		"wan2_mac":                       s.Wan2.Mac,
+		"wan2_max_speed":                 s.Wan2.MaxSpeed.Val,
+		"wan2_name":                      s.Wan2.Name,
+		"wan2_rx_bytes":                  s.Wan2.RxBytes.Val,
+		"wan2_rx_bytes-r":                s.Wan2.RxBytesR.Val,
+		"wan2_rx_dropped":                s.Wan2.RxDropped.Val,
+		"wan2_rx_errors":                 s.Wan2.RxErrors.Val,
+		"wan2_rx_multicast":              s.Wan2.RxMulticast.Val,
+		"wan2_rx_packets":                s.Wan2.RxPackets.Val,
+		"wan2_type":                      s.Wan2.Type,
+		"wan2_speed":                     s.Wan2.Speed.Val,
+		"wan2_up":                        s.Wan2.Up.Val,
+		"wan2_tx_bytes":                  s.Wan2.TxBytes.Val,
+		"wan2_tx_bytes-r":                s.Wan2.TxBytesR.Val,
+		"wan2_tx_dropped":                s.Wan2.TxDropped.Val,
+		"wan2_tx_errors":                 s.Wan2.TxErrors.Val,
+		"wan2_tx_packets":                s.Wan2.TxPackets.Val,
+		"loadavg_1":                      s.SysStats.Loadavg1.Val,
+		"loadavg_5":                      s.SysStats.Loadavg5.Val,
+		"loadavg_15":                     s.SysStats.Loadavg15.Val,
+		"mem_used":                       s.SysStats.MemUsed.Val,
+		"mem_buffer":                     s.SysStats.MemBuffer.Val,
+		"mem_total":                      s.SysStats.MemTotal.Val,
+		"cpu":                            s.SystemStats.CPU.Val,
+		"mem":                            s.SystemStats.Mem.Val,
+		"system_uptime":                  s.SystemStats.Uptime.Val,
+		"lan-rx_bytes":                   s.Stat.LanRxBytes.Val,
+		"lan-rx_packets":                 s.Stat.LanRxPackets.Val,
+		"lan-tx_bytes":                   s.Stat.LanTxBytes.Val,
+		"lan-tx_packets":                 s.Stat.LanTxPackets.Val,
+		"wan-rx_bytes":                   s.Stat.WanRxBytes.Val,
+		"wan-rx_dropped":                 s.Stat.WanRxDropped.Val,
+		"wan-rx_packets":                 s.Stat.WanRxPackets.Val,
+		"wan-tx_bytes":                   s.Stat.WanTxBytes.Val,
+		"wan-tx_packets":                 s.Stat.WanTxPackets.Val,
 	}
-	pt, err := influx.NewPoint("usg", tags, fields, now)
-	if err != nil {
-		return nil, err
-	}
-	points := []*influx.Point{pt}
-	for _, p := range u.NetworkTable {
+	r.send(&metric{Table: "usg", Tags: tags, Fields: fields})
+
+	for _, p := range s.NetworkTable {
 		tags := map[string]string{
-			"device_name": u.Name,
-			"device_id":   u.ID,
-			"device_mac":  u.Mac,
-			"site_name":   u.SiteName,
+			"device_name": s.Name,
+			"device_id":   s.ID,
+			"device_mac":  s.Mac,
+			"site_name":   s.SiteName,
 			"up":          p.Up.Txt,
 			"enabled":     p.Enabled.Txt,
 			"site_id":     p.SiteID,
@@ -156,18 +131,14 @@ func USGPoints(u *unifi.USG, now time.Time) ([]*influx.Point, error) {
 			"tx_bytes":   p.TxBytes.Val,
 			"tx_packets": p.TxPackets.Val,
 		}
-		pt, err = influx.NewPoint("usg_networks", tags, fields, now)
-		if err != nil {
-			return points, err
-		}
-		points = append(points, pt)
+		r.send(&metric{Table: "usg_networks", Tags: tags, Fields: fields})
 	}
-	for _, p := range u.PortTable {
+	for _, p := range s.PortTable {
 		tags := map[string]string{
-			"device_name": u.Name,
-			"device_id":   u.ID,
-			"device_mac":  u.Mac,
-			"site_name":   u.SiteName,
+			"device_name": s.Name,
+			"device_id":   s.ID,
+			"device_mac":  s.Mac,
+			"site_name":   s.SiteName,
 			"name":        p.Name,
 			"ifname":      p.Ifname,
 			"ip":          p.IP,
@@ -189,11 +160,7 @@ func USGPoints(u *unifi.USG, now time.Time) ([]*influx.Point, error) {
 			"rx_multicast": p.RxMulticast.Val,
 			"dns_servers":  strings.Join(p.DNS, ","),
 		}
-		pt, err = influx.NewPoint("usg_ports", tags, fields, now)
-		if err != nil {
-			return points, err
-		}
-		points = append(points, pt)
+		r.send(&metric{Table: "usg_ports", Tags: tags, Fields: fields})
+
 	}
-	return points, nil
 }
