@@ -43,7 +43,7 @@ func (u *InfluxUnifi) batchUSW(r report, s *unifi.USW) {
 		"stat_tx_errors":      s.Stat.Sw.TxErrors.Val,
 		"stat_tx_packets":     s.Stat.Sw.TxPackets.Val,
 		"stat_tx_retries":     s.Stat.Sw.TxRetries.Val,
-	}, u.batchSysStats(r, s.SysStats, s.SystemStats))
+	}, u.batchSysStats(s.SysStats, s.SystemStats))
 	r.send(&metric{Table: "usw", Tags: tags, Fields: fields})
 	u.batchPortTable(r, tags, s.PortTable)
 }
