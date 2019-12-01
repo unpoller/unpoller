@@ -19,7 +19,7 @@ func (u *InfluxUnifi) batchUSW(r report, s *unifi.USW) {
 		"serial":    s.Serial,
 		"type":      s.Type,
 	}
-	fields := map[string]interface{}{
+	fields := Combine(map[string]interface{}{
 		"guest-num_sta":       s.GuestNumSta.Val,
 		"ip":                  s.IP,
 		"bytes":               s.Bytes.Val,
@@ -31,15 +31,6 @@ func (u *InfluxUnifi) batchUSW(r report, s *unifi.USW) {
 		"uptime":              s.Uptime.Val,
 		"state":               s.State.Val,
 		"user-num_sta":        s.UserNumSta.Val,
-		"loadavg_1":           s.SysStats.Loadavg1.Val,
-		"loadavg_5":           s.SysStats.Loadavg5.Val,
-		"loadavg_15":          s.SysStats.Loadavg15.Val,
-		"mem_buffer":          s.SysStats.MemBuffer.Val,
-		"mem_used":            s.SysStats.MemUsed.Val,
-		"mem_total":           s.SysStats.MemTotal.Val,
-		"cpu":                 s.SystemStats.CPU.Val,
-		"mem":                 s.SystemStats.Mem.Val,
-		"system_uptime":       s.SystemStats.Uptime.Val,
 		"stat_bytes":          s.Stat.Sw.Bytes.Val,
 		"stat_rx_bytes":       s.Stat.Sw.RxBytes.Val,
 		"stat_rx_crypts":      s.Stat.Sw.RxCrypts.Val,
@@ -52,21 +43,24 @@ func (u *InfluxUnifi) batchUSW(r report, s *unifi.USW) {
 		"stat_tx_errors":      s.Stat.Sw.TxErrors.Val,
 		"stat_tx_packets":     s.Stat.Sw.TxPackets.Val,
 		"stat_tx_retries":     s.Stat.Sw.TxRetries.Val,
-	}
+	}, u.batchSysStats(r, s.SysStats, s.SystemStats))
 	r.send(&metric{Table: "usw", Tags: tags, Fields: fields})
+	u.batchPortTable(r, tags, s.PortTable)
+}
 
-	for _, p := range s.PortTable {
+func (u *InfluxUnifi) batchPortTable(r report, tags map[string]string, pt []unifi.Port) {
+	for _, p := range pt {
 		if !p.Up.Val || !p.Enable.Val {
 			continue // only record UP ports.
 		}
 		tags := map[string]string{
-			"site_name":   s.SiteName,
-			"device_name": s.Name,
+			"site_name":   tags["site_name"],
+			"device_name": tags["name"],
 			"name":        p.Name,
 			"poe_mode":    p.PoeMode,
 			"port_poe":    p.PortPoe.Txt,
 			"port_idx":    p.PortIdx.Txt,
-			"port_id":     s.Name + " Port " + p.PortIdx.Txt,
+			"port_id":     tags["name"] + " Port " + p.PortIdx.Txt,
 			"poe_enable":  p.PoeEnable.Txt,
 			"flowctrl_rx": p.FlowctrlRx.Txt,
 			"flowctrl_tx": p.FlowctrlTx.Txt,
