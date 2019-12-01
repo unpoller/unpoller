@@ -176,6 +176,7 @@ func (u *promUnifi) exportPortTable(r report, labels []string, pt []unifi.Port) 
 			{u.USW.TxDropped, prometheus.CounterValue, p.TxDropped, labelP},
 			{u.USW.TxErrors, prometheus.CounterValue, p.TxErrors, labelP},
 			{u.USW.TxMulticast, prometheus.CounterValue, p.TxMulticast, labelP},
+			{u.USW.TxPackets, prometheus.CounterValue, p.TxPackets, labelP},
 		})
 	}
 }
