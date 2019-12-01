@@ -21,14 +21,10 @@ type Report struct {
 	bp      influx.BatchPoints
 }
 
-// satisfy gomnd
-const one = 1
-
 // report is an internal interface that can be mocked and overrridden for tests.
 type report interface {
 	add()
 	done()
-	wait()
 	send(m *metric)
 	error(err error)
 	batch(m *metric, pt *influx.Point)
@@ -38,6 +34,9 @@ type report interface {
 func (r *Report) metrics() *metrics.Metrics {
 	return r.Metrics
 }
+
+// satisfy gomnd
+const one = 1
 
 func (r *Report) add() {
 	r.wg.Add(one)
@@ -50,10 +49,6 @@ func (r *Report) done() {
 func (r *Report) send(m *metric) {
 	r.wg.Add(one)
 	r.ch <- m
-}
-
-func (r *Report) wait() {
-	r.wg.Wait()
 }
 
 /* The following methods are not thread safe. */

@@ -73,7 +73,7 @@ func (u *InfluxUnifi) batchUSG(r report, s *unifi.USG) {
 			r.send(&metric{Table: "usg_ports", Tags: t, Fields: f})
 		}
 	*/
-	fields = Combine(fields, u.batchSysStats(r, s.SysStats, s.SystemStats))
+	fields = Combine(fields, u.batchSysStats(s.SysStats, s.SystemStats))
 	r.send(&metric{Table: "usg", Tags: tags, Fields: fields})
 	u.batchNetworkTable(r, tags, s.NetworkTable)
 	u.batchUSGwans(r, tags, s.Wan1, s.Wan2)
