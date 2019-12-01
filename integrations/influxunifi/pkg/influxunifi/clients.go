@@ -37,6 +37,8 @@ func (u *InfluxUnifi) batchClient(r report, s *unifi.Client) {
 		"ip":               s.IP,
 		"essid":            s.Essid,
 		"bssid":            s.Bssid,
+		"channel":          s.Channel.Val,
+		"hostname":         s.Name,
 		"radio_desc":       s.RadioDescription,
 		"satisfaction":     s.Satisfaction.Val,
 		"bytes_r":          s.BytesR,

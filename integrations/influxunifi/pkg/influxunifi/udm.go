@@ -74,7 +74,7 @@ func (u *InfluxUnifi) batchUDM(r report, s *unifi.UDM) {
 		"lan-tx_packets":                 s.Stat.Gw.LanTxPackets.Val,
 	}, u.batchSysStats(s.SysStats, s.SystemStats))
 	r.send(&metric{Table: "usg", Tags: tags, Fields: fields})
-	u.batchNetworkTable(r, tags, s.NetworkTable)
+	u.batchNetTable(r, tags, s.NetworkTable)
 	u.batchUSGwans(r, tags, s.Wan1, s.Wan2)
 
 	tags = map[string]string{
@@ -136,5 +136,6 @@ func (u *InfluxUnifi) batchUDM(r report, s *unifi.UDM) {
 	fields["guest-num_sta"] = int(s.GuestNumSta.Val)
 	fields["num_sta"] = s.NumSta.Val
 	r.send(&metric{Table: "uap", Tags: tags, Fields: fields})
-	u.processVAPs(r, tags, *s.VapTable, *s.RadioTable, *s.RadioTableStats)
+	u.processRadTable(r, tags, *s.RadioTable, *s.RadioTableStats)
+	u.processVAPTable(r, tags, *s.VapTable)
 }
