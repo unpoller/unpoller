@@ -4,6 +4,32 @@ import (
 	"golift.io/unifi"
 )
 
+// Combines concatenates N maps. This will delete things if not used with caution.
+func Combine(in ...map[string]interface{}) map[string]interface{} {
+	out := make(map[string]interface{})
+	for i := range in {
+		for k := range in[i] {
+			out[k] = in[i][k]
+		}
+	}
+	return out
+}
+
+// batchSysStats is used by all device types.
+func (u *InfluxUnifi) batchSysStats(r report, s unifi.SysStats, ss unifi.SystemStats) map[string]interface{} {
+	return map[string]interface{}{
+		"loadavg_1":     s.Loadavg1.Val,
+		"loadavg_5":     s.Loadavg5.Val,
+		"loadavg_15":    s.Loadavg15.Val,
+		"mem_used":      s.MemUsed.Val,
+		"mem_buffer":    s.MemBuffer.Val,
+		"mem_total":     s.MemTotal.Val,
+		"cpu":           ss.CPU.Val,
+		"mem":           ss.Mem.Val,
+		"system_uptime": ss.Uptime.Val,
+	}
+}
+
 // batchUDM generates Unifi Gateway datapoints for InfluxDB.
 // These points can be passed directly to influx.
 func (u *InfluxUnifi) batchUDM(r report, s *unifi.UDM) {
@@ -22,7 +48,7 @@ func (u *InfluxUnifi) batchUDM(r report, s *unifi.UDM) {
 		"serial":    s.Serial,
 		"type":      s.Type,
 	}
-	fields := map[string]interface{}{
+	fields := Combine(map[string]interface{}{
 		"ip":                             s.IP,
 		"bytes":                          s.Bytes.Val,
 		"last_seen":                      s.LastSeen.Val,
@@ -42,72 +68,14 @@ func (u *InfluxUnifi) batchUDM(r report, s *unifi.UDM) {
 		"speedtest-status_ping":          s.SpeedtestStatus.StatusPing.Val,
 		"speedtest-status_xput_download": s.SpeedtestStatus.XputDownload.Val,
 		"speedtest-status_xput_upload":   s.SpeedtestStatus.XputUpload.Val,
-		"wan1_bytes-r":                   s.Wan1.BytesR.Val,
-		"wan1_enable":                    s.Wan1.Enable.Val,
-		"wan1_full_duplex":               s.Wan1.FullDuplex.Val,
-		"wan1_gateway":                   s.Wan1.Gateway,
-		"wan1_ifname":                    s.Wan1.Ifname,
-		"wan1_ip":                        s.Wan1.IP,
-		"wan1_mac":                       s.Wan1.Mac,
-		"wan1_max_speed":                 s.Wan1.MaxSpeed.Val,
-		"wan1_name":                      s.Wan1.Name,
-		"wan1_rx_bytes":                  s.Wan1.RxBytes.Val,
-		"wan1_rx_bytes-r":                s.Wan1.RxBytesR.Val,
-		"wan1_rx_dropped":                s.Wan1.RxDropped.Val,
-		"wan1_rx_errors":                 s.Wan1.RxErrors.Val,
-		"wan1_rx_multicast":              s.Wan1.RxMulticast.Val,
-		"wan1_rx_packets":                s.Wan1.RxPackets.Val,
-		"wan1_type":                      s.Wan1.Type,
-		"wan1_speed":                     s.Wan1.Speed.Val,
-		"wan1_up":                        s.Wan1.Up.Val,
-		"wan1_tx_bytes":                  s.Wan1.TxBytes.Val,
-		"wan1_tx_bytes-r":                s.Wan1.TxBytesR.Val,
-		"wan1_tx_dropped":                s.Wan1.TxDropped.Val,
-		"wan1_tx_errors":                 s.Wan1.TxErrors.Val,
-		"wan1_tx_packets":                s.Wan1.TxPackets.Val,
-		"wan2_bytes-r":                   s.Wan2.BytesR.Val,
-		"wan2_enable":                    s.Wan2.Enable.Val,
-		"wan2_full_duplex":               s.Wan2.FullDuplex.Val,
-		"wan2_gateway":                   s.Wan2.Gateway,
-		"wan2_ifname":                    s.Wan2.Ifname,
-		"wan2_ip":                        s.Wan2.IP,
-		"wan2_mac":                       s.Wan2.Mac,
-		"wan2_max_speed":                 s.Wan2.MaxSpeed.Val,
-		"wan2_name":                      s.Wan2.Name,
-		"wan2_rx_bytes":                  s.Wan2.RxBytes.Val,
-		"wan2_rx_bytes-r":                s.Wan2.RxBytesR.Val,
-		"wan2_rx_dropped":                s.Wan2.RxDropped.Val,
-		"wan2_rx_errors":                 s.Wan2.RxErrors.Val,
-		"wan2_rx_multicast":              s.Wan2.RxMulticast.Val,
-		"wan2_rx_packets":                s.Wan2.RxPackets.Val,
-		"wan2_type":                      s.Wan2.Type,
-		"wan2_speed":                     s.Wan2.Speed.Val,
-		"wan2_up":                        s.Wan2.Up.Val,
-		"wan2_tx_bytes":                  s.Wan2.TxBytes.Val,
-		"wan2_tx_bytes-r":                s.Wan2.TxBytesR.Val,
-		"wan2_tx_dropped":                s.Wan2.TxDropped.Val,
-		"wan2_tx_errors":                 s.Wan2.TxErrors.Val,
-		"wan2_tx_packets":                s.Wan2.TxPackets.Val,
-		"loadavg_1":                      s.SysStats.Loadavg1.Val,
-		"loadavg_5":                      s.SysStats.Loadavg5.Val,
-		"loadavg_15":                     s.SysStats.Loadavg15.Val,
-		"mem_used":                       s.SysStats.MemUsed.Val,
-		"mem_buffer":                     s.SysStats.MemBuffer.Val,
-		"mem_total":                      s.SysStats.MemTotal.Val,
-		"cpu":                            s.SystemStats.CPU.Val,
-		"mem":                            s.SystemStats.Mem.Val,
-		"system_uptime":                  s.SystemStats.Uptime.Val,
-		"lan-rx_bytes":                   s.Stat.LanRxBytes.Val,
-		"lan-rx_packets":                 s.Stat.LanRxPackets.Val,
-		"lan-tx_bytes":                   s.Stat.LanTxBytes.Val,
-		"lan-tx_packets":                 s.Stat.LanTxPackets.Val,
-		"wan-rx_bytes":                   s.Stat.WanRxBytes.Val,
-		"wan-rx_dropped":                 s.Stat.WanRxDropped.Val,
-		"wan-rx_packets":                 s.Stat.WanRxPackets.Val,
-		"wan-tx_bytes":                   s.Stat.WanTxBytes.Val,
-		"wan-tx_packets":                 s.Stat.WanTxPackets.Val,
-	}
+		"lan-rx_bytes":                   s.Stat.Gw.LanRxBytes.Val,
+		"lan-rx_packets":                 s.Stat.Gw.LanRxPackets.Val,
+		"lan-tx_bytes":                   s.Stat.Gw.LanTxBytes.Val,
+		"lan-tx_packets":                 s.Stat.Gw.LanTxPackets.Val,
+	}, u.batchSysStats(r, s.SysStats, s.SystemStats))
 	r.send(&metric{Table: "usg", Tags: tags, Fields: fields})
+	u.batchNetworkTable(r, tags, s.NetworkTable)
+	u.batchUSGwans(r, tags, s.Wan1, s.Wan2)
 
 	tags = map[string]string{
 		"mac":       s.Mac,
@@ -127,16 +95,6 @@ func (u *InfluxUnifi) batchUDM(r report, s *unifi.UDM) {
 		"tx_bytes":        s.TxBytes.Val,
 		"uptime":          s.Uptime.Val,
 		"state":           s.State.Val,
-		"user-num_sta":    s.UserNumSta.Val,
-		"loadavg_1":       s.SysStats.Loadavg1.Val,
-		"loadavg_5":       s.SysStats.Loadavg5.Val,
-		"loadavg_15":      s.SysStats.Loadavg15.Val,
-		"mem_buffer":      s.SysStats.MemBuffer.Val,
-		"mem_used":        s.SysStats.MemUsed.Val,
-		"mem_total":       s.SysStats.MemTotal.Val,
-		"cpu":             s.SystemStats.CPU.Val,
-		"mem":             s.SystemStats.Mem.Val,
-		"system_uptime":   s.SystemStats.Uptime.Val,
 		"stat_bytes":      s.Stat.Sw.Bytes.Val,
 		"stat_rx_bytes":   s.Stat.Sw.RxBytes.Val,
 		"stat_rx_crypts":  s.Stat.Sw.RxCrypts.Val,
@@ -151,85 +109,8 @@ func (u *InfluxUnifi) batchUDM(r report, s *unifi.UDM) {
 		"stat_tx_retries": s.Stat.Sw.TxRetries.Val,
 	}
 	r.send(&metric{Table: "usw", Tags: tags, Fields: fields})
+	u.batchPortTable(r, tags, s.PortTable)
 
-	for _, p := range s.NetworkTable {
-		tags := map[string]string{
-			"device_name": s.Name,
-			"device_id":   s.ID,
-			"device_mac":  s.Mac,
-			"site_name":   s.SiteName,
-			"up":          p.Up.Txt,
-			"enabled":     p.Enabled.Txt,
-			"site_id":     p.SiteID,
-			"ip":          p.IP,
-			"ip_subnet":   p.IPSubnet,
-			"mac":         p.Mac,
-			"name":        p.Name,
-			"domain_name": p.DomainName,
-			"purpose":     p.Purpose,
-		}
-		fields := map[string]interface{}{
-			"domain_name":         p.DomainName,
-			"dhcpd_start":         p.DhcpdStart,
-			"dhcpd_stop":          p.DhcpdStop,
-			"ip":                  p.IP,
-			"ip_subnet":           p.IPSubnet,
-			"mac":                 p.Mac,
-			"name":                p.Name,
-			"num_sta":             p.NumSta.Val,
-			"purpose":             p.Purpose,
-			"rx_bytes":            p.RxBytes.Val,
-			"rx_packets":          p.RxPackets.Val,
-			"tx_bytes":            p.TxBytes.Val,
-			"tx_packets":          p.TxPackets.Val,
-			"ipv6_interface_type": p.Ipv6InterfaceType,
-			"attr_hidden_id":      p.AttrHiddenID,
-		}
-		r.send(&metric{Table: "usg_networks", Tags: tags, Fields: fields})
-	}
-
-	for _, p := range s.PortTable {
-		tags := map[string]string{
-			"site_id":     s.SiteID,
-			"site_name":   s.SiteName,
-			"device_name": s.Name,
-			"name":        p.Name,
-			"enable":      p.Enable.Txt,
-			"up":          p.Up.Txt,
-			"poe_mode":    p.PoeMode,
-			"port_poe":    p.PortPoe.Txt,
-			"port_idx":    p.PortIdx.Txt,
-			"port_id":     s.Name + " Port " + p.PortIdx.Txt,
-			"poe_enable":  p.PoeEnable.Txt,
-			"flowctrl_rx": p.FlowctrlRx.Txt,
-			"flowctrl_tx": p.FlowctrlTx.Txt,
-			"media":       p.Media,
-			"poe_class":   p.PoeClass,
-		}
-		fields := map[string]interface{}{
-			"dbytes_r":     p.BytesR.Val,
-			"rx_broadcast": p.RxBroadcast.Val,
-			"rx_bytes":     p.RxBytes.Val,
-			"rx_bytes-r":   p.RxBytesR.Val,
-			"rx_dropped":   p.RxDropped.Val,
-			"rx_errors":    p.RxErrors.Val,
-			"rx_multicast": p.RxMulticast.Val,
-			"rx_packets":   p.RxPackets.Val,
-			"speed":        p.Speed.Val,
-			"stp_pathcost": p.StpPathcost.Val,
-			"tx_broadcast": p.TxBroadcast.Val,
-			"tx_bytes":     p.TxBytes.Val,
-			"tx_bytes-r":   p.TxBytesR.Val,
-			"tx_dropped":   p.TxDropped.Val,
-			"tx_errors":    p.TxErrors.Val,
-			"tx_multicast": p.TxMulticast.Val,
-			"tx_packets":   p.TxPackets.Val,
-			"poe_current":  p.PoeCurrent.Val,
-			"poe_power":    p.PoePower.Val,
-			"poe_voltage":  p.PoeVoltage.Val,
-		}
-		r.send(&metric{Table: "usw_ports", Tags: tags, Fields: fields})
-	}
 	if s.Stat.Ap == nil {
 		return
 		// we're done now. the following code process UDM (non-pro) UAP data.
@@ -243,60 +124,17 @@ func (u *InfluxUnifi) batchUDM(r report, s *unifi.UDM) {
 		"serial":    s.Serial,
 		"type":      s.Type,
 	}
-	fields = map[string]interface{}{
-		"ip":            s.IP,
-		"bytes":         s.Bytes.Val,
-		"last_seen":     s.LastSeen.Val,
-		"rx_bytes":      s.RxBytes.Val,
-		"tx_bytes":      s.TxBytes.Val,
-		"uptime":        s.Uptime.Val,
-		"state":         int(s.State.Val),
-		"user-num_sta":  int(s.UserWlanNumSta.Val),
-		"guest-num_sta": int(s.GuestWlanNumSta.Val),
-		"num_sta":       s.WlanNumSta.Val,
-		"loadavg_1":     s.SysStats.Loadavg1.Val,
-		"loadavg_5":     s.SysStats.Loadavg5.Val,
-		"loadavg_15":    s.SysStats.Loadavg15.Val,
-		"mem_buffer":    s.SysStats.MemBuffer.Val,
-		"mem_total":     s.SysStats.MemTotal.Val,
-		"mem_used":      s.SysStats.MemUsed.Val,
-		"cpu":           s.SystemStats.CPU.Val,
-		"mem":           s.SystemStats.Mem.Val,
-		"system_uptime": s.SystemStats.Uptime.Val,
-		// Accumulative Statistics.
-		"stat_user-rx_packets":  s.Stat.Ap.UserRxPackets.Val,
-		"stat_guest-rx_packets": s.Stat.Ap.GuestRxPackets.Val,
-		"stat_rx_packets":       s.Stat.Ap.RxPackets.Val,
-		"stat_user-rx_bytes":    s.Stat.Ap.UserRxBytes.Val,
-		"stat_guest-rx_bytes":   s.Stat.Ap.GuestRxBytes.Val,
-		"stat_rx_bytes":         s.Stat.Ap.RxBytes.Val,
-		"stat_user-rx_errors":   s.Stat.Ap.UserRxErrors.Val,
-		"stat_guest-rx_errors":  s.Stat.Ap.GuestRxErrors.Val,
-		"stat_rx_errors":        s.Stat.Ap.RxErrors.Val,
-		"stat_user-rx_dropped":  s.Stat.Ap.UserRxDropped.Val,
-		"stat_guest-rx_dropped": s.Stat.Ap.GuestRxDropped.Val,
-		"stat_rx_dropped":       s.Stat.Ap.RxDropped.Val,
-		"stat_user-rx_crypts":   s.Stat.Ap.UserRxCrypts.Val,
-		"stat_guest-rx_crypts":  s.Stat.Ap.GuestRxCrypts.Val,
-		"stat_rx_crypts":        s.Stat.Ap.RxCrypts.Val,
-		"stat_user-rx_frags":    s.Stat.Ap.UserRxFrags.Val,
-		"stat_guest-rx_frags":   s.Stat.Ap.GuestRxFrags.Val,
-		"stat_rx_frags":         s.Stat.Ap.RxFrags.Val,
-		"stat_user-tx_packets":  s.Stat.Ap.UserTxPackets.Val,
-		"stat_guest-tx_packets": s.Stat.Ap.GuestTxPackets.Val,
-		"stat_tx_packets":       s.Stat.Ap.TxPackets.Val,
-		"stat_user-tx_bytes":    s.Stat.Ap.UserTxBytes.Val,
-		"stat_guest-tx_bytes":   s.Stat.Ap.GuestTxBytes.Val,
-		"stat_tx_bytes":         s.Stat.Ap.TxBytes.Val,
-		"stat_user-tx_errors":   s.Stat.Ap.UserTxErrors.Val,
-		"stat_guest-tx_errors":  s.Stat.Ap.GuestTxErrors.Val,
-		"stat_tx_errors":        s.Stat.Ap.TxErrors.Val,
-		"stat_user-tx_dropped":  s.Stat.Ap.UserTxDropped.Val,
-		"stat_guest-tx_dropped": s.Stat.Ap.GuestTxDropped.Val,
-		"stat_tx_dropped":       s.Stat.Ap.TxDropped.Val,
-		"stat_user-tx_retries":  s.Stat.Ap.UserTxRetries.Val,
-		"stat_guest-tx_retries": s.Stat.Ap.GuestTxRetries.Val,
-	}
+	fields = u.processUAPstats(r, s.Stat.Ap)
+	fields["ip"] = s.IP
+	fields["bytes"] = s.Bytes.Val
+	fields["last_seen"] = s.LastSeen.Val
+	fields["rx_bytes"] = s.RxBytes.Val
+	fields["tx_bytes"] = s.TxBytes.Val
+	fields["uptime"] = s.Uptime.Val
+	fields["state"] = s.State
+	fields["user-num_sta"] = int(s.UserNumSta.Val)
+	fields["guest-num_sta"] = int(s.GuestNumSta.Val)
+	fields["num_sta"] = s.NumSta.Val
 	r.send(&metric{Table: "uap", Tags: tags, Fields: fields})
-	u.processVAPs(r, *s.VapTable, *s.RadioTable, *s.RadioTableStats, s.Name, s.Mac, s.SiteName)
+	u.processVAPs(r, tags, *s.VapTable, *s.RadioTable, *s.RadioTableStats)
 }
