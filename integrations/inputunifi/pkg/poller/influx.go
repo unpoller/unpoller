@@ -9,6 +9,9 @@ import (
 
 // GetInfluxDB returns an InfluxDB interface.
 func (u *UnifiPoller) GetInfluxDB() (err error) {
+	if u.Influx != nil {
+		return nil
+	}
 	u.Influx, err = influxunifi.New(&influxunifi.Config{
 		Database: u.Config.InfluxDB,
 		User:     u.Config.InfluxUser,
@@ -29,6 +32,9 @@ func (u *UnifiPoller) GetInfluxDB() (err error) {
 // determine if there was a read or write error and act on it. This is currently
 // called in two places in this library. One returns an error, one does not.
 func (u *UnifiPoller) CollectAndProcess() error {
+	if err := u.GetInfluxDB(); err != nil {
+		return err
+	}
 	metrics, err := u.CollectMetrics()
 	if err != nil {
 		return err
