@@ -48,19 +48,19 @@ func (u *InfluxUnifi) batchUSW(r report, s *unifi.USW) {
 	u.batchPortTable(r, tags, s.PortTable)
 }
 
-func (u *InfluxUnifi) batchPortTable(r report, tags map[string]string, pt []unifi.Port) {
+func (u *InfluxUnifi) batchPortTable(r report, t map[string]string, pt []unifi.Port) {
 	for _, p := range pt {
 		if !p.Up.Val || !p.Enable.Val {
 			continue // only record UP ports.
 		}
 		tags := map[string]string{
-			"site_name":   tags["site_name"],
-			"device_name": tags["name"],
+			"site_name":   t["site_name"],
+			"device_name": t["name"],
 			"name":        p.Name,
 			"poe_mode":    p.PoeMode,
 			"port_poe":    p.PortPoe.Txt,
 			"port_idx":    p.PortIdx.Txt,
-			"port_id":     tags["name"] + " Port " + p.PortIdx.Txt,
+			"port_id":     t["name"] + " Port " + p.PortIdx.Txt,
 			"poe_enable":  p.PoeEnable.Txt,
 			"flowctrl_rx": p.FlowctrlRx.Txt,
 			"flowctrl_tx": p.FlowctrlTx.Txt,

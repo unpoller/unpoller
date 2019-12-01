@@ -31,7 +31,9 @@ func (u *InfluxUnifi) batchUAP(r report, s *unifi.UAP) {
 	fields["guest-num_sta"] = int(s.GuestNumSta.Val)
 	fields["num_sta"] = s.NumSta.Val
 	r.send(&metric{Table: "uap", Tags: tags, Fields: fields})
-	u.processVAPs(r, tags, s.VapTable, s.RadioTable, s.RadioTableStats)
+	u.processRadTable(r, tags, s.RadioTable, s.RadioTableStats)
+	u.processVAPTable(r, tags, s.VapTable)
+
 }
 
 func (u *InfluxUnifi) processUAPstats(ap *unifi.Ap) map[string]interface{} {
@@ -72,99 +74,101 @@ func (u *InfluxUnifi) processUAPstats(ap *unifi.Ap) map[string]interface{} {
 	}
 }
 
-// processVAPs creates points for Wifi Radios. This works with several types of UAP-capable devices.
-func (u *InfluxUnifi) processVAPs(r report, tags map[string]string, vt unifi.VapTable, rt unifi.RadioTable, rts unifi.RadioTableStats) {
-	// Loop each virtual AP (ESSID) and extract data for it
-	// from radio_tables and radio_table_stats.
+// processVAPTable creates points for Wifi Radios. This works with several types of UAP-capable devices.
+func (u *InfluxUnifi) processVAPTable(r report, t map[string]string, vt unifi.VapTable) {
 	for _, s := range vt {
-		t := make(map[string]string)      // tags
-		f := make(map[string]interface{}) // fields
-		t["device_name"] = tags["name"]
-		t["site_name"] = tags["site_name"]
-		t["ap_mac"] = s.ApMac
-		t["bssid"] = s.Bssid
-		t["id"] = s.ID
-		t["name"] = s.Name
-		t["radio_name"] = s.RadioName
-		t["essid"] = s.Essid
-		t["site_id"] = s.SiteID
-		t["usage"] = s.Usage
-		t["state"] = s.State
-		t["is_guest"] = s.IsGuest.Txt
-
-		f["ccq"] = s.Ccq
-		f["mac_filter_rejections"] = s.MacFilterRejections
-		f["num_satisfaction_sta"] = s.NumSatisfactionSta.Val
-		f["avg_client_signal"] = s.AvgClientSignal.Val
-		f["satisfaction"] = s.Satisfaction.Val
-		f["satisfaction_now"] = s.SatisfactionNow.Val
-		f["rx_bytes"] = s.RxBytes.Val
-		f["rx_crypts"] = s.RxCrypts.Val
-		f["rx_dropped"] = s.RxDropped.Val
-		f["rx_errors"] = s.RxErrors.Val
-		f["rx_frags"] = s.RxFrags.Val
-		f["rx_nwids"] = s.RxNwids.Val
-		f["rx_packets"] = s.RxPackets.Val
-		f["tx_bytes"] = s.TxBytes.Val
-		f["tx_dropped"] = s.TxDropped.Val
-		f["tx_errors"] = s.TxErrors.Val
-		f["tx_packets"] = s.TxPackets.Val
-		f["tx_power"] = s.TxPower.Val
-		f["tx_retries"] = s.TxRetries.Val
-		f["tx_combined_retries"] = s.TxCombinedRetries.Val
-		f["tx_data_mpdu_bytes"] = s.TxDataMpduBytes.Val
-		f["tx_rts_retries"] = s.TxRtsRetries.Val
-		f["tx_success"] = s.TxSuccess.Val
-		f["tx_total"] = s.TxTotal.Val
-		f["tx_tcp_goodbytes"] = s.TxTCPStats.Goodbytes.Val
-		f["tx_tcp_lat_avg"] = s.TxTCPStats.LatAvg.Val
-		f["tx_tcp_lat_max"] = s.TxTCPStats.LatMax.Val
-		f["tx_tcp_lat_min"] = s.TxTCPStats.LatMin.Val
-		f["rx_tcp_goodbytes"] = s.RxTCPStats.Goodbytes.Val
-		f["rx_tcp_lat_avg"] = s.RxTCPStats.LatAvg.Val
-		f["rx_tcp_lat_max"] = s.RxTCPStats.LatMax.Val
-		f["rx_tcp_lat_min"] = s.RxTCPStats.LatMin.Val
-		f["wifi_tx_latency_mov_avg"] = s.WifiTxLatencyMov.Avg.Val
-		f["wifi_tx_latency_mov_max"] = s.WifiTxLatencyMov.Max.Val
-		f["wifi_tx_latency_mov_min"] = s.WifiTxLatencyMov.Min.Val
-		f["wifi_tx_latency_mov_total"] = s.WifiTxLatencyMov.Total.Val
-		f["wifi_tx_latency_mov_cuont"] = s.WifiTxLatencyMov.TotalCount.Val
-
-		// XXX: This is busted. It needs its own table....
-		for _, p := range rt {
-			if p.Name != s.RadioName {
-				continue
-			}
-			t["channel"] = p.Channel.Txt
-			t["radio"] = p.Radio
-			f["current_antenna_gain"] = p.CurrentAntennaGain.Val
-			f["ht"] = p.Ht.Txt
-			f["max_txpower"] = p.MaxTxpower.Val
-			f["min_txpower"] = p.MinTxpower.Val
-			f["nss"] = p.Nss.Val
-			f["radio_caps"] = p.RadioCaps.Val
-			f["tx_power"] = p.TxPower.Val
+		tags := map[string]string{
+			"device_name": t["name"],
+			"site_name":   t["site_name"],
+			"ap_mac":      s.ApMac,
+			"bssid":       s.Bssid,
+			"id":          s.ID,
+			"name":        s.Name,
+			"radio_name":  s.RadioName,
+			"essid":       s.Essid,
+			"site_id":     s.SiteID,
+			"usage":       s.Usage,
+			"state":       s.State,
+			"is_guest":    s.IsGuest.Txt,
 		}
-
-		for _, p := range rts {
-			if p.Name != s.RadioName {
-				continue
-			}
-			f["ast_be_xmit"] = p.AstBeXmit.Val
-			f["channel"] = p.Channel.Val
-			f["cu_self_rx"] = p.CuSelfRx.Val
-			f["cu_self_tx"] = p.CuSelfTx.Val
-			f["cu_total"] = p.CuTotal.Val
-			f["extchannel"] = p.Extchannel.Val
-			f["gain"] = p.Gain.Val
-			f["guest-num_sta"] = p.GuestNumSta.Val
-			f["num_sta"] = p.NumSta.Val
-			f["radio"] = p.Radio
-			f["tx_packets"] = p.TxPackets.Val
-			f["tx_power"] = p.TxPower.Val
-			f["tx_retries"] = p.TxRetries.Val
-			f["user-num_sta"] = p.UserNumSta.Val
+		fields := map[string]interface{}{
+			"ccq":                       s.Ccq,
+			"mac_filter_rejections":     s.MacFilterRejections,
+			"num_satisfaction_sta":      s.NumSatisfactionSta.Val,
+			"avg_client_signal":         s.AvgClientSignal.Val,
+			"satisfaction":              s.Satisfaction.Val,
+			"satisfaction_now":          s.SatisfactionNow.Val,
+			"rx_bytes":                  s.RxBytes.Val,
+			"rx_crypts":                 s.RxCrypts.Val,
+			"rx_dropped":                s.RxDropped.Val,
+			"rx_errors":                 s.RxErrors.Val,
+			"rx_frags":                  s.RxFrags.Val,
+			"rx_nwids":                  s.RxNwids.Val,
+			"rx_packets":                s.RxPackets.Val,
+			"tx_bytes":                  s.TxBytes.Val,
+			"tx_dropped":                s.TxDropped.Val,
+			"tx_errors":                 s.TxErrors.Val,
+			"tx_packets":                s.TxPackets.Val,
+			"tx_power":                  s.TxPower.Val,
+			"tx_retries":                s.TxRetries.Val,
+			"tx_combined_retries":       s.TxCombinedRetries.Val,
+			"tx_data_mpdu_bytes":        s.TxDataMpduBytes.Val,
+			"tx_rts_retries":            s.TxRtsRetries.Val,
+			"tx_success":                s.TxSuccess.Val,
+			"tx_total":                  s.TxTotal.Val,
+			"tx_tcp_goodbytes":          s.TxTCPStats.Goodbytes.Val,
+			"tx_tcp_lat_avg":            s.TxTCPStats.LatAvg.Val,
+			"tx_tcp_lat_max":            s.TxTCPStats.LatMax.Val,
+			"tx_tcp_lat_min":            s.TxTCPStats.LatMin.Val,
+			"rx_tcp_goodbytes":          s.RxTCPStats.Goodbytes.Val,
+			"rx_tcp_lat_avg":            s.RxTCPStats.LatAvg.Val,
+			"rx_tcp_lat_max":            s.RxTCPStats.LatMax.Val,
+			"rx_tcp_lat_min":            s.RxTCPStats.LatMin.Val,
+			"wifi_tx_latency_mov_avg":   s.WifiTxLatencyMov.Avg.Val,
+			"wifi_tx_latency_mov_max":   s.WifiTxLatencyMov.Max.Val,
+			"wifi_tx_latency_mov_min":   s.WifiTxLatencyMov.Min.Val,
+			"wifi_tx_latency_mov_total": s.WifiTxLatencyMov.Total.Val,
+			"wifi_tx_latency_mov_cuont": s.WifiTxLatencyMov.TotalCount.Val,
 		}
-		r.send(&metric{Table: "uap_vaps", Tags: t, Fields: f})
+		r.send(&metric{Table: "uap_vaps", Tags: tags, Fields: fields})
+	}
+}
+
+func (u *InfluxUnifi) processRadTable(r report, t map[string]string, rt unifi.RadioTable, rts unifi.RadioTableStats) {
+	for _, p := range rt {
+		tags := map[string]string{
+			"device_name": t["name"],
+			"site_name":   t["site_name"],
+			"channel":     p.Channel.Txt,
+			"radio":       p.Radio,
+		}
+		fields := map[string]interface{}{
+			"current_antenna_gain": p.CurrentAntennaGain.Val,
+			"ht":                   p.Ht.Txt,
+			"max_txpower":          p.MaxTxpower.Val,
+			"min_txpower":          p.MinTxpower.Val,
+			"nss":                  p.Nss.Val,
+			"radio_caps":           p.RadioCaps.Val,
+		}
+		for _, t := range rts {
+			if t.Name == p.Name {
+				fields["ast_be_xmit"] = t.AstBeXmit.Val
+				fields["channel"] = t.Channel.Val
+				fields["cu_self_rx"] = t.CuSelfRx.Val
+				fields["cu_self_tx"] = t.CuSelfTx.Val
+				fields["cu_total"] = t.CuTotal.Val
+				fields["extchannel"] = t.Extchannel.Val
+				fields["gain"] = t.Gain.Val
+				fields["guest-num_sta"] = t.GuestNumSta.Val
+				fields["num_sta"] = t.NumSta.Val
+				fields["radio"] = t.Radio
+				fields["tx_packets"] = t.TxPackets.Val
+				fields["tx_power"] = t.TxPower.Val
+				fields["tx_retries"] = t.TxRetries.Val
+				fields["user-num_sta"] = t.UserNumSta.Val
+				break
+			}
+		}
+		r.send(&metric{Table: "uap_radios", Tags: tags, Fields: fields})
 	}
 }
