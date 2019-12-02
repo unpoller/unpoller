@@ -71,9 +71,11 @@ func descUSG(ns string) *usg {
 }
 
 func (u *promUnifi) exportUSG(r report, d *unifi.USG) {
-	labels := []string{d.IP, d.Version, d.Model, d.Serial, d.Type, d.Mac, d.SiteName, d.Name}
+	labels := []string{d.Type, d.SiteName, d.Name}
+	infoLabels := []string{d.IP, d.Version, d.Model, d.Serial, d.Mac}
 	// Gateway System Data.
 	r.send([]*metric{
+		{u.Device.Info, prometheus.GaugeValue, 1.0, append(labels, infoLabels...)},
 		{u.Device.Uptime, prometheus.GaugeValue, d.Uptime, labels},
 		{u.Device.TotalTxBytes, prometheus.CounterValue, d.TxBytes, labels},
 		{u.Device.TotalRxBytes, prometheus.CounterValue, d.RxBytes, labels},

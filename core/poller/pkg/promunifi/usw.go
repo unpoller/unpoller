@@ -47,8 +47,8 @@ type usw struct {
 
 func descUSW(ns string) *usw {
 	pns := ns + "port_"
-	// labels := []string{"ip", "version", "model", "serial", "type", "mac", "site_name", "name"}
-	labelS := []string{"site_name", "name"} // labels[6:]
+	// labels := []string{"type", "site_name", "name"}
+	labelS := []string{"site_name", "name"} // labels[1:]
 	labelP := []string{"port_id", "port_num", "port_name", "port_mac", "port_ip", "site_name", "name"}
 	return &usw{
 		SwRxPackets:   prometheus.NewDesc(ns+"switch_receive_packets_total", "Switch Packets Received Total", labelS, nil),
@@ -91,7 +91,8 @@ func descUSW(ns string) *usw {
 }
 
 func (u *promUnifi) exportUSW(r report, d *unifi.USW) {
-	labels := []string{d.IP, d.Version, d.Model, d.Serial, d.Type, d.Mac, d.SiteName, d.Name}
+	labels := []string{d.Type, d.SiteName, d.Name}
+	infoLabels := []string{d.IP, d.Version, d.Model, d.Serial, d.Mac}
 	if d.HasTemperature.Val {
 		r.send([]*metric{{u.Device.Temperature, prometheus.GaugeValue, d.GeneralTemperature, labels}})
 	}
@@ -101,6 +102,7 @@ func (u *promUnifi) exportUSW(r report, d *unifi.USW) {
 
 	// Switch System Data.
 	r.send([]*metric{
+		{u.Device.Info, prometheus.GaugeValue, 1.0, append(labels, infoLabels...)},
 		{u.Device.Uptime, prometheus.GaugeValue, d.Uptime, labels},
 		{u.Device.TotalMaxPower, prometheus.GaugeValue, d.TotalMaxPower, labels},
 		{u.Device.TotalTxBytes, prometheus.CounterValue, d.TxBytes, labels},
@@ -123,7 +125,7 @@ func (u *promUnifi) exportUSW(r report, d *unifi.USW) {
 }
 
 func (u *promUnifi) exportUSWstats(r report, labels []string, sw *unifi.Sw) {
-	labelS := labels[6:]
+	labelS := labels[1:]
 	r.send([]*metric{
 		{u.USW.SwRxPackets, prometheus.CounterValue, sw.RxPackets, labelS},
 		{u.USW.SwRxBytes, prometheus.CounterValue, sw.RxBytes, labelS},
