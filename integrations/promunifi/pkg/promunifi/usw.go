@@ -78,7 +78,7 @@ func descUSW(ns string) *usw {
 		RxErrors:     prometheus.NewDesc(pns+"receive_errors_total", "Total Receive Errors", labelP, nil),
 		RxMulticast:  prometheus.NewDesc(pns+"receive_multicast_total", "Total Receive Multicast", labelP, nil),
 		RxPackets:    prometheus.NewDesc(pns+"receive_packets_total", "Total Receive Packets", labelP, nil),
-		Satisfaction: prometheus.NewDesc(pns+"satisfaction_ratoi", "Satisfaction", labelP, nil),
+		Satisfaction: prometheus.NewDesc(pns+"satisfaction_ratio", "Satisfaction", labelP, nil),
 		Speed:        prometheus.NewDesc(pns+"port_speed_bps", "Speed", labelP, nil),
 		TxBroadcast:  prometheus.NewDesc(pns+"transmit_broadcast_total", "Total Transmit Broadcast", labelP, nil),
 		TxBytes:      prometheus.NewDesc(pns+"transmit_bytes_total", "Total Transmit Bytes", labelP, nil),
