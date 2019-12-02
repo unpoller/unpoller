@@ -46,8 +46,8 @@ func descClient(ns string) *uclient {
 	return &uclient{
 		Anomalies:      prometheus.NewDesc(ns+"anomalies", "Client Anomalies", labelW, nil),
 		BytesR:         prometheus.NewDesc(ns+"transfer_rate_bytes", "Client Data Rate", labelW, nil),
-		CCQ:            prometheus.NewDesc(ns+"ccq_percent", "Client Connection Quality", labelW, nil),
-		Satisfaction:   prometheus.NewDesc(ns+"satisfaction_percent", "Client Satisfaction", labelW, nil),
+		CCQ:            prometheus.NewDesc(ns+"ccq_ratio", "Client Connection Quality", labelW, nil),
+		Satisfaction:   prometheus.NewDesc(ns+"satisfaction_ratio", "Client Satisfaction", labelW, nil),
 		Noise:          prometheus.NewDesc(ns+"noise_db", "Client AP Noise", labelW, nil),
 		RoamCount:      prometheus.NewDesc(ns+"roam_count_total", "Client Roam Counter", labelW, nil),
 		RSSI:           prometheus.NewDesc(ns+"rssi_db", "Client RSSI", labelW, nil),
@@ -95,8 +95,8 @@ func (u *promUnifi) exportClient(r report, c *unifi.Client) {
 		labelW[len(labelW)-1] = "false"
 		r.send([]*metric{
 			{u.Client.Anomalies, prometheus.CounterValue, c.Anomalies, labelW},
-			{u.Client.CCQ, prometheus.GaugeValue, c.Ccq / 10, labelW},
-			{u.Client.Satisfaction, prometheus.GaugeValue, c.Satisfaction, labelW},
+			{u.Client.CCQ, prometheus.GaugeValue, c.Ccq / 1000, labelW},
+			{u.Client.Satisfaction, prometheus.GaugeValue, c.Satisfaction.Val / 100.0, labelW},
 			{u.Client.Noise, prometheus.GaugeValue, c.Noise, labelW},
 			{u.Client.RoamCount, prometheus.CounterValue, c.RoamCount, labelW},
 			{u.Client.RSSI, prometheus.GaugeValue, c.Rssi, labelW},
