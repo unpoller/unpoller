@@ -49,7 +49,7 @@ func descUSW(ns string) *usw {
 	pns := ns + "port_"
 	// labels := []string{"ip", "version", "model", "serial", "type", "mac", "site_name", "name"}
 	labelS := []string{"site_name", "name"} // labels[6:]
-	labelP := []string{"port_num", "port_name", "port_mac", "port_ip", "site_name", "name"}
+	labelP := []string{"port_id", "port_num", "port_name", "port_mac", "port_ip", "site_name", "name"}
 	return &usw{
 		SwRxPackets:   prometheus.NewDesc(ns+"switch_receive_packets_total", "Switch Packets Received Total", labelS, nil),
 		SwRxBytes:     prometheus.NewDesc(ns+"switch_receive_bytes_total", "Switch Bytes Received Total", labelS, nil),
@@ -147,11 +147,11 @@ func (u *promUnifi) exportUSWstats(r report, labels []string, sw *unifi.Sw) {
 func (u *promUnifi) exportPortTable(r report, labels []string, pt []unifi.Port) {
 	// Per-port data on a switch
 	for _, p := range pt {
-		if !p.Up.Val {
+		if !p.Up.Val || !p.Enable.Val {
 			continue
 		}
 		// Copy labels, and add four new ones.
-		labelP := []string{p.PortIdx.Txt, p.Name, p.Mac, p.IP, labels[6], labels[7]}
+		labelP := []string{labels[7] + " Port " + p.PortIdx.Txt, p.PortIdx.Txt, p.Name, p.Mac, p.IP, labels[6], labels[7]}
 		if p.PoeEnable.Val && p.PortPoe.Val {
 			r.send([]*metric{
 				{u.USW.PoeCurrent, prometheus.GaugeValue, p.PoeCurrent, labelP},
@@ -176,6 +176,7 @@ func (u *promUnifi) exportPortTable(r report, labels []string, pt []unifi.Port) 
 			{u.USW.TxDropped, prometheus.CounterValue, p.TxDropped, labelP},
 			{u.USW.TxErrors, prometheus.CounterValue, p.TxErrors, labelP},
 			{u.USW.TxMulticast, prometheus.CounterValue, p.TxMulticast, labelP},
+			{u.USW.TxPackets, prometheus.CounterValue, p.TxPackets, labelP},
 		})
 	}
 }
