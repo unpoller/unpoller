@@ -76,7 +76,7 @@ fi
 
 INSTALLER="rpm -Uvh"
 if [ "$FILE" = "deb" ]; then
-  INSTALLER="dpkg -i"
+  INSTALLER="dpkg --force-confdef --force-confold --install"
 fi
 
 FILE=$(basename ${URL})
