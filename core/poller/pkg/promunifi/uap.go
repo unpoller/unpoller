@@ -103,7 +103,7 @@ func descUAP(ns string) *uap {
 		WifiTxAttempts:      prometheus.NewDesc(ns+"stat_wifi_transmit_attempts_total", "Wifi Transmission Attempts", labelA, nil),
 		MacFilterRejections: prometheus.NewDesc(ns+"stat_mac_filter_rejects_total", "MAC Filter Rejections", labelA, nil),
 		// N each - 1 per Virtual AP (VAP)
-		VAPCcq:                   prometheus.NewDesc(ns+"vap_ccq", "VAP Client Connection Quality", labelV, nil),
+		VAPCcq:                   prometheus.NewDesc(ns+"vap_ccq_ratio", "VAP Client Connection Quality", labelV, nil),
 		VAPMacFilterRejections:   prometheus.NewDesc(ns+"vap_mac_filter_rejects_total", "VAP MAC Filter Rejections", labelV, nil),
 		VAPNumSatisfactionSta:    prometheus.NewDesc(ns+"vap_satisfaction_stations", "VAP Number Satisifaction Stations", labelV, nil),
 		VAPAvgClientSignal:       prometheus.NewDesc(ns+"vap_average_client_signal", "VAP Average Client Signal", labelV, nil),
@@ -256,10 +256,10 @@ func (u *promUnifi) exportVAPtable(r report, labels []string, vt unifi.VapTable)
 		labelV := append([]string{v.Name, v.Bssid, v.Radio, v.RadioName, v.Essid, v.Usage}, labels[6:]...)
 
 		r.send([]*metric{
-			{u.UAP.VAPCcq, prometheus.GaugeValue, v.Ccq / 10, labelV},
+			{u.UAP.VAPCcq, prometheus.GaugeValue, float64(v.Ccq) / 1000.0, labelV},
 			{u.UAP.VAPMacFilterRejections, prometheus.CounterValue, v.MacFilterRejections, labelV},
 			{u.UAP.VAPNumSatisfactionSta, prometheus.GaugeValue, v.NumSatisfactionSta, labelV},
-			{u.UAP.VAPAvgClientSignal, prometheus.GaugeValue, v.AvgClientSignal, labelV},
+			{u.UAP.VAPAvgClientSignal, prometheus.GaugeValue, v.AvgClientSignal.Val, labelV},
 			{u.UAP.VAPSatisfaction, prometheus.GaugeValue, v.Satisfaction.Val / 100.0, labelV},
 			{u.UAP.VAPSatisfactionNow, prometheus.GaugeValue, v.SatisfactionNow.Val / 100.0, labelV},
 			{u.UAP.VAPDNSAvgLatency, prometheus.GaugeValue, v.DNSAvgLatency.Val / 1000, labelV},
