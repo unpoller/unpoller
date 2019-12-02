@@ -72,7 +72,6 @@ type uap struct {
 	RadioChannel            *prometheus.Desc
 	RadioCuSelfRx           *prometheus.Desc
 	RadioCuSelfTx           *prometheus.Desc
-	RadioCuTotal            *prometheus.Desc
 	RadioExtchannel         *prometheus.Desc
 	RadioGain               *prometheus.Desc
 	RadioGuestNumSta        *prometheus.Desc
@@ -108,8 +107,8 @@ func descUAP(ns string) *uap {
 		VAPMacFilterRejections:   prometheus.NewDesc(ns+"vap_mac_filter_rejects_total", "VAP MAC Filter Rejections", labelV, nil),
 		VAPNumSatisfactionSta:    prometheus.NewDesc(ns+"vap_satisfaction_stations", "VAP Number Satisifaction Stations", labelV, nil),
 		VAPAvgClientSignal:       prometheus.NewDesc(ns+"vap_average_client_signal", "VAP Average Client Signal", labelV, nil),
-		VAPSatisfaction:          prometheus.NewDesc(ns+"vap_satisfaction_percent", "VAP Satisfaction", labelV, nil),
-		VAPSatisfactionNow:       prometheus.NewDesc(ns+"vap_satisfaction_now_percent", "VAP Satisfaction Now", labelV, nil),
+		VAPSatisfaction:          prometheus.NewDesc(ns+"vap_satisfaction_ratio", "VAP Satisfaction", labelV, nil),
+		VAPSatisfactionNow:       prometheus.NewDesc(ns+"vap_satisfaction_now_ratio", "VAP Satisfaction Now", labelV, nil),
 		VAPDNSAvgLatency:         prometheus.NewDesc(ns+"vap_dns_latency_average_seconds", "VAP DNS Latency Average", labelV, nil),
 		VAPRxBytes:               prometheus.NewDesc(ns+"vap_receive_bytes_total", "VAP Bytes Received", labelV, nil),
 		VAPRxCrypts:              prometheus.NewDesc(ns+"vap_receive_crypts_total", "VAP Crypts Received", labelV, nil),
@@ -152,9 +151,8 @@ func descUAP(ns string) *uap {
 		RadioTxPower:            prometheus.NewDesc(ns+"radio_transmit_power", "Radio Transmit Power", labelR, nil),
 		RadioAstBeXmit:          prometheus.NewDesc(ns+"radio_ast_be_xmit", "Radio AstBe Transmit", labelR, nil),
 		RadioChannel:            prometheus.NewDesc(ns+"radio_channel", "Radio Channel", labelR, nil),
-		RadioCuSelfRx:           prometheus.NewDesc(ns+"radio_channel_utilization_receive_percent", "Radio Channel Utilization Receive", labelR, nil),
-		RadioCuSelfTx:           prometheus.NewDesc(ns+"radio_channel_utilization_transmit_percent", "Radio Channel Utilization Transmit", labelR, nil),
-		RadioCuTotal:            prometheus.NewDesc(ns+"radio_channel_utilization_percent", "Radio Channel Utilization", labelR, nil),
+		RadioCuSelfRx:           prometheus.NewDesc(ns+"radio_channel_utilization_receive_ratio", "Radio Channel Utilization Receive", labelR, nil),
+		RadioCuSelfTx:           prometheus.NewDesc(ns+"radio_channel_utilization_transmit_ratio", "Radio Channel Utilization Transmit", labelR, nil),
 		RadioExtchannel:         prometheus.NewDesc(ns+"radio_ext_channel", "Radio Ext Channel", labelR, nil),
 		RadioGain:               prometheus.NewDesc(ns+"radio_gain", "Radio Gain", labelR, nil),
 		RadioGuestNumSta:        prometheus.NewDesc(ns+"radio_guest_stations", "Radio Guest Station Count", labelR, nil),
@@ -262,8 +260,8 @@ func (u *promUnifi) exportVAPtable(r report, labels []string, vt unifi.VapTable)
 			{u.UAP.VAPMacFilterRejections, prometheus.CounterValue, v.MacFilterRejections, labelV},
 			{u.UAP.VAPNumSatisfactionSta, prometheus.GaugeValue, v.NumSatisfactionSta, labelV},
 			{u.UAP.VAPAvgClientSignal, prometheus.GaugeValue, v.AvgClientSignal, labelV},
-			{u.UAP.VAPSatisfaction, prometheus.GaugeValue, v.Satisfaction, labelV},
-			{u.UAP.VAPSatisfactionNow, prometheus.GaugeValue, v.SatisfactionNow, labelV},
+			{u.UAP.VAPSatisfaction, prometheus.GaugeValue, v.Satisfaction.Val / 100.0, labelV},
+			{u.UAP.VAPSatisfactionNow, prometheus.GaugeValue, v.SatisfactionNow.Val / 100.0, labelV},
 			{u.UAP.VAPDNSAvgLatency, prometheus.GaugeValue, v.DNSAvgLatency.Val / 1000, labelV},
 			{u.UAP.VAPRxBytes, prometheus.CounterValue, v.RxBytes, labelV},
 			{u.UAP.VAPRxCrypts, prometheus.CounterValue, v.RxCrypts, labelV},
@@ -321,16 +319,15 @@ func (u *promUnifi) exportRadtable(r report, labels []string, rt unifi.RadioTabl
 				{u.UAP.RadioTxPower, prometheus.GaugeValue, t.TxPower, labelR},
 				{u.UAP.RadioAstBeXmit, prometheus.GaugeValue, t.AstBeXmit, labelR},
 				{u.UAP.RadioChannel, prometheus.GaugeValue, t.Channel, labelR},
-				{u.UAP.RadioCuSelfRx, prometheus.GaugeValue, t.CuSelfRx, labelR},
-				{u.UAP.RadioCuSelfTx, prometheus.GaugeValue, t.CuSelfTx, labelR},
-				{u.UAP.RadioCuTotal, prometheus.GaugeValue, t.CuTotal, labelR},
+				{u.UAP.RadioCuSelfRx, prometheus.GaugeValue, t.CuSelfRx.Val / 100.0, labelR},
+				{u.UAP.RadioCuSelfTx, prometheus.GaugeValue, t.CuSelfTx.Val / 100.0, labelR},
 				{u.UAP.RadioExtchannel, prometheus.GaugeValue, t.Extchannel, labelR},
 				{u.UAP.RadioGain, prometheus.GaugeValue, t.Gain, labelR},
 				{u.UAP.RadioGuestNumSta, prometheus.GaugeValue, t.GuestNumSta, labelR},
 				{u.UAP.RadioNumSta, prometheus.GaugeValue, t.NumSta, labelR},
 				{u.UAP.RadioUserNumSta, prometheus.GaugeValue, t.UserNumSta, labelR},
-				{u.UAP.RadioTxPackets, prometheus.CounterValue, t.TxPackets, labelR},
-				{u.UAP.RadioTxRetries, prometheus.CounterValue, t.TxRetries, labelR},
+				{u.UAP.RadioTxPackets, prometheus.GaugeValue, t.TxPackets, labelR},
+				{u.UAP.RadioTxRetries, prometheus.GaugeValue, t.TxRetries, labelR},
 			})
 		}
 	}
