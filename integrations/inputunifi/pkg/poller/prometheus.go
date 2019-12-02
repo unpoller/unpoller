@@ -1,7 +1,6 @@
 package poller
 
 import (
-	"fmt"
 	"net/http"
 	"strings"
 	"time"
@@ -54,16 +53,11 @@ func (u *UnifiPoller) ExportMetrics() (*metrics.Metrics, error) {
 // This is run by Prometheus as LoggingFn
 func (u *UnifiPoller) LogExportReport(report *promunifi.Report) {
 	m := report.Metrics
-	idsMsg := ""
-	if u.Config.CollectIDS {
-		idsMsg = fmt.Sprintf(", IDS Events: %d, ", len(m.IDSList))
-	}
-
 	u.Logf("UniFi Measurements Exported. Site: %d, Client: %d, "+
-		"UAP: %d, USG/UDM: %d, USW: %d%s, Descs: %d, "+
+		"UAP: %d, USG/UDM: %d, USW: %d, Descs: %d, "+
 		"Metrics: %d, Errs: %d, 0s: %d, Reqs/Total: %v / %v",
 		len(m.Sites), len(m.Clients), len(m.UAPs), len(m.UDMs)+len(m.USGs), len(m.USWs),
-		idsMsg, report.Descs, report.Total, report.Errors, report.Zeros,
+		report.Descs, report.Total, report.Errors, report.Zeros,
 		report.Fetch.Round(time.Millisecond/oneDecimalPoint),
 		report.Elapsed.Round(time.Millisecond/oneDecimalPoint))
 }

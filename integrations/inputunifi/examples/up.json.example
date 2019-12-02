@@ -13,7 +13,8 @@
  "unifi_user": "influx",
  "unifi_pass": "",
  "unifi_url": "https://127.0.0.1:8443",
- "collect_ids": false,
+ "save_ids": false,
+ "save_sites": true,
  "reauthenticate": false,
  "verify_ssl": false
 }
