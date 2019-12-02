@@ -114,8 +114,9 @@ func (c *Config) ParseENV() error {
 	t := reflect.TypeOf(Config{}) // Get tag names from the Config struct.
 	// Loop each Config struct member; get reflect tag & env var value; update config.
 	for i := 0; i < t.NumField(); i++ {
-		tag := strings.ToUpper(t.Field(i).Tag.Get("json")) // Get the ENV variable name from capitalized "json" struct tag
-		env := os.Getenv(ENVConfigPrefix + tag)            // Then pull value from OS.
+		tag := t.Field(i).Tag.Get("json")                 // Get the ENV variable name from "json" struct tag
+		tag = strings.Split(strings.ToUpper(tag), ",")[0] // Capitalize and remove ,omitempty suffix
+		env := os.Getenv(ENVConfigPrefix + tag)           // Then pull value from OS.
 		if tag == "" || env == "" {
 			continue // Skip if either are empty.
 		}
