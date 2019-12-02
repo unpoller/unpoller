@@ -96,7 +96,7 @@ func (u *promUnifi) exportUDM(r report, d *unifi.UDM) {
 	u.exportUSWstats(r, labels, d.Stat.Sw)
 	u.exportPortTable(r, labels, d.PortTable)
 	// Gateway Data
-	u.exportUSGstats(r, labels, d.Stat.Gw, d.SpeedtestStatus)
+	u.exportUSGstats(r, labels, d.Stat.Gw, d.SpeedtestStatus, d.Uplink)
 	u.exportWANPorts(r, labels, d.Wan1, d.Wan2)
 	// Wireless Data - UDM (non-pro) only
 	if d.Stat.Ap != nil && d.VapTable != nil {
