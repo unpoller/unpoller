@@ -72,7 +72,7 @@ func (u *promUnifi) exportSite(r report, s *unifi.Site) {
 			r.send([]*metric{
 				{u.Site.TxBytesR, prometheus.GaugeValue, h.TxBytesR, labels},
 				{u.Site.RxBytesR, prometheus.GaugeValue, h.RxBytesR, labels},
-				{u.Site.Uptime, prometheus.GaugeValue, h.Latency, labels},
+				{u.Site.Uptime, prometheus.GaugeValue, h.Uptime, labels},
 				{u.Site.Latency, prometheus.GaugeValue, h.Latency.Val / 1000, labels},
 				{u.Site.XputUp, prometheus.GaugeValue, h.XputUp, labels},
 				{u.Site.XputDown, prometheus.GaugeValue, h.XputDown, labels},
