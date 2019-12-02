@@ -2,7 +2,7 @@
 
 [![discord](https://badgen.net/badge/icon/Discord?color=0011ff&label&icon=https://simpleicons.now.sh/discord/eee "Ubiquiti Discord")](https://discord.gg/KnyKYt2)
 [![twitter](https://badgen.net/twitter/follow/TwitchCaptain?icon=https://simpleicons.now.sh/twitter/0099ff&label=TwitchCaptain&color=0116ff "TwitchCaptain @ Twitter")](https://twitter.com/TwitchCaptain)
-[![grafana](https://badgen.net/https/golift.io/bd/grafana/dashboard-downloads/10414,10415,10416,10417,10418,11314,11315?icon=https://simpleicons.now.sh/grafana/ED7F38&color=0011ff "Grafana Dashboard Downloads")](http://grafana.com/dashboards?search=unifi-poller)
+[![grafana](https://badgen.net/https/golift.io/bd/grafana/dashboard-downloads/10414,10415,10416,10417,10418,11311,11312,11313,11314,11315?icon=https://simpleicons.now.sh/grafana/ED7F38&color=0011ff "Grafana Dashboard Downloads")](http://grafana.com/dashboards?search=unifi-poller)
 [![pulls](https://badgen.net/docker/pulls/golift/unifi-poller?icon=https://simpleicons.now.sh/docker/38B1ED&label=pulls&color=0011ff "Docker Pulls")](https://hub.docker.com/r/golift/unifi-poller)
 [![DLs](https://img.shields.io/github/downloads/davidnewhall/unifi-poller/total.svg?logo=github&color=0116ff "GitHub Downloads")](https://www.somsubhra.com/github-release-stats/?username=davidnewhall&repository=unifi-poller)
 
@@ -15,9 +15,8 @@ Collect your UniFi controller data and report it to an InfluxDB instance,
 or export it for Prometheus collection. Prometheus support is
 [new](https://github.com/davidnewhall/unifi-poller/issues/88), and much
 of the documentation still needs to be updated; 11/30/2019.
-[Seven Grafana Dashboards](http://grafana.com/dashboards?search=unifi-poller)
-included; with screenshots. Five for InfluxDB and two for Prometheus, although
-three more Prometheus dashboards are coming!
+[Ten Grafana Dashboards](http://grafana.com/dashboards?search=unifi-poller)
+included; with screenshots. Five for InfluxDB and five for Prometheus.
 
 ## Installation
 [See the Wiki!](https://github.com/davidnewhall/unifi-poller/wiki/Installation)
