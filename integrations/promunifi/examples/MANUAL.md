@@ -107,6 +107,10 @@ is provided so the application can be easily adapted to any environment.
         measurements at /metrics for collection by prometheus. Enabling this
         mode disables InfluxDB usage entirely.
 
+        * Value: both
+        Setting the mode to "both" will cause the InfluxDB poller routine to run
+        along with the Prometheus exporter. You can run both at the same time.
+
     http_listen            default: 0.0.0.0:9130
         This option controls the IP and port the http listener uses when the
         mode is set to prometheus. This setting has no effect when other modes
@@ -143,12 +147,17 @@ is provided so the application can be easily adapted to any environment.
         Password used to authenticate with UniFi controller. This can also be
         set in an environment variable instead of a configuration file.
 
-    collect_ids            default: false
+    save_ids            default: false
         Setting this parameter to true will enable collection of Intrusion
         Detection System data. IDS and IPS are the same data set. This is off
         by default because most controllers do not have this enabled. It also
         creates a lot of new metrics from controllers with a lot of IDS entries.
         IDS data does not contain metrics, so this doesn't work with Prometheus.
+
+    save_sites
+        Setting this parameter to false will disable saving Network Site data.
+        This data populates the Sites dashboard, and this setting affects influx
+        and prometheus.
 
     reauthenticate         default: false
         Setting this parameter to true will make UniFi Poller send a new login

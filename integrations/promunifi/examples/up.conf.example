@@ -25,7 +25,7 @@ quiet = false
 # an invalid mode will also result in "influx". In this default mode the application
 # runs as a daemon and polls the controller at the configured interval.
 #
-# There are two other options at this time: "influxlambda" and "prometheus"
+# Other options: "influxlambda",  "prometheus", "both"
 #
 # Mode "influxlambda" makes the application exit after collecting and reporting metrics
 # to InfluxDB one time. This mode requires an external process like an AWS Lambda
@@ -33,6 +33,9 @@ quiet = false
 #
 # Mode "prometheus" opens an HTTP server on port 9130 and exports the metrics at
 # /metrics for polling collection by a prometheus server. This disables influxdb.
+#
+# Mode "both" runs the Prometheus HTTP server and InfluxDB poller interval at
+# the same time.
 mode = "influx"
 
 # This controls on which ip and port /metrics is exported when mode is "prometheus".
