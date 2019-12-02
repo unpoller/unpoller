@@ -110,7 +110,7 @@ sites side-by-side. So easy! This screenshot barely does it justice.
 ![USW Dashboard Image](https://grafana.com/api/dashboards/10417/images/6664/image)
 
 ## Copyright & License
-<img style="float: right;" align="right" width="200px" src="https://raw.githubusercontent.com/wiki/davidnewhall/unifi-poller/images/unifi-poller-logo.png">
+<img style="float: right;" align="right" width="200px" src="https://raw.githubusercontent.com/wiki/davidnewhall/unifi-poller/images/unifi-poller-prometheus-logo-small.png">
 
 -   Copyright © 2016 Garrett Bjerkhoel.
 -   Copyright © 2018-2019 David Newhall II.
