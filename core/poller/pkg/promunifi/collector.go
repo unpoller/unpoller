@@ -118,10 +118,7 @@ func (u *promUnifi) Collect(ch chan<- prometheus.Metric) {
 
 	// Pass Report interface into our collecting and reporting methods.
 	go u.exportMetrics(r, ch)
-	for _, f := range []func(report){u.loopClients, u.loopSites, u.loopUAPs, u.loopUSWs, u.loopUSGs, u.loopUDMs} {
-		r.add()
-		go f(r) // in loops.go.
-	}
+	u.loopExports(r)
 }
 
 // This is closely tied to the method above with a sync.WaitGroup.
@@ -147,4 +144,54 @@ func (u *promUnifi) exportMetrics(r report, ch chan<- prometheus.Metric) {
 		}
 		r.done()
 	}
+}
+
+func (u *promUnifi) loopExports(r report) {
+	r.add()
+	go func() {
+		defer r.done()
+		for _, s := range r.metrics().Sites {
+			u.exportSite(r, s)
+		}
+	}()
+
+	r.add()
+	go func() {
+		defer r.done()
+		for _, d := range r.metrics().UAPs {
+			u.exportUAP(r, d)
+		}
+	}()
+
+	r.add()
+	go func() {
+		defer r.done()
+		for _, d := range r.metrics().UDMs {
+			u.exportUDM(r, d)
+		}
+	}()
+
+	r.add()
+	go func() {
+		defer r.done()
+		for _, d := range r.metrics().USGs {
+			u.exportUSG(r, d)
+		}
+	}()
+
+	r.add()
+	go func() {
+		defer r.done()
+		for _, d := range r.metrics().USWs {
+			u.exportUSW(r, d)
+		}
+	}()
+
+	r.add()
+	go func() {
+		defer r.done()
+		for _, c := range r.metrics().Clients {
+			u.exportClient(r, c)
+		}
+	}()
 }
