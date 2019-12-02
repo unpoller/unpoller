@@ -68,7 +68,7 @@ func (u *UnifiPoller) CollectMetrics() (*metrics.Metrics, error) {
 	// Get the sites we care about.
 	m.Sites, err = u.GetFilteredSites()
 	u.LogError(err, "unifi.GetSites()")
-	if u.Config.CollectIDS {
+	if u.Config.SaveIDS {
 		m.IDSList, err = u.Unifi.GetIDS(m.Sites, time.Now().Add(u.Config.Interval.Duration), time.Now())
 		u.LogError(err, "unifi.GetIDS()")
 	}
@@ -110,6 +110,9 @@ func (u *UnifiPoller) AugmentMetrics(metrics *metrics.Metrics) {
 		metrics.Clients[i].ApName = devices[c.ApMac]
 		metrics.Clients[i].GwName = devices[c.GwMac]
 		metrics.Clients[i].RadioDescription = bssdIDs[metrics.Clients[i].Bssid] + metrics.Clients[i].RadioProto
+	}
+	if !u.Config.SaveSites {
+		metrics.Sites = nil
 	}
 }
 
