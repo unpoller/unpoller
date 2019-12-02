@@ -13,7 +13,7 @@ import (
 	"time"
 
 	"github.com/BurntSushi/toml"
-	influx "github.com/influxdata/influxdb1-client/v2"
+	"github.com/davidnewhall/unifi-poller/pkg/influxunifi"
 	"github.com/spf13/pflag"
 	"golift.io/unifi"
 	yaml "gopkg.in/yaml.v2"
@@ -41,7 +41,7 @@ const ENVConfigPrefix = "UP_"
 
 // UnifiPoller contains the application startup data, and auth info for UniFi & Influx.
 type UnifiPoller struct {
-	Influx     influx.Client
+	Influx     *influxunifi.InfluxUnifi
 	Unifi      *unifi.Unifi
 	Flag       *Flag
 	Config     *Config
@@ -65,9 +65,10 @@ type Config struct {
 	Debug      bool     `json:"debug" toml:"debug" xml:"debug" yaml:"debug"`
 	Quiet      bool     `json:"quiet,omitempty" toml:"quiet,omitempty" xml:"quiet" yaml:"quiet"`
 	VerifySSL  bool     `json:"verify_ssl" toml:"verify_ssl" xml:"verify_ssl" yaml:"verify_ssl"`
-	CollectIDS bool     `json:"collect_ids" toml:"collect_ids" xml:"collect_ids" yaml:"collect_ids"`
+	SaveIDS    bool     `json:"save_ids" toml:"save_ids" xml:"save_ids" yaml:"save_ids"`
 	ReAuth     bool     `json:"reauthenticate" toml:"reauthenticate" xml:"reauthenticate" yaml:"reauthenticate"`
 	InfxBadSSL bool     `json:"influx_insecure_ssl" toml:"influx_insecure_ssl" xml:"influx_insecure_ssl" yaml:"influx_insecure_ssl"`
+	SaveSites  bool     `json:"save_sites,omitempty" toml:"save_sites,omitempty" xml:"save_sites" yaml:"save_sites"`
 	Mode       string   `json:"mode" toml:"mode" xml:"mode" yaml:"mode"`
 	HTTPListen string   `json:"http_listen" toml:"http_listen" xml:"http_listen" yaml:"http_listen"`
 	Namespace  string   `json:"namespace" toml:"namespace" xml:"namespace" yaml:"namespace"`
