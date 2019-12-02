@@ -36,7 +36,7 @@ type usg struct {
 }
 
 func descUSG(ns string) *usg {
-	//	labels := []string{"ip", "version", "model", "serial", "type", "mac", "site_name", "name"}
+	//	labels := []string{"version", "model", "serial", "type", "mac", "site_name", "name"}
 	//	labelWan := append([]string{"port"}, labels[6:]...)
 	labels := []string{"port", "site_name", "name"}
 	return &usg{
@@ -72,7 +72,7 @@ func descUSG(ns string) *usg {
 
 func (u *promUnifi) exportUSG(r report, d *unifi.USG) {
 	labels := []string{d.Type, d.SiteName, d.Name}
-	infoLabels := []string{d.IP, d.Version, d.Model, d.Serial, d.Mac}
+	infoLabels := []string{d.Version, d.Model, d.Serial, d.Mac}
 	// Gateway System Data.
 	r.send([]*metric{
 		{u.Device.Info, prometheus.GaugeValue, 1.0, append(labels, infoLabels...)},
