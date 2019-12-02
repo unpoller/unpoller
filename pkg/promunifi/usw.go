@@ -92,7 +92,7 @@ func descUSW(ns string) *usw {
 
 func (u *promUnifi) exportUSW(r report, d *unifi.USW) {
 	labels := []string{d.Type, d.SiteName, d.Name}
-	infoLabels := []string{d.IP, d.Version, d.Model, d.Serial, d.Mac}
+	infoLabels := []string{d.Version, d.Model, d.Serial, d.Mac}
 	if d.HasTemperature.Val {
 		r.send([]*metric{{u.Device.Temperature, prometheus.GaugeValue, d.GeneralTemperature, labels}})
 	}
