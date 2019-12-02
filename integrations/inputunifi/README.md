@@ -1,4 +1,4 @@
-<img width="320px" src="https://raw.githubusercontent.com/wiki/davidnewhall/unifi-poller/images/unifi-poller-logo.png"> now with <img width="30px" src="https://prometheus.io/assets/prometheus_logo.png"> Prometheus support!
+<img width="320px" src="https://raw.githubusercontent.com/wiki/davidnewhall/unifi-poller/images/unifi-poller-logo.png">
 
 [![discord](https://badgen.net/badge/icon/Discord?color=0011ff&label&icon=https://simpleicons.now.sh/discord/eee "Ubiquiti Discord")](https://discord.gg/KnyKYt2)
 [![twitter](https://badgen.net/twitter/follow/TwitchCaptain?icon=https://simpleicons.now.sh/twitter/0099ff&label=TwitchCaptain&color=0116ff "TwitchCaptain @ Twitter")](https://twitter.com/TwitchCaptain)
@@ -14,7 +14,7 @@
 Collect your UniFi controller data and report it to an InfluxDB instance,
 or export it for Prometheus collection. Prometheus support is
 [new](https://github.com/davidnewhall/unifi-poller/issues/88), and much
-of the documentation still needs to be updated; 11/30/2019.
+of the documentation still needs to be updated; 12/2/2019.
 [Ten Grafana Dashboards](http://grafana.com/dashboards?search=unifi-poller)
 included; with screenshots. Five for InfluxDB and five for Prometheus.
 
@@ -110,7 +110,7 @@ sites side-by-side. So easy! This screenshot barely does it justice.
 ![USW Dashboard Image](https://grafana.com/api/dashboards/10417/images/6664/image)
 
 ## Copyright & License
-<img style="float: right;" align="right" width="200px" src="https://raw.githubusercontent.com/wiki/davidnewhall/unifi-poller/images/unifi-poller-prometheus-logo-small.png">
+<img style="float: right;" align="right" width="200px" src="https://raw.githubusercontent.com/wiki/davidnewhall/unifi-poller/images/unifi-poller-logo.png">
 
 -   Copyright © 2016 Garrett Bjerkhoel.
 -   Copyright © 2018-2019 David Newhall II.
