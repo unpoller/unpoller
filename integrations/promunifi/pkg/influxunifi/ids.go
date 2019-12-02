@@ -1,13 +1,12 @@
 package influxunifi
 
 import (
-	influx "github.com/influxdata/influxdb1-client/v2"
 	"golift.io/unifi"
 )
 
-// IDSPoints generates intrusion detection datapoints for InfluxDB.
+// batchIDS generates intrusion detection datapoints for InfluxDB.
 // These points can be passed directly to influx.
-func IDSPoints(i *unifi.IDS) ([]*influx.Point, error) {
+func (u *InfluxUnifi) batchIDS(r report, i *unifi.IDS) {
 	tags := map[string]string{
 		"in_iface":       i.InIface,
 		"event_type":     i.EventType,
@@ -36,9 +35,5 @@ func IDSPoints(i *unifi.IDS) ([]*influx.Point, error) {
 		"srcipASN":     i.SrcipASN,
 		"usgipASN":     i.UsgipASN,
 	}
-	pt, err := influx.NewPoint("intrusion_detect", tags, fields, i.Datetime)
-	if err != nil {
-		return nil, err
-	}
-	return []*influx.Point{pt}, nil
+	r.send(&metric{Table: "intrusion_detect", Tags: tags, Fields: fields})
 }

@@ -1,119 +1,70 @@
 package influxunifi
 
 import (
-	"time"
-
-	influx "github.com/influxdata/influxdb1-client/v2"
 	"golift.io/unifi"
 )
 
-// USWPoints generates Unifi Switch datapoints for InfluxDB.
+// batchUSW generates Unifi Switch datapoints for InfluxDB.
 // These points can be passed directly to influx.
-func USWPoints(u *unifi.USW, now time.Time) ([]*influx.Point, error) {
-	if u.Stat.Sw == nil {
-		u.Stat.Sw = &unifi.Sw{}
+func (u *InfluxUnifi) batchUSW(r report, s *unifi.USW) {
+	if s.Stat.Sw == nil {
+		s.Stat.Sw = &unifi.Sw{}
 	}
 	tags := map[string]string{
-		"id":                     u.ID,
-		"mac":                    u.Mac,
-		"device_oid":             u.Stat.Oid,
-		"site_id":                u.SiteID,
-		"site_name":              u.SiteName,
-		"name":                   u.Name,
-		"adopted":                u.Adopted.Txt,
-		"cfgversion":             u.Cfgversion,
-		"config_network_ip":      u.ConfigNetwork.IP,
-		"config_network_type":    u.ConfigNetwork.Type,
-		"device_id":              u.DeviceID,
-		"inform_ip":              u.InformIP,
-		"known_cfgversion":       u.KnownCfgversion,
-		"locating":               u.Locating.Txt,
-		"model":                  u.Model,
-		"serial":                 u.Serial,
-		"type":                   u.Type,
-		"dot1x_portctrl_enabled": u.Dot1XPortctrlEnabled.Txt,
-		"flowctrl_enabled":       u.FlowctrlEnabled.Txt,
-		"has_fan":                u.HasFan.Txt,
-		"has_temperature":        u.HasTemperature.Txt,
-		"jumboframe_enabled":     u.JumboframeEnabled.Txt,
-		"stp_version":            u.StpVersion,
+		"mac":       s.Mac,
+		"site_name": s.SiteName,
+		"name":      s.Name,
+		"version":   s.Version,
+		"model":     s.Model,
+		"serial":    s.Serial,
+		"type":      s.Type,
 	}
-	fields := map[string]interface{}{
-		"fw_caps":             u.FwCaps.Val,
-		"guest-num_sta":       u.GuestNumSta.Val,
-		"ip":                  u.IP,
-		"bytes":               u.Bytes.Val,
-		"fan_level":           u.FanLevel.Val,
-		"general_temperature": u.GeneralTemperature.Val,
-		"last_seen":           u.LastSeen.Val,
-		"license_state":       u.LicenseState,
-		"overheating":         u.Overheating.Val,
-		"rx_bytes":            u.RxBytes.Val,
-		"tx_bytes":            u.TxBytes.Val,
-		"uptime":              u.Uptime.Val,
-		"state":               u.State.Val,
-		"user-num_sta":        u.UserNumSta.Val,
-		"version":             u.Version,
-		"loadavg_1":           u.SysStats.Loadavg1.Val,
-		"loadavg_5":           u.SysStats.Loadavg5.Val,
-		"loadavg_15":          u.SysStats.Loadavg15.Val,
-		"mem_buffer":          u.SysStats.MemBuffer.Val,
-		"mem_used":            u.SysStats.MemUsed.Val,
-		"mem_total":           u.SysStats.MemTotal.Val,
-		"cpu":                 u.SystemStats.CPU.Val,
-		"mem":                 u.SystemStats.Mem.Val,
-		"stp_priority":        u.StpPriority.Val,
-		"system_uptime":       u.SystemStats.Uptime.Val,
-		"stat_bytes":          u.Stat.Bytes.Val,
-		"stat_rx_bytes":       u.Stat.RxBytes.Val,
-		"stat_rx_crypts":      u.Stat.RxCrypts.Val,
-		"stat_rx_dropped":     u.Stat.RxDropped.Val,
-		"stat_rx_errors":      u.Stat.RxErrors.Val,
-		"stat_rx_frags":       u.Stat.RxFrags.Val,
-		"stat_rx_packets":     u.Stat.TxPackets.Val,
-		"stat_tx_bytes":       u.Stat.TxBytes.Val,
-		"stat_tx_dropped":     u.Stat.TxDropped.Val,
-		"stat_tx_errors":      u.Stat.TxErrors.Val,
-		"stat_tx_packets":     u.Stat.TxPackets.Val,
-		"stat_tx_retries":     u.Stat.TxRetries.Val,
-		"uplink_depth":        u.UplinkDepth.Txt,
-	}
-	pt, err := influx.NewPoint("usw", tags, fields, now)
-	if err != nil {
-		return nil, err
-	}
-	points := []*influx.Point{pt}
-	for _, p := range u.PortTable {
+	fields := Combine(map[string]interface{}{
+		"guest-num_sta":       s.GuestNumSta.Val,
+		"ip":                  s.IP,
+		"bytes":               s.Bytes.Val,
+		"fan_level":           s.FanLevel.Val,
+		"general_temperature": s.GeneralTemperature.Val,
+		"last_seen":           s.LastSeen.Val,
+		"rx_bytes":            s.RxBytes.Val,
+		"tx_bytes":            s.TxBytes.Val,
+		"uptime":              s.Uptime.Val,
+		"state":               s.State.Val,
+		"user-num_sta":        s.UserNumSta.Val,
+		"stat_bytes":          s.Stat.Sw.Bytes.Val,
+		"stat_rx_bytes":       s.Stat.Sw.RxBytes.Val,
+		"stat_rx_crypts":      s.Stat.Sw.RxCrypts.Val,
+		"stat_rx_dropped":     s.Stat.Sw.RxDropped.Val,
+		"stat_rx_errors":      s.Stat.Sw.RxErrors.Val,
+		"stat_rx_frags":       s.Stat.Sw.RxFrags.Val,
+		"stat_rx_packets":     s.Stat.Sw.TxPackets.Val,
+		"stat_tx_bytes":       s.Stat.Sw.TxBytes.Val,
+		"stat_tx_dropped":     s.Stat.Sw.TxDropped.Val,
+		"stat_tx_errors":      s.Stat.Sw.TxErrors.Val,
+		"stat_tx_packets":     s.Stat.Sw.TxPackets.Val,
+		"stat_tx_retries":     s.Stat.Sw.TxRetries.Val,
+	}, u.batchSysStats(s.SysStats, s.SystemStats))
+	r.send(&metric{Table: "usw", Tags: tags, Fields: fields})
+	u.batchPortTable(r, tags, s.PortTable)
+}
+
+func (u *InfluxUnifi) batchPortTable(r report, t map[string]string, pt []unifi.Port) {
+	for _, p := range pt {
+		if !p.Up.Val || !p.Enable.Val {
+			continue // only record UP ports.
+		}
 		tags := map[string]string{
-			"site_id":       u.SiteID,
-			"site_name":     u.SiteName,
-			"device_name":   u.Name,
-			"name":          p.Name,
-			"enable":        p.Enable.Txt,
-			"is_uplink":     p.IsUplink.Txt,
-			"up":            p.Up.Txt,
-			"portconf_id":   p.PortconfID,
-			"dot1x_mode":    p.Dot1XMode,
-			"dot1x_status":  p.Dot1XStatus,
-			"stp_state":     p.StpState,
-			"sfp_found":     p.SfpFound.Txt,
-			"op_mode":       p.OpMode,
-			"poe_mode":      p.PoeMode,
-			"port_poe":      p.PortPoe.Txt,
-			"port_idx":      p.PortIdx.Txt,
-			"port_id":       u.Name + " Port " + p.PortIdx.Txt,
-			"poe_enable":    p.PoeEnable.Txt,
-			"flowctrl_rx":   p.FlowctrlRx.Txt,
-			"flowctrl_tx":   p.FlowctrlTx.Txt,
-			"autoneg":       p.Autoneg.Txt,
-			"full_duplex":   p.FullDuplex.Txt,
-			"jumbo":         p.Jumbo.Txt,
-			"masked":        p.Masked.Txt,
-			"poe_good":      p.PoeGood.Txt,
-			"media":         p.Media,
-			"poe_class":     p.PoeClass,
-			"poe_caps":      p.PoeCaps.Txt,
-			"aggregated_by": p.AggregatedBy.Txt,
+			"site_name":   t["site_name"],
+			"device_name": t["name"],
+			"name":        p.Name,
+			"poe_mode":    p.PoeMode,
+			"port_poe":    p.PortPoe.Txt,
+			"port_idx":    p.PortIdx.Txt,
+			"port_id":     t["name"] + " Port " + p.PortIdx.Txt,
+			"poe_enable":  p.PoeEnable.Txt,
+			"flowctrl_rx": p.FlowctrlRx.Txt,
+			"flowctrl_tx": p.FlowctrlTx.Txt,
+			"media":       p.Media,
 		}
 		fields := map[string]interface{}{
 			"dbytes_r":     p.BytesR.Val,
@@ -133,16 +84,12 @@ func USWPoints(u *unifi.USW, now time.Time) ([]*influx.Point, error) {
 			"tx_errors":    p.TxErrors.Val,
 			"tx_multicast": p.TxMulticast.Val,
 			"tx_packets":   p.TxPackets.Val,
-			"poe_current":  p.PoeCurrent.Val,
-			"poe_power":    p.PoePower.Val,
-			"poe_voltage":  p.PoeVoltage.Val,
-			"full_duplex":  p.FullDuplex.Val,
 		}
-		pt, err = influx.NewPoint("usw_ports", tags, fields, now)
-		if err != nil {
-			return points, err
+		if p.PoeEnable.Val && p.PortPoe.Val {
+			fields["poe_current"] = p.PoeCurrent.Val
+			fields["poe_power"] = p.PoePower.Val
+			fields["poe_voltage"] = p.PoeVoltage.Val
 		}
-		points = append(points, pt)
+		r.send(&metric{Table: "usw_ports", Tags: tags, Fields: fields})
 	}
-	return points, nil
 }
