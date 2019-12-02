@@ -95,7 +95,7 @@ func (u *promUnifi) exportClient(r report, c *unifi.Client) {
 		labelW[len(labelW)-1] = "false"
 		r.send([]*metric{
 			{u.Client.Anomalies, prometheus.CounterValue, c.Anomalies, labelW},
-			{u.Client.CCQ, prometheus.GaugeValue, c.Ccq / 1000, labelW},
+			{u.Client.CCQ, prometheus.GaugeValue, float64(c.Ccq) / 1000.0, labelW},
 			{u.Client.Satisfaction, prometheus.GaugeValue, c.Satisfaction.Val / 100.0, labelW},
 			{u.Client.Noise, prometheus.GaugeValue, c.Noise, labelW},
 			{u.Client.RoamCount, prometheus.CounterValue, c.RoamCount, labelW},
