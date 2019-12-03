@@ -64,8 +64,7 @@ func descDevice(ns string) *unifiDevice {
 // UDM is a collection of stats from USG, USW and UAP. It has no unique stats.
 func (u *promUnifi) exportUDM(r report, d *unifi.UDM) {
 	labels := []string{d.Type, d.SiteName, d.Name}
-	labelsGuest := append(labels, "guest")
-	labelsUser := append(labels, "user")
+	infoLabels := []string{d.Version, d.Model, d.Serial, d.Mac}
 	// Dream Machine System Data.
 	r.send([]*metric{
 		{u.Device.Info, prometheus.GaugeValue, d.Uptime, append(labels, infoLabels...)},
