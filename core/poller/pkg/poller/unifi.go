@@ -101,10 +101,7 @@ func (u *UnifiPoller) AugmentMetrics(metrics *metrics.Metrics) {
 	for _, r := range metrics.USWs {
 		devices[r.Mac] = r.Name
 	}
-	for i, r := range metrics.UDMs {
-		if r.Model == "UDMPRO" {
-			metrics.UDMs[i].Type = "udmp"
-		}
+	for _, r := range metrics.UDMs {
 		devices[r.Mac] = r.Name
 	}
 	// These come blank, so set them here.
