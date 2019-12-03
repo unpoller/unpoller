@@ -24,7 +24,7 @@ type uclient struct {
 	TxRetries         *prometheus.Desc
 	TxPower           *prometheus.Desc
 	TxRate            *prometheus.Desc
-	Info              *prometheus.Desc
+	Uptime            *prometheus.Desc
 	WifiTxAttempts    *prometheus.Desc
 	WiredRxBytes      *prometheus.Desc
 	WiredRxBytesR     *prometheus.Desc
@@ -63,7 +63,7 @@ func descClient(ns string) *uclient {
 		TxPower:        prometheus.NewDesc(ns+"radio_transmit_power_dbm", "Client Transmit Power", labelW, nil),
 		TxRate:         prometheus.NewDesc(ns+"radio_transmit_rate_bps", "Client Transmit Rate", labelW, nil),
 		WifiTxAttempts: prometheus.NewDesc(ns+"wifi_attempts_transmit_total", "Client Wifi Transmit Attempts", labelW, nil),
-		Info:           prometheus.NewDesc(ns+"uptime_seconds", "Client Uptime", labelW, nil), // XXX: re-purpose for info tags.
+		Uptime:         prometheus.NewDesc(ns+"uptime_seconds", "Client Uptime", labelW, nil), // XXX: re-purpose for info tags.
 		/* needs more "looking into"
 		DpiStatsApp:       prometheus.NewDesc(ns+"dpi_stats_app", "Client DPI Stats App", labels, nil),
 		DpiStatsCat:       prometheus.NewDesc(ns+"dpi_stats_cat", "Client DPI Stats Cat", labels, nil),
@@ -115,7 +115,7 @@ func (u *promUnifi) exportClient(r report, c *unifi.Client) {
 			{u.Client.BytesR, gauge, c.BytesR, labelW},
 		})
 	}
-	r.send([]*metric{{u.Client.Info, gauge, c.Uptime, labelW}})
+	r.send([]*metric{{u.Client.Uptime, gauge, c.Uptime, labelW}})
 	/* needs more "looking into"
 	{u.Client.DpiStatsApp, gauge, c.DpiStats.App, labels},
 	{u.Client.DpiStatsCat, gauge, c.DpiStats.Cat, labels},
