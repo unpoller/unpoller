@@ -506,7 +506,7 @@ type VapTable []struct {
 	AvgClientSignal     FlexInt     `json:"avg_client_signal"`
 	Bssid               string      `json:"bssid"`
 	Ccq                 int         `json:"ccq"`
-	Channel             int         `json:"channel"`
+	Channel             FlexInt     `json:"channel"`
 	DNSAvgLatency       FlexInt     `json:"dns_avg_latency"`
 	Essid               string      `json:"essid"`
 	Extchannel          int         `json:"extchannel"`
