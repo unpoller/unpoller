@@ -59,11 +59,11 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:2d5cd61daa5565187e1d96bae64dbbc6080dacf741448e9629c64fd93203b0d4"
+  digest = "1:982be0b5396e16a663697899ce69cc7b1e71ddcae4153af157578d4dc9bc3f88"
   name = "github.com/prometheus/client_model"
   packages = ["go"]
   pruneopts = "UT"
-  revision = "14fe0d1b01d4d5fc031dd4bec1823bd3ebbe8016"
+  revision = "d1d2010b5beead3fa1c5f271a5cf626e40b3ad6e"
 
 [[projects]]
   digest = "1:f119e3205d3a1f0f19dbd7038eb37528e2c6f0933269dc344e305951fb87d632"
@@ -106,12 +106,12 @@
   revision = "6d18c012aee9febd81bbf9806760c8c4480e870d"
 
 [[projects]]
-  digest = "1:0d815236933294be05901215b375de3a7c990abcb769069eccca32a825a15862"
+  digest = "1:87738e338f505d3e3be1f80d36b53f3c4e73be9b7ad4ccae46abbe9ef04f3f71"
   name = "golift.io/unifi"
   packages = ["."]
   pruneopts = "UT"
-  revision = "68fa5c1f82da4567d8c192c52397984551cb08b9"
-  version = "v4.1.4"
+  revision = "ba857a3a04311fed362cb43fa7bf4066bc3a7e55"
+  version = "v4.1.5"
 
 [[projects]]
   digest = "1:b75b3deb2bce8bc079e16bb2aecfe01eb80098f5650f9e93e5643ca8b7b73737"
