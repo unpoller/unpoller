@@ -92,13 +92,13 @@ func descUSW(ns string) *usw {
 
 func (u *promUnifi) exportUSW(r report, d *unifi.USW) {
 	labels := []string{d.Type, d.SiteName, d.Name}
-	infoLabels := []string{d.Version, d.Model, d.Serial, d.Mac, d.IP, d.ID, d.Bytes.Txt}
+	infoLabels := []string{d.Version, d.Model, d.Serial, d.Mac, d.IP, d.ID, d.Bytes.Txt, d.Uptime.Txt}
 	u.exportUSWstats(r, labels, d.Stat.Sw)
 	u.exportPRTtable(r, labels, d.PortTable)
 	u.exportBYTstats(r, labels, d.TxBytes, d.RxBytes)
 	u.exportSYSstats(r, labels, d.SysStats, d.SystemStats)
 	u.exportSTAcount(r, labels, d.UserNumSta, d.GuestNumSta)
-	r.sendone(u.Device.Info, gauge, d.Uptime, append(labels, infoLabels...))
+	r.sendone(u.Device.Info, gauge, 1.0, append(labels, infoLabels...))
 	// Switch System Data.
 	if d.HasTemperature.Val {
 		r.sendone(u.Device.Temperature, gauge, d.GeneralTemperature, labels)
