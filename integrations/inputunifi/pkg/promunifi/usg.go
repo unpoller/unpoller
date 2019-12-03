@@ -36,8 +36,6 @@ type usg struct {
 }
 
 func descUSG(ns string) *usg {
-	//	labels := []string{"ip", "version", "model", "serial", "type", "mac", "site_name", "name"}
-	//	labelWan := append([]string{"port"}, labels[6:]...)
 	labels := []string{"port", "site_name", "name"}
 	return &usg{
 		WanRxPackets:   prometheus.NewDesc(ns+"wan_receive_packets_total", "WAN Receive Packets Total", labels, nil),
@@ -71,36 +69,35 @@ func descUSG(ns string) *usg {
 }
 
 func (u *promUnifi) exportUSG(r report, d *unifi.USG) {
-	labels := []string{d.IP, d.Version, d.Model, d.Serial, d.Type, d.Mac, d.SiteName, d.Name}
-	labelsUser := append(labels, "user")
-	labelsGuest := append(labels, "guest")
+	labels := []string{d.Type, d.SiteName, d.Name}
+	infoLabels := []string{d.Version, d.Model, d.Serial, d.Mac, d.IP, d.ID, d.Bytes.Txt}
 	// Gateway System Data.
 	r.send([]*metric{
-		{u.Device.Uptime, prometheus.GaugeValue, d.Uptime, labels},
+		{u.Device.Info, prometheus.GaugeValue, d.Uptime, append(labels, infoLabels...)},
 		{u.Device.TotalTxBytes, prometheus.CounterValue, d.TxBytes, labels},
 		{u.Device.TotalRxBytes, prometheus.CounterValue, d.RxBytes, labels},
 		{u.Device.TotalBytes, prometheus.CounterValue, d.Bytes, labels},
-		{u.Device.NumSta, prometheus.GaugeValue, d.UserNumSta, labelsUser},
-		{u.Device.NumSta, prometheus.GaugeValue, d.GuestNumSta, labelsGuest},
-		{u.Device.NumDesktop, prometheus.GaugeValue, d.NumDesktop, labels},
-		{u.Device.NumMobile, prometheus.GaugeValue, d.NumMobile, labels},
-		{u.Device.NumHandheld, prometheus.GaugeValue, d.NumHandheld, labels},
+		{u.Device.Counter, prometheus.GaugeValue, d.UserNumSta, append(labels, "user")},
+		{u.Device.Counter, prometheus.GaugeValue, d.GuestNumSta, append(labels, "guest")},
+		{u.Device.Counter, prometheus.GaugeValue, d.NumDesktop, append(labels, "desktop")},
+		{u.Device.Counter, prometheus.GaugeValue, d.NumMobile, append(labels, "mobile")},
+		{u.Device.Counter, prometheus.GaugeValue, d.NumHandheld, append(labels, "handheld")},
 		{u.Device.Loadavg1, prometheus.GaugeValue, d.SysStats.Loadavg1, labels},
 		{u.Device.Loadavg5, prometheus.GaugeValue, d.SysStats.Loadavg5, labels},
 		{u.Device.Loadavg15, prometheus.GaugeValue, d.SysStats.Loadavg15, labels},
 		{u.Device.MemUsed, prometheus.GaugeValue, d.SysStats.MemUsed, labels},
 		{u.Device.MemTotal, prometheus.GaugeValue, d.SysStats.MemTotal, labels},
 		{u.Device.MemBuffer, prometheus.GaugeValue, d.SysStats.MemBuffer, labels},
-		{u.Device.CPU, prometheus.GaugeValue, d.SystemStats.CPU, labels},
-		{u.Device.Mem, prometheus.GaugeValue, d.SystemStats.Mem, labels},
+		{u.Device.CPU, prometheus.GaugeValue, d.SystemStats.CPU.Val / 100.0, labels},
+		{u.Device.Mem, prometheus.GaugeValue, d.SystemStats.Mem.Val / 100.0, labels},
 	})
 	u.exportWANPorts(r, labels, d.Wan1, d.Wan2)
 	u.exportUSGstats(r, labels, d.Stat.Gw, d.SpeedtestStatus, d.Uplink)
 }
 
 func (u *promUnifi) exportUSGstats(r report, labels []string, gw *unifi.Gw, st unifi.SpeedtestStatus, ul unifi.Uplink) {
-	labelLan := []string{"lan", labels[6], labels[7]}
-	labelWan := []string{"all", labels[6], labels[7]}
+	labelLan := []string{"lan", labels[1], labels[2]}
+	labelWan := []string{"all", labels[1], labels[2]}
 	r.send([]*metric{
 		/* // Combined Port Stats - not really needed. sum() the others instead.
 		{u.USG.WanRxPackets, prometheus.CounterValue, gw.WanRxPackets, labelWan},
@@ -130,7 +127,7 @@ func (u *promUnifi) exportWANPorts(r report, labels []string, wans ...unifi.Wan)
 		if !wan.Up.Val {
 			continue // only record UP interfaces.
 		}
-		labelWan := []string{wan.Name, labels[6], labels[7]}
+		labelWan := []string{wan.Name, labels[1], labels[2]}
 		r.send([]*metric{
 			{u.USG.WanRxPackets, prometheus.CounterValue, wan.RxPackets, labelWan},
 			{u.USG.WanRxBytes, prometheus.CounterValue, wan.RxBytes, labelWan},
