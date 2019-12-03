@@ -2,8 +2,8 @@
 
 # Deploy our built packages to packagecloud.
 
-REPO=dev
-[ "$TRAVIS_BRANCH" != "$TRAVIS_TAG" ] || REPO=big
+REPO=unstable
+[ "$TRAVIS_BRANCH" != "$TRAVIS_TAG" ] || REPO=stable
 echo "deploying packages from branch: $TRAVIS_BRANCH, tag: $TRAVIS_TAG to repo: $REPO"
 
 source .metadata.sh
