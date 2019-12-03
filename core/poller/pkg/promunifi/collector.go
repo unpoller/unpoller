@@ -121,16 +121,17 @@ func (u *promUnifi) Collect(ch chan<- prometheus.Metric) {
 	}
 
 	// Pass Report interface into our collecting and reporting methods.
-	go u.exportMetrics(r, ch)
+	go u.exportMetrics(r, ch, r.ch)
 	u.loopExports(r)
 }
 
 // This is closely tied to the method above with a sync.WaitGroup.
 // This method runs in a go routine and exits when the channel closes.
-func (u *promUnifi) exportMetrics(r report, ch chan<- prometheus.Metric) {
+// This is where our channels connects to the prometheus channel.
+func (u *promUnifi) exportMetrics(r report, ch chan<- prometheus.Metric, ourChan chan []*metric) {
 	descs := make(map[*prometheus.Desc]bool) // used as a counter
 	defer r.report(descs)
-	for newMetrics := range r.channel() {
+	for newMetrics := range ourChan {
 		for _, m := range newMetrics {
 			descs[m.Desc] = true
 			switch v := m.Value.(type) {
