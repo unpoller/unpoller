@@ -160,14 +160,14 @@ func descUAP(ns string) *uap {
 
 func (u *promUnifi) exportUAP(r report, d *unifi.UAP) {
 	labels := []string{d.Type, d.SiteName, d.Name}
-	infoLabels := []string{d.Version, d.Model, d.Serial, d.Mac, d.IP, d.ID, d.Bytes.Txt}
+	infoLabels := []string{d.Version, d.Model, d.Serial, d.Mac, d.IP, d.ID, d.Bytes.Txt, d.Uptime.Txt}
 	u.exportUAPstats(r, labels, d.Stat.Ap, d.BytesD, d.TxBytesD, d.RxBytesD, d.BytesR)
 	u.exportVAPtable(r, labels, d.VapTable)
 	u.exportBYTstats(r, labels, d.TxBytes, d.RxBytes)
 	u.exportSYSstats(r, labels, d.SysStats, d.SystemStats)
 	u.exportSTAcount(r, labels, d.UserNumSta, d.GuestNumSta)
 	u.exportRADtable(r, labels, d.RadioTable, d.RadioTableStats)
-	r.sendone(u.Device.Info, gauge, d.Uptime, append(labels, infoLabels...))
+	r.sendone(u.Device.Info, gauge, 1.0, append(labels, infoLabels...))
 }
 
 // udm doesn't have these stats exposed yet, so pass 2 or 6 metrics.

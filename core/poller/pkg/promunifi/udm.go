@@ -31,7 +31,7 @@ type unifiDevice struct {
 
 func descDevice(ns string) *unifiDevice {
 	labels := []string{"type", "site_name", "name"}
-	infoLabels := []string{"version", "model", "serial", "mac", "ip", "id", "bytes"}
+	infoLabels := []string{"version", "model", "serial", "mac", "ip", "id", "bytes", "uptime"}
 	return &unifiDevice{
 		Info:          prometheus.NewDesc(ns+"info", "Device Information", append(labels, infoLabels...), nil),
 		Temperature:   prometheus.NewDesc(ns+"temperature_celsius", "Temperature", labels, nil),
@@ -59,7 +59,7 @@ func descDevice(ns string) *unifiDevice {
 // UDM is a collection of stats from USG, USW and UAP. It has no unique stats.
 func (u *promUnifi) exportUDM(r report, d *unifi.UDM) {
 	labels := []string{d.Type, d.SiteName, d.Name}
-	infoLabels := []string{d.Version, d.Model, d.Serial, d.Mac, d.IP, d.ID, d.Bytes.Txt}
+	infoLabels := []string{d.Version, d.Model, d.Serial, d.Mac, d.IP, d.ID, d.Bytes.Txt, d.Uptime.Txt}
 	// Shared data (all devices do this).
 	u.exportBYTstats(r, labels, d.TxBytes, d.RxBytes)
 	u.exportSYSstats(r, labels, d.SysStats, d.SystemStats)
@@ -71,7 +71,7 @@ func (u *promUnifi) exportUDM(r report, d *unifi.UDM) {
 	u.exportWANPorts(r, labels, d.Wan1, d.Wan2)
 	u.exportUSGstats(r, labels, d.Stat.Gw, d.SpeedtestStatus, d.Uplink)
 	// Dream Machine System Data.
-	r.sendone(u.Device.Info, gauge, d.Uptime, append(labels, infoLabels...))
+	r.sendone(u.Device.Info, gauge, 1.0, append(labels, infoLabels...))
 	// Wireless Data - UDM (non-pro) only
 	if d.Stat.Ap != nil && d.VapTable != nil {
 		u.exportUAPstats(r, labels, d.Stat.Ap)
