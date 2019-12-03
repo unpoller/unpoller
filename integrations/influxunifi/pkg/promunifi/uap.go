@@ -172,16 +172,16 @@ func (u *promUnifi) exportUAP(r report, d *unifi.UAP) {
 		{u.Device.TxBytesD, prometheus.CounterValue, d.TxBytesD, labels}, // not sure if these 3 Ds are counters or gauges.
 		{u.Device.RxBytesD, prometheus.CounterValue, d.RxBytesD, labels}, // not sure if these 3 Ds are counters or gauges.
 		{u.Device.BytesR, prometheus.GaugeValue, d.BytesR, labels},
-		{u.Device.NumSta, prometheus.GaugeValue, d.UserNumSta, append(labels, "user")},
-		{u.Device.NumSta, prometheus.GaugeValue, d.GuestNumSta, append(labels, "guest")},
+		{u.Device.Counter, prometheus.GaugeValue, d.UserNumSta, append(labels, "user")},
+		{u.Device.Counter, prometheus.GaugeValue, d.GuestNumSta, append(labels, "guest")},
 		{u.Device.Loadavg1, prometheus.GaugeValue, d.SysStats.Loadavg1, labels},
 		{u.Device.Loadavg5, prometheus.GaugeValue, d.SysStats.Loadavg5, labels},
 		{u.Device.Loadavg15, prometheus.GaugeValue, d.SysStats.Loadavg15, labels},
 		{u.Device.MemUsed, prometheus.GaugeValue, d.SysStats.MemUsed, labels},
 		{u.Device.MemTotal, prometheus.GaugeValue, d.SysStats.MemTotal, labels},
 		{u.Device.MemBuffer, prometheus.GaugeValue, d.SysStats.MemBuffer, labels},
-		{u.Device.CPU, prometheus.GaugeValue, d.SystemStats.CPU, labels},
-		{u.Device.Mem, prometheus.GaugeValue, d.SystemStats.Mem, labels},
+		{u.Device.CPU, prometheus.GaugeValue, d.SystemStats.CPU.Val / 100.0, labels},
+		{u.Device.Mem, prometheus.GaugeValue, d.SystemStats.Mem.Val / 100.0, labels},
 	})
 
 	u.exportUAPstats(r, labels, d.Stat.Ap)
