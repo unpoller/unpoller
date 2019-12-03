@@ -47,8 +47,7 @@ type usw struct {
 
 func descUSW(ns string) *usw {
 	pns := ns + "port_"
-	// labels := []string{"type", "site_name", "name"}
-	labelS := []string{"site_name", "name"} // labels[1:]
+	labelS := []string{"site_name", "name"}
 	labelP := []string{"port_id", "port_num", "port_name", "port_mac", "port_ip", "site_name", "name"}
 	return &usw{
 		SwRxPackets:   prometheus.NewDesc(ns+"switch_receive_packets_total", "Switch Packets Received Total", labelS, nil),
@@ -91,7 +90,6 @@ func descUSW(ns string) *usw {
 }
 
 func (u *promUnifi) exportUSW(r report, d *unifi.USW) {
-
 	labels := []string{d.Type, d.SiteName, d.Name}
 	infoLabels := []string{d.Version, d.Model, d.Serial, d.Mac, d.IP, d.ID, d.Bytes.Txt}
 	labelsGuest := append(labels, "guest")

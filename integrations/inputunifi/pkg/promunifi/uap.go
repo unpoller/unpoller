@@ -80,7 +80,6 @@ type uap struct {
 }
 
 func descUAP(ns string) *uap {
-	//	labels := []string{"type", "site_name", "name"}
 	labelA := []string{"stat", "site_name", "name"} // stat + labels[1:]
 	labelV := []string{"vap_name", "bssid", "radio", "radio_name", "essid", "usage", "site_name", "name"}
 	labelR := []string{"radio_name", "radio", "site_name", "name"}
