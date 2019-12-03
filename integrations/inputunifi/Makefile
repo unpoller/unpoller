@@ -276,20 +276,3 @@ install: man readme $(BINARY)
 	/usr/bin/install -m 0644 -cp examples/$(CONFIG_FILE).example $(ETC)/$(BINARY)/
 	[ -f $(ETC)/$(BINARY)/$(CONFIG_FILE) ] || /usr/bin/install -m 0644 -cp  examples/$(CONFIG_FILE).example $(ETC)/$(BINARY)/$(CONFIG_FILE)
 	/usr/bin/install -m 0644 -cp LICENSE *.html examples/* $(PREFIX)/share/doc/$(BINARY)/
-
-# If you installed with `make install` run `make uninstall` before installing a binary package. (even on Linux!!!)
-# This will remove the package install from macOS, it will not remove a package install from Linux.
-uninstall:
-	@echo "  ==> You must run make uninstall as root on Linux. Recommend not running as root on macOS."
-	[ -x /bin/systemctl ] && /bin/systemctl disable $(BINARY) || true
-	[ -x /bin/systemctl ] && /bin/systemctl stop $(BINARY) || true
-	[ -x /bin/launchctl ] && [ -f ~/Library/LaunchAgents/com.github.$(GHUSER).$(BINARY).plist ] \
-		&& /bin/launchctl unload ~/Library/LaunchAgents/com.github.$(GHUSER).$(BINARY).plist || true
-	[ -x /bin/launchctl ] && [ -f /Library/LaunchAgents/com.github.$(GHUSER).$(BINARY).plist ] \
-		&& /bin/launchctl unload /Library/LaunchAgents/com.github.$(GHUSER).$(BINARY).plist || true
-	rm -rf /usr/local/{etc,bin,share/doc}/$(BINARY)
-	rm -f ~/Library/LaunchAgents/com.github.$(GHUSER).$(BINARY).plist
-	rm -f /Library/LaunchAgents/com.github.$(GHUSER).$(BINARY).plist || true
-	rm -f /etc/systemd/system/$(BINARY).service /usr/local/share/man/man1/$(BINARY).1.gz
-	[ -x /bin/systemctl ] && /bin/systemctl --system daemon-reload || true
-	@[ -f /Library/LaunchAgents/com.github.$(GHUSER).$(BINARY).plist ] && echo "  ==> Unload and delete this file manually:" && echo "  sudo launchctl unload /Library/LaunchAgents/com.github.$(GHUSER).$(BINARY).plist" && echo "  sudo rm -f /Library/LaunchAgents/com.github.$(GHUSER).$(BINARY).plist" || true
