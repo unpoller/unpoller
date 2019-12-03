@@ -50,6 +50,7 @@ func descUSW(ns string) *usw {
 	labelS := []string{"site_name", "name"}
 	labelP := []string{"port_id", "port_num", "port_name", "port_mac", "port_ip", "site_name", "name"}
 	return &usw{
+		// This data may be derivable by sum()ing the port data.
 		SwRxPackets:   prometheus.NewDesc(ns+"switch_receive_packets_total", "Switch Packets Received Total", labelS, nil),
 		SwRxBytes:     prometheus.NewDesc(ns+"switch_receive_bytes_total", "Switch Bytes Received Total", labelS, nil),
 		SwRxErrors:    prometheus.NewDesc(ns+"switch_receive_errors_total", "Switch Errors Received Total", labelS, nil),
@@ -92,60 +93,49 @@ func descUSW(ns string) *usw {
 func (u *promUnifi) exportUSW(r report, d *unifi.USW) {
 	labels := []string{d.Type, d.SiteName, d.Name}
 	infoLabels := []string{d.Version, d.Model, d.Serial, d.Mac, d.IP, d.ID, d.Bytes.Txt}
-	labelsGuest := append(labels, "guest")
-	labelsUser := append(labels, "user")
+	u.exportUSWstats(r, labels, d.Stat.Sw)
+	u.exportPRTtable(r, labels, d.PortTable)
+	u.exportBYTstats(r, labels, d.TxBytes, d.RxBytes)
+	u.exportSYSstats(r, labels, d.SysStats, d.SystemStats)
+	u.exportSTAcount(r, labels, d.UserNumSta, d.GuestNumSta)
+	r.sendone(u.Device.Info, gauge, d.Uptime, append(labels, infoLabels...))
+	// Switch System Data.
 	if d.HasTemperature.Val {
-		r.send([]*metric{{u.Device.Temperature, prometheus.GaugeValue, d.GeneralTemperature, labels}})
+		r.sendone(u.Device.Temperature, gauge, d.GeneralTemperature, labels)
 	}
 	if d.HasFan.Val {
-		r.send([]*metric{{u.Device.FanLevel, prometheus.GaugeValue, d.FanLevel, labels}})
+		r.sendone(u.Device.FanLevel, gauge, d.FanLevel, labels)
 	}
-
-	// Switch System Data.
-	r.send([]*metric{
-		{u.Device.Info, prometheus.GaugeValue, d.Uptime, append(labels, infoLabels...)},
-		{u.Device.TotalMaxPower, prometheus.GaugeValue, d.TotalMaxPower, labels},
-		{u.Device.TotalTxBytes, prometheus.CounterValue, d.TxBytes, labels},
-		{u.Device.TotalRxBytes, prometheus.CounterValue, d.RxBytes, labels},
-		{u.Device.TotalBytes, prometheus.CounterValue, d.Bytes, labels},
-		{u.Device.Counter, prometheus.GaugeValue, d.UserNumSta, labelsUser},
-		{u.Device.Counter, prometheus.GaugeValue, d.GuestNumSta, labelsGuest},
-		{u.Device.Loadavg1, prometheus.GaugeValue, d.SysStats.Loadavg1, labels},
-		{u.Device.Loadavg5, prometheus.GaugeValue, d.SysStats.Loadavg5, labels},
-		{u.Device.Loadavg15, prometheus.GaugeValue, d.SysStats.Loadavg15, labels},
-		{u.Device.MemUsed, prometheus.GaugeValue, d.SysStats.MemUsed, labels},
-		{u.Device.MemTotal, prometheus.GaugeValue, d.SysStats.MemTotal, labels},
-		{u.Device.MemBuffer, prometheus.GaugeValue, d.SysStats.MemBuffer, labels},
-		{u.Device.CPU, prometheus.GaugeValue, d.SystemStats.CPU.Val / 100.0, labels},
-		{u.Device.Mem, prometheus.GaugeValue, d.SystemStats.Mem.Val / 100.0, labels},
-	})
-	u.exportPortTable(r, labels, d.PortTable)
-	u.exportUSWstats(r, labels, d.Stat.Sw)
+	if d.TotalMaxPower.Txt != "" {
+		r.sendone(u.Device.TotalMaxPower, gauge, d.TotalMaxPower, labels)
+	}
 }
 
+// Switch Stats
 func (u *promUnifi) exportUSWstats(r report, labels []string, sw *unifi.Sw) {
 	labelS := labels[1:]
 	r.send([]*metric{
-		{u.USW.SwRxPackets, prometheus.CounterValue, sw.RxPackets, labelS},
-		{u.USW.SwRxBytes, prometheus.CounterValue, sw.RxBytes, labelS},
-		{u.USW.SwRxErrors, prometheus.CounterValue, sw.RxErrors, labelS},
-		{u.USW.SwRxDropped, prometheus.CounterValue, sw.RxDropped, labelS},
-		{u.USW.SwRxCrypts, prometheus.CounterValue, sw.RxCrypts, labelS},
-		{u.USW.SwRxFrags, prometheus.CounterValue, sw.RxFrags, labelS},
-		{u.USW.SwTxPackets, prometheus.CounterValue, sw.TxPackets, labelS},
-		{u.USW.SwTxBytes, prometheus.CounterValue, sw.TxBytes, labelS},
-		{u.USW.SwTxErrors, prometheus.CounterValue, sw.TxErrors, labelS},
-		{u.USW.SwTxDropped, prometheus.CounterValue, sw.TxDropped, labelS},
-		{u.USW.SwTxRetries, prometheus.CounterValue, sw.TxRetries, labelS},
-		{u.USW.SwRxMulticast, prometheus.CounterValue, sw.RxMulticast, labelS},
-		{u.USW.SwRxBroadcast, prometheus.CounterValue, sw.RxBroadcast, labelS},
-		{u.USW.SwTxMulticast, prometheus.CounterValue, sw.TxMulticast, labelS},
-		{u.USW.SwTxBroadcast, prometheus.CounterValue, sw.TxBroadcast, labelS},
-		{u.USW.SwBytes, prometheus.CounterValue, sw.Bytes, labelS},
+		{u.USW.SwRxPackets, counter, sw.RxPackets, labelS},
+		{u.USW.SwRxBytes, counter, sw.RxBytes, labelS},
+		{u.USW.SwRxErrors, counter, sw.RxErrors, labelS},
+		{u.USW.SwRxDropped, counter, sw.RxDropped, labelS},
+		{u.USW.SwRxCrypts, counter, sw.RxCrypts, labelS},
+		{u.USW.SwRxFrags, counter, sw.RxFrags, labelS},
+		{u.USW.SwTxPackets, counter, sw.TxPackets, labelS},
+		{u.USW.SwTxBytes, counter, sw.TxBytes, labelS},
+		{u.USW.SwTxErrors, counter, sw.TxErrors, labelS},
+		{u.USW.SwTxDropped, counter, sw.TxDropped, labelS},
+		{u.USW.SwTxRetries, counter, sw.TxRetries, labelS},
+		{u.USW.SwRxMulticast, counter, sw.RxMulticast, labelS},
+		{u.USW.SwRxBroadcast, counter, sw.RxBroadcast, labelS},
+		{u.USW.SwTxMulticast, counter, sw.TxMulticast, labelS},
+		{u.USW.SwTxBroadcast, counter, sw.TxBroadcast, labelS},
+		{u.USW.SwBytes, counter, sw.Bytes, labelS},
 	})
 }
 
-func (u *promUnifi) exportPortTable(r report, labels []string, pt []unifi.Port) {
+// Switch Port Table
+func (u *promUnifi) exportPRTtable(r report, labels []string, pt []unifi.Port) {
 	// Per-port data on a switch
 	for _, p := range pt {
 		if !p.Up.Val || !p.Enable.Val {
@@ -155,29 +145,29 @@ func (u *promUnifi) exportPortTable(r report, labels []string, pt []unifi.Port) 
 		labelP := []string{labels[2] + " Port " + p.PortIdx.Txt, p.PortIdx.Txt, p.Name, p.Mac, p.IP, labels[1], labels[2]}
 		if p.PoeEnable.Val && p.PortPoe.Val {
 			r.send([]*metric{
-				{u.USW.PoeCurrent, prometheus.GaugeValue, p.PoeCurrent, labelP},
-				{u.USW.PoePower, prometheus.GaugeValue, p.PoePower, labelP},
-				{u.USW.PoeVoltage, prometheus.GaugeValue, p.PoeVoltage, labelP},
+				{u.USW.PoeCurrent, gauge, p.PoeCurrent, labelP},
+				{u.USW.PoePower, gauge, p.PoePower, labelP},
+				{u.USW.PoeVoltage, gauge, p.PoeVoltage, labelP},
 			})
 		}
 
 		r.send([]*metric{
-			{u.USW.RxBroadcast, prometheus.CounterValue, p.RxBroadcast, labelP},
-			{u.USW.RxBytes, prometheus.CounterValue, p.RxBytes, labelP},
-			{u.USW.RxBytesR, prometheus.GaugeValue, p.RxBytesR, labelP},
-			{u.USW.RxDropped, prometheus.CounterValue, p.RxDropped, labelP},
-			{u.USW.RxErrors, prometheus.CounterValue, p.RxErrors, labelP},
-			{u.USW.RxMulticast, prometheus.CounterValue, p.RxMulticast, labelP},
-			{u.USW.RxPackets, prometheus.CounterValue, p.RxPackets, labelP},
-			{u.USW.Satisfaction, prometheus.GaugeValue, p.Satisfaction.Val / 100.0, labelP},
-			{u.USW.Speed, prometheus.GaugeValue, p.Speed.Val * 1000000, labelP},
-			{u.USW.TxBroadcast, prometheus.CounterValue, p.TxBroadcast, labelP},
-			{u.USW.TxBytes, prometheus.CounterValue, p.TxBytes, labelP},
-			{u.USW.TxBytesR, prometheus.GaugeValue, p.TxBytesR, labelP},
-			{u.USW.TxDropped, prometheus.CounterValue, p.TxDropped, labelP},
-			{u.USW.TxErrors, prometheus.CounterValue, p.TxErrors, labelP},
-			{u.USW.TxMulticast, prometheus.CounterValue, p.TxMulticast, labelP},
-			{u.USW.TxPackets, prometheus.CounterValue, p.TxPackets, labelP},
+			{u.USW.RxBroadcast, counter, p.RxBroadcast, labelP},
+			{u.USW.RxBytes, counter, p.RxBytes, labelP},
+			{u.USW.RxBytesR, gauge, p.RxBytesR, labelP},
+			{u.USW.RxDropped, counter, p.RxDropped, labelP},
+			{u.USW.RxErrors, counter, p.RxErrors, labelP},
+			{u.USW.RxMulticast, counter, p.RxMulticast, labelP},
+			{u.USW.RxPackets, counter, p.RxPackets, labelP},
+			{u.USW.Satisfaction, gauge, p.Satisfaction.Val / 100.0, labelP},
+			{u.USW.Speed, gauge, p.Speed.Val * 1000000, labelP},
+			{u.USW.TxBroadcast, counter, p.TxBroadcast, labelP},
+			{u.USW.TxBytes, counter, p.TxBytes, labelP},
+			{u.USW.TxBytesR, gauge, p.TxBytesR, labelP},
+			{u.USW.TxDropped, counter, p.TxDropped, labelP},
+			{u.USW.TxErrors, counter, p.TxErrors, labelP},
+			{u.USW.TxMulticast, counter, p.TxMulticast, labelP},
+			{u.USW.TxPackets, counter, p.TxPackets, labelP},
 		})
 	}
 }
