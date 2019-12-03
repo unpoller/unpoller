@@ -70,62 +70,62 @@ func (u *promUnifi) exportSite(r report, s *unifi.Site) {
 		switch h.Subsystem {
 		case "www":
 			r.send([]*metric{
-				{u.Site.TxBytesR, prometheus.GaugeValue, h.TxBytesR, labels},
-				{u.Site.RxBytesR, prometheus.GaugeValue, h.RxBytesR, labels},
-				{u.Site.Uptime, prometheus.GaugeValue, h.Uptime, labels},
-				{u.Site.Latency, prometheus.GaugeValue, h.Latency.Val / 1000, labels},
-				{u.Site.XputUp, prometheus.GaugeValue, h.XputUp, labels},
-				{u.Site.XputDown, prometheus.GaugeValue, h.XputDown, labels},
-				{u.Site.SpeedtestPing, prometheus.GaugeValue, h.SpeedtestPing, labels},
-				{u.Site.Drops, prometheus.CounterValue, h.Drops, labels},
+				{u.Site.TxBytesR, gauge, h.TxBytesR, labels},
+				{u.Site.RxBytesR, gauge, h.RxBytesR, labels},
+				{u.Site.Uptime, gauge, h.Uptime, labels},
+				{u.Site.Latency, gauge, h.Latency.Val / 1000, labels},
+				{u.Site.XputUp, gauge, h.XputUp, labels},
+				{u.Site.XputDown, gauge, h.XputDown, labels},
+				{u.Site.SpeedtestPing, gauge, h.SpeedtestPing, labels},
+				{u.Site.Drops, counter, h.Drops, labels},
 			})
 
 		case "wlan":
 			r.send([]*metric{
-				{u.Site.TxBytesR, prometheus.GaugeValue, h.TxBytesR, labels},
-				{u.Site.RxBytesR, prometheus.GaugeValue, h.RxBytesR, labels},
-				{u.Site.NumAdopted, prometheus.GaugeValue, h.NumAdopted, labels},
-				{u.Site.NumDisconnected, prometheus.GaugeValue, h.NumDisconnected, labels},
-				{u.Site.NumPending, prometheus.GaugeValue, h.NumPending, labels},
-				{u.Site.NumUser, prometheus.GaugeValue, h.NumUser, labels},
-				{u.Site.NumGuest, prometheus.GaugeValue, h.NumGuest, labels},
-				{u.Site.NumIot, prometheus.GaugeValue, h.NumIot, labels},
-				{u.Site.NumAp, prometheus.GaugeValue, h.NumAp, labels},
-				{u.Site.NumDisabled, prometheus.GaugeValue, h.NumDisabled, labels},
+				{u.Site.TxBytesR, gauge, h.TxBytesR, labels},
+				{u.Site.RxBytesR, gauge, h.RxBytesR, labels},
+				{u.Site.NumAdopted, gauge, h.NumAdopted, labels},
+				{u.Site.NumDisconnected, gauge, h.NumDisconnected, labels},
+				{u.Site.NumPending, gauge, h.NumPending, labels},
+				{u.Site.NumUser, gauge, h.NumUser, labels},
+				{u.Site.NumGuest, gauge, h.NumGuest, labels},
+				{u.Site.NumIot, gauge, h.NumIot, labels},
+				{u.Site.NumAp, gauge, h.NumAp, labels},
+				{u.Site.NumDisabled, gauge, h.NumDisabled, labels},
 			})
 
 		case "wan":
 			r.send([]*metric{
-				{u.Site.TxBytesR, prometheus.GaugeValue, h.TxBytesR, labels},
-				{u.Site.RxBytesR, prometheus.GaugeValue, h.RxBytesR, labels},
-				{u.Site.NumAdopted, prometheus.GaugeValue, h.NumAdopted, labels},
-				{u.Site.NumDisconnected, prometheus.GaugeValue, h.NumDisconnected, labels},
-				{u.Site.NumPending, prometheus.GaugeValue, h.NumPending, labels},
-				{u.Site.NumGw, prometheus.GaugeValue, h.NumGw, labels},
-				{u.Site.NumSta, prometheus.GaugeValue, h.NumSta, labels},
+				{u.Site.TxBytesR, gauge, h.TxBytesR, labels},
+				{u.Site.RxBytesR, gauge, h.RxBytesR, labels},
+				{u.Site.NumAdopted, gauge, h.NumAdopted, labels},
+				{u.Site.NumDisconnected, gauge, h.NumDisconnected, labels},
+				{u.Site.NumPending, gauge, h.NumPending, labels},
+				{u.Site.NumGw, gauge, h.NumGw, labels},
+				{u.Site.NumSta, gauge, h.NumSta, labels},
 			})
 
 		case "lan":
 			r.send([]*metric{
-				{u.Site.TxBytesR, prometheus.GaugeValue, h.TxBytesR, labels},
-				{u.Site.RxBytesR, prometheus.GaugeValue, h.RxBytesR, labels},
-				{u.Site.NumAdopted, prometheus.GaugeValue, h.NumAdopted, labels},
-				{u.Site.NumDisconnected, prometheus.GaugeValue, h.NumDisconnected, labels},
-				{u.Site.NumPending, prometheus.GaugeValue, h.NumPending, labels},
-				{u.Site.NumUser, prometheus.GaugeValue, h.NumUser, labels},
-				{u.Site.NumGuest, prometheus.GaugeValue, h.NumGuest, labels},
-				{u.Site.NumIot, prometheus.GaugeValue, h.NumIot, labels},
-				{u.Site.NumSw, prometheus.GaugeValue, h.NumSw, labels},
+				{u.Site.TxBytesR, gauge, h.TxBytesR, labels},
+				{u.Site.RxBytesR, gauge, h.RxBytesR, labels},
+				{u.Site.NumAdopted, gauge, h.NumAdopted, labels},
+				{u.Site.NumDisconnected, gauge, h.NumDisconnected, labels},
+				{u.Site.NumPending, gauge, h.NumPending, labels},
+				{u.Site.NumUser, gauge, h.NumUser, labels},
+				{u.Site.NumGuest, gauge, h.NumGuest, labels},
+				{u.Site.NumIot, gauge, h.NumIot, labels},
+				{u.Site.NumSw, gauge, h.NumSw, labels},
 			})
 
 		case "vpn":
 			r.send([]*metric{
-				{u.Site.RemoteUserNumActive, prometheus.GaugeValue, h.RemoteUserNumActive, labels},
-				{u.Site.RemoteUserNumInactive, prometheus.GaugeValue, h.RemoteUserNumInactive, labels},
-				{u.Site.RemoteUserRxBytes, prometheus.CounterValue, h.RemoteUserRxBytes, labels},
-				{u.Site.RemoteUserTxBytes, prometheus.CounterValue, h.RemoteUserTxBytes, labels},
-				{u.Site.RemoteUserRxPackets, prometheus.CounterValue, h.RemoteUserRxPackets, labels},
-				{u.Site.RemoteUserTxPackets, prometheus.CounterValue, h.RemoteUserTxPackets, labels},
+				{u.Site.RemoteUserNumActive, gauge, h.RemoteUserNumActive, labels},
+				{u.Site.RemoteUserNumInactive, gauge, h.RemoteUserNumInactive, labels},
+				{u.Site.RemoteUserRxBytes, counter, h.RemoteUserRxBytes, labels},
+				{u.Site.RemoteUserTxBytes, counter, h.RemoteUserTxBytes, labels},
+				{u.Site.RemoteUserRxPackets, counter, h.RemoteUserRxPackets, labels},
+				{u.Site.RemoteUserTxPackets, counter, h.RemoteUserTxPackets, labels},
 			})
 		}
 	}

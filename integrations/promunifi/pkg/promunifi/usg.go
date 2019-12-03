@@ -72,56 +72,35 @@ func (u *promUnifi) exportUSG(r report, d *unifi.USG) {
 	labels := []string{d.Type, d.SiteName, d.Name}
 	infoLabels := []string{d.Version, d.Model, d.Serial, d.Mac, d.IP, d.ID, d.Bytes.Txt}
 	// Gateway System Data.
-	r.send([]*metric{
-		{u.Device.Info, prometheus.GaugeValue, d.Uptime, append(labels, infoLabels...)},
-		{u.Device.TotalTxBytes, prometheus.CounterValue, d.TxBytes, labels},
-		{u.Device.TotalRxBytes, prometheus.CounterValue, d.RxBytes, labels},
-		{u.Device.TotalBytes, prometheus.CounterValue, d.Bytes, labels},
-		{u.Device.Counter, prometheus.GaugeValue, d.UserNumSta, append(labels, "user")},
-		{u.Device.Counter, prometheus.GaugeValue, d.GuestNumSta, append(labels, "guest")},
-		{u.Device.Counter, prometheus.GaugeValue, d.NumDesktop, append(labels, "desktop")},
-		{u.Device.Counter, prometheus.GaugeValue, d.NumMobile, append(labels, "mobile")},
-		{u.Device.Counter, prometheus.GaugeValue, d.NumHandheld, append(labels, "handheld")},
-		{u.Device.Loadavg1, prometheus.GaugeValue, d.SysStats.Loadavg1, labels},
-		{u.Device.Loadavg5, prometheus.GaugeValue, d.SysStats.Loadavg5, labels},
-		{u.Device.Loadavg15, prometheus.GaugeValue, d.SysStats.Loadavg15, labels},
-		{u.Device.MemUsed, prometheus.GaugeValue, d.SysStats.MemUsed, labels},
-		{u.Device.MemTotal, prometheus.GaugeValue, d.SysStats.MemTotal, labels},
-		{u.Device.MemBuffer, prometheus.GaugeValue, d.SysStats.MemBuffer, labels},
-		{u.Device.CPU, prometheus.GaugeValue, d.SystemStats.CPU.Val / 100.0, labels},
-		{u.Device.Mem, prometheus.GaugeValue, d.SystemStats.Mem.Val / 100.0, labels},
-	})
 	u.exportWANPorts(r, labels, d.Wan1, d.Wan2)
+	u.exportBYTstats(r, labels, d.TxBytes, d.RxBytes)
+	u.exportSYSstats(r, labels, d.SysStats, d.SystemStats)
 	u.exportUSGstats(r, labels, d.Stat.Gw, d.SpeedtestStatus, d.Uplink)
+	u.exportSTAcount(r, labels, d.UserNumSta, d.GuestNumSta, d.NumDesktop, d.UserNumSta, d.GuestNumSta)
+	r.sendone(u.Device.Info, gauge, d.Uptime, append(labels, infoLabels...))
 }
 
+// Gateway States
 func (u *promUnifi) exportUSGstats(r report, labels []string, gw *unifi.Gw, st unifi.SpeedtestStatus, ul unifi.Uplink) {
 	labelLan := []string{"lan", labels[1], labels[2]}
 	labelWan := []string{"all", labels[1], labels[2]}
 	r.send([]*metric{
-		/* // Combined Port Stats - not really needed. sum() the others instead.
-		{u.USG.WanRxPackets, prometheus.CounterValue, gw.WanRxPackets, labelWan},
-		{u.USG.WanRxBytes, prometheus.CounterValue, gw.WanRxBytes, labelWan},
-		{u.USG.WanRxDropped, prometheus.CounterValue, gw.WanRxDropped, labelWan},
-		{u.USG.WanTxPackets, prometheus.CounterValue, gw.WanTxPackets, labelWan},
-		{u.USG.WanTxBytes, prometheus.CounterValue, gw.WanTxBytes, labelWan},
-		{u.USG.WanRxErrors, prometheus.CounterValue, gw.WanRxErrors, labelWan},
-		*/
-		{u.USG.LanRxPackets, prometheus.CounterValue, gw.LanRxPackets, labelLan},
-		{u.USG.LanRxBytes, prometheus.CounterValue, gw.LanRxBytes, labelLan},
-		{u.USG.LanTxPackets, prometheus.CounterValue, gw.LanTxPackets, labelLan},
-		{u.USG.LanTxBytes, prometheus.CounterValue, gw.LanTxBytes, labelLan},
-		{u.USG.LanRxDropped, prometheus.CounterValue, gw.LanRxDropped, labelLan},
-		{u.USG.UplinkLatency, prometheus.GaugeValue, ul.Latency.Val / 1000, labelWan},
-		{u.USG.UplinkSpeed, prometheus.GaugeValue, ul.Speed, labelWan},
+		{u.USG.LanRxPackets, counter, gw.LanRxPackets, labelLan},
+		{u.USG.LanRxBytes, counter, gw.LanRxBytes, labelLan},
+		{u.USG.LanTxPackets, counter, gw.LanTxPackets, labelLan},
+		{u.USG.LanTxBytes, counter, gw.LanTxBytes, labelLan},
+		{u.USG.LanRxDropped, counter, gw.LanRxDropped, labelLan},
+		{u.USG.UplinkLatency, gauge, ul.Latency.Val / 1000, labelWan},
+		{u.USG.UplinkSpeed, gauge, ul.Speed, labelWan},
 		// Speed Test Stats
-		{u.USG.Latency, prometheus.GaugeValue, st.Latency.Val / 1000, labelWan},
-		{u.USG.Runtime, prometheus.GaugeValue, st.Runtime, labelWan},
-		{u.USG.XputDownload, prometheus.GaugeValue, st.XputDownload, labelWan},
-		{u.USG.XputUpload, prometheus.GaugeValue, st.XputUpload, labelWan},
+		{u.USG.Latency, gauge, st.Latency.Val / 1000, labelWan},
+		{u.USG.Runtime, gauge, st.Runtime, labelWan},
+		{u.USG.XputDownload, gauge, st.XputDownload, labelWan},
+		{u.USG.XputUpload, gauge, st.XputUpload, labelWan},
 	})
 }
 
+// WAN Stats
 func (u *promUnifi) exportWANPorts(r report, labels []string, wans ...unifi.Wan) {
 	for _, wan := range wans {
 		if !wan.Up.Val {
@@ -129,21 +108,21 @@ func (u *promUnifi) exportWANPorts(r report, labels []string, wans ...unifi.Wan)
 		}
 		labelWan := []string{wan.Name, labels[1], labels[2]}
 		r.send([]*metric{
-			{u.USG.WanRxPackets, prometheus.CounterValue, wan.RxPackets, labelWan},
-			{u.USG.WanRxBytes, prometheus.CounterValue, wan.RxBytes, labelWan},
-			{u.USG.WanRxDropped, prometheus.CounterValue, wan.RxDropped, labelWan},
-			{u.USG.WanRxErrors, prometheus.CounterValue, wan.RxErrors, labelWan},
-			{u.USG.WanTxPackets, prometheus.CounterValue, wan.TxPackets, labelWan},
-			{u.USG.WanTxBytes, prometheus.CounterValue, wan.TxBytes, labelWan},
-			{u.USG.WanRxBroadcast, prometheus.CounterValue, wan.RxBroadcast, labelWan},
-			{u.USG.WanRxMulticast, prometheus.CounterValue, wan.RxMulticast, labelWan},
-			{u.USG.WanSpeed, prometheus.CounterValue, wan.Speed.Val * 1000000, labelWan},
-			{u.USG.WanTxBroadcast, prometheus.CounterValue, wan.TxBroadcast, labelWan},
-			{u.USG.WanTxBytesR, prometheus.CounterValue, wan.TxBytesR, labelWan},
-			{u.USG.WanTxDropped, prometheus.CounterValue, wan.TxDropped, labelWan},
-			{u.USG.WanTxErrors, prometheus.CounterValue, wan.TxErrors, labelWan},
-			{u.USG.WanTxMulticast, prometheus.CounterValue, wan.TxMulticast, labelWan},
-			{u.USG.WanBytesR, prometheus.GaugeValue, wan.BytesR, labelWan},
+			{u.USG.WanRxPackets, counter, wan.RxPackets, labelWan},
+			{u.USG.WanRxBytes, counter, wan.RxBytes, labelWan},
+			{u.USG.WanRxDropped, counter, wan.RxDropped, labelWan},
+			{u.USG.WanRxErrors, counter, wan.RxErrors, labelWan},
+			{u.USG.WanTxPackets, counter, wan.TxPackets, labelWan},
+			{u.USG.WanTxBytes, counter, wan.TxBytes, labelWan},
+			{u.USG.WanRxBroadcast, counter, wan.RxBroadcast, labelWan},
+			{u.USG.WanRxMulticast, counter, wan.RxMulticast, labelWan},
+			{u.USG.WanSpeed, counter, wan.Speed.Val * 1000000, labelWan},
+			{u.USG.WanTxBroadcast, counter, wan.TxBroadcast, labelWan},
+			{u.USG.WanTxBytesR, counter, wan.TxBytesR, labelWan},
+			{u.USG.WanTxDropped, counter, wan.TxDropped, labelWan},
+			{u.USG.WanTxErrors, counter, wan.TxErrors, labelWan},
+			{u.USG.WanTxMulticast, counter, wan.TxMulticast, labelWan},
+			{u.USG.WanBytesR, gauge, wan.BytesR, labelWan},
 		})
 	}
 }

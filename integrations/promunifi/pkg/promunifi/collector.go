@@ -16,6 +16,10 @@ import (
 // channel buffer, fits at least one batch.
 const buffer = 50
 
+// simply fewer letters.
+const counter = prometheus.CounterValue
+const gauge = prometheus.GaugeValue
+
 // UnifiCollectorCnfg defines the data needed to collect and report UniFi Metrics.
 type UnifiCollectorCnfg struct {
 	// If non-empty, each of the collected metrics is prefixed by the
@@ -147,10 +151,11 @@ func (u *promUnifi) exportMetrics(r report, ch chan<- prometheus.Metric) {
 }
 
 func (u *promUnifi) loopExports(r report) {
+	m := r.metrics()
 	r.add()
 	go func() {
 		defer r.done()
-		for _, s := range r.metrics().Sites {
+		for _, s := range m.Sites {
 			u.exportSite(r, s)
 		}
 	}()
@@ -158,7 +163,7 @@ func (u *promUnifi) loopExports(r report) {
 	r.add()
 	go func() {
 		defer r.done()
-		for _, d := range r.metrics().UAPs {
+		for _, d := range m.UAPs {
 			u.exportUAP(r, d)
 		}
 	}()
@@ -166,7 +171,7 @@ func (u *promUnifi) loopExports(r report) {
 	r.add()
 	go func() {
 		defer r.done()
-		for _, d := range r.metrics().UDMs {
+		for _, d := range m.UDMs {
 			u.exportUDM(r, d)
 		}
 	}()
@@ -174,7 +179,7 @@ func (u *promUnifi) loopExports(r report) {
 	r.add()
 	go func() {
 		defer r.done()
-		for _, d := range r.metrics().USGs {
+		for _, d := range m.USGs {
 			u.exportUSG(r, d)
 		}
 	}()
@@ -182,7 +187,7 @@ func (u *promUnifi) loopExports(r report) {
 	r.add()
 	go func() {
 		defer r.done()
-		for _, d := range r.metrics().USWs {
+		for _, d := range m.USWs {
 			u.exportUSW(r, d)
 		}
 	}()
@@ -190,7 +195,7 @@ func (u *promUnifi) loopExports(r report) {
 	r.add()
 	go func() {
 		defer r.done()
-		for _, c := range r.metrics().Clients {
+		for _, c := range m.Clients {
 			u.exportClient(r, c)
 		}
 	}()

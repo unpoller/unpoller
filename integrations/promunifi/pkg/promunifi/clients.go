@@ -24,7 +24,7 @@ type uclient struct {
 	TxRetries         *prometheus.Desc
 	TxPower           *prometheus.Desc
 	TxRate            *prometheus.Desc
-	Uptime            *prometheus.Desc
+	Info              *prometheus.Desc
 	WifiTxAttempts    *prometheus.Desc
 	WiredRxBytes      *prometheus.Desc
 	WiredRxBytesR     *prometheus.Desc
@@ -63,7 +63,7 @@ func descClient(ns string) *uclient {
 		TxPower:        prometheus.NewDesc(ns+"radio_transmit_power_dbm", "Client Transmit Power", labelW, nil),
 		TxRate:         prometheus.NewDesc(ns+"radio_transmit_rate_bps", "Client Transmit Rate", labelW, nil),
 		WifiTxAttempts: prometheus.NewDesc(ns+"wifi_attempts_transmit_total", "Client Wifi Transmit Attempts", labelW, nil),
-		Uptime:         prometheus.NewDesc(ns+"uptime_seconds", "Client Uptime", labelW, nil),
+		Info:           prometheus.NewDesc(ns+"uptime_seconds", "Client Uptime", labelW, nil), // XXX: re-purpose for info tags.
 		/* needs more "looking into"
 		DpiStatsApp:       prometheus.NewDesc(ns+"dpi_stats_app", "Client DPI Stats App", labels, nil),
 		DpiStatsCat:       prometheus.NewDesc(ns+"dpi_stats_cat", "Client DPI Stats Cat", labels, nil),
@@ -83,47 +83,45 @@ func (u *promUnifi) exportClient(r report, c *unifi.Client) {
 		labels[len(labels)-1] = "true"
 		labelW[len(labelW)-1] = "true"
 		r.send([]*metric{
-			{u.Client.RxBytes, prometheus.CounterValue, c.WiredRxBytes, labels},
-			{u.Client.RxBytesR, prometheus.GaugeValue, c.WiredRxBytesR, labels},
-			{u.Client.RxPackets, prometheus.CounterValue, c.WiredRxPackets, labels},
-			{u.Client.TxBytes, prometheus.CounterValue, c.WiredTxBytes, labels},
-			{u.Client.TxBytesR, prometheus.GaugeValue, c.WiredTxBytesR, labels},
-			{u.Client.TxPackets, prometheus.CounterValue, c.WiredTxPackets, labels},
+			{u.Client.RxBytes, counter, c.WiredRxBytes, labels},
+			{u.Client.RxBytesR, gauge, c.WiredRxBytesR, labels},
+			{u.Client.RxPackets, counter, c.WiredRxPackets, labels},
+			{u.Client.TxBytes, counter, c.WiredTxBytes, labels},
+			{u.Client.TxBytesR, gauge, c.WiredTxBytesR, labels},
+			{u.Client.TxPackets, counter, c.WiredTxPackets, labels},
 		})
 	} else {
 		labels[len(labels)-1] = "false"
 		labelW[len(labelW)-1] = "false"
 		r.send([]*metric{
-			{u.Client.Anomalies, prometheus.CounterValue, c.Anomalies, labelW},
-			{u.Client.CCQ, prometheus.GaugeValue, float64(c.Ccq) / 1000.0, labelW},
-			{u.Client.Satisfaction, prometheus.GaugeValue, c.Satisfaction.Val / 100.0, labelW},
-			{u.Client.Noise, prometheus.GaugeValue, c.Noise, labelW},
-			{u.Client.RoamCount, prometheus.CounterValue, c.RoamCount, labelW},
-			{u.Client.RSSI, prometheus.GaugeValue, c.Rssi, labelW},
-			{u.Client.Signal, prometheus.GaugeValue, c.Signal, labelW},
-			{u.Client.TxPower, prometheus.GaugeValue, c.TxPower, labelW},
-			{u.Client.TxRate, prometheus.GaugeValue, c.TxRate * 1000, labelW},
-			{u.Client.WifiTxAttempts, prometheus.CounterValue, c.WifiTxAttempts, labelW},
-			{u.Client.RxRate, prometheus.GaugeValue, c.RxRate * 1000, labelW},
-			{u.Client.TxRetries, prometheus.CounterValue, c.TxRetries, labels},
-			{u.Client.TxBytes, prometheus.CounterValue, c.TxBytes, labels},
-			{u.Client.TxBytesR, prometheus.GaugeValue, c.TxBytesR, labels},
-			{u.Client.TxPackets, prometheus.CounterValue, c.TxPackets, labels},
-			{u.Client.RxBytes, prometheus.CounterValue, c.RxBytes, labels},
-			{u.Client.RxBytesR, prometheus.GaugeValue, c.RxBytesR, labels},
-			{u.Client.RxPackets, prometheus.CounterValue, c.RxPackets, labels},
-			{u.Client.BytesR, prometheus.GaugeValue, c.BytesR, labelW},
+			{u.Client.Anomalies, counter, c.Anomalies, labelW},
+			{u.Client.CCQ, gauge, float64(c.Ccq) / 1000.0, labelW},
+			{u.Client.Satisfaction, gauge, c.Satisfaction.Val / 100.0, labelW},
+			{u.Client.Noise, gauge, c.Noise, labelW},
+			{u.Client.RoamCount, counter, c.RoamCount, labelW},
+			{u.Client.RSSI, gauge, c.Rssi, labelW},
+			{u.Client.Signal, gauge, c.Signal, labelW},
+			{u.Client.TxPower, gauge, c.TxPower, labelW},
+			{u.Client.TxRate, gauge, c.TxRate * 1000, labelW},
+			{u.Client.WifiTxAttempts, counter, c.WifiTxAttempts, labelW},
+			{u.Client.RxRate, gauge, c.RxRate * 1000, labelW},
+			{u.Client.TxRetries, counter, c.TxRetries, labels},
+			{u.Client.TxBytes, counter, c.TxBytes, labels},
+			{u.Client.TxBytesR, gauge, c.TxBytesR, labels},
+			{u.Client.TxPackets, counter, c.TxPackets, labels},
+			{u.Client.RxBytes, counter, c.RxBytes, labels},
+			{u.Client.RxBytesR, gauge, c.RxBytesR, labels},
+			{u.Client.RxPackets, counter, c.RxPackets, labels},
+			{u.Client.BytesR, gauge, c.BytesR, labelW},
 		})
 	}
-	r.send([]*metric{
-		{u.Client.Uptime, prometheus.GaugeValue, c.Uptime, labelW},
-		/* needs more "looking into"
-		{u.Client.DpiStatsApp, prometheus.GaugeValue, c.DpiStats.App, labels},
-		{u.Client.DpiStatsCat, prometheus.GaugeValue, c.DpiStats.Cat, labels},
-		{u.Client.DpiStatsRxBytes, prometheus.CounterValue, c.DpiStats.RxBytes, labels},
-		{u.Client.DpiStatsRxPackets, prometheus.CounterValue, c.DpiStats.RxPackets, labels},
-		{u.Client.DpiStatsTxBytes, prometheus.CounterValue, c.DpiStats.TxBytes, labels},
-		{u.Client.DpiStatsTxPackets, prometheus.CounterValue, c.DpiStats.TxPackets, labels},
-		*/
-	})
+	r.sendone(u.Client.Info, gauge, c.Uptime, labelW)
+	/* needs more "looking into"
+	{u.Client.DpiStatsApp, gauge, c.DpiStats.App, labels},
+	{u.Client.DpiStatsCat, gauge, c.DpiStats.Cat, labels},
+	{u.Client.DpiStatsRxBytes, counter, c.DpiStats.RxBytes, labels},
+	{u.Client.DpiStatsRxPackets, counter, c.DpiStats.RxPackets, labels},
+	{u.Client.DpiStatsTxBytes, counter, c.DpiStats.TxBytes, labels},
+	{u.Client.DpiStatsTxPackets, counter, c.DpiStats.TxPackets, labels},
+	*/
 }
