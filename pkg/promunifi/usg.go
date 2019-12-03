@@ -70,14 +70,14 @@ func descUSG(ns string) *usg {
 
 func (u *promUnifi) exportUSG(r report, d *unifi.USG) {
 	labels := []string{d.Type, d.SiteName, d.Name}
-	infoLabels := []string{d.Version, d.Model, d.Serial, d.Mac, d.IP, d.ID, d.Bytes.Txt}
+	infoLabels := []string{d.Version, d.Model, d.Serial, d.Mac, d.IP, d.ID, d.Bytes.Txt, d.Uptime.Txt}
 	// Gateway System Data.
 	u.exportWANPorts(r, labels, d.Wan1, d.Wan2)
 	u.exportBYTstats(r, labels, d.TxBytes, d.RxBytes)
 	u.exportSYSstats(r, labels, d.SysStats, d.SystemStats)
 	u.exportUSGstats(r, labels, d.Stat.Gw, d.SpeedtestStatus, d.Uplink)
 	u.exportSTAcount(r, labels, d.UserNumSta, d.GuestNumSta, d.NumDesktop, d.UserNumSta, d.GuestNumSta)
-	r.sendone(u.Device.Info, gauge, d.Uptime, append(labels, infoLabels...))
+	r.sendone(u.Device.Info, gauge, 1.0, append(labels, infoLabels...))
 }
 
 // Gateway States
