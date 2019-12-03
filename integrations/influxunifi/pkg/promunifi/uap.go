@@ -170,6 +170,7 @@ func (u *promUnifi) exportUAP(r report, d *unifi.UAP) {
 	r.sendone(u.Device.Info, gauge, d.Uptime, append(labels, infoLabels...))
 }
 
+// udm doesn't have these stats exposed yet, so pass 2 or 6 metrics.
 func (u *promUnifi) exportUAPstats(r report, labels []string, ap *unifi.Ap, bytes ...unifi.FlexInt) {
 	labelU := []string{"user", labels[1], labels[2]}
 	labelG := []string{"guest", labels[1], labels[2]}
