@@ -36,8 +36,6 @@ type usg struct {
 }
 
 func descUSG(ns string) *usg {
-	//	labels := []string{"version", "model", "serial", "type", "mac", "site_name", "name"}
-	//	labelWan := append([]string{"port"}, labels[6:]...)
 	labels := []string{"port", "site_name", "name"}
 	return &usg{
 		WanRxPackets:   prometheus.NewDesc(ns+"wan_receive_packets_total", "WAN Receive Packets Total", labels, nil),
