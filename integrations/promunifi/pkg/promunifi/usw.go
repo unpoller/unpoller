@@ -92,6 +92,8 @@ func descUSW(ns string) *usw {
 
 func (u *promUnifi) exportUSW(r report, d *unifi.USW) {
 	labels := []string{d.IP, d.Version, d.Model, d.Serial, d.Type, d.Mac, d.SiteName, d.Name}
+	labelsGuest := append(labels, "guest")
+	labelsUser := append(labels, "user")
 	if d.HasTemperature.Val {
 		r.send([]*metric{{u.Device.Temperature, prometheus.GaugeValue, d.GeneralTemperature, labels}})
 	}
@@ -106,9 +108,8 @@ func (u *promUnifi) exportUSW(r report, d *unifi.USW) {
 		{u.Device.TotalTxBytes, prometheus.CounterValue, d.TxBytes, labels},
 		{u.Device.TotalRxBytes, prometheus.CounterValue, d.RxBytes, labels},
 		{u.Device.TotalBytes, prometheus.CounterValue, d.Bytes, labels},
-		{u.Device.NumSta, prometheus.GaugeValue, d.NumSta, labels},
-		{u.Device.UserNumSta, prometheus.GaugeValue, d.UserNumSta, labels},
-		{u.Device.GuestNumSta, prometheus.GaugeValue, d.GuestNumSta, labels},
+		{u.Device.NumSta, prometheus.GaugeValue, d.UserNumSta, labelsUser},
+		{u.Device.NumSta, prometheus.GaugeValue, d.GuestNumSta, labelsGuest},
 		{u.Device.Loadavg1, prometheus.GaugeValue, d.SysStats.Loadavg1, labels},
 		{u.Device.Loadavg5, prometheus.GaugeValue, d.SysStats.Loadavg5, labels},
 		{u.Device.Loadavg15, prometheus.GaugeValue, d.SysStats.Loadavg15, labels},

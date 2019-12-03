@@ -74,9 +74,7 @@ type uap struct {
 	RadioCuSelfTx           *prometheus.Desc
 	RadioExtchannel         *prometheus.Desc
 	RadioGain               *prometheus.Desc
-	RadioGuestNumSta        *prometheus.Desc
 	RadioNumSta             *prometheus.Desc
-	RadioUserNumSta         *prometheus.Desc
 	RadioTxPackets          *prometheus.Desc
 	RadioTxRetries          *prometheus.Desc
 }
@@ -155,9 +153,7 @@ func descUAP(ns string) *uap {
 		RadioCuSelfTx:           prometheus.NewDesc(ns+"radio_channel_utilization_transmit_ratio", "Radio Channel Utilization Transmit", labelR, nil),
 		RadioExtchannel:         prometheus.NewDesc(ns+"radio_ext_channel", "Radio Ext Channel", labelR, nil),
 		RadioGain:               prometheus.NewDesc(ns+"radio_gain", "Radio Gain", labelR, nil),
-		RadioGuestNumSta:        prometheus.NewDesc(ns+"radio_guest_stations", "Radio Guest Station Count", labelR, nil),
-		RadioNumSta:             prometheus.NewDesc(ns+"radio_stations", "Radio Total Station Count", labelR, nil),
-		RadioUserNumSta:         prometheus.NewDesc(ns+"radio_user_stations", "Radio User Station Count", labelR, nil),
+		RadioNumSta:             prometheus.NewDesc(ns+"radio_stations", "Radio Total Station Count", append(labelR, "station_type"), nil),
 		RadioTxPackets:          prometheus.NewDesc(ns+"radio_transmit_packets", "Radio Transmitted Packets", labelR, nil),
 		RadioTxRetries:          prometheus.NewDesc(ns+"radio_transmit_retries", "Radio Transmit Retries", labelR, nil),
 	}
@@ -175,9 +171,8 @@ func (u *promUnifi) exportUAP(r report, d *unifi.UAP) {
 		{u.Device.TxBytesD, prometheus.CounterValue, d.TxBytesD, labels}, // not sure if these 3 Ds are counters or gauges.
 		{u.Device.RxBytesD, prometheus.CounterValue, d.RxBytesD, labels}, // not sure if these 3 Ds are counters or gauges.
 		{u.Device.BytesR, prometheus.GaugeValue, d.BytesR, labels},
-		{u.Device.NumSta, prometheus.GaugeValue, d.NumSta, labels},
-		{u.Device.UserNumSta, prometheus.GaugeValue, d.UserNumSta, labels},
-		{u.Device.GuestNumSta, prometheus.GaugeValue, d.GuestNumSta, labels},
+		{u.Device.NumSta, prometheus.GaugeValue, d.UserNumSta, append(labels, "user")},
+		{u.Device.NumSta, prometheus.GaugeValue, d.GuestNumSta, append(labels, "guest")},
 		{u.Device.Loadavg1, prometheus.GaugeValue, d.SysStats.Loadavg1, labels},
 		{u.Device.Loadavg5, prometheus.GaugeValue, d.SysStats.Loadavg5, labels},
 		{u.Device.Loadavg15, prometheus.GaugeValue, d.SysStats.Loadavg15, labels},
@@ -301,6 +296,8 @@ func (u *promUnifi) exportRadtable(r report, labels []string, rt unifi.RadioTabl
 	// radio table
 	for _, p := range rt {
 		labelR := append([]string{p.Name, p.Radio}, labels[6:]...)
+		labelRUser := append(labelR, "user")
+		labelRGuest := append(labelR, "guest")
 		r.send([]*metric{
 			{u.UAP.RadioCurrentAntennaGain, prometheus.GaugeValue, p.CurrentAntennaGain, labelR},
 			{u.UAP.RadioHt, prometheus.GaugeValue, p.Ht, labelR},
@@ -323,9 +320,8 @@ func (u *promUnifi) exportRadtable(r report, labels []string, rt unifi.RadioTabl
 				{u.UAP.RadioCuSelfTx, prometheus.GaugeValue, t.CuSelfTx.Val / 100.0, labelR},
 				{u.UAP.RadioExtchannel, prometheus.GaugeValue, t.Extchannel, labelR},
 				{u.UAP.RadioGain, prometheus.GaugeValue, t.Gain, labelR},
-				{u.UAP.RadioGuestNumSta, prometheus.GaugeValue, t.GuestNumSta, labelR},
-				{u.UAP.RadioNumSta, prometheus.GaugeValue, t.NumSta, labelR},
-				{u.UAP.RadioUserNumSta, prometheus.GaugeValue, t.UserNumSta, labelR},
+				{u.UAP.RadioNumSta, prometheus.GaugeValue, t.GuestNumSta, labelRGuest},
+				{u.UAP.RadioNumSta, prometheus.GaugeValue, t.UserNumSta, labelRUser},
 				{u.UAP.RadioTxPackets, prometheus.GaugeValue, t.TxPackets, labelR},
 				{u.UAP.RadioTxRetries, prometheus.GaugeValue, t.TxRetries, labelR},
 			})

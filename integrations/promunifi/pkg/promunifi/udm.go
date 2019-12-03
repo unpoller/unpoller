@@ -20,8 +20,6 @@ type unifiDevice struct {
 	TxBytesD      *prometheus.Desc // ap only
 	RxBytesD      *prometheus.Desc // ap only
 	NumSta        *prometheus.Desc
-	UserNumSta    *prometheus.Desc
-	GuestNumSta   *prometheus.Desc
 	NumDesktop    *prometheus.Desc // gw only
 	NumMobile     *prometheus.Desc // gw only
 	NumHandheld   *prometheus.Desc // gw only
@@ -50,9 +48,7 @@ func descDevice(ns string) *unifiDevice {
 		Bytes:         prometheus.NewDesc(ns+"transferred_bytes_total", "Bytes Transferred", labels, nil),
 		TxBytesD:      prometheus.NewDesc(ns+"d_tranmsit_bytes", "Transmit Bytes D???", labels, nil),
 		RxBytesD:      prometheus.NewDesc(ns+"d_receive_bytes", "Receive Bytes D???", labels, nil),
-		NumSta:        prometheus.NewDesc(ns+"stations", "Number of Stations", labels, nil),
-		UserNumSta:    prometheus.NewDesc(ns+"user_stations", "Number of User Stations", labels, nil),
-		GuestNumSta:   prometheus.NewDesc(ns+"guest_stations", "Number of Guest Stations", labels, nil),
+		NumSta:        prometheus.NewDesc(ns+"stations", "Number of Stations", append(labels, "station_type"), nil),
 		NumDesktop:    prometheus.NewDesc(ns+"desktops", "Number of Desktops", labels, nil),
 		NumMobile:     prometheus.NewDesc(ns+"mobile", "Number of Mobiles", labels, nil),
 		NumHandheld:   prometheus.NewDesc(ns+"handheld", "Number of Handhelds", labels, nil),
@@ -70,15 +66,16 @@ func descDevice(ns string) *unifiDevice {
 // UDM is a collection of stats from USG, USW and UAP. It has no unique stats.
 func (u *promUnifi) exportUDM(r report, d *unifi.UDM) {
 	labels := []string{d.IP, d.Version, d.Model, d.Serial, d.Type, d.Mac, d.SiteName, d.Name}
+	labelsGuest := append(labels, "guest")
+	labelsUser := append(labels, "user")
 	// Dream Machine System Data.
 	r.send([]*metric{
 		{u.Device.Uptime, prometheus.GaugeValue, d.Uptime, labels},
 		{u.Device.TotalTxBytes, prometheus.CounterValue, d.TxBytes, labels},
 		{u.Device.TotalRxBytes, prometheus.CounterValue, d.RxBytes, labels},
 		{u.Device.TotalBytes, prometheus.CounterValue, d.Bytes, labels},
-		{u.Device.NumSta, prometheus.GaugeValue, d.NumSta, labels},
-		{u.Device.UserNumSta, prometheus.GaugeValue, d.UserNumSta, labels},
-		{u.Device.GuestNumSta, prometheus.GaugeValue, d.GuestNumSta, labels},
+		{u.Device.NumSta, prometheus.GaugeValue, d.UserNumSta, labelsUser},
+		{u.Device.NumSta, prometheus.GaugeValue, d.GuestNumSta, labelsGuest},
 		{u.Device.NumDesktop, prometheus.GaugeValue, d.NumDesktop, labels},
 		{u.Device.NumMobile, prometheus.GaugeValue, d.NumMobile, labels},
 		{u.Device.NumHandheld, prometheus.GaugeValue, d.NumHandheld, labels},
