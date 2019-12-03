@@ -72,8 +72,8 @@ deploy:
     on:
       tags: true
   - provider: script
-    script: rvm 2.0.0 scripts/package-deploy.sh
+    script: scripts/package-deploy.sh
     skip_cleanup: true
     on:
       all_branches: true
-      condition: $TRAVIS_BRANCH =~ ^(master|v[0-9.])$
+      condition: $TRAVIS_BRANCH =~ ^(master|v[0-9.]+)$
