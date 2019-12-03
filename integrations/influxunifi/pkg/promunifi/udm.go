@@ -7,8 +7,7 @@ import (
 
 // These are shared by all four device types: UDM, UAP, USG, USW
 type unifiDevice struct {
-	Info          *prometheus.Desc
-	Uptime        *prometheus.Desc
+	Info          *prometheus.Desc // uptime
 	Temperature   *prometheus.Desc // sw only
 	TotalMaxPower *prometheus.Desc // sw only
 	FanLevel      *prometheus.Desc // sw only
@@ -36,10 +35,9 @@ type unifiDevice struct {
 
 func descDevice(ns string) *unifiDevice {
 	labels := []string{"type", "site_name", "name"}
-	infoLabels := []string{"version", "model", "serial", "mac"}
+	infoLabels := []string{"version", "model", "serial", "mac", "ip", "id", "bytes"}
 	return &unifiDevice{
 		Info:          prometheus.NewDesc(ns+"info", "Device Information", append(labels, infoLabels...), nil),
-		Uptime:        prometheus.NewDesc(ns+"uptime", "Uptime", labels, nil),
 		Temperature:   prometheus.NewDesc(ns+"temperature_celsius", "Temperature", labels, nil),
 		TotalMaxPower: prometheus.NewDesc(ns+"max_power_total", "Total Max Power", labels, nil),
 		FanLevel:      prometheus.NewDesc(ns+"fan_level", "Fan Level", labels, nil),
@@ -69,13 +67,12 @@ func descDevice(ns string) *unifiDevice {
 // UDM is a collection of stats from USG, USW and UAP. It has no unique stats.
 func (u *promUnifi) exportUDM(r report, d *unifi.UDM) {
 	labels := []string{d.Type, d.SiteName, d.Name}
-	infoLabels := []string{d.Version, d.Model, d.Serial, d.Mac}
+	infoLabels := []string{d.Version, d.Model, d.Serial, d.Mac, d.IP, d.ID, d.Bytes.Txt}
 	labelsGuest := append(labels, "guest")
 	labelsUser := append(labels, "user")
 	// Dream Machine System Data.
 	r.send([]*metric{
 		{u.Device.Info, prometheus.GaugeValue, d.Uptime, append(labels, infoLabels...)},
-		{u.Device.Uptime, prometheus.GaugeValue, d.Uptime, labels},
 		{u.Device.TotalTxBytes, prometheus.CounterValue, d.TxBytes, labels},
 		{u.Device.TotalRxBytes, prometheus.CounterValue, d.RxBytes, labels},
 		{u.Device.TotalBytes, prometheus.CounterValue, d.Bytes, labels},
