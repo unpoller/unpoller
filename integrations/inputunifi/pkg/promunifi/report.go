@@ -16,6 +16,7 @@ type report interface {
 	add()
 	done()
 	send([]*metric)
+	sendone(*prometheus.Desc, prometheus.ValueType, interface{}, []string)
 	metrics() *metrics.Metrics
 	channel() chan []*metric
 	report(descs map[*prometheus.Desc]bool)
@@ -32,6 +33,11 @@ func (r *Report) add() {
 
 func (r *Report) done() {
 	r.wg.Add(-one)
+}
+
+func (r *Report) sendone(d *prometheus.Desc, tv prometheus.ValueType, i interface{}, s []string) {
+	r.wg.Add(one)
+	r.ch <- []*metric{{d, tv, i, s}}
 }
 
 func (r *Report) send(m []*metric) {
