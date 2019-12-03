@@ -43,7 +43,6 @@ script:
 after_success:
   # Display Release Folder
   - ls -l release/
-  - scripts/package-deploy.sh
   # Setup the ssh client so we can clone and push to the homebrew formula repo.
   # You must put github_deploy_file into .secret_files.tar.enc
   # This is an ssh key added to your homebrew forumla repo.
@@ -75,4 +74,5 @@ deploy:
   - provider: script
     script: scripts/package-deploy.sh
     on:
-      tags: true
+      all_branches: true
+      condition: $TRAVIS_BRANCH =~ ^(master|v[0-9.])$
