@@ -108,16 +108,16 @@ func (u *promUnifi) exportUSW(r report, d *unifi.USW) {
 		{u.Device.TotalTxBytes, prometheus.CounterValue, d.TxBytes, labels},
 		{u.Device.TotalRxBytes, prometheus.CounterValue, d.RxBytes, labels},
 		{u.Device.TotalBytes, prometheus.CounterValue, d.Bytes, labels},
-		{u.Device.NumSta, prometheus.GaugeValue, d.UserNumSta, labelsUser},
-		{u.Device.NumSta, prometheus.GaugeValue, d.GuestNumSta, labelsGuest},
+		{u.Device.Counter, prometheus.GaugeValue, d.UserNumSta, labelsUser},
+		{u.Device.Counter, prometheus.GaugeValue, d.GuestNumSta, labelsGuest},
 		{u.Device.Loadavg1, prometheus.GaugeValue, d.SysStats.Loadavg1, labels},
 		{u.Device.Loadavg5, prometheus.GaugeValue, d.SysStats.Loadavg5, labels},
 		{u.Device.Loadavg15, prometheus.GaugeValue, d.SysStats.Loadavg15, labels},
 		{u.Device.MemUsed, prometheus.GaugeValue, d.SysStats.MemUsed, labels},
 		{u.Device.MemTotal, prometheus.GaugeValue, d.SysStats.MemTotal, labels},
 		{u.Device.MemBuffer, prometheus.GaugeValue, d.SysStats.MemBuffer, labels},
-		{u.Device.CPU, prometheus.GaugeValue, d.SystemStats.CPU, labels},
-		{u.Device.Mem, prometheus.GaugeValue, d.SystemStats.Mem, labels},
+		{u.Device.CPU, prometheus.GaugeValue, d.SystemStats.CPU.Val / 100.0, labels},
+		{u.Device.Mem, prometheus.GaugeValue, d.SystemStats.Mem.Val / 100.0, labels},
 	})
 	u.exportPortTable(r, labels, d.PortTable)
 	u.exportUSWstats(r, labels, d.Stat.Sw)
