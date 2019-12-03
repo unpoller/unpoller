@@ -177,16 +177,12 @@ func (u *promUnifi) exportUAP(r report, d *unifi.UAP) {
 func (u *promUnifi) exportUAPstats(r report, labels []string, ap *unifi.Ap, bytes ...unifi.FlexInt) {
 	labelU := []string{"user", labels[1], labels[2]}
 	labelG := []string{"guest", labels[1], labels[2]}
-	if len(bytes) > 0 {
-		r.send([]*metric{
-			// ap only stuff.
-			{u.Device.BytesD, counter, bytes[0], labels},   // not sure if these 3 Ds are counters or gauges.
-			{u.Device.TxBytesD, counter, bytes[1], labels}, // not sure if these 3 Ds are counters or gauges.
-			{u.Device.RxBytesD, counter, bytes[2], labels}, // not sure if these 3 Ds are counters or gauges.
-			{u.Device.BytesR, gauge, bytes[3], labels},     // only UAP has this one, and those ^ weird.
-		})
-	}
 	r.send([]*metric{
+		// ap only stuff.
+		{u.Device.BytesD, counter, bytes[0], labels},   // not sure if these 3 Ds are counters or gauges.
+		{u.Device.TxBytesD, counter, bytes[1], labels}, // not sure if these 3 Ds are counters or gauges.
+		{u.Device.RxBytesD, counter, bytes[2], labels}, // not sure if these 3 Ds are counters or gauges.
+		{u.Device.BytesR, gauge, bytes[3], labels},     // only UAP has this one, and those ^ weird.
 		// user
 		{u.UAP.ApWifiTxDropped, counter, ap.UserWifiTxDropped, labelU},
 		{u.UAP.ApRxErrors, counter, ap.UserRxErrors, labelU},
