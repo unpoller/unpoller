@@ -93,7 +93,7 @@ func descUSW(ns string) *usw {
 func (u *promUnifi) exportUSW(r report, d *unifi.USW) {
 
 	labels := []string{d.Type, d.SiteName, d.Name}
-	infoLabels := []string{d.Version, d.Model, d.Serial, d.Mac}
+	infoLabels := []string{d.Version, d.Model, d.Serial, d.Mac, d.IP, d.ID, d.Bytes.Txt}
 	labelsGuest := append(labels, "guest")
 	labelsUser := append(labels, "user")
 	if d.HasTemperature.Val {
@@ -106,7 +106,6 @@ func (u *promUnifi) exportUSW(r report, d *unifi.USW) {
 	// Switch System Data.
 	r.send([]*metric{
 		{u.Device.Info, prometheus.GaugeValue, d.Uptime, append(labels, infoLabels...)},
-		{u.Device.Uptime, prometheus.GaugeValue, d.Uptime, labels},
 		{u.Device.TotalMaxPower, prometheus.GaugeValue, d.TotalMaxPower, labels},
 		{u.Device.TotalTxBytes, prometheus.CounterValue, d.TxBytes, labels},
 		{u.Device.TotalRxBytes, prometheus.CounterValue, d.RxBytes, labels},
