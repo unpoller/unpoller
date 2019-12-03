@@ -71,27 +71,25 @@ func descUSG(ns string) *usg {
 func (u *promUnifi) exportUSG(r report, d *unifi.USG) {
 	labels := []string{d.Type, d.SiteName, d.Name}
 	infoLabels := []string{d.Version, d.Model, d.Serial, d.Mac, d.IP, d.ID, d.Bytes.Txt}
-	labelsUser := append(labels, "user")
-	labelsGuest := append(labels, "guest")
 	// Gateway System Data.
 	r.send([]*metric{
 		{u.Device.Info, prometheus.GaugeValue, d.Uptime, append(labels, infoLabels...)},
 		{u.Device.TotalTxBytes, prometheus.CounterValue, d.TxBytes, labels},
 		{u.Device.TotalRxBytes, prometheus.CounterValue, d.RxBytes, labels},
 		{u.Device.TotalBytes, prometheus.CounterValue, d.Bytes, labels},
-		{u.Device.NumSta, prometheus.GaugeValue, d.UserNumSta, labelsUser},
-		{u.Device.NumSta, prometheus.GaugeValue, d.GuestNumSta, labelsGuest},
-		{u.Device.NumDesktop, prometheus.GaugeValue, d.NumDesktop, labels},
-		{u.Device.NumMobile, prometheus.GaugeValue, d.NumMobile, labels},
-		{u.Device.NumHandheld, prometheus.GaugeValue, d.NumHandheld, labels},
+		{u.Device.Counter, prometheus.GaugeValue, d.UserNumSta, append(labels, "user")},
+		{u.Device.Counter, prometheus.GaugeValue, d.GuestNumSta, append(labels, "guest")},
+		{u.Device.Counter, prometheus.GaugeValue, d.NumDesktop, append(labels, "desktop")},
+		{u.Device.Counter, prometheus.GaugeValue, d.NumMobile, append(labels, "mobile")},
+		{u.Device.Counter, prometheus.GaugeValue, d.NumHandheld, append(labels, "handheld")},
 		{u.Device.Loadavg1, prometheus.GaugeValue, d.SysStats.Loadavg1, labels},
 		{u.Device.Loadavg5, prometheus.GaugeValue, d.SysStats.Loadavg5, labels},
 		{u.Device.Loadavg15, prometheus.GaugeValue, d.SysStats.Loadavg15, labels},
 		{u.Device.MemUsed, prometheus.GaugeValue, d.SysStats.MemUsed, labels},
 		{u.Device.MemTotal, prometheus.GaugeValue, d.SysStats.MemTotal, labels},
 		{u.Device.MemBuffer, prometheus.GaugeValue, d.SysStats.MemBuffer, labels},
-		{u.Device.CPU, prometheus.GaugeValue, d.SystemStats.CPU, labels},
-		{u.Device.Mem, prometheus.GaugeValue, d.SystemStats.Mem, labels},
+		{u.Device.CPU, prometheus.GaugeValue, d.SystemStats.CPU.Val / 100.0, labels},
+		{u.Device.Mem, prometheus.GaugeValue, d.SystemStats.Mem.Val / 100.0, labels},
 	})
 	u.exportWANPorts(r, labels, d.Wan1, d.Wan2)
 	u.exportUSGstats(r, labels, d.Stat.Gw, d.SpeedtestStatus, d.Uplink)
