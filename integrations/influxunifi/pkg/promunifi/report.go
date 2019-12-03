@@ -17,7 +17,6 @@ type report interface {
 	done()
 	send([]*metric)
 	metrics() *metrics.Metrics
-	channel() chan []*metric
 	report(descs map[*prometheus.Desc]bool)
 	export(m *metric, v float64) prometheus.Metric
 	error(ch chan<- prometheus.Metric, d *prometheus.Desc, v interface{})
@@ -41,10 +40,6 @@ func (r *Report) send(m []*metric) {
 
 func (r *Report) metrics() *metrics.Metrics {
 	return r.Metrics
-}
-
-func (r *Report) channel() chan []*metric {
-	return r.ch
 }
 
 func (r *Report) report(descs map[*prometheus.Desc]bool) {

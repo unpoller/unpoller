@@ -160,89 +160,67 @@ func descUAP(ns string) *uap {
 
 func (u *promUnifi) exportUAP(r report, d *unifi.UAP) {
 	labels := []string{d.Type, d.SiteName, d.Name}
-	infoLabels := []string{d.Version, d.Model, d.Serial, d.Mac, d.IP, d.ID, d.Bytes.Txt}
-
-	// Wireless System Data.
-	r.send([]*metric{
-		{u.Device.Info, prometheus.GaugeValue, d.Uptime, append(labels, infoLabels...)},
-		{u.Device.TotalTxBytes, prometheus.CounterValue, d.TxBytes, labels},
-		{u.Device.TotalRxBytes, prometheus.CounterValue, d.RxBytes, labels},
-		{u.Device.TotalBytes, prometheus.CounterValue, d.Bytes, labels},
-		{u.Device.BytesD, prometheus.CounterValue, d.BytesD, labels},     // not sure if these 3 Ds are counters or gauges.
-		{u.Device.TxBytesD, prometheus.CounterValue, d.TxBytesD, labels}, // not sure if these 3 Ds are counters or gauges.
-		{u.Device.RxBytesD, prometheus.CounterValue, d.RxBytesD, labels}, // not sure if these 3 Ds are counters or gauges.
-		{u.Device.BytesR, prometheus.GaugeValue, d.BytesR, labels},
-		{u.Device.Counter, prometheus.GaugeValue, d.UserNumSta, append(labels, "user")},
-		{u.Device.Counter, prometheus.GaugeValue, d.GuestNumSta, append(labels, "guest")},
-		{u.Device.Loadavg1, prometheus.GaugeValue, d.SysStats.Loadavg1, labels},
-		{u.Device.Loadavg5, prometheus.GaugeValue, d.SysStats.Loadavg5, labels},
-		{u.Device.Loadavg15, prometheus.GaugeValue, d.SysStats.Loadavg15, labels},
-		{u.Device.MemUsed, prometheus.GaugeValue, d.SysStats.MemUsed, labels},
-		{u.Device.MemTotal, prometheus.GaugeValue, d.SysStats.MemTotal, labels},
-		{u.Device.MemBuffer, prometheus.GaugeValue, d.SysStats.MemBuffer, labels},
-		{u.Device.CPU, prometheus.GaugeValue, d.SystemStats.CPU.Val / 100.0, labels},
-		{u.Device.Mem, prometheus.GaugeValue, d.SystemStats.Mem.Val / 100.0, labels},
-	})
-
-	u.exportUAPstats(r, labels, d.Stat.Ap)
+	infoLabels := []string{d.Version, d.Model, d.Serial, d.Mac, d.IP, d.ID, d.Bytes.Txt, d.Uptime.Txt}
+	u.exportUAPstats(r, labels, d.Stat.Ap, d.BytesD, d.TxBytesD, d.RxBytesD, d.BytesR)
 	u.exportVAPtable(r, labels, d.VapTable)
-	u.exportRadtable(r, labels, d.RadioTable, d.RadioTableStats)
+	u.exportBYTstats(r, labels, d.TxBytes, d.RxBytes)
+	u.exportSYSstats(r, labels, d.SysStats, d.SystemStats)
+	u.exportSTAcount(r, labels, d.UserNumSta, d.GuestNumSta)
+	u.exportRADtable(r, labels, d.RadioTable, d.RadioTableStats)
+	r.send([]*metric{
+		{u.Device.Info, gauge, 1.0, append(labels, infoLabels...)},
+		{u.Device.Uptime, gauge, d.Uptime, labels},
+	})
 }
 
-func (u *promUnifi) exportUAPstats(r report, labels []string, ap *unifi.Ap) {
-	//	labelA := append([]string{"all"}, labels[2:]...)
+// udm doesn't have these stats exposed yet, so pass 2 or 6 metrics.
+func (u *promUnifi) exportUAPstats(r report, labels []string, ap *unifi.Ap, bytes ...unifi.FlexInt) {
 	labelU := []string{"user", labels[1], labels[2]}
 	labelG := []string{"guest", labels[1], labels[2]}
+	if len(bytes) > 0 {
+		r.send([]*metric{
+			// ap only stuff.
+			{u.Device.BytesD, counter, bytes[0], labels},   // not sure if these 3 Ds are counters or gauges.
+			{u.Device.TxBytesD, counter, bytes[1], labels}, // not sure if these 3 Ds are counters or gauges.
+			{u.Device.RxBytesD, counter, bytes[2], labels}, // not sure if these 3 Ds are counters or gauges.
+			{u.Device.BytesR, gauge, bytes[3], labels},     // only UAP has this one, and those ^ weird.
+		})
+	}
 	r.send([]*metric{
-		/* // all
-		{u.UAP.ApWifiTxDropped, prometheus.CounterValue, ap.WifiTxDropped, labelA},
-		{u.UAP.ApRxErrors, prometheus.CounterValue, ap.RxErrors, labelA},
-		{u.UAP.ApRxDropped, prometheus.CounterValue, ap.RxDropped, labelA},
-		{u.UAP.ApRxFrags, prometheus.CounterValue, ap.RxFrags, labelA},
-		{u.UAP.ApRxCrypts, prometheus.CounterValue, ap.RxCrypts, labelA},
-		{u.UAP.ApTxPackets, prometheus.CounterValue, ap.TxPackets, labelA},
-		{u.UAP.ApTxBytes, prometheus.CounterValue, ap.TxBytes, labelA},
-		{u.UAP.ApTxErrors, prometheus.CounterValue, ap.TxErrors, labelA},
-		{u.UAP.ApTxDropped, prometheus.CounterValue, ap.TxDropped, labelA},
-		{u.UAP.ApTxRetries, prometheus.CounterValue, ap.TxRetries, labelA},
-		{u.UAP.ApRxPackets, prometheus.CounterValue, ap.RxPackets, labelA},
-		{u.UAP.ApRxBytes, prometheus.CounterValue, ap.RxBytes, labelA},
-		{u.UAP.WifiTxAttempts, prometheus.CounterValue, ap.WifiTxAttempts, labelA},
-		{u.UAP.MacFilterRejections, prometheus.CounterValue, ap.MacFilterRejections, labelA},
-		*/
 		// user
-		{u.UAP.ApWifiTxDropped, prometheus.CounterValue, ap.UserWifiTxDropped, labelU},
-		{u.UAP.ApRxErrors, prometheus.CounterValue, ap.UserRxErrors, labelU},
-		{u.UAP.ApRxDropped, prometheus.CounterValue, ap.UserRxDropped, labelU},
-		{u.UAP.ApRxFrags, prometheus.CounterValue, ap.UserRxFrags, labelU},
-		{u.UAP.ApRxCrypts, prometheus.CounterValue, ap.UserRxCrypts, labelU},
-		{u.UAP.ApTxPackets, prometheus.CounterValue, ap.UserTxPackets, labelU},
-		{u.UAP.ApTxBytes, prometheus.CounterValue, ap.UserTxBytes, labelU},
-		{u.UAP.ApTxErrors, prometheus.CounterValue, ap.UserTxErrors, labelU},
-		{u.UAP.ApTxDropped, prometheus.CounterValue, ap.UserTxDropped, labelU},
-		{u.UAP.ApTxRetries, prometheus.CounterValue, ap.UserTxRetries, labelU},
-		{u.UAP.ApRxPackets, prometheus.CounterValue, ap.UserRxPackets, labelU},
-		{u.UAP.ApRxBytes, prometheus.CounterValue, ap.UserRxBytes, labelU},
-		{u.UAP.WifiTxAttempts, prometheus.CounterValue, ap.UserWifiTxAttempts, labelU},
-		{u.UAP.MacFilterRejections, prometheus.CounterValue, ap.UserMacFilterRejections, labelU},
+		{u.UAP.ApWifiTxDropped, counter, ap.UserWifiTxDropped, labelU},
+		{u.UAP.ApRxErrors, counter, ap.UserRxErrors, labelU},
+		{u.UAP.ApRxDropped, counter, ap.UserRxDropped, labelU},
+		{u.UAP.ApRxFrags, counter, ap.UserRxFrags, labelU},
+		{u.UAP.ApRxCrypts, counter, ap.UserRxCrypts, labelU},
+		{u.UAP.ApTxPackets, counter, ap.UserTxPackets, labelU},
+		{u.UAP.ApTxBytes, counter, ap.UserTxBytes, labelU},
+		{u.UAP.ApTxErrors, counter, ap.UserTxErrors, labelU},
+		{u.UAP.ApTxDropped, counter, ap.UserTxDropped, labelU},
+		{u.UAP.ApTxRetries, counter, ap.UserTxRetries, labelU},
+		{u.UAP.ApRxPackets, counter, ap.UserRxPackets, labelU},
+		{u.UAP.ApRxBytes, counter, ap.UserRxBytes, labelU},
+		{u.UAP.WifiTxAttempts, counter, ap.UserWifiTxAttempts, labelU},
+		{u.UAP.MacFilterRejections, counter, ap.UserMacFilterRejections, labelU},
 		// guest
-		{u.UAP.ApWifiTxDropped, prometheus.CounterValue, ap.GuestWifiTxDropped, labelG},
-		{u.UAP.ApRxErrors, prometheus.CounterValue, ap.GuestRxErrors, labelG},
-		{u.UAP.ApRxDropped, prometheus.CounterValue, ap.GuestRxDropped, labelG},
-		{u.UAP.ApRxFrags, prometheus.CounterValue, ap.GuestRxFrags, labelG},
-		{u.UAP.ApRxCrypts, prometheus.CounterValue, ap.GuestRxCrypts, labelG},
-		{u.UAP.ApTxPackets, prometheus.CounterValue, ap.GuestTxPackets, labelG},
-		{u.UAP.ApTxBytes, prometheus.CounterValue, ap.GuestTxBytes, labelG},
-		{u.UAP.ApTxErrors, prometheus.CounterValue, ap.GuestTxErrors, labelG},
-		{u.UAP.ApTxDropped, prometheus.CounterValue, ap.GuestTxDropped, labelG},
-		{u.UAP.ApTxRetries, prometheus.CounterValue, ap.GuestTxRetries, labelG},
-		{u.UAP.ApRxPackets, prometheus.CounterValue, ap.GuestRxPackets, labelG},
-		{u.UAP.ApRxBytes, prometheus.CounterValue, ap.GuestRxBytes, labelG},
-		{u.UAP.WifiTxAttempts, prometheus.CounterValue, ap.GuestWifiTxAttempts, labelG},
-		{u.UAP.MacFilterRejections, prometheus.CounterValue, ap.GuestMacFilterRejections, labelG},
+		{u.UAP.ApWifiTxDropped, counter, ap.GuestWifiTxDropped, labelG},
+		{u.UAP.ApRxErrors, counter, ap.GuestRxErrors, labelG},
+		{u.UAP.ApRxDropped, counter, ap.GuestRxDropped, labelG},
+		{u.UAP.ApRxFrags, counter, ap.GuestRxFrags, labelG},
+		{u.UAP.ApRxCrypts, counter, ap.GuestRxCrypts, labelG},
+		{u.UAP.ApTxPackets, counter, ap.GuestTxPackets, labelG},
+		{u.UAP.ApTxBytes, counter, ap.GuestTxBytes, labelG},
+		{u.UAP.ApTxErrors, counter, ap.GuestTxErrors, labelG},
+		{u.UAP.ApTxDropped, counter, ap.GuestTxDropped, labelG},
+		{u.UAP.ApTxRetries, counter, ap.GuestTxRetries, labelG},
+		{u.UAP.ApRxPackets, counter, ap.GuestRxPackets, labelG},
+		{u.UAP.ApRxBytes, counter, ap.GuestRxBytes, labelG},
+		{u.UAP.WifiTxAttempts, counter, ap.GuestWifiTxAttempts, labelG},
+		{u.UAP.MacFilterRejections, counter, ap.GuestMacFilterRejections, labelG},
 	})
 }
 
+// UAP VAP Table
 func (u *promUnifi) exportVAPtable(r report, labels []string, vt unifi.VapTable) {
 	// vap table stats
 	for _, v := range vt {
@@ -252,60 +230,61 @@ func (u *promUnifi) exportVAPtable(r report, labels []string, vt unifi.VapTable)
 		labelV := []string{v.Name, v.Bssid, v.Radio, v.RadioName, v.Essid, v.Usage, labels[1], labels[2]}
 
 		r.send([]*metric{
-			{u.UAP.VAPCcq, prometheus.GaugeValue, float64(v.Ccq) / 1000.0, labelV},
-			{u.UAP.VAPMacFilterRejections, prometheus.CounterValue, v.MacFilterRejections, labelV},
-			{u.UAP.VAPNumSatisfactionSta, prometheus.GaugeValue, v.NumSatisfactionSta, labelV},
-			{u.UAP.VAPAvgClientSignal, prometheus.GaugeValue, v.AvgClientSignal.Val, labelV},
-			{u.UAP.VAPSatisfaction, prometheus.GaugeValue, v.Satisfaction.Val / 100.0, labelV},
-			{u.UAP.VAPSatisfactionNow, prometheus.GaugeValue, v.SatisfactionNow.Val / 100.0, labelV},
-			{u.UAP.VAPDNSAvgLatency, prometheus.GaugeValue, v.DNSAvgLatency.Val / 1000, labelV},
-			{u.UAP.VAPRxBytes, prometheus.CounterValue, v.RxBytes, labelV},
-			{u.UAP.VAPRxCrypts, prometheus.CounterValue, v.RxCrypts, labelV},
-			{u.UAP.VAPRxDropped, prometheus.CounterValue, v.RxDropped, labelV},
-			{u.UAP.VAPRxErrors, prometheus.CounterValue, v.RxErrors, labelV},
-			{u.UAP.VAPRxFrags, prometheus.CounterValue, v.RxFrags, labelV},
-			{u.UAP.VAPRxNwids, prometheus.CounterValue, v.RxNwids, labelV},
-			{u.UAP.VAPRxPackets, prometheus.CounterValue, v.RxPackets, labelV},
-			{u.UAP.VAPTxBytes, prometheus.CounterValue, v.TxBytes, labelV},
-			{u.UAP.VAPTxDropped, prometheus.CounterValue, v.TxDropped, labelV},
-			{u.UAP.VAPTxErrors, prometheus.CounterValue, v.TxErrors, labelV},
-			{u.UAP.VAPTxPackets, prometheus.CounterValue, v.TxPackets, labelV},
-			{u.UAP.VAPTxPower, prometheus.GaugeValue, v.TxPower, labelV},
-			{u.UAP.VAPTxRetries, prometheus.CounterValue, v.TxRetries, labelV},
-			{u.UAP.VAPTxCombinedRetries, prometheus.CounterValue, v.TxCombinedRetries, labelV},
-			{u.UAP.VAPTxDataMpduBytes, prometheus.CounterValue, v.TxDataMpduBytes, labelV},
-			{u.UAP.VAPTxRtsRetries, prometheus.CounterValue, v.TxRtsRetries, labelV},
-			{u.UAP.VAPTxTotal, prometheus.CounterValue, v.TxTotal, labelV},
-			{u.UAP.VAPTxGoodbytes, prometheus.CounterValue, v.TxTCPStats.Goodbytes, labelV},
-			{u.UAP.VAPTxLatAvg, prometheus.GaugeValue, v.TxTCPStats.LatAvg.Val / 1000, labelV},
-			{u.UAP.VAPTxLatMax, prometheus.GaugeValue, v.TxTCPStats.LatMax.Val / 1000, labelV},
-			{u.UAP.VAPTxLatMin, prometheus.GaugeValue, v.TxTCPStats.LatMin.Val / 1000, labelV},
-			{u.UAP.VAPRxGoodbytes, prometheus.CounterValue, v.RxTCPStats.Goodbytes, labelV},
-			{u.UAP.VAPRxLatAvg, prometheus.GaugeValue, v.RxTCPStats.LatAvg.Val / 1000, labelV},
-			{u.UAP.VAPRxLatMax, prometheus.GaugeValue, v.RxTCPStats.LatMax.Val / 1000, labelV},
-			{u.UAP.VAPRxLatMin, prometheus.GaugeValue, v.RxTCPStats.LatMin.Val / 1000, labelV},
-			{u.UAP.VAPWifiTxLatencyMovAvg, prometheus.GaugeValue, v.WifiTxLatencyMov.Avg.Val / 1000, labelV},
-			{u.UAP.VAPWifiTxLatencyMovMax, prometheus.GaugeValue, v.WifiTxLatencyMov.Max.Val / 1000, labelV},
-			{u.UAP.VAPWifiTxLatencyMovMin, prometheus.GaugeValue, v.WifiTxLatencyMov.Min.Val / 1000, labelV},
-			{u.UAP.VAPWifiTxLatencyMovTotal, prometheus.CounterValue, v.WifiTxLatencyMov.Total, labelV},      // not sure if gauge or counter.
-			{u.UAP.VAPWifiTxLatencyMovCount, prometheus.CounterValue, v.WifiTxLatencyMov.TotalCount, labelV}, // not sure if gauge or counter.
+			{u.UAP.VAPCcq, gauge, float64(v.Ccq) / 1000.0, labelV},
+			{u.UAP.VAPMacFilterRejections, counter, v.MacFilterRejections, labelV},
+			{u.UAP.VAPNumSatisfactionSta, gauge, v.NumSatisfactionSta, labelV},
+			{u.UAP.VAPAvgClientSignal, gauge, v.AvgClientSignal.Val, labelV},
+			{u.UAP.VAPSatisfaction, gauge, v.Satisfaction.Val / 100.0, labelV},
+			{u.UAP.VAPSatisfactionNow, gauge, v.SatisfactionNow.Val / 100.0, labelV},
+			{u.UAP.VAPDNSAvgLatency, gauge, v.DNSAvgLatency.Val / 1000, labelV},
+			{u.UAP.VAPRxBytes, counter, v.RxBytes, labelV},
+			{u.UAP.VAPRxCrypts, counter, v.RxCrypts, labelV},
+			{u.UAP.VAPRxDropped, counter, v.RxDropped, labelV},
+			{u.UAP.VAPRxErrors, counter, v.RxErrors, labelV},
+			{u.UAP.VAPRxFrags, counter, v.RxFrags, labelV},
+			{u.UAP.VAPRxNwids, counter, v.RxNwids, labelV},
+			{u.UAP.VAPRxPackets, counter, v.RxPackets, labelV},
+			{u.UAP.VAPTxBytes, counter, v.TxBytes, labelV},
+			{u.UAP.VAPTxDropped, counter, v.TxDropped, labelV},
+			{u.UAP.VAPTxErrors, counter, v.TxErrors, labelV},
+			{u.UAP.VAPTxPackets, counter, v.TxPackets, labelV},
+			{u.UAP.VAPTxPower, gauge, v.TxPower, labelV},
+			{u.UAP.VAPTxRetries, counter, v.TxRetries, labelV},
+			{u.UAP.VAPTxCombinedRetries, counter, v.TxCombinedRetries, labelV},
+			{u.UAP.VAPTxDataMpduBytes, counter, v.TxDataMpduBytes, labelV},
+			{u.UAP.VAPTxRtsRetries, counter, v.TxRtsRetries, labelV},
+			{u.UAP.VAPTxTotal, counter, v.TxTotal, labelV},
+			{u.UAP.VAPTxGoodbytes, counter, v.TxTCPStats.Goodbytes, labelV},
+			{u.UAP.VAPTxLatAvg, gauge, v.TxTCPStats.LatAvg.Val / 1000, labelV},
+			{u.UAP.VAPTxLatMax, gauge, v.TxTCPStats.LatMax.Val / 1000, labelV},
+			{u.UAP.VAPTxLatMin, gauge, v.TxTCPStats.LatMin.Val / 1000, labelV},
+			{u.UAP.VAPRxGoodbytes, counter, v.RxTCPStats.Goodbytes, labelV},
+			{u.UAP.VAPRxLatAvg, gauge, v.RxTCPStats.LatAvg.Val / 1000, labelV},
+			{u.UAP.VAPRxLatMax, gauge, v.RxTCPStats.LatMax.Val / 1000, labelV},
+			{u.UAP.VAPRxLatMin, gauge, v.RxTCPStats.LatMin.Val / 1000, labelV},
+			{u.UAP.VAPWifiTxLatencyMovAvg, gauge, v.WifiTxLatencyMov.Avg.Val / 1000, labelV},
+			{u.UAP.VAPWifiTxLatencyMovMax, gauge, v.WifiTxLatencyMov.Max.Val / 1000, labelV},
+			{u.UAP.VAPWifiTxLatencyMovMin, gauge, v.WifiTxLatencyMov.Min.Val / 1000, labelV},
+			{u.UAP.VAPWifiTxLatencyMovTotal, counter, v.WifiTxLatencyMov.Total, labelV},      // not sure if gauge or counter.
+			{u.UAP.VAPWifiTxLatencyMovCount, counter, v.WifiTxLatencyMov.TotalCount, labelV}, // not sure if gauge or counter.
 		})
 	}
 }
 
-func (u *promUnifi) exportRadtable(r report, labels []string, rt unifi.RadioTable, rts unifi.RadioTableStats) {
+// UAP Radio Table
+func (u *promUnifi) exportRADtable(r report, labels []string, rt unifi.RadioTable, rts unifi.RadioTableStats) {
 	// radio table
 	for _, p := range rt {
 		labelR := []string{p.Name, p.Radio, labels[1], labels[2]}
 		labelRUser := append(labelR, "user")
 		labelRGuest := append(labelR, "guest")
 		r.send([]*metric{
-			{u.UAP.RadioCurrentAntennaGain, prometheus.GaugeValue, p.CurrentAntennaGain, labelR},
-			{u.UAP.RadioHt, prometheus.GaugeValue, p.Ht, labelR},
-			{u.UAP.RadioMaxTxpower, prometheus.GaugeValue, p.MaxTxpower, labelR},
-			{u.UAP.RadioMinTxpower, prometheus.GaugeValue, p.MinTxpower, labelR},
-			{u.UAP.RadioNss, prometheus.GaugeValue, p.Nss, labelR},
-			{u.UAP.RadioRadioCaps, prometheus.GaugeValue, p.RadioCaps, labelR},
+			{u.UAP.RadioCurrentAntennaGain, gauge, p.CurrentAntennaGain, labelR},
+			{u.UAP.RadioHt, gauge, p.Ht, labelR},
+			{u.UAP.RadioMaxTxpower, gauge, p.MaxTxpower, labelR},
+			{u.UAP.RadioMinTxpower, gauge, p.MinTxpower, labelR},
+			{u.UAP.RadioNss, gauge, p.Nss, labelR},
+			{u.UAP.RadioRadioCaps, gauge, p.RadioCaps, labelR},
 		})
 
 		// combine radio table with radio stats table.
@@ -314,18 +293,19 @@ func (u *promUnifi) exportRadtable(r report, labels []string, rt unifi.RadioTabl
 				continue
 			}
 			r.send([]*metric{
-				{u.UAP.RadioTxPower, prometheus.GaugeValue, t.TxPower, labelR},
-				{u.UAP.RadioAstBeXmit, prometheus.GaugeValue, t.AstBeXmit, labelR},
-				{u.UAP.RadioChannel, prometheus.GaugeValue, t.Channel, labelR},
-				{u.UAP.RadioCuSelfRx, prometheus.GaugeValue, t.CuSelfRx.Val / 100.0, labelR},
-				{u.UAP.RadioCuSelfTx, prometheus.GaugeValue, t.CuSelfTx.Val / 100.0, labelR},
-				{u.UAP.RadioExtchannel, prometheus.GaugeValue, t.Extchannel, labelR},
-				{u.UAP.RadioGain, prometheus.GaugeValue, t.Gain, labelR},
-				{u.UAP.RadioNumSta, prometheus.GaugeValue, t.GuestNumSta, labelRGuest},
-				{u.UAP.RadioNumSta, prometheus.GaugeValue, t.UserNumSta, labelRUser},
-				{u.UAP.RadioTxPackets, prometheus.GaugeValue, t.TxPackets, labelR},
-				{u.UAP.RadioTxRetries, prometheus.GaugeValue, t.TxRetries, labelR},
+				{u.UAP.RadioTxPower, gauge, t.TxPower, labelR},
+				{u.UAP.RadioAstBeXmit, gauge, t.AstBeXmit, labelR},
+				{u.UAP.RadioChannel, gauge, t.Channel, labelR},
+				{u.UAP.RadioCuSelfRx, gauge, t.CuSelfRx.Val / 100.0, labelR},
+				{u.UAP.RadioCuSelfTx, gauge, t.CuSelfTx.Val / 100.0, labelR},
+				{u.UAP.RadioExtchannel, gauge, t.Extchannel, labelR},
+				{u.UAP.RadioGain, gauge, t.Gain, labelR},
+				{u.UAP.RadioNumSta, gauge, t.GuestNumSta, labelRGuest},
+				{u.UAP.RadioNumSta, gauge, t.UserNumSta, labelRUser},
+				{u.UAP.RadioTxPackets, gauge, t.TxPackets, labelR},
+				{u.UAP.RadioTxRetries, gauge, t.TxRetries, labelR},
 			})
+			break
 		}
 	}
 }
