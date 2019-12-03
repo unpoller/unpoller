@@ -19,37 +19,30 @@ func (u *InfluxUnifi) batchUSG(r report, s *unifi.USG) {
 		"serial":    s.Serial,
 		"type":      s.Type,
 	}
-	fields := Combine(map[string]interface{}{
-		"ip":                             s.IP,
-		"bytes":                          s.Bytes.Val,
-		"last_seen":                      s.LastSeen.Val,
-		"license_state":                  s.LicenseState,
-		"guest-num_sta":                  s.GuestNumSta.Val,
-		"rx_bytes":                       s.RxBytes.Val,
-		"tx_bytes":                       s.TxBytes.Val,
-		"uptime":                         s.Uptime.Val,
-		"state":                          s.State.Val,
-		"user-num_sta":                   s.UserNumSta.Val,
-		"version":                        s.Version,
-		"num_desktop":                    s.NumDesktop.Val,
-		"num_handheld":                   s.NumHandheld.Val,
-		"uplink_latency":                 s.Uplink.Latency.Val,
-		"uplink_speed":                   s.Uplink.Speed.Val,
-		"num_mobile":                     s.NumMobile.Val,
-		"speedtest-status_latency":       s.SpeedtestStatus.Latency.Val,
-		"speedtest-status_runtime":       s.SpeedtestStatus.Runtime.Val,
-		"speedtest-status_ping":          s.SpeedtestStatus.StatusPing.Val,
-		"speedtest-status_xput_download": s.SpeedtestStatus.XputDownload.Val,
-		"speedtest-status_xput_upload":   s.SpeedtestStatus.XputUpload.Val,
-		"lan-rx_bytes":                   s.Stat.Gw.LanRxBytes.Val,
-		"lan-rx_packets":                 s.Stat.Gw.LanRxPackets.Val,
-		"lan-tx_bytes":                   s.Stat.Gw.LanTxBytes.Val,
-		"lan-tx_packets":                 s.Stat.Gw.LanTxPackets.Val,
-		"lan-rx_dropped":                 s.Stat.Gw.LanRxDropped.Val,
-	}, u.batchSysStats(s.SysStats, s.SystemStats))
+	fields := Combine(
+		u.batchSysStats(s.SysStats, s.SystemStats),
+		u.batchUSGstat(s.SpeedtestStatus, s.Stat.Gw, s.Uplink),
+		map[string]interface{}{
+			"ip":            s.IP,
+			"bytes":         s.Bytes.Val,
+			"last_seen":     s.LastSeen.Val,
+			"license_state": s.LicenseState,
+			"guest-num_sta": s.GuestNumSta.Val,
+			"rx_bytes":      s.RxBytes.Val,
+			"tx_bytes":      s.TxBytes.Val,
+			"uptime":        s.Uptime.Val,
+			"state":         s.State.Val,
+			"user-num_sta":  s.UserNumSta.Val,
+			"version":       s.Version,
+			"num_desktop":   s.NumDesktop.Val,
+			"num_handheld":  s.NumHandheld.Val,
+			"num_mobile":    s.NumMobile.Val,
+		},
+	)
 	r.send(&metric{Table: "usg", Tags: tags, Fields: fields})
 	u.batchNetTable(r, tags, s.NetworkTable)
 	u.batchUSGwans(r, tags, s.Wan1, s.Wan2)
+
 	/*
 		for _, p := range s.PortTable {
 			t := map[string]string{
@@ -80,7 +73,22 @@ func (u *InfluxUnifi) batchUSG(r report, s *unifi.USG) {
 		}
 	*/
 }
-
+func (u *InfluxUnifi) batchUSGstat(ss unifi.SpeedtestStatus, gw *unifi.Gw, ul unifi.Uplink) map[string]interface{} {
+	return map[string]interface{}{
+		"uplink_latency":                 ul.Latency.Val,
+		"uplink_speed":                   ul.Speed.Val,
+		"speedtest-status_latency":       ss.Latency.Val,
+		"speedtest-status_runtime":       ss.Runtime.Val,
+		"speedtest-status_ping":          ss.StatusPing.Val,
+		"speedtest-status_xput_download": ss.XputDownload.Val,
+		"speedtest-status_xput_upload":   ss.XputUpload.Val,
+		"lan-rx_bytes":                   gw.LanRxBytes.Val,
+		"lan-rx_packets":                 gw.LanRxPackets.Val,
+		"lan-tx_bytes":                   gw.LanTxBytes.Val,
+		"lan-tx_packets":                 gw.LanTxPackets.Val,
+		"lan-rx_dropped":                 gw.LanRxDropped.Val,
+	}
+}
 func (u *InfluxUnifi) batchUSGwans(r report, tags map[string]string, wans ...unifi.Wan) {
 	for _, wan := range wans {
 		if !wan.Up.Val {

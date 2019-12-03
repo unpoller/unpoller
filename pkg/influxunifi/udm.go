@@ -48,31 +48,26 @@ func (u *InfluxUnifi) batchUDM(r report, s *unifi.UDM) {
 		"serial":    s.Serial,
 		"type":      s.Type,
 	}
-	fields := Combine(map[string]interface{}{
-		"ip":                             s.IP,
-		"bytes":                          s.Bytes.Val,
-		"last_seen":                      s.LastSeen.Val,
-		"license_state":                  s.LicenseState,
-		"guest-num_sta":                  s.GuestNumSta.Val,
-		"rx_bytes":                       s.RxBytes.Val,
-		"tx_bytes":                       s.TxBytes.Val,
-		"uptime":                         s.Uptime.Val,
-		"state":                          s.State.Val,
-		"user-num_sta":                   s.UserNumSta.Val,
-		"version":                        s.Version,
-		"num_desktop":                    s.NumDesktop.Val,
-		"num_handheld":                   s.NumHandheld.Val,
-		"num_mobile":                     s.NumMobile.Val,
-		"speedtest-status_latency":       s.SpeedtestStatus.Latency.Val,
-		"speedtest-status_runtime":       s.SpeedtestStatus.Runtime.Val,
-		"speedtest-status_ping":          s.SpeedtestStatus.StatusPing.Val,
-		"speedtest-status_xput_download": s.SpeedtestStatus.XputDownload.Val,
-		"speedtest-status_xput_upload":   s.SpeedtestStatus.XputUpload.Val,
-		"lan-rx_bytes":                   s.Stat.Gw.LanRxBytes.Val,
-		"lan-rx_packets":                 s.Stat.Gw.LanRxPackets.Val,
-		"lan-tx_bytes":                   s.Stat.Gw.LanTxBytes.Val,
-		"lan-tx_packets":                 s.Stat.Gw.LanTxPackets.Val,
-	}, u.batchSysStats(s.SysStats, s.SystemStats))
+	fields := Combine(
+		u.batchUSGstat(s.SpeedtestStatus, s.Stat.Gw, s.Uplink),
+		u.batchSysStats(s.SysStats, s.SystemStats),
+		map[string]interface{}{
+			"ip":            s.IP,
+			"bytes":         s.Bytes.Val,
+			"last_seen":     s.LastSeen.Val,
+			"license_state": s.LicenseState,
+			"guest-num_sta": s.GuestNumSta.Val,
+			"rx_bytes":      s.RxBytes.Val,
+			"tx_bytes":      s.TxBytes.Val,
+			"uptime":        s.Uptime.Val,
+			"state":         s.State.Val,
+			"user-num_sta":  s.UserNumSta.Val,
+			"version":       s.Version,
+			"num_desktop":   s.NumDesktop.Val,
+			"num_handheld":  s.NumHandheld.Val,
+			"num_mobile":    s.NumMobile.Val,
+		},
+	)
 	r.send(&metric{Table: "usg", Tags: tags, Fields: fields})
 	u.batchNetTable(r, tags, s.NetworkTable)
 	u.batchUSGwans(r, tags, s.Wan1, s.Wan2)
