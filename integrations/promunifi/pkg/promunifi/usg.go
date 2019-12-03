@@ -36,7 +36,7 @@ type usg struct {
 }
 
 func descUSG(ns string) *usg {
-	//	labels := []string{"ip", "version", "model", "serial", "type", "mac", "site_name", "name"}
+	//	labels := []string{"version", "model", "serial", "type", "mac", "site_name", "name"}
 	//	labelWan := append([]string{"port"}, labels[6:]...)
 	labels := []string{"port", "site_name", "name"}
 	return &usg{
@@ -71,11 +71,13 @@ func descUSG(ns string) *usg {
 }
 
 func (u *promUnifi) exportUSG(r report, d *unifi.USG) {
-	labels := []string{d.IP, d.Version, d.Model, d.Serial, d.Type, d.Mac, d.SiteName, d.Name}
+	labels := []string{d.Type, d.SiteName, d.Name}
+	infoLabels := []string{d.Version, d.Model, d.Serial, d.Mac}
 	labelsUser := append(labels, "user")
 	labelsGuest := append(labels, "guest")
 	// Gateway System Data.
 	r.send([]*metric{
+		{u.Device.Info, prometheus.GaugeValue, d.Uptime, append(labels, infoLabels...)},
 		{u.Device.Uptime, prometheus.GaugeValue, d.Uptime, labels},
 		{u.Device.TotalTxBytes, prometheus.CounterValue, d.TxBytes, labels},
 		{u.Device.TotalRxBytes, prometheus.CounterValue, d.RxBytes, labels},
@@ -99,8 +101,8 @@ func (u *promUnifi) exportUSG(r report, d *unifi.USG) {
 }
 
 func (u *promUnifi) exportUSGstats(r report, labels []string, gw *unifi.Gw, st unifi.SpeedtestStatus, ul unifi.Uplink) {
-	labelLan := []string{"lan", labels[6], labels[7]}
-	labelWan := []string{"all", labels[6], labels[7]}
+	labelLan := []string{"lan", labels[1], labels[2]}
+	labelWan := []string{"all", labels[1], labels[2]}
 	r.send([]*metric{
 		/* // Combined Port Stats - not really needed. sum() the others instead.
 		{u.USG.WanRxPackets, prometheus.CounterValue, gw.WanRxPackets, labelWan},
@@ -130,7 +132,7 @@ func (u *promUnifi) exportWANPorts(r report, labels []string, wans ...unifi.Wan)
 		if !wan.Up.Val {
 			continue // only record UP interfaces.
 		}
-		labelWan := []string{wan.Name, labels[6], labels[7]}
+		labelWan := []string{wan.Name, labels[1], labels[2]}
 		r.send([]*metric{
 			{u.USG.WanRxPackets, prometheus.CounterValue, wan.RxPackets, labelWan},
 			{u.USG.WanRxBytes, prometheus.CounterValue, wan.RxBytes, labelWan},
