@@ -112,6 +112,10 @@ type UDM struct {
 	TxBytes         FlexInt `json:"tx_bytes"`
 	RxBytes         FlexInt `json:"rx_bytes"`
 	Bytes           FlexInt `json:"bytes"`
+	BytesD          FlexInt `json:"bytes-d"`
+	TxBytesD        FlexInt `json:"tx_bytes-d"`
+	RxBytesD        FlexInt `json:"rx_bytes-d"`
+	BytesR          FlexInt `json:"bytes-r"`
 	NumSta          FlexInt `json:"num_sta"`            // USG
 	WlanNumSta      FlexInt `json:"wlan-num_sta"`       // UAP
 	LanNumSta       FlexInt `json:"lan-num_sta"`        // USW

@@ -15,6 +15,7 @@ import (
 	"net/http"
 	"net/http/cookiejar"
 	"strings"
+	"time"
 )
 
 // NewUnifi creates a http.Client with authenticated cookies.
@@ -79,13 +80,15 @@ func (u *Unifi) GetServerData() error {
 	return u.GetData(StatusPath, &response)
 }
 
-// GetData makes a unifi request and unmarshal the response into a provided pointer.
-func (u *Unifi) GetData(methodPath string, v interface{}) error {
-	body, err := u.GetJSON(methodPath)
+// GetData makes a unifi request and unmarshals the response into a provided pointer.
+func (u *Unifi) GetData(apiPath string, v interface{}) error {
+	start := time.Now()
+	body, err := u.GetJSON(apiPath)
+	dur := time.Since(start)
 	if err != nil {
 		return err
 	}
-	u.DebugLog("Unmarshaling %s (bytes: %d)", methodPath, len(body))
+	u.DebugLog("Requested %s: elapsed %v, returned %d bytes", apiPath, dur.Round(time.Millisecond), len(body))
 	return json.Unmarshal(body, v)
 }
 
@@ -94,17 +97,17 @@ func (u *Unifi) GetData(methodPath string, v interface{}) error {
 // And if you're doing that... sumbut a pull request with your new struct. :)
 // This is a helper method that is exposed for convenience.
 func (u *Unifi) UniReq(apiPath string, params string) (req *http.Request, err error) {
-	path := u.URL + apiPath
-	switch {
-	case params == "":
-		req, err = http.NewRequest("GET", path, nil)
+	switch params {
+	case "":
+		req, err = http.NewRequest("GET", u.URL+apiPath, nil)
 	default:
-		req, err = http.NewRequest("POST", path, bytes.NewBufferString(params))
+		req, err = http.NewRequest("POST", u.URL+apiPath, bytes.NewBufferString(params))
 	}
-	if err == nil {
-		req.Header.Add("Accept", "application/json")
+	if err != nil {
+		return
 	}
-	u.DebugLog("Downloading %s (params: %v, error: %v)", path, params != "", err != nil)
+	req.Header.Add("Accept", "application/json")
+	u.DebugLog("Requesting %s, with params: %v", apiPath, params != "")
 	return
 }
 
