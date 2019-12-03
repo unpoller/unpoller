@@ -72,7 +72,7 @@ deploy:
     on:
       tags: true
   - provider: script
-    script: scripts/package-deploy.sh
+    script: rvm 2.0.0 do scripts/package-deploy.sh
     skip_cleanup: true
     on:
       all_branches: true
