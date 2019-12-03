@@ -35,7 +35,7 @@ func descDevice(ns string) *unifiDevice {
 	infoLabels := []string{"version", "model", "serial", "mac", "ip", "id", "bytes", "uptime"}
 	return &unifiDevice{
 		Info:          prometheus.NewDesc(ns+"info", "Device Information", append(labels, infoLabels...), nil),
-		Uptime:        prometheus.NewDesc(ns+"uptime", "Device Uptime", labels, nil),
+		Uptime:        prometheus.NewDesc(ns+"uptime_seconds", "Device Uptime", labels, nil),
 		Temperature:   prometheus.NewDesc(ns+"temperature_celsius", "Temperature", labels, nil),
 		TotalMaxPower: prometheus.NewDesc(ns+"max_power_total", "Total Max Power", labels, nil),
 		FanLevel:      prometheus.NewDesc(ns+"fan_level", "Fan Level", labels, nil),
