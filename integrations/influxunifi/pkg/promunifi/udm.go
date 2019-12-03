@@ -16,13 +16,9 @@ type unifiDevice struct {
 	TotalBytes    *prometheus.Desc
 	BytesR        *prometheus.Desc // ap only
 	BytesD        *prometheus.Desc // ap only
-	Bytes         *prometheus.Desc // ap only
 	TxBytesD      *prometheus.Desc // ap only
 	RxBytesD      *prometheus.Desc // ap only
 	Counter       *prometheus.Desc
-	NumDesktop    *prometheus.Desc // gw only
-	NumMobile     *prometheus.Desc // gw only
-	NumHandheld   *prometheus.Desc // gw only
 	Loadavg1      *prometheus.Desc
 	Loadavg5      *prometheus.Desc
 	Loadavg15     *prometheus.Desc
@@ -46,7 +42,6 @@ func descDevice(ns string) *unifiDevice {
 		TotalBytes:    prometheus.NewDesc(ns+"bytes_total", "Total Bytes Transferred", labels, nil),
 		BytesR:        prometheus.NewDesc(ns+"rate_bytes", "Transfer Rate", labels, nil),
 		BytesD:        prometheus.NewDesc(ns+"d_bytes", "Total Bytes D???", labels, nil),
-		Bytes:         prometheus.NewDesc(ns+"transferred_bytes_total", "Bytes Transferred", labels, nil),
 		TxBytesD:      prometheus.NewDesc(ns+"d_tranmsit_bytes", "Transmit Bytes D???", labels, nil),
 		RxBytesD:      prometheus.NewDesc(ns+"d_receive_bytes", "Receive Bytes D???", labels, nil),
 		Counter:       prometheus.NewDesc(ns+"stations", "Number of Stations", append(labels, "station_type"), nil),
@@ -65,37 +60,61 @@ func descDevice(ns string) *unifiDevice {
 func (u *promUnifi) exportUDM(r report, d *unifi.UDM) {
 	labels := []string{d.Type, d.SiteName, d.Name}
 	infoLabels := []string{d.Version, d.Model, d.Serial, d.Mac, d.IP, d.ID, d.Bytes.Txt}
-	// Dream Machine System Data.
-	r.send([]*metric{
-		{u.Device.Info, prometheus.GaugeValue, d.Uptime, append(labels, infoLabels...)},
-		{u.Device.TotalTxBytes, prometheus.CounterValue, d.TxBytes, labels},
-		{u.Device.TotalRxBytes, prometheus.CounterValue, d.RxBytes, labels},
-		{u.Device.TotalBytes, prometheus.CounterValue, d.Bytes, labels},
-		{u.Device.Counter, prometheus.GaugeValue, d.UserNumSta, append(labels, "user")},
-		{u.Device.Counter, prometheus.GaugeValue, d.GuestNumSta, append(labels, "guest")},
-		{u.Device.Counter, prometheus.GaugeValue, d.NumDesktop, append(labels, "desktop")},
-		{u.Device.Counter, prometheus.GaugeValue, d.NumMobile, append(labels, "mobile")},
-		{u.Device.Counter, prometheus.GaugeValue, d.NumHandheld, append(labels, "handheld")},
-		{u.Device.Loadavg1, prometheus.GaugeValue, d.SysStats.Loadavg1, labels},
-		{u.Device.Loadavg5, prometheus.GaugeValue, d.SysStats.Loadavg5, labels},
-		{u.Device.Loadavg15, prometheus.GaugeValue, d.SysStats.Loadavg15, labels},
-		{u.Device.MemUsed, prometheus.GaugeValue, d.SysStats.MemUsed, labels},
-		{u.Device.MemTotal, prometheus.GaugeValue, d.SysStats.MemTotal, labels},
-		{u.Device.MemBuffer, prometheus.GaugeValue, d.SysStats.MemBuffer, labels},
-		{u.Device.CPU, prometheus.GaugeValue, d.SystemStats.CPU.Val / 100.0, labels},
-		{u.Device.Mem, prometheus.GaugeValue, d.SystemStats.Mem.Val / 100.0, labels},
-	})
-
+	// Shared data (all devices do this).
+	u.exportBYTstats(r, labels, d.TxBytes, d.RxBytes)
+	u.exportSYSstats(r, labels, d.SysStats, d.SystemStats)
+	u.exportSTAcount(r, labels, d.UserNumSta, d.GuestNumSta, d.NumDesktop, d.NumMobile, d.NumHandheld)
 	// Switch Data
 	u.exportUSWstats(r, labels, d.Stat.Sw)
-	u.exportPortTable(r, labels, d.PortTable)
+	u.exportPRTtable(r, labels, d.PortTable)
 	// Gateway Data
-	u.exportUSGstats(r, labels, d.Stat.Gw, d.SpeedtestStatus, d.Uplink)
 	u.exportWANPorts(r, labels, d.Wan1, d.Wan2)
+	u.exportUSGstats(r, labels, d.Stat.Gw, d.SpeedtestStatus, d.Uplink)
+	// Dream Machine System Data.
+	r.sendone(u.Device.Info, gauge, d.Uptime, append(labels, infoLabels...))
 	// Wireless Data - UDM (non-pro) only
 	if d.Stat.Ap != nil && d.VapTable != nil {
 		u.exportUAPstats(r, labels, d.Stat.Ap)
+		//		u.exportUAPstats(r, labels, d.Stat.Ap, d.BytesD, d.TxBytesD, d.RxBytesD, d.BytesR)
 		u.exportVAPtable(r, labels, *d.VapTable)
-		u.exportRadtable(r, labels, *d.RadioTable, *d.RadioTableStats)
+		u.exportRADtable(r, labels, *d.RadioTable, *d.RadioTableStats)
 	}
+}
+
+// shared by all
+func (u *promUnifi) exportBYTstats(r report, labels []string, tx, rx unifi.FlexInt) {
+	r.send([]*metric{
+		{u.Device.TotalTxBytes, counter, tx, labels},
+		{u.Device.TotalRxBytes, counter, rx, labels},
+		{u.Device.TotalBytes, counter, tx.Val + rx.Val, labels},
+	})
+}
+
+// shared by all
+func (u *promUnifi) exportSTAcount(r report, labels []string, stas ...unifi.FlexInt) {
+	r.send([]*metric{
+		{u.Device.Counter, gauge, stas[0], append(labels, "user")},
+		{u.Device.Counter, gauge, stas[1], append(labels, "guest")},
+	})
+	if len(stas) > 2 {
+		r.send([]*metric{
+			{u.Device.Counter, gauge, stas[2], append(labels, "desktop")},
+			{u.Device.Counter, gauge, stas[3], append(labels, "mobile")},
+			{u.Device.Counter, gauge, stas[4], append(labels, "handheld")},
+		})
+	}
+}
+
+// shared by all
+func (u *promUnifi) exportSYSstats(r report, labels []string, s unifi.SysStats, ss unifi.SystemStats) {
+	r.send([]*metric{
+		{u.Device.Loadavg1, gauge, s.Loadavg1, labels},
+		{u.Device.Loadavg5, gauge, s.Loadavg5, labels},
+		{u.Device.Loadavg15, gauge, s.Loadavg15, labels},
+		{u.Device.MemUsed, gauge, s.MemUsed, labels},
+		{u.Device.MemTotal, gauge, s.MemTotal, labels},
+		{u.Device.MemBuffer, gauge, s.MemBuffer, labels},
+		{u.Device.CPU, gauge, ss.CPU.Val / 100.0, labels},
+		{u.Device.Mem, gauge, ss.Mem.Val / 100.0, labels},
+	})
 }
