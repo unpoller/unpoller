@@ -3,8 +3,8 @@
 # Deploy our built packages to packagecloud.
 
 REPO=dev
-[ "$SOURCE_BRANCH" != "master" ] || REPO=big
-echo "deploy source branch: $SOURCE_BRANCH"
+[ "$TRAVIS_BRANCH" != "$TRAVIS_TAG" ] || REPO=big
+echo "deploying packages from branch: $SOURCE_BRANCH, tag: $TRAVIS_TAG to repo: $REPO"
 
 source .metadata.sh
 # deb
