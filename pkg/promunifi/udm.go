@@ -79,8 +79,7 @@ func (u *promUnifi) exportUDM(r report, d *unifi.UDM) {
 	})
 	// Wireless Data - UDM (non-pro) only
 	if d.Stat.Ap != nil && d.VapTable != nil {
-		u.exportUAPstats(r, labels, d.Stat.Ap)
-		//		u.exportUAPstats(r, labels, d.Stat.Ap, d.BytesD, d.TxBytesD, d.RxBytesD, d.BytesR)
+		u.exportUAPstats(r, labels, d.Stat.Ap, d.BytesD, d.TxBytesD, d.RxBytesD, d.BytesR)
 		u.exportVAPtable(r, labels, *d.VapTable)
 		u.exportRADtable(r, labels, *d.RadioTable, *d.RadioTableStats)
 	}

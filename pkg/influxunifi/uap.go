@@ -99,7 +99,7 @@ func (u *InfluxUnifi) processVAPTable(r report, t map[string]string, vt unifi.Va
 			"satisfaction":              s.Satisfaction.Val,
 			"satisfaction_now":          s.SatisfactionNow.Val,
 			"num_sta":                   s.NumSta,
-			"channel":                   s.Channel,
+			"channel":                   s.Channel.Val,
 			"rx_bytes":                  s.RxBytes.Val,
 			"rx_crypts":                 s.RxCrypts.Val,
 			"rx_dropped":                s.RxDropped.Val,
