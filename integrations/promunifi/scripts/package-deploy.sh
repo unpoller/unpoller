@@ -4,7 +4,7 @@
 
 REPO=dev
 [ "$TRAVIS_BRANCH" != "$TRAVIS_TAG" ] || REPO=big
-echo "deploying packages from branch: $SOURCE_BRANCH, tag: $TRAVIS_TAG to repo: $REPO"
+echo "deploying packages from branch: $TRAVIS_BRANCH, tag: $TRAVIS_TAG to repo: $REPO"
 
 source .metadata.sh
 # deb
