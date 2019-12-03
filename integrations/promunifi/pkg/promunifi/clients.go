@@ -115,7 +115,7 @@ func (u *promUnifi) exportClient(r report, c *unifi.Client) {
 			{u.Client.BytesR, gauge, c.BytesR, labelW},
 		})
 	}
-	r.sendone(u.Client.Info, gauge, c.Uptime, labelW)
+	r.send([]*metric{{u.Client.Info, gauge, c.Uptime, labelW}})
 	/* needs more "looking into"
 	{u.Client.DpiStatsApp, gauge, c.DpiStats.App, labels},
 	{u.Client.DpiStatsCat, gauge, c.DpiStats.Cat, labels},

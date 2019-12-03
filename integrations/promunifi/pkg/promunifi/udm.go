@@ -7,7 +7,8 @@ import (
 
 // These are shared by all four device types: UDM, UAP, USG, USW
 type unifiDevice struct {
-	Info          *prometheus.Desc // uptime
+	Info          *prometheus.Desc
+	Uptime        *prometheus.Desc
 	Temperature   *prometheus.Desc // sw only
 	TotalMaxPower *prometheus.Desc // sw only
 	FanLevel      *prometheus.Desc // sw only
@@ -34,6 +35,7 @@ func descDevice(ns string) *unifiDevice {
 	infoLabels := []string{"version", "model", "serial", "mac", "ip", "id", "bytes", "uptime"}
 	return &unifiDevice{
 		Info:          prometheus.NewDesc(ns+"info", "Device Information", append(labels, infoLabels...), nil),
+		Uptime:        prometheus.NewDesc(ns+"uptime", "Device Uptime", labels, nil),
 		Temperature:   prometheus.NewDesc(ns+"temperature_celsius", "Temperature", labels, nil),
 		TotalMaxPower: prometheus.NewDesc(ns+"max_power_total", "Total Max Power", labels, nil),
 		FanLevel:      prometheus.NewDesc(ns+"fan_level", "Fan Level", labels, nil),
@@ -71,7 +73,10 @@ func (u *promUnifi) exportUDM(r report, d *unifi.UDM) {
 	u.exportWANPorts(r, labels, d.Wan1, d.Wan2)
 	u.exportUSGstats(r, labels, d.Stat.Gw, d.SpeedtestStatus, d.Uplink)
 	// Dream Machine System Data.
-	r.sendone(u.Device.Info, gauge, 1.0, append(labels, infoLabels...))
+	r.send([]*metric{
+		{u.Device.Info, gauge, 1.0, append(labels, infoLabels...)},
+		{u.Device.Uptime, gauge, d.Uptime, labels},
+	})
 	// Wireless Data - UDM (non-pro) only
 	if d.Stat.Ap != nil && d.VapTable != nil {
 		u.exportUAPstats(r, labels, d.Stat.Ap)

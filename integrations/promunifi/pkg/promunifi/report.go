@@ -16,7 +16,6 @@ type report interface {
 	add()
 	done()
 	send([]*metric)
-	sendone(*prometheus.Desc, prometheus.ValueType, interface{}, []string)
 	metrics() *metrics.Metrics
 	report(descs map[*prometheus.Desc]bool)
 	export(m *metric, v float64) prometheus.Metric
@@ -32,11 +31,6 @@ func (r *Report) add() {
 
 func (r *Report) done() {
 	r.wg.Add(-one)
-}
-
-func (r *Report) sendone(desc *prometheus.Desc, valType prometheus.ValueType, val interface{}, labels []string) {
-	r.wg.Add(one)
-	r.ch <- []*metric{{desc, valType, val, labels}}
 }
 
 func (r *Report) send(m []*metric) {

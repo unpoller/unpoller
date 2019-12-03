@@ -167,7 +167,10 @@ func (u *promUnifi) exportUAP(r report, d *unifi.UAP) {
 	u.exportSYSstats(r, labels, d.SysStats, d.SystemStats)
 	u.exportSTAcount(r, labels, d.UserNumSta, d.GuestNumSta)
 	u.exportRADtable(r, labels, d.RadioTable, d.RadioTableStats)
-	r.sendone(u.Device.Info, gauge, 1.0, append(labels, infoLabels...))
+	r.send([]*metric{
+		{u.Device.Info, gauge, 1.0, append(labels, infoLabels...)},
+		{u.Device.Uptime, gauge, d.Uptime, labels},
+	})
 }
 
 // udm doesn't have these stats exposed yet, so pass 2 or 6 metrics.

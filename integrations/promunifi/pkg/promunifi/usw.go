@@ -98,16 +98,19 @@ func (u *promUnifi) exportUSW(r report, d *unifi.USW) {
 	u.exportBYTstats(r, labels, d.TxBytes, d.RxBytes)
 	u.exportSYSstats(r, labels, d.SysStats, d.SystemStats)
 	u.exportSTAcount(r, labels, d.UserNumSta, d.GuestNumSta)
-	r.sendone(u.Device.Info, gauge, 1.0, append(labels, infoLabels...))
+	r.send([]*metric{
+		{u.Device.Info, gauge, 1.0, append(labels, infoLabels...)},
+		{u.Device.Uptime, gauge, d.Uptime, labels},
+	})
 	// Switch System Data.
 	if d.HasTemperature.Val {
-		r.sendone(u.Device.Temperature, gauge, d.GeneralTemperature, labels)
+		r.send([]*metric{{u.Device.Temperature, gauge, d.GeneralTemperature, labels}})
 	}
 	if d.HasFan.Val {
-		r.sendone(u.Device.FanLevel, gauge, d.FanLevel, labels)
+		r.send([]*metric{{u.Device.FanLevel, gauge, d.FanLevel, labels}})
 	}
 	if d.TotalMaxPower.Txt != "" {
-		r.sendone(u.Device.TotalMaxPower, gauge, d.TotalMaxPower, labels)
+		r.send([]*metric{{u.Device.TotalMaxPower, gauge, d.TotalMaxPower, labels}})
 	}
 }
 
