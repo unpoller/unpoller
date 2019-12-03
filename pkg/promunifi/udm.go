@@ -90,7 +90,7 @@ func (u *promUnifi) exportBYTstats(r report, labels []string, tx, rx unifi.FlexI
 	})
 }
 
-// shared by all
+// shared by all, pass 2 or 5 stats.
 func (u *promUnifi) exportSTAcount(r report, labels []string, stas ...unifi.FlexInt) {
 	r.send([]*metric{
 		{u.Device.Counter, gauge, stas[0], append(labels, "user")},

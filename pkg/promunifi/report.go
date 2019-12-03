@@ -18,7 +18,6 @@ type report interface {
 	send([]*metric)
 	sendone(*prometheus.Desc, prometheus.ValueType, interface{}, []string)
 	metrics() *metrics.Metrics
-	channel() chan []*metric
 	report(descs map[*prometheus.Desc]bool)
 	export(m *metric, v float64) prometheus.Metric
 	error(ch chan<- prometheus.Metric, d *prometheus.Desc, v interface{})
@@ -35,9 +34,9 @@ func (r *Report) done() {
 	r.wg.Add(-one)
 }
 
-func (r *Report) sendone(d *prometheus.Desc, tv prometheus.ValueType, i interface{}, s []string) {
+func (r *Report) sendone(desc *prometheus.Desc, valType prometheus.ValueType, val interface{}, labels []string) {
 	r.wg.Add(one)
-	r.ch <- []*metric{{d, tv, i, s}}
+	r.ch <- []*metric{{desc, valType, val, labels}}
 }
 
 func (r *Report) send(m []*metric) {
@@ -47,10 +46,6 @@ func (r *Report) send(m []*metric) {
 
 func (r *Report) metrics() *metrics.Metrics {
 	return r.Metrics
-}
-
-func (r *Report) channel() chan []*metric {
-	return r.ch
 }
 
 func (r *Report) report(descs map[*prometheus.Desc]bool) {
