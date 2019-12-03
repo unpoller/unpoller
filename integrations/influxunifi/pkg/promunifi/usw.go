@@ -47,8 +47,7 @@ type usw struct {
 
 func descUSW(ns string) *usw {
 	pns := ns + "port_"
-	// labels := []string{"ip", "version", "model", "serial", "type", "mac", "site_name", "name"}
-	labelS := []string{"site_name", "name"} // labels[6:]
+	labelS := []string{"site_name", "name"}
 	labelP := []string{"port_id", "port_num", "port_name", "port_mac", "port_ip", "site_name", "name"}
 	return &usw{
 		SwRxPackets:   prometheus.NewDesc(ns+"switch_receive_packets_total", "Switch Packets Received Total", labelS, nil),
@@ -91,7 +90,8 @@ func descUSW(ns string) *usw {
 }
 
 func (u *promUnifi) exportUSW(r report, d *unifi.USW) {
-	labels := []string{d.IP, d.Version, d.Model, d.Serial, d.Type, d.Mac, d.SiteName, d.Name}
+	labels := []string{d.Type, d.SiteName, d.Name}
+	infoLabels := []string{d.Version, d.Model, d.Serial, d.Mac, d.IP, d.ID, d.Bytes.Txt}
 	labelsGuest := append(labels, "guest")
 	labelsUser := append(labels, "user")
 	if d.HasTemperature.Val {
@@ -103,28 +103,28 @@ func (u *promUnifi) exportUSW(r report, d *unifi.USW) {
 
 	// Switch System Data.
 	r.send([]*metric{
-		{u.Device.Uptime, prometheus.GaugeValue, d.Uptime, labels},
+		{u.Device.Info, prometheus.GaugeValue, d.Uptime, append(labels, infoLabels...)},
 		{u.Device.TotalMaxPower, prometheus.GaugeValue, d.TotalMaxPower, labels},
 		{u.Device.TotalTxBytes, prometheus.CounterValue, d.TxBytes, labels},
 		{u.Device.TotalRxBytes, prometheus.CounterValue, d.RxBytes, labels},
 		{u.Device.TotalBytes, prometheus.CounterValue, d.Bytes, labels},
-		{u.Device.NumSta, prometheus.GaugeValue, d.UserNumSta, labelsUser},
-		{u.Device.NumSta, prometheus.GaugeValue, d.GuestNumSta, labelsGuest},
+		{u.Device.Counter, prometheus.GaugeValue, d.UserNumSta, labelsUser},
+		{u.Device.Counter, prometheus.GaugeValue, d.GuestNumSta, labelsGuest},
 		{u.Device.Loadavg1, prometheus.GaugeValue, d.SysStats.Loadavg1, labels},
 		{u.Device.Loadavg5, prometheus.GaugeValue, d.SysStats.Loadavg5, labels},
 		{u.Device.Loadavg15, prometheus.GaugeValue, d.SysStats.Loadavg15, labels},
 		{u.Device.MemUsed, prometheus.GaugeValue, d.SysStats.MemUsed, labels},
 		{u.Device.MemTotal, prometheus.GaugeValue, d.SysStats.MemTotal, labels},
 		{u.Device.MemBuffer, prometheus.GaugeValue, d.SysStats.MemBuffer, labels},
-		{u.Device.CPU, prometheus.GaugeValue, d.SystemStats.CPU, labels},
-		{u.Device.Mem, prometheus.GaugeValue, d.SystemStats.Mem, labels},
+		{u.Device.CPU, prometheus.GaugeValue, d.SystemStats.CPU.Val / 100.0, labels},
+		{u.Device.Mem, prometheus.GaugeValue, d.SystemStats.Mem.Val / 100.0, labels},
 	})
 	u.exportPortTable(r, labels, d.PortTable)
 	u.exportUSWstats(r, labels, d.Stat.Sw)
 }
 
 func (u *promUnifi) exportUSWstats(r report, labels []string, sw *unifi.Sw) {
-	labelS := labels[6:]
+	labelS := labels[1:]
 	r.send([]*metric{
 		{u.USW.SwRxPackets, prometheus.CounterValue, sw.RxPackets, labelS},
 		{u.USW.SwRxBytes, prometheus.CounterValue, sw.RxBytes, labelS},
@@ -152,7 +152,7 @@ func (u *promUnifi) exportPortTable(r report, labels []string, pt []unifi.Port) 
 			continue
 		}
 		// Copy labels, and add four new ones.
-		labelP := []string{labels[7] + " Port " + p.PortIdx.Txt, p.PortIdx.Txt, p.Name, p.Mac, p.IP, labels[6], labels[7]}
+		labelP := []string{labels[2] + " Port " + p.PortIdx.Txt, p.PortIdx.Txt, p.Name, p.Mac, p.IP, labels[1], labels[2]}
 		if p.PoeEnable.Val && p.PortPoe.Val {
 			r.send([]*metric{
 				{u.USW.PoeCurrent, prometheus.GaugeValue, p.PoeCurrent, labelP},
