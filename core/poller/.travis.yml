@@ -31,10 +31,12 @@ before_script:
   # Create your own deploy key, tar it, and encrypt the file to make this work. Optionally add a bitly_token file to the archive.
   - openssl aes-256-cbc -K $encrypted_9f3147001275_key -iv $encrypted_9f3147001275_iv -in .secret-files.tar.enc -out .secret-files.tar -d
   - tar -xf .secret-files.tar
+  - gpg --import gpg.signing.key
+  - rm -f gpg.signing.key .secret-files.tar
+  - echo "%no-protection" > ~/.rpmmacros
   - source .metadata.sh
   - make vendor
 script:
-  - gpg --import gpg.signing.key
   # Test Go and Docker.
   - make test
   - make docker
