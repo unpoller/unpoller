@@ -40,10 +40,10 @@ before_script:
   - make vendor
 script:
   # Test Go and Docker.
-  - make test
-  - make docker
+#  - make test
+#  - make docker
   # Test built docker image.
-  - docker run $BINARY -v 2>&1 | grep -Eq "^$BINARY v$VERSION"
+#  - docker run $BINARY -v 2>&1 | grep -Eq "^$BINARY v$VERSION"
   # Build everything
   - rvm 2.0.0 do make release
 after_success:
