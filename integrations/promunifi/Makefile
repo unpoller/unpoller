@@ -132,7 +132,7 @@ rpm: $(BINARY)-$(RPMVERSION)-$(ITERATION).x86_64.rpm
 $(BINARY)-$(RPMVERSION)-$(ITERATION).x86_64.rpm: package_build_linux check_fpm
 	@echo "Building 'rpm' package for $(BINARY) version '$(RPMVERSION)-$(ITERATION)'."
 	fpm -s dir -t rpm $(PACKAGE_ARGS) -a x86_64 -v $(RPMVERSION) -C $<
-	[ "$(SIGNING_KEY)" == "" ] || rpmsign --key-id=$(SIGNING_KEY) --addsign $(BINARY)-$(RPMVERSION)-$(ITERATION).x86_64.rpm
+	[ "$(SIGNING_KEY)" == "" ] || echo "n" | rpmsign --key-id=$(SIGNING_KEY) --addsign $(BINARY)-$(RPMVERSION)-$(ITERATION).x86_64.rpm
 
 deb: $(BINARY)_$(VERSION)-$(ITERATION)_amd64.deb
 $(BINARY)_$(VERSION)-$(ITERATION)_amd64.deb: package_build_linux check_fpm
@@ -144,7 +144,7 @@ rpm386: $(BINARY)-$(RPMVERSION)-$(ITERATION).i386.rpm
 $(BINARY)-$(RPMVERSION)-$(ITERATION).i386.rpm: package_build_linux_386 check_fpm
 	@echo "Building 32-bit 'rpm' package for $(BINARY) version '$(RPMVERSION)-$(ITERATION)'."
 	fpm -s dir -t rpm $(PACKAGE_ARGS) -a i386 -v $(RPMVERSION) -C $<
-	[ "$(SIGNING_KEY)" == "" ] || rpmsign --key-id=$(SIGNING_KEY) --addsign $(BINARY)-$(RPMVERSION)-$(ITERATION).i386.rpm
+	[ "$(SIGNING_KEY)" == "" ] || echo "n" | rpmsign --key-id=$(SIGNING_KEY) --addsign $(BINARY)-$(RPMVERSION)-$(ITERATION).i386.rpm
 
 deb386: $(BINARY)_$(VERSION)-$(ITERATION)_i386.deb
 $(BINARY)_$(VERSION)-$(ITERATION)_i386.deb: package_build_linux_386 check_fpm
@@ -156,7 +156,7 @@ rpmarm: $(BINARY)-$(RPMVERSION)-$(ITERATION).arm64.rpm
 $(BINARY)-$(RPMVERSION)-$(ITERATION).arm64.rpm: package_build_linux_arm64 check_fpm
 	@echo "Building 64-bit ARM8 'rpm' package for $(BINARY) version '$(RPMVERSION)-$(ITERATION)'."
 	fpm -s dir -t rpm $(PACKAGE_ARGS) -a arm64 -v $(RPMVERSION) -C $<
-	[ "$(SIGNING_KEY)" == "" ] || rpmsign --key-id=$(SIGNING_KEY) --addsign $(BINARY)-$(RPMVERSION)-$(ITERATION).arm64.rpm
+	[ "$(SIGNING_KEY)" == "" ] || echo "n" | rpmsign --key-id=$(SIGNING_KEY) --addsign $(BINARY)-$(RPMVERSION)-$(ITERATION).arm64.rpm
 
 debarm: $(BINARY)_$(VERSION)-$(ITERATION)_arm64.deb
 $(BINARY)_$(VERSION)-$(ITERATION)_arm64.deb: package_build_linux_arm64 check_fpm
@@ -168,7 +168,7 @@ rpmarmhf: $(BINARY)-$(RPMVERSION)-$(ITERATION).armhf.rpm
 $(BINARY)-$(RPMVERSION)-$(ITERATION).armhf.rpm: package_build_linux_armhf check_fpm
 	@echo "Building 32-bit ARM6/7 HF 'rpm' package for $(BINARY) version '$(RPMVERSION)-$(ITERATION)'."
 	fpm -s dir -t rpm $(PACKAGE_ARGS) -a armhf -v $(RPMVERSION) -C $<
-	[ "$(SIGNING_KEY)" == "" ] || rpmsign --key-id=$(SIGNING_KEY) --addsign $(BINARY)-$(RPMVERSION)-$(ITERATION).armhf.rpm
+	[ "$(SIGNING_KEY)" == "" ] || echo "n" | rpmsign --key-id=$(SIGNING_KEY) --addsign $(BINARY)-$(RPMVERSION)-$(ITERATION).armhf.rpm
 
 debarmhf: $(BINARY)_$(VERSION)-$(ITERATION)_armhf.deb
 $(BINARY)_$(VERSION)-$(ITERATION)_armhf.deb: package_build_linux_armhf check_fpm
