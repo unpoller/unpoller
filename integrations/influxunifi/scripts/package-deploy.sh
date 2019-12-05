@@ -8,7 +8,7 @@ echo "deploying packages from branch: $TRAVIS_BRANCH, tag: $TRAVIS_TAG to repo: 
 
 source .metadata.sh
 # deb
-cmd="package_cloud push golift/${REPO}/debian/trusty"
+cmd="package_cloud push golift/${REPO}/ubuntu/bionic"
 $cmd release/unifi-poller_${VERSION}-${ITERATION}_arm64.deb
 $cmd release/unifi-poller_${VERSION}-${ITERATION}_amd64.deb
 $cmd release/unifi-poller_${VERSION}-${ITERATION}_armhf.deb
