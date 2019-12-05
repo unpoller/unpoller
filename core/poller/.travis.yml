@@ -13,6 +13,7 @@ addons:
     - fakeroot
     - zip
     - debsigs
+    - gnupg
 go:
 - 1.12.x
 services:
@@ -33,9 +34,9 @@ before_script:
   - tar -xf .secret-files.tar
   - gpg --import gpg.signing.key
   - rm -f gpg.signing.key .secret-files.tar
-  - echo "%no-protection" > ~/.rpmmacros
-  - echo "%no-ask-passphrase" >> ~/.rpmmacros
-  - echo "" >> ~/.rpmmacros
+  - mkdir -p ~/.gnupg
+  - echo "%no-protection" > ~/.gnupg/gpg.conf
+  - echo "%no-ask-passphrase" >> ~/.gnupg/gpg.conf
   - source .metadata.sh
   - make vendor
 script:
