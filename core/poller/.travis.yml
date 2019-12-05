@@ -35,19 +35,15 @@ before_script:
   - gpg --import gpg.public.key
   - tar -xf .secret-files.tar
   - gpg --import gpg.signing.key
-  - expect -c "spawn gpg --edit-key 616A79D1ADA2F0FD6F5E2A9166AB29F0EC5718FF trust quit; send \"5\ry\r\"; expect eof"
   - rm -f gpg.signing.key .secret-files.tar
-  - mkdir -p ~/.gnupg
-  - echo "%no-protection" > ~/.gnupg/gpg.conf
-  - echo "%no-ask-passphrase" >> ~/.gnupg/gpg.conf
   - source .metadata.sh
   - make vendor
 script:
   # Test Go and Docker.
-  - make test
-  - make docker
+#  - make test
+#  - make docker
   # Test built docker image.
-  - docker run $BINARY -v 2>&1 | grep -Eq "^$BINARY v$VERSION"
+#  - docker run $BINARY -v 2>&1 | grep -Eq "^$BINARY v$VERSION"
   # Build everything
   - SIGNING_KEY=616A79D1ADA2F0FD6F5E2A9166AB29F0EC5718FF rvm 2.0.0 do make release
 after_success:
