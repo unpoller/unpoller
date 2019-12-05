@@ -12,6 +12,8 @@ addons:
     - libgnome-keyring-dev
     - fakeroot
     - zip
+    - debsigs
+    - gpg
 go:
 - 1.12.x
 services:
@@ -28,18 +30,19 @@ install:
   - rvm 2.0.0 do gem install --no-document fpm
 before_script:
   # Create your own deploy key, tar it, and encrypt the file to make this work. Optionally add a bitly_token file to the archive.
-  - openssl aes-256-cbc -K $encrypted_e3d3b4b2abab_key -iv $encrypted_e3d3b4b2abab_iv -in .secret-files.tar.enc -out .secret-files.tar -d
+  - openssl aes-256-cbc -K $encrypted_9f3147001275_key -iv $encrypted_9f3147001275_iv -in .secret-files.tar.enc -out .secret-files.tar -d
   - tar -xf .secret-files.tar
   - source .metadata.sh
   - make vendor
 script:
+  - gpg --import gpg.signing.key
   # Test Go and Docker.
   - make test
   - make docker
   # Test built docker image.
   - docker run $BINARY -v 2>&1 | grep -Eq "^$BINARY v$VERSION"
   # Build everything
-  - rvm 2.0.0 do make release
+  - rvm 2.0.0 do SIGNING_KEY=616A79D1ADA2F0FD6F5E2A9166AB29F0EC5718FF make release
 after_success:
   # Display Release Folder
   - ls -l release/
