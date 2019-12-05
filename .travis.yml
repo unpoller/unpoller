@@ -13,7 +13,6 @@ addons:
     - fakeroot
     - zip
     - debsigs
-    - gpg
 go:
 - 1.12.x
 services:
