@@ -45,7 +45,7 @@ script:
   # Test built docker image.
   - docker run $BINARY -v 2>&1 | grep -Eq "^$BINARY v$VERSION"
   # Build everything
-  - SIGNING_KEY=616A79D1ADA2F0FD6F5E2A9166AB29F0EC5718FF rvm 2.0.0 do make release
+  - rvm 2.0.0 do make release
 after_success:
   # Display Release Folder
   - ls -l release/
