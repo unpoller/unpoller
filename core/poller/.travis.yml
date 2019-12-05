@@ -14,6 +14,7 @@ addons:
     - zip
     - debsigs
     - gnupg
+    - expect
 go:
 - 1.12.x
 services:
@@ -33,6 +34,8 @@ before_script:
   - openssl aes-256-cbc -K $encrypted_9f3147001275_key -iv $encrypted_9f3147001275_iv -in .secret-files.tar.enc -out .secret-files.tar -d
   - tar -xf .secret-files.tar
   - gpg --import gpg.signing.key
+  - gpg --import gpg.public.key
+  - expect -c "spawn gpg --edit-key 616A79D1ADA2F0FD6F5E2A9166AB29F0EC5718FF trust quit; send \"5\ry\r\"; expect eof"
   - rm -f gpg.signing.key .secret-files.tar
   - mkdir -p ~/.gnupg
   - echo "%no-protection" > ~/.gnupg/gpg.conf
