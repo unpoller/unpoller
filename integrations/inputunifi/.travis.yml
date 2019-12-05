@@ -34,6 +34,8 @@ before_script:
   - gpg --import gpg.signing.key
   - rm -f gpg.signing.key .secret-files.tar
   - echo "%no-protection" > ~/.rpmmacros
+  - echo "%no-ask-passphrase" >> ~/.rpmmacros
+  - echo "" >> ~/.rpmmacros
   - source .metadata.sh
   - make vendor
 script:
