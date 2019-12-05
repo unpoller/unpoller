@@ -109,6 +109,21 @@ You can drill down into specific sites, switches, and ports. Compare ports in di
 sites side-by-side. So easy! This screenshot barely does it justice.
 ![USW Dashboard Image](https://grafana.com/api/dashboards/10417/images/6664/image)
 
+## Integrations
+
+The following fine folks are providing their services, completely free! These service
+integrations are used for things like storage, building, compiling, distribution and
+documentation support. This project succeeds because of them. Thank you!
+<p style="text-align: center;">
+  <a title="Packagecloud" alt="Packagecloud" href="https://Packagecloud.io"><img src="https://docs.golift.io/integrations/packagecloud.png"/></a>
+  <a title="GitHub" alt="GitHub" href="https://GitHub.com"><img src="https://docs.golift.io/integrations/octocat.png"/></a>
+  <a title="Docker Cloud" alt="Docker" href="https://cloud.docker.com"><img src="https://docs.golift.io/integrations/docker.png"/></a>
+  <a title="Travis-CI" alt="Travis-CI" href="https://Travis-CI.com"><img src="https://docs.golift.io/integrations/travis-ci.png"/></a>
+  <a title="Homebrew" alt="Homebrew" href="https://brew.sh"><img src="https://docs.golift.io/integrations/homebrew.png"/></a>
+  <a title="Go Lift" alt="Go Lift" href="https://golift.io"><img src="https://docs.golift.io/integrations/golift.png"/></a>
+  <a title="Grafana" alt="Grafana" href="https://grafana.com"><img src="https://docs.golift.io/integrations/grafana.png"/></a>
+</p>
+
 ## Copyright & License
 <img style="float: right;" align="right" width="200px" src="https://raw.githubusercontent.com/wiki/davidnewhall/unifi-poller/images/unifi-poller-logo.png">
 
