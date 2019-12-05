@@ -57,6 +57,7 @@ release: clean macos windows linux_packages
 	# Generating File Hashes
 	openssl dgst -r -sha256 $@/* | sed 's#release/##' | tee $@/checksums.sha256.txt
 
+
 # Delete all build assets.
 clean:
 	# Cleaning up.
@@ -131,41 +132,49 @@ rpm: $(BINARY)-$(RPMVERSION)-$(ITERATION).x86_64.rpm
 $(BINARY)-$(RPMVERSION)-$(ITERATION).x86_64.rpm: package_build_linux check_fpm
 	@echo "Building 'rpm' package for $(BINARY) version '$(RPMVERSION)-$(ITERATION)'."
 	fpm -s dir -t rpm $(PACKAGE_ARGS) -a x86_64 -v $(RPMVERSION) -C $<
+	[ "$(SIGNING_KEY)" == "" ] || rpmsign --key-id=$(SIGNING_KEY) --addsign $(BINARY)-$(RPMVERSION)-$(ITERATION).x86_64.rpm
 
 deb: $(BINARY)_$(VERSION)-$(ITERATION)_amd64.deb
 $(BINARY)_$(VERSION)-$(ITERATION)_amd64.deb: package_build_linux check_fpm
 	@echo "Building 'deb' package for $(BINARY) version '$(VERSION)-$(ITERATION)'."
 	fpm -s dir -t deb $(PACKAGE_ARGS) -a amd64 -v $(VERSION) -C $<
+	[ "$(SIGNING_KEY)" == "" ] || debsigs --default-key="$(SIGNING_KEY)" --sign=origin $(BINARY)_$(VERSION)-$(ITERATION)_amd64.deb
 
 rpm386: $(BINARY)-$(RPMVERSION)-$(ITERATION).i386.rpm
 $(BINARY)-$(RPMVERSION)-$(ITERATION).i386.rpm: package_build_linux_386 check_fpm
 	@echo "Building 32-bit 'rpm' package for $(BINARY) version '$(RPMVERSION)-$(ITERATION)'."
 	fpm -s dir -t rpm $(PACKAGE_ARGS) -a i386 -v $(RPMVERSION) -C $<
+	[ "$(SIGNING_KEY)" == "" ] || rpmsign --key-id=$(SIGNING_KEY) --addsign $(BINARY)-$(RPMVERSION)-$(ITERATION).i386.rpm
 
 deb386: $(BINARY)_$(VERSION)-$(ITERATION)_i386.deb
 $(BINARY)_$(VERSION)-$(ITERATION)_i386.deb: package_build_linux_386 check_fpm
 	@echo "Building 32-bit 'deb' package for $(BINARY) version '$(VERSION)-$(ITERATION)'."
 	fpm -s dir -t deb $(PACKAGE_ARGS) -a i386 -v $(VERSION) -C $<
+	[ "$(SIGNING_KEY)" == "" ] || debsigs --default-key="$(SIGNING_KEY)" --sign=origin $(BINARY)_$(VERSION)-$(ITERATION)_i386.deb
 
 rpmarm: $(BINARY)-$(RPMVERSION)-$(ITERATION).arm64.rpm
 $(BINARY)-$(RPMVERSION)-$(ITERATION).arm64.rpm: package_build_linux_arm64 check_fpm
 	@echo "Building 64-bit ARM8 'rpm' package for $(BINARY) version '$(RPMVERSION)-$(ITERATION)'."
 	fpm -s dir -t rpm $(PACKAGE_ARGS) -a arm64 -v $(RPMVERSION) -C $<
+	[ "$(SIGNING_KEY)" == "" ] || rpmsign --key-id=$(SIGNING_KEY) --addsign $(BINARY)-$(RPMVERSION)-$(ITERATION).arm64.rpm
 
 debarm: $(BINARY)_$(VERSION)-$(ITERATION)_arm64.deb
 $(BINARY)_$(VERSION)-$(ITERATION)_arm64.deb: package_build_linux_arm64 check_fpm
 	@echo "Building 64-bit ARM8 'deb' package for $(BINARY) version '$(VERSION)-$(ITERATION)'."
 	fpm -s dir -t deb $(PACKAGE_ARGS) -a arm64 -v $(VERSION) -C $<
+	[ "$(SIGNING_KEY)" == "" ] || debsigs --default-key="$(SIGNING_KEY)" --sign=origin $(BINARY)_$(VERSION)-$(ITERATION)_arm64.deb
 
 rpmarmhf: $(BINARY)-$(RPMVERSION)-$(ITERATION).armhf.rpm
 $(BINARY)-$(RPMVERSION)-$(ITERATION).armhf.rpm: package_build_linux_armhf check_fpm
 	@echo "Building 32-bit ARM6/7 HF 'rpm' package for $(BINARY) version '$(RPMVERSION)-$(ITERATION)'."
 	fpm -s dir -t rpm $(PACKAGE_ARGS) -a armhf -v $(RPMVERSION) -C $<
+	[ "$(SIGNING_KEY)" == "" ] || rpmsign --key-id=$(SIGNING_KEY) --addsign $(BINARY)-$(RPMVERSION)-$(ITERATION).armhf.rpm
 
 debarmhf: $(BINARY)_$(VERSION)-$(ITERATION)_armhf.deb
 $(BINARY)_$(VERSION)-$(ITERATION)_armhf.deb: package_build_linux_armhf check_fpm
 	@echo "Building 32-bit ARM6/7 HF 'deb' package for $(BINARY) version '$(VERSION)-$(ITERATION)'."
 	fpm -s dir -t deb $(PACKAGE_ARGS) -a armhf -v $(VERSION) -C $<
+	[ "$(SIGNING_KEY)" == "" ] || debsigs --default-key="$(SIGNING_KEY)" --sign=origin $(BINARY)_$(VERSION)-$(ITERATION)_armhf.deb
 
 # Build an environment that can be packaged for linux.
 package_build_linux: readme man linux
