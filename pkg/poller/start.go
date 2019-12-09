@@ -116,20 +116,23 @@ func (u *UnifiPoller) Run() error {
 // PollController runs forever, polling UniFi and pushing to InfluxDB
 // This is started by Run() or RunBoth() after everything checks out.
 func (u *UnifiPoller) PollController() {
+	var tryAgain bool
 	interval := u.Config.Interval.Round(time.Second)
 	log.Printf("[INFO] Everything checks out! Poller started, InfluxDB interval: %v", interval)
 	ticker := time.NewTicker(interval)
 	for u.LastCheck = range ticker.C {
 		// Some users need to re-auth every interval because the cookie times out.
-		if u.Config.ReAuth {
+		if u.Config.ReAuth || tryAgain {
 			u.LogDebugf("Re-authenticating to UniFi Controller")
 			if err := u.Unifi.Login(); err != nil {
 				u.LogErrorf("%v", err)
 				continue
 			}
+			tryAgain = false
 		}
 		if err := u.CollectAndProcess(); err != nil {
 			u.LogErrorf("%v", err)
+			tryAgain = true
 		}
 	}
 }
