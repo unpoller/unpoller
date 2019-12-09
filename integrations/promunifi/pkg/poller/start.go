@@ -100,55 +100,36 @@ func (u *UnifiPoller) Run() error {
 
 	switch strings.ToLower(u.Config.Mode) {
 	default:
-		return u.PollController()
+		u.PollController()
+		return nil
 	case "influxlambda", "lambdainflux", "lambda_influx", "influx_lambda":
 		u.LastCheck = time.Now()
 		return u.CollectAndProcess()
+	case "both":
+		go u.PollController()
+		fallthrough
 	case "prometheus", "exporter":
 		return u.RunPrometheus()
-	case "both":
-		return u.RunBoth()
 	}
-}
-
-// RunBoth starts the prometheus exporter and influxdb exporter at the same time.
-// This will likely double the amount of polls your controller receives.
-func (u *UnifiPoller) RunBoth() error {
-	e := make(chan error)
-	defer close(e)
-	go func() {
-		e <- u.RunPrometheus()
-	}()
-	go func() {
-		e <- u.PollController()
-	}()
-	// If either method returns an error (even nil), bail out.
-	return <-e
 }
 
 // PollController runs forever, polling UniFi and pushing to InfluxDB
 // This is started by Run() or RunBoth() after everything checks out.
-func (u *UnifiPoller) PollController() error {
+func (u *UnifiPoller) PollController() {
 	interval := u.Config.Interval.Round(time.Second)
-	log.Printf("[INFO] Everything checks out! Poller started, interval: %v", interval)
+	log.Printf("[INFO] Everything checks out! Poller started, InfluxDB interval: %v", interval)
 	ticker := time.NewTicker(interval)
-	defer ticker.Stop()
-
 	for u.LastCheck = range ticker.C {
 		// Some users need to re-auth every interval because the cookie times out.
 		if u.Config.ReAuth {
 			u.LogDebugf("Re-authenticating to UniFi Controller")
 			if err := u.Unifi.Login(); err != nil {
-				return err
+				u.LogErrorf("%v", err)
+				continue
 			}
 		}
 		if err := u.CollectAndProcess(); err != nil {
-			return err
-		}
-		// check for errors from the unifi polls.
-		if u.errorCount > 0 {
-			return fmt.Errorf("too many errors, stopping poller")
+			u.LogErrorf("%v", err)
 		}
 	}
-	return nil
 }

@@ -42,7 +42,7 @@ func (u *UnifiPoller) CollectAndProcess() error {
 	u.AugmentMetrics(metrics)
 	report, err := u.Influx.ReportMetrics(metrics)
 	if err != nil {
-		u.LogError(err, "processing metrics")
+		u.LogErrorf("processing metrics: %v", err)
 		return err
 	}
 	u.LogInfluxReport(report)
