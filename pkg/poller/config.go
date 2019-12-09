@@ -1,5 +1,13 @@
 package poller
 
+/*
+	I consider this file the pinacle example of how to allow a Go application to be configured from a file.
+	You can put your configuration into any file format: XML, YAML, JSON, TOML, and you can override any
+	struct member using an environment variable. The Duration type is also supported. All of the Config{}
+	and Duration{} types and methods are reusable in other projects. Just adjust the data in the struct to
+	meet your app's needs. See the New() procedure and Start() method in start.go for example usage.
+*/
+
 import (
 	"encoding/json"
 	"encoding/xml"
@@ -41,12 +49,11 @@ const ENVConfigPrefix = "UP_"
 
 // UnifiPoller contains the application startup data, and auth info for UniFi & Influx.
 type UnifiPoller struct {
-	Influx     *influxunifi.InfluxUnifi
-	Unifi      *unifi.Unifi
-	Flag       *Flag
-	Config     *Config
-	errorCount int
-	LastCheck  time.Time
+	Influx    *influxunifi.InfluxUnifi
+	Unifi     *unifi.Unifi
+	Flag      *Flag
+	Config    *Config
+	LastCheck time.Time
 }
 
 // Flag represents the CLI args available and their settings.
@@ -110,44 +117,50 @@ func (c *Config) ParseFile(configFile string) error {
 // ParseENV copies environment variables into configuration values.
 // This is useful for Docker users that find it easier to pass ENV variables
 // than a specific configuration file. Uses reflection to find struct tags.
+// This method uses the json struct tag member to match environment variables.
+// Use a custom tag name by changing "json" below, but that's overkill for this app.
 func (c *Config) ParseENV() error {
-	t := reflect.TypeOf(Config{}) // Get tag names from the Config struct.
-	// Loop each Config struct member; get reflect tag & env var value; update config.
-	for i := 0; i < t.NumField(); i++ {
+	t := reflect.TypeOf(*c)             // Get "types" from the Config struct.
+	for i := 0; i < t.NumField(); i++ { // Loop each Config struct member
 		tag := t.Field(i).Tag.Get("json")                 // Get the ENV variable name from "json" struct tag
 		tag = strings.Split(strings.ToUpper(tag), ",")[0] // Capitalize and remove ,omitempty suffix
 		env := os.Getenv(ENVConfigPrefix + tag)           // Then pull value from OS.
-		if tag == "" || env == "" {
-			continue // Skip if either are empty.
+		if tag == "" || env == "" {                       // Skip if either are empty.
+			continue
 		}
 
 		// Reflect and update the u.Config struct member at position i.
-		switch c := reflect.ValueOf(c).Elem().Field(i); c.Type().String() {
+		switch field := reflect.ValueOf(c).Elem().Field(i); field.Type().String() {
 		// Handle each member type appropriately (differently).
 		case "string":
 			// This is a reflect package method to update a struct member by index.
-			c.SetString(env)
+			field.SetString(env)
+
 		case "int":
 			val, err := strconv.Atoi(env)
 			if err != nil {
 				return fmt.Errorf("%s: %v", tag, err)
 			}
-			c.Set(reflect.ValueOf(val))
+			field.Set(reflect.ValueOf(val))
+
 		case "[]string":
-			c.Set(reflect.ValueOf(strings.Split(env, ",")))
+			field.Set(reflect.ValueOf(strings.Split(env, ",")))
+
 		case path.Base(t.PkgPath()) + ".Duration":
 			val, err := time.ParseDuration(env)
 			if err != nil {
 				return fmt.Errorf("%s: %v", tag, err)
 			}
-			c.Set(reflect.ValueOf(Duration{val}))
+			field.Set(reflect.ValueOf(Duration{val}))
+
 		case "bool":
 			val, err := strconv.ParseBool(env)
 			if err != nil {
 				return fmt.Errorf("%s: %v", tag, err)
 			}
-			c.SetBool(val)
+			field.SetBool(val)
 		}
+		// Add more types here if more types are added to the config struct.
 	}
 
 	return nil
