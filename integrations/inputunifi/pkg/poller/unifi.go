@@ -67,16 +67,16 @@ func (u *UnifiPoller) CollectMetrics() (*metrics.Metrics, error) {
 	var err error
 	// Get the sites we care about.
 	m.Sites, err = u.GetFilteredSites()
-	u.LogError(err, "unifi.GetSites()")
+	u.LogErrorf("unifi.GetSites(): %v", err)
 	if u.Config.SaveIDS {
 		m.IDSList, err = u.Unifi.GetIDS(m.Sites, time.Now().Add(u.Config.Interval.Duration), time.Now())
-		u.LogError(err, "unifi.GetIDS()")
+		u.LogErrorf("unifi.GetIDS(): %v", err)
 	}
 	// Get all the points.
 	m.Clients, err = u.Unifi.GetClients(m.Sites)
-	u.LogError(err, "unifi.GetClients()")
+	u.LogErrorf("unifi.GetClients(): %v", err)
 	m.Devices, err = u.Unifi.GetDevices(m.Sites)
-	u.LogError(err, "unifi.GetDevices()")
+	u.LogErrorf("unifi.GetDevices(): %v", err)
 	return m, err
 }
 
