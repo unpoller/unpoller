@@ -8,15 +8,6 @@ import (
 
 const callDepth = 2
 
-// LogError logs an error and increments the error counter.
-// Should be used in the poller loop.
-func (u *UnifiPoller) LogError(err error, prefix string) {
-	if err != nil {
-		u.errorCount++
-		_ = log.Output(callDepth, fmt.Sprintf("[ERROR] %v: %v", prefix, err))
-	}
-}
-
 // StringInSlice returns true if a string is in a slice.
 func StringInSlice(str string, slice []string) bool {
 	for _, s := range slice {
@@ -41,7 +32,7 @@ func (u *UnifiPoller) LogDebugf(m string, v ...interface{}) {
 	}
 }
 
-// LogErrorf prints an error log entry. This is used for external library logging.
+// LogErrorf prints an error log entry.
 func (u *UnifiPoller) LogErrorf(m string, v ...interface{}) {
 	_ = log.Output(callDepth, fmt.Sprintf("[ERROR] "+m, v...))
 }
