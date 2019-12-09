@@ -35,16 +35,19 @@ func (u *UnifiPoller) CollectAndProcess() error {
 	if err := u.GetInfluxDB(); err != nil {
 		return err
 	}
+
 	metrics, err := u.CollectMetrics()
 	if err != nil {
 		return err
 	}
 	u.AugmentMetrics(metrics)
+
 	report, err := u.Influx.ReportMetrics(metrics)
 	if err != nil {
 		u.LogErrorf("processing metrics: %v", err)
 		return err
 	}
+
 	u.LogInfluxReport(report)
 	return nil
 }
