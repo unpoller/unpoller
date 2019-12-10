@@ -181,6 +181,7 @@ func (u *promUnifi) exportUAPstats(r report, labels []string, ap *unifi.Ap, byte
 		log.Println("ap was nil?!", labels[2])
 		return
 	}
+	log.Println("ap not nil")
 	labelU := []string{"user", labels[1], labels[2]}
 	labelG := []string{"guest", labels[1], labels[2]}
 	r.send([]*metric{
