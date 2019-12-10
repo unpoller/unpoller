@@ -69,6 +69,9 @@ func descUSG(ns string) *usg {
 }
 
 func (u *promUnifi) exportUSG(r report, d *unifi.USG) {
+	if !d.Adopted.Val || d.Locating.Val {
+		return
+	}
 	labels := []string{d.Type, d.SiteName, d.Name}
 	infoLabels := []string{d.Version, d.Model, d.Serial, d.Mac, d.IP, d.ID, d.Bytes.Txt, d.Uptime.Txt}
 	// Gateway System Data.
