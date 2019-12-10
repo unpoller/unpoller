@@ -35,7 +35,7 @@ func (u *UnifiPoller) ExportMetrics() (*metrics.Metrics, error) {
 		u.LogErrorf("collecting metrics: %v", err)
 		u.Logf("Re-authenticating to UniFi Controller")
 
-		if err := u.Unifi.Login(); err != nil {
+		if err := u.GetUnifi(); err != nil {
 			u.LogErrorf("re-authenticating: %v", err)
 			return nil, err
 		}
