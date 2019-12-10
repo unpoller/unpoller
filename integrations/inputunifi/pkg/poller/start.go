@@ -92,11 +92,13 @@ func (f *Flag) Parse(args []string) {
 // 2. Run the collector one time and report the metrics to influxdb. (lambda)
 // 3. Start a web server and wait for Prometheus to poll the application for metrics.
 func (u *UnifiPoller) Run() error {
-	if err := u.GetUnifi(); err != nil {
-		return err
+	switch err := u.GetUnifi(); err {
+	case nil:
+		u.Logf("Polling UniFi Controller at %s v%s as user %s. Sites: %v",
+			u.Config.UnifiBase, u.Unifi.ServerVersion, u.Config.UnifiUser, u.Config.Sites)
+	default:
+		u.LogErrorf("Controller Auth or Connection failed, but continuing to retry! %v", err)
 	}
-	u.Logf("Polling UniFi Controller at %s v%s as user %s. Sites: %v",
-		u.Config.UnifiBase, u.Unifi.ServerVersion, u.Config.UnifiUser, u.Config.Sites)
 
 	switch strings.ToLower(u.Config.Mode) {
 	default:
@@ -116,23 +118,13 @@ func (u *UnifiPoller) Run() error {
 // PollController runs forever, polling UniFi and pushing to InfluxDB
 // This is started by Run() or RunBoth() after everything checks out.
 func (u *UnifiPoller) PollController() {
-	var tryAgain bool
 	interval := u.Config.Interval.Round(time.Second)
 	log.Printf("[INFO] Everything checks out! Poller started, InfluxDB interval: %v", interval)
 	ticker := time.NewTicker(interval)
 	for u.LastCheck = range ticker.C {
-		// Some users need to re-auth every interval because the cookie times out.
-		if u.Config.ReAuth || tryAgain {
-			u.LogDebugf("Re-authenticating to UniFi Controller")
-			if err := u.Unifi.Login(); err != nil {
-				u.LogErrorf("%v", err)
-				continue
-			}
-			tryAgain = false
-		}
 		if err := u.CollectAndProcess(); err != nil {
 			u.LogErrorf("%v", err)
-			tryAgain = true
+			u.Unifi = nil // trigger re-auth in unifi.go.
 		}
 	}
 }
