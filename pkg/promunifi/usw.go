@@ -116,6 +116,9 @@ func (u *promUnifi) exportUSW(r report, d *unifi.USW) {
 
 // Switch Stats
 func (u *promUnifi) exportUSWstats(r report, labels []string, sw *unifi.Sw) {
+	if sw == nil {
+		return
+	}
 	labelS := labels[1:]
 	r.send([]*metric{
 		{u.USW.SwRxPackets, counter, sw.RxPackets, labelS},
