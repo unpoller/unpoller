@@ -7,8 +7,8 @@ import (
 // batchUSG generates Unifi Gateway datapoints for InfluxDB.
 // These points can be passed directly to influx.
 func (u *InfluxUnifi) batchUSG(r report, s *unifi.USG) {
-	if s.Stat.Gw == nil {
-		s.Stat.Gw = &unifi.Gw{}
+	if !s.Adopted.Val || s.Locating.Val {
+		return
 	}
 	tags := map[string]string{
 		"mac":       s.Mac,
@@ -74,6 +74,9 @@ func (u *InfluxUnifi) batchUSG(r report, s *unifi.USG) {
 	*/
 }
 func (u *InfluxUnifi) batchUSGstat(ss unifi.SpeedtestStatus, gw *unifi.Gw, ul unifi.Uplink) map[string]interface{} {
+	if gw == nil {
+		return map[string]interface{}{}
+	}
 	return map[string]interface{}{
 		"uplink_latency":                 ul.Latency.Val,
 		"uplink_speed":                   ul.Speed.Val,
