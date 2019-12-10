@@ -159,6 +159,9 @@ func descUAP(ns string) *uap {
 }
 
 func (u *promUnifi) exportUAP(r report, d *unifi.UAP) {
+	if !d.Adopted.Val || d.Locating.Val {
+		return
+	}
 	labels := []string{d.Type, d.SiteName, d.Name}
 	infoLabels := []string{d.Version, d.Model, d.Serial, d.Mac, d.IP, d.ID, d.Bytes.Txt, d.Uptime.Txt}
 	u.exportUAPstats(r, labels, d.Stat.Ap, d.BytesD, d.TxBytesD, d.RxBytesD, d.BytesR)
