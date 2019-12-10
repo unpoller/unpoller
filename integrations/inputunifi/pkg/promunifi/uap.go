@@ -1,8 +1,6 @@
 package promunifi
 
 import (
-	"log"
-
 	"github.com/prometheus/client_golang/prometheus"
 	"golift.io/unifi"
 )
@@ -178,10 +176,8 @@ func (u *promUnifi) exportUAP(r report, d *unifi.UAP) {
 // udm doesn't have these stats exposed yet, so pass 2 or 6 metrics.
 func (u *promUnifi) exportUAPstats(r report, labels []string, ap *unifi.Ap, bytes ...unifi.FlexInt) {
 	if ap == nil {
-		log.Println("ap was nil?!", labels[2])
 		return
 	}
-	log.Println("ap not nil")
 	labelU := []string{"user", labels[1], labels[2]}
 	labelG := []string{"guest", labels[1], labels[2]}
 	r.send([]*metric{
