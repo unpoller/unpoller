@@ -3,6 +3,7 @@ package promunifi
 
 import (
 	"fmt"
+	"log"
 	"reflect"
 	"strings"
 	"sync"
@@ -112,6 +113,7 @@ func (u *promUnifi) Collect(ch chan<- prometheus.Metric) {
 	defer r.close()
 
 	if r.Metrics, err = r.cf.CollectFn(); err != nil {
+		log.Println("Error", err)
 		r.error(ch, prometheus.NewInvalidDesc(fmt.Errorf("metric fetch failed")), err)
 		return
 	}
