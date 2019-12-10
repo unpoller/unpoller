@@ -76,20 +76,20 @@ func (u *UnifiPoller) CollectMetrics() (*metrics.Metrics, error) {
 	var err error
 	// Get the sites we care about.
 	if m.Sites, err = u.GetFilteredSites(); err != nil {
-		u.LogErrorf("unifi.GetSites(): %v", err)
+		return m, fmt.Errorf("unifi.GetSites(): %v", err)
 	}
 	if u.Config.SaveIDS {
 		m.IDSList, err = u.Unifi.GetIDS(m.Sites, time.Now().Add(u.Config.Interval.Duration), time.Now())
-		u.LogErrorf("unifi.GetIDS(): %v", err)
+		return m, fmt.Errorf("unifi.GetIDS(): %v", err)
 	}
 	// Get all the points.
 	if m.Clients, err = u.Unifi.GetClients(m.Sites); err != nil {
-		u.LogErrorf("unifi.GetClients(): %v", err)
+		return m, fmt.Errorf("unifi.GetClients(): %v", err)
 	}
 	if m.Devices, err = u.Unifi.GetDevices(m.Sites); err != nil {
-		u.LogErrorf("unifi.GetDevices(): %v", err)
+		return m, fmt.Errorf("unifi.GetDevices(): %v", err)
 	}
-	return m, err
+	return m, nil
 }
 
 // AugmentMetrics is our middleware layer between collecting metrics and writing them.
