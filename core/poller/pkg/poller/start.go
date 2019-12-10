@@ -36,6 +36,7 @@ func New() *UnifiPoller {
 // Parses cli flags, parses config file, parses env vars, sets up logging, then:
 // - dumps a json payload OR - executes Run().
 func (u *UnifiPoller) Start() error {
+	log.SetOutput(os.Stdout)
 	log.SetFlags(log.LstdFlags)
 	u.Flag.Parse(os.Args[1:])
 
