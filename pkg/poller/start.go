@@ -28,7 +28,10 @@ func New() *UnifiPoller {
 			SaveSites:  true,
 			HTTPListen: defaultHTTPListen,
 			Namespace:  appName,
-		}, Flag: &Flag{ConfigFile: DefaultConfFile},
+		},
+		Flag: &Flag{
+			ConfigFile: DefaultConfFile,
+		},
 	}
 }
 
@@ -125,6 +128,7 @@ func (u *UnifiPoller) PollController() {
 	for u.LastCheck = range ticker.C {
 		if err := u.CollectAndProcess(); err != nil {
 			u.LogErrorf("%v", err)
+			u.Unifi.CloseIdleConnections()
 			u.Unifi = nil // trigger re-auth in unifi.go.
 		}
 	}

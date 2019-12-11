@@ -18,6 +18,7 @@ import (
 	"reflect"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/BurntSushi/toml"
@@ -49,11 +50,12 @@ const ENVConfigPrefix = "UP_"
 
 // UnifiPoller contains the application startup data, and auth info for UniFi & Influx.
 type UnifiPoller struct {
-	Influx    *influxunifi.InfluxUnifi
-	Unifi     *unifi.Unifi
-	Flag      *Flag
-	Config    *Config
-	LastCheck time.Time
+	Influx     *influxunifi.InfluxUnifi
+	Unifi      *unifi.Unifi
+	Flag       *Flag
+	Config     *Config
+	LastCheck  time.Time
+	sync.Mutex // locks the Unifi struct member when re-authing to unifi.
 }
 
 // Flag represents the CLI args available and their settings.
