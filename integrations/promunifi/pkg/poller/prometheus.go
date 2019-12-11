@@ -23,6 +23,7 @@ func (u *UnifiPoller) RunPrometheus() error {
 		LoggingFn:    u.LogExportReport,
 		ReportErrors: true, // XXX: Does this need to be configurable?
 	}))
+
 	return http.ListenAndServe(u.Config.HTTPListen, nil)
 }
 
