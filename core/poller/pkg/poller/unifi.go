@@ -11,6 +11,11 @@ import (
 
 // GetUnifi returns a UniFi controller interface.
 func (u *UnifiPoller) GetUnifi() (err error) {
+	u.Lock()
+	defer u.Unlock()
+	if u.Unifi != nil {
+		u.Unifi.CloseIdleConnections()
+	}
 	// Create an authenticated session to the Unifi Controller.
 	u.Unifi, err = unifi.NewUnifi(&unifi.Config{
 		User:      u.Config.UnifiUser,
