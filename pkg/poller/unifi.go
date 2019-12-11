@@ -13,9 +13,11 @@ import (
 func (u *UnifiPoller) GetUnifi() (err error) {
 	u.Lock()
 	defer u.Unlock()
+
 	if u.Unifi != nil {
 		u.Unifi.CloseIdleConnections()
 	}
+
 	// Create an authenticated session to the Unifi Controller.
 	u.Unifi, err = unifi.NewUnifi(&unifi.Config{
 		User:      u.Config.UnifiUser,
@@ -29,6 +31,7 @@ func (u *UnifiPoller) GetUnifi() (err error) {
 		u.Unifi = nil
 		return fmt.Errorf("unifi controller: %v", err)
 	}
+
 	u.LogDebugf("Authenticated with controller successfully")
 
 	return u.CheckSites()
@@ -40,20 +43,26 @@ func (u *UnifiPoller) CheckSites() error {
 	if strings.Contains(strings.ToLower(u.Config.Mode), "lambda") {
 		return nil // Skip this in lambda mode.
 	}
+
 	u.LogDebugf("Checking Controller Sites List")
+
 	sites, err := u.Unifi.GetSites()
 	if err != nil {
 		return err
 	}
+
 	msg := []string{}
+
 	for _, site := range sites {
 		msg = append(msg, site.Name+" ("+site.Desc+")")
 	}
 	u.Logf("Found %d site(s) on controller: %v", len(msg), strings.Join(msg, ", "))
+
 	if StringInSlice("all", u.Config.Sites) {
 		u.Config.Sites = []string{"all"}
 		return nil
 	}
+
 FIRST:
 	for _, s := range u.Config.Sites {
 		for _, site := range sites {
@@ -64,6 +73,7 @@ FIRST:
 		// This is fine, it may get added later.
 		u.LogErrorf("configured site not found on controller: %v", s)
 	}
+
 	return nil
 }
 
@@ -110,23 +120,29 @@ func (u *UnifiPoller) AugmentMetrics(metrics *metrics.Metrics) {
 	if metrics == nil || metrics.Devices == nil || metrics.Clients == nil {
 		return
 	}
+
 	devices := make(map[string]string)
 	bssdIDs := make(map[string]string)
+
 	for _, r := range metrics.UAPs {
 		devices[r.Mac] = r.Name
 		for _, v := range r.VapTable {
 			bssdIDs[v.Bssid] = fmt.Sprintf("%s %s %s:", r.Name, v.Radio, v.RadioName)
 		}
 	}
+
 	for _, r := range metrics.USGs {
 		devices[r.Mac] = r.Name
 	}
+
 	for _, r := range metrics.USWs {
 		devices[r.Mac] = r.Name
 	}
+
 	for _, r := range metrics.UDMs {
 		devices[r.Mac] = r.Name
 	}
+
 	// These come blank, so set them here.
 	for i, c := range metrics.Clients {
 		metrics.Clients[i].SwName = devices[c.SwMac]
@@ -134,6 +150,7 @@ func (u *UnifiPoller) AugmentMetrics(metrics *metrics.Metrics) {
 		metrics.Clients[i].GwName = devices[c.GwMac]
 		metrics.Clients[i].RadioDescription = bssdIDs[metrics.Clients[i].Bssid] + metrics.Clients[i].RadioProto
 	}
+
 	if !u.Config.SaveSites {
 		metrics.Sites = nil
 	}
@@ -143,13 +160,15 @@ func (u *UnifiPoller) AugmentMetrics(metrics *metrics.Metrics) {
 // Omits requested but unconfigured sites. Grabs the full list from the
 // controller and returns the sites provided in the config file.
 func (u *UnifiPoller) GetFilteredSites() (unifi.Sites, error) {
+	var i int
+
 	sites, err := u.Unifi.GetSites()
 	if err != nil {
 		return nil, err
 	} else if len(u.Config.Sites) < 1 || StringInSlice("all", u.Config.Sites) {
 		return sites, nil
 	}
-	var i int
+
 	for _, s := range sites {
 		// Only include valid sites in the request filter.
 		if StringInSlice(s.Name, u.Config.Sites) {
@@ -157,5 +176,6 @@ func (u *UnifiPoller) GetFilteredSites() (unifi.Sites, error) {
 			i++
 		}
 	}
+
 	return sites[:i], nil
 }
