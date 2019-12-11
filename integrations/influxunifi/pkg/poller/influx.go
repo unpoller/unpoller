@@ -12,6 +12,7 @@ func (u *UnifiPoller) GetInfluxDB() (err error) {
 	if u.Influx != nil {
 		return nil
 	}
+
 	u.Influx, err = influxunifi.New(&influxunifi.Config{
 		Database: u.Config.InfluxDB,
 		User:     u.Config.InfluxUser,
@@ -22,7 +23,9 @@ func (u *UnifiPoller) GetInfluxDB() (err error) {
 	if err != nil {
 		return fmt.Errorf("influxdb: %v", err)
 	}
+
 	u.Logf("Logging Measurements to InfluxDB at %s as user %s", u.Config.InfluxURL, u.Config.InfluxUser)
+
 	return nil
 }
 
@@ -40,6 +43,7 @@ func (u *UnifiPoller) CollectAndProcess() error {
 	if err != nil {
 		return err
 	}
+
 	u.AugmentMetrics(metrics)
 
 	report, err := u.Influx.ReportMetrics(metrics)
@@ -54,9 +58,11 @@ func (u *UnifiPoller) CollectAndProcess() error {
 // LogInfluxReport writes a log message after exporting to influxdb.
 func (u *UnifiPoller) LogInfluxReport(r *influxunifi.Report) {
 	idsMsg := ""
+
 	if u.Config.SaveIDS {
 		idsMsg = fmt.Sprintf("IDS Events: %d, ", len(r.Metrics.IDSList))
 	}
+
 	u.Logf("UniFi Metrics Recorded. Sites: %d, Clients: %d, "+
 		"UAP: %d, USG/UDM: %d, USW: %d, %sPoints: %d, Fields: %d, Errs: %d, Elapsed: %v",
 		len(r.Metrics.Sites), len(r.Metrics.Clients), len(r.Metrics.UAPs),
