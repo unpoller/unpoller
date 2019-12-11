@@ -27,7 +27,7 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:50708c8fc92aec981df5c446581cf9f90ba9e2a5692118e0ce75d4534aaa14a2"
+  digest = "1:00e5ad58045d6d2a6c9e65d1809ff2594bc396e911712ae892a93976fdece115"
   name = "github.com/influxdata/influxdb1-client"
   packages = [
     "models",
@@ -35,7 +35,7 @@
     "v2",
   ]
   pruneopts = "UT"
-  revision = "fc22c7df067eefd070157f157893fbce961d6359"
+  revision = "8bf82d3c094dc06be9da8e5bf9d3589b6ea032ae"
 
 [[projects]]
   digest = "1:ff5ebae34cfbf047d505ee150de27e60570e8c394b3b8fdbb720ff6ac71985fc"
@@ -103,15 +103,15 @@
   name = "golang.org/x/sys"
   packages = ["windows"]
   pruneopts = "UT"
-  revision = "ce4227a45e2eb77e5c847278dcc6a626742e2945"
+  revision = "ac6580df4449443a05718fd7858c1f91ad5f8d20"
 
 [[projects]]
-  digest = "1:87738e338f505d3e3be1f80d36b53f3c4e73be9b7ad4ccae46abbe9ef04f3f71"
+  digest = "1:2883cea734f2766f41ff9c9d4aefccccc53e3d44f5c8b08893b9c218cf666722"
   name = "golift.io/unifi"
   packages = ["."]
   pruneopts = "UT"
-  revision = "ba857a3a04311fed362cb43fa7bf4066bc3a7e55"
-  version = "v4.1.5"
+  revision = "a607fe940c6a563c6994f2c945394b19d2183b1c"
+  version = "v4.1.6"
 
 [[projects]]
   digest = "1:b75b3deb2bce8bc079e16bb2aecfe01eb80098f5650f9e93e5643ca8b7b73737"

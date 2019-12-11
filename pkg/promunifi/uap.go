@@ -159,6 +159,9 @@ func descUAP(ns string) *uap {
 }
 
 func (u *promUnifi) exportUAP(r report, d *unifi.UAP) {
+	if !d.Adopted.Val || d.Locating.Val {
+		return
+	}
 	labels := []string{d.Type, d.SiteName, d.Name}
 	infoLabels := []string{d.Version, d.Model, d.Serial, d.Mac, d.IP, d.ID, d.Bytes.Txt, d.Uptime.Txt}
 	u.exportUAPstats(r, labels, d.Stat.Ap, d.BytesD, d.TxBytesD, d.RxBytesD, d.BytesR)
@@ -175,6 +178,9 @@ func (u *promUnifi) exportUAP(r report, d *unifi.UAP) {
 
 // udm doesn't have these stats exposed yet, so pass 2 or 6 metrics.
 func (u *promUnifi) exportUAPstats(r report, labels []string, ap *unifi.Ap, bytes ...unifi.FlexInt) {
+	if ap == nil {
+		return
+	}
 	labelU := []string{"user", labels[1], labels[2]}
 	labelG := []string{"guest", labels[1], labels[2]}
 	r.send([]*metric{

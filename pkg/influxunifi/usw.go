@@ -7,9 +7,10 @@ import (
 // batchUSW generates Unifi Switch datapoints for InfluxDB.
 // These points can be passed directly to influx.
 func (u *InfluxUnifi) batchUSW(r report, s *unifi.USW) {
-	if s.Stat.Sw == nil {
-		s.Stat.Sw = &unifi.Sw{}
+	if !s.Adopted.Val || s.Locating.Val {
+		return
 	}
+
 	tags := map[string]string{
 		"mac":       s.Mac,
 		"site_name": s.SiteName,
@@ -19,35 +20,45 @@ func (u *InfluxUnifi) batchUSW(r report, s *unifi.USW) {
 		"serial":    s.Serial,
 		"type":      s.Type,
 	}
-	fields := Combine(map[string]interface{}{
-		"guest-num_sta":       s.GuestNumSta.Val,
-		"ip":                  s.IP,
-		"bytes":               s.Bytes.Val,
-		"fan_level":           s.FanLevel.Val,
-		"general_temperature": s.GeneralTemperature.Val,
-		"last_seen":           s.LastSeen.Val,
-		"rx_bytes":            s.RxBytes.Val,
-		"tx_bytes":            s.TxBytes.Val,
-		"uptime":              s.Uptime.Val,
-		"state":               s.State.Val,
-		"user-num_sta":        s.UserNumSta.Val,
-		"stat_bytes":          s.Stat.Sw.Bytes.Val,
-		"stat_rx_bytes":       s.Stat.Sw.RxBytes.Val,
-		"stat_rx_crypts":      s.Stat.Sw.RxCrypts.Val,
-		"stat_rx_dropped":     s.Stat.Sw.RxDropped.Val,
-		"stat_rx_errors":      s.Stat.Sw.RxErrors.Val,
-		"stat_rx_frags":       s.Stat.Sw.RxFrags.Val,
-		"stat_rx_packets":     s.Stat.Sw.TxPackets.Val,
-		"stat_tx_bytes":       s.Stat.Sw.TxBytes.Val,
-		"stat_tx_dropped":     s.Stat.Sw.TxDropped.Val,
-		"stat_tx_errors":      s.Stat.Sw.TxErrors.Val,
-		"stat_tx_packets":     s.Stat.Sw.TxPackets.Val,
-		"stat_tx_retries":     s.Stat.Sw.TxRetries.Val,
-	}, u.batchSysStats(s.SysStats, s.SystemStats))
+	fields := Combine(
+		u.batchUSWstat(s.Stat.Sw),
+		u.batchSysStats(s.SysStats, s.SystemStats),
+		map[string]interface{}{
+			"guest-num_sta":       s.GuestNumSta.Val,
+			"ip":                  s.IP,
+			"bytes":               s.Bytes.Val,
+			"fan_level":           s.FanLevel.Val,
+			"general_temperature": s.GeneralTemperature.Val,
+			"last_seen":           s.LastSeen.Val,
+			"rx_bytes":            s.RxBytes.Val,
+			"tx_bytes":            s.TxBytes.Val,
+			"uptime":              s.Uptime.Val,
+			"state":               s.State.Val,
+			"user-num_sta":        s.UserNumSta.Val,
+		})
 	r.send(&metric{Table: "usw", Tags: tags, Fields: fields})
 	u.batchPortTable(r, tags, s.PortTable)
 }
 
+func (u *InfluxUnifi) batchUSWstat(sw *unifi.Sw) map[string]interface{} {
+	if sw == nil {
+		return map[string]interface{}{}
+	}
+	return map[string]interface{}{
+		"stat_bytes":      sw.Bytes.Val,
+		"stat_rx_bytes":   sw.RxBytes.Val,
+		"stat_rx_crypts":  sw.RxCrypts.Val,
+		"stat_rx_dropped": sw.RxDropped.Val,
+		"stat_rx_errors":  sw.RxErrors.Val,
+		"stat_rx_frags":   sw.RxFrags.Val,
+		"stat_rx_packets": sw.TxPackets.Val,
+		"stat_tx_bytes":   sw.TxBytes.Val,
+		"stat_tx_dropped": sw.TxDropped.Val,
+		"stat_tx_errors":  sw.TxErrors.Val,
+		"stat_tx_packets": sw.TxPackets.Val,
+		"stat_tx_retries": sw.TxRetries.Val,
+	}
+}
 func (u *InfluxUnifi) batchPortTable(r report, t map[string]string, pt []unifi.Port) {
 	for _, p := range pt {
 		if !p.Up.Val || !p.Enable.Val {
