@@ -26,47 +26,61 @@ func NewUnifi(config *Config) (*Unifi, error) {
 	if err != nil {
 		return nil, err
 	}
-	if config.ErrorLog == nil {
-		config.ErrorLog = DiscardLogs
-	}
-	if config.DebugLog == nil {
-		config.DebugLog = DiscardLogs
-	}
+
 	config.URL = strings.TrimRight(config.URL, "/")
+
+	if config.ErrorLog == nil {
+		config.ErrorLog = discardLogs
+	}
+
+	if config.DebugLog == nil {
+		config.DebugLog = discardLogs
+	}
+
 	u := &Unifi{Config: config,
 		Client: &http.Client{
-			Transport: &http.Transport{TLSClientConfig: &tls.Config{InsecureSkipVerify: !config.VerifySSL}},
-			Jar:       jar,
+			Jar: jar,
+			Transport: &http.Transport{
+				TLSClientConfig: &tls.Config{InsecureSkipVerify: !config.VerifySSL},
+			},
 		},
 	}
 	if err := u.Login(); err != nil {
 		return u, err
 	}
+
 	if err := u.GetServerData(); err != nil {
 		return u, fmt.Errorf("unable to get server version: %v", err)
 	}
+
 	return u, nil
 }
 
 // Login is a helper method. It can be called to grab a new authentication cookie.
 func (u *Unifi) Login() error {
+	start := time.Now()
+
 	// magic login.
-	req, err := u.UniReq(LoginPath, fmt.Sprintf(`{"username":"%s","password":"%s"}`, u.User, u.Pass))
+	req, err := u.UniReq(APILoginPath, fmt.Sprintf(`{"username":"%s","password":"%s"}`, u.User, u.Pass))
 	if err != nil {
 		return err
 	}
+
 	resp, err := u.Do(req)
 	if err != nil {
 		return err
 	}
-	defer func() {
-		_, _ = io.Copy(ioutil.Discard, resp.Body) // avoid leaking.
-		_ = resp.Body.Close()
-	}()
+	defer resp.Body.Close() // we need no data here.
+
+	_, _ = io.Copy(ioutil.Discard, resp.Body) // avoid leaking.
+	u.DebugLog("Requested %s: elapsed %v, returned %d bytes",
+		APILoginPath, time.Since(start).Round(time.Millisecond), resp.ContentLength)
+
 	if resp.StatusCode != http.StatusOK {
 		return fmt.Errorf("authentication failed (user: %s): %s (status: %s)",
-			u.User, u.URL+LoginPath, resp.Status)
+			u.User, u.URL+APILoginPath, resp.Status)
 	}
+
 	return nil
 }
 
@@ -76,19 +90,24 @@ func (u *Unifi) GetServerData() error {
 	var response struct {
 		Data server `json:"meta"`
 	}
+
 	u.server = &response.Data
-	return u.GetData(StatusPath, &response)
+
+	return u.GetData(APIStatusPath, &response)
 }
 
 // GetData makes a unifi request and unmarshals the response into a provided pointer.
 func (u *Unifi) GetData(apiPath string, v interface{}) error {
 	start := time.Now()
+
 	body, err := u.GetJSON(apiPath)
-	dur := time.Since(start)
 	if err != nil {
 		return err
 	}
-	u.DebugLog("Requested %s: elapsed %v, returned %d bytes", apiPath, dur.Round(time.Millisecond), len(body))
+
+	u.DebugLog("Requested %s: elapsed %v, returned %d bytes",
+		apiPath, time.Since(start).Round(time.Millisecond), len(body))
+
 	return json.Unmarshal(body, v)
 }
 
@@ -103,11 +122,14 @@ func (u *Unifi) UniReq(apiPath string, params string) (req *http.Request, err er
 	default:
 		req, err = http.NewRequest("POST", u.URL+apiPath, bytes.NewBufferString(params))
 	}
+
 	if err != nil {
 		return
 	}
+
 	req.Header.Add("Accept", "application/json")
 	u.DebugLog("Requesting %s, with params: %v", apiPath, params != "")
+
 	return
 }
 
@@ -117,19 +139,21 @@ func (u *Unifi) GetJSON(apiPath string) ([]byte, error) {
 	if err != nil {
 		return []byte{}, err
 	}
+
 	resp, err := u.Do(req)
 	if err != nil {
 		return []byte{}, err
 	}
-	defer func() {
-		_ = resp.Body.Close()
-	}()
+	defer resp.Body.Close()
+
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
 		return body, err
 	}
+
 	if resp.StatusCode != http.StatusOK {
 		err = fmt.Errorf("invalid status code from server %s", resp.Status)
 	}
+
 	return body, err
 }

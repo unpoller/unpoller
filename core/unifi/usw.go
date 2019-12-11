@@ -364,10 +364,13 @@ func (v *USWStat) UnmarshalJSON(data []byte) error {
 	var n struct {
 		Sw `json:"sw"`
 	}
+
 	v.Sw = &n.Sw
+
 	err := json.Unmarshal(data, v.Sw) // controller version 5.10.
 	if err != nil {
 		return json.Unmarshal(data, &n) // controller version 5.11.
 	}
+
 	return nil
 }

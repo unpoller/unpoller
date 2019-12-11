@@ -65,7 +65,7 @@ type IDS struct {
 	UsgipASN              string    `json:"usgipASN"`
 	Catname               string    `json:"catname"`
 	InnerAlertAction      string    `json:"inner_alert_action"`
-	InnerAlertGid         int64     `json:"inner_alert_gid"`
+	InnerAlertGID         int64     `json:"inner_alert_gid"`
 	InnerAlertSignatureID int64     `json:"inner_alert_signature_id"`
 	InnerAlertRev         int64     `json:"inner_alert_rev"`
 	InnerAlertSignature   string    `json:"inner_alert_signature"`
@@ -86,14 +86,18 @@ type IDS struct {
 // Returns all events that happened in site between from and to.
 func (u *Unifi) GetIDS(sites Sites, from, to time.Time) ([]*IDS, error) {
 	data := []*IDS{}
+
 	for _, site := range sites {
 		u.DebugLog("Polling Controller for IDS/IPS Data, site %s (%s) ", site.Name, site.Desc)
+
 		ids, err := u.GetSiteIDS(site, from, to)
 		if err != nil {
 			return data, err
 		}
+
 		data = append(data, ids...)
 	}
+
 	return data, nil
 }
 
@@ -103,31 +107,38 @@ func (u *Unifi) GetSiteIDS(site *Site, from, to time.Time) ([]*IDS, error) {
 	var response struct {
 		Data []*IDS `json:"data"`
 	}
-	URIpath := fmt.Sprintf(IPSEvents, site.Name)
+
+	URIpath := fmt.Sprintf(APIIPSEvents, site.Name)
+
 	params := fmt.Sprintf(`{"start":"%v000","end":"%v000","_limit":50000}`, from.Unix(), to.Unix())
+
 	req, err := u.UniReq(URIpath, params)
 	if err != nil {
 		return nil, err
 	}
+
 	resp, err := u.Do(req)
 	if err != nil {
 		return nil, err
 	}
-	defer func() {
-		_ = resp.Body.Close()
-	}()
+	defer resp.Body.Close()
+
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
 		return nil, err
 	}
+
 	if resp.StatusCode != http.StatusOK {
 		return nil, fmt.Errorf("invalid status code from server %s", resp.Status)
 	}
+
 	if err := json.Unmarshal(body, &response); err != nil {
 		return nil, err
 	}
+
 	for i := range response.Data {
 		response.Data[i].SiteName = site.SiteName
 	}
+
 	return response.Data, nil
 }

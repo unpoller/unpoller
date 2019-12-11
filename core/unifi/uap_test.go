@@ -40,14 +40,14 @@ func TestUAPUnmarshalJSON(t *testing.T) {
 
 	t.Parallel()
 	a := assert.New(t)
-
+	rxPakcets := 49299197
 	u := &UAPStat{}
 	err := u.UnmarshalJSON([]byte(testcontroller510))
 	a.Nil(err, "must be no error unmarshaling test strings")
-	a.Equal(float64(49299197), u.RxPackets.Val, "data was not properly unmarshaled")
+	a.Equal(float64(rxPakcets), u.RxPackets.Val, "data was not properly unmarshaled")
 
 	u = &UAPStat{} // reset
 	err = u.UnmarshalJSON([]byte(testcontroller511))
 	a.Nil(err, "must be no error unmarshaling test strings")
-	a.Equal(float64(49299197), u.RxPackets.Val, "data was not properly unmarshaled")
+	a.Equal(float64(rxPakcets), u.RxPackets.Val, "data was not properly unmarshaled")
 }

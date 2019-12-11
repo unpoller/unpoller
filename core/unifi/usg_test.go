@@ -48,12 +48,13 @@ func TestUSGUnmarshalJSON(t *testing.T) {
 	a := assert.New(t)
 
 	u := &USGStat{}
+	lanRx := 37599596992669
 	err := u.UnmarshalJSON([]byte(testcontroller510))
 	a.Nil(err, "must be no error unmarshaling test strings")
-	a.Equal(float64(37599596992669), u.LanRxBytes.Val, "data was not properly unmarshaled")
+	a.Equal(float64(lanRx), u.LanRxBytes.Val, "data was not properly unmarshaled")
 
 	u = &USGStat{} // reset
 	err = u.UnmarshalJSON([]byte(testcontroller511))
 	a.Nil(err, "must be no error unmarshaling test strings")
-	a.Equal(float64(37599596992669), u.LanRxBytes.Val, "data was not properly unmarshaled")
+	a.Equal(float64(lanRx), u.LanRxBytes.Val, "data was not properly unmarshaled")
 }

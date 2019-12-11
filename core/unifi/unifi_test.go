@@ -9,6 +9,10 @@ import (
 )
 
 func TestNewUnifi(t *testing.T) {
+	/* NOT DONE: OPEN web server, check parameters posted, more. This test is incomplete.
+	a.EqualValues(`{"username": "user1","password": "pass2"}`, string(post_params),
+		"user/pass json parameters improperly encoded")
+	*/
 	t.Parallel()
 	a := assert.New(t)
 	u := "http://127.0.0.1:64431"
@@ -17,16 +21,12 @@ func TestNewUnifi(t *testing.T) {
 		Pass:      "pass2",
 		URL:       u,
 		VerifySSL: false,
-		DebugLog:  DiscardLogs,
+		DebugLog:  discardLogs,
 	}
 	authReq, err := NewUnifi(c)
 	a.NotNil(err)
 	a.EqualValues(u, authReq.URL)
 	a.Contains(err.Error(), "connection refused", "an invalid destination should produce a connection error.")
-	/* TODO: OPEN web server, check parameters posted, more. This test is incomplete.
-	a.EqualValues(`{"username": "user1","password": "pass2"}`, string(post_params),
-		"user/pass json parameters improperly encoded")
-	*/
 }
 
 func TestUniReq(t *testing.T) {
@@ -35,7 +35,7 @@ func TestUniReq(t *testing.T) {
 	p := "/test/path"
 	u := "http://some.url:8443"
 	// Test empty parameters.
-	authReq := &Unifi{Client: &http.Client{}, Config: &Config{URL: u, DebugLog: DiscardLogs}}
+	authReq := &Unifi{Client: &http.Client{}, Config: &Config{URL: u, DebugLog: discardLogs}}
 	r, err := authReq.UniReq(p, "")
 	a.Nil(err, "newrequest must not produce an error")
 	a.EqualValues(p, r.URL.Path,
@@ -46,7 +46,7 @@ func TestUniReq(t *testing.T) {
 
 	// Test with parameters
 	k := "key1=value9&key2=value7"
-	authReq = &Unifi{Client: &http.Client{}, Config: &Config{URL: "http://some.url:8443", DebugLog: DiscardLogs}}
+	authReq = &Unifi{Client: &http.Client{}, Config: &Config{URL: "http://some.url:8443", DebugLog: discardLogs}}
 	r, err = authReq.UniReq(p, k)
 	a.Nil(err, "newrequest must not produce an error")
 	a.EqualValues(p, r.URL.Path,

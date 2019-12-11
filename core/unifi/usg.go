@@ -239,10 +239,13 @@ func (v *USGStat) UnmarshalJSON(data []byte) error {
 	var n struct {
 		Gw `json:"gw"`
 	}
+
 	v.Gw = &n.Gw
+
 	err := json.Unmarshal(data, v.Gw) // controller version 5.10.
 	if err != nil {
 		return json.Unmarshal(data, &n) // controller version 5.11.
 	}
+
 	return nil
 }

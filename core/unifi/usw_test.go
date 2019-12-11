@@ -6,8 +6,8 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestUSWUnmarshalJSON(t *testing.T) {
-	testcontroller511 := `{
+func testGetControllerJSON() (string, string) {
+	return `{
 		"sw": {
 		  "site_id": "mySite",
 		  "o": "sw",
@@ -31,19 +31,8 @@ func TestUSWUnmarshalJSON(t *testing.T) {
 		  "tx_multicast": 123,
 		  "tx_broadcast": 123,
 		  "bytes": 123,
-		  "duration": 123,
-		  "port_1-tx_packets": 123,
-		  "port_1-tx_bytes": 123,
-		  "port_1-tx_multicast": 123,
-		  "port_1-tx_broadcast": 123,
-		  "port_1-rx_packets": 123,
-		  "port_1-rx_bytes": 123,
-		  "port_1-rx_dropped": 123,
-		  "port_1-rx_multicast": 123,
-		  "port_1-rx_broadcast": 123,
-		  "port_1-rx_errors": 123}}`
-
-	testcontroller510 := `{
+		  "duration": 123}}`,
+		`{
 		"site_id": "mySite",
 		"o": "sw",
 		"oid": "00:00:00:00:00:00",
@@ -66,28 +55,21 @@ func TestUSWUnmarshalJSON(t *testing.T) {
 		"tx_multicast": 123,
 		"tx_broadcast": 123,
 		"bytes": 123,
-		"duration": 123,
-		"port_1-tx_packets": 123,
-		"port_1-tx_bytes": 123,
-		"port_1-tx_multicast": 123,
-		"port_1-tx_broadcast": 123,
-		"port_1-rx_packets": 123,
-		"port_1-rx_bytes": 123,
-		"port_1-rx_dropped": 123,
-		"port_1-rx_multicast": 123,
-		"port_1-rx_broadcast": 123,
-		"port_1-rx_errors": 123}`
+		"duration": 123}`
+}
 
+func TestUSWUnmarshalJSON(t *testing.T) {
 	t.Parallel()
 	a := assert.New(t)
-
+	testcontroller511, testcontroller510 := testGetControllerJSON()
+	rxMulticast := 123
 	u := &USWStat{}
 	err := u.UnmarshalJSON([]byte(testcontroller510))
 	a.Nil(err, "must be no error unmarshaling test strings")
-	a.Equal(float64(123), u.RxMulticast.Val, "data was not properly unmarshaled")
+	a.Equal(float64(rxMulticast), u.RxMulticast.Val, "data was not properly unmarshaled")
 
 	u = &USWStat{} // reset
 	err = u.UnmarshalJSON([]byte(testcontroller511))
 	a.Nil(err, "must be no error unmarshaling test strings")
-	a.Equal(float64(123), u.RxMulticast.Val, "data was not properly unmarshaled")
+	a.Equal(float64(rxMulticast), u.RxMulticast.Val, "data was not properly unmarshaled")
 }

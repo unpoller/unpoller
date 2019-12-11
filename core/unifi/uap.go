@@ -555,10 +555,13 @@ func (v *UAPStat) UnmarshalJSON(data []byte) error {
 	var n struct {
 		Ap `json:"ap"`
 	}
+
 	v.Ap = &n.Ap
+
 	err := json.Unmarshal(data, v.Ap) // controller version 5.10.
 	if err != nil {
 		return json.Unmarshal(data, &n) // controller version 5.11.
 	}
+
 	return nil
 }

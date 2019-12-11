@@ -5,15 +5,19 @@ import "fmt"
 // GetClients returns a response full of clients' data from the UniFi Controller.
 func (u *Unifi) GetClients(sites Sites) (Clients, error) {
 	data := make([]*Client, 0)
+
 	for _, site := range sites {
 		var response struct {
 			Data []*Client `json:"data"`
 		}
+
 		u.DebugLog("Polling Controller, retreiving UniFi Clients, site %s (%s) ", site.Name, site.Desc)
-		clientPath := fmt.Sprintf(ClientPath, site.Name)
+
+		clientPath := fmt.Sprintf(APIClientPath, site.Name)
 		if err := u.GetData(clientPath, &response); err != nil {
 			return nil, err
 		}
+
 		for i, d := range response.Data {
 			// Add the special "Site Name" to each client. This becomes a Grafana filter somewhere.
 			response.Data[i].SiteName = site.Desc + " (" + site.Name + ")"
@@ -21,8 +25,10 @@ func (u *Unifi) GetClients(sites Sites) (Clients, error) {
 			response.Data[i].Hostname = pick(d.Hostname, d.Name, d.Mac)
 			response.Data[i].Name = pick(d.Name, d.Hostname)
 		}
+
 		data = append(data, response.Data...)
 	}
+
 	return data, nil
 }
 

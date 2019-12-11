@@ -11,30 +11,30 @@ import (
 // This is a list of unifi API paths.
 // The %s in each string must be replaced with a Site.Name.
 const (
-	// StatusPath shows Controller version.
-	StatusPath string = "/status"
-	// SiteList is the path to the api site list.
-	SiteList string = "/api/stat/sites"
-	// ClientPath is Unifi Clients API Path
-	ClientPath string = "/api/s/%s/stat/sta"
-	// DevicePath is where we get data about Unifi devices.
-	DevicePath string = "/api/s/%s/stat/device"
-	// NetworkPath contains network-configuration data. Not really graphable.
-	NetworkPath string = "/api/s/%s/rest/networkconf"
-	// UserGroupPath contains usergroup configurations.
-	UserGroupPath string = "/api/s/%s/rest/usergroup"
-	// LoginPath is Unifi Controller Login API Path
-	LoginPath string = "/api/login"
-	// IPSEvents returns Intrusion Detection Systems Events
-	IPSEvents string = "/api/s/%s/stat/ips/event"
+	// APIStatusPath shows Controller version.
+	APIStatusPath string = "/status"
+	// APISiteList is the path to the api site list.
+	APISiteList string = "/api/stat/sites"
+	// APIClientPath is Unifi Clients API Path
+	APIClientPath string = "/api/s/%s/stat/sta"
+	// APIDevicePath is where we get data about Unifi devices.
+	APIDevicePath string = "/api/s/%s/stat/device"
+	// APINetworkPath contains network-configuration data. Not really graphable.
+	APINetworkPath string = "/api/s/%s/rest/networkconf"
+	// APIUserGroupPath contains usergroup configurations.
+	APIUserGroupPath string = "/api/s/%s/rest/usergroup"
+	// APILoginPath is Unifi Controller Login API Path
+	APILoginPath string = "/api/login"
+	// APIIPSEvents returns Intrusion Detection Systems Events
+	APIIPSEvents string = "/api/s/%s/stat/ips/event"
 )
 
 // Logger is a base type to deal with changing log outputs. Create a logger
 // that matches this interface to capture debug and error logs.
 type Logger func(msg string, fmt ...interface{})
 
-// DiscardLogs is the default debug logger.
-func DiscardLogs(msg string, v ...interface{}) {
+// discardLogs is the default debug logger.
+func discardLogs(msg string, v ...interface{}) {
 	// do nothing.
 }
 
@@ -86,9 +86,11 @@ type FlexInt struct {
 // Generally, do call this directly, it's used in the json interface.
 func (f *FlexInt) UnmarshalJSON(b []byte) error {
 	var unk interface{}
+
 	if err := json.Unmarshal(b, &unk); err != nil {
 		return err
 	}
+
 	switch i := unk.(type) {
 	case float64:
 		f.Val = i
@@ -102,6 +104,7 @@ func (f *FlexInt) UnmarshalJSON(b []byte) error {
 	default:
 		return fmt.Errorf("cannot unmarshal to FlexInt: %s", b)
 	}
+
 	return nil
 }
 
@@ -120,5 +123,6 @@ func (f *FlexBool) UnmarshalJSON(b []byte) error {
 		strings.EqualFold(f.Txt, "t") || strings.EqualFold(f.Txt, "armed") || strings.EqualFold(f.Txt, "active") ||
 		strings.EqualFold(f.Txt, "enabled") || strings.EqualFold(f.Txt, "ready") || strings.EqualFold(f.Txt, "up") ||
 		strings.EqualFold(f.Txt, "ok")
+
 	return nil
 }
