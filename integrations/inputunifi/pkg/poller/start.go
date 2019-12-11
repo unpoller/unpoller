@@ -28,7 +28,10 @@ func New() *UnifiPoller {
 			SaveSites:  true,
 			HTTPListen: defaultHTTPListen,
 			Namespace:  appName,
-		}, Flag: &Flag{ConfigFile: DefaultConfFile},
+		},
+		Flag: &Flag{
+			ConfigFile: DefaultConfFile,
+		},
 	}
 }
 
@@ -36,6 +39,7 @@ func New() *UnifiPoller {
 // Parses cli flags, parses config file, parses env vars, sets up logging, then:
 // - dumps a json payload OR - executes Run().
 func (u *UnifiPoller) Start() error {
+	log.SetOutput(os.Stdout)
 	log.SetFlags(log.LstdFlags)
 	u.Flag.Parse(os.Args[1:])
 
@@ -92,63 +96,44 @@ func (f *Flag) Parse(args []string) {
 // 2. Run the collector one time and report the metrics to influxdb. (lambda)
 // 3. Start a web server and wait for Prometheus to poll the application for metrics.
 func (u *UnifiPoller) Run() error {
-	if err := u.GetUnifi(); err != nil {
-		return err
+	switch err := u.GetUnifi(); err {
+	case nil:
+		u.Logf("Polling UniFi Controller at %s v%s as user %s. Sites: %v",
+			u.Config.UnifiBase, u.Unifi.ServerVersion, u.Config.UnifiUser, u.Config.Sites)
+	default:
+		u.LogErrorf("Controller Auth or Connection failed, but continuing to retry! %v", err)
 	}
-	u.Logf("Polling UniFi Controller at %s v%s as user %s. Sites: %v",
-		u.Config.UnifiBase, u.Unifi.ServerVersion, u.Config.UnifiUser, u.Config.Sites)
 
 	switch strings.ToLower(u.Config.Mode) {
 	default:
-		return u.PollController()
+		u.PollController()
+		return nil
 	case "influxlambda", "lambdainflux", "lambda_influx", "influx_lambda":
 		u.LastCheck = time.Now()
 		return u.CollectAndProcess()
+	case "both":
+		go u.PollController()
+		fallthrough
 	case "prometheus", "exporter":
 		return u.RunPrometheus()
-	case "both":
-		return u.RunBoth()
 	}
-}
-
-// RunBoth starts the prometheus exporter and influxdb exporter at the same time.
-// This will likely double the amount of polls your controller receives.
-func (u *UnifiPoller) RunBoth() error {
-	e := make(chan error)
-	defer close(e)
-	go func() {
-		e <- u.RunPrometheus()
-	}()
-	go func() {
-		e <- u.PollController()
-	}()
-	// If either method returns an error (even nil), bail out.
-	return <-e
 }
 
 // PollController runs forever, polling UniFi and pushing to InfluxDB
 // This is started by Run() or RunBoth() after everything checks out.
-func (u *UnifiPoller) PollController() error {
+func (u *UnifiPoller) PollController() {
 	interval := u.Config.Interval.Round(time.Second)
-	log.Printf("[INFO] Everything checks out! Poller started, interval: %v", interval)
-	ticker := time.NewTicker(interval)
-	defer ticker.Stop()
+	log.Printf("[INFO] Everything checks out! Poller started, InfluxDB interval: %v", interval)
 
+	ticker := time.NewTicker(interval)
 	for u.LastCheck = range ticker.C {
-		// Some users need to re-auth every interval because the cookie times out.
-		if u.Config.ReAuth {
-			u.LogDebugf("Re-authenticating to UniFi Controller")
-			if err := u.Unifi.Login(); err != nil {
-				return err
+		if err := u.CollectAndProcess(); err != nil {
+			u.LogErrorf("%v", err)
+
+			if u.Unifi != nil {
+				u.Unifi.CloseIdleConnections()
+				u.Unifi = nil // trigger re-auth in unifi.go.
 			}
 		}
-		if err := u.CollectAndProcess(); err != nil {
-			return err
-		}
-		// check for errors from the unifi polls.
-		if u.errorCount > 0 {
-			return fmt.Errorf("too many errors, stopping poller")
-		}
 	}
-	return nil
 }
