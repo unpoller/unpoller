@@ -33,11 +33,8 @@ func (u *InfluxUnifi) batchSysStats(s unifi.SysStats, ss unifi.SystemStats) map[
 // batchUDM generates Unifi Gateway datapoints for InfluxDB.
 // These points can be passed directly to influx.
 func (u *InfluxUnifi) batchUDM(r report, s *unifi.UDM) {
-	if s.Stat.Sw == nil {
-		s.Stat.Sw = &unifi.Sw{}
-	}
-	if s.Stat.Gw == nil {
-		s.Stat.Gw = &unifi.Gw{}
+	if !s.Adopted.Val || s.Locating.Val {
+		return
 	}
 	tags := map[string]string{
 		"mac":       s.Mac,
@@ -81,28 +78,18 @@ func (u *InfluxUnifi) batchUDM(r report, s *unifi.UDM) {
 		"serial":    s.Serial,
 		"type":      s.Type,
 	}
-	fields = map[string]interface{}{
-		"guest-num_sta":   s.GuestNumSta.Val,
-		"ip":              s.IP,
-		"bytes":           s.Bytes.Val,
-		"last_seen":       s.LastSeen.Val,
-		"rx_bytes":        s.RxBytes.Val,
-		"tx_bytes":        s.TxBytes.Val,
-		"uptime":          s.Uptime.Val,
-		"state":           s.State.Val,
-		"stat_bytes":      s.Stat.Sw.Bytes.Val,
-		"stat_rx_bytes":   s.Stat.Sw.RxBytes.Val,
-		"stat_rx_crypts":  s.Stat.Sw.RxCrypts.Val,
-		"stat_rx_dropped": s.Stat.Sw.RxDropped.Val,
-		"stat_rx_errors":  s.Stat.Sw.RxErrors.Val,
-		"stat_rx_frags":   s.Stat.Sw.RxFrags.Val,
-		"stat_rx_packets": s.Stat.Sw.TxPackets.Val,
-		"stat_tx_bytes":   s.Stat.Sw.TxBytes.Val,
-		"stat_tx_dropped": s.Stat.Sw.TxDropped.Val,
-		"stat_tx_errors":  s.Stat.Sw.TxErrors.Val,
-		"stat_tx_packets": s.Stat.Sw.TxPackets.Val,
-		"stat_tx_retries": s.Stat.Sw.TxRetries.Val,
-	}
+	fields = Combine(
+		u.batchUSWstat(s.Stat.Sw),
+		map[string]interface{}{
+			"guest-num_sta": s.GuestNumSta.Val,
+			"ip":            s.IP,
+			"bytes":         s.Bytes.Val,
+			"last_seen":     s.LastSeen.Val,
+			"rx_bytes":      s.RxBytes.Val,
+			"tx_bytes":      s.TxBytes.Val,
+			"uptime":        s.Uptime.Val,
+			"state":         s.State.Val,
+		})
 	r.send(&metric{Table: "usw", Tags: tags, Fields: fields})
 	u.batchPortTable(r, tags, s.PortTable)
 
