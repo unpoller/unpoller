@@ -128,7 +128,9 @@ func (u *UnifiPoller) PollController() {
 	for u.LastCheck = range ticker.C {
 		if err := u.CollectAndProcess(); err != nil {
 			u.LogErrorf("%v", err)
-			u.Unifi.CloseIdleConnections()
+			if u.Unifi != nil {
+				u.Unifi.CloseIdleConnections()
+			}
 			u.Unifi = nil // trigger re-auth in unifi.go.
 		}
 	}
