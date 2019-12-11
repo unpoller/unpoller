@@ -69,31 +69,37 @@ FIRST:
 
 // CollectMetrics grabs all the measurements from a UniFi controller and returns them.
 func (u *UnifiPoller) CollectMetrics() (*metrics.Metrics, error) {
+	var err error
+
 	if u.Unifi == nil || u.Config.ReAuth {
 		// Some users need to re-auth every interval because the cookie times out.
 		// Sometimes we hit this path when the controller dies.
-		u.LogDebugf("Re-authenticating to UniFi Controller")
+		u.Logf("Re-authenticating to UniFi Controller")
 		if err := u.GetUnifi(); err != nil {
 			return nil, err
 		}
 	}
+
 	m := &metrics.Metrics{TS: u.LastCheck} // At this point, it's the Current Check.
-	var err error
 	// Get the sites we care about.
 	if m.Sites, err = u.GetFilteredSites(); err != nil {
 		return m, fmt.Errorf("unifi.GetSites(): %v", err)
 	}
+
 	if u.Config.SaveIDS {
 		m.IDSList, err = u.Unifi.GetIDS(m.Sites, time.Now().Add(u.Config.Interval.Duration), time.Now())
 		return m, fmt.Errorf("unifi.GetIDS(): %v", err)
 	}
+
 	// Get all the points.
 	if m.Clients, err = u.Unifi.GetClients(m.Sites); err != nil {
 		return m, fmt.Errorf("unifi.GetClients(): %v", err)
 	}
+
 	if m.Devices, err = u.Unifi.GetDevices(m.Sites); err != nil {
 		return m, fmt.Errorf("unifi.GetDevices(): %v", err)
 	}
+
 	return m, nil
 }
 
