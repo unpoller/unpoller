@@ -121,6 +121,7 @@ func (u *Unifi) GetSiteIDS(site *Site, from, to time.Time) ([]*IDS, error) {
 	if err != nil {
 		return nil, err
 	}
+
 	defer resp.Body.Close()
 
 	body, err := ioutil.ReadAll(resp.Body)

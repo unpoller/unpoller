@@ -9,10 +9,6 @@ import (
 )
 
 func TestNewUnifi(t *testing.T) {
-	/* NOT DONE: OPEN web server, check parameters posted, more. This test is incomplete.
-	a.EqualValues(`{"username": "user1","password": "pass2"}`, string(post_params),
-		"user/pass json parameters improperly encoded")
-	*/
 	t.Parallel()
 	a := assert.New(t)
 	u := "http://127.0.0.1:64431"
@@ -59,3 +55,8 @@ func TestUniReq(t *testing.T) {
 	a.Nil(err, "problem reading request body, POST parameters may be malformed")
 	a.EqualValues(k, string(d), "POST parameters improperly encoded")
 }
+
+/* NOT DONE: OPEN web server, check parameters posted, more. This test is incomplete.
+a.EqualValues(`{"username": "user1","password": "pass2"}`, string(post_params),
+	"user/pass json parameters improperly encoded")
+*/

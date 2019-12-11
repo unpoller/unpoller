@@ -70,8 +70,8 @@ func (u *Unifi) Login() error {
 	if err != nil {
 		return err
 	}
-	defer resp.Body.Close() // we need no data here.
 
+	defer resp.Body.Close()                   // we need no data here.
 	_, _ = io.Copy(ioutil.Discard, resp.Body) // avoid leaking.
 	u.DebugLog("Requested %s: elapsed %v, returned %d bytes",
 		APILoginPath, time.Since(start).Round(time.Millisecond), resp.ContentLength)
@@ -144,6 +144,7 @@ func (u *Unifi) GetJSON(apiPath string) ([]byte, error) {
 	if err != nil {
 		return []byte{}, err
 	}
+
 	defer resp.Body.Close()
 
 	body, err := ioutil.ReadAll(resp.Body)
