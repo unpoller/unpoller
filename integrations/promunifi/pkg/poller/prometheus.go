@@ -15,7 +15,7 @@ const oneDecimalPoint = 10
 
 // RunPrometheus starts the web server and registers the collector.
 func (u *UnifiPoller) RunPrometheus() error {
-	u.Logf("Exporting Measurements at https://%s/metrics for Prometheus", u.Config.HTTPListen)
+	u.Logf("Exporting Measurements for Prometheus at https://%s/metrics", u.Config.HTTPListen)
 	http.Handle("/metrics", promhttp.Handler())
 	prometheus.MustRegister(promunifi.NewUnifiCollector(promunifi.UnifiCollectorCnfg{
 		Namespace:    strings.Replace(u.Config.Namespace, "-", "", -1),
@@ -23,6 +23,7 @@ func (u *UnifiPoller) RunPrometheus() error {
 		LoggingFn:    u.LogExportReport,
 		ReportErrors: true, // XXX: Does this need to be configurable?
 	}))
+
 	return http.ListenAndServe(u.Config.HTTPListen, nil)
 }
 
@@ -34,8 +35,9 @@ func (u *UnifiPoller) ExportMetrics() (*metrics.Metrics, error) {
 	if err != nil {
 		u.LogErrorf("collecting metrics: %v", err)
 		u.Logf("Re-authenticating to UniFi Controller")
-		if err := u.Unifi.Login(); err != nil {
-			u.LogError(err, "re-authenticating")
+
+		if err := u.GetUnifi(); err != nil {
+			u.LogErrorf("re-authenticating: %v", err)
 			return nil, err
 		}
 
