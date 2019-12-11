@@ -60,6 +60,9 @@ func descDevice(ns string) *unifiDevice {
 
 // UDM is a collection of stats from USG, USW and UAP. It has no unique stats.
 func (u *promUnifi) exportUDM(r report, d *unifi.UDM) {
+	if !d.Adopted.Val || d.Locating.Val {
+		return
+	}
 	labels := []string{d.Type, d.SiteName, d.Name}
 	infoLabels := []string{d.Version, d.Model, d.Serial, d.Mac, d.IP, d.ID, d.Bytes.Txt, d.Uptime.Txt}
 	// Shared data (all devices do this).

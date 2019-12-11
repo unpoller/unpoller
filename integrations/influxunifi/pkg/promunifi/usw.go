@@ -91,6 +91,9 @@ func descUSW(ns string) *usw {
 }
 
 func (u *promUnifi) exportUSW(r report, d *unifi.USW) {
+	if !d.Adopted.Val || d.Locating.Val {
+		return
+	}
 	labels := []string{d.Type, d.SiteName, d.Name}
 	infoLabels := []string{d.Version, d.Model, d.Serial, d.Mac, d.IP, d.ID, d.Bytes.Txt, d.Uptime.Txt}
 	u.exportUSWstats(r, labels, d.Stat.Sw)
@@ -116,6 +119,9 @@ func (u *promUnifi) exportUSW(r report, d *unifi.USW) {
 
 // Switch Stats
 func (u *promUnifi) exportUSWstats(r report, labels []string, sw *unifi.Sw) {
+	if sw == nil {
+		return
+	}
 	labelS := labels[1:]
 	r.send([]*metric{
 		{u.USW.SwRxPackets, counter, sw.RxPackets, labelS},

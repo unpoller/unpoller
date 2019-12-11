@@ -7,8 +7,8 @@ import (
 // batchUAP generates Wireless-Access-Point datapoints for InfluxDB.
 // These points can be passed directly to influx.
 func (u *InfluxUnifi) batchUAP(r report, s *unifi.UAP) {
-	if s.Stat.Ap == nil {
-		s.Stat.Ap = &unifi.Ap{}
+	if !s.Adopted.Val || s.Locating.Val {
+		return
 	}
 	tags := map[string]string{
 		"mac":       s.Mac,
@@ -36,6 +36,9 @@ func (u *InfluxUnifi) batchUAP(r report, s *unifi.UAP) {
 }
 
 func (u *InfluxUnifi) processUAPstats(ap *unifi.Ap) map[string]interface{} {
+	if ap == nil {
+		return map[string]interface{}{}
+	}
 	// Accumulative Statistics.
 	return map[string]interface{}{
 		"stat_user-rx_packets":  ap.UserRxPackets.Val,
