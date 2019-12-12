@@ -21,7 +21,6 @@ for os in el centos; do
   done
 done
 
-
 for os in ubuntu debian; do
   for arch in arm64 armhf amd64 i386; do
     file="unifi-poller_${VERSION}-${ITERATION}_${arch}.deb"
