@@ -9,6 +9,7 @@ import (
 	"github.com/davidnewhall/unifi-poller/pkg/promunifi"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
+	"github.com/prometheus/common/version"
 )
 
 const oneDecimalPoint = 10
@@ -23,6 +24,9 @@ func (u *UnifiPoller) RunPrometheus() error {
 		LoggingFn:    u.LogExportReport,
 		ReportErrors: true, // XXX: Does this need to be configurable?
 	}))
+
+	version.Version = Version
+	prometheus.MustRegister(version.NewCollector("unifipoller"))
 
 	return http.ListenAndServe(u.Config.HTTPListen, nil)
 }
