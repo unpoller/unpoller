@@ -42,6 +42,12 @@ $(PACKAGE_SCRIPTS) \
 --config-files "/etc/$(BINARY)/$(CONFIG_FILE)"
 endef
 
+VERSION_LDFLAGS:= \
+  -X $(IMPORT_PATH)/vendor/github.com/prometheus/common/version.Branch=$(BRANCH) \
+  -X $(IMPORT_PATH)/vendor/github.com/prometheus/common/version.BuildDate=$(DATE) \
+  -X $(IMPORT_PATH)/vendor/github.com/prometheus/common/version.Revision=$(COMMIT) \
+  -X $(VERSION_PATH)=$(VERSION)-$(ITERATION)
+
 # Makefile targets follow.
 
 all: build
@@ -89,40 +95,40 @@ README.html: md2roff
 
 build: $(BINARY)
 $(BINARY): main.go pkg/*/*.go
-	go build -o $(BINARY) -ldflags "-w -s -X $(VERSION_PATH)=$(VERSION)-$(ITERATION)"
+	go build -o $(BINARY) -ldflags "-w -s $(VERSION_LDFLAGS)"
 
 linux: $(BINARY).amd64.linux
 $(BINARY).amd64.linux: main.go pkg/*/*.go
 	# Building linux 64-bit x86 binary.
-	GOOS=linux GOARCH=amd64 go build -o $@ -ldflags "-w -s -X $(VERSION_PATH)=$(VERSION)-$(ITERATION)"
+	GOOS=linux GOARCH=amd64 go build -o $@ -ldflags "-w -s $(VERSION_LDFLAGS)"
 
 linux386: $(BINARY).i386.linux
 $(BINARY).i386.linux: main.go pkg/*/*.go
 	# Building linux 32-bit x86 binary.
-	GOOS=linux GOARCH=386 go build -o $@ -ldflags "-w -s -X $(VERSION_PATH)=$(VERSION)-$(ITERATION)"
+	GOOS=linux GOARCH=386 go build -o $@ -ldflags "-w -s $(VERSION_LDFLAGS)"
 
 arm: arm64 armhf
 
 arm64: $(BINARY).arm64.linux
 $(BINARY).arm64.linux: main.go pkg/*/*.go
 	# Building linux 64-bit ARM binary.
-	GOOS=linux GOARCH=arm64 go build -o $@ -ldflags "-w -s -X $(VERSION_PATH)=$(VERSION)-$(ITERATION)"
+	GOOS=linux GOARCH=arm64 go build -o $@ -ldflags "-w -s $(VERSION_LDFLAGS)"
 
 armhf: $(BINARY).armhf.linux
 $(BINARY).armhf.linux: main.go pkg/*/*.go
 	# Building linux 32-bit ARM binary.
-	GOOS=linux GOARCH=arm GOARM=6 go build -o $@ -ldflags "-w -s -X $(VERSION_PATH)=$(VERSION)-$(ITERATION)"
+	GOOS=linux GOARCH=arm GOARM=6 go build -o $@ -ldflags "-w -s $(VERSION_LDFLAGS)"
 
 macos: $(BINARY).amd64.macos
 $(BINARY).amd64.macos: main.go pkg/*/*.go
 	# Building darwin 64-bit x86 binary.
-	GOOS=darwin GOARCH=amd64 go build -o $@ -ldflags "-w -s -X $(VERSION_PATH)=$(VERSION)-$(ITERATION)"
+	GOOS=darwin GOARCH=amd64 go build -o $@ -ldflags "-w -s $(VERSION_LDFLAGS)"
 
 exe: $(BINARY).amd64.exe
 windows: $(BINARY).amd64.exe
 $(BINARY).amd64.exe: main.go pkg/*/*.go
 	# Building windows 64-bit x86 binary.
-	GOOS=windows GOARCH=amd64 go build -o $@ -ldflags "-w -s -X $(VERSION_PATH)=$(VERSION)-$(ITERATION)"
+	GOOS=windows GOARCH=amd64 go build -o $@ -ldflags "-w -s $(VERSION_LDFLAGS)"
 
 # Packages
 
