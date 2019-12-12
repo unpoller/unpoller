@@ -3,7 +3,7 @@
 # Deploy our built packages to jfrog bintray.
 
 COMPONENT=unstable
-if [ "$TRAVIS_BRANCH" != "$TRAVIS_TAG" ] && [ "$TRAVIS_BRANCH" != "" ]; then
+if [ "$TRAVIS_BRANCH" == "$TRAVIS_TAG" ] && [ "$TRAVIS_BRANCH" != "" ]; then
   COMPONENT=main
 fi
 echo "deploying packages from branch: $TRAVIS_BRANCH, tag: $TRAVIS_TAG to repo: $COMPONENT"
