@@ -1,21 +1,33 @@
 #!/bin/bash
 
-# Deploy our built packages to packagecloud.
+# Deploy our built packages to jfrog bintray.
 
-REPO=unstable
-[ "$TRAVIS_BRANCH" != "$TRAVIS_TAG" ] || REPO=stable
-echo "deploying packages from branch: $TRAVIS_BRANCH, tag: $TRAVIS_TAG to repo: $REPO"
+COMPONENT=unstable
+if [ "$TRAVIS_BRANCH" != "$TRAVIS_TAG" ] && [ "$TRAVIS_BRANCH" != "" ]; then
+  COMPONENT=main
+fi
+echo "deploying packages from branch: $TRAVIS_BRANCH, tag: $TRAVIS_TAG to repo: $COMPONENT"
 
 source .metadata.sh
-# deb
-cmd="package_cloud push golift/${REPO}/ubuntu/bionic"
-$cmd release/unifi-poller_${VERSION}-${ITERATION}_arm64.deb
-$cmd release/unifi-poller_${VERSION}-${ITERATION}_amd64.deb
-$cmd release/unifi-poller_${VERSION}-${ITERATION}_armhf.deb
-$cmd release/unifi-poller_${VERSION}-${ITERATION}_i386.deb
-# rpm
-cmd="package_cloud push golift/${REPO}/el/6"
-$cmd release/unifi-poller-${VERSION}-${ITERATION}.arm64.rpm
-$cmd release/unifi-poller-${VERSION}-${ITERATION}.x86_64.rpm
-$cmd release/unifi-poller-${VERSION}-${ITERATION}.armhf.rpm
-$cmd release/unifi-poller-${VERSION}-${ITERATION}.i386.rpm
+
+for os in el centos; do
+  for arch in arm64 armhf x86_64 i386; do
+    file="unifi-poller-${VERSION}-${ITERATION}.${arch}.rpm"
+    opts="publish=1;override=1"
+    url="https://api.bintray.com/content/golift/${os}/unifi-poller/${VERSION}-${ITERATION}/${COMPONENT}/${arch}/${file}"
+    echo curl -T "release/${file}" "${url};${opts}"
+    curl -T "release/${file}" -u "${JFROG_USER_API_KEY}" "${url};${opts}"
+    echo
+  done
+done
+
+for os in ubuntu debian; do
+  for arch in arm64 armhf amd64 i386; do
+    file="unifi-poller_${VERSION}-${ITERATION}_${arch}.deb"
+    opts="deb_distribution=xenial,bionic,focal,jesse,stretch,buster,bullseye;deb_component=${COMPONENT};deb_architecture=${arch};publish=1;override=1"
+    url="https://api.bintray.com/content/golift/${os}/unifi-poller/${VERSION}-${ITERATION}/${file}"
+    echo curl -T "release/${file}" "${url};${opts}"
+    curl -T "release/${file}" -u "${JFROG_USER_API_KEY}" "${url};${opts}"
+    echo
+  done
+done
