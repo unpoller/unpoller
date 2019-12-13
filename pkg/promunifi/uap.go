@@ -83,6 +83,7 @@ func descUAP(ns string) *uap {
 	labelA := []string{"stat", "site_name", "name"} // stat + labels[1:]
 	labelV := []string{"vap_name", "bssid", "radio", "radio_name", "essid", "usage", "site_name", "name"}
 	labelR := []string{"radio_name", "radio", "site_name", "name"}
+
 	return &uap{
 		// 3x each - stat table: total, guest, user
 		ApWifiTxDropped:     prometheus.NewDesc(ns+"stat_wifi_transmt_dropped_total", "Wifi Transmissions Dropped", labelA, nil),
@@ -162,6 +163,7 @@ func (u *promUnifi) exportUAP(r report, d *unifi.UAP) {
 	if !d.Adopted.Val || d.Locating.Val {
 		return
 	}
+
 	labels := []string{d.Type, d.SiteName, d.Name}
 	infoLabels := []string{d.Version, d.Model, d.Serial, d.Mac, d.IP, d.ID, d.Bytes.Txt, d.Uptime.Txt}
 	u.exportUAPstats(r, labels, d.Stat.Ap, d.BytesD, d.TxBytesD, d.RxBytesD, d.BytesR)
@@ -181,6 +183,7 @@ func (u *promUnifi) exportUAPstats(r report, labels []string, ap *unifi.Ap, byte
 	if ap == nil {
 		return
 	}
+
 	labelU := []string{"user", labels[1], labels[2]}
 	labelG := []string{"guest", labels[1], labels[2]}
 	r.send([]*metric{
@@ -229,8 +232,8 @@ func (u *promUnifi) exportVAPtable(r report, labels []string, vt unifi.VapTable)
 		if !v.Up.Val {
 			continue
 		}
-		labelV := []string{v.Name, v.Bssid, v.Radio, v.RadioName, v.Essid, v.Usage, labels[1], labels[2]}
 
+		labelV := []string{v.Name, v.Bssid, v.Radio, v.RadioName, v.Essid, v.Usage, labels[1], labels[2]}
 		r.send([]*metric{
 			{u.UAP.VAPCcq, gauge, float64(v.Ccq) / 1000.0, labelV},
 			{u.UAP.VAPMacFilterRejections, counter, v.MacFilterRejections, labelV},
@@ -294,6 +297,7 @@ func (u *promUnifi) exportRADtable(r report, labels []string, rt unifi.RadioTabl
 			if t.Name != p.Name {
 				continue
 			}
+
 			r.send([]*metric{
 				{u.UAP.RadioTxPower, gauge, t.TxPower, labelR},
 				{u.UAP.RadioAstBeXmit, gauge, t.AstBeXmit, labelR},

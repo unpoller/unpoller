@@ -49,6 +49,7 @@ func descUSW(ns string) *usw {
 	pns := ns + "port_"
 	labelS := []string{"site_name", "name"}
 	labelP := []string{"port_id", "port_num", "port_name", "port_mac", "port_ip", "site_name", "name"}
+
 	return &usw{
 		// This data may be derivable by sum()ing the port data.
 		SwRxPackets:   prometheus.NewDesc(ns+"switch_receive_packets_total", "Switch Packets Received Total", labelS, nil),
@@ -94,6 +95,7 @@ func (u *promUnifi) exportUSW(r report, d *unifi.USW) {
 	if !d.Adopted.Val || d.Locating.Val {
 		return
 	}
+
 	labels := []string{d.Type, d.SiteName, d.Name}
 	infoLabels := []string{d.Version, d.Model, d.Serial, d.Mac, d.IP, d.ID, d.Bytes.Txt, d.Uptime.Txt}
 	u.exportUSWstats(r, labels, d.Stat.Sw)
@@ -105,13 +107,16 @@ func (u *promUnifi) exportUSW(r report, d *unifi.USW) {
 		{u.Device.Info, gauge, 1.0, append(labels, infoLabels...)},
 		{u.Device.Uptime, gauge, d.Uptime, labels},
 	})
+
 	// Switch System Data.
 	if d.HasTemperature.Val {
 		r.send([]*metric{{u.Device.Temperature, gauge, d.GeneralTemperature, labels}})
 	}
+
 	if d.HasFan.Val {
 		r.send([]*metric{{u.Device.FanLevel, gauge, d.FanLevel, labels}})
 	}
+
 	if d.TotalMaxPower.Txt != "" {
 		r.send([]*metric{{u.Device.TotalMaxPower, gauge, d.TotalMaxPower, labels}})
 	}
@@ -122,6 +127,7 @@ func (u *promUnifi) exportUSWstats(r report, labels []string, sw *unifi.Sw) {
 	if sw == nil {
 		return
 	}
+
 	labelS := labels[1:]
 	r.send([]*metric{
 		{u.USW.SwRxPackets, counter, sw.RxPackets, labelS},
@@ -150,8 +156,10 @@ func (u *promUnifi) exportPRTtable(r report, labels []string, pt []unifi.Port) {
 		if !p.Up.Val || !p.Enable.Val {
 			continue
 		}
+
 		// Copy labels, and add four new ones.
 		labelP := []string{labels[2] + " Port " + p.PortIdx.Txt, p.PortIdx.Txt, p.Name, p.Mac, p.IP, labels[1], labels[2]}
+
 		if p.PoeEnable.Val && p.PortPoe.Val {
 			r.send([]*metric{
 				{u.USW.PoeCurrent, gauge, p.PoeCurrent, labelP},

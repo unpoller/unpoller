@@ -66,8 +66,7 @@ func descSite(ns string) *site {
 
 func (u *promUnifi) exportSite(r report, s *unifi.Site) {
 	for _, h := range s.Health {
-		labels := []string{h.Subsystem, h.Status, s.SiteName}
-		switch h.Subsystem {
+		switch labels := []string{h.Subsystem, h.Status, s.SiteName}; labels[0] {
 		case "www":
 			r.send([]*metric{
 				{u.Site.TxBytesR, gauge, h.TxBytesR, labels},

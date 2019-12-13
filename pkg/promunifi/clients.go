@@ -43,6 +43,7 @@ type uclient struct {
 func descClient(ns string) *uclient {
 	labels := []string{"name", "mac", "site_name", "gw_name", "sw_name", "vlan", "ip", "oui", "network", "sw_port", "ap_name", "wired"}
 	labelW := append([]string{"radio_name", "radio", "radio_proto", "channel", "essid", "bssid", "radio_desc"}, labels...)
+
 	return &uclient{
 		Anomalies:      prometheus.NewDesc(ns+"anomalies", "Client Anomalies", labelW, nil),
 		BytesR:         prometheus.NewDesc(ns+"transfer_rate_bytes", "Client Data Rate", labelW, nil),
@@ -115,6 +116,7 @@ func (u *promUnifi) exportClient(r report, c *unifi.Client) {
 			{u.Client.BytesR, gauge, c.BytesR, labelW},
 		})
 	}
+
 	r.send([]*metric{{u.Client.Uptime, gauge, c.Uptime, labelW}})
 	/* needs more "looking into"
 	{u.Client.DpiStatsApp, gauge, c.DpiStats.App, labels},
