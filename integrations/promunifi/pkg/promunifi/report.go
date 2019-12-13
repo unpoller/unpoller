@@ -46,20 +46,24 @@ func (r *Report) report(descs map[*prometheus.Desc]bool) {
 	if r.cf.LoggingFn == nil {
 		return
 	}
+
 	r.Descs = len(descs)
 	r.cf.LoggingFn(r)
 }
 
 func (r *Report) export(m *metric, v float64) prometheus.Metric {
 	r.Total++
+
 	if v == 0 {
 		r.Zeros++
 	}
+
 	return prometheus.MustNewConstMetric(m.Desc, m.ValueType, v, m.Labels...)
 }
 
 func (r *Report) error(ch chan<- prometheus.Metric, d *prometheus.Desc, v interface{}) {
 	r.Errors++
+
 	if r.cf.ReportErrors {
 		ch <- prometheus.NewInvalidMetric(d, fmt.Errorf("error: %v", v))
 	}

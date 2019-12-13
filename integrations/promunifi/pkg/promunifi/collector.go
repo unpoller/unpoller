@@ -75,9 +75,11 @@ func NewUnifiCollector(opts UnifiCollectorCnfg) prometheus.Collector {
 	if opts.CollectFn == nil {
 		panic("nil collector function")
 	}
+
 	if opts.Namespace = strings.Trim(opts.Namespace, "_") + "_"; opts.Namespace == "_" {
 		opts.Namespace = ""
 	}
+
 	return &promUnifi{
 		Config: opts,
 		Client: descClient(opts.Namespace + "client_"),
@@ -94,6 +96,7 @@ func NewUnifiCollector(opts UnifiCollectorCnfg) prometheus.Collector {
 func (u *promUnifi) Describe(ch chan<- *prometheus.Desc) {
 	for _, f := range []interface{}{u.Client, u.Device, u.UAP, u.USG, u.USW, u.Site} {
 		v := reflect.Indirect(reflect.ValueOf(f))
+
 		// Loop each struct member and send it to the provided channel.
 		for i := 0; i < v.NumField(); i++ {
 			desc, ok := v.Field(i).Interface().(*prometheus.Desc)
@@ -108,6 +111,7 @@ func (u *promUnifi) Describe(ch chan<- *prometheus.Desc) {
 // the current metrics (from another package) then exports them for prometheus.
 func (u *promUnifi) Collect(ch chan<- prometheus.Metric) {
 	var err error
+
 	r := &Report{cf: u.Config, ch: make(chan []*metric, buffer), Start: time.Now()}
 	defer r.close()
 
@@ -116,6 +120,7 @@ func (u *promUnifi) Collect(ch chan<- prometheus.Metric) {
 		return
 	}
 	r.Fetch = time.Since(r.Start)
+
 	if r.Metrics.Devices == nil {
 		r.Metrics.Devices = &unifi.Devices{}
 	}
@@ -131,6 +136,7 @@ func (u *promUnifi) Collect(ch chan<- prometheus.Metric) {
 func (u *promUnifi) exportMetrics(r report, ch chan<- prometheus.Metric, ourChan chan []*metric) {
 	descs := make(map[*prometheus.Desc]bool) // used as a counter
 	defer r.report(descs)
+
 	for newMetrics := range ourChan {
 		for _, m := range newMetrics {
 			descs[m.Desc] = true

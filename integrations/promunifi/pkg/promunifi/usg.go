@@ -72,6 +72,7 @@ func (u *promUnifi) exportUSG(r report, d *unifi.USG) {
 	if !d.Adopted.Val || d.Locating.Val {
 		return
 	}
+
 	labels := []string{d.Type, d.SiteName, d.Name}
 	infoLabels := []string{d.Version, d.Model, d.Serial, d.Mac, d.IP, d.ID, d.Bytes.Txt, d.Uptime.Txt}
 	// Gateway System Data.
@@ -91,6 +92,7 @@ func (u *promUnifi) exportUSGstats(r report, labels []string, gw *unifi.Gw, st u
 	if gw == nil {
 		return
 	}
+
 	labelLan := []string{"lan", labels[1], labels[2]}
 	labelWan := []string{"all", labels[1], labels[2]}
 	r.send([]*metric{
@@ -115,6 +117,7 @@ func (u *promUnifi) exportWANPorts(r report, labels []string, wans ...unifi.Wan)
 		if !wan.Up.Val {
 			continue // only record UP interfaces.
 		}
+
 		labelWan := []string{wan.Name, labels[1], labels[2]}
 		r.send([]*metric{
 			{u.USG.WanRxPackets, counter, wan.RxPackets, labelWan},
