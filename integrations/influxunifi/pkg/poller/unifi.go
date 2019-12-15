@@ -10,45 +10,45 @@ import (
 )
 
 // GetUnifi returns a UniFi controller interface.
-func (u *UnifiPoller) GetUnifi(config Controller) error {
+func (u *UnifiPoller) GetUnifi(c Controller) error {
 	var err error
 
 	u.Lock()
 	defer u.Unlock()
 
-	if config.Unifi != nil {
-		config.Unifi.CloseIdleConnections()
+	if c.Unifi != nil {
+		c.Unifi.CloseIdleConnections()
 	}
-
 	// Create an authenticated session to the Unifi Controller.
-	config.Unifi, err = unifi.NewUnifi(&unifi.Config{
-		User:      config.User,
-		Pass:      config.Pass,
-		URL:       config.URL,
-		VerifySSL: config.VerifySSL,
+	c.Unifi, err = unifi.NewUnifi(&unifi.Config{
+		User:      c.User,
+		Pass:      c.Pass,
+		URL:       c.URL,
+		VerifySSL: c.VerifySSL,
 		ErrorLog:  u.LogErrorf, // Log all errors.
 		DebugLog:  u.LogDebugf, // Log debug messages.
 	})
+
 	if err != nil {
-		config.Unifi = nil
+		c.Unifi = nil
 		return fmt.Errorf("unifi controller: %v", err)
 	}
 
-	u.LogDebugf("Authenticated with controller successfully, %s", config.URL)
+	u.LogDebugf("Authenticated with controller successfully, %s", c.URL)
 
-	return u.CheckSites(config)
+	return u.CheckSites(c)
 }
 
 // CheckSites makes sure the list of provided sites exists on the controller.
 // This does not run in Lambda (run-once) mode.
-func (u *UnifiPoller) CheckSites(config Controller) error {
+func (u *UnifiPoller) CheckSites(c Controller) error {
 	if strings.Contains(strings.ToLower(u.Config.Mode), "lambda") {
 		return nil // Skip this in lambda mode.
 	}
 
 	u.LogDebugf("Checking Controller Sites List")
 
-	sites, err := config.Unifi.GetSites()
+	sites, err := c.Unifi.GetSites()
 	if err != nil {
 		return err
 	}
@@ -60,13 +60,13 @@ func (u *UnifiPoller) CheckSites(config Controller) error {
 	}
 	u.Logf("Found %d site(s) on controller: %v", len(msg), strings.Join(msg, ", "))
 
-	if StringInSlice("all", config.Sites) {
-		config.Sites = []string{"all"}
+	if StringInSlice("all", c.Sites) {
+		c.Sites = []string{"all"}
 		return nil
 	}
 
 FIRST:
-	for _, s := range config.Sites {
+	for _, s := range c.Sites {
 		for _, site := range sites {
 			if s == site.Name {
 				continue FIRST
@@ -97,9 +97,22 @@ func (u *UnifiPoller) CollectMetrics() (metrics *metrics.Metrics, err error) {
 			}
 		}
 
+		if m == nil {
+			continue
+		}
+
 		metrics.Sites = append(metrics.Sites, m.Sites...)
 		metrics.Clients = append(metrics.Clients, m.Clients...)
 		metrics.IDSList = append(metrics.IDSList, m.IDSList...)
+
+		if m.Devices == nil {
+			continue
+		}
+
+		if metrics.Devices == nil {
+			metrics.Devices = &unifi.Devices{}
+		}
+
 		metrics.UAPs = append(metrics.UAPs, m.UAPs...)
 		metrics.USGs = append(metrics.USGs, m.USGs...)
 		metrics.USWs = append(metrics.USWs, m.USWs...)
@@ -134,7 +147,7 @@ func (u *UnifiPoller) collectController(c Controller) (*metrics.Metrics, error) 
 	}
 
 	if c.SaveIDS {
-		m.IDSList, err = c.Unifi.GetIDS(m.Sites, time.Now().Add(u.Config.Interval.Duration), time.Now())
+		m.IDSList, err = c.Unifi.GetIDS(m.Sites, time.Now().Add(2*time.Minute), time.Now())
 		if err != nil {
 			return m, fmt.Errorf("unifi.GetIDS(%v): %v", c.URL, err)
 		}
