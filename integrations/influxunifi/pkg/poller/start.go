@@ -6,7 +6,7 @@ import (
 	"log"
 	"os"
 
-	"github.com/github/hub/version"
+	"github.com/prometheus/common/version"
 	"github.com/spf13/pflag"
 )
 
