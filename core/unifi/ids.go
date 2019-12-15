@@ -95,9 +95,11 @@ func (u *Unifi) GetIDS(sites Sites, from, to time.Time) ([]*IDS, error) {
 		if err != nil {
 			return data, err
 		}
+
 		for i := range ids {
 			ids[i].SourceName = u.URL
 		}
+
 		data = append(data, ids...)
 	}
 
