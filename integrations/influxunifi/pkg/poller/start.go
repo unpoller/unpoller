@@ -131,17 +131,3 @@ func (u *UnifiPoller) Run() error {
 		return u.RunPrometheus()
 	}
 }
-
-// PollController runs forever, polling UniFi and pushing to InfluxDB
-// This is started by Run() or RunBoth() after everything checks out.
-func (u *UnifiPoller) PollController() {
-	interval := u.Config.Interval.Round(time.Second)
-	log.Printf("[INFO] Everything checks out! Poller started, InfluxDB interval: %v", interval)
-
-	ticker := time.NewTicker(interval)
-	for u.LastCheck = range ticker.C {
-		if err := u.CollectAndProcess(); err != nil {
-			u.LogErrorf("%v", err)
-		}
-	}
-}
