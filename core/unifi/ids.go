@@ -13,6 +13,7 @@ type IDSList []*IDS
 
 // IDS holds an Intrusion Prevention System Event.
 type IDS struct {
+	SourceName    string   `json:"-"`
 	ID            string   `json:"_id"`
 	Archived      FlexBool `json:"archived"`
 	Timestamp     int64    `json:"timestamp"`
@@ -94,7 +95,9 @@ func (u *Unifi) GetIDS(sites Sites, from, to time.Time) ([]*IDS, error) {
 		if err != nil {
 			return data, err
 		}
-
+		for i := range ids {
+			ids[i].SourceName = u.URL
+		}
 		data = append(data, ids...)
 	}
 

@@ -19,6 +19,8 @@ func (u *Unifi) GetClients(sites Sites) (Clients, error) {
 		}
 
 		for i, d := range response.Data {
+			// Add special SourceName value.
+			response.Data[i].SourceName = u.URL
 			// Add the special "Site Name" to each client. This becomes a Grafana filter somewhere.
 			response.Data[i].SiteName = site.Desc + " (" + site.Name + ")"
 			// Fix name and hostname fields. Sometimes one or the other is blank.
@@ -37,6 +39,7 @@ type Clients []*Client
 
 // Client defines all the data a connected-network client contains.
 type Client struct {
+	SourceName   string  `json:"-"`
 	Anomalies    int64   `json:"anomalies,omitempty"`
 	ApMac        string  `json:"ap_mac"`
 	ApName       string  `json:"-"`

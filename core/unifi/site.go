@@ -15,6 +15,8 @@ func (u *Unifi) GetSites() (Sites, error) {
 	sites := []string{} // used for debug log only
 
 	for i, d := range response.Data {
+		// Add special SourceName value.
+		response.Data[i].SourceName = u.URL
 		// If the human name is missing (description), set it to the cryptic name.
 		response.Data[i].Desc = pick(d.Desc, d.Name)
 		// Add the custom site name to each site. used as a Grafana filter somewhere.
@@ -32,6 +34,7 @@ type Sites []*Site
 
 // Site represents a site's data.
 type Site struct {
+	SourceName   string   `json:"-"`
 	ID           string   `json:"_id"`
 	Name         string   `json:"name"`
 	Desc         string   `json:"desc"`
