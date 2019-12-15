@@ -66,12 +66,13 @@
   revision = "d1d2010b5beead3fa1c5f271a5cf626e40b3ad6e"
 
 [[projects]]
-  digest = "1:f119e3205d3a1f0f19dbd7038eb37528e2c6f0933269dc344e305951fb87d632"
+  digest = "1:7dec9ab2db741c280b89b142b08ea142824152c5f40fb1f90c35b6ef7a694456"
   name = "github.com/prometheus/common"
   packages = [
     "expfmt",
     "internal/bitbucket.org/ww/goautoneg",
     "model",
+    "version",
   ]
   pruneopts = "UT"
   revision = "287d3e634a1e550c9e463dd7e5a75a422c614505"
@@ -129,6 +130,7 @@
     "github.com/influxdata/influxdb1-client/v2",
     "github.com/prometheus/client_golang/prometheus",
     "github.com/prometheus/client_golang/prometheus/promhttp",
+    "github.com/prometheus/common/version",
     "github.com/spf13/pflag",
     "golift.io/unifi",
     "gopkg.in/yaml.v2",
