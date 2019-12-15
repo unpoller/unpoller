@@ -65,10 +65,10 @@ is provided so the application can be easily adapted to any environment.
 
 `Config File Parameters`
 
-    interval               default: 30s
-        How often to poll the controller for updated client and device data.
-        The UniFi Controller only updates traffic stats about every 30-60 seconds.
-        Only works if "mode" (below) is "influx" - other modes do not use interval.
+Additional parameters are added by output packages. Parameters can also be set
+using environment variables. See the GitHub wiki for more information! 
+
+    >>> POLLER FIELDS FOLLOW - you may have multiple controllers:
 
     debug                  default: false
         This turns on time stamps and line numbers in logs, outputs a few extra
@@ -79,56 +79,7 @@ is provided so the application can be easily adapted to any environment.
         errors will be logged. Using this with debug=true adds line numbers to
         any error logs.
 
-    mode                   default: "influx"
-        * Value: influx
-        This default mode runs this application as a daemon. It will poll
-        the controller at the configured interval and report measurements to
-        InfluxDB. Providing an invalid value will run in this default mode.
-
-        * Value: influxlambda
-        Setting this value will invoke a run-once mode where the application
-        immediately polls the controller and reports the metrics to InfluxDB.
-        Then it exits. This mode is useful in an AWS Lambda or a crontab where
-        the execution timings are controlled. This mode may also be adapted
-        to run in other collector scripts and apps like telegraf or diamond.
-        This mode can also be combined with a "test database" in InfluxDB to
-        give yourself a "test config file" you may run ad-hoc to test changes.
-
-        * Value: prometheus
-        In this mode the application opens an http interface and exports the
-        measurements at /metrics for collection by prometheus. Enabling this
-        mode disables InfluxDB usage entirely.
-
-        * Value: both
-        Setting the mode to "both" will cause the InfluxDB poller routine to run
-        along with the Prometheus exporter. You can run both at the same time.
-
-    http_listen            default: 0.0.0.0:9130
-        This option controls the IP and port the http listener uses when the
-        mode is set to prometheus. This setting has no effect when other modes
-        are in use. Metrics become available at the /metrics URI.
-
-    influx_url             default: http://127.0.0.1:8086
-        This is the URL where the Influx web server is available.
-
-    influx_user            default: unifi
-        Username used to authenticate with InfluxDB.
-
-    influx_pass            default: unifi
-        Password used to authenticate with InfluxDB.
-
-    influx_db              default: unifi
-        Custom database created in InfluxDB to use with this application.
-        On first setup, log into InfluxDB and create access:
-        $ influx -host localhost -port 8086
-        CREATE DATABASE unifi
-        CREATE USER unifi WITH PASSWORD 'unifi' WITH ALL PRIVILEGES
-        GRANT ALL ON unifi TO unifi
-
-    influx_insecure_ssl    default: false
-        Setting this to true will allow use of InfluxDB with an invalid SSL certificate.
-
-      >>> CONTROLLER FIELDS FOLLOW - you may have multiple controllers:
+    >>> CONTROLLER FIELDS FOLLOW - you may have multiple controllers:
 
     sites                  default: ["all"]
         This list of strings should represent the names of sites on the UniFi
