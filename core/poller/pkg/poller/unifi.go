@@ -30,6 +30,7 @@ func (u *UnifiPoller) GetUnifi(config Controller) error {
 		DebugLog:  u.LogDebugf, // Log debug messages.
 	})
 	if err != nil {
+		config.Unifi = nil
 		return fmt.Errorf("unifi controller: %v", err)
 	}
 
@@ -81,13 +82,8 @@ FIRST:
 func (u *UnifiPoller) CollectMetrics() (metrics *metrics.Metrics, err error) {
 	var errs []string
 
-	for _, c := range u.Config.Controller {
+	for _, c := range u.Config.Controllers {
 		m, err := u.collectController(c)
-		if err != nil {
-			errs = append(errs, err.Error())
-			continue
-		}
-
 		if err != nil {
 			u.LogErrorf("collecting metrics from %s: %v", c.URL, err)
 			u.Logf("Re-authenticating to UniFi Controller: %s", c.URL)
@@ -123,7 +119,7 @@ func (u *UnifiPoller) collectController(c Controller) (*metrics.Metrics, error) 
 	if c.Unifi == nil {
 		// Some users need to re-auth every interval because the cookie times out.
 		// Sometimes we hit this path when the controller dies.
-		u.Logf("Re-authenticating to UniFi Controller")
+		u.Logf("Re-authenticating to UniFi Controller: %v", c.URL)
 
 		if err := u.GetUnifi(c); err != nil {
 			return nil, err
@@ -134,23 +130,23 @@ func (u *UnifiPoller) collectController(c Controller) (*metrics.Metrics, error) 
 
 	// Get the sites we care about.
 	if m.Sites, err = u.GetFilteredSites(c); err != nil {
-		return m, fmt.Errorf("unifi.GetSites(): %v", err)
+		return m, fmt.Errorf("unifi.GetSites(%v): %v", c.URL, err)
 	}
 
 	if c.SaveIDS {
 		m.IDSList, err = c.Unifi.GetIDS(m.Sites, time.Now().Add(u.Config.Interval.Duration), time.Now())
 		if err != nil {
-			return m, fmt.Errorf("unifi.GetIDS(): %v", err)
+			return m, fmt.Errorf("unifi.GetIDS(%v): %v", c.URL, err)
 		}
 	}
 
 	// Get all the points.
 	if m.Clients, err = c.Unifi.GetClients(m.Sites); err != nil {
-		return m, fmt.Errorf("unifi.GetClients(): %v", err)
+		return m, fmt.Errorf("unifi.GetClients(%v): %v", c.URL, err)
 	}
 
 	if m.Devices, err = c.Unifi.GetDevices(m.Sites); err != nil {
-		return m, fmt.Errorf("unifi.GetDevices(): %v", err)
+		return m, fmt.Errorf("unifi.GetDevices(%v): %v", c.URL, err)
 	}
 
 	return u.augmentMetrics(c, m), nil
@@ -204,19 +200,19 @@ func (u *UnifiPoller) augmentMetrics(c Controller, metrics *metrics.Metrics) *me
 // GetFilteredSites returns a list of sites to fetch data for.
 // Omits requested but unconfigured sites. Grabs the full list from the
 // controller and returns the sites provided in the config file.
-func (u *UnifiPoller) GetFilteredSites(config Controller) (unifi.Sites, error) {
+func (u *UnifiPoller) GetFilteredSites(c Controller) (unifi.Sites, error) {
 	var i int
 
-	sites, err := config.Unifi.GetSites()
+	sites, err := c.Unifi.GetSites()
 	if err != nil {
 		return nil, err
-	} else if len(config.Sites) < 1 || StringInSlice("all", config.Sites) {
+	} else if len(c.Sites) < 1 || StringInSlice("all", c.Sites) {
 		return sites, nil
 	}
 
 	for _, s := range sites {
 		// Only include valid sites in the request filter.
-		if StringInSlice(s.Name, config.Sites) {
+		if StringInSlice(s.Name, c.Sites) {
 			sites[i] = s
 			i++
 		}
