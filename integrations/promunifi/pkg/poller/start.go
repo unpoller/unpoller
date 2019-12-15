@@ -17,7 +17,7 @@ import (
 func New() *UnifiPoller {
 	return &UnifiPoller{
 		Config: &Config{
-			Controller: []Controller{{
+			Controllers: []Controller{{
 				Sites:     []string{"all"},
 				User:      defaultUnifiUser,
 				Pass:      "",
@@ -65,7 +65,6 @@ func (u *UnifiPoller) Start() error {
 	if _, err := config.ParseENV(u.Config, ENVConfigPrefix); err != nil {
 		return err
 	}
-	log.Println("START(): controller", u.Config.Controller)
 	if u.Flag.DumpJSON != "" {
 		return u.DumpJSONPayload()
 	}
@@ -100,7 +99,7 @@ func (f *Flag) Parse(args []string) {
 // 2. Run the collector one time and report the metrics to influxdb. (lambda)
 // 3. Start a web server and wait for Prometheus to poll the application for metrics.
 func (u *UnifiPoller) Run() error {
-	for _, c := range u.Config.Controller {
+	for _, c := range u.Config.Controllers {
 		switch err := u.GetUnifi(c); err {
 		case nil:
 			u.Logf("Polling UniFi Controller at %s v%s as user %s. Sites: %v",

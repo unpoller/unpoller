@@ -72,16 +72,16 @@ type Controller struct {
 // This is all of the data stored in the config file.
 // Any with explicit defaults have omitempty on json and toml tags.
 type Config struct {
-	Interval   config.Duration `json:"interval,omitempty" toml:"interval,omitempty" xml:"interval" yaml:"interval"`
-	Debug      bool            `json:"debug" toml:"debug" xml:"debug" yaml:"debug"`
-	Quiet      bool            `json:"quiet,omitempty" toml:"quiet,omitempty" xml:"quiet" yaml:"quiet"`
-	InfxBadSSL bool            `json:"influx_insecure_ssl" toml:"influx_insecure_ssl" xml:"influx_insecure_ssl" yaml:"influx_insecure_ssl"`
-	Mode       string          `json:"mode" toml:"mode" xml:"mode" yaml:"mode"`
-	HTTPListen string          `json:"http_listen" toml:"http_listen" xml:"http_listen" yaml:"http_listen"`
-	Namespace  string          `json:"namespace" toml:"namespace" xml:"namespace" yaml:"namespace"`
-	InfluxURL  string          `json:"influx_url,omitempty" toml:"influx_url,omitempty" xml:"influx_url" yaml:"influx_url"`
-	InfluxUser string          `json:"influx_user,omitempty" toml:"influx_user,omitempty" xml:"influx_user" yaml:"influx_user"`
-	InfluxPass string          `json:"influx_pass,omitempty" toml:"influx_pass,omitempty" xml:"influx_pass" yaml:"influx_pass"`
-	InfluxDB   string          `json:"influx_db,omitempty" toml:"influx_db,omitempty" xml:"influx_db" yaml:"influx_db"`
-	Controller []Controller    `json:"controller,omitempty" toml:"controller,omitempty" xml:"controller" yaml:"controller"`
+	Interval    config.Duration `json:"interval,omitempty" toml:"interval,omitempty" xml:"interval" yaml:"interval"`
+	Debug       bool            `json:"debug" toml:"debug" xml:"debug" yaml:"debug"`
+	Quiet       bool            `json:"quiet,omitempty" toml:"quiet,omitempty" xml:"quiet" yaml:"quiet"`
+	InfxBadSSL  bool            `json:"influx_insecure_ssl" toml:"influx_insecure_ssl" xml:"influx_insecure_ssl" yaml:"influx_insecure_ssl"`
+	Mode        string          `json:"mode" toml:"mode" xml:"mode" yaml:"mode"`
+	HTTPListen  string          `json:"http_listen" toml:"http_listen" xml:"http_listen" yaml:"http_listen"`
+	Namespace   string          `json:"namespace" toml:"namespace" xml:"namespace" yaml:"namespace"`
+	InfluxURL   string          `json:"influx_url,omitempty" toml:"influx_url,omitempty" xml:"influx_url" yaml:"influx_url"`
+	InfluxUser  string          `json:"influx_user,omitempty" toml:"influx_user,omitempty" xml:"influx_user" yaml:"influx_user"`
+	InfluxPass  string          `json:"influx_pass,omitempty" toml:"influx_pass,omitempty" xml:"influx_pass" yaml:"influx_pass"`
+	InfluxDB    string          `json:"influx_db,omitempty" toml:"influx_db,omitempty" xml:"influx_db" yaml:"influx_db"`
+	Controllers []Controller    `json:"controller,omitempty" toml:"controller,omitempty" xml:"controller" yaml:"controller"`
 }

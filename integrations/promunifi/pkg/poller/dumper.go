@@ -12,7 +12,7 @@ import (
 // This only works with controller 0 (first one) in the config.
 func (u *UnifiPoller) DumpJSONPayload() (err error) {
 	u.Config.Quiet = true
-	config := u.Config.Controller[0]
+	config := u.Config.Controllers[0]
 
 	config.Unifi, err = unifi.NewUnifi(&unifi.Config{
 		User:      config.User,
