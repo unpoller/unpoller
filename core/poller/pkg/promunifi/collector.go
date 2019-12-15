@@ -44,16 +44,16 @@ type Prometheus struct {
 
 // Config is the input (config file) data used to initialize this output plugin.
 type Config struct {
-	Disable bool `json:"disable" toml:"disable" xml:"disable" yaml:"disable"`
 	// If non-empty, each of the collected metrics is prefixed by the
 	// provided string and an underscore ("_").
-	Namespace string `json:"namespace" toml:"namespace" xml:"namespace" yaml:"namespace"`
+	Namespace  string `json:"namespace" toml:"namespace" xml:"namespace" yaml:"namespace"`
+	HTTPListen string `json:"http_listen" toml:"http_listen" xml:"http_listen" yaml:"http_listen"`
 	// If true, any error encountered during collection is reported as an
 	// invalid metric (see NewInvalidMetric). Otherwise, errors are ignored
 	// and the collected metrics will be incomplete. Possibly, no metrics
 	// will be collected at all.
-	ReportErrors bool   `json:"report_errors" toml:"report_errors" xml:"report_errors" yaml:"report_errors"`
-	HTTPListen   string `json:"http_listen" toml:"http_listen" xml:"http_listen" yaml:"http_listen"`
+	ReportErrors bool `json:"report_errors" toml:"report_errors" xml:"report_errors" yaml:"report_errors"`
+	Disable      bool `json:"disable" toml:"disable" xml:"disable" yaml:"disable"`
 }
 
 type metric struct {
