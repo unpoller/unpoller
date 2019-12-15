@@ -3,19 +3,24 @@
 # provided values are defaults. See up.conf.example!   #
 ########################################################
 ---
-interval: "30s"
 
-debug: false
-quiet: false
+poller:
+  debug: false
+  quiet: false
 
-mode: "influx"
-http_listen: "0.0.0.0:9130"
+prometheus:
+  disable: false
+  http_listen: "0.0.0.0:9130"
+  report_errors: false
 
-influx_url: "http://127.0.0.1:8086"
-influx_user: "unifi"
-influx_pass: "unifi"
-influx_db: "unifi"
-influx_insecure_ssl: false
+influxdb:
+  disable: false
+  interval: "30s"
+  url:  "http://127.0.0.1:8086"
+  user: "unifi"
+  pass: "unifi"
+  db:   "unifi"
+  verify_ssl: false
 
 controller:
   - name: ""

@@ -46,7 +46,7 @@ VERSION_LDFLAGS:= \
   -X $(IMPORT_PATH)/vendor/github.com/prometheus/common/version.Branch=$(BRANCH) \
   -X $(IMPORT_PATH)/vendor/github.com/prometheus/common/version.BuildDate=$(DATE) \
   -X $(IMPORT_PATH)/vendor/github.com/prometheus/common/version.Revision=$(COMMIT) \
-  -X $(VERSION_PATH)=$(VERSION)-$(ITERATION)
+  -X $(IMPORT_PATH)/vendor/github.com/prometheus/common/version.Version=$(VERSION)-$(ITERATION)
 
 # Makefile targets follow.
 

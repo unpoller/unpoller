@@ -1,50 +1,59 @@
-// Package promunifi provides the bridge between unifi metrics and prometheus.
+// Package promunifi provides the bridge between unifi-poller metrics and prometheus.
 package promunifi
 
 import (
 	"fmt"
+	"net/http"
 	"reflect"
 	"strings"
 	"sync"
 	"time"
 
-	"github.com/davidnewhall/unifi-poller/pkg/metrics"
+	"github.com/davidnewhall/unifi-poller/pkg/poller"
 	"github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/common/version"
 	"golift.io/unifi"
 )
 
-// channel buffer, fits at least one batch.
-const buffer = 50
-
-// simply fewer letters.
-const counter = prometheus.CounterValue
-const gauge = prometheus.GaugeValue
-
-// UnifiCollectorCnfg defines the data needed to collect and report UniFi Metrics.
-type UnifiCollectorCnfg struct {
-	// If non-empty, each of the collected metrics is prefixed by the
-	// provided string and an underscore ("_").
-	Namespace string
-	// If true, any error encountered during collection is reported as an
-	// invalid metric (see NewInvalidMetric). Otherwise, errors are ignored
-	// and the collected metrics will be incomplete. Possibly, no metrics
-	// will be collected at all.
-	ReportErrors bool
-	// This function is passed to the Collect() method. The Collect method runs
-	// this function to retrieve the latest UniFi measurements and export them.
-	CollectFn func() (*metrics.Metrics, error)
-	// Provide a logger function if you want to run a routine *after* prometheus checks in.
-	LoggingFn func(*Report)
-}
+const (
+	// channel buffer, fits at least one batch.
+	buffer            = 50
+	defaultHTTPListen = "0.0.0.0:9130"
+	// simply fewer letters.
+	counter = prometheus.CounterValue
+	gauge   = prometheus.GaugeValue
+)
 
 type promUnifi struct {
-	Config UnifiCollectorCnfg
+	*Prometheus
 	Client *uclient
 	Device *unifiDevice
 	UAP    *uap
 	USG    *usg
 	USW    *usw
 	Site   *site
+	// This interface is passed to the Collect() method. The Collect method uses
+	// this interface to retrieve the latest UniFi measurements and export them.
+	Collector poller.Collect
+}
+
+// Prometheus allows the data to be nested in the config file.
+type Prometheus struct {
+	Config Config `json:"prometheus" toml:"prometheus" xml:"prometheus" yaml:"prometheus"`
+}
+
+// Config is the input (config file) data used to initialize this output plugin.
+type Config struct {
+	Disable bool `json:"disable" toml:"disable" xml:"disable" yaml:"disable"`
+	// If non-empty, each of the collected metrics is prefixed by the
+	// provided string and an underscore ("_").
+	Namespace string `json:"namespace" toml:"namespace" xml:"namespace" yaml:"namespace"`
+	// If true, any error encountered during collection is reported as an
+	// invalid metric (see NewInvalidMetric). Otherwise, errors are ignored
+	// and the collected metrics will be incomplete. Possibly, no metrics
+	// will be collected at all.
+	ReportErrors bool   `json:"report_errors" toml:"report_errors" xml:"report_errors" yaml:"report_errors"`
+	HTTPListen   string `json:"http_listen" toml:"http_listen" xml:"http_listen" yaml:"http_listen"`
 }
 
 type metric struct {
@@ -54,41 +63,64 @@ type metric struct {
 	Labels    []string
 }
 
-// Report is passed into LoggingFn to log the export metrics to stdout (outside this package).
+// Report accumulates counters that are printed to a log line.
 type Report struct {
-	Total   int              // Total count of metrics recorded.
-	Errors  int              // Total count of errors recording metrics.
-	Zeros   int              // Total count of metrics equal to zero.
-	Descs   int              // Total count of unique metrics descriptions.
-	Metrics *metrics.Metrics // Metrics collected and recorded.
-	Elapsed time.Duration    // Duration elapsed collecting and exporting.
-	Fetch   time.Duration    // Duration elapsed making controller requests.
-	Start   time.Time        // Time collection began.
+	Total   int             // Total count of metrics recorded.
+	Errors  int             // Total count of errors recording metrics.
+	Zeros   int             // Total count of metrics equal to zero.
+	Metrics *poller.Metrics // Metrics collected and recorded.
+	Elapsed time.Duration   // Duration elapsed collecting and exporting.
+	Fetch   time.Duration   // Duration elapsed making controller requests.
+	Start   time.Time       // Time collection began.
 	ch      chan []*metric
 	wg      sync.WaitGroup
-	cf      UnifiCollectorCnfg
+	Config
 }
 
-// NewUnifiCollector returns a prometheus collector that will export any available
-// UniFi metrics. You must provide a collection function in the opts.
-func NewUnifiCollector(opts UnifiCollectorCnfg) prometheus.Collector {
-	if opts.CollectFn == nil {
-		panic("nil collector function")
+func init() {
+	u := &promUnifi{Prometheus: &Prometheus{}}
+	poller.NewOutput(&poller.Output{
+		Name:   "prometheus",
+		Config: u.Prometheus,
+		Method: u.Run,
+	})
+}
+
+// Run creates the collectors and starts the web server up.
+// Should be run in a Go routine. Returns nil if not configured.
+func (u *promUnifi) Run(c poller.Collect) error {
+	if u.Config.Disable {
+		return nil
 	}
 
-	if opts.Namespace = strings.Trim(opts.Namespace, "_") + "_"; opts.Namespace == "_" {
-		opts.Namespace = ""
+	if u.Config.Namespace == "" {
+		u.Config.Namespace = strings.Replace(poller.AppName, "-", "", -1)
 	}
 
-	return &promUnifi{
-		Config: opts,
-		Client: descClient(opts.Namespace + "client_"),
-		Device: descDevice(opts.Namespace + "device_"), // stats for all device types.
-		UAP:    descUAP(opts.Namespace + "device_"),
-		USG:    descUSG(opts.Namespace + "device_"),
-		USW:    descUSW(opts.Namespace + "device_"),
-		Site:   descSite(opts.Namespace + "site_"),
+	if u.Config.HTTPListen == "" {
+		u.Config.HTTPListen = defaultHTTPListen
 	}
+
+	name := strings.Replace(u.Config.Namespace, "-", "_", -1)
+
+	ns := name
+	if ns = strings.Trim(ns, "_") + "_"; ns == "_" {
+		ns = ""
+	}
+
+	prometheus.MustRegister(version.NewCollector(name))
+	prometheus.MustRegister(&promUnifi{
+		Collector: c,
+		Client:    descClient(ns + "client_"),
+		Device:    descDevice(ns + "device_"), // stats for all device types.
+		UAP:       descUAP(ns + "device_"),
+		USG:       descUSG(ns + "device_"),
+		USW:       descUSW(ns + "device_"),
+		Site:      descSite(ns + "site_"),
+	})
+	c.Logf("Exporting Measurements for Prometheus at https://%s/metrics, namespace: %s", u.Config.HTTPListen, u.Config.Namespace)
+
+	return http.ListenAndServe(u.Config.HTTPListen, nil)
 }
 
 // Describe satisfies the prometheus Collector. This returns all of the
@@ -112,10 +144,10 @@ func (u *promUnifi) Describe(ch chan<- *prometheus.Desc) {
 func (u *promUnifi) Collect(ch chan<- prometheus.Metric) {
 	var err error
 
-	r := &Report{cf: u.Config, ch: make(chan []*metric, buffer), Start: time.Now()}
+	r := &Report{Config: u.Config, ch: make(chan []*metric, buffer), Start: time.Now()}
 	defer r.close()
 
-	if r.Metrics, err = r.cf.CollectFn(); err != nil {
+	if r.Metrics, err = u.Collector.Metrics(); err != nil {
 		r.error(ch, prometheus.NewInvalidDesc(fmt.Errorf("metric fetch failed")), err)
 		return
 	}
@@ -135,7 +167,7 @@ func (u *promUnifi) Collect(ch chan<- prometheus.Metric) {
 // This is where our channels connects to the prometheus channel.
 func (u *promUnifi) exportMetrics(r report, ch chan<- prometheus.Metric, ourChan chan []*metric) {
 	descs := make(map[*prometheus.Desc]bool) // used as a counter
-	defer r.report(descs)
+	defer r.report(u.Collector, descs)
 
 	for newMetrics := range ourChan {
 		for _, m := range newMetrics {
