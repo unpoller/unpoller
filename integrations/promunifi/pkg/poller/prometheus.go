@@ -9,6 +9,7 @@ import (
 	"github.com/davidnewhall/unifi-poller/pkg/promunifi"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
+	"github.com/prometheus/common/version"
 )
 
 const oneDecimalPoint = 10
@@ -17,12 +18,16 @@ const oneDecimalPoint = 10
 func (u *UnifiPoller) RunPrometheus() error {
 	u.Logf("Exporting Measurements for Prometheus at https://%s/metrics", u.Config.HTTPListen)
 	http.Handle("/metrics", promhttp.Handler())
+	ns := strings.Replace(u.Config.Namespace, "-", "", -1)
 	prometheus.MustRegister(promunifi.NewUnifiCollector(promunifi.UnifiCollectorCnfg{
-		Namespace:    strings.Replace(u.Config.Namespace, "-", "", -1),
+		Namespace:    ns,
 		CollectFn:    u.ExportMetrics,
 		LoggingFn:    u.LogExportReport,
 		ReportErrors: true, // XXX: Does this need to be configurable?
 	}))
+
+	version.Version = Version
+	prometheus.MustRegister(version.NewCollector(ns))
 
 	return http.ListenAndServe(u.Config.HTTPListen, nil)
 }
