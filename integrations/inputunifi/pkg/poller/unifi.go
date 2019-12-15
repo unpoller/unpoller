@@ -84,18 +84,9 @@ func (u *UnifiPoller) CollectMetrics() (*metrics.Metrics, error) {
 	metrics := &metrics.Metrics{}
 
 	for _, c := range u.Config.Controllers {
-		m, err := u.collectController(c)
+		m, err := u.checkAndPollController(c)
 		if err != nil {
-			u.LogErrorf("collecting metrics from %s: %v", c.URL, err)
-			u.Logf("Re-authenticating to UniFi Controller: %s", c.URL)
-
-			if err := u.GetUnifi(c); err != nil {
-				u.LogErrorf("re-authenticating to %s: %v", c.URL, err)
-				errs = append(errs, err.Error())
-			} else if m, err = u.collectController(c); err != nil {
-				u.LogErrorf("collecting metrics from %s: %v", c.URL, err)
-				errs = append(errs, err.Error())
-			}
+			errs = append(errs, err.Error())
 		}
 
 		if m == nil {
@@ -129,18 +120,34 @@ func (u *UnifiPoller) CollectMetrics() (*metrics.Metrics, error) {
 	return metrics, err
 }
 
-func (u *UnifiPoller) collectController(c Controller) (*metrics.Metrics, error) {
-	var err error
-
+func (u *UnifiPoller) checkAndPollController(c Controller) (*metrics.Metrics, error) {
 	if c.Unifi == nil {
-		// Some users need to re-auth every interval because the cookie times out.
-		// Sometimes we hit this path when the controller dies.
-		u.Logf("Re-authenticating to UniFi Controller: %v", c.URL)
+		u.Logf("Re-authenticating to UniFi Controller: %s", c.URL)
 
 		if err := u.GetUnifi(c); err != nil {
+			u.LogErrorf("re-authenticating to %s: %v", c.URL, err)
 			return nil, err
 		}
 	}
+
+	m, err := u.collectController(c)
+	if err == nil {
+		return m, nil
+	}
+
+	u.LogErrorf("collecting metrics %v", err)
+	u.Logf("Re-authenticating to UniFi Controller: %s", c.URL)
+
+	if err := u.GetUnifi(c); err != nil {
+		u.LogErrorf("re-authenticating to %s: %v", c.URL, err)
+		return nil, err
+	}
+
+	return u.collectController(c)
+}
+
+func (u *UnifiPoller) collectController(c Controller) (*metrics.Metrics, error) {
+	var err error
 
 	m := &metrics.Metrics{TS: u.LastCheck} // At this point, it's the Current Check.
 
