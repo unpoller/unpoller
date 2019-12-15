@@ -36,24 +36,7 @@ func (u *UnifiPoller) RunPrometheus() error {
 // HTTP at /metrics for prometheus collection.
 // This is run by Prometheus as CollectFn.
 func (u *UnifiPoller) ExportMetrics() (*metrics.Metrics, error) {
-	m, err := u.CollectMetrics()
-	if err != nil {
-		u.LogErrorf("collecting metrics: %v", err)
-		u.Logf("Re-authenticating to UniFi Controller")
-
-		if err := u.GetUnifi(); err != nil {
-			u.LogErrorf("re-authenticating: %v", err)
-			return nil, err
-		}
-
-		if m, err = u.CollectMetrics(); err != nil {
-			u.LogErrorf("collecting metrics: %v", err)
-			return nil, err
-		}
-	}
-
-	u.AugmentMetrics(m)
-	return m, nil
+	return u.CollectMetrics()
 }
 
 // LogExportReport is called after prometheus exports metrics.
