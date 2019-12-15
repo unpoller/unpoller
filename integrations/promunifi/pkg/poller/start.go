@@ -91,7 +91,7 @@ func (u *UnifiPoller) Run() error {
 			u.Logf("Polling UniFi Controller at %s v%s as user %s. Sites: %v",
 				c.URL, c.Unifi.ServerVersion, c.User, c.Sites)
 		default:
-			u.LogErrorf("Controller Auth or Connection failed, but continuing to retry! %s: %v", c.URL, err)
+			u.LogErrorf("Controller Auth or Connection failed, but continuing to retry! %s: %v", c.Name, err)
 		}
 	}
 
