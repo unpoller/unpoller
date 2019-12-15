@@ -5,7 +5,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/davidnewhall/unifi-poller/pkg/metrics"
 	"golift.io/unifi"
 )
 
@@ -42,10 +41,6 @@ func (u *UnifiPoller) GetUnifi(c Controller) error {
 // CheckSites makes sure the list of provided sites exists on the controller.
 // This does not run in Lambda (run-once) mode.
 func (u *UnifiPoller) CheckSites(c Controller) error {
-	if strings.Contains(strings.ToLower(u.Config.Mode), "lambda") {
-		return nil // Skip this in lambda mode.
-	}
-
 	u.LogDebugf("Checking Controller Sites List")
 
 	sites, err := c.Unifi.GetSites()
@@ -58,6 +53,7 @@ func (u *UnifiPoller) CheckSites(c Controller) error {
 	for _, site := range sites {
 		msg = append(msg, site.Name+" ("+site.Desc+")")
 	}
+
 	u.Logf("Found %d site(s) on controller: %v", len(msg), strings.Join(msg, ", "))
 
 	if StringInSlice("all", c.Sites) {
@@ -78,10 +74,10 @@ FIRST:
 	return nil
 }
 
-// CollectMetrics grabs all the measurements from a UniFi controller and returns them.
-func (u *UnifiPoller) CollectMetrics() (*metrics.Metrics, error) {
+// Metrics grabs all the measurements from a UniFi controller and returns them.
+func (u *UnifiPoller) Metrics() (*Metrics, error) {
 	errs := []string{}
-	metrics := &metrics.Metrics{}
+	metrics := &Metrics{}
 
 	for _, c := range u.Config.Controllers {
 		m, err := u.checkAndPollController(c)
@@ -120,7 +116,7 @@ func (u *UnifiPoller) CollectMetrics() (*metrics.Metrics, error) {
 	return metrics, err
 }
 
-func (u *UnifiPoller) checkAndPollController(c Controller) (*metrics.Metrics, error) {
+func (u *UnifiPoller) checkAndPollController(c Controller) (*Metrics, error) {
 	if c.Unifi == nil {
 		u.Logf("Re-authenticating to UniFi Controller: %s", c.URL)
 
@@ -146,10 +142,10 @@ func (u *UnifiPoller) checkAndPollController(c Controller) (*metrics.Metrics, er
 	return u.collectController(c)
 }
 
-func (u *UnifiPoller) collectController(c Controller) (*metrics.Metrics, error) {
+func (u *UnifiPoller) collectController(c Controller) (*Metrics, error) {
 	var err error
 
-	m := &metrics.Metrics{TS: u.LastCheck} // At this point, it's the Current Check.
+	m := &Metrics{TS: time.Now()} // At this point, it's the Current Check.
 
 	// Get the sites we care about.
 	if m.Sites, err = u.GetFilteredSites(c); err != nil {
@@ -178,7 +174,7 @@ func (u *UnifiPoller) collectController(c Controller) (*metrics.Metrics, error) 
 // augmentMetrics is our middleware layer between collecting metrics and writing them.
 // This is where we can manipuate the returned data or make arbitrary decisions.
 // This function currently adds parent device names to client metrics.
-func (u *UnifiPoller) augmentMetrics(c Controller, metrics *metrics.Metrics) *metrics.Metrics {
+func (u *UnifiPoller) augmentMetrics(c Controller, metrics *Metrics) *Metrics {
 	if metrics == nil || metrics.Devices == nil || metrics.Clients == nil {
 		return metrics
 	}
