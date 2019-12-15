@@ -3,8 +3,6 @@
 # provided values are defaults. See up.conf.example!   #
 ########################################################
 ---
-sites:
-  - all
 interval: "30s"
 
 debug: false
@@ -19,10 +17,13 @@ influx_pass: "unifi"
 influx_db: "unifi"
 influx_insecure_ssl: false
 
-unifi_user: "influx"
-unifi_pass: ""
-unifi_url: "https://127.0.0.1:8443"
-reauthenticate: false
-verify_ssl: false
-save_ids: false
-save_sites: true
+controller:
+  - name: ""
+    user: "influx"
+    pass: ""
+    url: "https://127.0.0.1:8443"
+    sites:
+      - all
+    verify_ssl: false
+    save_ids: false
+    save_sites: true
