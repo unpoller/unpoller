@@ -65,6 +65,7 @@ type metric struct {
 
 // Report accumulates counters that are printed to a log line.
 type Report struct {
+	Config
 	Total   int             // Total count of metrics recorded.
 	Errors  int             // Total count of errors recording metrics.
 	Zeros   int             // Total count of metrics equal to zero.
@@ -74,7 +75,6 @@ type Report struct {
 	Start   time.Time       // Time collection began.
 	ch      chan []*metric
 	wg      sync.WaitGroup
-	Config
 }
 
 func init() {
@@ -97,27 +97,28 @@ func (u *promUnifi) Run(c poller.Collect) error {
 		u.Config.Namespace = strings.Replace(poller.AppName, "-", "", -1)
 	}
 
+	u.Config.Namespace = strings.Replace(u.Config.Namespace, "-", "_", -1)
+
 	if u.Config.HTTPListen == "" {
 		u.Config.HTTPListen = defaultHTTPListen
 	}
 
-	name := strings.Replace(u.Config.Namespace, "-", "_", -1)
+	prometheus.MustRegister(version.NewCollector(u.Config.Namespace))
 
-	ns := name
-	if ns = strings.Trim(ns, "_") + "_"; ns == "_" {
-		ns = ""
+	if u.Config.Namespace = strings.Trim(u.Config.Namespace, "_") + "_"; u.Config.Namespace == "_" {
+		u.Config.Namespace = ""
 	}
 
-	prometheus.MustRegister(version.NewCollector(name))
 	prometheus.MustRegister(&promUnifi{
 		Collector: c,
-		Client:    descClient(ns + "client_"),
-		Device:    descDevice(ns + "device_"), // stats for all device types.
-		UAP:       descUAP(ns + "device_"),
-		USG:       descUSG(ns + "device_"),
-		USW:       descUSW(ns + "device_"),
-		Site:      descSite(ns + "site_"),
+		Client:    descClient(u.Config.Namespace + "client_"),
+		Device:    descDevice(u.Config.Namespace + "device_"), // stats for all device types.
+		UAP:       descUAP(u.Config.Namespace + "device_"),
+		USG:       descUSG(u.Config.Namespace + "device_"),
+		USW:       descUSW(u.Config.Namespace + "device_"),
+		Site:      descSite(u.Config.Namespace + "site_"),
 	})
+
 	c.Logf("Exporting Measurements for Prometheus at https://%s/metrics, namespace: %s", u.Config.HTTPListen, u.Config.Namespace)
 
 	return http.ListenAndServe(u.Config.HTTPListen, nil)
@@ -185,12 +186,14 @@ func (u *promUnifi) exportMetrics(r report, ch chan<- prometheus.Metric, ourChan
 				r.error(ch, m.Desc, fmt.Sprintf("not a number: %v", m.Value))
 			}
 		}
+
 		r.done()
 	}
 }
 
 func (u *promUnifi) loopExports(r report) {
 	m := r.metrics()
+
 	r.add()
 	go func() {
 		defer r.done()
