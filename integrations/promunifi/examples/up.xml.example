@@ -5,21 +5,23 @@
 # provided values are defaults. See up.conf.example!  #
 #######################################################
 -->
-<unifi-poller>
+<poller debug="false" quiet="false">
 
-  <interval>60s</interval>
+  <prometheus disable="false">
+    <http_listen>0.0.0.0:9130</http_listen>
+    <report_errors>false</report_errors>
+  </prometheus>
 
-  <debug>false</debug>
-  <quiet>false</quiet>
+  <influxdb disable="false">
+    <interval>30s</interval>
+    <url>http://127.0.0.1:8086</url>
+    <user>unifi</user>
+    <pass>unifi</pass>
+    <db>unifi</db>
+    <verify_ssl>false</verify_ssl>
+  </influxdb>
 
-  <mode>influx</mode>
-  <http_listen>0.0.0.0:9130</http_listen>
-
-  <influx_db>unifi</influx_db>
-  <influx_pass>unifi</influx_pass>
-  <influx_url>http://127.0.0.1:8086</influx_url>
-  <influx_user>unifi</influx_user>
-  <influx_insecure_ssl>false</influx_insecure_ssl>
+  <!-- Repeat this stanza to poll additional controllers. -->
   <controller name="">
     <sites>all</sites>
     <user>influx</user>
@@ -29,4 +31,5 @@
     <save_ids>false</save_ids>
     <save_sites>true</save_sites>
   </controller>
-</unifi-poller>
+
+</poller>
