@@ -44,8 +44,6 @@ func (u *UnifiPoller) CollectAndProcess() error {
 		return err
 	}
 
-	u.AugmentMetrics(metrics)
-
 	report, err := u.Influx.ReportMetrics(metrics)
 	if err != nil {
 		return err
@@ -57,12 +55,7 @@ func (u *UnifiPoller) CollectAndProcess() error {
 
 // LogInfluxReport writes a log message after exporting to influxdb.
 func (u *UnifiPoller) LogInfluxReport(r *influxunifi.Report) {
-	idsMsg := ""
-
-	if u.Config.SaveIDS {
-		idsMsg = fmt.Sprintf("IDS Events: %d, ", len(r.Metrics.IDSList))
-	}
-
+	idsMsg := fmt.Sprintf("IDS Events: %d, ", len(r.Metrics.IDSList))
 	u.Logf("UniFi Metrics Recorded. Sites: %d, Clients: %d, "+
 		"UAP: %d, USG/UDM: %d, USW: %d, %sPoints: %d, Fields: %d, Errs: %d, Elapsed: %v",
 		len(r.Metrics.Sites), len(r.Metrics.Clients), len(r.Metrics.UAPs),
