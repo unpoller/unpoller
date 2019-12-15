@@ -55,7 +55,7 @@ func (u *UnifiPoller) InitializeOutputs() error {
 	}
 
 	if count < 1 {
-		return fmt.Errorf("no output plugins configured")
+		return fmt.Errorf("no output plugins imported")
 	}
 
 	for err := range v {
@@ -64,7 +64,7 @@ func (u *UnifiPoller) InitializeOutputs() error {
 		}
 
 		if count--; count < 1 {
-			return fmt.Errorf("all output plugins have stopped")
+			return fmt.Errorf("all output plugins have stopped, or none enabled")
 		}
 	}
 
