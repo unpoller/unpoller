@@ -70,8 +70,7 @@ FIRST:
 				continue FIRST
 			}
 		}
-		// This is fine, it may get added later.
-		u.LogErrorf("configured site not found on controller: %v", s)
+		return fmt.Errorf("configured site not found on controller: %v", s)
 	}
 
 	return nil
