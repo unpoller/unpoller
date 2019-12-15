@@ -2,6 +2,7 @@ package poller
 
 import (
 	"fmt"
+	"log"
 	"time"
 
 	"github.com/davidnewhall/unifi-poller/pkg/influxunifi"
@@ -27,6 +28,20 @@ func (u *UnifiPoller) GetInfluxDB() (err error) {
 	u.Logf("Logging Measurements to InfluxDB at %s as user %s", u.Config.InfluxURL, u.Config.InfluxUser)
 
 	return nil
+}
+
+// PollController runs forever, polling UniFi and pushing to InfluxDB
+// This is started by Run() or RunBoth() after everything checks out.
+func (u *UnifiPoller) PollController() {
+	interval := u.Config.Interval.Round(time.Second)
+	log.Printf("[INFO] Everything checks out! Poller started, InfluxDB interval: %v", interval)
+
+	ticker := time.NewTicker(interval)
+	for u.LastCheck = range ticker.C {
+		if err := u.CollectAndProcess(); err != nil {
+			u.LogErrorf("%v", err)
+		}
+	}
 }
 
 // CollectAndProcess collects measurements and then reports them to InfluxDB
