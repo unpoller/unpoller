@@ -3,11 +3,7 @@
 ########################################################
 
 
-# The UniFi Controller only updates traffic stats about every 30 seconds.
-# Setting this to something lower may lead to "zeros" in your data.
-# If you're getting zeros now, set this to "1m"
-interval = "30s"
-
+[poller]
 # Turns on line numbers, microsecond logging, and a per-device log.
 # The default is false, but I personally leave this on at home (four devices).
 # This may be noisy if you have a lot of devices. It adds one line per device.
@@ -17,38 +13,34 @@ debug = false
 # Recommend enabling debug with this setting for better error logging.
 quiet = false
 
-# Which mode to run this application in. The default mode is "influx". Providing
-# an invalid mode will also result in "influx". In this default mode the application
-# runs as a daemon and polls the controller at the configured interval.
-#
-# Other options: "influxlambda",  "prometheus", "both"
-#
-# Mode "influxlambda" makes the application exit after collecting and reporting metrics
-# to InfluxDB one time. This mode requires an external process like an AWS Lambda
-# or a simple crontab to keep the timings accurate on UniFi Poller run intervals.
-#
-# Mode "prometheus" opens an HTTP server on port 9130 and exports the metrics at
-# /metrics for polling collection by a prometheus server. This disables influxdb.
-#
-# Mode "both" runs the Prometheus HTTP server and InfluxDB poller interval at
-# the same time.
-mode = "influx"
 
+#### OUTPUTS
+
+[prometheus]
+disable = false
 # This controls on which ip and port /metrics is exported when mode is "prometheus".
 # This has no effect in other modes. Must contain a colon and port.
 http_listen = "0.0.0.0:9130"
+report_errors = false
 
+[influxdb]
+disable = false
 # InfluxDB does not require auth by default, so the user/password are probably unimportant.
-influx_url = "http://127.0.0.1:8086"
-influx_user = "unifi"
-influx_pass = "unifi"
+url = "http://127.0.0.1:8086"
+user = "unifi"
+pass = "unifi"
 # Be sure to create this database.
-influx_db = "unifi"
-# If your InfluxDB uses an invalid SSL cert, set this to true.
-influx_insecure_ssl = false
+db = "unifi"
+# If your InfluxDB uses a valid SSL cert, set this to true.
+verify_ssl = false
+# The UniFi Controller only updates traffic stats about every 30 seconds.
+# Setting this to something lower may lead to "zeros" in your data.
+# If you're getting zeros now, set this to "1m"
+interval = "30s"
+
+#### INPUTS
 
 # You may repeat the following section to poll additional controllers.
-
 [[controller]]
 # Friendly name used in dashboards.
 name = ""

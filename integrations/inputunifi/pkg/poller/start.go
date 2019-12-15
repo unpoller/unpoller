@@ -5,26 +5,16 @@ import (
 	"fmt"
 	"log"
 	"os"
-	"strings"
-	"time"
 
+	"github.com/github/hub/version"
 	"github.com/spf13/pflag"
-	"golift.io/config"
 )
 
 // New returns a new poller struct preloaded with default values.
 // No need to call this if you call Start.c
 func New() *UnifiPoller {
 	return &UnifiPoller{
-		Config: &Config{
-			InfluxURL:  defaultInfluxURL,
-			InfluxUser: defaultInfluxUser,
-			InfluxPass: defaultInfluxPass,
-			InfluxDB:   defaultInfluxDB,
-			Interval:   config.Duration{Duration: defaultInterval},
-			HTTPListen: defaultHTTPListen,
-			Namespace:  appName,
-		},
+		Config: &Config{},
 		Flag: &Flag{
 			ConfigFile: DefaultConfFile,
 		},
@@ -40,7 +30,7 @@ func (u *UnifiPoller) Start() error {
 	u.Flag.Parse(os.Args[1:])
 
 	if u.Flag.ShowVer {
-		fmt.Printf("%s v%s\n", appName, Version)
+		fmt.Printf("%s v%s\n", AppName, version.Version)
 		return nil // don't run anything else w/ version request.
 	}
 
@@ -48,14 +38,8 @@ func (u *UnifiPoller) Start() error {
 		u.Logf("Loading Configuration File: %s", u.Flag.ConfigFile)
 	}
 
-	// Parse config file.
-	if err := config.ParseFile(u.Config, u.Flag.ConfigFile); err != nil {
-		u.Flag.Usage()
-		return err
-	}
-
-	// Update Config with ENV variable overrides.
-	if _, err := config.ParseENV(u.Config, ENVConfigPrefix); err != nil {
+	// Parse config file and ENV variables.
+	if err := u.ParseConfigs(); err != nil {
 		return err
 	}
 
@@ -78,16 +62,14 @@ func (u *UnifiPoller) Start() error {
 		u.LogDebugf("Debug Logging Enabled")
 	}
 
-	log.Printf("[INFO] UniFi Poller v%v Starting Up! PID: %d", Version, os.Getpid())
-
 	return u.Run()
 }
 
 // Parse turns CLI arguments into data structures. Called by Start() on startup.
 func (f *Flag) Parse(args []string) {
-	f.FlagSet = pflag.NewFlagSet(appName, pflag.ExitOnError)
+	f.FlagSet = pflag.NewFlagSet(AppName, pflag.ExitOnError)
 	f.Usage = func() {
-		fmt.Printf("Usage: %s [--config=/path/to/up.conf] [--version]", appName)
+		fmt.Printf("Usage: %s [--config=/path/to/up.conf] [--version]", AppName)
 		f.PrintDefaults()
 	}
 
@@ -103,6 +85,8 @@ func (f *Flag) Parse(args []string) {
 // 2. Run the collector one time and report the metrics to influxdb. (lambda)
 // 3. Start a web server and wait for Prometheus to poll the application for metrics.
 func (u *UnifiPoller) Run() error {
+	log.Printf("[INFO] UniFi Poller v%v Starting Up! PID: %d", version.Version, os.Getpid())
+
 	for i, c := range u.Config.Controllers {
 		if c.Name == "" {
 			u.Config.Controllers[i].Name = c.URL
@@ -117,17 +101,5 @@ func (u *UnifiPoller) Run() error {
 		}
 	}
 
-	switch strings.ToLower(u.Config.Mode) {
-	default:
-		u.PollController()
-		return nil
-	case "influxlambda", "lambdainflux", "lambda_influx", "influx_lambda":
-		u.LastCheck = time.Now()
-		return u.CollectAndProcess()
-	case "both":
-		go u.PollController()
-		fallthrough
-	case "prometheus", "exporter":
-		return u.RunPrometheus()
-	}
+	return u.InitializeOutputs()
 }
