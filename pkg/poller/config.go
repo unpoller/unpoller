@@ -31,13 +31,13 @@ const ENVConfigPrefix = "UP"
 
 // UnifiPoller contains the application startup data, and auth info for UniFi & Influx.
 type UnifiPoller struct {
-	Flag       *Flag
+	Flags      *Flags
 	Config     *Config
 	sync.Mutex // locks the Unifi struct member when re-authing to unifi.
 }
 
-// Flag represents the CLI args available and their settings.
-type Flag struct {
+// Flags represents the CLI args available and their settings.
+type Flags struct {
 	ConfigFile string
 	DumpJSON   string
 	ShowVer    bool
@@ -84,8 +84,8 @@ type Poller struct {
 // ParseConfigs parses the poller config and the config for each registered output plugin.
 func (u *UnifiPoller) ParseConfigs() error {
 	// Parse config file.
-	if err := config.ParseFile(u.Config, u.Flag.ConfigFile); err != nil {
-		u.Flag.Usage()
+	if err := config.ParseFile(u.Config, u.Flags.ConfigFile); err != nil {
+		u.Flags.Usage()
 		return err
 	}
 
@@ -99,7 +99,7 @@ func (u *UnifiPoller) ParseConfigs() error {
 
 	for _, o := range outputs {
 		// Parse config file for each output plugin.
-		if err := config.ParseFile(o.Config, u.Flag.ConfigFile); err != nil {
+		if err := config.ParseFile(o.Config, u.Flags.ConfigFile); err != nil {
 			return err
 		}
 

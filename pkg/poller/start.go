@@ -10,15 +10,9 @@ import (
 	"github.com/spf13/pflag"
 )
 
-// New returns a new poller struct preloaded with default values.
-// No need to call this if you call Start.c
+// New returns a new poller struct.
 func New() *UnifiPoller {
-	return &UnifiPoller{
-		Config: &Config{},
-		Flag: &Flag{
-			ConfigFile: DefaultConfFile,
-		},
-	}
+	return &UnifiPoller{Config: &Config{}, Flags: &Flags{}}
 }
 
 // Start begins the application from a CLI.
@@ -27,15 +21,15 @@ func New() *UnifiPoller {
 func (u *UnifiPoller) Start() error {
 	log.SetOutput(os.Stdout)
 	log.SetFlags(log.LstdFlags)
-	u.Flag.Parse(os.Args[1:])
+	u.Flags.Parse(os.Args[1:])
 
-	if u.Flag.ShowVer {
+	if u.Flags.ShowVer {
 		fmt.Printf("%s v%s\n", AppName, version.Version)
 		return nil // don't run anything else w/ version request.
 	}
 
-	if u.Flag.DumpJSON == "" { // do not print this when dumping JSON.
-		u.Logf("Loading Configuration File: %s", u.Flag.ConfigFile)
+	if u.Flags.DumpJSON == "" { // do not print this when dumping JSON.
+		u.Logf("Loading Configuration File: %s", u.Flags.ConfigFile)
 	}
 
 	// Parse config file and ENV variables.
@@ -53,7 +47,7 @@ func (u *UnifiPoller) Start() error {
 		}}
 	}
 
-	if u.Flag.DumpJSON != "" {
+	if u.Flags.DumpJSON != "" {
 		return u.DumpJSONPayload()
 	}
 
@@ -66,7 +60,7 @@ func (u *UnifiPoller) Start() error {
 }
 
 // Parse turns CLI arguments into data structures. Called by Start() on startup.
-func (f *Flag) Parse(args []string) {
+func (f *Flags) Parse(args []string) {
 	f.FlagSet = pflag.NewFlagSet(AppName, pflag.ExitOnError)
 	f.Usage = func() {
 		fmt.Printf("Usage: %s [--config=/path/to/up.conf] [--version]", AppName)
