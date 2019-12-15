@@ -11,7 +11,7 @@
 /unifi-poller.*.linux
 /unifi-poller.rb
 *.sha256
-#/vendor
+/vendor
 .DS_Store
 *~
 /package_build_*
