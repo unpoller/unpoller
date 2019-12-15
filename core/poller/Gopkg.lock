@@ -46,12 +46,11 @@
   version = "v1.0.1"
 
 [[projects]]
-  digest = "1:eb04f69c8991e52eff33c428bd729e04208bf03235be88e4df0d88497c6861b9"
+  digest = "1:7097829edd12fd7211fca0d29496b44f94ef9e6d72f88fb64f3d7b06315818ad"
   name = "github.com/prometheus/client_golang"
   packages = [
     "prometheus",
     "prometheus/internal",
-    "prometheus/promhttp",
   ]
   pruneopts = "UT"
   revision = "170205fb58decfd011f1550d4cfb737230d7ae4f"
@@ -136,7 +135,6 @@
   input-imports = [
     "github.com/influxdata/influxdb1-client/v2",
     "github.com/prometheus/client_golang/prometheus",
-    "github.com/prometheus/client_golang/prometheus/promhttp",
     "github.com/prometheus/common/version",
     "github.com/spf13/pflag",
     "golift.io/config",
