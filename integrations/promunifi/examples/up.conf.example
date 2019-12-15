@@ -2,10 +2,6 @@
 # commented lines are defaults, uncomment to change.   #
 ########################################################
 
-# If the controller has more than one site, specify which sites to poll here.
-# Set this to ["default"] to poll only the first site on the controller.
-# A setting of ["all"] will poll all sites; this works if you only have 1 site too.
-sites = ["all"]
 
 # The UniFi Controller only updates traffic stats about every 30 seconds.
 # Setting this to something lower may lead to "zeros" in your data.
@@ -51,18 +47,22 @@ influx_db = "unifi"
 # If your InfluxDB uses an invalid SSL cert, set this to true.
 influx_insecure_ssl = false
 
-# Make a read-only user in the UniFi Admin Settings.
-unifi_user = "influx"
-# You may also set env variable UNIFI_PASSWORD instead of putting this in the config.
-unifi_pass = "4BB9345C-2341-48D7-99F5-E01B583FF77F"
-unifi_url = "https://127.0.0.1:8443"
+# You may repeat the following section to poll additional controllers.
 
-# Some controllers or reverse proxy configurations do not allow cookies to be
-# re-user on every request (every interval). This setting provides a workaround
-# That causes the poller to re-auth (login) to the controller on every interval.
-# Only enable this if you get login errors after 30 seconds. This will generate
-# a few more requests to your controller every interval.
-reauthenticate = false
+[[controller]]
+# Friendly name used in dashboards.
+name = ""
+
+url = "https://127.0.0.1:8443"
+# Make a read-only user in the UniFi Admin Settings.
+user = "influx"
+# You may also set env variable UNIFI_PASSWORD instead of putting this in the config.
+pass = "4BB9345C-2341-48D7-99F5-E01B583FF77F"
+
+# If the controller has more than one site, specify which sites to poll here.
+# Set this to ["default"] to poll only the first site on the controller.
+# A setting of ["all"] will poll all sites; this works if you only have 1 site too.
+sites = ["all"]
 
 # Enable collection of Intrusion Detection System Data (InfluxDB only).
 # Only useful if IDS or IPS are enabled on one of the sites.
