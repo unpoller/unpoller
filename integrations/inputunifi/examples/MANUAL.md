@@ -65,14 +65,6 @@ is provided so the application can be easily adapted to any environment.
 
 `Config File Parameters`
 
-    sites                  default: ["all"]
-        This list of strings should represent the names of sites on the UniFi
-        controller that will be polled for data. Pass `all` in the list to
-        poll all sites. On startup, the application prints out all site names
-        found in the controller; they're cryptic, but they have the human-name
-        next to them. The cryptic names go into the config file `sites` list.
-        The controller's first site is not cryptic and is named `default`.
-
     interval               default: 30s
         How often to poll the controller for updated client and device data.
         The UniFi Controller only updates traffic stats about every 30-60 seconds.
@@ -136,34 +128,38 @@ is provided so the application can be easily adapted to any environment.
     influx_insecure_ssl    default: false
         Setting this to true will allow use of InfluxDB with an invalid SSL certificate.
 
-    unifi_url              default: https://127.0.0.1:8443
+      >>> CONTROLLER FIELDS FOLLOW - you may have multiple controllers:
+
+    sites                  default: ["all"]
+        This list of strings should represent the names of sites on the UniFi
+        controller that will be polled for data. Pass `all` in the list to
+        poll all sites. On startup, the application prints out all site names
+        found in the controller; they're cryptic, but they have the human-name
+        next to them. The cryptic names go into the config file `sites` list.
+        The controller's first site is not cryptic and is named `default`.
+
+    url                    default: https://127.0.0.1:8443
         This is the URL where the UniFi Controller is available.
 
-    unifi_user             default: influxdb
+    user                   default: influxdb
         Username used to authenticate with UniFi controller. This should be a
         special service account created on the control with read-only access.
 
-    unifi_user             no default   ENV: UNIFI_PASSWORD
+    user                   no default
         Password used to authenticate with UniFi controller. This can also be
         set in an environment variable instead of a configuration file.
 
-    save_ids            default: false
+    save_ids               default: false
         Setting this parameter to true will enable collection of Intrusion
         Detection System data. IDS and IPS are the same data set. This is off
         by default because most controllers do not have this enabled. It also
         creates a lot of new metrics from controllers with a lot of IDS entries.
         IDS data does not contain metrics, so this doesn't work with Prometheus.
 
-    save_sites
+    save_sites             default: true
         Setting this parameter to false will disable saving Network Site data.
         This data populates the Sites dashboard, and this setting affects influx
         and prometheus.
-
-    reauthenticate         default: false
-        Setting this parameter to true will make UniFi Poller send a new login
-        request on every interval. This generates a new cookie. Some controller
-        or reverse proxy configurations require this. Do not enable it unless
-        your configuration causes the poller to be logged out after some time.
 
     verify_ssl             default: false
         If your UniFi controller has a valid SSL certificate, you can enable
