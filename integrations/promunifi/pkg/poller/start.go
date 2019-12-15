@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/spf13/pflag"
+	"golift.io/config"
 )
 
 // New returns a new poller struct preloaded with default values.
@@ -23,7 +24,7 @@ func New() *UnifiPoller {
 			UnifiUser:  defaultUnifiUser,
 			UnifiPass:  "",
 			UnifiBase:  defaultUnifiURL,
-			Interval:   Duration{defaultInterval},
+			Interval:   config.Duration{Duration: defaultInterval},
 			Sites:      []string{"all"},
 			SaveSites:  true,
 			HTTPListen: defaultHTTPListen,
@@ -53,16 +54,16 @@ func (u *UnifiPoller) Start() error {
 	}
 
 	// Parse config file.
-	if err := u.Config.ParseFile(u.Flag.ConfigFile); err != nil {
+	if err := config.ParseFile(u.Config, u.Flag.ConfigFile); err != nil {
 		u.Flag.Usage()
 		return err
 	}
 
 	// Update Config with ENV variable overrides.
-	if err := u.Config.ParseENV(); err != nil {
+	if _, err := config.ParseENV(u.Config, ENVConfigPrefix); err != nil {
 		return err
 	}
-
+	log.Println("START():", u.Config.Controller)
 	if u.Flag.DumpJSON != "" {
 		return u.DumpJSONPayload()
 	}
@@ -71,7 +72,7 @@ func (u *UnifiPoller) Start() error {
 		log.SetFlags(log.Lshortfile | log.Lmicroseconds | log.Ldate)
 		u.LogDebugf("Debug Logging Enabled")
 	}
-
+	log.Println("sites", u.Config.Sites)
 	log.Printf("[INFO] UniFi Poller v%v Starting Up! PID: %d", Version, os.Getpid())
 	return u.Run()
 }
