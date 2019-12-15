@@ -10,11 +10,12 @@ import (
 
 	"github.com/davidnewhall/unifi-poller/pkg/poller"
 	influx "github.com/influxdata/influxdb1-client/v2"
-	conf "golift.io/config"
+	"golift.io/config"
 )
 
 const (
 	defaultInterval   = 30 * time.Second
+	minimumInterval   = 10 * time.Second
 	defaultInfluxDB   = "unifi"
 	defaultInfluxUser = "unifi"
 	defaultInfluxURL  = "http://127.0.0.1:8086"
@@ -22,13 +23,13 @@ const (
 
 // Config defines the data needed to store metrics in InfluxDB
 type Config struct {
-	Interval  conf.Duration `json:"interval,omitempty" toml:"interval,omitempty" xml:"interval" yaml:"interval"`
-	Disable   bool          `json:"disable" toml:"disable" xml:"disable" yaml:"disable"`
-	VerifySSL bool          `json:"verify_ssl" toml:"verify_ssl" xml:"verify_ssl" yaml:"verify_ssl"`
-	URL       string        `json:"url,omitempty" toml:"url,omitempty" xml:"url" yaml:"url"`
-	User      string        `json:"user,omitempty" toml:"user,omitempty" xml:"user" yaml:"user"`
-	Pass      string        `json:"pass,omitempty" toml:"pass,omitempty" xml:"pass" yaml:"pass"`
-	DB        string        `json:"db,omitempty" toml:"db,omitempty" xml:"db" yaml:"db"`
+	Interval  config.Duration `json:"interval,omitempty" toml:"interval,omitempty" xml:"interval" yaml:"interval"`
+	Disable   bool            `json:"disable" toml:"disable" xml:"disable" yaml:"disable"`
+	VerifySSL bool            `json:"verify_ssl" toml:"verify_ssl" xml:"verify_ssl" yaml:"verify_ssl"`
+	URL       string          `json:"url,omitempty" toml:"url,omitempty" xml:"url" yaml:"url"`
+	User      string          `json:"user,omitempty" toml:"user,omitempty" xml:"user" yaml:"user"`
+	Pass      string          `json:"pass,omitempty" toml:"pass,omitempty" xml:"pass" yaml:"pass"`
+	DB        string          `json:"db,omitempty" toml:"db,omitempty" xml:"db" yaml:"db"`
 }
 
 // InfluxDB allows the data to be nested in the config file.
@@ -63,9 +64,9 @@ func init() {
 // This is started by Run() or RunBoth() after everything checks out.
 func (u *InfluxUnifi) PollController() {
 	interval := u.Config.Interval.Round(time.Second)
+	ticker := time.NewTicker(interval)
 	log.Printf("[INFO] Everything checks out! Poller started, InfluxDB interval: %v", interval)
 
-	ticker := time.NewTicker(interval)
 	for u.LastCheck = range ticker.C {
 		metrics, err := u.Collector.Metrics()
 		if err != nil {
@@ -128,12 +129,12 @@ func (u *InfluxUnifi) setConfigDefaults() {
 	}
 
 	if u.Config.Interval.Duration == 0 {
-		u.Config.Interval = conf.Duration{Duration: defaultInterval}
-	} else if u.Config.Interval.Duration < defaultInterval/2 {
-		u.Config.Interval = conf.Duration{Duration: defaultInterval / 2}
+		u.Config.Interval = config.Duration{Duration: defaultInterval}
+	} else if u.Config.Interval.Duration < minimumInterval {
+		u.Config.Interval = config.Duration{Duration: minimumInterval}
 	}
 
-	u.Config.Interval = conf.Duration{Duration: u.Config.Interval.Duration.Round(time.Second)}
+	u.Config.Interval = config.Duration{Duration: u.Config.Interval.Duration.Round(time.Second)}
 }
 
 // ReportMetrics batches all device and client data into influxdb data points.
@@ -179,6 +180,7 @@ func (u *InfluxUnifi) collect(r report, ch chan *metric) {
 // to the collect routine through the metric channel.
 func (u *InfluxUnifi) loopPoints(r report) {
 	m := r.metrics()
+
 	r.add()
 	go func() {
 		defer r.done()
@@ -186,6 +188,7 @@ func (u *InfluxUnifi) loopPoints(r report) {
 			u.batchSite(r, s)
 		}
 	}()
+
 	r.add()
 	go func() {
 		defer r.done()
@@ -193,6 +196,7 @@ func (u *InfluxUnifi) loopPoints(r report) {
 			u.batchClient(r, s)
 		}
 	}()
+
 	r.add()
 	go func() {
 		defer r.done()
@@ -200,6 +204,7 @@ func (u *InfluxUnifi) loopPoints(r report) {
 			u.batchIDS(r, s)
 		}
 	}()
+
 	if m.Devices == nil {
 		return
 	}
@@ -211,6 +216,7 @@ func (u *InfluxUnifi) loopPoints(r report) {
 			u.batchUAP(r, s)
 		}
 	}()
+
 	r.add()
 	go func() {
 		defer r.done()
@@ -218,6 +224,7 @@ func (u *InfluxUnifi) loopPoints(r report) {
 			u.batchUSG(r, s)
 		}
 	}()
+
 	r.add()
 	go func() {
 		defer r.done()
@@ -225,6 +232,7 @@ func (u *InfluxUnifi) loopPoints(r report) {
 			u.batchUSW(r, s)
 		}
 	}()
+
 	r.add()
 	go func() {
 		defer r.done()

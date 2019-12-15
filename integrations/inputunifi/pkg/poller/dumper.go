@@ -37,12 +37,12 @@ func (u *UnifiPoller) DumpJSONPayload() (err error) {
 	switch sites, err := u.GetFilteredSites(config); {
 	case err != nil:
 		return err
-	case StringInSlice(u.Flag.DumpJSON, []string{"d", "device", "devices"}):
+	case StringInSlice(u.Flags.DumpJSON, []string{"d", "device", "devices"}):
 		return u.dumpSitesJSON(config, unifi.APIDevicePath, "Devices", sites)
-	case StringInSlice(u.Flag.DumpJSON, []string{"client", "clients", "c"}):
+	case StringInSlice(u.Flags.DumpJSON, []string{"client", "clients", "c"}):
 		return u.dumpSitesJSON(config, unifi.APIClientPath, "Clients", sites)
-	case strings.HasPrefix(u.Flag.DumpJSON, "other "):
-		apiPath := strings.SplitN(u.Flag.DumpJSON, " ", 2)[1]
+	case strings.HasPrefix(u.Flags.DumpJSON, "other "):
+		apiPath := strings.SplitN(u.Flags.DumpJSON, " ", 2)[1]
 		_, _ = fmt.Fprintf(os.Stderr, "[INFO] Dumping Path '%s':\n", apiPath)
 		return u.PrintRawAPIJSON(config, apiPath)
 	default:
