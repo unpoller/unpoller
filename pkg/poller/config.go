@@ -61,6 +61,7 @@ type Controller struct {
 	VerifySSL bool         `json:"verify_ssl" toml:"verify_ssl" xml:"verify_ssl" yaml:"verify_ssl"`
 	SaveIDS   bool         `json:"save_ids" toml:"save_ids" xml:"save_ids" yaml:"save_ids"`
 	SaveSites bool         `json:"save_sites,omitempty" toml:"save_sites,omitempty" xml:"save_sites" yaml:"save_sites"`
+	Name      string       `json:"name" toml:"name" xml:"name,attr" yaml:"name"`
 	User      string       `json:"user,omitempty" toml:"user,omitempty" xml:"user" yaml:"user"`
 	Pass      string       `json:"pass,omitempty" toml:"pass,omitempty" xml:"pass" yaml:"pass"`
 	URL       string       `json:"url,omitempty" toml:"url,omitempty" xml:"url" yaml:"url"`
