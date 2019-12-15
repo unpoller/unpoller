@@ -41,7 +41,6 @@ const ENVConfigPrefix = "UP"
 // UnifiPoller contains the application startup data, and auth info for UniFi & Influx.
 type UnifiPoller struct {
 	Influx     *influxunifi.InfluxUnifi
-	Unifi      *unifi.Unifi
 	Flag       *Flag
 	Config     *Config
 	LastCheck  time.Time
@@ -59,14 +58,14 @@ type Flag struct {
 // Controller represents the configuration for a UniFi Controller.
 // Each polled controller may have its own configuration.
 type Controller struct {
-	VerifySSL bool     `json:"verify_ssl" toml:"verify_ssl" xml:"verify_ssl" yaml:"verify_ssl"`
-	SaveIDS   bool     `json:"save_ids" toml:"save_ids" xml:"save_ids" yaml:"save_ids"`
-	ReAuth    bool     `json:"reauthenticate" toml:"reauthenticate" xml:"reauthenticate" yaml:"reauthenticate"`
-	SaveSites bool     `json:"save_sites,omitempty" toml:"save_sites,omitempty" xml:"save_sites" yaml:"save_sites"`
-	User      string   `json:"unifi_user,omitempty" toml:"unifi_user,omitempty" xml:"unifi_user" yaml:"unifi_user"`
-	Pass      string   `json:"unifi_pass,omitempty" toml:"unifi_pass,omitempty" xml:"unifi_pass" yaml:"unifi_pass"`
-	URL       string   `json:"unifi_url,omitempty" toml:"unifi_url,omitempty" xml:"unifi_url" yaml:"unifi_url"`
-	Sites     []string `json:"sites,omitempty" toml:"sites,omitempty" xml:"sites" yaml:"sites"`
+	VerifySSL bool         `json:"verify_ssl" toml:"verify_ssl" xml:"verify_ssl" yaml:"verify_ssl"`
+	SaveIDS   bool         `json:"save_ids" toml:"save_ids" xml:"save_ids" yaml:"save_ids"`
+	SaveSites bool         `json:"save_sites,omitempty" toml:"save_sites,omitempty" xml:"save_sites" yaml:"save_sites"`
+	User      string       `json:"unifi_user,omitempty" toml:"unifi_user,omitempty" xml:"unifi_user" yaml:"unifi_user"`
+	Pass      string       `json:"unifi_pass,omitempty" toml:"unifi_pass,omitempty" xml:"unifi_pass" yaml:"unifi_pass"`
+	URL       string       `json:"unifi_url,omitempty" toml:"unifi_url,omitempty" xml:"unifi_url" yaml:"unifi_url"`
+	Sites     []string     `json:"sites,omitempty" toml:"sites,omitempty" xml:"sites" yaml:"sites"`
+	Unifi     *unifi.Unifi `json:"-" toml:"-" xml:"-" yaml:"-"`
 }
 
 // Config represents the data needed to poll a controller and report to influxdb.
@@ -76,11 +75,7 @@ type Config struct {
 	Interval   config.Duration `json:"interval,omitempty" toml:"interval,omitempty" xml:"interval" yaml:"interval"`
 	Debug      bool            `json:"debug" toml:"debug" xml:"debug" yaml:"debug"`
 	Quiet      bool            `json:"quiet,omitempty" toml:"quiet,omitempty" xml:"quiet" yaml:"quiet"`
-	VerifySSL  bool            `json:"verify_ssl" toml:"verify_ssl" xml:"verify_ssl" yaml:"verify_ssl"`
-	SaveIDS    bool            `json:"save_ids" toml:"save_ids" xml:"save_ids" yaml:"save_ids"`
-	ReAuth     bool            `json:"reauthenticate" toml:"reauthenticate" xml:"reauthenticate" yaml:"reauthenticate"`
 	InfxBadSSL bool            `json:"influx_insecure_ssl" toml:"influx_insecure_ssl" xml:"influx_insecure_ssl" yaml:"influx_insecure_ssl"`
-	SaveSites  bool            `json:"save_sites,omitempty" toml:"save_sites,omitempty" xml:"save_sites" yaml:"save_sites"`
 	Mode       string          `json:"mode" toml:"mode" xml:"mode" yaml:"mode"`
 	HTTPListen string          `json:"http_listen" toml:"http_listen" xml:"http_listen" yaml:"http_listen"`
 	Namespace  string          `json:"namespace" toml:"namespace" xml:"namespace" yaml:"namespace"`
@@ -88,9 +83,5 @@ type Config struct {
 	InfluxUser string          `json:"influx_user,omitempty" toml:"influx_user,omitempty" xml:"influx_user" yaml:"influx_user"`
 	InfluxPass string          `json:"influx_pass,omitempty" toml:"influx_pass,omitempty" xml:"influx_pass" yaml:"influx_pass"`
 	InfluxDB   string          `json:"influx_db,omitempty" toml:"influx_db,omitempty" xml:"influx_db" yaml:"influx_db"`
-	UnifiUser  string          `json:"unifi_user,omitempty" toml:"unifi_user,omitempty" xml:"unifi_user" yaml:"unifi_user"`
-	UnifiPass  string          `json:"unifi_pass,omitempty" toml:"unifi_pass,omitempty" xml:"unifi_pass" yaml:"unifi_pass"`
-	UnifiBase  string          `json:"unifi_url,omitempty" toml:"unifi_url,omitempty" xml:"unifi_url" yaml:"unifi_url"`
-	Sites      []string        `json:"sites,omitempty" toml:"sites,omitempty" xml:"sites" yaml:"sites"`
 	Controller []Controller    `json:"controller,omitempty" toml:"controller,omitempty" xml:"controller" yaml:"controller"`
 }
