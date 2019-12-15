@@ -17,16 +17,18 @@ import (
 func New() *UnifiPoller {
 	return &UnifiPoller{
 		Config: &Config{
+			Controller: []Controller{{
+				Sites:     []string{"all"},
+				User:      defaultUnifiUser,
+				Pass:      "",
+				URL:       defaultUnifiURL,
+				SaveSites: true,
+			}},
 			InfluxURL:  defaultInfluxURL,
 			InfluxUser: defaultInfluxUser,
 			InfluxPass: defaultInfluxPass,
 			InfluxDB:   defaultInfluxDB,
-			UnifiUser:  defaultUnifiUser,
-			UnifiPass:  "",
-			UnifiBase:  defaultUnifiURL,
 			Interval:   config.Duration{Duration: defaultInterval},
-			Sites:      []string{"all"},
-			SaveSites:  true,
 			HTTPListen: defaultHTTPListen,
 			Namespace:  appName,
 		},
@@ -63,7 +65,7 @@ func (u *UnifiPoller) Start() error {
 	if _, err := config.ParseENV(u.Config, ENVConfigPrefix); err != nil {
 		return err
 	}
-	log.Println("START():", u.Config.Controller)
+	log.Println("START(): controller", u.Config.Controller)
 	if u.Flag.DumpJSON != "" {
 		return u.DumpJSONPayload()
 	}
@@ -72,8 +74,9 @@ func (u *UnifiPoller) Start() error {
 		log.SetFlags(log.Lshortfile | log.Lmicroseconds | log.Ldate)
 		u.LogDebugf("Debug Logging Enabled")
 	}
-	log.Println("sites", u.Config.Sites)
+
 	log.Printf("[INFO] UniFi Poller v%v Starting Up! PID: %d", Version, os.Getpid())
+
 	return u.Run()
 }
 
@@ -97,12 +100,14 @@ func (f *Flag) Parse(args []string) {
 // 2. Run the collector one time and report the metrics to influxdb. (lambda)
 // 3. Start a web server and wait for Prometheus to poll the application for metrics.
 func (u *UnifiPoller) Run() error {
-	switch err := u.GetUnifi(); err {
-	case nil:
-		u.Logf("Polling UniFi Controller at %s v%s as user %s. Sites: %v",
-			u.Config.UnifiBase, u.Unifi.ServerVersion, u.Config.UnifiUser, u.Config.Sites)
-	default:
-		u.LogErrorf("Controller Auth or Connection failed, but continuing to retry! %v", err)
+	for _, c := range u.Config.Controller {
+		switch err := u.GetUnifi(c); err {
+		case nil:
+			u.Logf("Polling UniFi Controller at %s v%s as user %s. Sites: %v",
+				c.URL, c.Unifi.ServerVersion, c.User, c.Sites)
+		default:
+			u.LogErrorf("Controller Auth or Connection failed, but continuing to retry! %s: %v", c.URL, err)
+		}
 	}
 
 	switch strings.ToLower(u.Config.Mode) {
@@ -130,11 +135,6 @@ func (u *UnifiPoller) PollController() {
 	for u.LastCheck = range ticker.C {
 		if err := u.CollectAndProcess(); err != nil {
 			u.LogErrorf("%v", err)
-
-			if u.Unifi != nil {
-				u.Unifi.CloseIdleConnections()
-				u.Unifi = nil // trigger re-auth in unifi.go.
-			}
 		}
 	}
 }

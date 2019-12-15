@@ -9,50 +9,53 @@ import (
 )
 
 // DumpJSONPayload prints raw json from the UniFi Controller.
+// This only works with controller 0 (first one) in the config.
 func (u *UnifiPoller) DumpJSONPayload() (err error) {
 	u.Config.Quiet = true
-	u.Unifi, err = unifi.NewUnifi(&unifi.Config{
-		User:      u.Config.UnifiUser,
-		Pass:      u.Config.UnifiPass,
-		URL:       u.Config.UnifiBase,
-		VerifySSL: u.Config.VerifySSL,
+	config := u.Config.Controller[0]
+
+	config.Unifi, err = unifi.NewUnifi(&unifi.Config{
+		User:      config.User,
+		Pass:      config.Pass,
+		URL:       config.URL,
+		VerifySSL: config.VerifySSL,
 	})
 	if err != nil {
 		return err
 	}
 
-	fmt.Fprintf(os.Stderr, "[INFO] Authenticated to UniFi Controller @ %v as user %v",
-		u.Config.UnifiBase, u.Config.UnifiUser)
-	if err := u.CheckSites(); err != nil {
+	fmt.Fprintf(os.Stderr, "[INFO] Authenticated to UniFi Controller @ %v as user %v", config.URL, config.User)
+
+	if err := u.CheckSites(config); err != nil {
 		return err
 	}
 
-	u.Unifi.ErrorLog = func(m string, v ...interface{}) {
+	config.Unifi.ErrorLog = func(m string, v ...interface{}) {
 		fmt.Fprintf(os.Stderr, "[ERROR] "+m, v...)
 	} // Log all errors to stderr.
 
-	switch sites, err := u.GetFilteredSites(); {
+	switch sites, err := u.GetFilteredSites(config); {
 	case err != nil:
 		return err
 	case StringInSlice(u.Flag.DumpJSON, []string{"d", "device", "devices"}):
-		return u.dumpSitesJSON(unifi.APIDevicePath, "Devices", sites)
+		return u.dumpSitesJSON(config, unifi.APIDevicePath, "Devices", sites)
 	case StringInSlice(u.Flag.DumpJSON, []string{"client", "clients", "c"}):
-		return u.dumpSitesJSON(unifi.APIClientPath, "Clients", sites)
+		return u.dumpSitesJSON(config, unifi.APIClientPath, "Clients", sites)
 	case strings.HasPrefix(u.Flag.DumpJSON, "other "):
 		apiPath := strings.SplitN(u.Flag.DumpJSON, " ", 2)[1]
 		_, _ = fmt.Fprintf(os.Stderr, "[INFO] Dumping Path '%s':\n", apiPath)
-		return u.PrintRawAPIJSON(apiPath)
+		return u.PrintRawAPIJSON(config, apiPath)
 	default:
 		return fmt.Errorf("must provide filter: devices, clients, other")
 	}
 }
 
-func (u *UnifiPoller) dumpSitesJSON(path, name string, sites unifi.Sites) error {
+func (u *UnifiPoller) dumpSitesJSON(c Controller, path, name string, sites unifi.Sites) error {
 	for _, s := range sites {
 		apiPath := fmt.Sprintf(path, s.Name)
 		_, _ = fmt.Fprintf(os.Stderr, "[INFO] Dumping %s: '%s' JSON for site: %s (%s):\n",
 			name, apiPath, s.Desc, s.Name)
-		if err := u.PrintRawAPIJSON(apiPath); err != nil {
+		if err := u.PrintRawAPIJSON(c, apiPath); err != nil {
 			return err
 		}
 	}
@@ -60,8 +63,8 @@ func (u *UnifiPoller) dumpSitesJSON(path, name string, sites unifi.Sites) error 
 }
 
 // PrintRawAPIJSON prints the raw json for a user-provided path on a UniFi Controller.
-func (u *UnifiPoller) PrintRawAPIJSON(apiPath string) error {
-	body, err := u.Unifi.GetJSON(apiPath)
+func (u *UnifiPoller) PrintRawAPIJSON(c Controller, apiPath string) error {
+	body, err := c.Unifi.GetJSON(apiPath)
 	fmt.Println(string(body))
 	return err
 }
