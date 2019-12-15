@@ -79,8 +79,9 @@ FIRST:
 }
 
 // CollectMetrics grabs all the measurements from a UniFi controller and returns them.
-func (u *UnifiPoller) CollectMetrics() (metrics *metrics.Metrics, err error) {
-	var errs []string
+func (u *UnifiPoller) CollectMetrics() (*metrics.Metrics, error) {
+	errs := []string{}
+	metrics := &metrics.Metrics{}
 
 	for _, c := range u.Config.Controllers {
 		m, err := u.collectController(c)
@@ -119,11 +120,13 @@ func (u *UnifiPoller) CollectMetrics() (metrics *metrics.Metrics, err error) {
 		metrics.UDMs = append(metrics.UDMs, m.UDMs...)
 	}
 
+	var err error
+
 	if len(errs) > 0 {
 		err = fmt.Errorf(strings.Join(errs, ", "))
 	}
 
-	return
+	return metrics, err
 }
 
 func (u *UnifiPoller) collectController(c Controller) (*metrics.Metrics, error) {
