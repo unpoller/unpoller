@@ -61,9 +61,9 @@ type Controller struct {
 	VerifySSL bool         `json:"verify_ssl" toml:"verify_ssl" xml:"verify_ssl" yaml:"verify_ssl"`
 	SaveIDS   bool         `json:"save_ids" toml:"save_ids" xml:"save_ids" yaml:"save_ids"`
 	SaveSites bool         `json:"save_sites,omitempty" toml:"save_sites,omitempty" xml:"save_sites" yaml:"save_sites"`
-	User      string       `json:"unifi_user,omitempty" toml:"unifi_user,omitempty" xml:"unifi_user" yaml:"unifi_user"`
-	Pass      string       `json:"unifi_pass,omitempty" toml:"unifi_pass,omitempty" xml:"unifi_pass" yaml:"unifi_pass"`
-	URL       string       `json:"unifi_url,omitempty" toml:"unifi_url,omitempty" xml:"unifi_url" yaml:"unifi_url"`
+	User      string       `json:"user,omitempty" toml:"user,omitempty" xml:"user" yaml:"user"`
+	Pass      string       `json:"pass,omitempty" toml:"pass,omitempty" xml:"pass" yaml:"pass"`
+	URL       string       `json:"url,omitempty" toml:"url,omitempty" xml:"url" yaml:"url"`
 	Sites     []string     `json:"sites,omitempty" toml:"sites,omitempty" xml:"sites" yaml:"sites"`
 	Unifi     *unifi.Unifi `json:"-" toml:"-" xml:"-" yaml:"-"`
 }
