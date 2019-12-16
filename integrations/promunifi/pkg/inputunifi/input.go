@@ -27,7 +27,7 @@ type Controller struct {
 	User      string       `json:"user" toml:"user" xml:"user" yaml:"user"`
 	Pass      string       `json:"pass" toml:"pass" xml:"pass" yaml:"pass"`
 	URL       string       `json:"url" toml:"url" xml:"url" yaml:"url"`
-	Sites     []string     `json:"sites,omitempty" toml:"sites,omitempty" xml:"sites" yaml:"sites"`
+	Sites     []string     `json:"sites,omitempty" toml:"sites,omitempty" xml:"site" yaml:"sites"`
 	Unifi     *unifi.Unifi `json:"-" toml:"-" xml:"-" yaml:"-"`
 }
 
@@ -35,7 +35,7 @@ type Controller struct {
 type Config struct {
 	sync.RWMutex              // locks the Unifi struct member when re-authing to unifi.
 	Disable      bool         `json:"disable" toml:"disable" xml:"disable" yaml:"disable"`
-	Controllers  []Controller `json:"controller" toml:"controller" xml:"controller" yaml:"controller"`
+	Controllers  []Controller `json:"controllers" toml:"controller" xml:"controller" yaml:"controllers"`
 }
 
 func init() {
