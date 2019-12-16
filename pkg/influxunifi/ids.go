@@ -35,5 +35,6 @@ func (u *InfluxUnifi) batchIDS(r report, i *unifi.IDS) {
 		"srcipASN":     i.SrcipASN,
 		"usgipASN":     i.UsgipASN,
 	}
+
 	r.send(&metric{Table: "intrusion_detect", Tags: tags, Fields: fields})
 }

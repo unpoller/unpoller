@@ -49,45 +49,46 @@ func descUSW(ns string) *usw {
 	pns := ns + "port_"
 	labelS := []string{"site_name", "name"}
 	labelP := []string{"port_id", "port_num", "port_name", "port_mac", "port_ip", "site_name", "name"}
+	nd := prometheus.NewDesc
 
 	return &usw{
 		// This data may be derivable by sum()ing the port data.
-		SwRxPackets:   prometheus.NewDesc(ns+"switch_receive_packets_total", "Switch Packets Received Total", labelS, nil),
-		SwRxBytes:     prometheus.NewDesc(ns+"switch_receive_bytes_total", "Switch Bytes Received Total", labelS, nil),
-		SwRxErrors:    prometheus.NewDesc(ns+"switch_receive_errors_total", "Switch Errors Received Total", labelS, nil),
-		SwRxDropped:   prometheus.NewDesc(ns+"switch_receive_dropped_total", "Switch Dropped Received Total", labelS, nil),
-		SwRxCrypts:    prometheus.NewDesc(ns+"switch_receive_crypts_total", "Switch Crypts Received Total", labelS, nil),
-		SwRxFrags:     prometheus.NewDesc(ns+"switch_receive_frags_total", "Switch Frags Received Total", labelS, nil),
-		SwTxPackets:   prometheus.NewDesc(ns+"switch_transmit_packets_total", "Switch Packets Transmit Total", labelS, nil),
-		SwTxBytes:     prometheus.NewDesc(ns+"switch_transmit_bytes_total", "Switch Bytes Transmit Total", labelS, nil),
-		SwTxErrors:    prometheus.NewDesc(ns+"switch_transmit_errors_total", "Switch Errors Transmit Total", labelS, nil),
-		SwTxDropped:   prometheus.NewDesc(ns+"switch_transmit_dropped_total", "Switch Dropped Transmit Total", labelS, nil),
-		SwTxRetries:   prometheus.NewDesc(ns+"switch_transmit_retries_total", "Switch Retries Transmit Total", labelS, nil),
-		SwRxMulticast: prometheus.NewDesc(ns+"switch_receive_multicast_total", "Switch Multicast Receive Total", labelS, nil),
-		SwRxBroadcast: prometheus.NewDesc(ns+"switch_receive_broadcast_total", "Switch Broadcast Receive Total", labelS, nil),
-		SwTxMulticast: prometheus.NewDesc(ns+"switch_transmit_multicast_total", "Switch Multicast Transmit Total", labelS, nil),
-		SwTxBroadcast: prometheus.NewDesc(ns+"switch_transmit_broadcast_total", "Switch Broadcast Transmit Total", labelS, nil),
-		SwBytes:       prometheus.NewDesc(ns+"switch_bytes_total", "Switch Bytes Transferred Total", labelS, nil),
+		SwRxPackets:   nd(ns+"switch_receive_packets_total", "Switch Packets Received Total", labelS, nil),
+		SwRxBytes:     nd(ns+"switch_receive_bytes_total", "Switch Bytes Received Total", labelS, nil),
+		SwRxErrors:    nd(ns+"switch_receive_errors_total", "Switch Errors Received Total", labelS, nil),
+		SwRxDropped:   nd(ns+"switch_receive_dropped_total", "Switch Dropped Received Total", labelS, nil),
+		SwRxCrypts:    nd(ns+"switch_receive_crypts_total", "Switch Crypts Received Total", labelS, nil),
+		SwRxFrags:     nd(ns+"switch_receive_frags_total", "Switch Frags Received Total", labelS, nil),
+		SwTxPackets:   nd(ns+"switch_transmit_packets_total", "Switch Packets Transmit Total", labelS, nil),
+		SwTxBytes:     nd(ns+"switch_transmit_bytes_total", "Switch Bytes Transmit Total", labelS, nil),
+		SwTxErrors:    nd(ns+"switch_transmit_errors_total", "Switch Errors Transmit Total", labelS, nil),
+		SwTxDropped:   nd(ns+"switch_transmit_dropped_total", "Switch Dropped Transmit Total", labelS, nil),
+		SwTxRetries:   nd(ns+"switch_transmit_retries_total", "Switch Retries Transmit Total", labelS, nil),
+		SwRxMulticast: nd(ns+"switch_receive_multicast_total", "Switch Multicast Receive Total", labelS, nil),
+		SwRxBroadcast: nd(ns+"switch_receive_broadcast_total", "Switch Broadcast Receive Total", labelS, nil),
+		SwTxMulticast: nd(ns+"switch_transmit_multicast_total", "Switch Multicast Transmit Total", labelS, nil),
+		SwTxBroadcast: nd(ns+"switch_transmit_broadcast_total", "Switch Broadcast Transmit Total", labelS, nil),
+		SwBytes:       nd(ns+"switch_bytes_total", "Switch Bytes Transferred Total", labelS, nil),
 		// per-port data
-		PoeCurrent:   prometheus.NewDesc(pns+"poe_amperes", "POE Current", labelP, nil),
-		PoePower:     prometheus.NewDesc(pns+"poe_watts", "POE Power", labelP, nil),
-		PoeVoltage:   prometheus.NewDesc(pns+"poe_volts", "POE Voltage", labelP, nil),
-		RxBroadcast:  prometheus.NewDesc(pns+"receive_broadcast_total", "Receive Broadcast", labelP, nil),
-		RxBytes:      prometheus.NewDesc(pns+"receive_bytes_total", "Total Receive Bytes", labelP, nil),
-		RxBytesR:     prometheus.NewDesc(pns+"receive_rate_bytes", "Receive Bytes Rate", labelP, nil),
-		RxDropped:    prometheus.NewDesc(pns+"receive_dropped_total", "Total Receive Dropped", labelP, nil),
-		RxErrors:     prometheus.NewDesc(pns+"receive_errors_total", "Total Receive Errors", labelP, nil),
-		RxMulticast:  prometheus.NewDesc(pns+"receive_multicast_total", "Total Receive Multicast", labelP, nil),
-		RxPackets:    prometheus.NewDesc(pns+"receive_packets_total", "Total Receive Packets", labelP, nil),
-		Satisfaction: prometheus.NewDesc(pns+"satisfaction_ratio", "Satisfaction", labelP, nil),
-		Speed:        prometheus.NewDesc(pns+"port_speed_bps", "Speed", labelP, nil),
-		TxBroadcast:  prometheus.NewDesc(pns+"transmit_broadcast_total", "Total Transmit Broadcast", labelP, nil),
-		TxBytes:      prometheus.NewDesc(pns+"transmit_bytes_total", "Total Transmit Bytes", labelP, nil),
-		TxBytesR:     prometheus.NewDesc(pns+"transmit_rate_bytes", "Transmit Bytes Rate", labelP, nil),
-		TxDropped:    prometheus.NewDesc(pns+"transmit_dropped_total", "Total Transmit Dropped", labelP, nil),
-		TxErrors:     prometheus.NewDesc(pns+"transmit_errors_total", "Total Transmit Errors", labelP, nil),
-		TxMulticast:  prometheus.NewDesc(pns+"transmit_multicast_total", "Total Tranmist Multicast", labelP, nil),
-		TxPackets:    prometheus.NewDesc(pns+"transmit_packets_total", "Total Transmit Packets", labelP, nil),
+		PoeCurrent:   nd(pns+"poe_amperes", "POE Current", labelP, nil),
+		PoePower:     nd(pns+"poe_watts", "POE Power", labelP, nil),
+		PoeVoltage:   nd(pns+"poe_volts", "POE Voltage", labelP, nil),
+		RxBroadcast:  nd(pns+"receive_broadcast_total", "Receive Broadcast", labelP, nil),
+		RxBytes:      nd(pns+"receive_bytes_total", "Total Receive Bytes", labelP, nil),
+		RxBytesR:     nd(pns+"receive_rate_bytes", "Receive Bytes Rate", labelP, nil),
+		RxDropped:    nd(pns+"receive_dropped_total", "Total Receive Dropped", labelP, nil),
+		RxErrors:     nd(pns+"receive_errors_total", "Total Receive Errors", labelP, nil),
+		RxMulticast:  nd(pns+"receive_multicast_total", "Total Receive Multicast", labelP, nil),
+		RxPackets:    nd(pns+"receive_packets_total", "Total Receive Packets", labelP, nil),
+		Satisfaction: nd(pns+"satisfaction_ratio", "Satisfaction", labelP, nil),
+		Speed:        nd(pns+"port_speed_bps", "Speed", labelP, nil),
+		TxBroadcast:  nd(pns+"transmit_broadcast_total", "Total Transmit Broadcast", labelP, nil),
+		TxBytes:      nd(pns+"transmit_bytes_total", "Total Transmit Bytes", labelP, nil),
+		TxBytesR:     nd(pns+"transmit_rate_bytes", "Transmit Bytes Rate", labelP, nil),
+		TxDropped:    nd(pns+"transmit_dropped_total", "Total Transmit Dropped", labelP, nil),
+		TxErrors:     nd(pns+"transmit_errors_total", "Total Transmit Errors", labelP, nil),
+		TxMulticast:  nd(pns+"transmit_multicast_total", "Total Tranmist Multicast", labelP, nil),
+		TxPackets:    nd(pns+"transmit_packets_total", "Total Transmit Packets", labelP, nil),
 	}
 }
 
@@ -98,6 +99,7 @@ func (u *promUnifi) exportUSW(r report, d *unifi.USW) {
 
 	labels := []string{d.Type, d.SiteName, d.Name}
 	infoLabels := []string{d.Version, d.Model, d.Serial, d.Mac, d.IP, d.ID, d.Bytes.Txt, d.Uptime.Txt}
+
 	u.exportUSWstats(r, labels, d.Stat.Sw)
 	u.exportPRTtable(r, labels, d.PortTable)
 	u.exportBYTstats(r, labels, d.TxBytes, d.RxBytes)
@@ -129,6 +131,7 @@ func (u *promUnifi) exportUSWstats(r report, labels []string, sw *unifi.Sw) {
 	}
 
 	labelS := labels[1:]
+
 	r.send([]*metric{
 		{u.USW.SwRxPackets, counter, sw.RxPackets, labelS},
 		{u.USW.SwRxBytes, counter, sw.RxBytes, labelS},
