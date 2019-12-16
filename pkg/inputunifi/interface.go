@@ -10,6 +10,10 @@ import (
 
 // Metrics grabs all the measurements from a UniFi controller and returns them.
 func (u *InputUnifi) Metrics() (*poller.Metrics, error) {
+	if u.Config.Disable {
+		return nil, nil
+	}
+
 	errs := []string{}
 	metrics := &poller.Metrics{}
 

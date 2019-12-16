@@ -9,6 +9,10 @@ package poller
 */
 
 import (
+	"os"
+	"path"
+	"plugin"
+	"strings"
 	"time"
 
 	"github.com/spf13/pflag"
@@ -53,33 +57,24 @@ type Config struct {
 
 // Poller is the global config values.
 type Poller struct {
-	Debug bool `json:"debug" toml:"debug" xml:"debug,attr" yaml:"debug"`
-	Quiet bool `json:"quiet,omitempty" toml:"quiet,omitempty" xml:"quiet,attr" yaml:"quiet"`
+	Plugins []string `json:"plugins" toml:"plugins" xml:"plugin" yaml:"plugins"`
+	Debug   bool     `json:"debug" toml:"debug" xml:"debug,attr" yaml:"debug"`
+	Quiet   bool     `json:"quiet,omitempty" toml:"quiet,omitempty" xml:"quiet,attr" yaml:"quiet"`
 }
 
-// ParseConfigs parses the poller config and the config for each registered output plugin.
-func (u *UnifiPoller) ParseConfigs() error {
-	// Parse core config.
-	if err := u.ParseInterface(u.Config); err != nil {
-		return err
-	}
+// LoadPlugins reads-in dynamic shared libraries.
+// Not used very often, if at all.
+func (u *UnifiPoller) LoadPlugins() error {
+	for _, p := range u.Plugins {
+		name := strings.TrimSuffix(p, ".so") + ".so"
 
-	// Parse output plugin configs.
-	outputSync.Lock()
-	defer outputSync.Unlock()
-
-	for _, o := range outputs {
-		if err := u.ParseInterface(o.Config); err != nil {
-			return err
+		if _, err := os.Stat(name); os.IsNotExist(err) {
+			name = path.Join(DefaultObjPath, name)
 		}
-	}
 
-	// Parse input plugin configs.
-	inputSync.Lock()
-	defer inputSync.Unlock()
+		u.Logf("Loading Dynamic Plugin: %s", name)
 
-	for _, i := range inputs {
-		if err := u.ParseInterface(i.Config); err != nil {
+		if _, err := plugin.Open(name); err != nil {
 			return err
 		}
 	}
@@ -87,8 +82,27 @@ func (u *UnifiPoller) ParseConfigs() error {
 	return nil
 }
 
-// ParseInterface parses the config file and environment variables into the provided interface.
-func (u *UnifiPoller) ParseInterface(i interface{}) error {
+// ParseConfigs parses the poller config and the config for each registered output plugin.
+func (u *UnifiPoller) ParseConfigs() error {
+	// Parse core config.
+	if err := u.parseInterface(u.Config); err != nil {
+		return err
+	}
+
+	// Load dynamic plugins.
+	if err := u.LoadPlugins(); err != nil {
+		return err
+	}
+
+	if err := u.parseInputs(); err != nil {
+		return err
+	}
+
+	return u.parseOutputs()
+}
+
+// parseInterface parses the config file and environment variables into the provided interface.
+func (u *UnifiPoller) parseInterface(i interface{}) error {
 	// Parse config file into provided interface.
 	if err := config.ParseFile(i, u.Flags.ConfigFile); err != nil {
 		return err
@@ -98,4 +112,32 @@ func (u *UnifiPoller) ParseInterface(i interface{}) error {
 	_, err := config.ParseENV(i, ENVConfigPrefix)
 
 	return err
+}
+
+// Parse input plugin configs.
+func (u *UnifiPoller) parseInputs() error {
+	inputSync.Lock()
+	defer inputSync.Unlock()
+
+	for _, i := range inputs {
+		if err := u.parseInterface(i.Config); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+// Parse output plugin configs.
+func (u *UnifiPoller) parseOutputs() error {
+	outputSync.Lock()
+	defer outputSync.Unlock()
+
+	for _, o := range outputs {
+		if err := u.parseInterface(o.Config); err != nil {
+			return err
+		}
+	}
+
+	return nil
 }
