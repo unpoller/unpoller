@@ -41,7 +41,8 @@ type uclient struct {
 }
 
 func descClient(ns string) *uclient {
-	labels := []string{"name", "mac", "site_name", "gw_name", "sw_name", "vlan", "ip", "oui", "network", "sw_port", "ap_name", "wired"}
+	labels := []string{"name", "mac", "site_name", "gw_name", "sw_name", "vlan",
+		"ip", "oui", "network", "sw_port", "ap_name", "wired"}
 	labelW := append([]string{"radio_name", "radio", "radio_proto", "channel", "essid", "bssid", "radio_desc"}, labels...)
 
 	return &uclient{
@@ -64,25 +65,34 @@ func descClient(ns string) *uclient {
 		TxPower:        prometheus.NewDesc(ns+"radio_transmit_power_dbm", "Client Transmit Power", labelW, nil),
 		TxRate:         prometheus.NewDesc(ns+"radio_transmit_rate_bps", "Client Transmit Rate", labelW, nil),
 		WifiTxAttempts: prometheus.NewDesc(ns+"wifi_attempts_transmit_total", "Client Wifi Transmit Attempts", labelW, nil),
-		Uptime:         prometheus.NewDesc(ns+"uptime_seconds", "Client Uptime", labelW, nil), // XXX: re-purpose for info tags.
+		Uptime:         prometheus.NewDesc(ns+"uptime_seconds", "Client Uptime", labelW, nil),
 		/* needs more "looking into"
-		DpiStatsApp:       prometheus.NewDesc(ns+"dpi_stats_app", "Client DPI Stats App", labels, nil),
-		DpiStatsCat:       prometheus.NewDesc(ns+"dpi_stats_cat", "Client DPI Stats Cat", labels, nil),
-		DpiStatsRxBytes:   prometheus.NewDesc(ns+"dpi_stats_receive_bytes_total", "Client DPI Stats Receive Bytes", labels, nil),
-		DpiStatsRxPackets: prometheus.NewDesc(ns+"dpi_stats_receive_packets_total", "Client DPI Stats Receive Packets", labels, nil),
-		DpiStatsTxBytes:   prometheus.NewDesc(ns+"dpi_stats_transmit_bytes_total", "Client DPI Stats Transmit Bytes", labels, nil),
-		DpiStatsTxPackets: prometheus.NewDesc(ns+"dpi_stats_transmit_packets_total", "Client DPI Stats Transmit Packets", labels, nil),
+		DpiStatsApp:       prometheus.NewDesc(ns+"dpi_stats_app",
+		"Client DPI Stats App", labels, nil),
+		DpiStatsCat:       prometheus.NewDesc(ns+"dpi_stats_cat",
+		"Client DPI Stats Cat", labels, nil),
+		DpiStatsRxBytes:   prometheus.NewDesc(ns+"dpi_stats_receive_bytes_total",
+		"Client DPI Stats Receive Bytes", labels, nil),
+		DpiStatsRxPackets: prometheus.NewDesc(ns+"dpi_stats_receive_packets_total",
+		"Client DPI Stats Receive Packets", labels, nil),
+		DpiStatsTxBytes:   prometheus.NewDesc(ns+"dpi_stats_transmit_bytes_total",
+		"Client DPI Stats Transmit Bytes", labels, nil),
+		DpiStatsTxPackets: prometheus.NewDesc(ns+"dpi_stats_transmit_packets_total",
+		"Client DPI Stats Transmit Packets", labels, nil),
 		*/
 	}
 }
 
 func (u *promUnifi) exportClient(r report, c *unifi.Client) {
-	labels := []string{c.Name, c.Mac, c.SiteName, c.GwName, c.SwName, c.Vlan.Txt, c.IP, c.Oui, c.Network, c.SwPort.Txt, c.ApName, ""}
-	labelW := append([]string{c.RadioName, c.Radio, c.RadioProto, c.Channel.Txt, c.Essid, c.Bssid, c.RadioDescription}, labels...)
+	labels := []string{c.Name, c.Mac, c.SiteName, c.GwName, c.SwName, c.Vlan.Txt,
+		c.IP, c.Oui, c.Network, c.SwPort.Txt, c.ApName, ""}
+	labelW := append([]string{c.RadioName, c.Radio, c.RadioProto, c.Channel.Txt,
+		c.Essid, c.Bssid, c.RadioDescription}, labels...)
 
 	if c.IsWired.Val {
 		labels[len(labels)-1] = "true"
 		labelW[len(labelW)-1] = "true"
+
 		r.send([]*metric{
 			{u.Client.RxBytes, counter, c.WiredRxBytes, labels},
 			{u.Client.RxBytesR, gauge, c.WiredRxBytesR, labels},
@@ -94,6 +104,7 @@ func (u *promUnifi) exportClient(r report, c *unifi.Client) {
 	} else {
 		labels[len(labels)-1] = "false"
 		labelW[len(labelW)-1] = "false"
+
 		r.send([]*metric{
 			{u.Client.Anomalies, counter, c.Anomalies, labelW},
 			{u.Client.CCQ, gauge, float64(c.Ccq) / 1000.0, labelW},
@@ -118,12 +129,13 @@ func (u *promUnifi) exportClient(r report, c *unifi.Client) {
 	}
 
 	r.send([]*metric{{u.Client.Uptime, gauge, c.Uptime, labelW}})
-	/* needs more "looking into"
-	{u.Client.DpiStatsApp, gauge, c.DpiStats.App, labels},
-	{u.Client.DpiStatsCat, gauge, c.DpiStats.Cat, labels},
-	{u.Client.DpiStatsRxBytes, counter, c.DpiStats.RxBytes, labels},
-	{u.Client.DpiStatsRxPackets, counter, c.DpiStats.RxPackets, labels},
-	{u.Client.DpiStatsTxBytes, counter, c.DpiStats.TxBytes, labels},
-	{u.Client.DpiStatsTxPackets, counter, c.DpiStats.TxPackets, labels},
-	*/
 }
+
+/* needs more "looking into"
+{u.Client.DpiStatsApp, gauge, c.DpiStats.App, labels},
+{u.Client.DpiStatsCat, gauge, c.DpiStats.Cat, labels},
+{u.Client.DpiStatsRxBytes, counter, c.DpiStats.RxBytes, labels},
+{u.Client.DpiStatsRxPackets, counter, c.DpiStats.RxPackets, labels},
+{u.Client.DpiStatsTxBytes, counter, c.DpiStats.TxBytes, labels},
+{u.Client.DpiStatsTxPackets, counter, c.DpiStats.TxPackets, labels},
+*/

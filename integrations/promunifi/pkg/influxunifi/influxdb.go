@@ -17,7 +17,7 @@ const (
 	defaultInterval   = 30 * time.Second
 	minimumInterval   = 10 * time.Second
 	defaultInfluxDB   = "unifi"
-	defaultInfluxUser = "unifi"
+	defaultInfluxUser = "unifipoller"
 	defaultInfluxURL  = "http://127.0.0.1:8086"
 )
 
@@ -53,6 +53,7 @@ type metric struct {
 
 func init() {
 	u := &InfluxUnifi{InfluxDB: &InfluxDB{}, LastCheck: time.Now()}
+
 	poller.NewOutput(&poller.Output{
 		Name:   "influxdb",
 		Config: u.InfluxDB,
@@ -143,9 +144,12 @@ func (u *InfluxUnifi) setConfigDefaults() {
 func (u *InfluxUnifi) ReportMetrics(m *poller.Metrics) (*Report, error) {
 	r := &Report{Metrics: m, ch: make(chan *metric), Start: time.Now()}
 	defer close(r.ch)
-	// Make a new Influx Points Batcher.
+
 	var err error
+
+	// Make a new Influx Points Batcher.
 	r.bp, err = influx.NewBatchPoints(influx.BatchPointsConfig{Database: u.Config.DB})
+
 	if err != nil {
 		return nil, fmt.Errorf("influx.NewBatchPoints: %v", err)
 	}
@@ -159,7 +163,9 @@ func (u *InfluxUnifi) ReportMetrics(m *poller.Metrics) (*Report, error) {
 	if err = u.influx.Write(r.bp); err != nil {
 		return nil, fmt.Errorf("influxdb.Write(points): %v", err)
 	}
+
 	r.Elapsed = time.Since(r.Start)
+
 	return r, nil
 }
 
@@ -172,6 +178,7 @@ func (u *InfluxUnifi) collect(r report, ch chan *metric) {
 		} else {
 			r.batch(m, pt)
 		}
+
 		r.done()
 	}
 }
@@ -182,24 +189,28 @@ func (u *InfluxUnifi) loopPoints(r report) {
 	m := r.metrics()
 
 	r.add()
+	r.add()
+	r.add()
+
 	go func() {
 		defer r.done()
+
 		for _, s := range m.Sites {
 			u.batchSite(r, s)
 		}
 	}()
 
-	r.add()
 	go func() {
 		defer r.done()
+
 		for _, s := range m.Clients {
 			u.batchClient(r, s)
 		}
 	}()
 
-	r.add()
 	go func() {
 		defer r.done()
+
 		for _, s := range m.IDSList {
 			u.batchIDS(r, s)
 		}
@@ -209,33 +220,44 @@ func (u *InfluxUnifi) loopPoints(r report) {
 		return
 	}
 
+	u.loopDevicePoints(r)
+}
+
+func (u *InfluxUnifi) loopDevicePoints(r report) {
+	m := r.metrics()
+
 	r.add()
+	r.add()
+	r.add()
+	r.add()
+
 	go func() {
 		defer r.done()
+
 		for _, s := range m.UAPs {
 			u.batchUAP(r, s)
 		}
 	}()
 
-	r.add()
 	go func() {
 		defer r.done()
+
 		for _, s := range m.USGs {
 			u.batchUSG(r, s)
 		}
 	}()
 
-	r.add()
 	go func() {
 		defer r.done()
+
 		for _, s := range m.USWs {
 			u.batchUSW(r, s)
 		}
 	}()
 
-	r.add()
 	go func() {
 		defer r.done()
+
 		for _, s := range m.UDMs {
 			u.batchUDM(r, s)
 		}

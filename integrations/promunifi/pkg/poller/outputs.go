@@ -14,9 +14,7 @@ var (
 // Output packages must implement this interface.
 type Collect interface {
 	Metrics() (*Metrics, error)
-	Logf(m string, v ...interface{})
-	LogErrorf(m string, v ...interface{})
-	LogDebugf(m string, v ...interface{})
+	Logger
 }
 
 // Output defines the output data for a metric exporter like influx or prometheus.
@@ -49,6 +47,7 @@ func (u *UnifiPoller) InitializeOutputs() error {
 
 	for _, o := range outputs {
 		count++
+
 		go func(o *Output) {
 			v <- o.Method(u)
 		}(o)

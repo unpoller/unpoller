@@ -79,6 +79,7 @@ type Report struct {
 
 func init() {
 	u := &promUnifi{Prometheus: &Prometheus{}}
+
 	poller.NewOutput(&poller.Output{
 		Name:   "prometheus",
 		Config: u.Prometheus,
@@ -93,33 +94,27 @@ func (u *promUnifi) Run(c poller.Collect) error {
 		return nil
 	}
 
+	u.Config.Namespace = strings.Trim(strings.Replace(u.Config.Namespace, "-", "_", -1), "_")
 	if u.Config.Namespace == "" {
 		u.Config.Namespace = strings.Replace(poller.AppName, "-", "", -1)
 	}
-
-	u.Config.Namespace = strings.Replace(u.Config.Namespace, "-", "_", -1)
 
 	if u.Config.HTTPListen == "" {
 		u.Config.HTTPListen = defaultHTTPListen
 	}
 
 	prometheus.MustRegister(version.NewCollector(u.Config.Namespace))
-
-	if u.Config.Namespace = strings.Trim(u.Config.Namespace, "_") + "_"; u.Config.Namespace == "_" {
-		u.Config.Namespace = ""
-	}
-
 	prometheus.MustRegister(&promUnifi{
 		Collector: c,
-		Client:    descClient(u.Config.Namespace + "client_"),
-		Device:    descDevice(u.Config.Namespace + "device_"), // stats for all device types.
-		UAP:       descUAP(u.Config.Namespace + "device_"),
-		USG:       descUSG(u.Config.Namespace + "device_"),
-		USW:       descUSW(u.Config.Namespace + "device_"),
-		Site:      descSite(u.Config.Namespace + "site_"),
+		Client:    descClient(u.Config.Namespace + "_client_"),
+		Device:    descDevice(u.Config.Namespace + "_device_"), // stats for all device types.
+		UAP:       descUAP(u.Config.Namespace + "_device_"),
+		USG:       descUSG(u.Config.Namespace + "_device_"),
+		USW:       descUSW(u.Config.Namespace + "_device_"),
+		Site:      descSite(u.Config.Namespace + "_site_"),
 	})
-
-	c.Logf("Exporting Measurements for Prometheus at https://%s/metrics, namespace: %s", u.Config.HTTPListen, u.Config.Namespace)
+	c.Logf("Exporting Measurements for Prometheus at https://%s/metrics, namespace: %s",
+		u.Config.HTTPListen, u.Config.Namespace)
 
 	return http.ListenAndServe(u.Config.HTTPListen, nil)
 }
@@ -152,6 +147,7 @@ func (u *promUnifi) Collect(ch chan<- prometheus.Metric) {
 		r.error(ch, prometheus.NewInvalidDesc(fmt.Errorf("metric fetch failed")), err)
 		return
 	}
+
 	r.Fetch = time.Since(r.Start)
 
 	if r.Metrics.Devices == nil {
@@ -173,6 +169,7 @@ func (u *promUnifi) exportMetrics(r report, ch chan<- prometheus.Metric, ourChan
 	for newMetrics := range ourChan {
 		for _, m := range newMetrics {
 			descs[m.Desc] = true
+
 			switch v := m.Value.(type) {
 			case unifi.FlexInt:
 				ch <- r.export(m, v.Val)
@@ -195,48 +192,55 @@ func (u *promUnifi) loopExports(r report) {
 	m := r.metrics()
 
 	r.add()
+	r.add()
+	r.add()
+	r.add()
+	r.add()
+	r.add()
+
 	go func() {
 		defer r.done()
+
 		for _, s := range m.Sites {
 			u.exportSite(r, s)
 		}
 	}()
 
-	r.add()
 	go func() {
 		defer r.done()
+
 		for _, d := range m.UAPs {
 			u.exportUAP(r, d)
 		}
 	}()
 
-	r.add()
 	go func() {
 		defer r.done()
+
 		for _, d := range m.UDMs {
 			u.exportUDM(r, d)
 		}
 	}()
 
-	r.add()
 	go func() {
 		defer r.done()
+
 		for _, d := range m.USGs {
 			u.exportUSG(r, d)
 		}
 	}()
 
-	r.add()
 	go func() {
 		defer r.done()
+
 		for _, d := range m.USWs {
 			u.exportUSW(r, d)
 		}
 	}()
 
-	r.add()
 	go func() {
 		defer r.done()
+
 		for _, c := range m.Clients {
 			u.exportClient(r, c)
 		}
