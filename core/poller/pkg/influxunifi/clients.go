@@ -66,14 +66,7 @@ func (u *InfluxUnifi) batchClient(r report, s *unifi.Client) {
 		"wired-tx_bytes":   s.WiredTxBytes,
 		"wired-tx_bytes-r": s.WiredTxBytesR,
 		"wired-tx_packets": s.WiredTxPackets,
-		/*
-			"dpi_app":          c.DpiStats.App.Val,
-			"dpi_cat":          c.DpiStats.Cat.Val,
-			"dpi_rx_bytes":     c.DpiStats.RxBytes.Val,
-			"dpi_rx_packets":   c.DpiStats.RxPackets.Val,
-			"dpi_tx_bytes":     c.DpiStats.TxBytes.Val,
-			"dpi_tx_packets":   c.DpiStats.TxPackets.Val,
-		*/
 	}
+
 	r.send(&metric{Table: "clients", Tags: tags, Fields: fields})
 }
