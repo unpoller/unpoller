@@ -9,7 +9,6 @@ package poller
 */
 
 import (
-	"sync"
 	"time"
 
 	"github.com/spf13/pflag"
@@ -17,23 +16,17 @@ import (
 	"golift.io/unifi"
 )
 
-// App defaults in case they're missing from the config.
 const (
 	// AppName is the name of the application.
-	AppName          = "unifi-poller"
-	defaultUnifiUser = "influx"
-	defaultUnifiURL  = "https://127.0.0.1:8443"
+	AppName = "unifi-poller"
+	// ENVConfigPrefix is the prefix appended to an env variable tag name.
+	ENVConfigPrefix = "UP"
 )
-
-// ENVConfigPrefix is the prefix appended to an env variable tag
-// name before retrieving the value from the OS.
-const ENVConfigPrefix = "UP"
 
 // UnifiPoller contains the application startup data, and auth info for UniFi & Influx.
 type UnifiPoller struct {
-	Flags      *Flags
-	Config     *Config
-	sync.Mutex // locks the Unifi struct member when re-authing to unifi.
+	Flags *Flags
+	*Config
 }
 
 // Flags represents the CLI args available and their settings.
@@ -53,26 +46,9 @@ type Metrics struct {
 	*unifi.Devices
 }
 
-// Controller represents the configuration for a UniFi Controller.
-// Each polled controller may have its own configuration.
-type Controller struct {
-	VerifySSL bool         `json:"verify_ssl" toml:"verify_ssl" xml:"verify_ssl" yaml:"verify_ssl"`
-	SaveIDS   bool         `json:"save_ids" toml:"save_ids" xml:"save_ids" yaml:"save_ids"`
-	SaveSites bool         `json:"save_sites,omitempty" toml:"save_sites,omitempty" xml:"save_sites" yaml:"save_sites"`
-	Name      string       `json:"name" toml:"name" xml:"name,attr" yaml:"name"`
-	User      string       `json:"user,omitempty" toml:"user,omitempty" xml:"user" yaml:"user"`
-	Pass      string       `json:"pass,omitempty" toml:"pass,omitempty" xml:"pass" yaml:"pass"`
-	URL       string       `json:"url,omitempty" toml:"url,omitempty" xml:"url" yaml:"url"`
-	Sites     []string     `json:"sites,omitempty" toml:"sites,omitempty" xml:"sites" yaml:"sites"`
-	Unifi     *unifi.Unifi `json:"-" toml:"-" xml:"-" yaml:"-"`
-}
-
-// Config represents the data needed to poll a controller and report to influxdb.
-// This is all of the data stored in the config file.
-// Any with explicit defaults have omitempty on json and toml tags.
+// Config represents the core library input data.
 type Config struct {
-	Poller      `json:"poller" toml:"poller" xml:"poller" yaml:"poller"`
-	Controllers []Controller `json:"controller,omitempty" toml:"controller,omitempty" xml:"controller" yaml:"controller"`
+	Poller `json:"poller" toml:"poller" xml:"poller" yaml:"poller"`
 }
 
 // Poller is the global config values.
@@ -83,31 +59,43 @@ type Poller struct {
 
 // ParseConfigs parses the poller config and the config for each registered output plugin.
 func (u *UnifiPoller) ParseConfigs() error {
-	// Parse config file.
-	if err := config.ParseFile(u.Config, u.Flags.ConfigFile); err != nil {
-		u.Flags.Usage()
+	// Parse core config.
+	if err := u.ParseInterface(u.Config); err != nil {
 		return err
 	}
 
-	// Update Config with ENV variable overrides.
-	if _, err := config.ParseENV(u.Config, ENVConfigPrefix); err != nil {
-		return err
-	}
-
+	// Parse output plugin configs.
 	outputSync.Lock()
 	defer outputSync.Unlock()
 
 	for _, o := range outputs {
-		// Parse config file for each output plugin.
-		if err := config.ParseFile(o.Config, u.Flags.ConfigFile); err != nil {
+		if err := u.ParseInterface(o.Config); err != nil {
 			return err
 		}
+	}
 
-		// Update Config for each output with ENV variable overrides.
-		if _, err := config.ParseENV(o.Config, ENVConfigPrefix); err != nil {
+	// Parse input plugin configs.
+	inputSync.Lock()
+	defer inputSync.Unlock()
+
+	for _, i := range inputs {
+		if err := u.ParseInterface(i.Config); err != nil {
 			return err
 		}
 	}
 
 	return nil
+}
+
+// ParseInterface parses the config file and environment variables into the provided interface.
+func (u *UnifiPoller) ParseInterface(i interface{}) error {
+	// Parse config file into provided interface.
+	if err := config.ParseFile(i, u.Flags.ConfigFile); err != nil {
+		return err
+	}
+
+	// Parse environment variables into provided interface.
+	_, err := config.ParseENV(i, ENVConfigPrefix)
+
+	return err
 }

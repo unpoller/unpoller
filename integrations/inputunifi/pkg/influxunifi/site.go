@@ -51,6 +51,7 @@ func (u *InfluxUnifi) batchSite(r report, s *unifi.Site) {
 			"remote_user_tx_packets":   h.RemoteUserTxPackets.Val,
 			"num_new_alarms":           s.NumNewAlarms.Val,
 		}
+
 		r.send(&metric{Table: "subsystems", Tags: tags, Fields: fields})
 	}
 }

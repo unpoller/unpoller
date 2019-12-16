@@ -37,25 +37,6 @@ func (u *UnifiPoller) Start() error {
 		return err
 	}
 
-	if len(u.Config.Controllers) < 1 {
-		u.Config.Controllers = []Controller{{
-			Sites:     []string{"all"},
-			User:      defaultUnifiUser,
-			Pass:      "",
-			URL:       defaultUnifiURL,
-			SaveSites: true,
-		}}
-	}
-
-	if u.Flags.DumpJSON != "" {
-		return u.DumpJSONPayload()
-	}
-
-	if u.Config.Debug {
-		log.SetFlags(log.Lshortfile | log.Lmicroseconds | log.Ldate)
-		u.LogDebugf("Debug Logging Enabled")
-	}
-
 	return u.Run()
 }
 
@@ -79,20 +60,19 @@ func (f *Flags) Parse(args []string) {
 // 2. Run the collector one time and report the metrics to influxdb. (lambda)
 // 3. Start a web server and wait for Prometheus to poll the application for metrics.
 func (u *UnifiPoller) Run() error {
+	if u.Flags.DumpJSON != "" {
+		return u.DumpJSONPayload()
+	}
+
+	if u.Config.Debug {
+		log.SetFlags(log.Lshortfile | log.Lmicroseconds | log.Ldate)
+		u.LogDebugf("Debug Logging Enabled")
+	}
+
 	log.Printf("[INFO] UniFi Poller v%v Starting Up! PID: %d", version.Version, os.Getpid())
 
-	for i, c := range u.Config.Controllers {
-		if c.Name == "" {
-			u.Config.Controllers[i].Name = c.URL
-		}
-
-		switch err := u.GetUnifi(c); err {
-		case nil:
-			u.Logf("Polling UniFi Controller at %s v%s as user %s. Sites: %v",
-				c.URL, c.Unifi.ServerVersion, c.User, c.Sites)
-		default:
-			u.LogErrorf("Controller Auth or Connection failed, but continuing to retry! %s: %v", c.Name, err)
-		}
+	if err := u.InitializeInputs(); err != nil {
+		return err
 	}
 
 	return u.InitializeOutputs()

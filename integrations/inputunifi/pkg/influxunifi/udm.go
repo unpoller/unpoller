@@ -4,14 +4,16 @@ import (
 	"golift.io/unifi"
 )
 
-// Combines concatenates N maps. This will delete things if not used with caution.
+// Combine concatenates N maps. This will delete things if not used with caution.
 func Combine(in ...map[string]interface{}) map[string]interface{} {
 	out := make(map[string]interface{})
+
 	for i := range in {
 		for k := range in[i] {
 			out[k] = in[i][k]
 		}
 	}
+
 	return out
 }
 
@@ -36,6 +38,7 @@ func (u *InfluxUnifi) batchUDM(r report, s *unifi.UDM) {
 	if !s.Adopted.Val || s.Locating.Val {
 		return
 	}
+
 	tags := map[string]string{
 		"mac":       s.Mac,
 		"site_name": s.SiteName,
@@ -65,6 +68,7 @@ func (u *InfluxUnifi) batchUDM(r report, s *unifi.UDM) {
 			"num_mobile":    s.NumMobile.Val,
 		},
 	)
+
 	r.send(&metric{Table: "usg", Tags: tags, Fields: fields})
 	u.batchNetTable(r, tags, s.NetworkTable)
 	u.batchUSGwans(r, tags, s.Wan1, s.Wan2)
@@ -90,13 +94,14 @@ func (u *InfluxUnifi) batchUDM(r report, s *unifi.UDM) {
 			"uptime":        s.Uptime.Val,
 			"state":         s.State.Val,
 		})
+
 	r.send(&metric{Table: "usw", Tags: tags, Fields: fields})
 	u.batchPortTable(r, tags, s.PortTable)
 
 	if s.Stat.Ap == nil {
-		return
-		// we're done now. the following code process UDM (non-pro) UAP data.
+		return // we're done now. the following code process UDM (non-pro) UAP data.
 	}
+
 	tags = map[string]string{
 		"mac":       s.Mac,
 		"site_name": s.SiteName,
@@ -117,6 +122,7 @@ func (u *InfluxUnifi) batchUDM(r report, s *unifi.UDM) {
 	fields["user-num_sta"] = int(s.UserNumSta.Val)
 	fields["guest-num_sta"] = int(s.GuestNumSta.Val)
 	fields["num_sta"] = s.NumSta.Val
+
 	r.send(&metric{Table: "uap", Tags: tags, Fields: fields})
 	u.processRadTable(r, tags, *s.RadioTable, *s.RadioTableStats)
 	u.processVAPTable(r, tags, *s.VapTable)

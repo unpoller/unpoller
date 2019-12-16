@@ -36,6 +36,7 @@ func (u *InfluxUnifi) batchUSW(r report, s *unifi.USW) {
 			"state":               s.State.Val,
 			"user-num_sta":        s.UserNumSta.Val,
 		})
+
 	r.send(&metric{Table: "usw", Tags: tags, Fields: fields})
 	u.batchPortTable(r, tags, s.PortTable)
 }
@@ -44,6 +45,7 @@ func (u *InfluxUnifi) batchUSWstat(sw *unifi.Sw) map[string]interface{} {
 	if sw == nil {
 		return map[string]interface{}{}
 	}
+
 	return map[string]interface{}{
 		"stat_bytes":      sw.Bytes.Val,
 		"stat_rx_bytes":   sw.RxBytes.Val,
@@ -59,11 +61,13 @@ func (u *InfluxUnifi) batchUSWstat(sw *unifi.Sw) map[string]interface{} {
 		"stat_tx_retries": sw.TxRetries.Val,
 	}
 }
+
 func (u *InfluxUnifi) batchPortTable(r report, t map[string]string, pt []unifi.Port) {
 	for _, p := range pt {
 		if !p.Up.Val || !p.Enable.Val {
 			continue // only record UP ports.
 		}
+
 		tags := map[string]string{
 			"site_name":   t["site_name"],
 			"device_name": t["name"],
@@ -96,11 +100,13 @@ func (u *InfluxUnifi) batchPortTable(r report, t map[string]string, pt []unifi.P
 			"tx_multicast": p.TxMulticast.Val,
 			"tx_packets":   p.TxPackets.Val,
 		}
+
 		if p.PoeEnable.Val && p.PortPoe.Val {
 			fields["poe_current"] = p.PoeCurrent.Val
 			fields["poe_power"] = p.PoePower.Val
 			fields["poe_voltage"] = p.PoeVoltage.Val
 		}
+
 		r.send(&metric{Table: "usw_ports", Tags: tags, Fields: fields})
 	}
 }
