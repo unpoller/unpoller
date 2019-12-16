@@ -8,6 +8,7 @@ IGNORED:=$(shell bash -c "source .metadata.sh ; env | sed 's/=/:=/;s/^/export /'
 # md2roff turns markdown into man files and html files.
 MD2ROFF_BIN=github.com/github/hub/md2roff-bin
 
+
 # Travis CI passes the version in. Local builds get it from the current git tag.
 ifeq ($(VERSION),)
 	include .metadata.make
@@ -185,10 +186,11 @@ $(BINARY)_$(VERSION)-$(ITERATION)_armhf.deb: package_build_linux_armhf check_fpm
 # Build an environment that can be packaged for linux.
 package_build_linux: readme man linux
 	# Building package environment for linux.
-	mkdir -p $@/usr/bin $@/etc/$(BINARY) $@/usr/share/man/man1 $@/usr/share/doc/$(BINARY)
+	mkdir -p $@/usr/bin $@/etc/$(BINARY) $@/usr/share/man/man1 $@/usr/share/doc/$(BINARY) $@/usr/lib/$(BINARY)
 	# Copying the binary, config file, unit file, and man page into the env.
 	cp $(BINARY).amd64.linux $@/usr/bin/$(BINARY)
 	cp *.1.gz $@/usr/share/man/man1
+	cp *.so $@/usr/lib/$(BINARY)/
 	cp examples/$(CONFIG_FILE).example $@/etc/$(BINARY)/
 	cp examples/$(CONFIG_FILE).example $@/etc/$(BINARY)/$(CONFIG_FILE)
 	cp LICENSE *.html examples/*?.?* $@/usr/share/doc/$(BINARY)/
@@ -253,6 +255,12 @@ $(BINARY).rb: v$(VERSION).tar.gz.sha256 init/homebrew/$(FORMULA).rb.tmpl
 		init/homebrew/$(FORMULA).rb.tmpl | tee $(BINARY).rb
 		# That perl line turns hello-world into HelloWorld, etc.
 
+# This is kind janky because it always builds the plugins, even if they are already built.
+# Still needs to be made multi arch, which adds complications, especially when creating packages.
+plugins: $(patsubst %.go,%.so,$(wildcard ./plugins/*/main.go))
+$(patsubst %.go,%.so,$(wildcard ./plugins/*/main.go)):
+	go build -o $(patsubst plugins/%/main.so,%.so,$@) -ldflags "$(VERSION_LDFLAGS)" -buildmode=plugin ./$(patsubst %main.so,%,$@)
+
 # Extras
 
 # Run code tests and lint.
@@ -285,8 +293,9 @@ install: man readme $(BINARY)
 	@[ "$(PREFIX)" != "" ] || (echo "Unable to continue, PREFIX not set. Use: make install PREFIX=/usr/local ETC=/usr/local/etc" && false)
 	@[ "$(ETC)" != "" ] || (echo "Unable to continue, ETC not set. Use: make install PREFIX=/usr/local ETC=/usr/local/etc" && false)
 	# Copying the binary, config file, unit file, and man page into the env.
-	/usr/bin/install -m 0755 -d $(PREFIX)/bin $(PREFIX)/share/man/man1 $(ETC)/$(BINARY) $(PREFIX)/share/doc/$(BINARY)
+	/usr/bin/install -m 0755 -d $(PREFIX)/bin $(PREFIX)/share/man/man1 $(ETC)/$(BINARY) $(PREFIX)/share/doc/$(BINARY) $(PREFIX)/lib/$(BINARY)
 	/usr/bin/install -m 0755 -cp $(BINARY) $(PREFIX)/bin/$(BINARY)
+	/usr/bin/install -m 0755 -cp *.so $(PREFIX)/lib/$(BINARY)/
 	/usr/bin/install -m 0644 -cp $(BINARY).1.gz $(PREFIX)/share/man/man1
 	/usr/bin/install -m 0644 -cp examples/$(CONFIG_FILE).example $(ETC)/$(BINARY)/
 	[ -f $(ETC)/$(BINARY)/$(CONFIG_FILE) ] || /usr/bin/install -m 0644 -cp  examples/$(CONFIG_FILE).example $(ETC)/$(BINARY)/$(CONFIG_FILE)

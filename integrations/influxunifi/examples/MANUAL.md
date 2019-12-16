@@ -66,7 +66,7 @@ is provided so the application can be easily adapted to any environment.
 `Config File Parameters`
 
 Additional parameters are added by output packages. Parameters can also be set
-using environment variables. See the GitHub wiki for more information! 
+using environment variables. See the GitHub wiki for more information!
 
     >>> POLLER FIELDS FOLLOW - you may have multiple controllers:
 
@@ -79,7 +79,7 @@ using environment variables. See the GitHub wiki for more information!
         errors will be logged. Using this with debug=true adds line numbers to
         any error logs.
 
-    >>> CONTROLLER FIELDS FOLLOW - you may have multiple controllers:
+    >>> UNIFI CONTROLLER FIELDS FOLLOW - you may have multiple controllers:
 
     sites                  default: ["all"]
         This list of strings should represent the names of sites on the UniFi
@@ -96,7 +96,7 @@ using environment variables. See the GitHub wiki for more information!
         Username used to authenticate with UniFi controller. This should be a
         special service account created on the control with read-only access.
 
-    user                   no default
+    pass                   no default
         Password used to authenticate with UniFi controller. This can also be
         set in an environment variable instead of a configuration file.
 

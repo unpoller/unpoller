@@ -13,6 +13,8 @@ debug = false
 # Recommend enabling debug with this setting for better error logging.
 quiet = false
 
+# Load dynamic plugins. Advanced use; only sample mysql plugin provided by default.
+plugins = []
 
 #### OUTPUTS
 
@@ -40,9 +42,12 @@ interval = "30s"
 
 #### INPUTS
 
+[unifi]
+disable = false
+
 # You may repeat the following section to poll additional controllers.
-[[controller]]
-# Friendly name used in dashboards.
+[[unifi.controller]]
+# Friendly name used in dashboards. Uses URL if left empty.
 name = ""
 
 url = "https://127.0.0.1:8443"
