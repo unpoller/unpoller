@@ -3,19 +3,15 @@ package poller
 import (
 	"fmt"
 	"log"
-	"strings"
 )
 
 const callDepth = 2
 
-// StringInSlice returns true if a string is in a slice.
-func StringInSlice(str string, slice []string) bool {
-	for _, s := range slice {
-		if strings.EqualFold(s, str) {
-			return true
-		}
-	}
-	return false
+// Logger is passed into input packages so they may write logs.
+type Logger interface {
+	Logf(m string, v ...interface{})
+	LogErrorf(m string, v ...interface{})
+	LogDebugf(m string, v ...interface{})
 }
 
 // Logf prints a log entry if quiet is false.
