@@ -19,7 +19,7 @@ addons:
     - gcc
     - gcc-multilib
     - g++-multilib
-    - build-base
+    - libc6-dev-i386
 go:
 - 1.13.x
 services:
