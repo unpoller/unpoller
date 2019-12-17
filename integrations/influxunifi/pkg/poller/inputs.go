@@ -17,12 +17,19 @@ var (
 type Input interface {
 	Initialize(Logger) error    // Called once on startup to initialize the plugin.
 	Metrics() (*Metrics, error) // Called every time new metrics are requested.
+	RawMetrics(Filter) ([]byte, error)
 }
 
 // InputPlugin describes an input plugin's consumable interface.
 type InputPlugin struct {
 	Config interface{} // Each config is passed into an unmarshaller later.
 	Input
+}
+
+// Filter is used for raw metrics filters.
+type Filter struct {
+	Type string
+	Term string
 }
 
 // NewInput creates a metric input. This should be called by input plugins

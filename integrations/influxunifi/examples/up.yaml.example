@@ -24,6 +24,7 @@ influxdb:
   verify_ssl: false
 
 unifi:
+  disable: false
   controllers:
     - name: ""
       user: "influx"
