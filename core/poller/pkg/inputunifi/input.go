@@ -108,14 +108,21 @@ func (u *InputUnifi) checkSites(c *Controller) error {
 		return nil
 	}
 
+	keep := []string{}
+
 FIRST:
 	for _, s := range c.Sites {
 		for _, site := range sites {
 			if s == site.Name {
+				keep = append(keep, s)
 				continue FIRST
 			}
 		}
-		return fmt.Errorf("configured site not found on controller: %v", s)
+		u.LogErrorf("Configured site not found on controller %s: %v", c.Name, s)
+	}
+
+	if c.Sites = keep; len(keep) < 1 {
+		c.Sites = []string{"all"}
 	}
 
 	return nil

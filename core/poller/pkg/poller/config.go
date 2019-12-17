@@ -52,7 +52,7 @@ type Metrics struct {
 
 // Config represents the core library input data.
 type Config struct {
-	Poller `json:"poller" toml:"poller" xml:"poller" yaml:"poller"`
+	*Poller `json:"poller" toml:"poller" xml:"poller" yaml:"poller"`
 }
 
 // Poller is the global config values.
@@ -103,6 +103,7 @@ func (u *UnifiPoller) ParseConfigs() error {
 
 // parseInterface parses the config file and environment variables into the provided interface.
 func (u *UnifiPoller) parseInterface(i interface{}) error {
+	config.ENVTag = "xml" // xml tag is better formatted for slices.
 	// Parse config file into provided interface.
 	if err := config.ParseFile(i, u.Flags.ConfigFile); err != nil {
 		return err
