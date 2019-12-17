@@ -107,11 +107,11 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:7a90fad47972b5ae06013d4685eb2f3007e7c92609a1399d2adf59fe04cd9b63"
+  digest = "1:331d56d3a24e9b8d203883c28803313af060ca5c350be0a9c0552b43f355ecd8"
   name = "golift.io/config"
   packages = ["."]
   pruneopts = "UT"
-  revision = "fe642c8392dc00d72ddcc47f05a06096bd5d054b"
+  revision = "1861b4270bf42ec3ccaf86871aa1cf6742564d0f"
 
 [[projects]]
   digest = "1:2883cea734f2766f41ff9c9d4aefccccc53e3d44f5c8b08893b9c218cf666722"

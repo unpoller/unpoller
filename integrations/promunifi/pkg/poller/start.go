@@ -12,7 +12,7 @@ import (
 
 // New returns a new poller struct.
 func New() *UnifiPoller {
-	return &UnifiPoller{Config: &Config{}, Flags: &Flags{}}
+	return &UnifiPoller{Config: &Config{Poller: &Poller{}}, Flags: &Flags{}}
 }
 
 // Start begins the application from a CLI.
