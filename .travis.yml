@@ -15,11 +15,6 @@ addons:
     - debsigs
     - gnupg
     - expect
-    - musl-dev
-    - gcc
-    - gcc-multilib
-    - g++-multilib
-    - libc6-dev-i386
 go:
 - 1.13.x
 services:
