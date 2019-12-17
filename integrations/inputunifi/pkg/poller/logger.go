@@ -16,14 +16,14 @@ type Logger interface {
 
 // Logf prints a log entry if quiet is false.
 func (u *UnifiPoller) Logf(m string, v ...interface{}) {
-	if !u.Config.Quiet {
+	if !u.Quiet {
 		_ = log.Output(callDepth, fmt.Sprintf("[INFO] "+m, v...))
 	}
 }
 
 // LogDebugf prints a debug log entry if debug is true and quite is false
 func (u *UnifiPoller) LogDebugf(m string, v ...interface{}) {
-	if u.Config.Debug && !u.Config.Quiet {
+	if u.Debug && !u.Quiet {
 		_ = log.Output(callDepth, fmt.Sprintf("[DEBUG] "+m, v...))
 	}
 }

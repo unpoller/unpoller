@@ -24,7 +24,7 @@
     <verify_ssl>false</verify_ssl>
   </influxdb>
 
-  <unifi>
+  <unifi disable="false">
     <!-- Repeat this stanza to poll additional controllers. -->
     <controller name="">
       <site>all</site>

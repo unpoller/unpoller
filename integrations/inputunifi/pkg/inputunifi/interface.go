@@ -1,12 +1,50 @@
 package inputunifi
 
+/* This file contains the three poller.Input interface methods. */
+
 import (
 	"fmt"
+	"os"
 	"strings"
 
 	"github.com/davidnewhall/unifi-poller/pkg/poller"
 	"golift.io/unifi"
 )
+
+// Initialize gets called one time when starting up.
+// Satisfies poller.Input interface.
+func (u *InputUnifi) Initialize(l poller.Logger) error {
+	if u.Config.Disable {
+		l.Logf("unifi input disabled")
+		return nil
+	}
+
+	if len(u.Config.Controllers) < 1 {
+		return fmt.Errorf("no unifi controllers defined for unifi input")
+	}
+
+	u.Logger = l
+
+	for i, c := range u.Config.Controllers {
+		if c.Name == "" {
+			u.Config.Controllers[i].Name = c.URL
+		}
+
+		switch err := u.getUnifi(c); err {
+		case nil:
+			if err := u.checkSites(c); err != nil {
+				u.LogErrorf("checking sites on %s: %v", c.Name, err)
+			}
+
+			u.Logf("Polling UniFi Controller at %s v%s as user %s. Sites: %v",
+				c.URL, c.Unifi.ServerVersion, c.User, c.Sites)
+		default:
+			u.LogErrorf("Controller Auth or Connection failed, but continuing to retry! %s: %v", c.Name, err)
+		}
+	}
+
+	return nil
+}
 
 // Metrics grabs all the measurements from a UniFi controller and returns them.
 func (u *InputUnifi) Metrics() (*poller.Metrics, error) {
@@ -52,75 +90,35 @@ func (u *InputUnifi) Metrics() (*poller.Metrics, error) {
 	return metrics, nil
 }
 
-// Initialize gets called one time when starting up.
-// Satisfies poller.Input interface.
-func (u *InputUnifi) Initialize(l poller.Logger) error {
-	if u.Config.Disable {
-		l.Logf("unifi input disabled")
-		return nil
-	}
+// RawMetrics returns API output from the first configured unifi controller.
+func (u *InputUnifi) RawMetrics(filter poller.Filter) ([]byte, error) {
+	c := u.Config.Controllers[0] // We could pull the controller number from the filter.
+	if u.isNill(c) {
+		u.Logf("Re-authenticating to UniFi Controller: %s", c.URL)
 
-	if len(u.Config.Controllers) < 1 {
-		return fmt.Errorf("no unifi controllers defined for unifi input")
-	}
-
-	u.Logger = l
-
-	for i, c := range u.Config.Controllers {
-		if c.Name == "" {
-			u.Config.Controllers[i].Name = c.URL
-		}
-
-		switch err := u.getUnifi(c); err {
-		case nil:
-			if err := u.checkSites(c); err != nil {
-				u.LogErrorf("checking sites on %s: %v", c.Name, err)
-			}
-
-			u.Logf("Polling UniFi Controller at %s v%s as user %s. Sites: %v",
-				c.URL, c.Unifi.ServerVersion, c.User, c.Sites)
-		default:
-			u.LogErrorf("Controller Auth or Connection failed, but continuing to retry! %s: %v", c.Name, err)
+		if err := u.getUnifi(c); err != nil {
+			return nil, fmt.Errorf("re-authenticating to %s: %v", c.Name, err)
 		}
 	}
 
-	return nil
-}
+	if err := u.checkSites(c); err != nil {
+		return nil, err
+	}
 
-// checkSites makes sure the list of provided sites exists on the controller.
-// This only runs once during initialization.
-func (u *InputUnifi) checkSites(c Controller) error {
-	u.Config.RLock()
-	defer u.Config.RUnlock()
-	u.LogDebugf("Checking Controller Sites List")
-
-	sites, err := c.Unifi.GetSites()
+	sites, err := u.getFilteredSites(c)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	msg := []string{}
-
-	for _, site := range sites {
-		msg = append(msg, site.Name+" ("+site.Desc+")")
+	switch filter.Type {
+	case "d", "device", "devices":
+		return u.dumpSitesJSON(c, unifi.APIDevicePath, "Devices", sites)
+	case "client", "clients", "c":
+		return u.dumpSitesJSON(c, unifi.APIClientPath, "Clients", sites)
+	case "other", "o":
+		_, _ = fmt.Fprintf(os.Stderr, "[INFO] Dumping Path '%s':\n", filter.Term)
+		return c.Unifi.GetJSON(filter.Term)
+	default:
+		return []byte{}, fmt.Errorf("must provide filter: devices, clients, other")
 	}
-
-	u.Logf("Found %d site(s) on controller: %v", len(msg), strings.Join(msg, ", "))
-
-	if poller.StringInSlice("all", c.Sites) {
-		c.Sites = []string{"all"}
-		return nil
-	}
-
-FIRST:
-	for _, s := range c.Sites {
-		for _, site := range sites {
-			if s == site.Name {
-				continue FIRST
-			}
-		}
-		return fmt.Errorf("configured site not found on controller: %v", s)
-	}
-
-	return nil
 }
