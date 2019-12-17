@@ -43,6 +43,8 @@ $(PACKAGE_SCRIPTS) \
 --config-files "/etc/$(BINARY)/$(CONFIG_FILE)"
 endef
 
+PLUGINS:=$(patsubst plugins/%/main.go,%,$(wildcard plugins/*/main.go))
+
 VERSION_LDFLAGS:= \
   -X $(IMPORT_PATH)/vendor/github.com/prometheus/common/version.Branch=$(BRANCH) \
   -X $(IMPORT_PATH)/vendor/github.com/prometheus/common/version.BuildDate=$(DATE) \
@@ -184,13 +186,14 @@ $(BINARY)_$(VERSION)-$(ITERATION)_armhf.deb: package_build_linux_armhf check_fpm
 	[ "$(SIGNING_KEY)" == "" ] || expect -c "spawn debsigs --default-key="$(SIGNING_KEY)" --sign=origin $(BINARY)_$(VERSION)-$(ITERATION)_armhf.deb; expect -exact \"Enter passphrase: \"; send \"$(PRIVATE_KEY)\r\"; expect eof"
 
 # Build an environment that can be packaged for linux.
-package_build_linux: readme man linux
+package_build_linux: readme man plugins_linux_amd64 linux
 	# Building package environment for linux.
 	mkdir -p $@/usr/bin $@/etc/$(BINARY) $@/usr/share/man/man1 $@/usr/share/doc/$(BINARY) $@/usr/lib/$(BINARY)
 	# Copying the binary, config file, unit file, and man page into the env.
 	cp $(BINARY).amd64.linux $@/usr/bin/$(BINARY)
 	cp *.1.gz $@/usr/share/man/man1
-	cp *.so $@/usr/lib/$(BINARY)/
+	rm -f $@/usr/lib/$(BINARY)/*.so
+	cp *amd64.so $@/usr/lib/$(BINARY)/
 	cp examples/$(CONFIG_FILE).example $@/etc/$(BINARY)/
 	cp examples/$(CONFIG_FILE).example $@/etc/$(BINARY)/$(CONFIG_FILE)
 	cp LICENSE *.html examples/*?.?* $@/usr/share/doc/$(BINARY)/
@@ -199,20 +202,26 @@ package_build_linux: readme man linux
 		sed -e "s/{{BINARY}}/$(BINARY)/g" -e "s/{{DESC}}/$(DESC)/g" \
 		init/systemd/template.unit.service > $@/lib/systemd/system/$(BINARY).service
 
-package_build_linux_386: package_build_linux linux386
+package_build_linux_386: package_build_linux plugins_linux_i386 linux386
 	mkdir -p $@
 	cp -r $</* $@/
 	cp $(BINARY).i386.linux $@/usr/bin/$(BINARY)
+	rm -f $@/usr/lib/$(BINARY)/*.so
+	cp *i386.so $@/usr/lib/$(BINARY)/
 
-package_build_linux_arm64: package_build_linux arm64
+package_build_linux_arm64: package_build_linux plugins_linux_arm64 arm64
 	mkdir -p $@
 	cp -r $</* $@/
 	cp $(BINARY).arm64.linux $@/usr/bin/$(BINARY)
+	rm -f $@/usr/lib/$(BINARY)/*.so
+	cp *arm64.so $@/usr/lib/$(BINARY)/
 
-package_build_linux_armhf: package_build_linux armhf
+package_build_linux_armhf: package_build_linux plugins_linux_armhf armhf
 	mkdir -p $@
 	cp -r $</* $@/
 	cp $(BINARY).armhf.linux $@/usr/bin/$(BINARY)
+	rm -f $@/usr/lib/$(BINARY)/*.so
+	cp *armhf.so $@/usr/lib/$(BINARY)/
 
 check_fpm:
 	@fpm --version > /dev/null || (echo "FPM missing. Install FPM: https://fpm.readthedocs.io/en/latest/installing.html" && false)
@@ -255,11 +264,29 @@ $(BINARY).rb: v$(VERSION).tar.gz.sha256 init/homebrew/$(FORMULA).rb.tmpl
 		init/homebrew/$(FORMULA).rb.tmpl | tee $(BINARY).rb
 		# That perl line turns hello-world into HelloWorld, etc.
 
-# This is kind janky because it always builds the plugins, even if they are already built.
-# Still needs to be made multi arch, which adds complications, especially when creating packages.
-plugins: $(patsubst %.go,%.so,$(wildcard ./plugins/*/main.go))
-$(patsubst %.go,%.so,$(wildcard ./plugins/*/main.go)):
-	go build -o $(patsubst plugins/%/main.so,%.so,$@) -ldflags "$(VERSION_LDFLAGS)" -buildmode=plugin ./$(patsubst %main.so,%,$@)
+# This probably wont work for most people.....
+plugins: linux_plugins plugins_darwin
+
+linux_plugins: plugins_linux_amd64 plugins_linux_i386 plugins_linux_arm64 plugins_linux_armhf
+plugins_linux_amd64: $(patsubst %,%.linux_amd64.so,$(PLUGINS))
+$(patsubst %,%.linux_amd64.so,$(PLUGINS)):
+	GOOS=linux GOARCH=amd64 go build -o $@ -ldflags "$(VERSION_LDFLAGS)" -buildmode=plugin ./plugins/$(patsubst %.linux_amd64.so,%,$@)
+
+plugins_linux_i386: $(patsubst %,%.linux_i386.so,$(PLUGINS))
+$(patsubst %,%.linux_i386.so,$(PLUGINS)):
+	GOOS=linux GOARCH=i386 go build -o $@ -ldflags "$(VERSION_LDFLAGS)" -buildmode=plugin ./plugins/$(patsubst %.linux_i386.so,%,$@)
+
+plugins_linux_arm64: $(patsubst %,%.linux_arm64.so,$(PLUGINS))
+$(patsubst %,%.linux_arm64.so,$(PLUGINS)):
+	GOOS=linux GOARCH=arm64 go build -o $@ -ldflags "$(VERSION_LDFLAGS)" -buildmode=plugin ./plugins/$(patsubst %.linux_arm64.so,%,$@)
+
+plugins_linux_armhf: $(patsubst %,%.linux_armhf.so,$(PLUGINS))
+$(patsubst %,%.linux_armhf.so,$(PLUGINS)):
+	GOOS=linux GOARCH=armhf go build -o $@ -ldflags "$(VERSION_LDFLAGS)" -buildmode=plugin ./plugins/$(patsubst %.linux_armhf.so,%,$@)
+
+plugins_darwin: $(patsubst %,%.darwin.so,$(PLUGINS))
+$(patsubst %,%.darwin.so,$(PLUGINS)):
+	GOOS=darwin go build -o $@ -ldflags "$(VERSION_LDFLAGS)" -buildmode=plugin ./plugins/$(patsubst %.darwin.so,%,$@)
 
 # Extras
 
@@ -283,7 +310,7 @@ deps:
 # Homebrew stuff. macOS only.
 
 # Used for Homebrew only. Other distros can create packages.
-install: man readme $(BINARY)
+install: man readme $(BINARY) plugins_darwin
 	@echo -  Done Building!  -
 	@echo -  Local installation with the Makefile is only supported on macOS.
 	@echo If you wish to install the application manually on Linux, check out the wiki: https://$(SOURCE_URL)/wiki/Installation
@@ -295,7 +322,7 @@ install: man readme $(BINARY)
 	# Copying the binary, config file, unit file, and man page into the env.
 	/usr/bin/install -m 0755 -d $(PREFIX)/bin $(PREFIX)/share/man/man1 $(ETC)/$(BINARY) $(PREFIX)/share/doc/$(BINARY) $(PREFIX)/lib/$(BINARY)
 	/usr/bin/install -m 0755 -cp $(BINARY) $(PREFIX)/bin/$(BINARY)
-	/usr/bin/install -m 0755 -cp *.so $(PREFIX)/lib/$(BINARY)/
+	/usr/bin/install -m 0755 -cp *darwin.so $(PREFIX)/lib/$(BINARY)/
 	/usr/bin/install -m 0644 -cp $(BINARY).1.gz $(PREFIX)/share/man/man1
 	/usr/bin/install -m 0644 -cp examples/$(CONFIG_FILE).example $(ETC)/$(BINARY)/
 	[ -f $(ETC)/$(BINARY)/$(CONFIG_FILE) ] || /usr/bin/install -m 0644 -cp  examples/$(CONFIG_FILE).example $(ETC)/$(BINARY)/$(CONFIG_FILE)
