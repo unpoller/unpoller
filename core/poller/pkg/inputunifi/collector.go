@@ -8,14 +8,14 @@ import (
 	"golift.io/unifi"
 )
 
-func (u *InputUnifi) isNill(c Controller) bool {
+func (u *InputUnifi) isNill(c *Controller) bool {
 	u.Config.RLock()
 	defer u.Config.RUnlock()
 
 	return c.Unifi == nil
 }
 
-func (u *InputUnifi) collectController(c Controller) (*poller.Metrics, error) {
+func (u *InputUnifi) collectController(c *Controller) (*poller.Metrics, error) {
 	if u.isNill(c) {
 		u.Logf("Re-authenticating to UniFi Controller: %s", c.URL)
 
@@ -32,7 +32,7 @@ func (u *InputUnifi) collectController(c Controller) (*poller.Metrics, error) {
 	return u.pollController(c)
 }
 
-func (u *InputUnifi) pollController(c Controller) (*poller.Metrics, error) {
+func (u *InputUnifi) pollController(c *Controller) (*poller.Metrics, error) {
 	var err error
 
 	u.Config.RLock()
@@ -67,7 +67,7 @@ func (u *InputUnifi) pollController(c Controller) (*poller.Metrics, error) {
 // augmentMetrics is our middleware layer between collecting metrics and writing them.
 // This is where we can manipuate the returned data or make arbitrary decisions.
 // This function currently adds parent device names to client metrics.
-func (u *InputUnifi) augmentMetrics(c Controller, metrics *poller.Metrics) *poller.Metrics {
+func (u *InputUnifi) augmentMetrics(c *Controller, metrics *poller.Metrics) *poller.Metrics {
 	if metrics == nil || metrics.Devices == nil || metrics.Clients == nil {
 		return metrics
 	}
@@ -113,22 +113,22 @@ func (u *InputUnifi) augmentMetrics(c Controller, metrics *poller.Metrics) *poll
 // getFilteredSites returns a list of sites to fetch data for.
 // Omits requested but unconfigured sites. Grabs the full list from the
 // controller and returns the sites provided in the config file.
-func (u *InputUnifi) getFilteredSites(c Controller) (unifi.Sites, error) {
+func (u *InputUnifi) getFilteredSites(c *Controller) (unifi.Sites, error) {
 	u.Config.RLock()
 	defer u.Config.RUnlock()
 
 	sites, err := c.Unifi.GetSites()
 	if err != nil {
 		return nil, err
-	} else if len(c.Sites) < 1 || poller.StringInSlice("all", c.Sites) {
+	} else if len(c.Sites) < 1 || StringInSlice("all", c.Sites) {
 		return sites, nil
 	}
 
-	var i int
+	i := 0
 
 	for _, s := range sites {
 		// Only include valid sites in the request filter.
-		if poller.StringInSlice(s.Name, c.Sites) {
+		if StringInSlice(s.Name, c.Sites) {
 			sites[i] = s
 			i++
 		}

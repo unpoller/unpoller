@@ -24,7 +24,7 @@ const (
 // Config defines the data needed to store metrics in InfluxDB
 type Config struct {
 	Interval  config.Duration `json:"interval,omitempty" toml:"interval,omitempty" xml:"interval" yaml:"interval"`
-	Disable   bool            `json:"disable" toml:"disable" xml:"disable" yaml:"disable"`
+	Disable   bool            `json:"disable" toml:"disable" xml:"disable,attr" yaml:"disable"`
 	VerifySSL bool            `json:"verify_ssl" toml:"verify_ssl" xml:"verify_ssl" yaml:"verify_ssl"`
 	URL       string          `json:"url,omitempty" toml:"url,omitempty" xml:"url" yaml:"url"`
 	User      string          `json:"user,omitempty" toml:"user,omitempty" xml:"user" yaml:"user"`
