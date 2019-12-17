@@ -140,12 +140,17 @@ func (u *promUnifi) Describe(ch chan<- *prometheus.Desc) {
 func (u *promUnifi) Collect(ch chan<- prometheus.Metric) {
 	var err error
 
+	ok := false
+
 	r := &Report{Config: u.Config, ch: make(chan []*metric, buffer), Start: time.Now()}
 	defer r.close()
 
-	if r.Metrics, err = u.Collector.Metrics(); err != nil {
+	if r.Metrics, ok, err = u.Collector.Metrics(); err != nil {
 		r.error(ch, prometheus.NewInvalidDesc(fmt.Errorf("metric fetch failed")), err)
-		return
+
+		if !ok {
+			return
+		}
 	}
 
 	r.Fetch = time.Since(r.Start)
