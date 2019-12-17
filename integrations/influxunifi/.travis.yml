@@ -15,8 +15,12 @@ addons:
     - debsigs
     - gnupg
     - expect
+    - musl-dev
+    - gcc
+    - libc6-dev-i386
+    - build-base
 go:
-- 1.12.x
+- 1.13.x
 services:
   - docker
 install:
