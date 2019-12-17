@@ -202,26 +202,20 @@ package_build_linux: readme man plugins_linux_amd64 linux
 		sed -e "s/{{BINARY}}/$(BINARY)/g" -e "s/{{DESC}}/$(DESC)/g" \
 		init/systemd/template.unit.service > $@/lib/systemd/system/$(BINARY).service
 
-package_build_linux_386: package_build_linux plugins_linux_i386 linux386
+package_build_linux_386: package_build_linux linux386
 	mkdir -p $@
 	cp -r $</* $@/
 	cp $(BINARY).i386.linux $@/usr/bin/$(BINARY)
-	rm -f $@/usr/lib/$(BINARY)/*.so
-	cp *i386.so $@/usr/lib/$(BINARY)/
 
-package_build_linux_arm64: package_build_linux plugins_linux_arm64 arm64
+package_build_linux_arm64: package_build_linux arm64
 	mkdir -p $@
 	cp -r $</* $@/
 	cp $(BINARY).arm64.linux $@/usr/bin/$(BINARY)
-	rm -f $@/usr/lib/$(BINARY)/*.so
-	cp *arm64.so $@/usr/lib/$(BINARY)/
 
-package_build_linux_armhf: package_build_linux plugins_linux_armhf armhf
+package_build_linux_armhf: package_build_linux armhf
 	mkdir -p $@
 	cp -r $</* $@/
 	cp $(BINARY).armhf.linux $@/usr/bin/$(BINARY)
-	rm -f $@/usr/lib/$(BINARY)/*.so
-	cp *armhf.so $@/usr/lib/$(BINARY)/
 
 check_fpm:
 	@fpm --version > /dev/null || (echo "FPM missing. Install FPM: https://fpm.readthedocs.io/en/latest/installing.html" && false)
@@ -264,25 +258,14 @@ $(BINARY).rb: v$(VERSION).tar.gz.sha256 init/homebrew/$(FORMULA).rb.tmpl
 		init/homebrew/$(FORMULA).rb.tmpl | tee $(BINARY).rb
 		# That perl line turns hello-world into HelloWorld, etc.
 
-# This probably wont work for most people.....
-plugins: linux_plugins plugins_darwin
+plugins: $(patsubst %,%.so,$(PLUGINS))
+$(patsubst %,%.so,$(PLUGINS)):
+	go build -o $@ -ldflags "$(VERSION_LDFLAGS)" -buildmode=plugin ./plugins/$(patsubst %.so,%,$@)
 
 linux_plugins: plugins_linux_amd64 plugins_linux_i386 plugins_linux_arm64 plugins_linux_armhf
 plugins_linux_amd64: $(patsubst %,%.linux_amd64.so,$(PLUGINS))
 $(patsubst %,%.linux_amd64.so,$(PLUGINS)):
 	GOOS=linux GOARCH=amd64 go build -o $@ -ldflags "$(VERSION_LDFLAGS)" -buildmode=plugin ./plugins/$(patsubst %.linux_amd64.so,%,$@)
-
-plugins_linux_i386: $(patsubst %,%.linux_i386.so,$(PLUGINS))
-$(patsubst %,%.linux_i386.so,$(PLUGINS)):
-	GOOS=linux GOARCH=386 go build -o $@ -ldflags "$(VERSION_LDFLAGS)" -buildmode=plugin ./plugins/$(patsubst %.linux_i386.so,%,$@)
-
-plugins_linux_arm64: $(patsubst %,%.linux_arm64.so,$(PLUGINS))
-$(patsubst %,%.linux_arm64.so,$(PLUGINS)):
-	GOOS=linux GOARCH=arm64 go build -o $@ -ldflags "$(VERSION_LDFLAGS)" -buildmode=plugin ./plugins/$(patsubst %.linux_arm64.so,%,$@)
-
-plugins_linux_armhf: $(patsubst %,%.linux_armhf.so,$(PLUGINS))
-$(patsubst %,%.linux_armhf.so,$(PLUGINS)):
-	GOOS=linux GOARCH=armhf go build -o $@ -ldflags "$(VERSION_LDFLAGS)" -buildmode=plugin ./plugins/$(patsubst %.linux_armhf.so,%,$@)
 
 plugins_darwin: $(patsubst %,%.darwin.so,$(PLUGINS))
 $(patsubst %,%.darwin.so,$(PLUGINS)):
