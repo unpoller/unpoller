@@ -47,15 +47,25 @@ func (u *InputUnifi) Initialize(l poller.Logger) error {
 }
 
 // Metrics grabs all the measurements from a UniFi controller and returns them.
-func (u *InputUnifi) Metrics() (*poller.Metrics, error) {
+func (u *InputUnifi) Metrics() (*poller.Metrics, bool, error) {
+	return u.MetricsFrom(poller.Filter{})
+}
+
+// MetricsFrom grabs all the measurements from a UniFi controller and returns them.
+func (u *InputUnifi) MetricsFrom(filter poller.Filter) (*poller.Metrics, bool, error) {
 	if u.Config.Disable {
-		return nil, nil
+		return nil, false, nil
 	}
 
 	errs := []string{}
 	metrics := &poller.Metrics{}
+	ok := false
 
 	for _, c := range u.Config.Controllers {
+		if filter.Term != "" && c.Name != filter.Term {
+			continue
+		}
+
 		m, err := u.collectController(c)
 		if err != nil {
 			errs = append(errs, err.Error())
@@ -64,6 +74,8 @@ func (u *InputUnifi) Metrics() (*poller.Metrics, error) {
 		if m == nil {
 			continue
 		}
+
+		ok = true
 
 		metrics.Sites = append(metrics.Sites, m.Sites...)
 		metrics.Clients = append(metrics.Clients, m.Clients...)
@@ -84,10 +96,10 @@ func (u *InputUnifi) Metrics() (*poller.Metrics, error) {
 	}
 
 	if len(errs) > 0 {
-		return metrics, fmt.Errorf(strings.Join(errs, ", "))
+		return metrics, ok, fmt.Errorf(strings.Join(errs, ", "))
 	}
 
-	return metrics, nil
+	return metrics, ok, nil
 }
 
 // RawMetrics returns API output from the first configured unifi controller.
