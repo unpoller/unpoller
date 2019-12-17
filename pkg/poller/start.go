@@ -61,10 +61,14 @@ func (f *Flags) Parse(args []string) {
 // 3. Start a web server and wait for Prometheus to poll the application for metrics.
 func (u *UnifiPoller) Run() error {
 	if u.Flags.DumpJSON != "" {
+		if err := u.InitializeInputs(); err != nil {
+			return err
+		}
+
 		return u.DumpJSONPayload()
 	}
 
-	if u.Config.Debug {
+	if u.Debug {
 		log.SetFlags(log.Lshortfile | log.Lmicroseconds | log.Ldate)
 		u.LogDebugf("Debug Logging Enabled")
 	}
