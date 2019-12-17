@@ -274,7 +274,7 @@ $(patsubst %,%.linux_amd64.so,$(PLUGINS)):
 
 plugins_linux_i386: $(patsubst %,%.linux_i386.so,$(PLUGINS))
 $(patsubst %,%.linux_i386.so,$(PLUGINS)):
-	GOOS=linux GOARCH=i386 go build -o $@ -ldflags "$(VERSION_LDFLAGS)" -buildmode=plugin ./plugins/$(patsubst %.linux_i386.so,%,$@)
+	GOOS=linux GOARCH=386 go build -o $@ -ldflags "$(VERSION_LDFLAGS)" -buildmode=plugin ./plugins/$(patsubst %.linux_i386.so,%,$@)
 
 plugins_linux_arm64: $(patsubst %,%.linux_arm64.so,$(PLUGINS))
 $(patsubst %,%.linux_arm64.so,$(PLUGINS)):
