@@ -69,10 +69,13 @@ func (u *InfluxUnifi) PollController() {
 	log.Printf("[INFO] Everything checks out! Poller started, InfluxDB interval: %v", interval)
 
 	for u.LastCheck = range ticker.C {
-		metrics, err := u.Collector.Metrics()
+		metrics, ok, err := u.Collector.Metrics()
 		if err != nil {
 			u.Collector.LogErrorf("%v", err)
-			continue
+
+			if !ok {
+				continue
+			}
 		}
 
 		report, err := u.ReportMetrics(metrics)
