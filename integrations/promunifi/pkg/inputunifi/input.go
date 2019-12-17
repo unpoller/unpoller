@@ -44,6 +44,7 @@ func init() {
 	u := &InputUnifi{}
 
 	poller.NewInput(&poller.InputPlugin{
+		Name:   "unifi",
 		Input:  u, // this library implements poller.Input interface for Metrics().
 		Config: u, // Defines our config data interface.
 	})
