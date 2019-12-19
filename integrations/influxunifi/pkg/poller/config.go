@@ -16,7 +16,7 @@ import (
 	"time"
 
 	"github.com/spf13/pflag"
-	"golift.io/config"
+	"golift.io/cnfg"
 	"golift.io/unifi"
 )
 
@@ -103,14 +103,14 @@ func (u *UnifiPoller) ParseConfigs() error {
 
 // parseInterface parses the config file and environment variables into the provided interface.
 func (u *UnifiPoller) parseInterface(i interface{}) error {
-	config.ENVTag = "xml" // xml tag is better formatted for slices.
+	cnfg.ENVTag = "xml" // xml tag is better formatted for slices.
 	// Parse config file into provided interface.
-	if err := config.ParseFile(i, u.Flags.ConfigFile); err != nil {
+	if err := cnfg.ParseFile(i, u.Flags.ConfigFile); err != nil {
 		return err
 	}
 
 	// Parse environment variables into provided interface.
-	_, err := config.ParseENV(i, ENVConfigPrefix)
+	_, err := cnfg.ParseENV(i, ENVConfigPrefix)
 
 	return err
 }
