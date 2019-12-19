@@ -2,14 +2,6 @@
 
 
 [[projects]]
-  digest = "1:9f3b30d9f8e0d7040f729b82dcbc8f0dead820a133b3147ce355fc451f32d761"
-  name = "github.com/BurntSushi/toml"
-  packages = ["."]
-  pruneopts = "UT"
-  revision = "3012a1dbe2e4bd1391d42b32f0577cb7bbc7f005"
-  version = "v0.3.1"
-
-[[projects]]
   digest = "1:d6afaeed1502aa28e80a4ed0981d570ad91b2579193404256ce672ed0a609e0d"
   name = "github.com/beorn7/perks"
   packages = ["quantile"]
@@ -44,6 +36,14 @@
   pruneopts = "UT"
   revision = "c12348ce28de40eed0136aa2b644d0ee0650e56c"
   version = "v1.0.1"
+
+[[projects]]
+  digest = "1:6eea828983c70075ca297bb915ffbcfd3e34c5a50affd94428a65df955c0ff9c"
+  name = "github.com/pelletier/go-toml"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "903d9455db9ff1d7ac1ab199062eca7266dd11a3"
+  version = "v1.6.0"
 
 [[projects]]
   digest = "1:7097829edd12fd7211fca0d29496b44f94ef9e6d72f88fb64f3d7b06315818ad"
@@ -103,15 +103,23 @@
   name = "golang.org/x/sys"
   packages = ["windows"]
   pruneopts = "UT"
-  revision = "ac6580df4449443a05718fd7858c1f91ad5f8d20"
+  revision = "4a24b406529242041050cb1dec3e0e4c46a5f1b6"
 
 [[projects]]
-  branch = "master"
-  digest = "1:331d56d3a24e9b8d203883c28803313af060ca5c350be0a9c0552b43f355ecd8"
+  digest = "1:54742bef5cb29f706614c9edcfdeb29fb5992f26090f26ca955f575dddf54f9e"
+  name = "golift.io/cnfg"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "961061d377655468e9da4a9333e71b9b77402470"
+  version = "v0.0.1"
+
+[[projects]]
+  digest = "1:54742bef5cb29f706614c9edcfdeb29fb5992f26090f26ca955f575dddf54f9e"
   name = "golift.io/config"
   packages = ["."]
   pruneopts = "UT"
-  revision = "1861b4270bf42ec3ccaf86871aa1cf6742564d0f"
+  revision = "961061d377655468e9da4a9333e71b9b77402470"
+  version = "v0.0.1"
 
 [[projects]]
   digest = "1:2883cea734f2766f41ff9c9d4aefccccc53e3d44f5c8b08893b9c218cf666722"
@@ -137,6 +145,7 @@
     "github.com/prometheus/client_golang/prometheus",
     "github.com/prometheus/common/version",
     "github.com/spf13/pflag",
+    "golift.io/cnfg",
     "golift.io/config",
     "golift.io/unifi",
   ]
