@@ -65,56 +65,16 @@ is provided so the application can be easily adapted to any environment.
 
 `Config File Parameters`
 
-Additional parameters are added by output packages. Parameters can also be set
-using environment variables. See the GitHub wiki for more information!
+Configuration file (up.conf) parameters are documented in the wiki.
 
-    >>> POLLER FIELDS FOLLOW - you may have multiple controllers:
+*   [https://github.com/davidnewhall/unifi-poller/wiki/Configuration](https://github.com/davidnewhall/unifi-poller/wiki/Configuration)
 
-    debug                  default: false
-        This turns on time stamps and line numbers in logs, outputs a few extra
-        lines of information while processing.
+`Shell Environment Parameters`
 
-    quiet                  default: false
-        Setting this to true will turn off per-device and per-interval logs. Only
-        errors will be logged. Using this with debug=true adds line numbers to
-        any error logs.
+This application can be fully configured using shell environment variables.
+Find documentation for this feature on the Docker Wiki page.
 
-    >>> UNIFI CONTROLLER FIELDS FOLLOW - you may have multiple controllers:
-
-    sites                  default: ["all"]
-        This list of strings should represent the names of sites on the UniFi
-        controller that will be polled for data. Pass `all` in the list to
-        poll all sites. On startup, the application prints out all site names
-        found in the controller; they're cryptic, but they have the human-name
-        next to them. The cryptic names go into the config file `sites` list.
-        The controller's first site is not cryptic and is named `default`.
-
-    url                    default: https://127.0.0.1:8443
-        This is the URL where the UniFi Controller is available.
-
-    user                   default: influxdb
-        Username used to authenticate with UniFi controller. This should be a
-        special service account created on the control with read-only access.
-
-    pass                   no default
-        Password used to authenticate with UniFi controller. This can also be
-        set in an environment variable instead of a configuration file.
-
-    save_ids               default: false
-        Setting this parameter to true will enable collection of Intrusion
-        Detection System data. IDS and IPS are the same data set. This is off
-        by default because most controllers do not have this enabled. It also
-        creates a lot of new metrics from controllers with a lot of IDS entries.
-        IDS data does not contain metrics, so this doesn't work with Prometheus.
-
-    save_sites             default: true
-        Setting this parameter to false will disable saving Network Site data.
-        This data populates the Sites dashboard, and this setting affects influx
-        and prometheus.
-
-    verify_ssl             default: false
-        If your UniFi controller has a valid SSL certificate, you can enable
-        this option to validate it. Otherwise, any SSL certificate is valid.
+*   [https://github.com/davidnewhall/unifi-poller/wiki/Docker](https://github.com/davidnewhall/unifi-poller/wiki/Docker)
 
 GO DURATION
 ---
