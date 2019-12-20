@@ -14,20 +14,30 @@
   "influxdb": {
      "disable": false,
      "url": "http://127.0.0.1:8086",
-     "user": "unifi",
-     "pass": "unifi",
+     "user": "unifipoller",
+     "pass": "unifipoller",
      "db": "unifi",
      "verify_ssl": false,
      "interval": "30s"
   },
 
   "unifi": {
-    "disable": false,
+    "dynamic": false,
+    "defaults": {
+      "name": "https://127.0.0.1:8443",
+      "user": "unifipoller",
+      "pass": "unifipoller",
+      "url": "https://127.0.0.1:8443",
+      "sites": ["all"],
+      "save_ids": false,
+      "save_sites": true,
+      "verify_ssl": false
+    },
     "controllers": [
       {
        "name": "",
-       "user": "influx",
-       "pass": "",
+       "user": "unifipoller",
+       "pass": "unifipoller",
        "url": "https://127.0.0.1:8443",
        "sites": ["all"],
        "save_ids": false,
