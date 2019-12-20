@@ -55,7 +55,7 @@
 # provide one and dynamic is disabled. In other words, you can just add your
 # controller here and delete the following section. Either works.
 [unifi.defaults]
-  name = "https://127.0.0.1:8443"
+  role = "https://127.0.0.1:8443"
   url = "https://127.0.0.1:8443"
   user = "unifipoller"
   pass = "unifipoller"
@@ -68,7 +68,8 @@
 [[unifi.controller]]
   # Friendly name used in dashboards. Uses URL if left empty; which is fine.
   # Avoid changing this later because it will live forever in your database.
-  name = ""
+  # Multiple controllers may share a role. This allows grouping during scrapes.
+  role = ""
 
   url = "https://127.0.0.1:8443"
   # Make a read-only user in the UniFi Admin Settings.
