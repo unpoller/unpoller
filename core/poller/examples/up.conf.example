@@ -55,12 +55,12 @@
 # provide one and dynamic is disabled. In other words, you can just add your
 # controller here and delete the following section. Either works.
 [unifi.defaults]
-  role = "https://127.0.0.1:8443"
-  url = "https://127.0.0.1:8443"
-  user = "unifipoller"
-  pass = "unifipoller"
-  sites = ["all"]
-  save_ids = false
+  role       = "https://127.0.0.1:8443"
+  url        = "https://127.0.0.1:8443"
+  user       = "unifipoller"
+  pass       = "unifipoller"
+  sites      = ["all"]
+  save_ids   = false
   save_sites = true
   verify_ssl = false
 
@@ -74,7 +74,6 @@
   url = "https://127.0.0.1:8443"
   # Make a read-only user in the UniFi Admin Settings.
   user = "unifipoller"
-  # You may also set env variable UNIFI_PASSWORD instead of putting this in the config.
   pass = "4BB9345C-2341-48D7-99F5-E01B583FF77F"
 
   # If the controller has more than one site, specify which sites to poll here.
