@@ -29,11 +29,11 @@ unifi:
     role: "https://127.0.0.1:8443"
     user: "unifipoller"
     pass: "unifipoller"
-    url: "https://127.0.0.1:8443"
+    url:  "https://127.0.0.1:8443"
     sites:
       - all
     verify_ssl: false
-    save_ids: false
+    save_ids:   false
     save_sites: true
 
 
