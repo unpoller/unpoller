@@ -15,10 +15,10 @@ var (
 
 // Input plugins must implement this interface.
 type Input interface {
-	Initialize(Logger) error                    // Called once on startup to initialize the plugin.
-	Metrics() (*Metrics, bool, error)           // Called every time new metrics are requested.
-	MetricsFrom(Filter) (*Metrics, bool, error) // Called every time new metrics are requested.
-	RawMetrics(Filter) ([]byte, error)
+	Initialize(Logger) error                     // Called once on startup to initialize the plugin.
+	Metrics() (*Metrics, bool, error)            // Called every time new metrics are requested.
+	MetricsFrom(*Filter) (*Metrics, bool, error) // Called every time new metrics are requested.
+	RawMetrics(*Filter) ([]byte, error)
 }
 
 // InputPlugin describes an input plugin's consumable interface.
@@ -108,7 +108,7 @@ func (u *UnifiPoller) Metrics() (*Metrics, bool, error) {
 }
 
 // MetricsFrom aggregates all the measurements from all configured inputs and returns them.
-func (u *UnifiPoller) MetricsFrom(filter Filter) (*Metrics, bool, error) {
+func (u *UnifiPoller) MetricsFrom(filter *Filter) (*Metrics, bool, error) {
 	errs := []string{}
 	metrics := &Metrics{}
 	ok := false

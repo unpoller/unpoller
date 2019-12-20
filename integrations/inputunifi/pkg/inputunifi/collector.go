@@ -15,6 +15,49 @@ func (u *InputUnifi) isNill(c *Controller) bool {
 	return c.Unifi == nil
 }
 
+func (u *InputUnifi) dynamicController(url string) (*poller.Metrics, bool, error) {
+	c := u.Config.Default // copy defaults into new controller
+	c.Name = url
+	c.URL = url
+
+	u.Logf("Authenticating to Dynamic UniFi Controller: %s", url)
+
+	if err := u.getUnifi(&c); err != nil {
+		return nil, false, fmt.Errorf("authenticating to %s: %v", url, err)
+	}
+
+	metrics := &poller.Metrics{}
+	ok, err := u.appendController(&c, metrics)
+
+	return metrics, ok, err
+}
+
+func (u *InputUnifi) appendController(c *Controller, metrics *poller.Metrics) (bool, error) {
+	m, err := u.collectController(c)
+	if err != nil || m == nil {
+		return false, err
+	}
+
+	metrics.Sites = append(metrics.Sites, m.Sites...)
+	metrics.Clients = append(metrics.Clients, m.Clients...)
+	metrics.IDSList = append(metrics.IDSList, m.IDSList...)
+
+	if m.Devices == nil {
+		return true, nil
+	}
+
+	if metrics.Devices == nil {
+		metrics.Devices = &unifi.Devices{}
+	}
+
+	metrics.UAPs = append(metrics.UAPs, m.UAPs...)
+	metrics.USGs = append(metrics.USGs, m.USGs...)
+	metrics.USWs = append(metrics.USWs, m.USWs...)
+	metrics.UDMs = append(metrics.UDMs, m.UDMs...)
+
+	return true, nil
+}
+
 func (u *InputUnifi) collectController(c *Controller) (*poller.Metrics, error) {
 	if u.isNill(c) {
 		u.Logf("Re-authenticating to UniFi Controller: %s", c.URL)

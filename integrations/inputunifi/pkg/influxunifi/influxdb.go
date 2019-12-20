@@ -10,7 +10,7 @@ import (
 
 	"github.com/davidnewhall/unifi-poller/pkg/poller"
 	influx "github.com/influxdata/influxdb1-client/v2"
-	"golift.io/config"
+	"golift.io/cnfg"
 )
 
 const (
@@ -23,13 +23,13 @@ const (
 
 // Config defines the data needed to store metrics in InfluxDB
 type Config struct {
-	Interval  config.Duration `json:"interval,omitempty" toml:"interval,omitempty" xml:"interval" yaml:"interval"`
-	Disable   bool            `json:"disable" toml:"disable" xml:"disable,attr" yaml:"disable"`
-	VerifySSL bool            `json:"verify_ssl" toml:"verify_ssl" xml:"verify_ssl" yaml:"verify_ssl"`
-	URL       string          `json:"url,omitempty" toml:"url,omitempty" xml:"url" yaml:"url"`
-	User      string          `json:"user,omitempty" toml:"user,omitempty" xml:"user" yaml:"user"`
-	Pass      string          `json:"pass,omitempty" toml:"pass,omitempty" xml:"pass" yaml:"pass"`
-	DB        string          `json:"db,omitempty" toml:"db,omitempty" xml:"db" yaml:"db"`
+	Interval  cnfg.Duration `json:"interval,omitempty" toml:"interval,omitempty" xml:"interval" yaml:"interval"`
+	Disable   bool          `json:"disable" toml:"disable" xml:"disable,attr" yaml:"disable"`
+	VerifySSL bool          `json:"verify_ssl" toml:"verify_ssl" xml:"verify_ssl" yaml:"verify_ssl"`
+	URL       string        `json:"url,omitempty" toml:"url,omitempty" xml:"url" yaml:"url"`
+	User      string        `json:"user,omitempty" toml:"user,omitempty" xml:"user" yaml:"user"`
+	Pass      string        `json:"pass,omitempty" toml:"pass,omitempty" xml:"pass" yaml:"pass"`
+	DB        string        `json:"db,omitempty" toml:"db,omitempty" xml:"db" yaml:"db"`
 }
 
 // InfluxDB allows the data to be nested in the config file.
@@ -133,12 +133,12 @@ func (u *InfluxUnifi) setConfigDefaults() {
 	}
 
 	if u.Config.Interval.Duration == 0 {
-		u.Config.Interval = config.Duration{Duration: defaultInterval}
+		u.Config.Interval = cnfg.Duration{Duration: defaultInterval}
 	} else if u.Config.Interval.Duration < minimumInterval {
-		u.Config.Interval = config.Duration{Duration: minimumInterval}
+		u.Config.Interval = cnfg.Duration{Duration: minimumInterval}
 	}
 
-	u.Config.Interval = config.Duration{Duration: u.Config.Interval.Duration.Round(time.Second)}
+	u.Config.Interval = cnfg.Duration{Duration: u.Config.Interval.Duration.Round(time.Second)}
 }
 
 // ReportMetrics batches all device and client data into influxdb data points.
