@@ -24,12 +24,12 @@
   "unifi": {
     "dynamic": false,
     "defaults": {
-      "role": "https://127.0.0.1:8443",
-      "user": "unifipoller",
-      "pass": "unifipoller",
-      "url": "https://127.0.0.1:8443",
-      "sites": ["all"],
-      "save_ids": false,
+      "role":      "https://127.0.0.1:8443",
+      "user":      "unifipoller",
+      "pass":      "unifipoller",
+      "url":       "https://127.0.0.1:8443",
+      "sites":     ["all"],
+      "save_ids":   false,
       "save_sites": true,
       "verify_ssl": false
     },
