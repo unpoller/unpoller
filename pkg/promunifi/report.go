@@ -67,7 +67,7 @@ func (r *Report) export(m *metric, v float64) prometheus.Metric {
 func (r *Report) error(ch chan<- prometheus.Metric, d *prometheus.Desc, v interface{}) {
 	r.Errors++
 
-	if r.Config.ReportErrors {
+	if r.ReportErrors {
 		ch <- prometheus.NewInvalidMetric(d, fmt.Errorf("error: %v", v))
 	}
 }

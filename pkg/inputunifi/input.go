@@ -16,13 +16,15 @@ import (
 const (
 	defaultURL  = "https://127.0.0.1:8443"
 	defaultUser = "unifipoller"
-	defaultPass = "unifipollerp4$$w0rd"
+	defaultPass = "unifipoller"
 	defaultSite = "all"
 )
 
 // InputUnifi contains the running data.
 type InputUnifi struct {
-	Config *Config `json:"unifi" toml:"unifi" xml:"unifi" yaml:"unifi"`
+	Config     *Config `json:"unifi" toml:"unifi" xml:"unifi" yaml:"unifi"`
+	dynamic    map[string]*Controller
+	sync.Mutex // to lock the map above.
 	poller.Logger
 }
 
@@ -31,7 +33,7 @@ type InputUnifi struct {
 type Controller struct {
 	VerifySSL bool         `json:"verify_ssl" toml:"verify_ssl" xml:"verify_ssl" yaml:"verify_ssl"`
 	SaveIDS   bool         `json:"save_ids" toml:"save_ids" xml:"save_ids" yaml:"save_ids"`
-	SaveSites bool         `json:"save_sites" toml:"save_sites" xml:"save_sites" yaml:"save_sites"`
+	SaveSites *bool        `json:"save_sites" toml:"save_sites" xml:"save_sites" yaml:"save_sites"`
 	Name      string       `json:"name" toml:"name" xml:"name,attr" yaml:"name"`
 	User      string       `json:"user" toml:"user" xml:"user" yaml:"user"`
 	Pass      string       `json:"pass" toml:"pass" xml:"pass" yaml:"pass"`
@@ -44,8 +46,8 @@ type Controller struct {
 type Config struct {
 	sync.RWMutex               // locks the Unifi struct member when re-authing to unifi.
 	Default      Controller    `json:"defaults" toml:"defaults" xml:"default" yaml:"defaults"`
-	Disable      bool          `json:"disable" toml:"disable" xml:"disable" yaml:"disable"`
-	Dynamic      bool          `json:"dynamic" toml:"dynamic" xml:"dynamic" yaml:"dynamic"`
+	Disable      bool          `json:"disable" toml:"disable" xml:"disable,attr" yaml:"disable"`
+	Dynamic      bool          `json:"dynamic" toml:"dynamic" xml:"dynamic,attr" yaml:"dynamic"`
 	Controllers  []*Controller `json:"controllers" toml:"controller" xml:"controller" yaml:"controllers"`
 }
 
@@ -157,6 +159,11 @@ func (u *InputUnifi) dumpSitesJSON(c *Controller, path, name string, sites unifi
 }
 
 func (u *InputUnifi) setDefaults(c *Controller) {
+	if c.SaveSites == nil {
+		t := true
+		c.SaveSites = &t
+	}
+
 	if c.URL == "" {
 		c.URL = defaultURL
 	}

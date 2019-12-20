@@ -26,21 +26,16 @@ const (
 )
 
 type promUnifi struct {
-	*Prometheus
-	Client *uclient
-	Device *unifiDevice
-	UAP    *uap
-	USG    *usg
-	USW    *usw
-	Site   *site
+	*Config `json:"prometheus" toml:"prometheus" xml:"prometheus" yaml:"prometheus"`
+	Client  *uclient
+	Device  *unifiDevice
+	UAP     *uap
+	USG     *usg
+	USW     *usw
+	Site    *site
 	// This interface is passed to the Collect() method. The Collect method uses
 	// this interface to retrieve the latest UniFi measurements and export them.
 	Collector poller.Collect
-}
-
-// Prometheus allows the data to be nested in the config file.
-type Prometheus struct {
-	Config Config `json:"prometheus" toml:"prometheus" xml:"prometheus" yaml:"prometheus"`
 }
 
 // Config is the input (config file) data used to initialize this output plugin.
@@ -66,7 +61,7 @@ type metric struct {
 
 // Report accumulates counters that are printed to a log line.
 type Report struct {
-	Config
+	*Config
 	Total   int             // Total count of metrics recorded.
 	Errors  int             // Total count of errors recording metrics.
 	Zeros   int             // Total count of metrics equal to zero.
@@ -78,17 +73,18 @@ type Report struct {
 	wg      sync.WaitGroup
 }
 
+// target is used for targeted (sometimes dynamic) metrics scrapes.
 type target struct {
 	*poller.Filter
-	*promUnifi
+	u *promUnifi
 }
 
 func init() {
-	u := &promUnifi{Prometheus: &Prometheus{}}
+	u := &promUnifi{Config: &Config{}}
 
 	poller.NewOutput(&poller.Output{
 		Name:   "prometheus",
-		Config: u.Prometheus,
+		Config: u,
 		Method: u.Run,
 	})
 }
@@ -96,51 +92,55 @@ func init() {
 // Run creates the collectors and starts the web server up.
 // Should be run in a Go routine. Returns nil if not configured.
 func (u *promUnifi) Run(c poller.Collect) error {
-	if u.Config.Disable {
+	if u.Disable {
 		return nil
 	}
 
-	u.Config.Namespace = strings.Trim(strings.Replace(u.Config.Namespace, "-", "_", -1), "_")
-	if u.Config.Namespace == "" {
-		u.Config.Namespace = strings.Replace(poller.AppName, "-", "", -1)
+	u.Namespace = strings.Trim(strings.Replace(u.Namespace, "-", "_", -1), "_")
+	if u.Namespace == "" {
+		u.Namespace = strings.Replace(poller.AppName, "-", "", -1)
 	}
 
-	if u.Config.HTTPListen == "" {
-		u.Config.HTTPListen = defaultHTTPListen
+	if u.HTTPListen == "" {
+		u.HTTPListen = defaultHTTPListen
 	}
 
+	// Later can pass this in from poller by adding a method to the interface.
+	u.Collector = c
+	u.Client = descClient(u.Namespace + "_client_")
+	u.Device = descDevice(u.Namespace + "_device_") // stats for all device types.
+	u.UAP = descUAP(u.Namespace + "_device_")
+	u.USG = descUSG(u.Namespace + "_device_")
+	u.USW = descUSW(u.Namespace + "_device_")
+	u.Site = descSite(u.Namespace + "_site_")
 	mux := http.NewServeMux()
 
-	prometheus.MustRegister(version.NewCollector(u.Config.Namespace))
-	prometheus.MustRegister(&promUnifi{
-		Collector: c,
-		Client:    descClient(u.Config.Namespace + "_client_"),
-		Device:    descDevice(u.Config.Namespace + "_device_"), // stats for all device types.
-		UAP:       descUAP(u.Config.Namespace + "_device_"),
-		USG:       descUSG(u.Config.Namespace + "_device_"),
-		USW:       descUSW(u.Config.Namespace + "_device_"),
-		Site:      descSite(u.Config.Namespace + "_site_"),
-	})
-	c.Logf("Exporting Measurements for Prometheus at https://%s/metrics, namespace: %s",
-		u.Config.HTTPListen, u.Config.Namespace)
-	mux.Handle("/metrics", promhttp.HandlerFor(
-		prometheus.DefaultGatherer, promhttp.HandlerOpts{ErrorHandling: promhttp.ContinueOnError},
+	prometheus.MustRegister(version.NewCollector(u.Namespace))
+	prometheus.MustRegister(u)
+	c.Logf("Prometheus exported at https://%s/ - namespace: %s", u.HTTPListen, u.Namespace)
+	mux.Handle("/metrics", promhttp.HandlerFor(prometheus.DefaultGatherer,
+		promhttp.HandlerOpts{ErrorHandling: promhttp.ContinueOnError},
 	))
 	mux.HandleFunc("/scrape", u.ScrapeHandler)
+	mux.HandleFunc("/", u.DefaultHandler)
 
-	return http.ListenAndServe(u.Config.HTTPListen, mux)
+	return http.ListenAndServe(u.HTTPListen, mux)
 }
 
 // ScrapeHandler allows prometheus to scrape a single source, instead of all sources.
 func (u *promUnifi) ScrapeHandler(w http.ResponseWriter, r *http.Request) {
-	t := &target{promUnifi: u, Filter: &poller.Filter{}}
-	if t.Filter.Type = r.URL.Query().Get("input"); t.Filter.Type == "" {
+	t := &target{u: u, Filter: &poller.Filter{}}
+	if t.Name = r.URL.Query().Get("input"); t.Name == "" {
+		u.Collector.LogErrorf("input parameter missing on scrape from %v", r.RemoteAddr)
 		http.Error(w, `'input' parameter must be specified (try "unifi")`, 400)
+
 		return
 	}
 
-	if t.Filter.Term = r.URL.Query().Get("target"); t.Filter.Term == "" {
+	if t.Term = r.URL.Query().Get("target"); t.Term == "" {
+		u.Collector.LogErrorf("target parameter missing on scrape from %v", r.RemoteAddr)
 		http.Error(w, "'target' parameter must be specified, configured name, or unconfigured url", 400)
+
 		return
 	}
 
@@ -152,14 +152,15 @@ func (u *promUnifi) ScrapeHandler(w http.ResponseWriter, r *http.Request) {
 	).ServeHTTP(w, r)
 }
 
+func (u *promUnifi) DefaultHandler(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(200)
+	_, _ = w.Write([]byte(poller.AppName + "\n"))
+}
+
 // Describe satisfies the prometheus Collector. This returns all of the
 // metric descriptions that this packages produces.
 func (t *target) Describe(ch chan<- *prometheus.Desc) {
-	t.promUnifi.Describe(ch)
-}
-
-func (t *target) Collect(ch chan<- prometheus.Metric) {
-	t.promUnifi.collect(ch, t.Filter)
+	t.u.Describe(ch)
 }
 
 // Describe satisfies the prometheus Collector. This returns all of the
@@ -178,6 +179,11 @@ func (u *promUnifi) Describe(ch chan<- *prometheus.Desc) {
 	}
 }
 
+// Collect satisfies the prometheus Collector. This runs for a single controller poll.
+func (t *target) Collect(ch chan<- prometheus.Metric) {
+	t.u.collect(ch, t.Filter)
+}
+
 // Collect satisfies the prometheus Collector. This runs the input method to get
 // the current metrics (from another package) then exports them for prometheus.
 func (u *promUnifi) Collect(ch chan<- prometheus.Metric) {
@@ -187,10 +193,13 @@ func (u *promUnifi) Collect(ch chan<- prometheus.Metric) {
 func (u *promUnifi) collect(ch chan<- prometheus.Metric, filter *poller.Filter) {
 	var err error
 
-	ok := false
-
-	r := &Report{Config: u.Config, ch: make(chan []*metric, buffer), Start: time.Now()}
+	r := &Report{
+		Config: u.Config,
+		ch:     make(chan []*metric, buffer),
+		Start:  time.Now()}
 	defer r.close()
+
+	ok := false
 
 	if filter == nil {
 		r.Metrics, ok, err = u.Collector.Metrics()
@@ -198,15 +207,16 @@ func (u *promUnifi) collect(ch chan<- prometheus.Metric, filter *poller.Filter) 
 		r.Metrics, ok, err = u.Collector.MetricsFrom(filter)
 	}
 
+	r.Fetch = time.Since(r.Start)
+
 	if err != nil {
-		r.error(ch, prometheus.NewInvalidDesc(fmt.Errorf("metric fetch failed")), err)
+		r.error(ch, prometheus.NewInvalidDesc(err), fmt.Errorf("metric fetch failed"))
+		u.Collector.LogErrorf("metric fetch failed: %v", err)
 
 		if !ok {
 			return
 		}
 	}
-
-	r.Fetch = time.Since(r.Start)
 
 	if r.Metrics.Devices == nil {
 		r.Metrics.Devices = &unifi.Devices{}

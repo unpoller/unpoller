@@ -18,22 +18,33 @@
   <influxdb disable="false">
     <interval>30s</interval>
     <url>http://127.0.0.1:8086</url>
-    <user>unifi</user>
-    <pass>unifi</pass>
+    <user>unifipoller</user>
+    <pass>unifipoller</pass>
     <db>unifi</db>
     <verify_ssl>false</verify_ssl>
   </influxdb>
 
-  <unifi disable="false">
+  <unifi dynamic="false">
+    <default name="https://127.0.0.1:8443">
+      <site>all</site>
+      <user>unifipoller</user>
+      <pass>unifipoller</pass>
+      <url>https://127.0.0.1:8443</url>
+      <verify_ssl>false</verify_ssl>
+      <save_ids>false</save_ids>
+      <save_sites>true</save_sites>
+    </default>
+
     <!-- Repeat this stanza to poll additional controllers. -->
     <controller name="">
       <site>all</site>
-      <user>influx</user>
-      <pass></pass>
+      <user>unifipoller</user>
+      <pass>unifipoller</pass>
       <url>https://127.0.0.1:8443</url>
       <verify_ssl>false</verify_ssl>
       <save_ids>false</save_ids>
       <save_sites>true</save_sites>
     </controller>
+
   </unifi>
 </poller>
