@@ -26,7 +26,7 @@ influxdb:
 unifi:
   dynamic: false
   defaults:
-    name: "https://127.0.0.1:8443"
+    role: "https://127.0.0.1:8443"
     user: "unifipoller"
     pass: "unifipoller"
     url: "https://127.0.0.1:8443"
@@ -36,8 +36,10 @@ unifi:
     save_ids: false
     save_sites: true
 
+
   controllers:
-    - name: ""
+   # Repeat the following stanza to poll more controllers.
+    - role: ""
       user: "unifipoller"
       pass: "unifipoller"
       url: "https://127.0.0.1:8443"
