@@ -22,7 +22,7 @@ const (
 
 // InputUnifi contains the running data.
 type InputUnifi struct {
-	Config     *Config `json:"unifi" toml:"unifi" xml:"unifi" yaml:"unifi"`
+	*Config    `json:"unifi" toml:"unifi" xml:"unifi" yaml:"unifi"`
 	dynamic    map[string]*Controller
 	sync.Mutex // to lock the map above.
 	poller.Logger
@@ -34,7 +34,7 @@ type Controller struct {
 	VerifySSL bool         `json:"verify_ssl" toml:"verify_ssl" xml:"verify_ssl" yaml:"verify_ssl"`
 	SaveIDS   bool         `json:"save_ids" toml:"save_ids" xml:"save_ids" yaml:"save_ids"`
 	SaveSites *bool        `json:"save_sites" toml:"save_sites" xml:"save_sites" yaml:"save_sites"`
-	Name      string       `json:"name" toml:"name" xml:"name,attr" yaml:"name"`
+	Role      string       `json:"role" toml:"role" xml:"role,attr" yaml:"role"`
 	User      string       `json:"user" toml:"user" xml:"user" yaml:"user"`
 	Pass      string       `json:"pass" toml:"pass" xml:"pass" yaml:"pass"`
 	URL       string       `json:"url" toml:"url" xml:"url" yaml:"url"`
@@ -65,8 +65,8 @@ func init() {
 func (u *InputUnifi) getUnifi(c *Controller) error {
 	var err error
 
-	u.Config.Lock()
-	defer u.Config.Unlock()
+	u.Lock()
+	defer u.Unlock()
 
 	if c.Unifi != nil {
 		c.Unifi.CloseIdleConnections()
@@ -94,8 +94,8 @@ func (u *InputUnifi) getUnifi(c *Controller) error {
 // checkSites makes sure the list of provided sites exists on the controller.
 // This only runs once during initialization.
 func (u *InputUnifi) checkSites(c *Controller) error {
-	u.Config.RLock()
-	defer u.Config.RUnlock()
+	u.RLock()
+	defer u.RUnlock()
 
 	if len(c.Sites) < 1 || c.Sites[0] == "" {
 		c.Sites = []string{"all"}
@@ -113,7 +113,7 @@ func (u *InputUnifi) checkSites(c *Controller) error {
 		msg = append(msg, site.Name+" ("+site.Desc+")")
 	}
 
-	u.Logf("Found %d site(s) on controller %s: %v", len(msg), c.Name, strings.Join(msg, ", "))
+	u.Logf("Found %d site(s) on controller %s: %v", len(msg), c.Role, strings.Join(msg, ", "))
 
 	if StringInSlice("all", c.Sites) {
 		c.Sites = []string{"all"}
@@ -130,7 +130,7 @@ FIRST:
 				continue FIRST
 			}
 		}
-		u.LogErrorf("Configured site not found on controller %s: %v", c.Name, s)
+		u.LogErrorf("Configured site not found on controller %s: %v", c.Role, s)
 	}
 
 	if c.Sites = keep; len(keep) < 1 {
@@ -168,8 +168,8 @@ func (u *InputUnifi) setDefaults(c *Controller) {
 		c.URL = defaultURL
 	}
 
-	if c.Name == "" {
-		c.Name = c.URL
+	if c.Role == "" {
+		c.Role = c.URL
 	}
 
 	if c.Pass == "" {

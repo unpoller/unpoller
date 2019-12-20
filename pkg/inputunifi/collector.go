@@ -10,8 +10,8 @@ import (
 )
 
 func (u *InputUnifi) isNill(c *Controller) bool {
-	u.Config.RLock()
-	defer u.Config.RUnlock()
+	u.RLock()
+	defer u.RUnlock()
 
 	return c.Unifi == nil
 }
@@ -28,10 +28,10 @@ func (u *InputUnifi) newDynamicCntrlr(url string) (bool, *Controller) {
 		return false, c
 	}
 
-	ccopy := u.Config.Default // copy defaults into new controller
+	ccopy := u.Default // copy defaults into new controller
 	c = &ccopy
 	u.dynamic[url] = c
-	c.Name = url
+	c.Role = url
 	c.URL = url
 
 	return true, c
@@ -60,7 +60,7 @@ func (u *InputUnifi) collectController(c *Controller) (*poller.Metrics, error) {
 		u.Logf("Re-authenticating to UniFi Controller: %s", c.URL)
 
 		if err := u.getUnifi(c); err != nil {
-			return nil, fmt.Errorf("re-authenticating to %s: %v", c.Name, err)
+			return nil, fmt.Errorf("re-authenticating to %s: %v", c.Role, err)
 		}
 	}
 
@@ -70,8 +70,8 @@ func (u *InputUnifi) collectController(c *Controller) (*poller.Metrics, error) {
 func (u *InputUnifi) pollController(c *Controller) (*poller.Metrics, error) {
 	var err error
 
-	u.Config.RLock()
-	defer u.Config.RUnlock()
+	u.RLock()
+	defer u.RUnlock()
 
 	m := &poller.Metrics{TS: time.Now()} // At this point, it's the Current Check.
 
@@ -149,8 +149,8 @@ func (u *InputUnifi) augmentMetrics(c *Controller, metrics *poller.Metrics) *pol
 // Omits requested but unconfigured sites. Grabs the full list from the
 // controller and returns the sites provided in the config file.
 func (u *InputUnifi) getFilteredSites(c *Controller) (unifi.Sites, error) {
-	u.Config.RLock()
-	defer u.Config.RUnlock()
+	u.RLock()
+	defer u.RUnlock()
 
 	sites, err := c.Unifi.GetSites()
 	if err != nil {

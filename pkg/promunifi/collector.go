@@ -129,17 +129,21 @@ func (u *promUnifi) Run(c poller.Collect) error {
 
 // ScrapeHandler allows prometheus to scrape a single source, instead of all sources.
 func (u *promUnifi) ScrapeHandler(w http.ResponseWriter, r *http.Request) {
-	t := &target{u: u, Filter: &poller.Filter{}}
-	if t.Name = r.URL.Query().Get("input"); t.Name == "" {
+	t := &target{u: u, Filter: &poller.Filter{
+		Name: r.URL.Query().Get("input"), // "unifi"
+		Path: r.URL.Query().Get("path"),  // url: "https://127.0.0.1:8443"
+		Role: r.URL.Query().Get("role"),  // configured role in up.conf.
+	}}
+	if t.Name == "" {
 		u.Collector.LogErrorf("input parameter missing on scrape from %v", r.RemoteAddr)
 		http.Error(w, `'input' parameter must be specified (try "unifi")`, 400)
 
 		return
 	}
 
-	if t.Term = r.URL.Query().Get("target"); t.Term == "" {
-		u.Collector.LogErrorf("target parameter missing on scrape from %v", r.RemoteAddr)
-		http.Error(w, "'target' parameter must be specified, configured name, or unconfigured url", 400)
+	if t.Role == "" && t.Path == "" {
+		u.Collector.LogErrorf("role and path parameters missing on scrape from %v", r.RemoteAddr)
+		http.Error(w, "'role' OR 'path' parameter must be specified: configured role OR unconfigured url", 400)
 
 		return
 	}

@@ -25,7 +25,7 @@
   </influxdb>
 
   <unifi dynamic="false">
-    <default name="https://127.0.0.1:8443">
+    <default role="https://127.0.0.1:8443">
       <site>all</site>
       <user>unifipoller</user>
       <pass>unifipoller</pass>
@@ -36,7 +36,7 @@
     </default>
 
     <!-- Repeat this stanza to poll additional controllers. -->
-    <controller name="">
+    <controller role="">
       <site>all</site>
       <user>unifipoller</user>
       <pass>unifipoller</pass>
