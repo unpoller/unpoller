@@ -28,10 +28,26 @@ type InputPlugin struct {
 	Input
 }
 
-// Filter is used for raw metrics filters.
+// Filter is used for metrics filters. Many fields for lots of expansion.
 type Filter struct {
 	Type string
 	Term string
+	Name string
+	Tags string
+	Role string
+	Kind string
+	Path string
+	Area int
+	Item int
+	Unit int
+	Sign int64
+	Mass int64
+	Rate float64
+	Cost float64
+	Free bool
+	True bool
+	Done bool
+	Stop bool
 }
 
 // NewInput creates a metric input. This should be called by input plugins
@@ -107,14 +123,14 @@ func (u *UnifiPoller) Metrics() (*Metrics, bool, error) {
 	return metrics, ok, err
 }
 
-// MetricsFrom aggregates all the measurements from all configured inputs and returns them.
+// MetricsFrom aggregates all the measurements from filtered inputs and returns them.
 func (u *UnifiPoller) MetricsFrom(filter *Filter) (*Metrics, bool, error) {
 	errs := []string{}
 	metrics := &Metrics{}
 	ok := false
 
 	for _, input := range inputs {
-		if input.Name != filter.Type {
+		if !strings.EqualFold(input.Name, filter.Name) {
 			continue
 		}
 
@@ -128,23 +144,7 @@ func (u *UnifiPoller) MetricsFrom(filter *Filter) (*Metrics, bool, error) {
 		}
 
 		ok = true
-
-		metrics.Sites = append(metrics.Sites, m.Sites...)
-		metrics.Clients = append(metrics.Clients, m.Clients...)
-		metrics.IDSList = append(metrics.IDSList, m.IDSList...)
-
-		if m.Devices == nil {
-			continue
-		}
-
-		if metrics.Devices == nil {
-			metrics.Devices = &unifi.Devices{}
-		}
-
-		metrics.UAPs = append(metrics.UAPs, m.UAPs...)
-		metrics.USGs = append(metrics.USGs, m.USGs...)
-		metrics.USWs = append(metrics.USWs, m.USWs...)
-		metrics.UDMs = append(metrics.UDMs, m.UDMs...)
+		metrics = AppendMetrics(metrics, m)
 	}
 
 	var err error
@@ -154,4 +154,26 @@ func (u *UnifiPoller) MetricsFrom(filter *Filter) (*Metrics, bool, error) {
 	}
 
 	return metrics, ok, err
+}
+
+// AppendMetrics combined the metrics from two sources.
+func AppendMetrics(existing *Metrics, m *Metrics) *Metrics {
+	existing.Sites = append(existing.Sites, m.Sites...)
+	existing.Clients = append(existing.Clients, m.Clients...)
+	existing.IDSList = append(existing.IDSList, m.IDSList...)
+
+	if m.Devices == nil {
+		return existing
+	}
+
+	if existing.Devices == nil {
+		existing.Devices = &unifi.Devices{}
+	}
+
+	existing.UAPs = append(existing.UAPs, m.UAPs...)
+	existing.USGs = append(existing.USGs, m.USGs...)
+	existing.USWs = append(existing.USWs, m.USWs...)
+	existing.UDMs = append(existing.UDMs, m.UDMs...)
+
+	return existing
 }

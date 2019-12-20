@@ -2,6 +2,7 @@ package inputunifi
 
 import (
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/davidnewhall/unifi-poller/pkg/poller"
@@ -15,47 +16,43 @@ func (u *InputUnifi) isNill(c *Controller) bool {
 	return c.Unifi == nil
 }
 
-func (u *InputUnifi) dynamicController(url string) (*poller.Metrics, bool, error) {
-	c := u.Config.Default // copy defaults into new controller
+// newDynamicCntrlr creates and saves a controller (with auth cookie) for repeated use.
+// This is called when an unconfigured controller is requested.
+func (u *InputUnifi) newDynamicCntrlr(url string) (bool, *Controller) {
+	u.Lock()
+	defer u.Unlock()
+
+	c := u.dynamic[url]
+	if c != nil {
+		// it already exists.
+		return false, c
+	}
+
+	ccopy := u.Config.Default // copy defaults into new controller
+	c = &ccopy
+	u.dynamic[url] = c
 	c.Name = url
 	c.URL = url
 
-	u.Logf("Authenticating to Dynamic UniFi Controller: %s", url)
-
-	if err := u.getUnifi(&c); err != nil {
-		return nil, false, fmt.Errorf("authenticating to %s: %v", url, err)
-	}
-
-	metrics := &poller.Metrics{}
-	ok, err := u.appendController(&c, metrics)
-
-	return metrics, ok, err
+	return true, c
 }
 
-func (u *InputUnifi) appendController(c *Controller, metrics *poller.Metrics) (bool, error) {
-	m, err := u.collectController(c)
-	if err != nil || m == nil {
-		return false, err
+func (u *InputUnifi) dynamicController(url string) (*poller.Metrics, error) {
+	if !strings.HasPrefix(url, "http") {
+		return nil, fmt.Errorf("scrape filter match failed, and filter is not http URL")
 	}
 
-	metrics.Sites = append(metrics.Sites, m.Sites...)
-	metrics.Clients = append(metrics.Clients, m.Clients...)
-	metrics.IDSList = append(metrics.IDSList, m.IDSList...)
+	new, c := u.newDynamicCntrlr(url)
 
-	if m.Devices == nil {
-		return true, nil
+	if new {
+		u.Logf("Authenticating to Dynamic UniFi Controller: %s", url)
+
+		if err := u.getUnifi(c); err != nil {
+			return nil, fmt.Errorf("authenticating to %s: %v", url, err)
+		}
 	}
 
-	if metrics.Devices == nil {
-		metrics.Devices = &unifi.Devices{}
-	}
-
-	metrics.UAPs = append(metrics.UAPs, m.UAPs...)
-	metrics.USGs = append(metrics.USGs, m.USGs...)
-	metrics.USWs = append(metrics.USWs, m.USWs...)
-	metrics.UDMs = append(metrics.UDMs, m.UDMs...)
-
-	return true, nil
+	return u.collectController(c)
 }
 
 func (u *InputUnifi) collectController(c *Controller) (*poller.Metrics, error) {
@@ -65,11 +62,6 @@ func (u *InputUnifi) collectController(c *Controller) (*poller.Metrics, error) {
 		if err := u.getUnifi(c); err != nil {
 			return nil, fmt.Errorf("re-authenticating to %s: %v", c.Name, err)
 		}
-	}
-
-	m, err := u.pollController(c)
-	if err == nil {
-		return m, nil
 	}
 
 	return u.pollController(c)
@@ -146,7 +138,7 @@ func (u *InputUnifi) augmentMetrics(c *Controller, metrics *poller.Metrics) *pol
 		metrics.Clients[i].RadioDescription = bssdIDs[metrics.Clients[i].Bssid] + metrics.Clients[i].RadioProto
 	}
 
-	if !c.SaveSites {
+	if !*c.SaveSites {
 		metrics.Sites = nil
 	}
 
