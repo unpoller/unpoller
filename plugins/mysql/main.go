@@ -4,17 +4,17 @@ import (
 	"fmt"
 
 	"github.com/davidnewhall/unifi-poller/pkg/poller"
-	"golift.io/config"
+	"golift.io/cnfg"
 )
 
 // mysqlConfig represents the data that is unmarshalled from the up.conf config file for this plugins.
 type mysqlConfig struct {
-	Interval config.Duration `json:"interval" toml:"interval" xml:"interval" yaml:"interval"`
-	Host     string          `json:"host" toml:"host" xml:"host" yaml:"host"`
-	User     string          `json:"user" toml:"user" xml:"user" yaml:"user"`
-	Pass     string          `json:"pass" toml:"pass" xml:"pass" yaml:"pass"`
-	DB       string          `json:"db" toml:"db" xml:"db" yaml:"db"`
-	Table    string          `json:"table" toml:"table" xml:"table" yaml:"table"`
+	Interval cnfg.Duration `json:"interval" toml:"interval" xml:"interval" yaml:"interval"`
+	Host     string        `json:"host" toml:"host" xml:"host" yaml:"host"`
+	User     string        `json:"user" toml:"user" xml:"user" yaml:"user"`
+	Pass     string        `json:"pass" toml:"pass" xml:"pass" yaml:"pass"`
+	DB       string        `json:"db" toml:"db" xml:"db" yaml:"db"`
+	Table    string        `json:"table" toml:"table" xml:"table" yaml:"table"`
 	// Maps do not work with ENV VARIABLES yet, but may in the future.
 	Fields []string `json:"fields" toml:"fields" xml:"field" yaml:"fields"`
 }

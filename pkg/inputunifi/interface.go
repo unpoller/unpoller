@@ -19,16 +19,15 @@ func (u *InputUnifi) Initialize(l poller.Logger) error {
 		return nil
 	}
 
-	if len(u.Config.Controllers) < 1 {
-		return fmt.Errorf("no unifi controllers defined for unifi input")
+	if u.setDefaults(&u.Config.Default); len(u.Config.Controllers) < 1 {
+		new := u.Config.Default // copy defaults.
+		u.Config.Controllers = []*Controller{&new}
 	}
 
 	u.Logger = l
 
-	for i, c := range u.Config.Controllers {
-		if c.Name == "" {
-			u.Config.Controllers[i].Name = c.URL
-		}
+	for _, c := range u.Config.Controllers {
+		u.setDefaults(c)
 
 		switch err := u.getUnifi(c); err {
 		case nil:
@@ -48,12 +47,12 @@ func (u *InputUnifi) Initialize(l poller.Logger) error {
 
 // Metrics grabs all the measurements from a UniFi controller and returns them.
 func (u *InputUnifi) Metrics() (*poller.Metrics, bool, error) {
-	return u.MetricsFrom(poller.Filter{})
+	return u.MetricsFrom(nil)
 }
 
 // MetricsFrom grabs all the measurements from a UniFi controller and returns them.
-func (u *InputUnifi) MetricsFrom(filter poller.Filter) (*poller.Metrics, bool, error) {
-	if u.Config.Disable {
+func (u *InputUnifi) MetricsFrom(filter *poller.Filter) (*poller.Metrics, bool, error) {
+	if u.Config.Disable || filter == nil || filter.Term == "" {
 		return nil, false, nil
 	}
 
@@ -61,49 +60,36 @@ func (u *InputUnifi) MetricsFrom(filter poller.Filter) (*poller.Metrics, bool, e
 	metrics := &poller.Metrics{}
 	ok := false
 
+	// Check if the request is for an existing, configured controller.
 	for _, c := range u.Config.Controllers {
-		if filter.Term != "" && c.Name != filter.Term {
+		if !strings.EqualFold(c.Name, filter.Term) {
 			continue
 		}
 
-		m, err := u.collectController(c)
+		exists, err := u.appendController(c, metrics)
 		if err != nil {
 			errs = append(errs, err.Error())
 		}
 
-		if m == nil {
-			continue
+		if exists {
+			ok = true
 		}
-
-		ok = true
-
-		metrics.Sites = append(metrics.Sites, m.Sites...)
-		metrics.Clients = append(metrics.Clients, m.Clients...)
-		metrics.IDSList = append(metrics.IDSList, m.IDSList...)
-
-		if m.Devices == nil {
-			continue
-		}
-
-		if metrics.Devices == nil {
-			metrics.Devices = &unifi.Devices{}
-		}
-
-		metrics.UAPs = append(metrics.UAPs, m.UAPs...)
-		metrics.USGs = append(metrics.USGs, m.USGs...)
-		metrics.USWs = append(metrics.USWs, m.USWs...)
-		metrics.UDMs = append(metrics.UDMs, m.UDMs...)
 	}
 
 	if len(errs) > 0 {
 		return metrics, ok, fmt.Errorf(strings.Join(errs, ", "))
 	}
 
+	if u.Config.Dynamic && !ok && strings.HasPrefix(filter.Term, "http") {
+		// Attempt to a dynamic metrics fetch from an unconfigured controller.
+		return u.dynamicController(filter.Term)
+	}
+
 	return metrics, ok, nil
 }
 
 // RawMetrics returns API output from the first configured unifi controller.
-func (u *InputUnifi) RawMetrics(filter poller.Filter) ([]byte, error) {
+func (u *InputUnifi) RawMetrics(filter *poller.Filter) ([]byte, error) {
 	c := u.Config.Controllers[0] // We could pull the controller number from the filter.
 	if u.isNill(c) {
 		u.Logf("Re-authenticating to UniFi Controller: %s", c.URL)
