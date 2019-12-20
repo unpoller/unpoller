@@ -13,6 +13,13 @@ import (
 	"golift.io/unifi"
 )
 
+const (
+	defaultURL  = "https://127.0.0.1:8443"
+	defaultUser = "unifipoller"
+	defaultPass = "unifipollerp4$$w0rd"
+	defaultSite = "all"
+)
+
 // InputUnifi contains the running data.
 type InputUnifi struct {
 	Config *Config `json:"unifi" toml:"unifi" xml:"unifi" yaml:"unifi"`
@@ -36,7 +43,9 @@ type Controller struct {
 // Config contains our configuration data
 type Config struct {
 	sync.RWMutex               // locks the Unifi struct member when re-authing to unifi.
+	Default      Controller    `json:"defaults" toml:"defaults" xml:"default" yaml:"defaults"`
 	Disable      bool          `json:"disable" toml:"disable" xml:"disable" yaml:"disable"`
+	Dynamic      bool          `json:"dynamic" toml:"dynamic" xml:"dynamic" yaml:"dynamic"`
 	Controllers  []*Controller `json:"controllers" toml:"controller" xml:"controller" yaml:"controllers"`
 }
 
@@ -145,6 +154,28 @@ func (u *InputUnifi) dumpSitesJSON(c *Controller, path, name string, sites unifi
 	}
 
 	return allJSON, nil
+}
+
+func (u *InputUnifi) setDefaults(c *Controller) {
+	if c.URL == "" {
+		c.URL = defaultURL
+	}
+
+	if c.Name == "" {
+		c.Name = c.URL
+	}
+
+	if c.Pass == "" {
+		c.Pass = defaultPass
+	}
+
+	if c.User == "" {
+		c.User = defaultUser
+	}
+
+	if len(c.Sites) < 1 {
+		c.Sites = []string{defaultSite}
+	}
 }
 
 // StringInSlice returns true if a string is in a slice.

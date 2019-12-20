@@ -11,6 +11,7 @@ import (
 
 	"github.com/davidnewhall/unifi-poller/pkg/poller"
 	"github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/prometheus/common/version"
 	"golift.io/unifi"
 )
@@ -77,6 +78,11 @@ type Report struct {
 	wg      sync.WaitGroup
 }
 
+type target struct {
+	*poller.Filter
+	*promUnifi
+}
+
 func init() {
 	u := &promUnifi{Prometheus: &Prometheus{}}
 
@@ -103,6 +109,8 @@ func (u *promUnifi) Run(c poller.Collect) error {
 		u.Config.HTTPListen = defaultHTTPListen
 	}
 
+	mux := http.NewServeMux()
+
 	prometheus.MustRegister(version.NewCollector(u.Config.Namespace))
 	prometheus.MustRegister(&promUnifi{
 		Collector: c,
@@ -115,8 +123,43 @@ func (u *promUnifi) Run(c poller.Collect) error {
 	})
 	c.Logf("Exporting Measurements for Prometheus at https://%s/metrics, namespace: %s",
 		u.Config.HTTPListen, u.Config.Namespace)
+	mux.Handle("/metrics", promhttp.HandlerFor(
+		prometheus.DefaultGatherer, promhttp.HandlerOpts{ErrorHandling: promhttp.ContinueOnError},
+	))
+	mux.HandleFunc("/scrape", u.ScrapeHandler)
 
-	return http.ListenAndServe(u.Config.HTTPListen, nil)
+	return http.ListenAndServe(u.Config.HTTPListen, mux)
+}
+
+// ScrapeHandler allows prometheus to scrape a single source, instead of all sources.
+func (u *promUnifi) ScrapeHandler(w http.ResponseWriter, r *http.Request) {
+	t := &target{promUnifi: u, Filter: &poller.Filter{}}
+	if t.Filter.Type = r.URL.Query().Get("input"); t.Filter.Type == "" {
+		http.Error(w, `'input' parameter must be specified (try "unifi")`, 400)
+		return
+	}
+
+	if t.Filter.Term = r.URL.Query().Get("target"); t.Filter.Term == "" {
+		http.Error(w, "'target' parameter must be specified, configured name, or unconfigured url", 400)
+		return
+	}
+
+	registry := prometheus.NewRegistry()
+
+	registry.MustRegister(t)
+	promhttp.HandlerFor(
+		registry, promhttp.HandlerOpts{ErrorHandling: promhttp.ContinueOnError},
+	).ServeHTTP(w, r)
+}
+
+// Describe satisfies the prometheus Collector. This returns all of the
+// metric descriptions that this packages produces.
+func (t *target) Describe(ch chan<- *prometheus.Desc) {
+	t.promUnifi.Describe(ch)
+}
+
+func (t *target) Collect(ch chan<- prometheus.Metric) {
+	t.promUnifi.collect(ch, t.Filter)
 }
 
 // Describe satisfies the prometheus Collector. This returns all of the
@@ -138,6 +181,10 @@ func (u *promUnifi) Describe(ch chan<- *prometheus.Desc) {
 // Collect satisfies the prometheus Collector. This runs the input method to get
 // the current metrics (from another package) then exports them for prometheus.
 func (u *promUnifi) Collect(ch chan<- prometheus.Metric) {
+	u.collect(ch, nil)
+}
+
+func (u *promUnifi) collect(ch chan<- prometheus.Metric, filter *poller.Filter) {
 	var err error
 
 	ok := false
@@ -145,7 +192,13 @@ func (u *promUnifi) Collect(ch chan<- prometheus.Metric) {
 	r := &Report{Config: u.Config, ch: make(chan []*metric, buffer), Start: time.Now()}
 	defer r.close()
 
-	if r.Metrics, ok, err = u.Collector.Metrics(); err != nil {
+	if filter == nil {
+		r.Metrics, ok, err = u.Collector.Metrics()
+	} else {
+		r.Metrics, ok, err = u.Collector.MetricsFrom(filter)
+	}
+
+	if err != nil {
 		r.error(ch, prometheus.NewInvalidDesc(fmt.Errorf("metric fetch failed")), err)
 
 		if !ok {
