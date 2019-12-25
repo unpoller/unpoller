@@ -14,6 +14,7 @@ func (u *InfluxUnifi) batchUAP(r report, s *unifi.UAP) {
 	tags := map[string]string{
 		"mac":       s.Mac,
 		"site_name": s.SiteName,
+		"source":    s.SourceName,
 		"name":      s.Name,
 		"version":   s.Version,
 		"model":     s.Model,
@@ -85,6 +86,7 @@ func (u *InfluxUnifi) processVAPTable(r report, t map[string]string, vt unifi.Va
 		tags := map[string]string{
 			"device_name": t["name"],
 			"site_name":   t["site_name"],
+			"source":      t["source"],
 			"ap_mac":      s.ApMac,
 			"bssid":       s.Bssid,
 			"id":          s.ID,
@@ -148,6 +150,7 @@ func (u *InfluxUnifi) processRadTable(r report, t map[string]string, rt unifi.Ra
 		tags := map[string]string{
 			"device_name": t["name"],
 			"site_name":   t["site_name"],
+			"source":      t["source"],
 			"channel":     p.Channel.Txt,
 			"radio":       p.Radio,
 		}
