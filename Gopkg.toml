@@ -12,3 +12,7 @@
 [[constraint]]
   name = "golift.io/unifi"
   branch = "master"
+
+[[constraint]]
+  name = "golift.io/cnfg"
+  branch = "master"
