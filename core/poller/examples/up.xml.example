@@ -8,7 +8,7 @@
 <plugin> and <site> are lists of strings and may be repeated.
 -->
 <poller debug="false" quiet="false">
-  <plugin></plugin>
+  <!-- plugin></plugin -->
 
   <prometheus disable="false">
     <http_listen>0.0.0.0:9130</http_listen>
