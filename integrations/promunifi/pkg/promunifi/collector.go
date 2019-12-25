@@ -18,7 +18,7 @@ import (
 
 const (
 	// channel buffer, fits at least one batch.
-	buffer            = 50
+	defaultBuffer     = 50
 	defaultHTTPListen = "0.0.0.0:9130"
 	// simply fewer letters.
 	counter = prometheus.CounterValue
@@ -50,6 +50,9 @@ type Config struct {
 	// will be collected at all.
 	ReportErrors bool `json:"report_errors" toml:"report_errors" xml:"report_errors" yaml:"report_errors"`
 	Disable      bool `json:"disable" toml:"disable" xml:"disable" yaml:"disable"`
+	// Buffer is a channel buffer.
+	// Default is probably 50. Seems fast there; try 1 to see if CPU usage goes down?
+	Buffer int `json:"buffer" toml:"buffer" xml:"buffer" yaml:"buffer"`
 }
 
 type metric struct {
@@ -103,6 +106,10 @@ func (u *promUnifi) Run(c poller.Collect) error {
 
 	if u.HTTPListen == "" {
 		u.HTTPListen = defaultHTTPListen
+	}
+
+	if u.Buffer == 0 {
+		u.Buffer = defaultBuffer
 	}
 
 	// Later can pass this in from poller by adding a method to the interface.
@@ -200,7 +207,7 @@ func (u *promUnifi) collect(ch chan<- prometheus.Metric, filter *poller.Filter) 
 
 	r := &Report{
 		Config: u.Config,
-		ch:     make(chan []*metric, buffer),
+		ch:     make(chan []*metric, u.Config.Buffer),
 		Start:  time.Now()}
 	defer r.close()
 
