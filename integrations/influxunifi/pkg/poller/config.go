@@ -69,6 +69,10 @@ func (u *UnifiPoller) LoadPlugins() error {
 	for _, p := range u.Plugins {
 		name := strings.TrimSuffix(p, ".so") + ".so"
 
+		if name == ".so" {
+			continue // Just ignore it. uhg.
+		}
+
 		if _, err := os.Stat(name); os.IsNotExist(err) {
 			name = path.Join(DefaultObjPath, name)
 		}
