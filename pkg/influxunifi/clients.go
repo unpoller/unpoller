@@ -10,6 +10,7 @@ func (u *InfluxUnifi) batchClient(r report, s *unifi.Client) {
 	tags := map[string]string{
 		"mac":         s.Mac,
 		"site_name":   s.SiteName,
+		"source":      s.SourceName,
 		"ap_name":     s.ApName,
 		"gw_name":     s.GwName,
 		"sw_name":     s.SwName,

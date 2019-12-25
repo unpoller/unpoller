@@ -40,6 +40,7 @@ func (u *InfluxUnifi) batchUDM(r report, s *unifi.UDM) {
 	}
 
 	tags := map[string]string{
+		"source":    s.SourceName,
 		"mac":       s.Mac,
 		"site_name": s.SiteName,
 		"name":      s.Name,
@@ -52,6 +53,7 @@ func (u *InfluxUnifi) batchUDM(r report, s *unifi.UDM) {
 		u.batchUSGstat(s.SpeedtestStatus, s.Stat.Gw, s.Uplink),
 		u.batchSysStats(s.SysStats, s.SystemStats),
 		map[string]interface{}{
+			"source":        s.SourceName,
 			"ip":            s.IP,
 			"bytes":         s.Bytes.Val,
 			"last_seen":     s.LastSeen.Val,
@@ -76,6 +78,7 @@ func (u *InfluxUnifi) batchUDM(r report, s *unifi.UDM) {
 	tags = map[string]string{
 		"mac":       s.Mac,
 		"site_name": s.SiteName,
+		"source":    s.SourceName,
 		"name":      s.Name,
 		"version":   s.Version,
 		"model":     s.Model,
@@ -105,6 +108,7 @@ func (u *InfluxUnifi) batchUDM(r report, s *unifi.UDM) {
 	tags = map[string]string{
 		"mac":       s.Mac,
 		"site_name": s.SiteName,
+		"source":    s.SourceName,
 		"name":      s.Name,
 		"version":   s.Version,
 		"model":     s.Model,

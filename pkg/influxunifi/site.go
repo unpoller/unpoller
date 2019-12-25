@@ -11,6 +11,7 @@ func (u *InfluxUnifi) batchSite(r report, s *unifi.Site) {
 		tags := map[string]string{
 			"name":      s.Name,
 			"site_name": s.SiteName,
+			"source":    s.SourceName,
 			"desc":      s.Desc,
 			"status":    h.Status,
 			"subsystem": h.Subsystem,

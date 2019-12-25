@@ -14,6 +14,7 @@ func (u *InfluxUnifi) batchUSG(r report, s *unifi.USG) {
 	tags := map[string]string{
 		"mac":       s.Mac,
 		"site_name": s.SiteName,
+		"source":    s.SourceName,
 		"name":      s.Name,
 		"version":   s.Version,
 		"model":     s.Model,
@@ -76,6 +77,7 @@ func (u *InfluxUnifi) batchUSGwans(r report, tags map[string]string, wans ...uni
 		tags := map[string]string{
 			"device_name": tags["name"],
 			"site_name":   tags["site_name"],
+			"source":      tags["source"],
 			"ip":          wan.IP,
 			"purpose":     wan.Name,
 			"mac":         wan.Mac,
@@ -115,6 +117,7 @@ func (u *InfluxUnifi) batchNetTable(r report, tags map[string]string, nt unifi.N
 		tags := map[string]string{
 			"device_name": tags["name"],
 			"site_name":   tags["site_name"],
+			"source":      tags["source"],
 			"up":          p.Up.Txt,
 			"enabled":     p.Enabled.Txt,
 			"ip":          p.IP,

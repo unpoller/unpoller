@@ -134,6 +134,7 @@ func (u *promUnifi) ScrapeHandler(w http.ResponseWriter, r *http.Request) {
 		Path: r.URL.Query().Get("path"),  // url: "https://127.0.0.1:8443"
 		Role: r.URL.Query().Get("role"),  // configured role in up.conf.
 	}}
+
 	if t.Name == "" {
 		u.Collector.LogErrorf("input parameter missing on scrape from %v", r.RemoteAddr)
 		http.Error(w, `'input' parameter must be specified (try "unifi")`, 400)

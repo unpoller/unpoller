@@ -58,12 +58,12 @@
   version = "v1.1.0"
 
 [[projects]]
-  branch = "master"
   digest = "1:982be0b5396e16a663697899ce69cc7b1e71ddcae4153af157578d4dc9bc3f88"
   name = "github.com/prometheus/client_model"
   packages = ["go"]
   pruneopts = "UT"
   revision = "d1d2010b5beead3fa1c5f271a5cf626e40b3ad6e"
+  version = "v0.1.0"
 
 [[projects]]
   digest = "1:7dec9ab2db741c280b89b142b08ea142824152c5f40fb1f90c35b6ef7a694456"
@@ -100,27 +100,30 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:07f0cb66f649e51f9ef23441f8dfc34a73e7d9bf0832417abcbad578f1d8c8d6"
+  digest = "1:0ca5ac8aedc2fd9cb63c90acbd71c0cba8ddb61dfcca58b96cf41550689bf56d"
   name = "golang.org/x/sys"
   packages = ["windows"]
   pruneopts = "UT"
-  revision = "af0d71d358abe0ba3594483a5d519f429dbae3e9"
+  revision = "c709ea063b76879dc9915358f55d4d77c16ab6d5"
 
 [[projects]]
-  digest = "1:54742bef5cb29f706614c9edcfdeb29fb5992f26090f26ca955f575dddf54f9e"
+  digest = "1:b914912b8cb13beebf85b913006d8692bbf20d8620122966a7a911bbfc6e0104"
   name = "golift.io/cnfg"
-  packages = ["."]
+  packages = [
+    ".",
+    "cnfgfile",
+  ]
   pruneopts = "UT"
-  revision = "961061d377655468e9da4a9333e71b9b77402470"
-  version = "v0.0.1"
+  revision = "7d859f27a93d43faceb7101d02baeb8e69f16d4a"
+  version = "v0.0.4"
 
 [[projects]]
-  digest = "1:2883cea734f2766f41ff9c9d4aefccccc53e3d44f5c8b08893b9c218cf666722"
+  branch = "master"
+  digest = "1:13b9e827c1f958ffe31554d57940495010eef89928697f6c6beae78a750ee637"
   name = "golift.io/unifi"
   packages = ["."]
   pruneopts = "UT"
-  revision = "a607fe940c6a563c6994f2c945394b19d2183b1c"
-  version = "v4.1.6"
+  revision = "4d78625be4cd448ea2db35c63a40b451e7d0df99"
 
 [[projects]]
   digest = "1:b75b3deb2bce8bc079e16bb2aecfe01eb80098f5650f9e93e5643ca8b7b73737"
@@ -140,6 +143,7 @@
     "github.com/prometheus/common/version",
     "github.com/spf13/pflag",
     "golift.io/cnfg",
+    "golift.io/cnfg/cnfgfile",
     "golift.io/unifi",
   ]
   solver-name = "gps-cdcl"
