@@ -2,12 +2,28 @@
 
 
 [[projects]]
+  digest = "1:9f3b30d9f8e0d7040f729b82dcbc8f0dead820a133b3147ce355fc451f32d761"
+  name = "github.com/BurntSushi/toml"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "3012a1dbe2e4bd1391d42b32f0577cb7bbc7f005"
+  version = "v0.3.1"
+
+[[projects]]
   digest = "1:d6afaeed1502aa28e80a4ed0981d570ad91b2579193404256ce672ed0a609e0d"
   name = "github.com/beorn7/perks"
   packages = ["quantile"]
   pruneopts = "UT"
   revision = "37c8de3658fcb183f997c4e13e8337516ab753e6"
   version = "v1.0.1"
+
+[[projects]]
+  digest = "1:ffe9824d294da03b391f44e1ae8281281b4afc1bdaa9588c9097785e3af10cec"
+  name = "github.com/davecgh/go-spew"
+  packages = ["spew"]
+  pruneopts = "UT"
+  revision = "8991bc29aa16c548c550c7ff78260e27b9ab7c73"
+  version = "v1.1.1"
 
 [[projects]]
   digest = "1:573ca21d3669500ff845bdebee890eb7fc7f0f50c59f2132f2a0c6b03d85086a"
@@ -38,12 +54,12 @@
   version = "v1.0.1"
 
 [[projects]]
-  digest = "1:6eea828983c70075ca297bb915ffbcfd3e34c5a50affd94428a65df955c0ff9c"
-  name = "github.com/pelletier/go-toml"
-  packages = ["."]
+  digest = "1:0028cb19b2e4c3112225cd871870f2d9cf49b9b4276531f03438a88e94be86fe"
+  name = "github.com/pmezard/go-difflib"
+  packages = ["difflib"]
   pruneopts = "UT"
-  revision = "903d9455db9ff1d7ac1ab199062eca7266dd11a3"
-  version = "v1.6.0"
+  revision = "792786c7400a136282c1664665ae0a8db921c6c2"
+  version = "v1.0.0"
 
 [[projects]]
   digest = "1:eb04f69c8991e52eff33c428bd729e04208bf03235be88e4df0d88497c6861b9"
@@ -99,6 +115,14 @@
   version = "v1.0.5"
 
 [[projects]]
+  digest = "1:8548c309c65a85933a625be5e7d52b6ac927ca30c56869fae58123b8a77a75e1"
+  name = "github.com/stretchr/testify"
+  packages = ["assert"]
+  pruneopts = "UT"
+  revision = "221dbe5ed46703ee255b1da0dec05086f5035f62"
+  version = "v1.4.0"
+
+[[projects]]
   branch = "master"
   digest = "1:0ca5ac8aedc2fd9cb63c90acbd71c0cba8ddb61dfcca58b96cf41550689bf56d"
   name = "golang.org/x/sys"
@@ -107,15 +131,15 @@
   revision = "c709ea063b76879dc9915358f55d4d77c16ab6d5"
 
 [[projects]]
-  digest = "1:b914912b8cb13beebf85b913006d8692bbf20d8620122966a7a911bbfc6e0104"
+  branch = "master"
+  digest = "1:89262a29b1c07290b1de8245b27ec0b8f24b1ca1205b1cd95e4a6b911caf11d7"
   name = "golift.io/cnfg"
   packages = [
     ".",
     "cnfgfile",
   ]
   pruneopts = "UT"
-  revision = "7d859f27a93d43faceb7101d02baeb8e69f16d4a"
-  version = "v0.0.4"
+  revision = "bec8d8f51fc47101055ada9d952348522682ca16"
 
 [[projects]]
   branch = "master"
@@ -137,14 +161,17 @@
   analyzer-name = "dep"
   analyzer-version = 1
   input-imports = [
+    "github.com/BurntSushi/toml",
     "github.com/influxdata/influxdb1-client/v2",
     "github.com/prometheus/client_golang/prometheus",
     "github.com/prometheus/client_golang/prometheus/promhttp",
     "github.com/prometheus/common/version",
     "github.com/spf13/pflag",
+    "github.com/stretchr/testify/assert",
     "golift.io/cnfg",
     "golift.io/cnfg/cnfgfile",
     "golift.io/unifi",
+    "gopkg.in/yaml.v2",
   ]
   solver-name = "gps-cdcl"
   solver-version = 1
