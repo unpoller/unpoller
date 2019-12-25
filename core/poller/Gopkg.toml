@@ -7,3 +7,8 @@
 [prune]
   go-tests = true
   unused-packages = true
+
+# TODO: remove this!!!
+[[constraint]]
+  name = "golift.io/unifi"
+  branch = "master"
