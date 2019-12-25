@@ -21,12 +21,12 @@ type mysqlConfig struct {
 
 // Pointers are ignored during ENV variable unmarshal, avoid pointers to your config.
 // Only capital (exported) members are unmarshaled when passed into poller.NewOutput().
-type application struct {
+type plugin struct {
 	Config mysqlConfig `json:"mysql" toml:"mysql" xml:"mysql" yaml:"mysql"`
 }
 
 func init() {
-	u := &application{Config: mysqlConfig{}}
+	u := &plugin{Config: mysqlConfig{}}
 
 	poller.NewOutput(&poller.Output{
 		Name:   "mysql",
@@ -39,7 +39,7 @@ func main() {
 	fmt.Println("this is a unifi-poller plugin; not an application")
 }
 
-func (a *application) Run(c poller.Collect) error {
+func (a *plugin) Run(c poller.Collect) error {
 	c.Logf("mysql plugin is not finished")
 	return nil
 }

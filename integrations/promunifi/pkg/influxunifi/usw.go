@@ -14,6 +14,7 @@ func (u *InfluxUnifi) batchUSW(r report, s *unifi.USW) {
 	tags := map[string]string{
 		"mac":       s.Mac,
 		"site_name": s.SiteName,
+		"source":    s.SourceName,
 		"name":      s.Name,
 		"version":   s.Version,
 		"model":     s.Model,
@@ -71,6 +72,7 @@ func (u *InfluxUnifi) batchPortTable(r report, t map[string]string, pt []unifi.P
 		tags := map[string]string{
 			"site_name":   t["site_name"],
 			"device_name": t["name"],
+			"source":      t["source"],
 			"name":        p.Name,
 			"poe_mode":    p.PoeMode,
 			"port_poe":    p.PortPoe.Txt,

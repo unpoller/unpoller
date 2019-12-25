@@ -28,7 +28,7 @@
 [influxdb]
   disable = false
   # InfluxDB does not require auth by default, so the user/password are probably unimportant.
-  url = "http://127.0.0.1:8086"
+  url  = "http://127.0.0.1:8086"
   user = "unifipoller"
   pass = "unifipoller"
   # Be sure to create this database.

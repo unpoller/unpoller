@@ -47,8 +47,8 @@ type usw struct {
 
 func descUSW(ns string) *usw {
 	pns := ns + "port_"
-	labelS := []string{"site_name", "name"}
-	labelP := []string{"port_id", "port_num", "port_name", "port_mac", "port_ip", "site_name", "name"}
+	labelS := []string{"site_name", "name", "source"}
+	labelP := []string{"port_id", "port_num", "port_name", "port_mac", "port_ip", "site_name", "name", "source"}
 	nd := prometheus.NewDesc
 
 	return &usw{
@@ -97,7 +97,7 @@ func (u *promUnifi) exportUSW(r report, d *unifi.USW) {
 		return
 	}
 
-	labels := []string{d.Type, d.SiteName, d.Name}
+	labels := []string{d.Type, d.SiteName, d.Name, d.SourceName}
 	infoLabels := []string{d.Version, d.Model, d.Serial, d.Mac, d.IP, d.ID, d.Bytes.Txt, d.Uptime.Txt}
 
 	u.exportUSWstats(r, labels, d.Stat.Sw)
@@ -161,7 +161,7 @@ func (u *promUnifi) exportPRTtable(r report, labels []string, pt []unifi.Port) {
 		}
 
 		// Copy labels, and add four new ones.
-		labelP := []string{labels[2] + " Port " + p.PortIdx.Txt, p.PortIdx.Txt, p.Name, p.Mac, p.IP, labels[1], labels[2]}
+		labelP := []string{labels[2] + " Port " + p.PortIdx.Txt, p.PortIdx.Txt, p.Name, p.Mac, p.IP, labels[1], labels[2], labels[3]}
 
 		if p.PoeEnable.Val && p.PortPoe.Val {
 			r.send([]*metric{
