@@ -34,7 +34,7 @@ type site struct {
 }
 
 func descSite(ns string) *site {
-	labels := []string{"subsystem", "status", "site_name"}
+	labels := []string{"subsystem", "status", "site_name", "source"}
 	nd := prometheus.NewDesc
 
 	return &site{
@@ -68,7 +68,7 @@ func descSite(ns string) *site {
 
 func (u *promUnifi) exportSite(r report, s *unifi.Site) {
 	for _, h := range s.Health {
-		switch labels := []string{h.Subsystem, h.Status, s.SiteName}; labels[0] {
+		switch labels := []string{h.Subsystem, h.Status, s.SiteName, s.SourceName}; labels[0] {
 		case "www":
 			r.send([]*metric{
 				{u.Site.TxBytesR, gauge, h.TxBytesR, labels},

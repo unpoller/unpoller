@@ -80,9 +80,9 @@ type uap struct {
 }
 
 func descUAP(ns string) *uap {
-	labelA := []string{"stat", "site_name", "name"} // stat + labels[1:]
-	labelV := []string{"vap_name", "bssid", "radio", "radio_name", "essid", "usage", "site_name", "name"}
-	labelR := []string{"radio_name", "radio", "site_name", "name"}
+	labelA := []string{"stat", "site_name", "name", "source"} // stat + labels[1:]
+	labelV := []string{"vap_name", "bssid", "radio", "radio_name", "essid", "usage", "site_name", "name", "source"}
+	labelR := []string{"radio_name", "radio", "site_name", "name", "source"}
 	nd := prometheus.NewDesc
 
 	return &uap{
@@ -165,7 +165,7 @@ func (u *promUnifi) exportUAP(r report, d *unifi.UAP) {
 		return
 	}
 
-	labels := []string{d.Type, d.SiteName, d.Name}
+	labels := []string{d.Type, d.SiteName, d.Name, d.SourceName}
 	infoLabels := []string{d.Version, d.Model, d.Serial, d.Mac, d.IP, d.ID, d.Bytes.Txt, d.Uptime.Txt}
 	u.exportUAPstats(r, labels, d.Stat.Ap, d.BytesD, d.TxBytesD, d.RxBytesD, d.BytesR)
 	u.exportVAPtable(r, labels, d.VapTable)
@@ -185,8 +185,8 @@ func (u *promUnifi) exportUAPstats(r report, labels []string, ap *unifi.Ap, byte
 		return
 	}
 
-	labelU := []string{"user", labels[1], labels[2]}
-	labelG := []string{"guest", labels[1], labels[2]}
+	labelU := []string{"user", labels[1], labels[2], labels[3]}
+	labelG := []string{"guest", labels[1], labels[2], labels[3]}
 	r.send([]*metric{
 		// ap only stuff.
 		{u.Device.BytesD, counter, bytes[0], labels},   // not sure if these 3 Ds are counters or gauges.
@@ -234,7 +234,7 @@ func (u *promUnifi) exportVAPtable(r report, labels []string, vt unifi.VapTable)
 			continue
 		}
 
-		labelV := []string{v.Name, v.Bssid, v.Radio, v.RadioName, v.Essid, v.Usage, labels[1], labels[2]}
+		labelV := []string{v.Name, v.Bssid, v.Radio, v.RadioName, v.Essid, v.Usage, labels[1], labels[2], labels[3]}
 		r.send([]*metric{
 			{u.UAP.VAPCcq, gauge, float64(v.Ccq) / 1000.0, labelV},
 			{u.UAP.VAPMacFilterRejections, counter, v.MacFilterRejections, labelV},
@@ -281,7 +281,7 @@ func (u *promUnifi) exportVAPtable(r report, labels []string, vt unifi.VapTable)
 func (u *promUnifi) exportRADtable(r report, labels []string, rt unifi.RadioTable, rts unifi.RadioTableStats) {
 	// radio table
 	for _, p := range rt {
-		labelR := []string{p.Name, p.Radio, labels[1], labels[2]}
+		labelR := []string{p.Name, p.Radio, labels[1], labels[2], labels[3]}
 		labelRUser := append(labelR, "user")
 		labelRGuest := append(labelR, "guest")
 
