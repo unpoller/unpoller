@@ -231,7 +231,6 @@ docker:
 		--build-arg "VENDOR=$(VENDOR)" \
 		--build-arg "AUTHOR=$(MAINT)" \
 		--build-arg "BINARY=$(BINARY)" \
-		--build-arg "IMPORT_PATH=$(IMPORT_PATH)" \
 		--build-arg "SOURCE_URL=$(SOURCE_URL)" \
 		--build-arg "CONFIG_FILE=$(CONFIG_FILE)" \
 		--tag $(BINARY) .
@@ -250,7 +249,6 @@ $(BINARY).rb: v$(VERSION).tar.gz.sha256 init/homebrew/$(FORMULA).rb.tmpl
 		-e "s/{{SHA256}}/$(shell head -c64 $<)/g" \
 		-e "s/{{Desc}}/$(DESC)/g" \
 		-e "s%{{URL}}%$(URL)%g" \
-		-e "s%{{IMPORT_PATH}}%$(IMPORT_PATH)%g" \
 		-e "s%{{SOURCE_PATH}}%$(SOURCE_PATH)%g" \
 		-e "s%{{SOURCE_URL}}%$(SOURCE_URL)%g" \
 		-e "s%{{CONFIG_FILE}}%$(CONFIG_FILE)%g" \
