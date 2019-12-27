@@ -25,7 +25,7 @@ RUN apt-get update \
 COPY . $GOPATH/src/${IMPORT_PATH}
 WORKDIR $GOPATH/src/${IMPORT_PATH}
 
-RUN dep ensure --vendor-only \
+RUN go mod vendor \
   && CGO_ENABLED=0 make ${BINARY}.${ARCH}.${OS}
 
 FROM scratch
