@@ -283,12 +283,13 @@ lint:
 
 # This is safe; recommended even.
 dep: vendor
-vendor: Gopkg.*
-	dep ensure --vendor-only
+vendor: go.mod go.sum
+	go mod vendor
 
 # Don't run this unless you're ready to debug untested vendored dependencies.
-deps:
-	dep ensure --update
+deps: update vendor
+update:
+	go get -u -d
 
 # Homebrew stuff. macOS only.
 
