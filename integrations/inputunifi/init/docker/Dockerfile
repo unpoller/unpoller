@@ -9,21 +9,15 @@ ARG BUILD_DATE=0
 ARG COMMIT=0
 ARG VERSION=unknown
 ARG BINARY=application-builder
-ARG IMPORT_PATH=github.com/golift/application-builder
 
 FROM golang:stretch as builder
 ARG ARCH
 ARG OS
 ARG BINARY
-ARG IMPORT_PATH
 
-RUN mkdir -p $GOPATH/pkg/mod $GOPATH/bin $GOPATH/src/${IMPORT_PATH}
-RUN apt-get update \
-  && apt-get install -y curl  \
-  && curl https://raw.githubusercontent.com/golang/dep/master/install.sh | sh
-
-COPY . $GOPATH/src/${IMPORT_PATH}
-WORKDIR $GOPATH/src/${IMPORT_PATH}
+RUN mkdir -p $GOPATH/pkg/mod $GOPATH/bin $GOPATH/src /${BINARY}
+COPY . /${BINARY}
+WORKDIR /${BINARY}
 
 RUN go mod vendor \
   && CGO_ENABLED=0 make ${BINARY}.${ARCH}.${OS}
@@ -36,7 +30,6 @@ ARG COMMIT
 ARG VERSION
 ARG LICENSE=MIT
 ARG BINARY
-ARG IMPORT_PATH
 ARG SOURCE_URL=http://github.com/golift/application-builder
 ARG URL=http://github.com/golift/application-builder
 ARG DESC=application-builder
@@ -58,8 +51,8 @@ LABEL org.opencontainers.image.created="${BUILD_DATE}" \
       org.opencontainers.image.licenses="${LICENSE}" \
       org.opencontainers.image.version="${VERSION}"
 
-COPY --from=builder /go/src/${IMPORT_PATH}/${BINARY}.${ARCH}.${OS} /image
-COPY --from=builder /go/src/${IMPORT_PATH}/examples/${CONFIG_FILE}.example /etc/${BINARY}/${CONFIG_FILE}
+COPY --from=builder /${BINARY}/${BINARY}.${ARCH}.${OS} /image
+COPY --from=builder /${BINARY}/examples/${CONFIG_FILE}.example /etc/${BINARY}/${CONFIG_FILE}
 COPY --from=builder /etc/ssl /etc/ssl
 
 VOLUME [ "/etc/${BINARY}" ]
