@@ -281,8 +281,9 @@ lint:
 
 # This is safe; recommended even.
 dep: vendor
-vendor: go.mod go.sum
-	go mod vendor
+vendor: ./v1/go.mod ./v1/go.sum ./v2/go.mod ./v2/go.sum
+	go get ./v1
+	go get ./v2
 
 # Don't run this unless you're ready to debug untested vendored dependencies.
 deps: update vendor

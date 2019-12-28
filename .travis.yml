@@ -38,6 +38,7 @@ before_script:
   - source .metadata.sh
 script:
   # Test Go and Docker.
+  - make vendor
   - make test
   - make docker
   # Test built docker image.
