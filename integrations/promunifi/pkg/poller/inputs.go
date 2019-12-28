@@ -95,23 +95,7 @@ func (u *UnifiPoller) Metrics() (*Metrics, bool, error) {
 		}
 
 		ok = true
-
-		metrics.Sites = append(metrics.Sites, m.Sites...)
-		metrics.Clients = append(metrics.Clients, m.Clients...)
-		metrics.IDSList = append(metrics.IDSList, m.IDSList...)
-
-		if m.Devices == nil {
-			continue
-		}
-
-		if metrics.Devices == nil {
-			metrics.Devices = &unifi.Devices{}
-		}
-
-		metrics.UAPs = append(metrics.UAPs, m.UAPs...)
-		metrics.USGs = append(metrics.USGs, m.USGs...)
-		metrics.USWs = append(metrics.USWs, m.USWs...)
-		metrics.UDMs = append(metrics.UDMs, m.UDMs...)
+		metrics = AppendMetrics(metrics, m)
 	}
 
 	var err error
@@ -158,7 +142,9 @@ func (u *UnifiPoller) MetricsFrom(filter *Filter) (*Metrics, bool, error) {
 
 // AppendMetrics combined the metrics from two sources.
 func AppendMetrics(existing *Metrics, m *Metrics) *Metrics {
+	existing.SitesDPI = append(existing.SitesDPI, m.SitesDPI...)
 	existing.Sites = append(existing.Sites, m.Sites...)
+	existing.ClientsDPI = append(existing.ClientsDPI, m.ClientsDPI...)
 	existing.Clients = append(existing.Clients, m.Clients...)
 	existing.IDSList = append(existing.IDSList, m.IDSList...)
 
