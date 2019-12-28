@@ -97,10 +97,10 @@ func (u *Unifi) GetServerData() error {
 }
 
 // GetData makes a unifi request and unmarshals the response into a provided pointer.
-func (u *Unifi) GetData(apiPath string, v interface{}) error {
+func (u *Unifi) GetData(apiPath string, v interface{}, params ...string) error {
 	start := time.Now()
 
-	body, err := u.GetJSON(apiPath)
+	body, err := u.GetJSON(apiPath, params...)
 	if err != nil {
 		return err
 	}
@@ -134,8 +134,8 @@ func (u *Unifi) UniReq(apiPath string, params string) (req *http.Request, err er
 }
 
 // GetJSON returns the raw JSON from a path. This is useful for debugging.
-func (u *Unifi) GetJSON(apiPath string) ([]byte, error) {
-	req, err := u.UniReq(apiPath, "")
+func (u *Unifi) GetJSON(apiPath string, params ...string) ([]byte, error) {
+	req, err := u.UniReq(apiPath, strings.Join(params, " "))
 	if err != nil {
 		return []byte{}, err
 	}

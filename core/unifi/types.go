@@ -15,6 +15,10 @@ const (
 	APIStatusPath string = "/status"
 	// APISiteList is the path to the api site list.
 	APISiteList string = "/api/stat/sites"
+	// APISiteDPI is site DPI data.
+	APISiteDPI string = "/api/s/%s/stat/sitedpi"
+	// APISiteDPI is site DPI data.
+	APIClientDPI string = "/api/s/%s/stat/stadpi"
 	// APIClientPath is Unifi Clients API Path
 	APIClientPath string = "/api/s/%s/stat/sta"
 	// APIDevicePath is where we get data about Unifi devices.

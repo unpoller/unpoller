@@ -5,9 +5,13 @@ an authenticated http Client you may use to query the device for data. Also
 contains some built-in methods for de-serializing common client and device
 data. The data is provided in a large struct you can consume in your application.
 
-If more features are requested, I'll certainly consider them. Do you need to do
-more than just collect data? [Let me know](https://github.com/golift/unifi/issues/new)!
-Pull requests and feedback are welcomed!
+This library is designed to PULL data FROM the controller. It has no methods that
+update settings or change things on the controller.
+[Someone expressed interest](https://github.com/golift/unifi/issues/31) in
+adding methods to update data, and I'm okay with that. I'll even help add them.
+[Tell me what you want to do](https://github.com/golift/unifi/issues/new), and we'll make it happen.
+
+Pull requests, feature requests, code reviews and feedback are welcomed!
 
 Here's a working example:
 ```golang

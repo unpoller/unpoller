@@ -1,6 +1,9 @@
 package unifi
 
-import "strings"
+import (
+	"fmt"
+	"strings"
+)
 
 // GetSites returns a list of configured sites on the UniFi controller.
 func (u *Unifi) GetSites() (Sites, error) {
@@ -27,6 +30,36 @@ func (u *Unifi) GetSites() (Sites, error) {
 	u.DebugLog("Found %d site(s): %s", len(sites), strings.Join(sites, ","))
 
 	return response.Data, nil
+}
+
+// GetSiteDPI garners dpi data for sites.
+func (u *Unifi) GetSiteDPI(sites Sites) ([]*DPITable, error) {
+	data := []*DPITable{}
+
+	for _, site := range sites {
+		u.DebugLog("Polling Controller, retreiving Site DPI data, site %s (%s) ", site.Name, site.Desc)
+
+		var response struct {
+			Data []*DPITable `json:"data"`
+		}
+
+		siteDPIpath := fmt.Sprintf(APISiteDPI, site.Name)
+		if err := u.GetData(siteDPIpath, &response, `{"type":"by_app"}`); err != nil {
+			return nil, err
+		}
+
+		if l := len(response.Data); l > 1 {
+			return nil, fmt.Errorf("dpi data table contains more than 1 item; please open a bug report")
+		} else if l != 1 {
+			continue
+		}
+
+		response.Data[0].SourceName = site.SourceName
+		response.Data[0].SiteName = site.SiteName
+		data = append(data, response.Data[0])
+	}
+
+	return data, nil
 }
 
 // Sites is a struct to match Devices and Clients.
