@@ -43,7 +43,7 @@ $(PACKAGE_SCRIPTS) \
 --config-files "/etc/$(BINARY)/$(CONFIG_FILE)"
 endef
 
-PLUGINS:=$(patsubst plugins/%/main.go,%,$(wildcard plugins/*/main.go))
+PLUGINS:=$(patsubst v2/plugins/%/main.go,%,$(wildcard v2/plugins/*/main.go))
 
 VERSION_LDFLAGS:= \
   -X github.com/prometheus/common/version.Branch=$(TRAVIS_BRANCH) \
@@ -97,39 +97,39 @@ README.html: md2roff
 # Binaries
 
 build: $(BINARY)
-$(BINARY): main.go pkg/*/*.go
+$(BINARY): main.go v2/*/*.go
 	go build -o $(BINARY) -ldflags "-w -s $(VERSION_LDFLAGS)"
 
 linux: $(BINARY).amd64.linux
-$(BINARY).amd64.linux: main.go pkg/*/*.go
+$(BINARY).amd64.linux: main.go v2/*/*.go
 	# Building linux 64-bit x86 binary.
 	GOOS=linux GOARCH=amd64 go build -o $@ -ldflags "-w -s $(VERSION_LDFLAGS)"
 
 linux386: $(BINARY).i386.linux
-$(BINARY).i386.linux: main.go pkg/*/*.go
+$(BINARY).i386.linux: main.go v2/*/*.go
 	# Building linux 32-bit x86 binary.
 	GOOS=linux GOARCH=386 go build -o $@ -ldflags "-w -s $(VERSION_LDFLAGS)"
 
 arm: arm64 armhf
 
 arm64: $(BINARY).arm64.linux
-$(BINARY).arm64.linux: main.go pkg/*/*.go
+$(BINARY).arm64.linux: main.go v2/*/*.go
 	# Building linux 64-bit ARM binary.
 	GOOS=linux GOARCH=arm64 go build -o $@ -ldflags "-w -s $(VERSION_LDFLAGS)"
 
 armhf: $(BINARY).armhf.linux
-$(BINARY).armhf.linux: main.go pkg/*/*.go
+$(BINARY).armhf.linux: main.go v2/*/*.go
 	# Building linux 32-bit ARM binary.
 	GOOS=linux GOARCH=arm GOARM=6 go build -o $@ -ldflags "-w -s $(VERSION_LDFLAGS)"
 
 macos: $(BINARY).amd64.macos
-$(BINARY).amd64.macos: main.go pkg/*/*.go
+$(BINARY).amd64.macos: main.go v2/*/*.go
 	# Building darwin 64-bit x86 binary.
 	GOOS=darwin GOARCH=amd64 go build -o $@ -ldflags "-w -s $(VERSION_LDFLAGS)"
 
 exe: $(BINARY).amd64.exe
 windows: $(BINARY).amd64.exe
-$(BINARY).amd64.exe: main.go pkg/*/*.go
+$(BINARY).amd64.exe: main.go v2/*/*.go
 	# Building windows 64-bit x86 binary.
 	GOOS=windows GOARCH=amd64 go build -o $@ -ldflags "-w -s $(VERSION_LDFLAGS)"
 
@@ -258,16 +258,16 @@ $(BINARY).rb: v$(VERSION).tar.gz.sha256 init/homebrew/$(FORMULA).rb.tmpl
 
 plugins: $(patsubst %,%.so,$(PLUGINS))
 $(patsubst %,%.so,$(PLUGINS)):
-	go build -o $@ -ldflags "$(VERSION_LDFLAGS)" -buildmode=plugin ./plugins/$(patsubst %.so,%,$@)
+	go build -o $@ -ldflags "$(VERSION_LDFLAGS)" -buildmode=plugin ./v2/plugins/$(patsubst %.so,%,$@)
 
 linux_plugins: plugins_linux_amd64 plugins_linux_i386 plugins_linux_arm64 plugins_linux_armhf
 plugins_linux_amd64: $(patsubst %,%.linux_amd64.so,$(PLUGINS))
 $(patsubst %,%.linux_amd64.so,$(PLUGINS)):
-	GOOS=linux GOARCH=amd64 go build -o $@ -ldflags "$(VERSION_LDFLAGS)" -buildmode=plugin ./plugins/$(patsubst %.linux_amd64.so,%,$@)
+	GOOS=linux GOARCH=amd64 go build -o $@ -ldflags "$(VERSION_LDFLAGS)" -buildmode=plugin ./v2/plugins/$(patsubst %.linux_amd64.so,%,$@)
 
 plugins_darwin: $(patsubst %,%.darwin.so,$(PLUGINS))
 $(patsubst %,%.darwin.so,$(PLUGINS)):
-	GOOS=darwin go build -o $@ -ldflags "$(VERSION_LDFLAGS)" -buildmode=plugin ./plugins/$(patsubst %.darwin.so,%,$@)
+	GOOS=darwin go build -o $@ -ldflags "$(VERSION_LDFLAGS)" -buildmode=plugin ./v2/plugins/$(patsubst %.darwin.so,%,$@)
 
 # Extras
 
