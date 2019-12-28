@@ -6,44 +6,43 @@ import (
 )
 
 type uclient struct {
-	Anomalies         *prometheus.Desc
-	BytesR            *prometheus.Desc
-	CCQ               *prometheus.Desc
-	Satisfaction      *prometheus.Desc
-	Noise             *prometheus.Desc
-	RoamCount         *prometheus.Desc
-	RSSI              *prometheus.Desc
-	RxBytes           *prometheus.Desc
-	RxBytesR          *prometheus.Desc
-	RxPackets         *prometheus.Desc
-	RxRate            *prometheus.Desc
-	Signal            *prometheus.Desc
-	TxBytes           *prometheus.Desc
-	TxBytesR          *prometheus.Desc
-	TxPackets         *prometheus.Desc
-	TxRetries         *prometheus.Desc
-	TxPower           *prometheus.Desc
-	TxRate            *prometheus.Desc
-	Uptime            *prometheus.Desc
-	WifiTxAttempts    *prometheus.Desc
-	WiredRxBytes      *prometheus.Desc
-	WiredRxBytesR     *prometheus.Desc
-	WiredRxPackets    *prometheus.Desc
-	WiredTxBytes      *prometheus.Desc
-	WiredTxBytesR     *prometheus.Desc
-	WiredTxPackets    *prometheus.Desc
-	DpiStatsApp       *prometheus.Desc
-	DpiStatsCat       *prometheus.Desc
-	DpiStatsRxBytes   *prometheus.Desc
-	DpiStatsRxPackets *prometheus.Desc
-	DpiStatsTxBytes   *prometheus.Desc
-	DpiStatsTxPackets *prometheus.Desc
+	Anomalies      *prometheus.Desc
+	BytesR         *prometheus.Desc
+	CCQ            *prometheus.Desc
+	Satisfaction   *prometheus.Desc
+	Noise          *prometheus.Desc
+	RoamCount      *prometheus.Desc
+	RSSI           *prometheus.Desc
+	RxBytes        *prometheus.Desc
+	RxBytesR       *prometheus.Desc
+	RxPackets      *prometheus.Desc
+	RxRate         *prometheus.Desc
+	Signal         *prometheus.Desc
+	TxBytes        *prometheus.Desc
+	TxBytesR       *prometheus.Desc
+	TxPackets      *prometheus.Desc
+	TxRetries      *prometheus.Desc
+	TxPower        *prometheus.Desc
+	TxRate         *prometheus.Desc
+	Uptime         *prometheus.Desc
+	WifiTxAttempts *prometheus.Desc
+	WiredRxBytes   *prometheus.Desc
+	WiredRxBytesR  *prometheus.Desc
+	WiredRxPackets *prometheus.Desc
+	WiredTxBytes   *prometheus.Desc
+	WiredTxBytesR  *prometheus.Desc
+	WiredTxPackets *prometheus.Desc
+	DPITxPackets   *prometheus.Desc
+	DPIRxPackets   *prometheus.Desc
+	DPITxBytes     *prometheus.Desc
+	DPIRxBytes     *prometheus.Desc
 }
 
 func descClient(ns string) *uclient {
 	labels := []string{"name", "mac", "site_name", "gw_name", "sw_name", "vlan",
 		"ip", "oui", "network", "sw_port", "ap_name", "source", "wired"}
 	labelW := append([]string{"radio_name", "radio", "radio_proto", "channel", "essid", "bssid", "radio_desc"}, labels...)
+	labelDPI := []string{"name", "mac", "site_name", "source", "category", "application"}
 
 	return &uclient{
 		Anomalies:      prometheus.NewDesc(ns+"anomalies", "Client Anomalies", labelW, nil),
@@ -66,20 +65,25 @@ func descClient(ns string) *uclient {
 		TxRate:         prometheus.NewDesc(ns+"radio_transmit_rate_bps", "Client Transmit Rate", labelW, nil),
 		WifiTxAttempts: prometheus.NewDesc(ns+"wifi_attempts_transmit_total", "Client Wifi Transmit Attempts", labelW, nil),
 		Uptime:         prometheus.NewDesc(ns+"uptime_seconds", "Client Uptime", labelW, nil),
-		/* needs more "looking into"
-		DpiStatsApp:       prometheus.NewDesc(ns+"dpi_stats_app",
-		"Client DPI Stats App", labels, nil),
-		DpiStatsCat:       prometheus.NewDesc(ns+"dpi_stats_cat",
-		"Client DPI Stats Cat", labels, nil),
-		DpiStatsRxBytes:   prometheus.NewDesc(ns+"dpi_stats_receive_bytes_total",
-		"Client DPI Stats Receive Bytes", labels, nil),
-		DpiStatsRxPackets: prometheus.NewDesc(ns+"dpi_stats_receive_packets_total",
-		"Client DPI Stats Receive Packets", labels, nil),
-		DpiStatsTxBytes:   prometheus.NewDesc(ns+"dpi_stats_transmit_bytes_total",
-		"Client DPI Stats Transmit Bytes", labels, nil),
-		DpiStatsTxPackets: prometheus.NewDesc(ns+"dpi_stats_transmit_packets_total",
-		"Client DPI Stats Transmit Packets", labels, nil),
-		*/
+		DPITxPackets:   prometheus.NewDesc(ns+"dpi_transmit_packets", "Client DPI Transmit Packets", labelDPI, nil),
+		DPIRxPackets:   prometheus.NewDesc(ns+"dpi_receive_packets", "Client DPI Receive Packets", labelDPI, nil),
+		DPITxBytes:     prometheus.NewDesc(ns+"dpi_transmit_bytes", "Client DPI Transmit Bytes", labelDPI, nil),
+		DPIRxBytes:     prometheus.NewDesc(ns+"dpi_receive_bytes", "Client DPI Receive Bytes", labelDPI, nil),
+	}
+}
+
+func (u *promUnifi) exportClientDPI(r report, s *unifi.DPITable) {
+	for _, dpi := range s.ByApp {
+		labelDPI := []string{s.Name, s.MAC, s.SiteName, s.SourceName,
+			unifi.DPICats.Get(dpi.Cat), unifi.DPIApps.GetApp(dpi.Cat, dpi.App)}
+
+		// log.Println(labelDPI, dpi.Cat, dpi.App, dpi.TxBytes, dpi.RxBytes, dpi.TxPackets, dpi.RxPackets)
+		r.send([]*metric{
+			{u.Client.DPITxPackets, gauge, dpi.TxPackets, labelDPI},
+			{u.Client.DPIRxPackets, gauge, dpi.RxPackets, labelDPI},
+			{u.Client.DPITxBytes, gauge, dpi.TxBytes, labelDPI},
+			{u.Client.DPIRxBytes, gauge, dpi.RxBytes, labelDPI},
+		})
 	}
 }
 
@@ -130,12 +134,3 @@ func (u *promUnifi) exportClient(r report, c *unifi.Client) {
 
 	r.send([]*metric{{u.Client.Uptime, gauge, c.Uptime, labelW}})
 }
-
-/* needs more "looking into"
-{u.Client.DpiStatsApp, gauge, c.DpiStats.App, labels},
-{u.Client.DpiStatsCat, gauge, c.DpiStats.Cat, labels},
-{u.Client.DpiStatsRxBytes, counter, c.DpiStats.RxBytes, labels},
-{u.Client.DpiStatsRxPackets, counter, c.DpiStats.RxPackets, labels},
-{u.Client.DpiStatsTxBytes, counter, c.DpiStats.TxBytes, labels},
-{u.Client.DpiStatsTxPackets, counter, c.DpiStats.TxPackets, labels},
-*/
