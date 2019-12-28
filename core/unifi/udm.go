@@ -133,75 +133,45 @@ type UDM struct {
 
 // NetworkTable is the list of networks on a gateway.
 type NetworkTable []struct {
-	ID                     string        `json:"_id"`
-	AttrNoDelete           FlexBool      `json:"attr_no_delete"`
-	AttrHiddenID           string        `json:"attr_hidden_id"`
-	Name                   string        `json:"name"`
-	SiteID                 string        `json:"site_id"`
-	VlanEnabled            FlexBool      `json:"vlan_enabled"`
-	Purpose                string        `json:"purpose"`
-	IPSubnet               string        `json:"ip_subnet"`
-	Ipv6InterfaceType      string        `json:"ipv6_interface_type"`
-	DomainName             string        `json:"domain_name"`
-	IsNat                  FlexBool      `json:"is_nat"`
-	DhcpdEnabled           FlexBool      `json:"dhcpd_enabled"`
-	DhcpdStart             string        `json:"dhcpd_start"`
-	DhcpdStop              string        `json:"dhcpd_stop"`
-	Dhcpdv6Enabled         FlexBool      `json:"dhcpdv6_enabled"`
-	Ipv6RaEnabled          FlexBool      `json:"ipv6_ra_enabled"`
-	LteLanEnabled          FlexBool      `json:"lte_lan_enabled"`
-	Networkgroup           string        `json:"networkgroup"`
-	DhcpdLeasetime         FlexInt       `json:"dhcpd_leasetime"`
-	DhcpdDNSEnabled        FlexBool      `json:"dhcpd_dns_enabled"`
-	DhcpdGatewayEnabled    FlexBool      `json:"dhcpd_gateway_enabled"`
-	DhcpdTimeOffsetEnabled FlexBool      `json:"dhcpd_time_offset_enabled"`
-	Ipv6PdStart            string        `json:"ipv6_pd_start"`
-	Ipv6PdStop             string        `json:"ipv6_pd_stop"`
-	DhcpdDNS1              string        `json:"dhcpd_dns_1"`
-	DhcpdDNS2              string        `json:"dhcpd_dns_2"`
-	DhcpdDNS3              string        `json:"dhcpd_dns_3"`
-	DhcpdDNS4              string        `json:"dhcpd_dns_4"`
-	Enabled                FlexBool      `json:"enabled"`
-	DhcpRelayEnabled       FlexBool      `json:"dhcp_relay_enabled"`
-	Mac                    string        `json:"mac"`
-	IsGuest                FlexBool      `json:"is_guest"`
-	IP                     string        `json:"ip"`
-	Up                     FlexBool      `json:"up"`
-	DPIStatsTable          DPIStatsTable `json:"dpistats_table,omitempty"`
-	NumSta                 FlexInt       `json:"num_sta"`
-	RxBytes                FlexInt       `json:"rx_bytes"`
-	RxPackets              FlexInt       `json:"rx_packets"`
-	TxBytes                FlexInt       `json:"tx_bytes"`
-	TxPackets              FlexInt       `json:"tx_packets"`
-}
-
-// DPIStatsTable is the Deep Packet Inspection data for each "network"
-type DPIStatsTable struct {
-	LastUpdated FlexInt `json:"last_updated"`
-	ByCat       []struct {
-		Cat       FlexInt   `json:"cat"`
-		Apps      []FlexInt `json:"apps"`
-		RxBytes   FlexInt   `json:"rx_bytes"`
-		TxBytes   FlexInt   `json:"tx_bytes"`
-		RxPackets FlexInt   `json:"rx_packets"`
-		TxPackets FlexInt   `json:"tx_packets"`
-	} `json:"by_cat"`
-	ByApp []struct {
-		App     FlexInt `json:"app"`
-		Cat     FlexInt `json:"cat"`
-		Clients []struct {
-			Mac       string  `json:"mac"`
-			RxBytes   FlexInt `json:"rx_bytes"`
-			TxBytes   FlexInt `json:"tx_bytes"`
-			RxPackets FlexInt `json:"rx_packets"`
-			TxPackets FlexInt `json:"tx_packets"`
-		} `json:"clients"`
-		KnownClients FlexInt `json:"known_clients"`
-		RxBytes      FlexInt `json:"rx_bytes"`
-		TxBytes      FlexInt `json:"tx_bytes"`
-		RxPackets    FlexInt `json:"rx_packets"`
-		TxPackets    FlexInt `json:"tx_packets"`
-	} `json:"by_app"`
+	ID                     string   `json:"_id"`
+	AttrNoDelete           FlexBool `json:"attr_no_delete"`
+	AttrHiddenID           string   `json:"attr_hidden_id"`
+	Name                   string   `json:"name"`
+	SiteID                 string   `json:"site_id"`
+	VlanEnabled            FlexBool `json:"vlan_enabled"`
+	Purpose                string   `json:"purpose"`
+	IPSubnet               string   `json:"ip_subnet"`
+	Ipv6InterfaceType      string   `json:"ipv6_interface_type"`
+	DomainName             string   `json:"domain_name"`
+	IsNat                  FlexBool `json:"is_nat"`
+	DhcpdEnabled           FlexBool `json:"dhcpd_enabled"`
+	DhcpdStart             string   `json:"dhcpd_start"`
+	DhcpdStop              string   `json:"dhcpd_stop"`
+	Dhcpdv6Enabled         FlexBool `json:"dhcpdv6_enabled"`
+	Ipv6RaEnabled          FlexBool `json:"ipv6_ra_enabled"`
+	LteLanEnabled          FlexBool `json:"lte_lan_enabled"`
+	Networkgroup           string   `json:"networkgroup"`
+	DhcpdLeasetime         FlexInt  `json:"dhcpd_leasetime"`
+	DhcpdDNSEnabled        FlexBool `json:"dhcpd_dns_enabled"`
+	DhcpdGatewayEnabled    FlexBool `json:"dhcpd_gateway_enabled"`
+	DhcpdTimeOffsetEnabled FlexBool `json:"dhcpd_time_offset_enabled"`
+	Ipv6PdStart            string   `json:"ipv6_pd_start"`
+	Ipv6PdStop             string   `json:"ipv6_pd_stop"`
+	DhcpdDNS1              string   `json:"dhcpd_dns_1"`
+	DhcpdDNS2              string   `json:"dhcpd_dns_2"`
+	DhcpdDNS3              string   `json:"dhcpd_dns_3"`
+	DhcpdDNS4              string   `json:"dhcpd_dns_4"`
+	Enabled                FlexBool `json:"enabled"`
+	DhcpRelayEnabled       FlexBool `json:"dhcp_relay_enabled"`
+	Mac                    string   `json:"mac"`
+	IsGuest                FlexBool `json:"is_guest"`
+	IP                     string   `json:"ip"`
+	Up                     FlexBool `json:"up"`
+	NumSta                 FlexInt  `json:"num_sta"`
+	RxBytes                FlexInt  `json:"rx_bytes"`
+	RxPackets              FlexInt  `json:"rx_packets"`
+	TxBytes                FlexInt  `json:"tx_bytes"`
+	TxPackets              FlexInt  `json:"tx_packets"`
 }
 
 // UDMStat holds the "stat" data for a dream machine.

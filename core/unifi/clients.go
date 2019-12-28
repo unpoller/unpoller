@@ -1,6 +1,8 @@
 package unifi
 
-import "fmt"
+import (
+	"fmt"
+)
 
 // GetClients returns a response full of clients' data from the UniFi Controller.
 func (u *Unifi) GetClients(sites Sites) (Clients, error) {
@@ -29,6 +31,32 @@ func (u *Unifi) GetClients(sites Sites) (Clients, error) {
 		}
 
 		data = append(data, response.Data...)
+	}
+
+	return data, nil
+}
+
+// GetClientsDPI garners dpi data for clients.
+func (u *Unifi) GetClientsDPI(sites Sites) ([]*DPITable, error) {
+	var data []*DPITable
+
+	for _, site := range sites {
+		u.DebugLog("Polling Controller, retreiving Client DPI data, site %s (%s) ", site.Name, site.Desc)
+
+		var response struct {
+			Data []*DPITable `json:"data"`
+		}
+
+		clientDPIpath := fmt.Sprintf(APIClientDPI, site.Name)
+		if err := u.GetData(clientDPIpath, &response, `{"type":"by_app"}`); err != nil {
+			return nil, err
+		}
+
+		for _, d := range response.Data {
+			d.SourceName = site.SourceName
+			d.SiteName = site.SiteName
+			data = append(data, d)
+		}
 	}
 
 	return data, nil

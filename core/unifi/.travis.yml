@@ -11,5 +11,5 @@ before_install:
 install:
 - dep ensure
 script:
-- golangci-lint run --enable-all -e G402
+- golangci-lint run --enable-all -e G402 -D gochecknoglobals
 - go test ./...
