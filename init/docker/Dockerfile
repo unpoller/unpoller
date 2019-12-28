@@ -19,7 +19,7 @@ RUN mkdir -p $GOPATH/pkg/mod $GOPATH/bin $GOPATH/src /${BINARY}
 COPY . /${BINARY}
 WORKDIR /${BINARY}
 
-RUN CGO_ENABLED=0 make ${BINARY}.${ARCH}.${OS}
+RUN make vendor && CGO_ENABLED=0 make ${BINARY}.${ARCH}.${OS}
 
 FROM scratch
 ARG ARCH
