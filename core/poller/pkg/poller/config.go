@@ -49,6 +49,8 @@ type Metrics struct {
 	unifi.IDSList
 	unifi.Clients
 	*unifi.Devices
+	SitesDPI   []*unifi.DPITable
+	ClientsDPI []*unifi.DPITable
 }
 
 // Config represents the core library input data.
