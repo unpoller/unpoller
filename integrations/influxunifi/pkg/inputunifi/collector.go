@@ -145,6 +145,7 @@ func (u *InputUnifi) augmentMetrics(c *Controller, metrics *poller.Metrics) *pol
 		if devices[c.Mac] = c.Name; c.Name == "" {
 			devices[c.Mac] = c.Hostname
 		}
+
 		metrics.Clients[i].SwName = devices[c.SwMac]
 		metrics.Clients[i].ApName = devices[c.ApMac]
 		metrics.Clients[i].GwName = devices[c.GwMac]
