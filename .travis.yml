@@ -36,7 +36,6 @@ before_script:
   - gpg --import gpg.signing.key
   - rm -f gpg.signing.key .secret-files.tar
   - source .metadata.sh
-  - make vendor
 script:
   # Test Go and Docker.
   - make test

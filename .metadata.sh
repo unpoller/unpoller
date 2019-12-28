@@ -11,7 +11,7 @@ HBREPO="golift/homebrew-mugs"
 MAINT="David Newhall II <david at sleepers dot pro>"
 VENDOR="Go Lift <code at golift dot io>"
 DESC="Polls a UniFi controller, exports metrics to InfluxDB and Prometheus"
-GOLANGCI_LINT_ARGS="--enable-all -D gochecknoglobals -D funlen -e G402 -D gochecknoinits"
+GOLANGCI_LINT_ARGS="--enable-all -D gochecknoglobals -D funlen -e G402 -D gochecknoinits --skip-dirs=v1"
 # Example must exist at examples/$CONFIG_FILE.example
 CONFIG_FILE="up.conf"
 LICENSE="MIT"

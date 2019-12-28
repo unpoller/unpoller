@@ -3,12 +3,12 @@ package main
 import (
 	"log"
 
-	"github.com/davidnewhall/unifi-poller/v2/pkg/poller"
+	"github.com/davidnewhall/unifi-poller/v2/poller"
 	// Load input plugins!
-	_ "github.com/davidnewhall/unifi-poller/v2/pkg/inputunifi"
+	_ "github.com/davidnewhall/unifi-poller/v2/inputunifi"
 	// Load output plugins!
-	_ "github.com/davidnewhall/unifi-poller/v2/pkg/influxunifi"
-	_ "github.com/davidnewhall/unifi-poller/v2/pkg/promunifi"
+	_ "github.com/davidnewhall/unifi-poller/v2/influxunifi"
+	_ "github.com/davidnewhall/unifi-poller/v2/promunifi"
 )
 
 // Keep it simple.
@@ -23,7 +23,7 @@ func main() {
 /*
 import (
 	"log"
-	"github.com/davidnewhall/unifi-poller/pkg/poller"
+	"github.com/davidnewhall/unifi-poller/v1/poller"
 )
 
 func main() {

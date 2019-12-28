@@ -4,6 +4,7 @@ go 1.13
 
 require (
 	github.com/BurntSushi/toml v0.3.1 // indirect
+	github.com/davidnewhall/unifi-poller v1.6.3
 	github.com/influxdata/influxdb1-client v0.0.0-20191209144304-8bf82d3c094d
 	github.com/prometheus/client_golang v1.3.0
 	github.com/prometheus/common v0.7.0
