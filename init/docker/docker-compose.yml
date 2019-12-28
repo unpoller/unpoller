@@ -1,4 +1,5 @@
 version: '2'
+# this file is written for poller v1.x.x not v2.
 services:
   influxdb:
     restart: always

@@ -8,6 +8,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/prometheus/common/version"
 	"github.com/spf13/pflag"
 )
 
@@ -44,7 +45,7 @@ func (u *UnifiPoller) Start() error {
 	u.Flag.Parse(os.Args[1:])
 
 	if u.Flag.ShowVer {
-		fmt.Printf("%s v%s\n", appName, Version)
+		fmt.Printf("%s v%s\n", appName, version.Version)
 		return nil // don't run anything else w/ version request.
 	}
 
@@ -72,7 +73,7 @@ func (u *UnifiPoller) Start() error {
 		u.LogDebugf("Debug Logging Enabled")
 	}
 
-	log.Printf("[INFO] UniFi Poller v%v Starting Up! PID: %d", Version, os.Getpid())
+	log.Printf("[INFO] UniFi Poller v%v Starting Up! PID: %d", version.Version, os.Getpid())
 	return u.Run()
 }
 

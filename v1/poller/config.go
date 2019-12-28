@@ -28,9 +28,6 @@ import (
 	yaml "gopkg.in/yaml.v2"
 )
 
-// Version is injected by the Makefile
-var Version = "development"
-
 const (
 	// App defaults in case they're missing from the config.
 	appName           = "unifi-poller"

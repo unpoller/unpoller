@@ -11,6 +11,7 @@ HBREPO="golift/homebrew-mugs"
 MAINT="David Newhall II <david at sleepers dot pro>"
 VENDOR="Go Lift <code at golift dot io>"
 DESC="Polls a UniFi controller, exports metrics to InfluxDB and Prometheus"
+## TODO: fix lint in v1 so it can be checked.
 GOLANGCI_LINT_ARGS="--enable-all -D gochecknoglobals -D funlen -e G402 -D gochecknoinits --skip-dirs=v1"
 # Example must exist at examples/$CONFIG_FILE.example
 CONFIG_FILE="up.conf"
@@ -38,7 +39,10 @@ ITERATION=$(git rev-list --count --all || echo 0)
 DATE="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
 COMMIT="$(git rev-parse --short HEAD || echo 0)"
 
+# The application has multiple versions, so build the requested version.
+[ "$BUILD_VERSION" != "" ] || BUILD_VERSION=${VVERSION:0:2}
+
 # This is a custom download path for homebrew formula.
 SOURCE_PATH=https://golift.io/${BINARY}/archive/v${VERSION}.tar.gz
 
-export SOURCE_URL URL VVERSION VERSION ITERATION DATE COMMIT SOURCE_PATH
+export SOURCE_URL URL VVERSION VERSION ITERATION DATE COMMIT BUILD_VERSION SOURCE_PATH

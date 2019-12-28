@@ -25,8 +25,6 @@ func (u *UnifiPoller) RunPrometheus() error {
 		LoggingFn:    u.LogExportReport,
 		ReportErrors: true, // XXX: Does this need to be configurable?
 	}))
-
-	version.Version = Version
 	prometheus.MustRegister(version.NewCollector(ns))
 
 	return http.ListenAndServe(u.Config.HTTPListen, nil)

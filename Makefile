@@ -43,7 +43,7 @@ $(PACKAGE_SCRIPTS) \
 --config-files "/etc/$(BINARY)/$(CONFIG_FILE)"
 endef
 
-PLUGINS:=$(patsubst v2/plugins/%/main.go,%,$(wildcard v2/plugins/*/main.go))
+PLUGINS:=$(patsubst $(BUILD_VERSION)/plugins/%/main.go,%,$(wildcard $(BUILD_VERSION)/plugins/*/main.go))
 
 VERSION_LDFLAGS:= \
   -X github.com/prometheus/common/version.Branch=$(TRAVIS_BRANCH) \
@@ -71,7 +71,7 @@ release: clean macos windows linux_packages
 clean:
 	# Cleaning up.
 	rm -f $(BINARY) $(BINARY).*.{macos,linux,exe}{,.gz,.zip} $(BINARY).1{,.gz} $(BINARY).rb
-	rm -f $(BINARY){_,-}*.{deb,rpm} v*.tar.gz.sha256 examples/MANUAL .metadata.make
+	rm -f $(BINARY){_,-}*.{deb,rpm} v*.tar.gz.sha256 $(BUILD_VERSION)/examples/MANUAL .metadata.make
 	rm -f cmd/$(BINARY)/README{,.html} README{,.html} ./$(BINARY)_manual.html
 	rm -rf package_build_* release
 
@@ -81,9 +81,9 @@ clean:
 man: $(BINARY).1.gz
 $(BINARY).1.gz: md2roff
 	# Building man page. Build dependency first: md2roff
-	go run $(MD2ROFF_BIN) --manual $(BINARY) --version $(VERSION) --date "$(DATE)" examples/MANUAL.md
-	gzip -9nc examples/MANUAL > $@
-	mv examples/MANUAL.html $(BINARY)_manual.html
+	go run $(MD2ROFF_BIN) --manual $(BINARY) --version $(VERSION) --date "$(DATE)" $(BUILD_VERSION)/examples/MANUAL.md
+	gzip -9nc $(BUILD_VERSION)/examples/MANUAL > $@
+	mv $(BUILD_VERSION)/examples/MANUAL.html $(BINARY)_manual.html
 
 md2roff:
 	go get $(MD2ROFF_BIN)
@@ -97,41 +97,41 @@ README.html: md2roff
 # Binaries
 
 build: $(BINARY)
-$(BINARY): main.go v2/*/*.go
-	go build -o $(BINARY) -ldflags "-w -s $(VERSION_LDFLAGS)"
+$(BINARY): $(BUILD_VERSION)/main.go $(BUILD_VERSION)/*/*.go
+	go build -o ./$(BINARY) -ldflags "-w -s $(VERSION_LDFLAGS)" ./$(BUILD_VERSION)
 
 linux: $(BINARY).amd64.linux
-$(BINARY).amd64.linux: main.go v2/*/*.go
+$(BINARY).amd64.linux: main.go $(BUILD_VERSION)/*/*.go
 	# Building linux 64-bit x86 binary.
-	GOOS=linux GOARCH=amd64 go build -o $@ -ldflags "-w -s $(VERSION_LDFLAGS)"
+	GOOS=linux GOARCH=amd64 go build -o ./$@ -ldflags "-w -s $(VERSION_LDFLAGS)" ./$(BUILD_VERSION)
 
 linux386: $(BINARY).i386.linux
-$(BINARY).i386.linux: main.go v2/*/*.go
+$(BINARY).i386.linux: main.go $(BUILD_VERSION)/*/*.go
 	# Building linux 32-bit x86 binary.
-	GOOS=linux GOARCH=386 go build -o $@ -ldflags "-w -s $(VERSION_LDFLAGS)"
+	GOOS=linux GOARCH=386 go build -o ./$@ -ldflags "-w -s $(VERSION_LDFLAGS)" ./$(BUILD_VERSION)
 
 arm: arm64 armhf
 
 arm64: $(BINARY).arm64.linux
-$(BINARY).arm64.linux: main.go v2/*/*.go
+$(BINARY).arm64.linux: main.go $(BUILD_VERSION)/*/*.go
 	# Building linux 64-bit ARM binary.
-	GOOS=linux GOARCH=arm64 go build -o $@ -ldflags "-w -s $(VERSION_LDFLAGS)"
+	GOOS=linux GOARCH=arm64 go build -o ./$@ -ldflags "-w -s $(VERSION_LDFLAGS)" ./$(BUILD_VERSION)
 
 armhf: $(BINARY).armhf.linux
-$(BINARY).armhf.linux: main.go v2/*/*.go
+$(BINARY).armhf.linux: main.go $(BUILD_VERSION)/*/*.go
 	# Building linux 32-bit ARM binary.
-	GOOS=linux GOARCH=arm GOARM=6 go build -o $@ -ldflags "-w -s $(VERSION_LDFLAGS)"
+	GOOS=linux GOARCH=arm GOARM=6 go build -o ./$@ -ldflags "-w -s $(VERSION_LDFLAGS)" ./$(BUILD_VERSION)
 
 macos: $(BINARY).amd64.macos
-$(BINARY).amd64.macos: main.go v2/*/*.go
+$(BINARY).amd64.macos: main.go $(BUILD_VERSION)/*/*.go
 	# Building darwin 64-bit x86 binary.
-	GOOS=darwin GOARCH=amd64 go build -o $@ -ldflags "-w -s $(VERSION_LDFLAGS)"
+	GOOS=darwin GOARCH=amd64 go build -o ./$@ -ldflags "-w -s $(VERSION_LDFLAGS)" ./$(BUILD_VERSION)
 
 exe: $(BINARY).amd64.exe
 windows: $(BINARY).amd64.exe
-$(BINARY).amd64.exe: main.go v2/*/*.go
+$(BINARY).amd64.exe: main.go $(BUILD_VERSION)/*/*.go
 	# Building windows 64-bit x86 binary.
-	GOOS=windows GOARCH=amd64 go build -o $@ -ldflags "-w -s $(VERSION_LDFLAGS)"
+	GOOS=windows GOARCH=amd64 go build -o ./$@ -ldflags "-w -s $(VERSION_LDFLAGS)" ./$(BUILD_VERSION)
 
 # Packages
 
@@ -194,9 +194,9 @@ package_build_linux: readme man plugins_linux_amd64 linux
 	cp *.1.gz $@/usr/share/man/man1
 	rm -f $@/usr/lib/$(BINARY)/*.so
 	cp *amd64.so $@/usr/lib/$(BINARY)/
-	cp examples/$(CONFIG_FILE).example $@/etc/$(BINARY)/
-	cp examples/$(CONFIG_FILE).example $@/etc/$(BINARY)/$(CONFIG_FILE)
-	cp LICENSE *.html examples/*?.?* $@/usr/share/doc/$(BINARY)/
+	cp $(BUILD_VERSION)/examples/$(CONFIG_FILE).example $@/etc/$(BINARY)/
+	cp $(BUILD_VERSION)/examples/$(CONFIG_FILE).example $@/etc/$(BINARY)/$(CONFIG_FILE)
+	cp LICENSE *.html $(BUILD_VERSION)/examples/*?.?* $@/usr/share/doc/$(BINARY)/
 	[ "$(FORMULA)" != "service" ] || mkdir -p $@/lib/systemd/system
 	[ "$(FORMULA)" != "service" ] || \
 		sed -e "s/{{BINARY}}/$(BINARY)/g" -e "s/{{DESC}}/$(DESC)/g" \
@@ -258,16 +258,16 @@ $(BINARY).rb: v$(VERSION).tar.gz.sha256 init/homebrew/$(FORMULA).rb.tmpl
 
 plugins: $(patsubst %,%.so,$(PLUGINS))
 $(patsubst %,%.so,$(PLUGINS)):
-	go build -o $@ -ldflags "$(VERSION_LDFLAGS)" -buildmode=plugin ./v2/plugins/$(patsubst %.so,%,$@)
+	go build -o $@ -ldflags "$(VERSION_LDFLAGS)" -buildmode=plugin ./$(BUILD_VERSION)/plugins/$(patsubst %.so,%,$@)
 
 linux_plugins: plugins_linux_amd64 plugins_linux_i386 plugins_linux_arm64 plugins_linux_armhf
 plugins_linux_amd64: $(patsubst %,%.linux_amd64.so,$(PLUGINS))
 $(patsubst %,%.linux_amd64.so,$(PLUGINS)):
-	GOOS=linux GOARCH=amd64 go build -o $@ -ldflags "$(VERSION_LDFLAGS)" -buildmode=plugin ./v2/plugins/$(patsubst %.linux_amd64.so,%,$@)
+	GOOS=linux GOARCH=amd64 go build -o $@ -ldflags "$(VERSION_LDFLAGS)" -buildmode=plugin ./$(BUILD_VERSION)/plugins/$(patsubst %.linux_amd64.so,%,$@)
 
 plugins_darwin: $(patsubst %,%.darwin.so,$(PLUGINS))
 $(patsubst %,%.darwin.so,$(PLUGINS)):
-	GOOS=darwin go build -o $@ -ldflags "$(VERSION_LDFLAGS)" -buildmode=plugin ./v2/plugins/$(patsubst %.darwin.so,%,$@)
+	GOOS=darwin go build -o $@ -ldflags "$(VERSION_LDFLAGS)" -buildmode=plugin ./$(BUILD_VERSION)/plugins/$(patsubst %.darwin.so,%,$@)
 
 # Extras
 
@@ -306,6 +306,6 @@ install: man readme $(BINARY) plugins_darwin
 	/usr/bin/install -m 0755 -cp $(BINARY) $(PREFIX)/bin/$(BINARY)
 	/usr/bin/install -m 0755 -cp *darwin.so $(PREFIX)/lib/$(BINARY)/
 	/usr/bin/install -m 0644 -cp $(BINARY).1.gz $(PREFIX)/share/man/man1
-	/usr/bin/install -m 0644 -cp examples/$(CONFIG_FILE).example $(ETC)/$(BINARY)/
-	[ -f $(ETC)/$(BINARY)/$(CONFIG_FILE) ] || /usr/bin/install -m 0644 -cp  examples/$(CONFIG_FILE).example $(ETC)/$(BINARY)/$(CONFIG_FILE)
-	/usr/bin/install -m 0644 -cp LICENSE *.html examples/* $(PREFIX)/share/doc/$(BINARY)/
+	/usr/bin/install -m 0644 -cp $(BUILD_VERSION)/examples/$(CONFIG_FILE).example $(ETC)/$(BINARY)/
+	[ -f $(ETC)/$(BINARY)/$(CONFIG_FILE) ] || /usr/bin/install -m 0644 -cp  $(BUILD_VERSION)/examples/$(CONFIG_FILE).example $(ETC)/$(BINARY)/$(CONFIG_FILE)
+	/usr/bin/install -m 0644 -cp LICENSE *.html $(BUILD_VERSION)/examples/* $(PREFIX)/share/doc/$(BINARY)/

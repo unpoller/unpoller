@@ -29,7 +29,7 @@ for build in $BUILDS; do
     --build-arg "AUTHOR=${MAINT}" \
     --build-arg "BINARY=${BINARY}" \
     --build-arg "SOURCE_URL=${SOURCE_URL}" \
-    --build-arg "CONFIG_FILE=${CONFIG_FILE}" \
+    --build-arg "CONFIG_FILE=${BUILD_VERSION}/examples/${CONFIG_FILE}" \
     --tag "${IMAGE_NAME}_${os}_${name}" \
     --file ${DOCKERFILE_PATH} .
 done
