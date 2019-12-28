@@ -80,83 +80,81 @@ type uap struct {
 }
 
 func descUAP(ns string) *uap {
-	labelA := []string{"stat", "site_name", "name", "source"} // stat + labels[1:]
-	labelV := []string{"vap_name", "bssid", "radio", "radio_name", "essid", "usage", "site_name", "name", "source"}
-	labelR := []string{"radio_name", "radio", "site_name", "name", "source"}
-	nd := prometheus.NewDesc
-
+	labelA := []string{"stat", "site_name", "name"} // stat + labels[1:]
+	labelV := []string{"vap_name", "bssid", "radio", "radio_name", "essid", "usage", "site_name", "name"}
+	labelR := []string{"radio_name", "radio", "site_name", "name"}
 	return &uap{
 		// 3x each - stat table: total, guest, user
-		ApWifiTxDropped:     nd(ns+"stat_wifi_transmt_dropped_total", "Wifi Transmissions Dropped", labelA, nil),
-		ApRxErrors:          nd(ns+"stat_receive_errors_total", "Receive Errors", labelA, nil),
-		ApRxDropped:         nd(ns+"stat_receive_dropped_total", "Receive Dropped", labelA, nil),
-		ApRxFrags:           nd(ns+"stat_receive_frags_total", "Received Frags", labelA, nil),
-		ApRxCrypts:          nd(ns+"stat_receive_crypts_total", "Receive Crypts", labelA, nil),
-		ApTxPackets:         nd(ns+"stat_transmit_packets_total", "Transmit Packets", labelA, nil),
-		ApTxBytes:           nd(ns+"stat_transmit_bytes_total", "Transmit Bytes", labelA, nil),
-		ApTxErrors:          nd(ns+"stat_transmit_errors_total", "Transmit Errors", labelA, nil),
-		ApTxDropped:         nd(ns+"stat_transmit_dropped_total", "Transmit Dropped", labelA, nil),
-		ApTxRetries:         nd(ns+"stat_retries_tx_total", "Transmit Retries", labelA, nil),
-		ApRxPackets:         nd(ns+"stat_receive_packets_total", "Receive Packets", labelA, nil),
-		ApRxBytes:           nd(ns+"stat_receive_bytes_total", "Receive Bytes", labelA, nil),
-		WifiTxAttempts:      nd(ns+"stat_wifi_transmit_attempts_total", "Wifi Transmission Attempts", labelA, nil),
-		MacFilterRejections: nd(ns+"stat_mac_filter_rejects_total", "MAC Filter Rejections", labelA, nil),
+		ApWifiTxDropped:     prometheus.NewDesc(ns+"stat_wifi_transmt_dropped_total", "Wifi Transmissions Dropped", labelA, nil),
+		ApRxErrors:          prometheus.NewDesc(ns+"stat_receive_errors_total", "Receive Errors", labelA, nil),
+		ApRxDropped:         prometheus.NewDesc(ns+"stat_receive_dropped_total", "Receive Dropped", labelA, nil),
+		ApRxFrags:           prometheus.NewDesc(ns+"stat_receive_frags_total", "Received Frags", labelA, nil),
+		ApRxCrypts:          prometheus.NewDesc(ns+"stat_receive_crypts_total", "Receive Crypts", labelA, nil),
+		ApTxPackets:         prometheus.NewDesc(ns+"stat_transmit_packets_total", "Transmit Packets", labelA, nil),
+		ApTxBytes:           prometheus.NewDesc(ns+"stat_transmit_bytes_total", "Transmit Bytes", labelA, nil),
+		ApTxErrors:          prometheus.NewDesc(ns+"stat_transmit_errors_total", "Transmit Errors", labelA, nil),
+		ApTxDropped:         prometheus.NewDesc(ns+"stat_transmit_dropped_total", "Transmit Dropped", labelA, nil),
+		ApTxRetries:         prometheus.NewDesc(ns+"stat_retries_tx_total", "Transmit Retries", labelA, nil),
+		ApRxPackets:         prometheus.NewDesc(ns+"stat_receive_packets_total", "Receive Packets", labelA, nil),
+		ApRxBytes:           prometheus.NewDesc(ns+"stat_receive_bytes_total", "Receive Bytes", labelA, nil),
+		WifiTxAttempts:      prometheus.NewDesc(ns+"stat_wifi_transmit_attempts_total", "Wifi Transmission Attempts", labelA, nil),
+		MacFilterRejections: prometheus.NewDesc(ns+"stat_mac_filter_rejects_total", "MAC Filter Rejections", labelA, nil),
 		// N each - 1 per Virtual AP (VAP)
-		VAPCcq:                   nd(ns+"vap_ccq_ratio", "VAP Client Connection Quality", labelV, nil),
-		VAPMacFilterRejections:   nd(ns+"vap_mac_filter_rejects_total", "VAP MAC Filter Rejections", labelV, nil),
-		VAPNumSatisfactionSta:    nd(ns+"vap_satisfaction_stations", "VAP Number Satisifaction Stations", labelV, nil),
-		VAPAvgClientSignal:       nd(ns+"vap_average_client_signal", "VAP Average Client Signal", labelV, nil),
-		VAPSatisfaction:          nd(ns+"vap_satisfaction_ratio", "VAP Satisfaction", labelV, nil),
-		VAPSatisfactionNow:       nd(ns+"vap_satisfaction_now_ratio", "VAP Satisfaction Now", labelV, nil),
-		VAPDNSAvgLatency:         nd(ns+"vap_dns_latency_average_seconds", "VAP DNS Latency Average", labelV, nil),
-		VAPRxBytes:               nd(ns+"vap_receive_bytes_total", "VAP Bytes Received", labelV, nil),
-		VAPRxCrypts:              nd(ns+"vap_receive_crypts_total", "VAP Crypts Received", labelV, nil),
-		VAPRxDropped:             nd(ns+"vap_receive_dropped_total", "VAP Dropped Received", labelV, nil),
-		VAPRxErrors:              nd(ns+"vap_receive_errors_total", "VAP Errors Received", labelV, nil),
-		VAPRxFrags:               nd(ns+"vap_receive_frags_total", "VAP Frags Received", labelV, nil),
-		VAPRxNwids:               nd(ns+"vap_receive_nwids_total", "VAP Nwids Received", labelV, nil),
-		VAPRxPackets:             nd(ns+"vap_receive_packets_total", "VAP Packets Received", labelV, nil),
-		VAPTxBytes:               nd(ns+"vap_transmit_bytes_total", "VAP Bytes Transmitted", labelV, nil),
-		VAPTxDropped:             nd(ns+"vap_transmit_dropped_total", "VAP Dropped Transmitted", labelV, nil),
-		VAPTxErrors:              nd(ns+"vap_transmit_errors_total", "VAP Errors Transmitted", labelV, nil),
-		VAPTxPackets:             nd(ns+"vap_transmit_packets_total", "VAP Packets Transmitted", labelV, nil),
-		VAPTxPower:               nd(ns+"vap_transmit_power", "VAP Transmit Power", labelV, nil),
-		VAPTxRetries:             nd(ns+"vap_transmit_retries_total", "VAP Retries Transmitted", labelV, nil),
-		VAPTxCombinedRetries:     nd(ns+"vap_transmit_retries_combined_total", "VAP Retries Combined Tx", labelV, nil),
-		VAPTxDataMpduBytes:       nd(ns+"vap_data_mpdu_transmit_bytes_total", "VAP Data MPDU Bytes Tx", labelV, nil),
-		VAPTxRtsRetries:          nd(ns+"vap_transmit_rts_retries_total", "VAP RTS Retries Transmitted", labelV, nil),
-		VAPTxSuccess:             nd(ns+"vap_transmit_success_total", "VAP Success Transmits", labelV, nil),
-		VAPTxTotal:               nd(ns+"vap_transmit_total", "VAP Transmit Total", labelV, nil),
-		VAPTxGoodbytes:           nd(ns+"vap_transmit_goodbyes", "VAP Goodbyes Transmitted", labelV, nil),
-		VAPTxLatAvg:              nd(ns+"vap_transmit_latency_average_seconds", "VAP Latency Average Tx", labelV, nil),
-		VAPTxLatMax:              nd(ns+"vap_transmit_latency_maximum_seconds", "VAP Latency Maximum Tx", labelV, nil),
-		VAPTxLatMin:              nd(ns+"vap_transmit_latency_minimum_seconds", "VAP Latency Minimum Tx", labelV, nil),
-		VAPRxGoodbytes:           nd(ns+"vap_receive_goodbyes", "VAP Goodbyes Received", labelV, nil),
-		VAPRxLatAvg:              nd(ns+"vap_receive_latency_average_seconds", "VAP Latency Average Rx", labelV, nil),
-		VAPRxLatMax:              nd(ns+"vap_receive_latency_maximum_seconds", "VAP Latency Maximum Rx", labelV, nil),
-		VAPRxLatMin:              nd(ns+"vap_receive_latency_minimum_seconds", "VAP Latency Minimum Rx", labelV, nil),
-		VAPWifiTxLatencyMovAvg:   nd(ns+"vap_transmit_latency_moving_avg_seconds", "VAP Latency Moving Avg Tx", labelV, nil),
-		VAPWifiTxLatencyMovMax:   nd(ns+"vap_transmit_latency_moving_max_seconds", "VAP Latency Moving Min Tx", labelV, nil),
-		VAPWifiTxLatencyMovMin:   nd(ns+"vap_transmit_latency_moving_min_seconds", "VAP Latency Moving Max Tx", labelV, nil),
-		VAPWifiTxLatencyMovTotal: nd(ns+"vap_transmit_latency_moving_total", "VAP Latency Moving Total Tramsit", labelV, nil),
-		VAPWifiTxLatencyMovCount: nd(ns+"vap_transmit_latency_moving_count", "VAP Latency Moving Count Tramsit", labelV, nil),
+		VAPCcq:                   prometheus.NewDesc(ns+"vap_ccq_ratio", "VAP Client Connection Quality", labelV, nil),
+		VAPMacFilterRejections:   prometheus.NewDesc(ns+"vap_mac_filter_rejects_total", "VAP MAC Filter Rejections", labelV, nil),
+		VAPNumSatisfactionSta:    prometheus.NewDesc(ns+"vap_satisfaction_stations", "VAP Number Satisifaction Stations", labelV, nil),
+		VAPAvgClientSignal:       prometheus.NewDesc(ns+"vap_average_client_signal", "VAP Average Client Signal", labelV, nil),
+		VAPSatisfaction:          prometheus.NewDesc(ns+"vap_satisfaction_ratio", "VAP Satisfaction", labelV, nil),
+		VAPSatisfactionNow:       prometheus.NewDesc(ns+"vap_satisfaction_now_ratio", "VAP Satisfaction Now", labelV, nil),
+		VAPDNSAvgLatency:         prometheus.NewDesc(ns+"vap_dns_latency_average_seconds", "VAP DNS Latency Average", labelV, nil),
+		VAPRxBytes:               prometheus.NewDesc(ns+"vap_receive_bytes_total", "VAP Bytes Received", labelV, nil),
+		VAPRxCrypts:              prometheus.NewDesc(ns+"vap_receive_crypts_total", "VAP Crypts Received", labelV, nil),
+		VAPRxDropped:             prometheus.NewDesc(ns+"vap_receive_dropped_total", "VAP Dropped Received", labelV, nil),
+		VAPRxErrors:              prometheus.NewDesc(ns+"vap_receive_errors_total", "VAP Errors Received", labelV, nil),
+		VAPRxFrags:               prometheus.NewDesc(ns+"vap_receive_frags_total", "VAP Frags Received", labelV, nil),
+		VAPRxNwids:               prometheus.NewDesc(ns+"vap_receive_nwids_total", "VAP Nwids Received", labelV, nil),
+		VAPRxPackets:             prometheus.NewDesc(ns+"vap_receive_packets_total", "VAP Packets Received", labelV, nil),
+		VAPTxBytes:               prometheus.NewDesc(ns+"vap_transmit_bytes_total", "VAP Bytes Transmitted", labelV, nil),
+		VAPTxDropped:             prometheus.NewDesc(ns+"vap_transmit_dropped_total", "VAP Dropped Transmitted", labelV, nil),
+		VAPTxErrors:              prometheus.NewDesc(ns+"vap_transmit_errors_total", "VAP Errors Transmitted", labelV, nil),
+		VAPTxPackets:             prometheus.NewDesc(ns+"vap_transmit_packets_total", "VAP Packets Transmitted", labelV, nil),
+		VAPTxPower:               prometheus.NewDesc(ns+"vap_transmit_power", "VAP Transmit Power", labelV, nil),
+		VAPTxRetries:             prometheus.NewDesc(ns+"vap_transmit_retries_total", "VAP Retries Transmitted", labelV, nil),
+		VAPTxCombinedRetries:     prometheus.NewDesc(ns+"vap_transmit_retries_combined_total", "VAP Retries Combined Transmitted", labelV, nil),
+		VAPTxDataMpduBytes:       prometheus.NewDesc(ns+"vap_data_mpdu_transmit_bytes_total", "VAP Data MPDU Bytes Transmitted", labelV, nil),
+		VAPTxRtsRetries:          prometheus.NewDesc(ns+"vap_transmit_rts_retries_total", "VAP RTS Retries Transmitted", labelV, nil),
+		VAPTxSuccess:             prometheus.NewDesc(ns+"vap_transmit_success_total", "VAP Success Transmits", labelV, nil),
+		VAPTxTotal:               prometheus.NewDesc(ns+"vap_transmit_total", "VAP Transmit Total", labelV, nil),
+		VAPTxGoodbytes:           prometheus.NewDesc(ns+"vap_transmit_goodbyes", "VAP Goodbyes Transmitted", labelV, nil),
+		VAPTxLatAvg:              prometheus.NewDesc(ns+"vap_transmit_latency_average_seconds", "VAP Latency Average Transmit", labelV, nil),
+		VAPTxLatMax:              prometheus.NewDesc(ns+"vap_transmit_latency_maximum_seconds", "VAP Latency Maximum Transmit", labelV, nil),
+		VAPTxLatMin:              prometheus.NewDesc(ns+"vap_transmit_latency_minimum_seconds", "VAP Latency Minimum Transmit", labelV, nil),
+		VAPRxGoodbytes:           prometheus.NewDesc(ns+"vap_receive_goodbyes", "VAP Goodbyes Received", labelV, nil),
+		VAPRxLatAvg:              prometheus.NewDesc(ns+"vap_receive_latency_average_seconds", "VAP Latency Average Receive", labelV, nil),
+		VAPRxLatMax:              prometheus.NewDesc(ns+"vap_receive_latency_maximum_seconds", "VAP Latency Maximum Receive", labelV, nil),
+		VAPRxLatMin:              prometheus.NewDesc(ns+"vap_receive_latency_minimum_seconds", "VAP Latency Minimum Receive", labelV, nil),
+		VAPWifiTxLatencyMovAvg:   prometheus.NewDesc(ns+"vap_transmit_latency_moving_avg_seconds", "VAP Latency Moving Average Tramsit", labelV, nil),
+		VAPWifiTxLatencyMovMax:   prometheus.NewDesc(ns+"vap_transmit_latency_moving_max_seconds", "VAP Latency Moving Maximum Tramsit", labelV, nil),
+		VAPWifiTxLatencyMovMin:   prometheus.NewDesc(ns+"vap_transmit_latency_moving_min_seconds", "VAP Latency Moving Minimum Tramsit", labelV, nil),
+		VAPWifiTxLatencyMovTotal: prometheus.NewDesc(ns+"vap_transmit_latency_moving_total", "VAP Latency Moving Total Tramsit", labelV, nil),
+		VAPWifiTxLatencyMovCount: prometheus.NewDesc(ns+"vap_transmit_latency_moving_count", "VAP Latency Moving Count Tramsit", labelV, nil),
 		// N each - 1 per Radio. 1-4 radios per AP usually
-		RadioCurrentAntennaGain: nd(ns+"radio_current_antenna_gain", "Radio Current Antenna Gain", labelR, nil),
-		RadioHt:                 nd(ns+"radio_ht", "Radio HT", labelR, nil),
-		RadioMaxTxpower:         nd(ns+"radio_max_transmit_power", "Radio Maximum Transmit Power", labelR, nil),
-		RadioMinTxpower:         nd(ns+"radio_min_transmit_power", "Radio Minimum Transmit Power", labelR, nil),
-		RadioNss:                nd(ns+"radio_nss", "Radio Nss", labelR, nil),
-		RadioRadioCaps:          nd(ns+"radio_caps", "Radio Capabilities", labelR, nil),
-		RadioTxPower:            nd(ns+"radio_transmit_power", "Radio Transmit Power", labelR, nil),
-		RadioAstBeXmit:          nd(ns+"radio_ast_be_xmit", "Radio AstBe Transmit", labelR, nil),
-		RadioChannel:            nd(ns+"radio_channel", "Radio Channel", labelR, nil),
-		RadioCuSelfRx:           nd(ns+"radio_channel_utilization_receive_ratio", "Channel Utilization Rx", labelR, nil),
-		RadioCuSelfTx:           nd(ns+"radio_channel_utilization_transmit_ratio", "Channel Utilization Tx", labelR, nil),
-		RadioExtchannel:         nd(ns+"radio_ext_channel", "Radio Ext Channel", labelR, nil),
-		RadioGain:               nd(ns+"radio_gain", "Radio Gain", labelR, nil),
-		RadioNumSta:             nd(ns+"radio_stations", "Radio Total Station Count", append(labelR, "station_type"), nil),
-		RadioTxPackets:          nd(ns+"radio_transmit_packets", "Radio Transmitted Packets", labelR, nil),
-		RadioTxRetries:          nd(ns+"radio_transmit_retries", "Radio Transmit Retries", labelR, nil),
+		RadioCurrentAntennaGain: prometheus.NewDesc(ns+"radio_current_antenna_gain", "Radio Current Antenna Gain", labelR, nil),
+		RadioHt:                 prometheus.NewDesc(ns+"radio_ht", "Radio HT", labelR, nil),
+		RadioMaxTxpower:         prometheus.NewDesc(ns+"radio_max_transmit_power", "Radio Maximum Transmit Power", labelR, nil),
+		RadioMinTxpower:         prometheus.NewDesc(ns+"radio_min_transmit_power", "Radio Minimum Transmit Power", labelR, nil),
+		RadioNss:                prometheus.NewDesc(ns+"radio_nss", "Radio Nss", labelR, nil),
+		RadioRadioCaps:          prometheus.NewDesc(ns+"radio_caps", "Radio Capabilities", labelR, nil),
+		RadioTxPower:            prometheus.NewDesc(ns+"radio_transmit_power", "Radio Transmit Power", labelR, nil),
+		RadioAstBeXmit:          prometheus.NewDesc(ns+"radio_ast_be_xmit", "Radio AstBe Transmit", labelR, nil),
+		RadioChannel:            prometheus.NewDesc(ns+"radio_channel", "Radio Channel", labelR, nil),
+		RadioCuSelfRx:           prometheus.NewDesc(ns+"radio_channel_utilization_receive_ratio", "Radio Channel Utilization Receive", labelR, nil),
+		RadioCuSelfTx:           prometheus.NewDesc(ns+"radio_channel_utilization_transmit_ratio", "Radio Channel Utilization Transmit", labelR, nil),
+		RadioExtchannel:         prometheus.NewDesc(ns+"radio_ext_channel", "Radio Ext Channel", labelR, nil),
+		RadioGain:               prometheus.NewDesc(ns+"radio_gain", "Radio Gain", labelR, nil),
+		RadioNumSta:             prometheus.NewDesc(ns+"radio_stations", "Radio Total Station Count", append(labelR, "station_type"), nil),
+		RadioTxPackets:          prometheus.NewDesc(ns+"radio_transmit_packets", "Radio Transmitted Packets", labelR, nil),
+		RadioTxRetries:          prometheus.NewDesc(ns+"radio_transmit_retries", "Radio Transmit Retries", labelR, nil),
 	}
 }
 
@@ -164,8 +162,7 @@ func (u *promUnifi) exportUAP(r report, d *unifi.UAP) {
 	if !d.Adopted.Val || d.Locating.Val {
 		return
 	}
-
-	labels := []string{d.Type, d.SiteName, d.Name, d.SourceName}
+	labels := []string{d.Type, d.SiteName, d.Name}
 	infoLabels := []string{d.Version, d.Model, d.Serial, d.Mac, d.IP, d.ID, d.Bytes.Txt, d.Uptime.Txt}
 	u.exportUAPstats(r, labels, d.Stat.Ap, d.BytesD, d.TxBytesD, d.RxBytesD, d.BytesR)
 	u.exportVAPtable(r, labels, d.VapTable)
@@ -184,9 +181,8 @@ func (u *promUnifi) exportUAPstats(r report, labels []string, ap *unifi.Ap, byte
 	if ap == nil {
 		return
 	}
-
-	labelU := []string{"user", labels[1], labels[2], labels[3]}
-	labelG := []string{"guest", labels[1], labels[2], labels[3]}
+	labelU := []string{"user", labels[1], labels[2]}
+	labelG := []string{"guest", labels[1], labels[2]}
 	r.send([]*metric{
 		// ap only stuff.
 		{u.Device.BytesD, counter, bytes[0], labels},   // not sure if these 3 Ds are counters or gauges.
@@ -233,8 +229,8 @@ func (u *promUnifi) exportVAPtable(r report, labels []string, vt unifi.VapTable)
 		if !v.Up.Val {
 			continue
 		}
+		labelV := []string{v.Name, v.Bssid, v.Radio, v.RadioName, v.Essid, v.Usage, labels[1], labels[2]}
 
-		labelV := []string{v.Name, v.Bssid, v.Radio, v.RadioName, v.Essid, v.Usage, labels[1], labels[2], labels[3]}
 		r.send([]*metric{
 			{u.UAP.VAPCcq, gauge, float64(v.Ccq) / 1000.0, labelV},
 			{u.UAP.VAPMacFilterRejections, counter, v.MacFilterRejections, labelV},
@@ -281,10 +277,9 @@ func (u *promUnifi) exportVAPtable(r report, labels []string, vt unifi.VapTable)
 func (u *promUnifi) exportRADtable(r report, labels []string, rt unifi.RadioTable, rts unifi.RadioTableStats) {
 	// radio table
 	for _, p := range rt {
-		labelR := []string{p.Name, p.Radio, labels[1], labels[2], labels[3]}
+		labelR := []string{p.Name, p.Radio, labels[1], labels[2]}
 		labelRUser := append(labelR, "user")
 		labelRGuest := append(labelR, "guest")
-
 		r.send([]*metric{
 			{u.UAP.RadioCurrentAntennaGain, gauge, p.CurrentAntennaGain, labelR},
 			{u.UAP.RadioHt, gauge, p.Ht, labelR},
@@ -299,7 +294,6 @@ func (u *promUnifi) exportRADtable(r report, labels []string, rt unifi.RadioTabl
 			if t.Name != p.Name {
 				continue
 			}
-
 			r.send([]*metric{
 				{u.UAP.RadioTxPower, gauge, t.TxPower, labelR},
 				{u.UAP.RadioAstBeXmit, gauge, t.AstBeXmit, labelR},
@@ -313,7 +307,6 @@ func (u *promUnifi) exportRADtable(r report, labels []string, rt unifi.RadioTabl
 				{u.UAP.RadioTxPackets, gauge, t.TxPackets, labelR},
 				{u.UAP.RadioTxRetries, gauge, t.TxRetries, labelR},
 			})
-
 			break
 		}
 	}

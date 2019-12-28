@@ -36,8 +36,7 @@ type usg struct {
 }
 
 func descUSG(ns string) *usg {
-	labels := []string{"port", "site_name", "name", "source"}
-
+	labels := []string{"port", "site_name", "name"}
 	return &usg{
 		WanRxPackets:   prometheus.NewDesc(ns+"wan_receive_packets_total", "WAN Receive Packets Total", labels, nil),
 		WanRxBytes:     prometheus.NewDesc(ns+"wan_receive_bytes_total", "WAN Receive Bytes Total", labels, nil),
@@ -73,10 +72,8 @@ func (u *promUnifi) exportUSG(r report, d *unifi.USG) {
 	if !d.Adopted.Val || d.Locating.Val {
 		return
 	}
-
-	labels := []string{d.Type, d.SiteName, d.Name, d.SourceName}
+	labels := []string{d.Type, d.SiteName, d.Name}
 	infoLabels := []string{d.Version, d.Model, d.Serial, d.Mac, d.IP, d.ID, d.Bytes.Txt, d.Uptime.Txt}
-
 	// Gateway System Data.
 	u.exportWANPorts(r, labels, d.Wan1, d.Wan2)
 	u.exportBYTstats(r, labels, d.TxBytes, d.RxBytes)
@@ -94,10 +91,8 @@ func (u *promUnifi) exportUSGstats(r report, labels []string, gw *unifi.Gw, st u
 	if gw == nil {
 		return
 	}
-
-	labelLan := []string{"lan", labels[1], labels[2], labels[3]}
-	labelWan := []string{"all", labels[1], labels[2], labels[3]}
-
+	labelLan := []string{"lan", labels[1], labels[2]}
+	labelWan := []string{"all", labels[1], labels[2]}
 	r.send([]*metric{
 		{u.USG.LanRxPackets, counter, gw.LanRxPackets, labelLan},
 		{u.USG.LanRxBytes, counter, gw.LanRxBytes, labelLan},
@@ -120,9 +115,7 @@ func (u *promUnifi) exportWANPorts(r report, labels []string, wans ...unifi.Wan)
 		if !wan.Up.Val {
 			continue // only record UP interfaces.
 		}
-
-		labelWan := []string{wan.Name, labels[1], labels[2], labels[3]}
-
+		labelWan := []string{wan.Name, labels[1], labels[2]}
 		r.send([]*metric{
 			{u.USG.WanRxPackets, counter, wan.RxPackets, labelWan},
 			{u.USG.WanRxBytes, counter, wan.RxBytes, labelWan},

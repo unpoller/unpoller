@@ -31,9 +31,8 @@ type unifiDevice struct {
 }
 
 func descDevice(ns string) *unifiDevice {
-	labels := []string{"type", "site_name", "name", "source"}
+	labels := []string{"type", "site_name", "name"}
 	infoLabels := []string{"version", "model", "serial", "mac", "ip", "id", "bytes", "uptime"}
-
 	return &unifiDevice{
 		Info:          prometheus.NewDesc(ns+"info", "Device Information", append(labels, infoLabels...), nil),
 		Uptime:        prometheus.NewDesc(ns+"uptime_seconds", "Device Uptime", labels, nil),
@@ -64,8 +63,7 @@ func (u *promUnifi) exportUDM(r report, d *unifi.UDM) {
 	if !d.Adopted.Val || d.Locating.Val {
 		return
 	}
-
-	labels := []string{d.Type, d.SiteName, d.Name, d.SourceName}
+	labels := []string{d.Type, d.SiteName, d.Name}
 	infoLabels := []string{d.Version, d.Model, d.Serial, d.Mac, d.IP, d.ID, d.Bytes.Txt, d.Uptime.Txt}
 	// Shared data (all devices do this).
 	u.exportBYTstats(r, labels, d.TxBytes, d.RxBytes)
@@ -82,7 +80,6 @@ func (u *promUnifi) exportUDM(r report, d *unifi.UDM) {
 		{u.Device.Info, gauge, 1.0, append(labels, infoLabels...)},
 		{u.Device.Uptime, gauge, d.Uptime, labels},
 	})
-
 	// Wireless Data - UDM (non-pro) only
 	if d.Stat.Ap != nil && d.VapTable != nil {
 		u.exportUAPstats(r, labels, d.Stat.Ap, d.BytesD, d.TxBytesD, d.RxBytesD, d.BytesR)
@@ -106,7 +103,6 @@ func (u *promUnifi) exportSTAcount(r report, labels []string, stas ...unifi.Flex
 		{u.Device.Counter, gauge, stas[0], append(labels, "user")},
 		{u.Device.Counter, gauge, stas[1], append(labels, "guest")},
 	})
-
 	if len(stas) > 2 {
 		r.send([]*metric{
 			{u.Device.Counter, gauge, stas[2], append(labels, "desktop")},
