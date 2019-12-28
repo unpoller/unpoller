@@ -1,4 +1,4 @@
-module golift.io/unifi
+module golift.io/unifi/v4
 
 go 1.13
 
