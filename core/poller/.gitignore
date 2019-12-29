@@ -27,3 +27,4 @@ bitly_token
 github_deploy_key
 gpg.signing.key
 .secret-files.tar
+*.so
