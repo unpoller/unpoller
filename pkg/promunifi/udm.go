@@ -31,7 +31,7 @@ type unifiDevice struct {
 }
 
 func descDevice(ns string) *unifiDevice {
-	labels := []string{"type", "site_name", "name"}
+	labels := []string{"type", "site_name", "name", "source"}
 	infoLabels := []string{"version", "model", "serial", "mac", "ip", "id", "bytes", "uptime"}
 
 	return &unifiDevice{
@@ -65,7 +65,7 @@ func (u *promUnifi) exportUDM(r report, d *unifi.UDM) {
 		return
 	}
 
-	labels := []string{d.Type, d.SiteName, d.Name}
+	labels := []string{d.Type, d.SiteName, d.Name, d.SourceName}
 	infoLabels := []string{d.Version, d.Model, d.Serial, d.Mac, d.IP, d.ID, d.Bytes.Txt, d.Uptime.Txt}
 	// Shared data (all devices do this).
 	u.exportBYTstats(r, labels, d.TxBytes, d.RxBytes)

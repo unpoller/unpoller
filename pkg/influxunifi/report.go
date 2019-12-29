@@ -4,13 +4,13 @@ import (
 	"sync"
 	"time"
 
-	"github.com/davidnewhall/unifi-poller/pkg/metrics"
+	"github.com/davidnewhall/unifi-poller/pkg/poller"
 	influx "github.com/influxdata/influxdb1-client/v2"
 )
 
 // Report is returned to the calling procedure after everything is processed.
 type Report struct {
-	Metrics *metrics.Metrics
+	Metrics *poller.Metrics
 	Errors  []error
 	Total   int
 	Fields  int
@@ -28,10 +28,10 @@ type report interface {
 	send(m *metric)
 	error(err error)
 	batch(m *metric, pt *influx.Point)
-	metrics() *metrics.Metrics
+	metrics() *poller.Metrics
 }
 
-func (r *Report) metrics() *metrics.Metrics {
+func (r *Report) metrics() *poller.Metrics {
 	return r.Metrics
 }
 
