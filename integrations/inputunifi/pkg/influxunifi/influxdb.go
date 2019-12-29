@@ -194,12 +194,30 @@ func (u *InfluxUnifi) loopPoints(r report) {
 	r.add()
 	r.add()
 	r.add()
+	r.add()
+	r.add()
+
+	go func() {
+		defer r.done()
+
+		for _, s := range m.SitesDPI {
+			u.batchSiteDPI(r, s)
+		}
+	}()
 
 	go func() {
 		defer r.done()
 
 		for _, s := range m.Sites {
 			u.batchSite(r, s)
+		}
+	}()
+
+	go func() {
+		defer r.done()
+
+		for _, s := range m.ClientsDPI {
+			u.batchClientDPI(r, s)
 		}
 	}()
 
@@ -219,15 +237,14 @@ func (u *InfluxUnifi) loopPoints(r report) {
 		}
 	}()
 
-	if m.Devices == nil {
-		return
-	}
-
 	u.loopDevicePoints(r)
 }
 
 func (u *InfluxUnifi) loopDevicePoints(r report) {
 	m := r.metrics()
+	if m.Devices == nil {
+		return
+	}
 
 	r.add()
 	r.add()
