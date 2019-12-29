@@ -7,9 +7,9 @@ data. The data is provided in a large struct you can consume in your application
 
 This library is designed to PULL data FROM the controller. It has no methods that
 update settings or change things on the controller.
-[Someone expressed interest](https://github.com/golift/unifi/issues/31) in
+[Someone expressed interest](https://github.com/unifi-poller/unifi/issues/31) in
 adding methods to update data, and I'm okay with that. I'll even help add them.
-[Tell me what you want to do](https://github.com/golift/unifi/issues/new), and we'll make it happen.
+[Tell me what you want to do](https://github.com/unifi-poller/unifi/issues/new), and we'll make it happen.
 
 Pull requests, feature requests, code reviews and feedback are welcomed!
 
@@ -18,7 +18,7 @@ Here's a working example:
 package main
 
 import "log"
-import "golift.io/unifi"
+import "github.com/unifi-poller/unifi"
 
 func main() {
 	c := *unifi.Config{

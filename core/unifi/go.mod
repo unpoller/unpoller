@@ -1,4 +1,4 @@
-module golift.io/unifi
+module github.com/unifi-poller/unifi
 
 go 1.13
 

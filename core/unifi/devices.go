@@ -88,7 +88,7 @@ func (u *Unifi) unmarshalDevice(dev string, data json.RawMessage, v interface{})
 		json, err := data.MarshalJSON()
 		u.DebugLog("Failed Payload: %s (marshal err: %v)", json, err)
 		u.DebugLog("The above payload can prove useful during torubleshooting when you open an Issue:")
-		u.DebugLog("==- https://github.com/golift/unifi/issues/new -==")
+		u.DebugLog("==- https://github.com/unifi-poller/unifi/issues/new -==")
 	}
 
 	return err
