@@ -8,7 +8,7 @@ import (
 	"strings"
 
 	"github.com/unifi-poller/poller"
-	"golift.io/unifi"
+	"github.com/unifi-poller/unifi"
 )
 
 // Initialize gets called one time when starting up.

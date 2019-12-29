@@ -10,7 +10,7 @@ import (
 	"sync"
 
 	"github.com/unifi-poller/poller"
-	"golift.io/unifi"
+	"github.com/unifi-poller/unifi"
 )
 
 const (

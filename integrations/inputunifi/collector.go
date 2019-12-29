@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"github.com/unifi-poller/poller"
-	"golift.io/unifi"
+	"github.com/unifi-poller/unifi"
 )
 
 func (u *InputUnifi) isNill(c *Controller) bool {
