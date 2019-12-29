@@ -30,6 +30,7 @@
       "url":       "https://127.0.0.1:8443",
       "sites":     ["all"],
       "save_ids":   false,
+      "save_dpi":   false,
       "save_sites": true,
       "verify_ssl": false
     },
@@ -40,6 +41,7 @@
        "pass": "unifipoller",
        "url": "https://127.0.0.1:8443",
        "sites": ["all"],
+       "save_dpi": false,
        "save_ids": false,
        "save_sites": true,
        "verify_ssl": false
