@@ -16,9 +16,9 @@ import (
 	"time"
 
 	"github.com/spf13/pflag"
+	"github.com/unifi-poller/unifi"
 	"golift.io/cnfg"
 	"golift.io/cnfg/cnfgfile"
-	"golift.io/unifi"
 )
 
 const (

@@ -5,7 +5,7 @@ import (
 	"strings"
 	"sync"
 
-	"golift.io/unifi"
+	"github.com/unifi-poller/unifi"
 )
 
 var (
