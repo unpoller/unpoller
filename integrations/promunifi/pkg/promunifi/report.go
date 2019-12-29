@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/davidnewhall/unifi-poller/pkg/metrics"
+	"github.com/davidnewhall/unifi-poller/pkg/poller"
 	"github.com/prometheus/client_golang/prometheus"
 )
 
@@ -16,14 +16,15 @@ type report interface {
 	add()
 	done()
 	send([]*metric)
-	metrics() *metrics.Metrics
-	report(descs map[*prometheus.Desc]bool)
+	metrics() *poller.Metrics
+	report(c poller.Collect, descs map[*prometheus.Desc]bool)
 	export(m *metric, v float64) prometheus.Metric
 	error(ch chan<- prometheus.Metric, d *prometheus.Desc, v interface{})
 }
 
 // satisfy gomnd
 const one = 1
+const oneDecimalPoint = 10.0
 
 func (r *Report) add() {
 	r.wg.Add(one)
@@ -38,29 +39,35 @@ func (r *Report) send(m []*metric) {
 	r.ch <- m
 }
 
-func (r *Report) metrics() *metrics.Metrics {
+func (r *Report) metrics() *poller.Metrics {
 	return r.Metrics
 }
 
-func (r *Report) report(descs map[*prometheus.Desc]bool) {
-	if r.cf.LoggingFn == nil {
-		return
-	}
-	r.Descs = len(descs)
-	r.cf.LoggingFn(r)
+func (r *Report) report(c poller.Collect, descs map[*prometheus.Desc]bool) {
+	m := r.Metrics
+	c.Logf("UniFi Measurements Exported. Site: %d, Client: %d, "+
+		"UAP: %d, USG/UDM: %d, USW: %d, Descs: %d, "+
+		"Metrics: %d, Errs: %d, 0s: %d, Reqs/Total: %v / %v",
+		len(m.Sites), len(m.Clients), len(m.UAPs), len(m.UDMs)+len(m.USGs), len(m.USWs),
+		len(descs), r.Total, r.Errors, r.Zeros,
+		r.Fetch.Round(time.Millisecond/oneDecimalPoint),
+		r.Elapsed.Round(time.Millisecond/oneDecimalPoint))
 }
 
 func (r *Report) export(m *metric, v float64) prometheus.Metric {
 	r.Total++
+
 	if v == 0 {
 		r.Zeros++
 	}
+
 	return prometheus.MustNewConstMetric(m.Desc, m.ValueType, v, m.Labels...)
 }
 
 func (r *Report) error(ch chan<- prometheus.Metric, d *prometheus.Desc, v interface{}) {
 	r.Errors++
-	if r.cf.ReportErrors {
+
+	if r.ReportErrors {
 		ch <- prometheus.NewInvalidMetric(d, fmt.Errorf("error: %v", v))
 	}
 }
