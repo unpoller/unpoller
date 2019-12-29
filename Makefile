@@ -46,7 +46,7 @@ endef
 PLUGINS:=$(patsubst plugins/%/main.go,%,$(wildcard plugins/*/main.go))
 
 VERSION_LDFLAGS:= \
-  -X github.com/prometheus/common/version.Branch=$(TRAVIS_BRANCH) \
+  -X github.com/prometheus/common/version.Branch=$(BRANCH) \
   -X github.com/prometheus/common/version.BuildDate=$(DATE) \
   -X github.com/prometheus/common/version.Revision=$(COMMIT) \
   -X github.com/prometheus/common/version.Version=$(VERSION)-$(ITERATION)
@@ -285,7 +285,7 @@ lint:
 # This is safe; recommended even.
 dep: vendor
 vendor: go.mod go.sum
-	go mod vendor
+	go mod download
 
 # Don't run this unless you're ready to debug untested vendored dependencies.
 deps: update vendor
