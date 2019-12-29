@@ -9,7 +9,7 @@ import (
 
 	"sync"
 
-	"github.com/davidnewhall/unifi-poller/pkg/poller"
+	"github.com/unifi-poller/poller"
 	"golift.io/unifi"
 )
 
