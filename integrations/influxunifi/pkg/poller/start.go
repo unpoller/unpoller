@@ -5,30 +5,14 @@ import (
 	"fmt"
 	"log"
 	"os"
-	"strings"
-	"time"
 
+	"github.com/prometheus/common/version"
 	"github.com/spf13/pflag"
-	"golift.io/config"
 )
 
-// New returns a new poller struct preloaded with default values.
-// No need to call this if you call Start.c
+// New returns a new poller struct.
 func New() *UnifiPoller {
-	return &UnifiPoller{
-		Config: &Config{
-			InfluxURL:  defaultInfluxURL,
-			InfluxUser: defaultInfluxUser,
-			InfluxPass: defaultInfluxPass,
-			InfluxDB:   defaultInfluxDB,
-			Interval:   config.Duration{Duration: defaultInterval},
-			HTTPListen: defaultHTTPListen,
-			Namespace:  appName,
-		},
-		Flag: &Flag{
-			ConfigFile: DefaultConfFile,
-		},
-	}
+	return &UnifiPoller{Config: &Config{Poller: &Poller{}}, Flags: &Flags{}}
 }
 
 // Start begins the application from a CLI.
@@ -37,57 +21,30 @@ func New() *UnifiPoller {
 func (u *UnifiPoller) Start() error {
 	log.SetOutput(os.Stdout)
 	log.SetFlags(log.LstdFlags)
-	u.Flag.Parse(os.Args[1:])
+	u.Flags.Parse(os.Args[1:])
 
-	if u.Flag.ShowVer {
-		fmt.Printf("%s v%s\n", appName, Version)
+	if u.Flags.ShowVer {
+		fmt.Printf("%s v%s\n", AppName, version.Version)
 		return nil // don't run anything else w/ version request.
 	}
 
-	if u.Flag.DumpJSON == "" { // do not print this when dumping JSON.
-		u.Logf("Loading Configuration File: %s", u.Flag.ConfigFile)
+	if u.Flags.DumpJSON == "" { // do not print this when dumping JSON.
+		u.Logf("Loading Configuration File: %s", u.Flags.ConfigFile)
 	}
 
-	// Parse config file.
-	if err := config.ParseFile(u.Config, u.Flag.ConfigFile); err != nil {
-		u.Flag.Usage()
+	// Parse config file and ENV variables.
+	if err := u.ParseConfigs(); err != nil {
 		return err
 	}
-
-	// Update Config with ENV variable overrides.
-	if _, err := config.ParseENV(u.Config, ENVConfigPrefix); err != nil {
-		return err
-	}
-
-	if len(u.Config.Controllers) < 1 {
-		u.Config.Controllers = []Controller{{
-			Sites:     []string{"all"},
-			User:      defaultUnifiUser,
-			Pass:      "",
-			URL:       defaultUnifiURL,
-			SaveSites: true,
-		}}
-	}
-
-	if u.Flag.DumpJSON != "" {
-		return u.DumpJSONPayload()
-	}
-
-	if u.Config.Debug {
-		log.SetFlags(log.Lshortfile | log.Lmicroseconds | log.Ldate)
-		u.LogDebugf("Debug Logging Enabled")
-	}
-
-	log.Printf("[INFO] UniFi Poller v%v Starting Up! PID: %d", Version, os.Getpid())
 
 	return u.Run()
 }
 
 // Parse turns CLI arguments into data structures. Called by Start() on startup.
-func (f *Flag) Parse(args []string) {
-	f.FlagSet = pflag.NewFlagSet(appName, pflag.ExitOnError)
+func (f *Flags) Parse(args []string) {
+	f.FlagSet = pflag.NewFlagSet(AppName, pflag.ExitOnError)
 	f.Usage = func() {
-		fmt.Printf("Usage: %s [--config=/path/to/up.conf] [--version]", appName)
+		fmt.Printf("Usage: %s [--config=/path/to/up.conf] [--version]", AppName)
 		f.PrintDefaults()
 	}
 
@@ -103,31 +60,24 @@ func (f *Flag) Parse(args []string) {
 // 2. Run the collector one time and report the metrics to influxdb. (lambda)
 // 3. Start a web server and wait for Prometheus to poll the application for metrics.
 func (u *UnifiPoller) Run() error {
-	for i, c := range u.Config.Controllers {
-		if c.Name == "" {
-			u.Config.Controllers[i].Name = c.URL
+	if u.Flags.DumpJSON != "" {
+		if err := u.InitializeInputs(); err != nil {
+			return err
 		}
 
-		switch err := u.GetUnifi(c); err {
-		case nil:
-			u.Logf("Polling UniFi Controller at %s v%s as user %s. Sites: %v",
-				c.URL, c.Unifi.ServerVersion, c.User, c.Sites)
-		default:
-			u.LogErrorf("Controller Auth or Connection failed, but continuing to retry! %s: %v", c.URL, err)
-		}
+		return u.DumpJSONPayload()
 	}
 
-	switch strings.ToLower(u.Config.Mode) {
-	default:
-		u.PollController()
-		return nil
-	case "influxlambda", "lambdainflux", "lambda_influx", "influx_lambda":
-		u.LastCheck = time.Now()
-		return u.CollectAndProcess()
-	case "both":
-		go u.PollController()
-		fallthrough
-	case "prometheus", "exporter":
-		return u.RunPrometheus()
+	if u.Debug {
+		log.SetFlags(log.Lshortfile | log.Lmicroseconds | log.Ldate)
+		u.LogDebugf("Debug Logging Enabled")
 	}
+
+	log.Printf("[INFO] UniFi Poller v%v Starting Up! PID: %d", version.Version, os.Getpid())
+
+	if err := u.InitializeInputs(); err != nil {
+		return err
+	}
+
+	return u.InitializeOutputs()
 }

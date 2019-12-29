@@ -9,80 +9,142 @@ package poller
 */
 
 import (
-	"sync"
+	"os"
+	"path"
+	"plugin"
+	"strings"
 	"time"
 
-	"github.com/davidnewhall/unifi-poller/pkg/influxunifi"
 	"github.com/spf13/pflag"
-	"golift.io/config"
+	"golift.io/cnfg"
+	"golift.io/cnfg/cnfgfile"
 	"golift.io/unifi"
 )
 
-// Version is injected by the Makefile
-var Version = "development"
-
 const (
-	// App defaults in case they're missing from the config.
-	appName           = "unifi-poller"
-	defaultInterval   = 30 * time.Second
-	defaultInfluxDB   = "unifi"
-	defaultInfluxUser = "unifi"
-	defaultInfluxPass = "unifi"
-	defaultInfluxURL  = "http://127.0.0.1:8086"
-	defaultUnifiUser  = "influx"
-	defaultUnifiURL   = "https://127.0.0.1:8443"
-	defaultHTTPListen = "0.0.0.0:9130"
+	// AppName is the name of the application.
+	AppName = "unifi-poller"
+	// ENVConfigPrefix is the prefix appended to an env variable tag name.
+	ENVConfigPrefix = "UP"
 )
-
-// ENVConfigPrefix is the prefix appended to an env variable tag
-// name before retrieving the value from the OS.
-const ENVConfigPrefix = "UP"
 
 // UnifiPoller contains the application startup data, and auth info for UniFi & Influx.
 type UnifiPoller struct {
-	Influx     *influxunifi.InfluxUnifi
-	Flag       *Flag
-	Config     *Config
-	LastCheck  time.Time
-	sync.Mutex // locks the Unifi struct member when re-authing to unifi.
+	Flags *Flags
+	*Config
 }
 
-// Flag represents the CLI args available and their settings.
-type Flag struct {
+// Flags represents the CLI args available and their settings.
+type Flags struct {
 	ConfigFile string
 	DumpJSON   string
 	ShowVer    bool
 	*pflag.FlagSet
 }
 
-// Controller represents the configuration for a UniFi Controller.
-// Each polled controller may have its own configuration.
-type Controller struct {
-	VerifySSL bool         `json:"verify_ssl" toml:"verify_ssl" xml:"verify_ssl" yaml:"verify_ssl"`
-	SaveIDS   bool         `json:"save_ids" toml:"save_ids" xml:"save_ids" yaml:"save_ids"`
-	SaveSites bool         `json:"save_sites,omitempty" toml:"save_sites,omitempty" xml:"save_sites" yaml:"save_sites"`
-	Name      string       `json:"name" toml:"name" xml:"name,attr" yaml:"name"`
-	User      string       `json:"user,omitempty" toml:"user,omitempty" xml:"user" yaml:"user"`
-	Pass      string       `json:"pass,omitempty" toml:"pass,omitempty" xml:"pass" yaml:"pass"`
-	URL       string       `json:"url,omitempty" toml:"url,omitempty" xml:"url" yaml:"url"`
-	Sites     []string     `json:"sites,omitempty" toml:"sites,omitempty" xml:"sites" yaml:"sites"`
-	Unifi     *unifi.Unifi `json:"-" toml:"-" xml:"-" yaml:"-"`
+// Metrics is a type shared by the exporting and reporting packages.
+type Metrics struct {
+	TS time.Time
+	unifi.Sites
+	unifi.IDSList
+	unifi.Clients
+	*unifi.Devices
+	SitesDPI   []*unifi.DPITable
+	ClientsDPI []*unifi.DPITable
 }
 
-// Config represents the data needed to poll a controller and report to influxdb.
-// This is all of the data stored in the config file.
-// Any with explicit defaults have omitempty on json and toml tags.
+// Config represents the core library input data.
 type Config struct {
-	Interval    config.Duration `json:"interval,omitempty" toml:"interval,omitempty" xml:"interval" yaml:"interval"`
-	Debug       bool            `json:"debug" toml:"debug" xml:"debug" yaml:"debug"`
-	Quiet       bool            `json:"quiet,omitempty" toml:"quiet,omitempty" xml:"quiet" yaml:"quiet"`
-	InfxBadSSL  bool            `json:"influx_insecure_ssl" toml:"influx_insecure_ssl" xml:"influx_insecure_ssl" yaml:"influx_insecure_ssl"`
-	Mode        string          `json:"mode" toml:"mode" xml:"mode" yaml:"mode"`
-	HTTPListen  string          `json:"http_listen" toml:"http_listen" xml:"http_listen" yaml:"http_listen"`
-	Namespace   string          `json:"namespace" toml:"namespace" xml:"namespace" yaml:"namespace"`
-	InfluxURL   string          `json:"influx_url,omitempty" toml:"influx_url,omitempty" xml:"influx_url" yaml:"influx_url"`
-	InfluxUser  string          `json:"influx_user,omitempty" toml:"influx_user,omitempty" xml:"influx_user" yaml:"influx_user"`
-	InfluxPass  string          `json:"influx_pass,omitempty" toml:"influx_pass,omitempty" xml:"influx_pass" yaml:"influx_pass"`
-	InfluxDB    string          `json:"influx_db,omitempty" toml:"influx_db,omitempty" xml:"influx_db" yaml:"influx_db"`
-	Controllers []Controller    `json:"controller,omitempty" toml:"controller,omitempty" xml:"controller" yaml:"controller"`
+	*Poller `json:"poller" toml:"poller" xml:"poller" yaml:"poller"`
+}
+
+// Poller is the global config values.
+type Poller struct {
+	Plugins []string `json:"plugins" toml:"plugins" xml:"plugin" yaml:"plugins"`
+	Debug   bool     `json:"debug" toml:"debug" xml:"debug,attr" yaml:"debug"`
+	Quiet   bool     `json:"quiet,omitempty" toml:"quiet,omitempty" xml:"quiet,attr" yaml:"quiet"`
+}
+
+// LoadPlugins reads-in dynamic shared libraries.
+// Not used very often, if at all.
+func (u *UnifiPoller) LoadPlugins() error {
+	for _, p := range u.Plugins {
+		name := strings.TrimSuffix(p, ".so") + ".so"
+
+		if name == ".so" {
+			continue // Just ignore it. uhg.
+		}
+
+		if _, err := os.Stat(name); os.IsNotExist(err) {
+			name = path.Join(DefaultObjPath, name)
+		}
+
+		u.Logf("Loading Dynamic Plugin: %s", name)
+
+		if _, err := plugin.Open(name); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+// ParseConfigs parses the poller config and the config for each registered output plugin.
+func (u *UnifiPoller) ParseConfigs() error {
+	// Parse core config.
+	if err := u.parseInterface(u.Config); err != nil {
+		return err
+	}
+
+	// Load dynamic plugins.
+	if err := u.LoadPlugins(); err != nil {
+		return err
+	}
+
+	if err := u.parseInputs(); err != nil {
+		return err
+	}
+
+	return u.parseOutputs()
+}
+
+// parseInterface parses the config file and environment variables into the provided interface.
+func (u *UnifiPoller) parseInterface(i interface{}) error {
+	// Parse config file into provided interface.
+	if err := cnfgfile.Unmarshal(i, u.Flags.ConfigFile); err != nil {
+		return err
+	}
+
+	// Parse environment variables into provided interface.
+	_, err := cnfg.UnmarshalENV(i, ENVConfigPrefix)
+
+	return err
+}
+
+// Parse input plugin configs.
+func (u *UnifiPoller) parseInputs() error {
+	inputSync.Lock()
+	defer inputSync.Unlock()
+
+	for _, i := range inputs {
+		if err := u.parseInterface(i.Config); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+// Parse output plugin configs.
+func (u *UnifiPoller) parseOutputs() error {
+	outputSync.Lock()
+	defer outputSync.Unlock()
+
+	for _, o := range outputs {
+		if err := u.parseInterface(o.Config); err != nil {
+			return err
+		}
+	}
+
+	return nil
 }
