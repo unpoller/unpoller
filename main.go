@@ -3,12 +3,12 @@ package main
 import (
 	"log"
 
-	"github.com/davidnewhall/unifi-poller/pkg/poller"
+	"github.com/unifi-poller/poller"
 	// Load input plugins!
-	_ "github.com/davidnewhall/unifi-poller/pkg/inputunifi"
+	_ "github.com/unifi-poller/inputunifi"
 	// Load output plugins!
-	_ "github.com/davidnewhall/unifi-poller/pkg/influxunifi"
-	_ "github.com/davidnewhall/unifi-poller/pkg/promunifi"
+	_ "github.com/unifi-poller/influxunifi"
+	_ "github.com/unifi-poller/promunifi"
 )
 
 // Keep it simple.
