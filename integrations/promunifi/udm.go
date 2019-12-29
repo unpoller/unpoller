@@ -2,7 +2,7 @@ package promunifi
 
 import (
 	"github.com/prometheus/client_golang/prometheus"
-	"golift.io/unifi"
+	"github.com/unifi-poller/unifi"
 )
 
 // These are shared by all four device types: UDM, UAP, USG, USW

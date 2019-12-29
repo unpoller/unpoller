@@ -2,7 +2,7 @@ package promunifi
 
 import (
 	"github.com/prometheus/client_golang/prometheus"
-	"golift.io/unifi"
+	"github.com/unifi-poller/unifi"
 )
 
 type uap struct {

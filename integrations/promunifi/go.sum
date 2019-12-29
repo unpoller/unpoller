@@ -63,8 +63,10 @@ github.com/stretchr/objx v0.1.1/go.mod h1:HFkY916IF+rwdDfMAkV7OtwuqBVzrE8GR6GFx+
 github.com/stretchr/testify v1.2.2/go.mod h1:a8OnRcib4nhh0OaRAV+Yts87kKdq0PP7pXfy6kDkUVs=
 github.com/stretchr/testify v1.3.0/go.mod h1:M5WIy9Dh21IEIfnGCwXGc5bZfKNJtfHm1UVUgZn+9EI=
 github.com/stretchr/testify v1.4.0/go.mod h1:j7eGeouHqKxXV5pUuKE4zz7dFj8WfuZ+81PSLYec5m4=
-github.com/unifi-poller/poller v0.0.1 h1:/SIsahlUEVJ+v9+C94spjV58+MIqR5DucVZqOstj2vM=
-github.com/unifi-poller/poller v0.0.1/go.mod h1:sZfDL7wcVwenlkrm/92bsSuoKKUnjj0bwcSUCT+aA2s=
+github.com/unifi-poller/poller v0.0.2 h1:qUDSon8UIqRYOXd+V+3jThf2CSE/glQK8MSDmp20STU=
+github.com/unifi-poller/poller v0.0.2/go.mod h1:H1YErnDRLaUQBH09kzd7kNTL3bMNCPuYbg94aJBun7Y=
+github.com/unifi-poller/unifi v0.0.1 h1:8LTf0RyxMdDLmzm59mk7bz5/qfC1hHmC21u/uqx2vSQ=
+github.com/unifi-poller/unifi v0.0.1/go.mod h1:DagVD/I+VMnVUHmTT4Fi76lPI+DHbuMwwtMIzanwMxM=
 golang.org/x/crypto v0.0.0-20180904163835-0709b304e793/go.mod h1:6SG95UA2DQfeDnfUPMdvaQW0Q7yPrPDi9nlGo2tz2b4=
 golang.org/x/crypto v0.0.0-20190308221718-c2843e01d9a2/go.mod h1:djNgcEr1/C05ACkg1iLfiJU5Ep61QUkGW8qpdssI0+w=
 golang.org/x/net v0.0.0-20181114220301-adae6a3d119a/go.mod h1:mL1N/T3taQHkDXs73rZJwtUhF3w3ftmwwsq0BUmARs4=
@@ -80,10 +82,6 @@ golang.org/x/sys v0.0.0-20191220142924-d4481acd189f/go.mod h1:h1NjWce9XRLGQEsW7w
 golang.org/x/text v0.3.0/go.mod h1:NqM8EUOU14njkJ3fqMW+pc6Ldnwhi/IjpwHt7yyuwOQ=
 golift.io/cnfg v0.0.5 h1:HnMU8Z9C/igKvir1dqaHx5BPuNGZrp99FCtdJyP2Z4I=
 golift.io/cnfg v0.0.5/go.mod h1:ScFDIJg/rJGHbRaed/i7g1lBhywEjB0JiP2uZr3xC3A=
-golift.io/unifi v0.0.400 h1:r8FlE+p+zmm8jnQdT367H2aGVMTgxZTrHSwbsHBcayA=
-golift.io/unifi v0.0.400/go.mod h1:4BjegFlwA3am3mPlY0qHAnSKli4eexLQV42QKaRx9OY=
-golift.io/unifi v4.1.6+incompatible h1:Yhb/+obX2vT9i6PElGislSuQ1WUtOf+l+sRjVxlY6nM=
-golift.io/unifi v4.1.6+incompatible/go.mod h1:Zjw57ZAzTzCMw784pE8CdCFgkYSzVZzmJ++WUttbjto=
 gopkg.in/alecthomas/kingpin.v2 v2.2.6/go.mod h1:FMv+mEhP44yOT+4EoQTLFTRgOQ1FBLkstjWtayDeSgw=
 gopkg.in/check.v1 v0.0.0-20161208181325-20d25e280405/go.mod h1:Co6ibVJAznAaIkqp8huTwlJQCZ016jof/cbN4VW5Yz0=
 gopkg.in/yaml.v2 v2.2.1/go.mod h1:hI93XBmqTisBFMUTm0b8Fm+jr3Dg1NNxqwp+5A1VGuI=
