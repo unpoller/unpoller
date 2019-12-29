@@ -95,7 +95,7 @@ func init() {
 // Run creates the collectors and starts the web server up.
 // Should be run in a Go routine. Returns nil if not configured.
 func (u *promUnifi) Run(c poller.Collect) error {
-	if u.Disable {
+	if u.Config == nil || u.Disable {
 		return nil
 	}
 
