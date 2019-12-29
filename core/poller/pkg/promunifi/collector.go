@@ -277,12 +277,38 @@ func (u *promUnifi) loopExports(r report) {
 	r.add()
 	r.add()
 	r.add()
+	r.add()
+	r.add()
 
 	go func() {
 		defer r.done()
 
 		for _, s := range m.Sites {
 			u.exportSite(r, s)
+		}
+	}()
+
+	go func() {
+		defer r.done()
+
+		for _, s := range m.SitesDPI {
+			u.exportSiteDPI(r, s)
+		}
+	}()
+
+	go func() {
+		defer r.done()
+
+		for _, c := range m.Clients {
+			u.exportClient(r, c)
+		}
+	}()
+
+	go func() {
+		defer r.done()
+
+		for _, c := range m.ClientsDPI {
+			u.exportClientDPI(r, c)
 		}
 	}()
 
@@ -315,14 +341,6 @@ func (u *promUnifi) loopExports(r report) {
 
 		for _, d := range m.USWs {
 			u.exportUSW(r, d)
-		}
-	}()
-
-	go func() {
-		defer r.done()
-
-		for _, c := range m.Clients {
-			u.exportClient(r, c)
 		}
 	}()
 }

@@ -80,6 +80,16 @@ func (u *InputUnifi) pollController(c *Controller) (*poller.Metrics, error) {
 		return m, fmt.Errorf("unifi.GetSites(%v): %v", c.URL, err)
 	}
 
+	if c.SaveDPI {
+		if m.SitesDPI, err = c.Unifi.GetSiteDPI(m.Sites); err != nil {
+			return m, fmt.Errorf("unifi.GetSiteDPI(%v): %v", c.URL, err)
+		}
+
+		if m.ClientsDPI, err = c.Unifi.GetClientsDPI(m.Sites); err != nil {
+			return m, fmt.Errorf("unifi.GetClientsDPI(%v): %v", c.URL, err)
+		}
+	}
+
 	if c.SaveIDS {
 		m.IDSList, err = c.Unifi.GetIDS(m.Sites, time.Now().Add(2*time.Minute), time.Now())
 		if err != nil {
@@ -132,10 +142,22 @@ func (u *InputUnifi) augmentMetrics(c *Controller, metrics *poller.Metrics) *pol
 
 	// These come blank, so set them here.
 	for i, c := range metrics.Clients {
+		if devices[c.Mac] = c.Name; c.Name == "" {
+			devices[c.Mac] = c.Hostname
+		}
+
 		metrics.Clients[i].SwName = devices[c.SwMac]
 		metrics.Clients[i].ApName = devices[c.ApMac]
 		metrics.Clients[i].GwName = devices[c.GwMac]
 		metrics.Clients[i].RadioDescription = bssdIDs[metrics.Clients[i].Bssid] + metrics.Clients[i].RadioProto
+	}
+
+	for i := range metrics.ClientsDPI {
+		// Name on Client DPI data also comes blank, find it based on MAC address.
+		metrics.ClientsDPI[i].Name = devices[metrics.ClientsDPI[i].MAC]
+		if metrics.ClientsDPI[i].Name == "" {
+			metrics.ClientsDPI[i].Name = metrics.ClientsDPI[i].MAC
+		}
 	}
 
 	if !*c.SaveSites {
