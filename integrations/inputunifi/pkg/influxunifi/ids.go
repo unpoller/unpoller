@@ -8,6 +8,8 @@ import (
 // These points can be passed directly to influx.
 func (u *InfluxUnifi) batchIDS(r report, i *unifi.IDS) {
 	tags := map[string]string{
+		"site_name":      i.SiteName,
+		"source":         i.SourceName,
 		"in_iface":       i.InIface,
 		"event_type":     i.EventType,
 		"proto":          i.Proto,
@@ -35,5 +37,6 @@ func (u *InfluxUnifi) batchIDS(r report, i *unifi.IDS) {
 		"srcipASN":     i.SrcipASN,
 		"usgipASN":     i.UsgipASN,
 	}
+
 	r.send(&metric{Table: "intrusion_detect", Tags: tags, Fields: fields})
 }

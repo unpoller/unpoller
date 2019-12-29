@@ -10,9 +10,11 @@ func (u *InfluxUnifi) batchUAP(r report, s *unifi.UAP) {
 	if !s.Adopted.Val || s.Locating.Val {
 		return
 	}
+
 	tags := map[string]string{
 		"mac":       s.Mac,
 		"site_name": s.SiteName,
+		"source":    s.SourceName,
 		"name":      s.Name,
 		"version":   s.Version,
 		"model":     s.Model,
@@ -30,6 +32,7 @@ func (u *InfluxUnifi) batchUAP(r report, s *unifi.UAP) {
 	fields["user-num_sta"] = int(s.UserNumSta.Val)
 	fields["guest-num_sta"] = int(s.GuestNumSta.Val)
 	fields["num_sta"] = s.NumSta.Val
+
 	r.send(&metric{Table: "uap", Tags: tags, Fields: fields})
 	u.processRadTable(r, tags, s.RadioTable, s.RadioTableStats)
 	u.processVAPTable(r, tags, s.VapTable)
@@ -39,6 +42,7 @@ func (u *InfluxUnifi) processUAPstats(ap *unifi.Ap) map[string]interface{} {
 	if ap == nil {
 		return map[string]interface{}{}
 	}
+
 	// Accumulative Statistics.
 	return map[string]interface{}{
 		"stat_user-rx_packets":  ap.UserRxPackets.Val,
@@ -82,6 +86,7 @@ func (u *InfluxUnifi) processVAPTable(r report, t map[string]string, vt unifi.Va
 		tags := map[string]string{
 			"device_name": t["name"],
 			"site_name":   t["site_name"],
+			"source":      t["source"],
 			"ap_mac":      s.ApMac,
 			"bssid":       s.Bssid,
 			"id":          s.ID,
@@ -135,6 +140,7 @@ func (u *InfluxUnifi) processVAPTable(r report, t map[string]string, vt unifi.Va
 			"wifi_tx_latency_mov_total": s.WifiTxLatencyMov.Total.Val,
 			"wifi_tx_latency_mov_cuont": s.WifiTxLatencyMov.TotalCount.Val,
 		}
+
 		r.send(&metric{Table: "uap_vaps", Tags: tags, Fields: fields})
 	}
 }
@@ -144,6 +150,7 @@ func (u *InfluxUnifi) processRadTable(r report, t map[string]string, rt unifi.Ra
 		tags := map[string]string{
 			"device_name": t["name"],
 			"site_name":   t["site_name"],
+			"source":      t["source"],
 			"channel":     p.Channel.Txt,
 			"radio":       p.Radio,
 		}
@@ -155,6 +162,7 @@ func (u *InfluxUnifi) processRadTable(r report, t map[string]string, rt unifi.Ra
 			"nss":                  p.Nss.Val,
 			"radio_caps":           p.RadioCaps.Val,
 		}
+
 		for _, t := range rts {
 			if t.Name == p.Name {
 				fields["ast_be_xmit"] = t.AstBeXmit.Val
@@ -171,9 +179,11 @@ func (u *InfluxUnifi) processRadTable(r report, t map[string]string, rt unifi.Ra
 				fields["tx_power"] = t.TxPower.Val
 				fields["tx_retries"] = t.TxRetries.Val
 				fields["user-num_sta"] = t.UserNumSta.Val
+
 				break
 			}
 		}
+
 		r.send(&metric{Table: "uap_radios", Tags: tags, Fields: fields})
 	}
 }
