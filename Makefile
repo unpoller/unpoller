@@ -129,7 +129,7 @@ $(BINARY).amd64.macos: main.go
 
 exe: $(BINARY).amd64.exe
 windows: $(BINARY).amd64.exe
-$(BINARY).amd64.exe: main.go 
+$(BINARY).amd64.exe: main.go
 	# Building windows 64-bit x86 binary.
 	GOOS=windows GOARCH=amd64 go build -o $@ -ldflags "-w -s $(VERSION_LDFLAGS)"
 
@@ -193,7 +193,7 @@ package_build_linux: readme man plugins_linux_amd64 linux
 	cp $(BINARY).amd64.linux $@/usr/bin/$(BINARY)
 	cp *.1.gz $@/usr/share/man/man1
 	rm -f $@/usr/lib/$(BINARY)/*.so
-	cp *amd64.so $@/usr/lib/$(BINARY)/
+	[ ! -f *amd64.so ] || cp *amd64.so $@/usr/lib/$(BINARY)/
 	cp examples/$(CONFIG_FILE).example $@/etc/$(BINARY)/
 	cp examples/$(CONFIG_FILE).example $@/etc/$(BINARY)/$(CONFIG_FILE)
 	cp LICENSE *.html examples/*?.?* $@/usr/share/doc/$(BINARY)/
@@ -205,16 +205,19 @@ package_build_linux: readme man plugins_linux_amd64 linux
 package_build_linux_386: package_build_linux linux386
 	mkdir -p $@
 	cp -r $</* $@/
+	[ ! -f *386.so ] || cp *386.so $@/usr/lib/$(BINARY)/
 	cp $(BINARY).i386.linux $@/usr/bin/$(BINARY)
 
 package_build_linux_arm64: package_build_linux arm64
 	mkdir -p $@
 	cp -r $</* $@/
+	[ ! -f *arm64.so ] || cp *arm64.so $@/usr/lib/$(BINARY)/
 	cp $(BINARY).arm64.linux $@/usr/bin/$(BINARY)
 
 package_build_linux_armhf: package_build_linux armhf
 	mkdir -p $@
 	cp -r $</* $@/
+	[ ! -f *armhf.so ] || cp *armhf.so $@/usr/lib/$(BINARY)/
 	cp $(BINARY).armhf.linux $@/usr/bin/$(BINARY)
 
 check_fpm:
