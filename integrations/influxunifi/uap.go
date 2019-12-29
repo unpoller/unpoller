@@ -1,7 +1,7 @@
 package influxunifi
 
 import (
-	"golift.io/unifi"
+	"github.com/unifi-poller/unifi"
 )
 
 // batchUAP generates Wireless-Access-Point datapoints for InfluxDB.

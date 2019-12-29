@@ -1,7 +1,7 @@
 package influxunifi
 
 import (
-	"golift.io/unifi"
+	"github.com/unifi-poller/unifi"
 )
 
 // batchUSG generates Unifi Gateway datapoints for InfluxDB.

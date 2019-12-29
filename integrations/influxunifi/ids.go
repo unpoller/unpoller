@@ -1,7 +1,7 @@
 package influxunifi
 
 import (
-	"golift.io/unifi"
+	"github.com/unifi-poller/unifi"
 )
 
 // batchIDS generates intrusion detection datapoints for InfluxDB.

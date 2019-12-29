@@ -1,7 +1,7 @@
 package influxunifi
 
 import (
-	"golift.io/unifi"
+	"github.com/unifi-poller/unifi"
 )
 
 // Combine concatenates N maps. This will delete things if not used with caution.

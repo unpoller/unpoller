@@ -1,7 +1,7 @@
 package influxunifi
 
 import (
-	"golift.io/unifi"
+	"github.com/unifi-poller/unifi"
 )
 
 // batchSite generates Unifi Sites' datapoints for InfluxDB.
