@@ -5,10 +5,10 @@
 /unifi-poller*.1
 /unifi-poller*.deb
 /unifi-poller*.rpm
-/unifi-poller.*.arm
-/unifi-poller.exe
-/unifi-poller.*.macos
-/unifi-poller.*.linux
+/unifi-poller*.arm
+/unifi-poller*.exe
+/unifi-poller*.macos
+/unifi-poller*.linux
 /unifi-poller.rb
 *.sha256
 /vendor
