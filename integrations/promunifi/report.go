@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/davidnewhall/unifi-poller/pkg/poller"
 	"github.com/prometheus/client_golang/prometheus"
+	"github.com/unifi-poller/poller"
 )
 
 // This file contains the report interface.

@@ -9,10 +9,10 @@ import (
 	"sync"
 	"time"
 
-	"github.com/davidnewhall/unifi-poller/pkg/poller"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/prometheus/common/version"
+	"github.com/unifi-poller/poller"
 	"golift.io/unifi"
 )
 
