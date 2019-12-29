@@ -31,10 +31,15 @@ type site struct {
 	RemoteUserTxBytes     *prometheus.Desc
 	RemoteUserRxPackets   *prometheus.Desc
 	RemoteUserTxPackets   *prometheus.Desc
+	DPITxPackets          *prometheus.Desc
+	DPIRxPackets          *prometheus.Desc
+	DPITxBytes            *prometheus.Desc
+	DPIRxBytes            *prometheus.Desc
 }
 
 func descSite(ns string) *site {
 	labels := []string{"subsystem", "status", "site_name", "source"}
+	labelDPI := []string{"category", "application", "site_name", "source"}
 	nd := prometheus.NewDesc
 
 	return &site{
@@ -63,6 +68,24 @@ func descSite(ns string) *site {
 		RemoteUserTxBytes:     nd(ns+"remote_user_transmit_bytes_total", "Remote Users Transmit Bytes", labels, nil),
 		RemoteUserRxPackets:   nd(ns+"remote_user_receive_packets_total", "Remote Users Receive Packets", labels, nil),
 		RemoteUserTxPackets:   nd(ns+"remote_user_transmit_packets_total", "Remote Users Transmit Packets", labels, nil),
+		DPITxPackets:          nd(ns+"dpi_transmit_packets", "Site DPI Transmit Packets", labelDPI, nil),
+		DPIRxPackets:          nd(ns+"dpi_receive_packets", "Site DPI Receive Packets", labelDPI, nil),
+		DPITxBytes:            nd(ns+"dpi_transmit_bytes", "Site DPI Transmit Bytes", labelDPI, nil),
+		DPIRxBytes:            nd(ns+"dpi_receive_bytes", "Site DPI Receive Bytes", labelDPI, nil),
+	}
+}
+
+func (u *promUnifi) exportSiteDPI(r report, s *unifi.DPITable) {
+	for _, dpi := range s.ByApp {
+		labelDPI := []string{unifi.DPICats.Get(dpi.Cat), unifi.DPIApps.GetApp(dpi.Cat, dpi.App), s.SiteName, s.SourceName}
+
+		//	log.Println(labelsDPI, dpi.Cat, dpi.App, dpi.TxBytes, dpi.RxBytes, dpi.TxPackets, dpi.RxPackets)
+		r.send([]*metric{
+			{u.Site.DPITxPackets, gauge, dpi.TxPackets, labelDPI},
+			{u.Site.DPIRxPackets, gauge, dpi.RxPackets, labelDPI},
+			{u.Site.DPITxBytes, gauge, dpi.TxBytes, labelDPI},
+			{u.Site.DPIRxBytes, gauge, dpi.RxBytes, labelDPI},
+		})
 	}
 }
 
