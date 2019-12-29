@@ -38,7 +38,10 @@ ITERATION=$(git rev-list --count --all || echo 0)
 DATE="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
 COMMIT="$(git rev-parse --short HEAD || echo 0)"
 
+GIT_BRANCH="$(git rev-parse --abbrev-ref HEAD || echo unknown)"
+BRANCH="${TRAVIS_BRANCH:-${GIT_BRANCH}}"
+
 # This is a custom download path for homebrew formula.
 SOURCE_PATH=https://golift.io/${BINARY}/archive/v${VERSION}.tar.gz
 
-export SOURCE_URL URL VVERSION VERSION ITERATION DATE COMMIT SOURCE_PATH
+export SOURCE_URL URL VVERSION VERSION ITERATION DATE BRANCH COMMIT SOURCE_PATH
