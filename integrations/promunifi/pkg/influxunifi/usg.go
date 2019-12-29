@@ -10,9 +10,11 @@ func (u *InfluxUnifi) batchUSG(r report, s *unifi.USG) {
 	if !s.Adopted.Val || s.Locating.Val {
 		return
 	}
+
 	tags := map[string]string{
 		"mac":       s.Mac,
 		"site_name": s.SiteName,
+		"source":    s.SourceName,
 		"name":      s.Name,
 		"version":   s.Version,
 		"model":     s.Model,
@@ -39,44 +41,17 @@ func (u *InfluxUnifi) batchUSG(r report, s *unifi.USG) {
 			"num_mobile":    s.NumMobile.Val,
 		},
 	)
+
 	r.send(&metric{Table: "usg", Tags: tags, Fields: fields})
 	u.batchNetTable(r, tags, s.NetworkTable)
 	u.batchUSGwans(r, tags, s.Wan1, s.Wan2)
-
-	/*
-		for _, p := range s.PortTable {
-			t := map[string]string{
-				"device_name": tags["name"],
-				"site_name":   tags["site_name"],
-				"name":        p.Name,
-				"ifname":      p.Ifname,
-				"ip":          p.IP,
-				"mac":         p.Mac,
-				"up":          p.Up.Txt,
-				"speed":       p.Speed.Txt,
-				"full_duplex": p.FullDuplex.Txt,
-				"enable":      p.Enable.Txt,
-			}
-			f := map[string]interface{}{
-				"rx_bytes":     p.RxBytes.Val,
-				"rx_dropped":   p.RxDropped.Val,
-				"rx_errors":    p.RxErrors.Val,
-				"rx_packets":   p.RxBytes.Val,
-				"tx_bytes":     p.TxBytes.Val,
-				"tx_dropped":   p.TxDropped.Val,
-				"tx_errors":    p.TxErrors.Val,
-				"tx_packets":   p.TxPackets.Val,
-				"rx_multicast": p.RxMulticast.Val,
-				"dns_servers":  strings.Join(p.DNS, ","),
-			}
-			r.send(&metric{Table: "usg_ports", Tags: t, Fields: f})
-		}
-	*/
 }
+
 func (u *InfluxUnifi) batchUSGstat(ss unifi.SpeedtestStatus, gw *unifi.Gw, ul unifi.Uplink) map[string]interface{} {
 	if gw == nil {
 		return map[string]interface{}{}
 	}
+
 	return map[string]interface{}{
 		"uplink_latency":                 ul.Latency.Val,
 		"uplink_speed":                   ul.Speed.Val,
@@ -92,14 +67,17 @@ func (u *InfluxUnifi) batchUSGstat(ss unifi.SpeedtestStatus, gw *unifi.Gw, ul un
 		"lan-rx_dropped":                 gw.LanRxDropped.Val,
 	}
 }
+
 func (u *InfluxUnifi) batchUSGwans(r report, tags map[string]string, wans ...unifi.Wan) {
 	for _, wan := range wans {
 		if !wan.Up.Val {
 			continue
 		}
+
 		tags := map[string]string{
 			"device_name": tags["name"],
 			"site_name":   tags["site_name"],
+			"source":      tags["source"],
 			"ip":          wan.IP,
 			"purpose":     wan.Name,
 			"mac":         wan.Mac,
@@ -129,6 +107,7 @@ func (u *InfluxUnifi) batchUSGwans(r report, tags map[string]string, wans ...uni
 			"tx_broadcast": wan.TxBroadcast.Val,
 			"tx_multicast": wan.TxMulticast.Val,
 		}
+
 		r.send(&metric{Table: "usg_wan_ports", Tags: tags, Fields: fields})
 	}
 }
@@ -138,6 +117,7 @@ func (u *InfluxUnifi) batchNetTable(r report, tags map[string]string, nt unifi.N
 		tags := map[string]string{
 			"device_name": tags["name"],
 			"site_name":   tags["site_name"],
+			"source":      tags["source"],
 			"up":          p.Up.Txt,
 			"enabled":     p.Enabled.Txt,
 			"ip":          p.IP,
@@ -154,6 +134,7 @@ func (u *InfluxUnifi) batchNetTable(r report, tags map[string]string, nt unifi.N
 			"tx_bytes":   p.TxBytes.Val,
 			"tx_packets": p.TxPackets.Val,
 		}
+
 		r.send(&metric{Table: "usg_networks", Tags: tags, Fields: fields})
 	}
 }
