@@ -10,6 +10,7 @@ func (u *InfluxUnifi) batchClient(r report, s *unifi.Client) {
 	tags := map[string]string{
 		"mac":         s.Mac,
 		"site_name":   s.SiteName,
+		"source":      s.SourceName,
 		"ap_name":     s.ApName,
 		"gw_name":     s.GwName,
 		"sw_name":     s.SwName,
@@ -66,14 +67,29 @@ func (u *InfluxUnifi) batchClient(r report, s *unifi.Client) {
 		"wired-tx_bytes":   s.WiredTxBytes,
 		"wired-tx_bytes-r": s.WiredTxBytesR,
 		"wired-tx_packets": s.WiredTxPackets,
-		/*
-			"dpi_app":          c.DpiStats.App.Val,
-			"dpi_cat":          c.DpiStats.Cat.Val,
-			"dpi_rx_bytes":     c.DpiStats.RxBytes.Val,
-			"dpi_rx_packets":   c.DpiStats.RxPackets.Val,
-			"dpi_tx_bytes":     c.DpiStats.TxBytes.Val,
-			"dpi_tx_packets":   c.DpiStats.TxPackets.Val,
-		*/
 	}
+
 	r.send(&metric{Table: "clients", Tags: tags, Fields: fields})
+}
+
+func (u *InfluxUnifi) batchClientDPI(r report, s *unifi.DPITable) {
+	for _, dpi := range s.ByApp {
+		r.send(&metric{
+			Table: "clientdpi",
+			Tags: map[string]string{
+				"category":    unifi.DPICats.Get(dpi.Cat),
+				"application": unifi.DPIApps.GetApp(dpi.Cat, dpi.App),
+				"name":        s.Name,
+				"mac":         s.MAC,
+				"site_name":   s.SiteName,
+				"source":      s.SourceName,
+			},
+			Fields: map[string]interface{}{
+				"tx_packets": dpi.TxPackets,
+				"rx_packets": dpi.RxPackets,
+				"tx_bytes":   dpi.TxBytes,
+				"rx_bytes":   dpi.RxBytes,
+			}},
+		)
+	}
 }
