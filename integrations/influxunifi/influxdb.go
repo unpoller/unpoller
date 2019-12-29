@@ -34,7 +34,7 @@ type Config struct {
 
 // InfluxDB allows the data to be nested in the config file.
 type InfluxDB struct {
-	Config Config `json:"influxdb" toml:"influxdb" xml:"influxdb" yaml:"influxdb"`
+	*Config `json:"influxdb" toml:"influxdb" xml:"influxdb" yaml:"influxdb"`
 }
 
 // InfluxUnifi is returned by New() after you provide a Config.
@@ -64,7 +64,7 @@ func init() {
 // PollController runs forever, polling UniFi and pushing to InfluxDB
 // This is started by Run() or RunBoth() after everything checks out.
 func (u *InfluxUnifi) PollController() {
-	interval := u.Config.Interval.Round(time.Second)
+	interval := u.Interval.Round(time.Second)
 	ticker := time.NewTicker(interval)
 	log.Printf("[INFO] Everything checks out! Poller started, InfluxDB interval: %v", interval)
 
@@ -93,7 +93,7 @@ func (u *InfluxUnifi) PollController() {
 func (u *InfluxUnifi) Run(c poller.Collect) error {
 	var err error
 
-	if u.Config.Disable {
+	if u.Config == nil || u.Disable {
 		return nil
 	}
 
@@ -101,10 +101,10 @@ func (u *InfluxUnifi) Run(c poller.Collect) error {
 	u.setConfigDefaults()
 
 	u.influx, err = influx.NewHTTPClient(influx.HTTPConfig{
-		Addr:      u.Config.URL,
-		Username:  u.Config.User,
-		Password:  u.Config.Pass,
-		TLSConfig: &tls.Config{InsecureSkipVerify: !u.Config.VerifySSL},
+		Addr:      u.URL,
+		Username:  u.User,
+		Password:  u.Pass,
+		TLSConfig: &tls.Config{InsecureSkipVerify: !u.VerifySSL},
 	})
 	if err != nil {
 		return err
@@ -116,29 +116,29 @@ func (u *InfluxUnifi) Run(c poller.Collect) error {
 }
 
 func (u *InfluxUnifi) setConfigDefaults() {
-	if u.Config.URL == "" {
-		u.Config.URL = defaultInfluxURL
+	if u.URL == "" {
+		u.URL = defaultInfluxURL
 	}
 
-	if u.Config.User == "" {
-		u.Config.User = defaultInfluxUser
+	if u.User == "" {
+		u.User = defaultInfluxUser
 	}
 
-	if u.Config.Pass == "" {
-		u.Config.Pass = defaultInfluxUser
+	if u.Pass == "" {
+		u.Pass = defaultInfluxUser
 	}
 
-	if u.Config.DB == "" {
-		u.Config.DB = defaultInfluxDB
+	if u.DB == "" {
+		u.DB = defaultInfluxDB
 	}
 
-	if u.Config.Interval.Duration == 0 {
-		u.Config.Interval = cnfg.Duration{Duration: defaultInterval}
-	} else if u.Config.Interval.Duration < minimumInterval {
-		u.Config.Interval = cnfg.Duration{Duration: minimumInterval}
+	if u.Interval.Duration == 0 {
+		u.Interval = cnfg.Duration{Duration: defaultInterval}
+	} else if u.Interval.Duration < minimumInterval {
+		u.Interval = cnfg.Duration{Duration: minimumInterval}
 	}
 
-	u.Config.Interval = cnfg.Duration{Duration: u.Config.Interval.Duration.Round(time.Second)}
+	u.Interval = cnfg.Duration{Duration: u.Interval.Duration.Round(time.Second)}
 }
 
 // ReportMetrics batches all device and client data into influxdb data points.
@@ -151,7 +151,7 @@ func (u *InfluxUnifi) ReportMetrics(m *poller.Metrics) (*Report, error) {
 	var err error
 
 	// Make a new Influx Points Batcher.
-	r.bp, err = influx.NewBatchPoints(influx.BatchPointsConfig{Database: u.Config.DB})
+	r.bp, err = influx.NewBatchPoints(influx.BatchPointsConfig{Database: u.DB})
 
 	if err != nil {
 		return nil, fmt.Errorf("influx.NewBatchPoints: %v", err)
