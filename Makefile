@@ -8,6 +8,7 @@ IGNORED:=$(shell bash -c "source .metadata.sh ; env | sed 's/=/:=/;s/^/export /'
 # md2roff turns markdown into man files and html files.
 MD2ROFF_BIN=github.com/github/hub/md2roff-bin
 
+
 # Travis CI passes the version in. Local builds get it from the current git tag.
 ifeq ($(VERSION),)
 	include .metadata.make
@@ -42,11 +43,13 @@ $(PACKAGE_SCRIPTS) \
 --config-files "/etc/$(BINARY)/$(CONFIG_FILE)"
 endef
 
+PLUGINS:=$(patsubst plugins/%/main.go,%,$(wildcard plugins/*/main.go))
+
 VERSION_LDFLAGS:= \
-  -X $(IMPORT_PATH)/vendor/github.com/prometheus/common/version.Branch=$(BRANCH) \
-  -X $(IMPORT_PATH)/vendor/github.com/prometheus/common/version.BuildDate=$(DATE) \
-  -X $(IMPORT_PATH)/vendor/github.com/prometheus/common/version.Revision=$(COMMIT) \
-  -X $(VERSION_PATH)=$(VERSION)-$(ITERATION)
+  -X github.com/prometheus/common/version.Branch=$(TRAVIS_BRANCH) \
+  -X github.com/prometheus/common/version.BuildDate=$(DATE) \
+  -X github.com/prometheus/common/version.Revision=$(COMMIT) \
+  -X github.com/prometheus/common/version.Version=$(VERSION)-$(ITERATION)
 
 # Makefile targets follow.
 
@@ -183,12 +186,14 @@ $(BINARY)_$(VERSION)-$(ITERATION)_armhf.deb: package_build_linux_armhf check_fpm
 	[ "$(SIGNING_KEY)" == "" ] || expect -c "spawn debsigs --default-key="$(SIGNING_KEY)" --sign=origin $(BINARY)_$(VERSION)-$(ITERATION)_armhf.deb; expect -exact \"Enter passphrase: \"; send \"$(PRIVATE_KEY)\r\"; expect eof"
 
 # Build an environment that can be packaged for linux.
-package_build_linux: readme man linux
+package_build_linux: readme man plugins_linux_amd64 linux
 	# Building package environment for linux.
-	mkdir -p $@/usr/bin $@/etc/$(BINARY) $@/usr/share/man/man1 $@/usr/share/doc/$(BINARY)
+	mkdir -p $@/usr/bin $@/etc/$(BINARY) $@/usr/share/man/man1 $@/usr/share/doc/$(BINARY) $@/usr/lib/$(BINARY)
 	# Copying the binary, config file, unit file, and man page into the env.
 	cp $(BINARY).amd64.linux $@/usr/bin/$(BINARY)
 	cp *.1.gz $@/usr/share/man/man1
+	rm -f $@/usr/lib/$(BINARY)/*.so
+	cp *amd64.so $@/usr/lib/$(BINARY)/
 	cp examples/$(CONFIG_FILE).example $@/etc/$(BINARY)/
 	cp examples/$(CONFIG_FILE).example $@/etc/$(BINARY)/$(CONFIG_FILE)
 	cp LICENSE *.html examples/*?.?* $@/usr/share/doc/$(BINARY)/
@@ -226,7 +231,6 @@ docker:
 		--build-arg "VENDOR=$(VENDOR)" \
 		--build-arg "AUTHOR=$(MAINT)" \
 		--build-arg "BINARY=$(BINARY)" \
-		--build-arg "IMPORT_PATH=$(IMPORT_PATH)" \
 		--build-arg "SOURCE_URL=$(SOURCE_URL)" \
 		--build-arg "CONFIG_FILE=$(CONFIG_FILE)" \
 		--tag $(BINARY) .
@@ -245,13 +249,25 @@ $(BINARY).rb: v$(VERSION).tar.gz.sha256 init/homebrew/$(FORMULA).rb.tmpl
 		-e "s/{{SHA256}}/$(shell head -c64 $<)/g" \
 		-e "s/{{Desc}}/$(DESC)/g" \
 		-e "s%{{URL}}%$(URL)%g" \
-		-e "s%{{IMPORT_PATH}}%$(IMPORT_PATH)%g" \
 		-e "s%{{SOURCE_PATH}}%$(SOURCE_PATH)%g" \
 		-e "s%{{SOURCE_URL}}%$(SOURCE_URL)%g" \
 		-e "s%{{CONFIG_FILE}}%$(CONFIG_FILE)%g" \
 		-e "s%{{Class}}%$(shell echo $(BINARY) | perl -pe 's/(?:\b|-)(\p{Ll})/\u$$1/g')%g" \
 		init/homebrew/$(FORMULA).rb.tmpl | tee $(BINARY).rb
 		# That perl line turns hello-world into HelloWorld, etc.
+
+plugins: $(patsubst %,%.so,$(PLUGINS))
+$(patsubst %,%.so,$(PLUGINS)):
+	go build -o $@ -ldflags "$(VERSION_LDFLAGS)" -buildmode=plugin ./plugins/$(patsubst %.so,%,$@)
+
+linux_plugins: plugins_linux_amd64 plugins_linux_i386 plugins_linux_arm64 plugins_linux_armhf
+plugins_linux_amd64: $(patsubst %,%.linux_amd64.so,$(PLUGINS))
+$(patsubst %,%.linux_amd64.so,$(PLUGINS)):
+	GOOS=linux GOARCH=amd64 go build -o $@ -ldflags "$(VERSION_LDFLAGS)" -buildmode=plugin ./plugins/$(patsubst %.linux_amd64.so,%,$@)
+
+plugins_darwin: $(patsubst %,%.darwin.so,$(PLUGINS))
+$(patsubst %,%.darwin.so,$(PLUGINS)):
+	GOOS=darwin go build -o $@ -ldflags "$(VERSION_LDFLAGS)" -buildmode=plugin ./plugins/$(patsubst %.darwin.so,%,$@)
 
 # Extras
 
@@ -265,17 +281,18 @@ lint:
 
 # This is safe; recommended even.
 dep: vendor
-vendor: Gopkg.*
-	dep ensure --vendor-only
+vendor: go.mod go.sum
+	go mod vendor
 
 # Don't run this unless you're ready to debug untested vendored dependencies.
-deps:
-	dep ensure --update
+deps: update vendor
+update:
+	go get -u -d
 
 # Homebrew stuff. macOS only.
 
 # Used for Homebrew only. Other distros can create packages.
-install: man readme $(BINARY)
+install: man readme $(BINARY) plugins_darwin
 	@echo -  Done Building!  -
 	@echo -  Local installation with the Makefile is only supported on macOS.
 	@echo If you wish to install the application manually on Linux, check out the wiki: https://$(SOURCE_URL)/wiki/Installation
@@ -285,8 +302,9 @@ install: man readme $(BINARY)
 	@[ "$(PREFIX)" != "" ] || (echo "Unable to continue, PREFIX not set. Use: make install PREFIX=/usr/local ETC=/usr/local/etc" && false)
 	@[ "$(ETC)" != "" ] || (echo "Unable to continue, ETC not set. Use: make install PREFIX=/usr/local ETC=/usr/local/etc" && false)
 	# Copying the binary, config file, unit file, and man page into the env.
-	/usr/bin/install -m 0755 -d $(PREFIX)/bin $(PREFIX)/share/man/man1 $(ETC)/$(BINARY) $(PREFIX)/share/doc/$(BINARY)
+	/usr/bin/install -m 0755 -d $(PREFIX)/bin $(PREFIX)/share/man/man1 $(ETC)/$(BINARY) $(PREFIX)/share/doc/$(BINARY) $(PREFIX)/lib/$(BINARY)
 	/usr/bin/install -m 0755 -cp $(BINARY) $(PREFIX)/bin/$(BINARY)
+	/usr/bin/install -m 0755 -cp *darwin.so $(PREFIX)/lib/$(BINARY)/
 	/usr/bin/install -m 0644 -cp $(BINARY).1.gz $(PREFIX)/share/man/man1
 	/usr/bin/install -m 0644 -cp examples/$(CONFIG_FILE).example $(ETC)/$(BINARY)/
 	[ -f $(ETC)/$(BINARY)/$(CONFIG_FILE) ] || /usr/bin/install -m 0644 -cp  examples/$(CONFIG_FILE).example $(ETC)/$(BINARY)/$(CONFIG_FILE)

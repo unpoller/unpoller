@@ -11,6 +11,7 @@ func (u *InfluxUnifi) batchSite(r report, s *unifi.Site) {
 		tags := map[string]string{
 			"name":      s.Name,
 			"site_name": s.SiteName,
+			"source":    s.SourceName,
 			"desc":      s.Desc,
 			"status":    h.Status,
 			"subsystem": h.Subsystem,
@@ -51,6 +52,27 @@ func (u *InfluxUnifi) batchSite(r report, s *unifi.Site) {
 			"remote_user_tx_packets":   h.RemoteUserTxPackets.Val,
 			"num_new_alarms":           s.NumNewAlarms.Val,
 		}
+
 		r.send(&metric{Table: "subsystems", Tags: tags, Fields: fields})
+	}
+}
+
+func (u *InfluxUnifi) batchSiteDPI(r report, s *unifi.DPITable) {
+	for _, dpi := range s.ByApp {
+		r.send(&metric{
+			Table: "sitedpi",
+			Tags: map[string]string{
+				"category":    unifi.DPICats.Get(dpi.Cat),
+				"application": unifi.DPIApps.GetApp(dpi.Cat, dpi.App),
+				"site_name":   s.SiteName,
+				"source":      s.SourceName,
+			},
+			Fields: map[string]interface{}{
+				"tx_packets": dpi.TxPackets,
+				"rx_packets": dpi.RxPackets,
+				"tx_bytes":   dpi.TxBytes,
+				"rx_bytes":   dpi.RxBytes,
+			}},
+		)
 	}
 }
