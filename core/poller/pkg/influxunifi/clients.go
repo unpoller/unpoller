@@ -71,3 +71,25 @@ func (u *InfluxUnifi) batchClient(r report, s *unifi.Client) {
 
 	r.send(&metric{Table: "clients", Tags: tags, Fields: fields})
 }
+
+func (u *InfluxUnifi) batchClientDPI(r report, s *unifi.DPITable) {
+	for _, dpi := range s.ByApp {
+		r.send(&metric{
+			Table: "clientdpi",
+			Tags: map[string]string{
+				"category":    unifi.DPICats.Get(dpi.Cat),
+				"application": unifi.DPIApps.GetApp(dpi.Cat, dpi.App),
+				"name":        s.Name,
+				"mac":         s.MAC,
+				"site_name":   s.SiteName,
+				"source":      s.SourceName,
+			},
+			Fields: map[string]interface{}{
+				"tx_packets": dpi.TxPackets,
+				"rx_packets": dpi.RxPackets,
+				"tx_bytes":   dpi.TxBytes,
+				"rx_bytes":   dpi.RxBytes,
+			}},
+		)
+	}
+}
