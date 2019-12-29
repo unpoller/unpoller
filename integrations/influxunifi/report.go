@@ -4,8 +4,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/davidnewhall/unifi-poller/pkg/poller"
 	influx "github.com/influxdata/influxdb1-client/v2"
+	"github.com/unifi-poller/poller"
 )
 
 // Report is returned to the calling procedure after everything is processed.

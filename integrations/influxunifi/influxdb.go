@@ -8,8 +8,8 @@ import (
 	"log"
 	"time"
 
-	"github.com/davidnewhall/unifi-poller/pkg/poller"
 	influx "github.com/influxdata/influxdb1-client/v2"
+	"github.com/unifi-poller/poller"
 	"golift.io/cnfg"
 )
 
