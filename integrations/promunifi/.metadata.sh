@@ -25,10 +25,8 @@ export BINARY GHUSER HBREPO MAINT VENDOR DESC GOLANGCI_LINT_ARGS CONFIG_FILE LIC
 # Fix the repo if it doesn't match the binary name.
 # Provide a better URL if one exists.
 
-# Used as go import path in docker and homebrew builds.
-IMPORT_PATH="github.com/${GHUSER}/${BINARY}"
 # Used for source links and wiki links.
-SOURCE_URL="https://${IMPORT_PATH}"
+SOURCE_URL="https://github.com/${GHUSER}/${BINARY}"
 # Used for documentation links.
 URL="${SOURCE_URL}"
 
@@ -40,9 +38,7 @@ ITERATION=$(git rev-list --count --all || echo 0)
 DATE="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
 COMMIT="$(git rev-parse --short HEAD || echo 0)"
 
-# Used by homebrew downloads.
-#SOURCE_PATH=https://codeload.${IMPORT_PATH}/tar.gz/v${VERSION}
 # This is a custom download path for homebrew formula.
 SOURCE_PATH=https://golift.io/${BINARY}/archive/v${VERSION}.tar.gz
 
-export IMPORT_PATH SOURCE_URL URL VVERSION VERSION ITERATION DATE COMMIT SOURCE_PATH
+export SOURCE_URL URL VVERSION VERSION ITERATION DATE COMMIT SOURCE_PATH
