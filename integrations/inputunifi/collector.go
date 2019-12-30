@@ -90,10 +90,8 @@ func (u *InputUnifi) pollController(c *Controller) (*poller.Metrics, error) {
 		}
 	}
 
-	idsTime := 2 * time.Minute
-
 	if c.SaveIDS {
-		m.IDSList, err = c.Unifi.GetIDS(m.Sites, time.Now().Add(idsTime), time.Now())
+		m.IDSList, err = c.Unifi.GetIDS(m.Sites, time.Now().Add(time.Minute), time.Now())
 		if err != nil {
 			return m, fmt.Errorf("unifi.GetIDS(%v): %v", c.URL, err)
 		}
