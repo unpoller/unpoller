@@ -68,6 +68,9 @@ hash it out. I'm reasonable.
 
 If you're trying to fix something in the UniFi data collection (ie. you got an
 unmarshal error, or you want to add something I didn't include) then you
-should look at the [UniFi library](https://github.com/golift/unifi). All the
+should look at the [UniFi library](https://github.com/unifi-poller/unifi). All the
 data collection and export code lives there. Contributions and Issues are welcome
 on that code base as well.
+
+This application is very dynamic and built using several package repos.
+They are all in the [UniFi Poller GitHub Org](https://github.com/unifi-poller).
