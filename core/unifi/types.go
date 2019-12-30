@@ -112,6 +112,10 @@ func (f *FlexInt) UnmarshalJSON(b []byte) error {
 	return nil
 }
 
+func (f *FlexInt) String() string {
+	return f.Txt
+}
+
 // FlexBool provides a container and unmarshalling for fields that may be
 // boolean or strings in the Unifi API.
 type FlexBool struct {
@@ -129,4 +133,8 @@ func (f *FlexBool) UnmarshalJSON(b []byte) error {
 		strings.EqualFold(f.Txt, "ok")
 
 	return nil
+}
+
+func (f *FlexBool) String() string {
+	return f.Txt
 }
