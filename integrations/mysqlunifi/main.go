@@ -7,6 +7,12 @@ import (
 	"golift.io/cnfg"
 )
 
+// Only capital (exported) members are unmarshaled when passed into poller.NewOutput().
+type plugin struct {
+	*Config `json:"mysql" toml:"mysql" xml:"mysql" yaml:"mysql"`
+	poller.Collect
+}
+
 // Config represents the data that is unmarshalled from the up.conf config file for this plugins.
 // See up.conf.example.mysql for sample input data.
 type Config struct {
@@ -38,13 +44,6 @@ type Clients struct {
 	Fields map[string]string `json:"fields" toml:"fields" xml:"field" yaml:"fields"`
 }
 
-// Pointers are ignored during ENV variable unmarshal, avoid pointers to your config.
-// Only capital (exported) members are unmarshaled when passed into poller.NewOutput().
-type plugin struct {
-	*Config `json:"mysql" toml:"mysql" xml:"mysql" yaml:"mysql"`
-	poller.Collect
-}
-
 func init() {
 	u := &plugin{Config: &Config{}}
 
@@ -55,11 +54,6 @@ func init() {
 	})
 }
 
-// main() is required, but it shouldn't do much as it's not used in plugin mode.
-func main() {
-	fmt.Println("this is a unifi-poller plugin; not an application")
-}
-
 // Run gets called by poller core code. Return when the plugin stops working or has an error.
 // In other words, don't run your code in a go routine, it already is.
 func (p *plugin) Run(c poller.Collect) error {
@@ -67,5 +61,37 @@ func (p *plugin) Run(c poller.Collect) error {
 		return nil // no config or disabled, bail out.
 	}
 
+	if err := p.validateConfig(); err != nil {
+		return err
+	}
+
 	return p.runCollector()
+}
+
+// validateConfig checks input sanity.
+func (p *plugin) validateConfig() error {
+	if p.Interval.Duration == 0 {
+		return fmt.Errorf("must provide a polling interval")
+	}
+
+	if p.Clients == nil && len(p.Devices) == 0 {
+		return fmt.Errorf("must configure client or device collection; both empty")
+	}
+
+	for _, d := range p.Devices {
+		if len(d.Fields) == 0 {
+			return fmt.Errorf("no fields defined for device type %s, table %s", d.Type, d.Table)
+		}
+	}
+
+	if p.Clients != nil && p.Clients.Fields == nil {
+		return fmt.Errorf("no fields defined for clients; if you don't want to store client data, remove it from the config")
+	}
+
+	return nil
+}
+
+// main() is required, but it shouldn't do much as it's not used in plugin mode.
+func main() {
+	fmt.Println("this is a unifi-poller plugin; not an application")
 }
