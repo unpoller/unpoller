@@ -4,8 +4,6 @@
 
 # Must match the repo name.
 BINARY="unifi-poller"
-# github username
-GHUSER="davidnewhall"
 # Github repo containing homebrew formula repo.
 HBREPO="golift/homebrew-mugs"
 MAINT="David Newhall II <david at sleepers dot pro>"
@@ -19,14 +17,14 @@ LICENSE="MIT"
 # This affects the homebrew formula (launchd) and linux packages (systemd).
 FORMULA="service"
 
-export BINARY GHUSER HBREPO MAINT VENDOR DESC GOLANGCI_LINT_ARGS CONFIG_FILE LICENSE FORMULA
+export BINARY HBREPO MAINT VENDOR DESC GOLANGCI_LINT_ARGS CONFIG_FILE LICENSE FORMULA
 
 # The rest is mostly automatic.
 # Fix the repo if it doesn't match the binary name.
 # Provide a better URL if one exists.
 
 # Used for source links and wiki links.
-SOURCE_URL="https://github.com/${GHUSER}/${BINARY}"
+SOURCE_URL="https://github.com/${BINARY}/${BINARY}"
 # Used for documentation links.
 URL="${SOURCE_URL}"
 
