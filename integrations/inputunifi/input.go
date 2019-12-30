@@ -53,7 +53,7 @@ type Config struct {
 }
 
 func init() {
-	u := &InputUnifi{Config: &Config{}}
+	u := &InputUnifi{}
 
 	poller.NewInput(&poller.InputPlugin{
 		Name:   "unifi",

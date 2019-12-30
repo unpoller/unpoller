@@ -14,7 +14,11 @@ import (
 // Initialize gets called one time when starting up.
 // Satisfies poller.Input interface.
 func (u *InputUnifi) Initialize(l poller.Logger) error {
-	if u.Config == nil || u.Disable {
+	if u.Config == nil {
+		u.Config = &Config{Disable: true}
+	}
+
+	if u.Disable {
 		l.Logf("UniFi input plugin disabled or missing configuration!")
 		return nil
 	}
