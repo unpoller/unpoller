@@ -98,7 +98,7 @@ func (u *InputUnifi) checkSites(c *Controller) error {
 	u.RLock()
 	defer u.RUnlock()
 
-	if len(c.Sites) < 1 || c.Sites[0] == "" {
+	if len(c.Sites) == 0 || c.Sites[0] == "" {
 		c.Sites = []string{"all"}
 	}
 
@@ -134,7 +134,7 @@ FIRST:
 		u.LogErrorf("Configured site not found on controller %s: %v", c.Role, s)
 	}
 
-	if c.Sites = keep; len(keep) < 1 {
+	if c.Sites = keep; len(keep) == 0 {
 		c.Sites = []string{"all"}
 	}
 
@@ -181,7 +181,7 @@ func (u *InputUnifi) setDefaults(c *Controller) {
 		c.User = defaultUser
 	}
 
-	if len(c.Sites) < 1 {
+	if len(c.Sites) == 0 {
 		c.Sites = []string{defaultSite}
 	}
 }

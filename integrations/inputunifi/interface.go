@@ -23,12 +23,12 @@ func (u *InputUnifi) Initialize(l poller.Logger) error {
 		return nil
 	}
 
-	if u.setDefaults(&u.Default); len(u.Controllers) < 1 && !u.Dynamic {
+	if u.setDefaults(&u.Default); len(u.Controllers) == 0 && !u.Dynamic {
 		new := u.Default // copy defaults.
 		u.Controllers = []*Controller{&new}
 	}
 
-	if len(u.Controllers) < 1 {
+	if len(u.Controllers) == 0 {
 		l.Logf("No controllers configured. Polling dynamic controllers only!")
 	}
 

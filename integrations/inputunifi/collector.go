@@ -90,8 +90,10 @@ func (u *InputUnifi) pollController(c *Controller) (*poller.Metrics, error) {
 		}
 	}
 
+	idsTime := 2 * time.Minute
+
 	if c.SaveIDS {
-		m.IDSList, err = c.Unifi.GetIDS(m.Sites, time.Now().Add(2*time.Minute), time.Now())
+		m.IDSList, err = c.Unifi.GetIDS(m.Sites, time.Now().Add(idsTime), time.Now())
 		if err != nil {
 			return m, fmt.Errorf("unifi.GetIDS(%v): %v", c.URL, err)
 		}
@@ -177,7 +179,7 @@ func (u *InputUnifi) getFilteredSites(c *Controller) (unifi.Sites, error) {
 	sites, err := c.Unifi.GetSites()
 	if err != nil {
 		return nil, err
-	} else if len(c.Sites) < 1 || StringInSlice("all", c.Sites) {
+	} else if len(c.Sites) == 0 || StringInSlice("all", c.Sites) {
 		return sites, nil
 	}
 
