@@ -5,6 +5,9 @@ import (
 	"strings"
 )
 
+// Satisfy gomnd
+const oneItem = 1
+
 // GetSites returns a list of configured sites on the UniFi controller.
 func (u *Unifi) GetSites() (Sites, error) {
 	var response struct {
@@ -48,9 +51,9 @@ func (u *Unifi) GetSiteDPI(sites Sites) ([]*DPITable, error) {
 			return nil, err
 		}
 
-		if l := len(response.Data); l > 1 {
+		if l := len(response.Data); l > oneItem {
 			return nil, fmt.Errorf("dpi data table contains more than 1 item; please open a bug report")
-		} else if l != 1 {
+		} else if l != oneItem {
 			continue
 		}
 
