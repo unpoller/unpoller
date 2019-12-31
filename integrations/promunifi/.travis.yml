@@ -7,5 +7,5 @@ before_install:
 install:
 - go mod download
 script:
-- golangci-lint run --enable-all -D gochecknoinits -D funlen
+- golangci-lint run --enable-all -D gochecknoinits -D funlen -e gomnd
 - go test ./...
