@@ -67,6 +67,8 @@ github.com/unifi-poller/poller v0.0.2 h1:qUDSon8UIqRYOXd+V+3jThf2CSE/glQK8MSDmp2
 github.com/unifi-poller/poller v0.0.2/go.mod h1:H1YErnDRLaUQBH09kzd7kNTL3bMNCPuYbg94aJBun7Y=
 github.com/unifi-poller/unifi v0.0.1 h1:8LTf0RyxMdDLmzm59mk7bz5/qfC1hHmC21u/uqx2vSQ=
 github.com/unifi-poller/unifi v0.0.1/go.mod h1:DagVD/I+VMnVUHmTT4Fi76lPI+DHbuMwwtMIzanwMxM=
+github.com/unifi-poller/unifi v0.0.2 h1:FRa6G+VcxOdvy0/u/QLCHGCRYF6EDcxVYij0dDRCKxg=
+github.com/unifi-poller/unifi v0.0.2/go.mod h1:DagVD/I+VMnVUHmTT4Fi76lPI+DHbuMwwtMIzanwMxM=
 golang.org/x/crypto v0.0.0-20180904163835-0709b304e793/go.mod h1:6SG95UA2DQfeDnfUPMdvaQW0Q7yPrPDi9nlGo2tz2b4=
 golang.org/x/crypto v0.0.0-20190308221718-c2843e01d9a2/go.mod h1:djNgcEr1/C05ACkg1iLfiJU5Ep61QUkGW8qpdssI0+w=
 golang.org/x/net v0.0.0-20181114220301-adae6a3d119a/go.mod h1:mL1N/T3taQHkDXs73rZJwtUhF3w3ftmwwsq0BUmARs4=
@@ -78,6 +80,7 @@ golang.org/x/sys v0.0.0-20180905080454-ebe1bf3edb33/go.mod h1:STP8DvDyc/dI5b8T5h
 golang.org/x/sys v0.0.0-20181116152217-5ac8a444bdc5/go.mod h1:STP8DvDyc/dI5b8T5hshtkjS+E42TnysNCUPdjciGhY=
 golang.org/x/sys v0.0.0-20190215142949-d0b11bdaac8a/go.mod h1:STP8DvDyc/dI5b8T5hshtkjS+E42TnysNCUPdjciGhY=
 golang.org/x/sys v0.0.0-20190422165155-953cdadca894/go.mod h1:h1NjWce9XRLGQEsW7wpKNCjG9DtNlClVuFLEZdDNbEs=
+golang.org/x/sys v0.0.0-20191220142924-d4481acd189f h1:68K/z8GLUxV76xGSqwTWw2gyk/jwn79LUL43rES2g8o=
 golang.org/x/sys v0.0.0-20191220142924-d4481acd189f/go.mod h1:h1NjWce9XRLGQEsW7wpKNCjG9DtNlClVuFLEZdDNbEs=
 golang.org/x/text v0.3.0/go.mod h1:NqM8EUOU14njkJ3fqMW+pc6Ldnwhi/IjpwHt7yyuwOQ=
 golift.io/cnfg v0.0.5 h1:HnMU8Z9C/igKvir1dqaHx5BPuNGZrp99FCtdJyP2Z4I=
