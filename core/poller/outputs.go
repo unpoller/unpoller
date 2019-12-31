@@ -63,7 +63,7 @@ func (u *UnifiPoller) InitializeOutputs() error {
 			return err
 		}
 
-		if count--; count < 1 {
+		if count--; count == 0 {
 			return fmt.Errorf("all output plugins have stopped, or none enabled")
 		}
 	}
