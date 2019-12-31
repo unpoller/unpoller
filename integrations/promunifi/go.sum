@@ -65,6 +65,8 @@ github.com/stretchr/testify v1.3.0/go.mod h1:M5WIy9Dh21IEIfnGCwXGc5bZfKNJtfHm1UV
 github.com/stretchr/testify v1.4.0/go.mod h1:j7eGeouHqKxXV5pUuKE4zz7dFj8WfuZ+81PSLYec5m4=
 github.com/unifi-poller/poller v0.0.2 h1:qUDSon8UIqRYOXd+V+3jThf2CSE/glQK8MSDmp20STU=
 github.com/unifi-poller/poller v0.0.2/go.mod h1:H1YErnDRLaUQBH09kzd7kNTL3bMNCPuYbg94aJBun7Y=
+github.com/unifi-poller/poller v0.0.3 h1:VrVx+1jvVcRh11TyO9nn58el/nvWcRKtGwzrg80a0SQ=
+github.com/unifi-poller/poller v0.0.3/go.mod h1:ugy3FyZEH1rFyC3panBiJpXbLf7EZ4GkjiOtydB2CwQ=
 github.com/unifi-poller/unifi v0.0.1 h1:8LTf0RyxMdDLmzm59mk7bz5/qfC1hHmC21u/uqx2vSQ=
 github.com/unifi-poller/unifi v0.0.1/go.mod h1:DagVD/I+VMnVUHmTT4Fi76lPI+DHbuMwwtMIzanwMxM=
 github.com/unifi-poller/unifi v0.0.2 h1:FRa6G+VcxOdvy0/u/QLCHGCRYF6EDcxVYij0dDRCKxg=
