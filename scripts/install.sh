@@ -22,6 +22,8 @@ elif [[ $ARCH == *386* ]] || [[ $ARCH == *686* ]]; then
   ARCH="i386"
 elif [[ $ARCH == *arm64* ]] || [[ $ARCH == *armv8* ]]; then
   ARCH="arm64"
+elif [[ $ARCH == *aarch64* ]] || [[ $ARCH == *armv8* ]]; then
+  ARCH="arm64"
 elif [[ $ARCH == *armv6* ]] || [[ $ARCH == *armv7* ]]; then
   ARCH="armhf"
 else
