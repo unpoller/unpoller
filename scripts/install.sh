@@ -20,7 +20,7 @@ if [ "$ARCH" = "x86_64" ] || [ "$ARCH" = "amd64" ]; then
   ARCH="x86_64|amd64"
 elif [[ $ARCH == *386* ]] || [[ $ARCH == *686* ]]; then
   ARCH="i386"
-elif [[ $ARCH == *arm64* ]] || [[ $ARCH == *armv8* ]]; then
+elif [[ $ARCH == *arm64* ]] || [[ $ARCH == *armv8* ]] || [[ $ARCH == *aarch64* ]]; then
   ARCH="arm64"
 elif [[ $ARCH == *armv6* ]] || [[ $ARCH == *armv7* ]]; then
   ARCH="armhf"
