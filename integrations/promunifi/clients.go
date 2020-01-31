@@ -177,10 +177,13 @@ func (u *promUnifi) reportClientDPItotals(r report, appTotal, catTotal totalsDPI
 
 	// This can allow us to aggregate other data types later, like `name` or `mac`, or anything else unifi adds.
 	a := all{
-		{
-			kind: "application",
-			val:  appTotal,
-		},
+		/*
+			// This produces 7000+ metrics per site. Disabled for now.
+			{
+				kind: "application",
+				val:  appTotal,
+			},
+		*/
 		{
 			kind: "category",
 			val:  catTotal,
