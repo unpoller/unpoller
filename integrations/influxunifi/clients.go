@@ -123,12 +123,11 @@ func fillDPIMapTotals(m totalsDPImap, name, controller, site string, dpi unifi.D
 		return
 	}
 
-	oldDPI := m[controller][site][name]
-	oldDPI.TxPackets += dpi.TxPackets
-	oldDPI.RxPackets += dpi.RxPackets
-	oldDPI.TxBytes += dpi.TxBytes
-	oldDPI.RxBytes += dpi.RxBytes
-	m[controller][site][name] = oldDPI
+	dpi.TxPackets += m[controller][site][name].TxPackets
+	dpi.RxPackets += m[controller][site][name].RxPackets
+	dpi.TxBytes += m[controller][site][name].TxBytes
+	dpi.RxBytes += m[controller][site][name].RxBytes
+	m[controller][site][name] = dpi
 }
 
 func reportClientDPItotals(r report, appTotal, catTotal totalsDPImap) {
@@ -139,10 +138,13 @@ func reportClientDPItotals(r report, appTotal, catTotal totalsDPImap) {
 
 	// This can allow us to aggregate other data types later, like `name` or `mac`, or anything else unifi adds.
 	a := all{
-		{
-			kind: "application",
-			val:  appTotal,
-		},
+		/*
+			// This produces 7000+ metrics per site. Disabled for now.
+			{
+				kind: "application",
+				val:  appTotal,
+			},
+		*/
 		{
 			kind: "category",
 			val:  catTotal,
