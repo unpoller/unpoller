@@ -72,13 +72,24 @@ func (u *InfluxUnifi) batchClient(r report, s *unifi.Client) {
 	r.send(&metric{Table: "clients", Tags: tags, Fields: fields})
 }
 
+// totalsDPImap: controller, site, name (app/cat name), dpi
+type totalsDPImap map[string]map[string]map[string]unifi.DPIData
+
 func (u *InfluxUnifi) batchClientDPI(r report, s *unifi.DPITable) {
+	appTotal := make(totalsDPImap)
+	catTotal := make(totalsDPImap)
+
 	for _, dpi := range s.ByApp {
+		category := unifi.DPICats.Get(dpi.Cat)
+		application := unifi.DPIApps.GetApp(dpi.Cat, dpi.App)
+
+		fillDPIMapTotals(appTotal, application, s.SourceName, s.SiteName, dpi)
+		fillDPIMapTotals(catTotal, category, s.SourceName, s.SiteName, dpi)
 		r.send(&metric{
 			Table: "clientdpi",
 			Tags: map[string]string{
-				"category":    unifi.DPICats.Get(dpi.Cat),
-				"application": unifi.DPIApps.GetApp(dpi.Cat, dpi.App),
+				"category":    category,
+				"application": application,
 				"name":        s.Name,
 				"mac":         s.MAC,
 				"site_name":   s.SiteName,
@@ -91,5 +102,79 @@ func (u *InfluxUnifi) batchClientDPI(r report, s *unifi.DPITable) {
 				"rx_bytes":   dpi.RxBytes,
 			}},
 		)
+	}
+
+	reportClientDPItotals(r, appTotal, catTotal)
+}
+
+// fillDPIMapTotals fills in totals for categories and applications. maybe clients too.
+// This allows less processing in InfluxDB to produce total transfer data per cat or app.
+func fillDPIMapTotals(m totalsDPImap, name, controller, site string, dpi unifi.DPIData) {
+	if _, ok := m[controller]; !ok {
+		m[controller] = make(map[string]map[string]unifi.DPIData)
+	}
+
+	if _, ok := m[controller][site]; !ok {
+		m[controller][site] = make(map[string]unifi.DPIData)
+	}
+
+	if _, ok := m[controller][site][name]; !ok {
+		m[controller][site][name] = dpi
+		return
+	}
+
+	oldDPI := m[controller][site][name]
+	oldDPI.TxPackets += dpi.TxPackets
+	oldDPI.RxPackets += dpi.RxPackets
+	oldDPI.TxBytes += dpi.TxBytes
+	oldDPI.RxBytes += dpi.RxBytes
+	m[controller][site][name] = oldDPI
+}
+
+func reportClientDPItotals(r report, appTotal, catTotal totalsDPImap) {
+	type all []struct {
+		kind string
+		val  totalsDPImap
+	}
+
+	// This can allow us to aggregate other data types later, like `name` or `mac`, or anything else unifi adds.
+	a := all{
+		{
+			kind: "application",
+			val:  appTotal,
+		},
+		{
+			kind: "category",
+			val:  catTotal,
+		},
+	}
+
+	for _, k := range a {
+		for controller, s := range k.val {
+			for site, c := range s {
+				for name, m := range c {
+					m := &metric{
+						Table: "clientdpi",
+						Tags: map[string]string{
+							"category":    "TOTAL",
+							"application": "TOTAL",
+							"name":        "TOTAL",
+							"mac":         "TOTAL",
+							"site_name":   site,
+							"source":      controller,
+						},
+						Fields: map[string]interface{}{
+							"tx_packets": m.TxPackets,
+							"rx_packets": m.RxPackets,
+							"tx_bytes":   m.TxBytes,
+							"rx_bytes":   m.RxBytes,
+						},
+					}
+					m.Tags[k.kind] = name
+
+					r.send(m)
+				}
+			}
+		}
 	}
 }
