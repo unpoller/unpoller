@@ -75,16 +75,13 @@ func (u *InfluxUnifi) batchClient(r report, s *unifi.Client) {
 // totalsDPImap: controller, site, name (app/cat name), dpi
 type totalsDPImap map[string]map[string]map[string]unifi.DPIData
 
-func (u *InfluxUnifi) batchClientDPI(r report, s *unifi.DPITable) {
-	appTotal := make(totalsDPImap)
-	catTotal := make(totalsDPImap)
-
+func (u *InfluxUnifi) batchClientDPI(r report, s *unifi.DPITable, appTotal, catTotal totalsDPImap) {
 	for _, dpi := range s.ByApp {
 		category := unifi.DPICats.Get(dpi.Cat)
 		application := unifi.DPIApps.GetApp(dpi.Cat, dpi.App)
-
 		fillDPIMapTotals(appTotal, application, s.SourceName, s.SiteName, dpi)
 		fillDPIMapTotals(catTotal, category, s.SourceName, s.SiteName, dpi)
+
 		r.send(&metric{
 			Table: "clientdpi",
 			Tags: map[string]string{
@@ -103,31 +100,25 @@ func (u *InfluxUnifi) batchClientDPI(r report, s *unifi.DPITable) {
 			}},
 		)
 	}
-
-	reportClientDPItotals(r, appTotal, catTotal)
 }
 
 // fillDPIMapTotals fills in totals for categories and applications. maybe clients too.
 // This allows less processing in InfluxDB to produce total transfer data per cat or app.
 func fillDPIMapTotals(m totalsDPImap, name, controller, site string, dpi unifi.DPIData) {
-	if _, ok := m[controller]; !ok {
+	if m[controller] == nil {
 		m[controller] = make(map[string]map[string]unifi.DPIData)
 	}
 
-	if _, ok := m[controller][site]; !ok {
+	if m[controller][site] == nil {
 		m[controller][site] = make(map[string]unifi.DPIData)
 	}
 
-	if _, ok := m[controller][site][name]; !ok {
-		m[controller][site][name] = dpi
-		return
-	}
-
-	dpi.TxPackets += m[controller][site][name].TxPackets
-	dpi.RxPackets += m[controller][site][name].RxPackets
-	dpi.TxBytes += m[controller][site][name].TxBytes
-	dpi.RxBytes += m[controller][site][name].RxBytes
-	m[controller][site][name] = dpi
+	existing := m[controller][site][name]
+	existing.TxPackets += dpi.TxPackets
+	existing.RxPackets += dpi.RxPackets
+	existing.TxBytes += dpi.TxBytes
+	existing.RxBytes += dpi.RxBytes
+	m[controller][site][name] = existing
 }
 
 func reportClientDPItotals(r report, appTotal, catTotal totalsDPImap) {
@@ -155,7 +146,7 @@ func reportClientDPItotals(r report, appTotal, catTotal totalsDPImap) {
 		for controller, s := range k.val {
 			for site, c := range s {
 				for name, m := range c {
-					m := &metric{
+					newMetric := &metric{
 						Table: "clientdpi",
 						Tags: map[string]string{
 							"category":    "TOTAL",
@@ -172,9 +163,9 @@ func reportClientDPItotals(r report, appTotal, catTotal totalsDPImap) {
 							"rx_bytes":   m.RxBytes,
 						},
 					}
-					m.Tags[k.kind] = name
+					newMetric.Tags[k.kind] = name
 
-					r.send(m)
+					r.send(newMetric)
 				}
 			}
 		}
