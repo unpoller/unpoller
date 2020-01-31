@@ -31,6 +31,7 @@ type usg struct {
 	UplinkLatency  *prometheus.Desc
 	UplinkSpeed    *prometheus.Desc
 	Runtime        *prometheus.Desc
+	Rundate        *prometheus.Desc
 	XputDownload   *prometheus.Desc
 	XputUpload     *prometheus.Desc
 }
@@ -63,7 +64,8 @@ func descUSG(ns string) *usg {
 		Latency:        prometheus.NewDesc(ns+"speedtest_latency_seconds", "Speedtest Latency", labels, nil),
 		UplinkLatency:  prometheus.NewDesc(ns+"uplink_latency_seconds", "Uplink Latency", labels, nil),
 		UplinkSpeed:    prometheus.NewDesc(ns+"uplink_speed_mbps", "Uplink Speed", labels, nil),
-		Runtime:        prometheus.NewDesc(ns+"speedtest_runtime", "Speedtest Run Time", labels, nil),
+		Runtime:        prometheus.NewDesc(ns+"speedtest_runtime_seconds", "Speedtest Run Time", labels, nil),
+		Rundate:        prometheus.NewDesc(ns+"speedtest_rundate_seconds", "Speedtest Run Date", labels, nil),
 		XputDownload:   prometheus.NewDesc(ns+"speedtest_download", "Speedtest Download Rate", labels, nil),
 		XputUpload:     prometheus.NewDesc(ns+"speedtest_upload", "Speedtest Upload Rate", labels, nil),
 	}
@@ -109,6 +111,7 @@ func (u *promUnifi) exportUSGstats(r report, labels []string, gw *unifi.Gw, st u
 		// Speed Test Stats
 		{u.USG.Latency, gauge, st.Latency.Val / 1000, labelWan},
 		{u.USG.Runtime, gauge, st.Runtime, labelWan},
+		{u.USG.Rundate, gauge, st.Rundate, labelWan},
 		{u.USG.XputDownload, gauge, st.XputDownload, labelWan},
 		{u.USG.XputUpload, gauge, st.XputUpload, labelWan},
 	})
@@ -132,9 +135,10 @@ func (u *promUnifi) exportWANPorts(r report, labels []string, wans ...unifi.Wan)
 			{u.USG.WanTxBytes, counter, wan.TxBytes, labelWan},
 			{u.USG.WanRxBroadcast, counter, wan.RxBroadcast, labelWan},
 			{u.USG.WanRxMulticast, counter, wan.RxMulticast, labelWan},
-			{u.USG.WanSpeed, counter, wan.Speed.Val * 1000000, labelWan},
+			{u.USG.WanSpeed, gauge, wan.Speed.Val * 1000000, labelWan},
 			{u.USG.WanTxBroadcast, counter, wan.TxBroadcast, labelWan},
-			{u.USG.WanTxBytesR, counter, wan.TxBytesR, labelWan},
+			{u.USG.WanTxBytesR, gauge, wan.TxBytesR, labelWan},
+			{u.USG.WanRxBytesR, gauge, wan.RxBytesR, labelWan},
 			{u.USG.WanTxDropped, counter, wan.TxDropped, labelWan},
 			{u.USG.WanTxErrors, counter, wan.TxErrors, labelWan},
 			{u.USG.WanTxMulticast, counter, wan.TxMulticast, labelWan},
