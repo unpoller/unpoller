@@ -81,7 +81,7 @@ type Client struct {
 	DevFamily        FlexInt  `json:"dev_family"`
 	DevID            FlexInt  `json:"dev_id"`
 	DevVendor        FlexInt  `json:"dev_vendor,omitempty"`
-	DhcpendTime      int      `json:"dhcpend_time,omitempty"`
+	DhcpendTime      FlexInt  `json:"dhcpend_time,omitempty"`
 	Satisfaction     FlexInt  `json:"satisfaction,omitempty"`
 	Essid            string   `json:"essid"`
 	FirstSeen        int64    `json:"first_seen"`
