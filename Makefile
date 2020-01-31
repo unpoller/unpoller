@@ -8,7 +8,6 @@ IGNORED:=$(shell bash -c "source .metadata.sh ; env | sed 's/=/:=/;s/^/export /'
 # md2roff turns markdown into man files and html files.
 MD2ROFF_BIN=github.com/github/hub/md2roff-bin
 
-
 # Travis CI passes the version in. Local builds get it from the current git tag.
 ifeq ($(VERSION),)
 	include .metadata.make
@@ -53,7 +52,7 @@ VERSION_LDFLAGS:= \
 
 # Makefile targets follow.
 
-all: build
+all: clean build
 
 # Prepare a release. Called in Travis CI.
 release: clean macos windows linux_packages

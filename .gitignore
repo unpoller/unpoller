@@ -1,6 +1,7 @@
 /up.conf
 /unifi-poller
 /unifi-poller*.gz
+/unifi-poller*.txz
 /unifi-poller*.zip
 /unifi-poller*.1
 /unifi-poller*.deb
@@ -8,6 +9,7 @@
 /unifi-poller*.arm
 /unifi-poller*.exe
 /unifi-poller*.macos
+/unifi-poller*.bsd
 /unifi-poller*.linux
 /unifi-poller.rb
 *.sha256
