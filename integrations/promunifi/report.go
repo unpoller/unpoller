@@ -45,6 +45,10 @@ func (r *Report) metrics() *poller.Metrics {
 
 func (r *Report) report(c poller.Collect, descs map[*prometheus.Desc]bool) {
 	m := r.Metrics
+	if m == nil {
+		return
+	}
+
 	c.Logf("UniFi Measurements Exported. Site: %d, Client: %d, "+
 		"UAP: %d, USG/UDM: %d, USW: %d, Descs: %d, "+
 		"Metrics: %d, Errs: %d, 0s: %d, Reqs/Total: %v / %v",
