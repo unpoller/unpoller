@@ -286,6 +286,10 @@ func (u *InfluxUnifi) loopDevicePoints(r report) {
 
 // LogInfluxReport writes a log message after exporting to influxdb.
 func (u *InfluxUnifi) LogInfluxReport(r *Report) {
+	if r == nil || r.Metrics == nil {
+		return
+	}
+
 	idsMsg := fmt.Sprintf("IDS Events: %d, ", len(r.Metrics.IDSList))
 	u.Collector.Logf("UniFi Metrics Recorded. Sites: %d, Clients: %d, "+
 		"UAP: %d, USG/UDM: %d, USW: %d, %sPoints: %d, Fields: %d, Errs: %d, Elapsed: %v",
