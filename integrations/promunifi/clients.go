@@ -84,10 +84,10 @@ func (u *promUnifi) exportClientDPI(r report, s *unifi.DPITable) {
 		fillDPIMapTotals(catTotal, labelDPI[4], s.SourceName, s.SiteName, dpi)
 		// log.Println(labelDPI, dpi.Cat, dpi.App, dpi.TxBytes, dpi.RxBytes, dpi.TxPackets, dpi.RxPackets)
 		r.send([]*metric{
-			{u.Client.DPITxPackets, gauge, dpi.TxPackets, labelDPI},
-			{u.Client.DPIRxPackets, gauge, dpi.RxPackets, labelDPI},
-			{u.Client.DPITxBytes, gauge, dpi.TxBytes, labelDPI},
-			{u.Client.DPIRxBytes, gauge, dpi.RxBytes, labelDPI},
+			{u.Client.DPITxPackets, counter, dpi.TxPackets, labelDPI},
+			{u.Client.DPIRxPackets, counter, dpi.RxPackets, labelDPI},
+			{u.Client.DPITxBytes, counter, dpi.TxBytes, labelDPI},
+			{u.Client.DPIRxBytes, counter, dpi.RxBytes, labelDPI},
 		})
 	}
 
@@ -208,10 +208,10 @@ func (u *promUnifi) reportClientDPItotals(r report, appTotal, catTotal totalsDPI
 					}
 
 					m := []*metric{
-						{u.Client.DPITxPackets, gauge, m.TxPackets, labelDPI},
-						{u.Client.DPIRxPackets, gauge, m.RxPackets, labelDPI},
-						{u.Client.DPITxBytes, gauge, m.TxBytes, labelDPI},
-						{u.Client.DPIRxBytes, gauge, m.RxBytes, labelDPI},
+						{u.Client.DPITxPackets, counter, m.TxPackets, labelDPI},
+						{u.Client.DPIRxPackets, counter, m.RxPackets, labelDPI},
+						{u.Client.DPITxBytes, counter, m.TxBytes, labelDPI},
+						{u.Client.DPIRxBytes, counter, m.RxBytes, labelDPI},
 					}
 
 					r.send(m)
