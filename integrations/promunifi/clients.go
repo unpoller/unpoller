@@ -72,10 +72,7 @@ func descClient(ns string) *uclient {
 	}
 }
 
-func (u *promUnifi) exportClientDPI(r report, s *unifi.DPITable) {
-	appTotal := make(totalsDPImap)
-	catTotal := make(totalsDPImap)
-
+func (u *promUnifi) exportClientDPI(r report, s *unifi.DPITable, appTotal, catTotal totalsDPImap) {
 	for _, dpi := range s.ByApp {
 		labelDPI := []string{s.Name, s.MAC, s.SiteName, s.SourceName,
 			unifi.DPICats.Get(dpi.Cat), unifi.DPIApps.GetApp(dpi.Cat, dpi.App)}
@@ -90,8 +87,6 @@ func (u *promUnifi) exportClientDPI(r report, s *unifi.DPITable) {
 			{u.Client.DPIRxBytes, counter, dpi.RxBytes, labelDPI},
 		})
 	}
-
-	u.reportClientDPItotals(r, appTotal, catTotal)
 }
 
 func (u *promUnifi) exportClient(r report, c *unifi.Client) {
@@ -169,7 +164,7 @@ func fillDPIMapTotals(m totalsDPImap, name, controller, site string, dpi unifi.D
 	m[controller][site][name] = oldDPI
 }
 
-func (u *promUnifi) reportClientDPItotals(r report, appTotal, catTotal totalsDPImap) {
+func (u *promUnifi) exportClientDPItotals(r report, appTotal, catTotal totalsDPImap) {
 	type all []struct {
 		kind string
 		val  totalsDPImap
