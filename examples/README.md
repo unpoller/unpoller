@@ -10,4 +10,4 @@ format is always TOML and may have any _other_ suffix.
 #### Dashboards
 This folder used to contain Grafana Dashboards.
 **They are now located at [Grafana.com](https://grafana.com/dashboards?search=unifi-poller).**
-Also see [Grafana Dashboards](https://github.com/davidnewhall/unifi-poller/wiki/Grafana-Dashboards) Wiki.
+Also see [Grafana Dashboards](https://github.com/unifi-poller/unifi-poller/wiki/Grafana-Dashboards) Wiki.

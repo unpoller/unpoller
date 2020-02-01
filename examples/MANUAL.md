@@ -67,14 +67,14 @@ is provided so the application can be easily adapted to any environment.
 
 Configuration file (up.conf) parameters are documented in the wiki.
 
-*   [https://github.com/davidnewhall/unifi-poller/wiki/Configuration](https://github.com/davidnewhall/unifi-poller/wiki/Configuration)
+*   [https://github.com/unifi-poller/unifi-poller/wiki/Configuration](https://github.com/unifi-poller/unifi-poller/wiki/Configuration)
 
 `Shell Environment Parameters`
 
 This application can be fully configured using shell environment variables.
 Find documentation for this feature on the Docker Wiki page.
 
-*   [https://github.com/davidnewhall/unifi-poller/wiki/Docker](https://github.com/davidnewhall/unifi-poller/wiki/Docker)
+*   [https://github.com/unifi-poller/unifi-poller/wiki/Docker](https://github.com/unifi-poller/unifi-poller/wiki/Docker)
 
 GO DURATION
 ---
@@ -96,6 +96,6 @@ AUTHOR
 
 LOCATION
 ---
-*   UniFi Poller: [https://github.com/davidnewhall/unifi-poller](https://github.com/davidnewhall/unifi-poller)
+*   UniFi Poller: [https://github.com/unifi-poller/unifi-poller](https://github.com/unifi-poller/unifi-poller)
 *   UniFi Library: [https://github.com/golift/unifi](https://github.com/golift/unifi)
 *   Grafana Dashboards: [https://grafana.com/dashboards?search=unifi-poller](https://grafana.com/dashboards?search=unifi-poller)

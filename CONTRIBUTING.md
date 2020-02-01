@@ -7,7 +7,7 @@ making changes to it.
 
 ## TravisCI
 
-This repo is tested, built and deployed by [Travis-CI](https://travis-ci.org/davidnewhall/unifi-poller).
+This repo is tested, built and deployed by [Travis-CI](https://travis-ci.org/unifi-poller/unifi-poller).
 
 The [.travis.yml](.travis.yml) file in this repo coordinates the entire process.
 As long as this document is kept up to date, this is what the travis file does:

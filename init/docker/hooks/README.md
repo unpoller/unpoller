@@ -21,7 +21,7 @@ any build. Two environment variables must be passed in from Docker Cloud config.
 
 Keep the build simple; see screenshot. This only supports one build tag, but it creates many more.
 
-![UniFi Poller Docker Cloud Build Rules](https://raw.githubusercontent.com/wiki/davidnewhall/unifi-poller/images/unifi-poller-build-rules.png "UniFi Poller Docker Cloud Build Rules")
+![UniFi Poller Docker Cloud Build Rules](https://raw.githubusercontent.com/wiki/unifi-poller/unifi-poller/images/unifi-poller-build-rules.png "UniFi Poller Docker Cloud Build Rules")
 
 The fancy source tag is `/^v((\d+\.\d+)(?:\.\d+)?)$/` and it allows you to capture
 the minor version without patch-level in `{\2}`. I no longer use `{\2}` in my build.

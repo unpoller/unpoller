@@ -4,14 +4,14 @@
 #
 # Use it like this:  (sudo is optional)
 # ===
-#   curl https://raw.githubusercontent.com/davidnewhall/unifi-poller/master/scripts/install.sh | sudo bash
+#   curl https://raw.githubusercontent.com/unifi-poller/unifi-poller/master/scripts/install.sh | sudo bash
 # ===
 # If you're on redhat, this installs the latest rpm. If you're on Debian, it installs the latest deb package.
 #
 # This is part of application-builder.
 # https://github.com/golift/application-builder
 
-REPO=davidnewhall/unifi-poller
+REPO=unifi-poller/unifi-poller
 LATEST=https://api.github.com/repos/${REPO}/releases/latest
 ARCH=$(uname -m)
 
