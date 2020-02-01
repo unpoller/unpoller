@@ -250,13 +250,14 @@ package_build_linux_armhf: package_build_linux armhf
 
 # Build an environment that can be packaged for freebsd.
 package_build_freebsd: readme man freebsd
-	mkdir -p $@/usr/local/bin $@/usr/local/etc/{rc.d,$(BINARY)}  $@/usr/local/share/man/man1 $@/usr/local/share/doc/$(BINARY)
+	mkdir -p $@/usr/local/bin $@/usr/local/etc/$(BINARY) $@/usr/local/share/man/man1 $@/usr/local/share/doc/$(BINARY)
 	cp $(BINARY).amd64.freebsd $@/usr/local/bin/$(BINARY)
 	cp *.1.gz $@/usr/local/share/man/man1
 	cp examples/$(CONFIG_FILE).example $@/usr/local/etc/$(BINARY)/
 	cp examples/$(CONFIG_FILE).example $@/usr/local/etc/$(BINARY)/$(CONFIG_FILE)
 	cp LICENSE *.html examples/*?.?* $@/usr/local/share/doc/$(BINARY)/
-	cp init/bsd/unifi-poller.rc $@/usr/local/etc/rc.d/unifi-poller
+	[ "$(FORMULA)" != "service" ] || mkdir -p $@/usr/local/etc/rc.d
+	[ "$(FORMULA)" != "service" ] || cp init/bsd/unifi-poller.rc $@/usr/local/etc/rc.d/unifi-poller
 
 package_build_freebsd_386: package_build_freebsd freebsd386
 	mkdir -p $@
