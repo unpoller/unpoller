@@ -53,7 +53,7 @@ CONFIGURATION
 *   Config File Default Location:
     *   Linux:     `/etc/unifi-poller.conf`
     *   macOS/BSD: `/usr/local/etc/unifi-poller.conf`
-    *   Windows:   `C:\ProgramData\unifi-poller.conf`
+    *   Windows:   `C:\\ProgramData\\unifi-poller.conf`
 *   Config File Default Format: `TOML`
 *   Possible formats: `XML`, `JSON`, `TOML`, `YAML`
 
@@ -92,7 +92,7 @@ AUTHOR
 ---
 *   Garrett Bjerkhoel (original code) ~ 2016
 *   David Newhall II (rewritten) ~ 4/20/2018
-*   David Newhall II (still going) ~ 6/7/2019
+*   David Newhall II (still going) ~ 2/1/2020
 
 LOCATION
 ---
