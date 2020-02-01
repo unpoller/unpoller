@@ -40,7 +40,7 @@ $(PACKAGE_SCRIPTS) \
 --vendor "$(VENDOR)" \
 --description "$(DESC)" \
 --config-files "/etc/$(BINARY)/$(CONFIG_FILE)" \
---freebsd-origin "golift/$(BINARY)"
+--freebsd-origin "$(BINARY)/$(BINARY)"
 endef
 
 PLUGINS:=$(patsubst plugins/%/main.go,%,$(wildcard plugins/*/main.go))
