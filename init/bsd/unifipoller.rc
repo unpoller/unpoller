@@ -1,0 +1,24 @@
+#!/bin/sh
+#
+# rc.d startup script for unifi-poller. Written for FreeBSD.
+#
+# PROVIDE: unifi-poller
+# REQUIRE: networking syslog
+# KEYWORD:
+
+. /etc/rc.subr
+
+[ -f /usr/local/etc/defaults/unifi-poller ] && . /usr/local/etc/defaults/unifi-poller
+
+name="unifipoller"
+rcvar="unifipoller_enable"
+command="/usr/local/bin/unifi-poller"
+unifipoller_user="nobody"
+unifipoller_config="/usr/local/etc/unifi-poller/up.conf"
+
+start_cmd="/usr/sbin/daemon -T $name -l daemon -u $unifipoller_user $command -c $unifipoller_config"
+
+load_rc_config $name
+: ${unifipoller_enable:=no}
+
+run_rc_command "$1"

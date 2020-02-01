@@ -1,7 +1,8 @@
-########################################################
-# UniFi Poller primary configuration file. YAML FORMAT #
-# provided values are defaults. See up.conf.example!   #
-########################################################
+##############################################
+# UniFi Poller primary configuration file.   #
+# YAML FORMAT. Provided values are defaults. #
+# See up.conf.example!                       #
+##############################################
 ---
 
 poller:

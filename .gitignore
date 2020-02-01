@@ -9,6 +9,7 @@
 /unifi-poller*.arm
 /unifi-poller*.exe
 /unifi-poller*.macos
+/unifi-poller*.freebsd
 /unifi-poller*.bsd
 /unifi-poller*.linux
 /unifi-poller.rb

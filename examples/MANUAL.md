@@ -51,9 +51,9 @@ OPTIONS
 CONFIGURATION
 ---
 *   Config File Default Location:
-    *   Linux:   `/etc/unifi-poller/up.conf`
-    *   macOS:   `/usr/local/etc/unifi-poller/up.conf`
-    *   Windows: `C:\ProgramData\unifi-poller\up.conf`
+    *   Linux:     `/etc/unifi-poller.conf`
+    *   macOS/BSD: `/usr/local/etc/unifi-poller.conf`
+    *   Windows:   `C:\ProgramData\unifi-poller.conf`
 *   Config File Default Format: `TOML`
 *   Possible formats: `XML`, `JSON`, `TOML`, `YAML`
 

@@ -39,7 +39,8 @@ $(PACKAGE_SCRIPTS) \
 --maintainer "$(MAINT)" \
 --vendor "$(VENDOR)" \
 --description "$(DESC)" \
---config-files "/etc/$(BINARY)/$(CONFIG_FILE)"
+--config-files "/etc/$(BINARY)/$(CONFIG_FILE)" \
+--freebsd-origin "golift/$(BINARY)"
 endef
 
 PLUGINS:=$(patsubst plugins/%/main.go,%,$(wildcard plugins/*/main.go))
@@ -55,13 +56,13 @@ VERSION_LDFLAGS:= \
 all: clean build
 
 # Prepare a release. Called in Travis CI.
-release: clean macos windows linux_packages
+release: clean macos windows linux_packages freebsd_packages
 	# Prepareing a release!
 	mkdir -p $@
-	mv $(BINARY).*.macos $(BINARY).*.linux $@/
+	mv $(BINARY).*.macos $(BINARY).*.linux $(BINARY).*.freebsd $@/
 	gzip -9r $@/
 	for i in $(BINARY)*.exe; do zip -9qm $@/$$i.zip $$i;done
-	mv *.rpm *.deb $@/
+	mv *.rpm *.deb *.txz $@/
 	# Generating File Hashes
 	openssl dgst -r -sha256 $@/* | sed 's#release/##' | tee $@/checksums.sha256.txt
 
@@ -69,8 +70,8 @@ release: clean macos windows linux_packages
 # Delete all build assets.
 clean:
 	# Cleaning up.
-	rm -f $(BINARY) $(BINARY).*.{macos,linux,exe}{,.gz,.zip} $(BINARY).1{,.gz} $(BINARY).rb
-	rm -f $(BINARY){_,-}*.{deb,rpm} v*.tar.gz.sha256 examples/MANUAL .metadata.make
+	rm -f $(BINARY) $(BINARY).*.{macos,freebsd,linux,exe}{,.gz,.zip} $(BINARY).1{,.gz} $(BINARY).rb
+	rm -f $(BINARY){_,-}*.{deb,rpm,txz} v*.tar.gz.sha256 examples/MANUAL .metadata.make
 	rm -f cmd/$(BINARY)/README{,.html} README{,.html} ./$(BINARY)_manual.html
 	rm -rf package_build_* release
 
@@ -123,8 +124,19 @@ $(BINARY).armhf.linux: main.go
 
 macos: $(BINARY).amd64.macos
 $(BINARY).amd64.macos: main.go
-	# Building darwin 64-bit x86 binary.
 	GOOS=darwin GOARCH=amd64 go build -o $@ -ldflags "-w -s $(VERSION_LDFLAGS)"
+
+freebsd: $(BINARY).amd64.freebsd
+$(BINARY).amd64.freebsd: main.go
+	GOOS=freebsd GOARCH=amd64 go build -o $@ -ldflags "-w -s $(VERSION_LDFLAGS)"
+
+freebsd386: $(BINARY).i386.freebsd
+$(BINARY).i386.freebsd: main.go
+	GOOS=freebsd GOARCH=386 go build -o $@ -ldflags "-w -s $(VERSION_LDFLAGS)"
+
+freebsdarm: $(BINARY).armhf.freebsd
+$(BINARY).armhf.freebsd: main.go
+	GOOS=freebsd GOARCH=arm go build -o $@ -ldflags "-w -s $(VERSION_LDFLAGS)"
 
 exe: $(BINARY).amd64.exe
 windows: $(BINARY).amd64.exe
@@ -135,6 +147,8 @@ $(BINARY).amd64.exe: main.go
 # Packages
 
 linux_packages: rpm deb rpm386 deb386 debarm rpmarm debarmhf rpmarmhf
+
+freebsd_packages: freebsd_pkg freebsd386_pkg freebsdarm_pkg
 
 rpm: $(BINARY)-$(RPMVERSION)-$(ITERATION).x86_64.rpm
 $(BINARY)-$(RPMVERSION)-$(ITERATION).x86_64.rpm: package_build_linux check_fpm
@@ -184,6 +198,21 @@ $(BINARY)_$(VERSION)-$(ITERATION)_armhf.deb: package_build_linux_armhf check_fpm
 	fpm -s dir -t deb $(PACKAGE_ARGS) -a armhf -v $(VERSION) -C $<
 	[ "$(SIGNING_KEY)" == "" ] || expect -c "spawn debsigs --default-key="$(SIGNING_KEY)" --sign=origin $(BINARY)_$(VERSION)-$(ITERATION)_armhf.deb; expect -exact \"Enter passphrase: \"; send \"$(PRIVATE_KEY)\r\"; expect eof"
 
+freebsd_pkg: $(BINARY)-$(VERSION)_$(ITERATION).amd64.txz
+$(BINARY)-$(VERSION)_$(ITERATION).amd64.txz: package_build_freebsd check_fpm
+	@echo "Building 'freebsd pkg' package for $(BINARY) version '$(VERSION)-$(ITERATION)'."
+	fpm -s dir -t freebsd $(PACKAGE_ARGS) -a amd64 -v $(VERSION) -p $(BINARY)-$(VERSION)_$(ITERATION).amd64.txz -C $<
+
+freebsd386_pkg: $(BINARY)-$(VERSION)_$(ITERATION).i386.txz
+$(BINARY)-$(VERSION)_$(ITERATION).i386.txz: package_build_freebsd_386 check_fpm
+	@echo "Building 32-bit 'freebsd pkg' package for $(BINARY) version '$(VERSION)-$(ITERATION)'."
+	fpm -s dir -t freebsd $(PACKAGE_ARGS) -a 386 -v $(VERSION) -p $(BINARY)-$(VERSION)_$(ITERATION).i386.txz -C $<
+
+freebsdarm_pkg: $(BINARY)-$(VERSION)_$(ITERATION).armhf.txz
+$(BINARY)-$(VERSION)_$(ITERATION).armhf.txz: package_build_freebsd_arm check_fpm
+	@echo "Building 32-bit ARM6/7 HF 'freebsd pkg' package for $(BINARY) version '$(VERSION)-$(ITERATION)'."
+	fpm -s dir -t freebsd $(PACKAGE_ARGS) -a arm -v $(VERSION) -p $(BINARY)-$(VERSION)_$(ITERATION).armhf.txz -C $<
+
 # Build an environment that can be packaged for linux.
 package_build_linux: readme man plugins_linux_amd64 linux
 	# Building package environment for linux.
@@ -218,6 +247,26 @@ package_build_linux_armhf: package_build_linux armhf
 	cp -r $</* $@/
 	[ ! -f *armhf.so ] || cp *armhf.so $@/usr/lib/$(BINARY)/
 	cp $(BINARY).armhf.linux $@/usr/bin/$(BINARY)
+
+# Build an environment that can be packaged for freebsd.
+package_build_freebsd: readme man freebsd
+	mkdir -p $@/usr/local/bin $@/usr/local/etc/{rc.d,$(BINARY)}  $@/usr/local/share/man/man1 $@/usr/local/share/doc/$(BINARY)
+	cp $(BINARY).amd64.freebsd $@/usr/local/bin/$(BINARY)
+	cp *.1.gz $@/usr/local/share/man/man1
+	cp examples/$(CONFIG_FILE).example $@/usr/local/etc/$(BINARY)/
+	cp examples/$(CONFIG_FILE).example $@/usr/local/etc/$(BINARY)/$(CONFIG_FILE)
+	cp LICENSE *.html examples/*?.?* $@/usr/local/share/doc/$(BINARY)/
+	cp init/bsd/unifipoller.rc $@/usr/local/etc/rc.d/unifipoller
+
+package_build_freebsd_386: package_build_freebsd freebsd386
+	mkdir -p $@
+	cp -r $</* $@/
+	cp $(BINARY).i386.freebsd $@/usr/local/bin/$(BINARY)
+
+package_build_freebsd_arm: package_build_freebsd freebsdarm
+	mkdir -p $@
+	cp -r $</* $@/
+	cp $(BINARY).armhf.freebsd $@/usr/local/bin/$(BINARY)
 
 check_fpm:
 	@fpm --version > /dev/null || (echo "FPM missing. Install FPM: https://fpm.readthedocs.io/en/latest/installing.html" && false)

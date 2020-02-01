@@ -1,9 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-#######################################################
-# UniFi Poller primary configuration file. XML FORMAT #
-# provided values are defaults. See up.conf.example!  #
-#######################################################
+#############################################
+# UniFi Poller primary configuration file.  #
+# XML FORMAT. Provided values are defaults. #
+# See up.conf.example!                      #
+#############################################
 
 <plugin> and <site> are lists of strings and may be repeated.
 -->
