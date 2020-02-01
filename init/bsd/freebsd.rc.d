@@ -27,5 +27,9 @@ load_rc_config ${name}
 mkdir -p $(dirname ${pidfile})
 chown -R ${{BINARYU}}_user $(dirname ${pidfile})
 
+# Suck in optional exported override variables.
+# ie. add something like the following to this file: export UP_POLLER_DEBUG=true
+[ -f "/usr/local/etc/defaults/${real_name}" ] && . "/usr/local/etc/defaults/${real_name}"
+
 # Go!
 run_rc_command "$1"

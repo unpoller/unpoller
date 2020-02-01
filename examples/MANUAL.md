@@ -3,7 +3,7 @@ unifi-poller(1) -- Utility to poll UniFi Controller Metrics and store them in In
 
 SYNOPSIS
 ---
-`unifi-poller -c /etc/unifi-poller.conf`
+`unifi-poller -c /etc/unifi-poller/up.conf`
 
 This daemon polls a UniFi controller at a short interval and stores the collected
 measurements in an Influx Database. The measurements and metrics collected belong
@@ -51,9 +51,9 @@ OPTIONS
 CONFIGURATION
 ---
 *   Config File Default Location:
-    *   Linux:     `/etc/unifi-poller.conf`
-    *   macOS/BSD: `/usr/local/etc/unifi-poller.conf`
-    *   Windows:   `C:\\ProgramData\\unifi-poller.conf`
+    *   Mac/BSD: `/usr/local/etc/unifi-poller/up.conf`
+    *   Windows: `C:\\ProgramData\\unifi-poller\\up.conf`
+    *   Others:  `/etc/unifi-poller/up.conf`
 *   Config File Default Format: `TOML`
 *   Possible formats: `XML`, `JSON`, `TOML`, `YAML`
 

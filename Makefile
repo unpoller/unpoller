@@ -260,7 +260,7 @@ package_build_freebsd: readme man freebsd
 	[ "$(FORMULA)" != "service" ] || mkdir -p $@/usr/local/etc/rc.d
 	[ "$(FORMULA)" != "service" ] || \
 			sed -e "s/{{BINARY}}/$(BINARY)/g" -e "s/{{BINARYU}}/$(BINARYU)/g" -e "s/{{CONFIG_FILE}}/$(CONFIG_FILE)/g" \
-			init/bsd/template.rc.d > $@/usr/local/etc/rc.d/$(BINARY)
+			init/bsd/freebsd.rc.d > $@/usr/local/etc/rc.d/$(BINARY)
 	[ "$(FORMULA)" != "service" ] || chmod +x $@/usr/local/etc/rc.d/$(BINARY)
 
 package_build_freebsd_386: package_build_freebsd freebsd386

@@ -5,5 +5,5 @@ Generic FreeBSD rc.d service file lives here.
     sed -e "s/{{BINARY}}/app-name/g" \
         -e "s/{{BINARYU}}/app_name/g" \
         -e "s/{{CONFIG_FILE}}/app-name.conf/g" \
-        template.rc.d > /usr/local/etc/rc.d/app-name
+        freebsd.rc.d > /usr/local/etc/rc.d/app-name
 ```
