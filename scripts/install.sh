@@ -18,9 +18,12 @@
 REPO=unifi-poller/unifi-poller
 BREW=golift/mugs/unifi-poller
 LATEST=https://api.github.com/repos/${REPO}/releases/latest
+ISSUES=https://github.com/${REPO}/issues/new
 ARCH=$(uname -m)
 OS=$(uname -s)
 P=" ==>"
+
+# Nothing else needs to be changed. Unless you're fixing things!
 echo "<-------------------------------------------------->"
 
 if [ "$OS" = "Darwin" ]; then
@@ -42,7 +45,7 @@ else
   echo "${P} [ERROR] Unknown Architecture: ${ARCH}"
   echo "${P} $(uname -a)"
   echo "${P} Please report this, along with the above OS details:"
-  echo "     https://github.com/${REPO}/issues/new"
+  echo "     ${ISSUES}"
   exit 1
 fi
 
@@ -70,7 +73,7 @@ if [ "$FILE" = "" ]; then
   echo "${P} [ERROR] No pkg (freebsd), dpkg (debian) or rpm (redhat) package managers found; not sure what package to download!"
   echo "${P} $(uname -a)"
   echo "${P} If you feel this is a mistake, please report this along with the above OS details:"
-  echo "     https://github.com/${REPO}/issues/new"
+  echo "     ${ISSUES}"
   exit 1
 fi
 
@@ -97,7 +100,7 @@ if [ "$?" != "0" ] || [ "$URL" = "" ]; then
   echo "${P} [ERROR] Missing latest release for '${FILE}' file ($OS/${ARCH}) at ${LATEST}"
   echo "${P} $(uname -a)"
   echo "${P} Please report error this, along with the above OS details:"
-  echo "     https://github.com/${REPO}/issues/new"
+  echo "     ${ISSUES}"
   exit 1
 fi
 
