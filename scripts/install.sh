@@ -1,10 +1,10 @@
-#!/bin/bash
+#!/bin/sh
 
 # This is a quick and drity script to install the latest Linux package.
 #
 # Use it like this:  (sudo is optional)
 # ===
-#   curl https://raw.githubusercontent.com/unifi-poller/unifi-poller/master/scripts/install.sh | sudo bash
+#   curl https://raw.githubusercontent.com/unifi-poller/unifi-poller/master/scripts/install.sh | sudo sh
 # ===
 # If you're on redhat, this installs the latest rpm. If you're on Debian, it installs the latest deb package.
 #
@@ -30,7 +30,7 @@ else
   exit 1
 fi
 
-if [ "$1" == "deb" ] || [ "$1" == "rpm" ]; then
+if [ "$1" == "deb" ] || [ "$1" == "rpm" ] || [ "$1" == "txz" ]; then
   FILE=$1
 else
   # If you have both, rpm wins.
@@ -41,12 +41,17 @@ else
    dpkg --version > /dev/null 2>&1
    if [ "$?" = "0" ]; then
      FILE=deb
+   else
+    pkg --version > /dev/null 2>&1
+    if [ "$?" = "0" ]; then
+      FILE=txz
+    fi
    fi
   fi
 fi
 
 if [ "$FILE" = "" ]; then
-  echo "No dpkg or rpm package managers found!"
+  echo "No pkg (freebsd), dpkg (debian) or rpm (redhat) package managers found; not sure what package to download!"
   exit 1
 fi
 
@@ -70,13 +75,15 @@ fi
 URL=$($CMD ${LATEST} | egrep "browser_download_url.*(${ARCH})\.${FILE}\"" | cut -d\" -f 4)
 
 if [ "$?" != "0" ] || [ "$URL" = "" ]; then
-  echo "Error locating latest release at ${LATEST}"
+  echo "Error locating latest release for '${FILE} (${ARCH})' at ${LATEST}"
   exit 1
 fi
 
 INSTALLER="rpm -Uvh"
 if [ "$FILE" = "deb" ]; then
   INSTALLER="dpkg --force-confdef --force-confold --install"
+elif [ "$FILE" = "txz" ]; then
+  INSTALLER="pkg install"
 fi
 
 FILE=$(basename ${URL})
