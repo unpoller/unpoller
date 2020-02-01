@@ -1,6 +1,11 @@
 #!/bin/sh
 #
-# rc.d startup script for unifi-poller. Written for FreeBSD.
+# FreeBSD rc.d startup script for unifi-poller.
+# Target like so:
+#   sed -e "s/{{BINARY}}/app-name/g"
+#     -e "s/{{BINARYU}}/app_name/g" \
+#     -e "s/{{CONFIG_FILE}}/app-name.conf/g" \
+#     thisfile.rc > /usr/local/etc/rc.d/unifi-poller
 #
 # PROVIDE: unifi-poller
 # REQUIRE: networking syslog
@@ -8,15 +13,23 @@
 
 . /etc/rc.subr
 
-name="unifipoller"
-rcvar="unifipoller_enable"
-command="/usr/local/bin/unifi-poller"
-unifipoller_user="nobody"
-unifipoller_config="/usr/local/etc/unifi-poller/up.conf"
+name="{{BINARYU}}"
+rcvar="{{BINARYU}}_enable"
+{{BINARYU}}_command="/usr/local/bin/{{BINARY}}"
+{{BINARYU}}_user="nobody"
+{{BINARYU}}_config="/usr/local/etc/{{BINARY}}/{{CONFIG_FILE}}"
+pidfile="/var/run/{{BINARY}}/pid"
 
-start_cmd="/usr/sbin/daemon -T $name -l daemon -u $unifipoller_user $command -c $unifipoller_config"
+# This runs `daemon` as the `{{BINARYU}}_user` user.
+command="/usr/sbin/daemon"
+command_args="-P ${pidfile} -r -t {{BINARY}} -T {{BINARY}} -l daemon ${{{BINARYU}}_command} -c ${{{BINARYU}}_config}"
 
-load_rc_config $name
-: ${unifipoller_enable:=no}
+load_rc_config ${name}
+: ${{{BINARYU}}_enable:=no}
 
+# Make a place for the pid file.
+mkdir -p $(dirname ${pidfile})
+chown -R ${{BINARYU}}_user $(dirname ${pidfile})
+
+# Go!
 run_rc_command "$1"

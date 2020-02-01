@@ -22,6 +22,7 @@ endif
 
 # rpm is wierd and changes - to _ in versions.
 RPMVERSION:=$(shell echo $(VERSION) | tr -- - _)
+BINARYU:=$(shell echo $(BINARY) | tr -- - _)
 
 PACKAGE_SCRIPTS=
 ifeq ($(FORMULA),service)
@@ -257,7 +258,10 @@ package_build_freebsd: readme man freebsd
 	cp examples/$(CONFIG_FILE).example $@/usr/local/etc/$(BINARY)/$(CONFIG_FILE)
 	cp LICENSE *.html examples/*?.?* $@/usr/local/share/doc/$(BINARY)/
 	[ "$(FORMULA)" != "service" ] || mkdir -p $@/usr/local/etc/rc.d
-	[ "$(FORMULA)" != "service" ] || cp init/bsd/unifi-poller.rc $@/usr/local/etc/rc.d/unifi-poller
+	[ "$(FORMULA)" != "service" ] || \
+			sed -e "s/{{BINARY}}/$(BINARY)/g" -e "s/{{BINARYU}}/$(BINARYU)/g" -e "s/{{CONFIG_FILE}}/$(CONFIG_FILE)/g" \
+			init/bsd/unifi-poller.rc > $@/usr/local/etc/rc.d/unifi-poller
+	[ "$(FORMULA)" != "service" ] || chmod +x $@/usr/local/etc/rc.d/unifi-poller
 
 package_build_freebsd_386: package_build_freebsd freebsd386
 	mkdir -p $@
