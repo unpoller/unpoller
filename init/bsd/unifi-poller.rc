@@ -5,9 +5,9 @@
 #   sed -e "s/{{BINARY}}/app-name/g"
 #     -e "s/{{BINARYU}}/app_name/g" \
 #     -e "s/{{CONFIG_FILE}}/app-name.conf/g" \
-#     thisfile.rc > /usr/local/etc/rc.d/unifi-poller
+#     thisfile.rc > /usr/local/etc/rc.d/app-name
 #
-# PROVIDE: unifi-poller
+# PROVIDE: {{BINARY}}
 # REQUIRE: networking syslog
 # KEYWORD:
 
