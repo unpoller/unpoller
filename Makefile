@@ -256,7 +256,7 @@ package_build_freebsd: readme man freebsd
 	cp examples/$(CONFIG_FILE).example $@/usr/local/etc/$(BINARY)/
 	cp examples/$(CONFIG_FILE).example $@/usr/local/etc/$(BINARY)/$(CONFIG_FILE)
 	cp LICENSE *.html examples/*?.?* $@/usr/local/share/doc/$(BINARY)/
-	cp init/bsd/unifipoller.rc $@/usr/local/etc/rc.d/unifipoller
+	cp init/bsd/unifi-poller.rc $@/usr/local/etc/rc.d/unifi-poller
 
 package_build_freebsd_386: package_build_freebsd freebsd386
 	mkdir -p $@

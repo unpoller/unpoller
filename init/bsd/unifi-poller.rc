@@ -8,8 +8,6 @@
 
 . /etc/rc.subr
 
-[ -f /usr/local/etc/defaults/unifi-poller ] && . /usr/local/etc/defaults/unifi-poller
-
 name="unifipoller"
 rcvar="unifipoller_enable"
 command="/usr/local/bin/unifi-poller"
