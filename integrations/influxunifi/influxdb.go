@@ -10,6 +10,7 @@ import (
 
 	influx "github.com/influxdata/influxdb1-client/v2"
 	"github.com/unifi-poller/poller"
+	"github.com/unifi-poller/unifi"
 	"golift.io/cnfg"
 )
 
@@ -248,6 +249,7 @@ func (u *InfluxUnifi) loopPoints(r report) {
 func (u *InfluxUnifi) loopDevicePoints(r report) {
 	m := r.metrics()
 	if m.Devices == nil {
+		m.Devices = &unifi.Devices{}
 		return
 	}
 
@@ -291,14 +293,12 @@ func (u *InfluxUnifi) loopDevicePoints(r report) {
 
 // LogInfluxReport writes a log message after exporting to influxdb.
 func (u *InfluxUnifi) LogInfluxReport(r *Report) {
-	if r == nil || r.Metrics == nil || r.Metrics.Devices == nil {
-		return
-	}
+	m := r.Metrics
+	idsMsg := fmt.Sprintf("IDS Events: %d, ", len(m.IDSList))
 
-	idsMsg := fmt.Sprintf("IDS Events: %d, ", len(r.Metrics.IDSList))
 	u.Collector.Logf("UniFi Metrics Recorded. Sites: %d, Clients: %d, "+
 		"UAP: %d, USG/UDM: %d, USW: %d, %sPoints: %d, Fields: %d, Errs: %d, Elapsed: %v",
-		len(r.Metrics.Sites), len(r.Metrics.Clients), len(r.Metrics.UAPs),
-		len(r.Metrics.UDMs)+len(r.Metrics.USGs), len(r.Metrics.USWs), idsMsg, r.Total,
+		len(m.Sites), len(m.Clients), len(m.UAPs),
+		len(m.UDMs)+len(m.USGs), len(m.USWs), idsMsg, r.Total,
 		r.Fields, len(r.Errors), r.Elapsed.Round(time.Millisecond))
 }
