@@ -72,13 +72,21 @@ func (u *InfluxUnifi) batchClient(r report, s *unifi.Client) {
 	r.send(&metric{Table: "clients", Tags: tags, Fields: fields})
 }
 
-func (u *InfluxUnifi) batchClientDPI(r report, s *unifi.DPITable) {
+// totalsDPImap: controller, site, name (app/cat name), dpi
+type totalsDPImap map[string]map[string]map[string]unifi.DPIData
+
+func (u *InfluxUnifi) batchClientDPI(r report, s *unifi.DPITable, appTotal, catTotal totalsDPImap) {
 	for _, dpi := range s.ByApp {
+		category := unifi.DPICats.Get(dpi.Cat)
+		application := unifi.DPIApps.GetApp(dpi.Cat, dpi.App)
+		fillDPIMapTotals(appTotal, application, s.SourceName, s.SiteName, dpi)
+		fillDPIMapTotals(catTotal, category, s.SourceName, s.SiteName, dpi)
+
 		r.send(&metric{
 			Table: "clientdpi",
 			Tags: map[string]string{
-				"category":    unifi.DPICats.Get(dpi.Cat),
-				"application": unifi.DPIApps.GetApp(dpi.Cat, dpi.App),
+				"category":    category,
+				"application": application,
 				"name":        s.Name,
 				"mac":         s.MAC,
 				"site_name":   s.SiteName,
@@ -91,5 +99,78 @@ func (u *InfluxUnifi) batchClientDPI(r report, s *unifi.DPITable) {
 				"rx_bytes":   dpi.RxBytes,
 			}},
 		)
+	}
+}
+
+// fillDPIMapTotals fills in totals for categories and applications. maybe clients too.
+// This allows less processing in InfluxDB to produce total transfer data per cat or app.
+func fillDPIMapTotals(m totalsDPImap, name, controller, site string, dpi unifi.DPIData) {
+	if m[controller] == nil {
+		m[controller] = make(map[string]map[string]unifi.DPIData)
+	}
+
+	if m[controller][site] == nil {
+		m[controller][site] = make(map[string]unifi.DPIData)
+	}
+
+	existing := m[controller][site][name]
+	existing.TxPackets += dpi.TxPackets
+	existing.RxPackets += dpi.RxPackets
+	existing.TxBytes += dpi.TxBytes
+	existing.RxBytes += dpi.RxBytes
+	m[controller][site][name] = existing
+}
+
+func reportClientDPItotals(r report, appTotal, catTotal totalsDPImap) {
+	type all []struct {
+		kind string
+		val  totalsDPImap
+	}
+
+	// This produces 7000+ metrics per site. Disabled for now.
+	if appTotal != nil {
+		appTotal = nil
+	}
+
+	// This can allow us to aggregate other data types later, like `name` or `mac`, or anything else unifi adds.
+	a := all{
+		// This produces 7000+ metrics per site. Disabled for now.
+		{
+			kind: "application",
+			val:  appTotal,
+		},
+		{
+			kind: "category",
+			val:  catTotal,
+		},
+	}
+
+	for _, k := range a {
+		for controller, s := range k.val {
+			for site, c := range s {
+				for name, m := range c {
+					newMetric := &metric{
+						Table: "clientdpi",
+						Tags: map[string]string{
+							"category":    "TOTAL",
+							"application": "TOTAL",
+							"name":        "TOTAL",
+							"mac":         "TOTAL",
+							"site_name":   site,
+							"source":      controller,
+						},
+						Fields: map[string]interface{}{
+							"tx_packets": m.TxPackets,
+							"rx_packets": m.RxPackets,
+							"tx_bytes":   m.TxBytes,
+							"rx_bytes":   m.RxBytes,
+						},
+					}
+					newMetric.Tags[k.kind] = name
+
+					r.send(newMetric)
+				}
+			}
+		}
 	}
 }

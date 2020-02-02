@@ -216,9 +216,14 @@ func (u *InfluxUnifi) loopPoints(r report) {
 	go func() {
 		defer r.done()
 
+		appTotal := make(totalsDPImap)
+		catTotal := make(totalsDPImap)
+
 		for _, s := range m.ClientsDPI {
-			u.batchClientDPI(r, s)
+			u.batchClientDPI(r, s, appTotal, catTotal)
 		}
+
+		reportClientDPItotals(r, appTotal, catTotal)
 	}()
 
 	go func() {

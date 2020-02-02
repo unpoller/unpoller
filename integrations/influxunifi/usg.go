@@ -39,6 +39,7 @@ func (u *InfluxUnifi) batchUSG(r report, s *unifi.USG) {
 			"num_desktop":   s.NumDesktop.Val,
 			"num_handheld":  s.NumHandheld.Val,
 			"num_mobile":    s.NumMobile.Val,
+			//			"speedtest_rundate": time.Unix(int64(s.SpeedtestStatus.Rundate.Val), 0).String(),
 		},
 	)
 
