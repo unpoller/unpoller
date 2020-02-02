@@ -25,7 +25,16 @@ done
 echo "Annotating Images: ${IMAGES}"
 
 # Build all the Docker tags if the source branch is a release and not a branch.
-[ "v$VERSION" != "$SOURCE_BRANCH" ] || TAGS="latest $VERSION $SHORTVER stable"
+if [ "v$VERSION" = "$SOURCE_BRANCH" ]; then
+  TAGS="$VERSION $(echo $VERSION | cut -d. -f1,2)"
+
+  echo $SOURCE_BRANCH | grep -q -- -
+  if [ "$?" = "1" ]; then
+    # tag does not contain a dash, so assume it's a prod tag.
+    TAGS="$TAGS latest stable"
+  fi
+fi
+
 echo "Version: $VERSION, Source: $SOURCE_BRANCH, Building tags: ${TAGS}"
 
 # Create multi-architecture manifests for each tag with all the built images.

@@ -3,7 +3,7 @@ unifi-poller(1) -- Utility to poll UniFi Controller Metrics and store them in In
 
 SYNOPSIS
 ---
-`unifi-poller -c /etc/unifi-poller.conf`
+`unifi-poller -c /etc/unifi-poller/up.conf`
 
 This daemon polls a UniFi controller at a short interval and stores the collected
 measurements in an Influx Database. The measurements and metrics collected belong
@@ -51,9 +51,9 @@ OPTIONS
 CONFIGURATION
 ---
 *   Config File Default Location:
-    *   Linux:   `/etc/unifi-poller/up.conf`
-    *   macOS:   `/usr/local/etc/unifi-poller/up.conf`
-    *   Windows: `C:\ProgramData\unifi-poller\up.conf`
+    *   Mac/BSD: `/usr/local/etc/unifi-poller/up.conf`
+    *   Windows: `C:\\ProgramData\\unifi-poller\\up.conf`
+    *   Others:  `/etc/unifi-poller/up.conf`
 *   Config File Default Format: `TOML`
 *   Possible formats: `XML`, `JSON`, `TOML`, `YAML`
 
@@ -67,14 +67,14 @@ is provided so the application can be easily adapted to any environment.
 
 Configuration file (up.conf) parameters are documented in the wiki.
 
-*   [https://github.com/davidnewhall/unifi-poller/wiki/Configuration](https://github.com/davidnewhall/unifi-poller/wiki/Configuration)
+*   [https://github.com/unifi-poller/unifi-poller/wiki/Configuration](https://github.com/unifi-poller/unifi-poller/wiki/Configuration)
 
 `Shell Environment Parameters`
 
 This application can be fully configured using shell environment variables.
 Find documentation for this feature on the Docker Wiki page.
 
-*   [https://github.com/davidnewhall/unifi-poller/wiki/Docker](https://github.com/davidnewhall/unifi-poller/wiki/Docker)
+*   [https://github.com/unifi-poller/unifi-poller/wiki/Docker](https://github.com/unifi-poller/unifi-poller/wiki/Docker)
 
 GO DURATION
 ---
@@ -92,10 +92,10 @@ AUTHOR
 ---
 *   Garrett Bjerkhoel (original code) ~ 2016
 *   David Newhall II (rewritten) ~ 4/20/2018
-*   David Newhall II (still going) ~ 6/7/2019
+*   David Newhall II (still going) ~ 2/1/2020
 
 LOCATION
 ---
-*   UniFi Poller: [https://github.com/davidnewhall/unifi-poller](https://github.com/davidnewhall/unifi-poller)
+*   UniFi Poller: [https://github.com/unifi-poller/unifi-poller](https://github.com/unifi-poller/unifi-poller)
 *   UniFi Library: [https://github.com/golift/unifi](https://github.com/golift/unifi)
 *   Grafana Dashboards: [https://grafana.com/dashboards?search=unifi-poller](https://grafana.com/dashboards?search=unifi-poller)

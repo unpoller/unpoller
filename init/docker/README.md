@@ -14,4 +14,4 @@ in InfluxDB by UniFi Poller.
 
 ##### HOWTO
 **Learn more about how and when to use these *Docker Compose* files in the
-[Docker Wiki](https://github.com/davidnewhall/unifi-poller/wiki/Docker).**
+[Docker Wiki](https://github.com/unifi-poller/unifi-poller/wiki/Docker).**

@@ -3,7 +3,7 @@
 <plist version="1.0">
     <dict>
         <key>Label</key>
-        <string>com.github.davidnewhall.unifi-poller</string>
+        <string>com.github.unifi-poller.unifi-poller</string>
         <key>ProgramArguments</key>
         <array>
             <string>/usr/local/bin/unifi-poller</string>
