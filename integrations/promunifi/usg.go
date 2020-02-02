@@ -1,8 +1,6 @@
 package promunifi
 
 import (
-	"time"
-
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/unifi-poller/unifi"
 )
@@ -40,7 +38,6 @@ type usg struct {
 
 func descUSG(ns string) *usg {
 	labels := []string{"port", "site_name", "name", "source"}
-	labelSS := []string{"port", "site_name", "name", "source", "rundate"}
 
 	return &usg{
 		WanRxPackets:   prometheus.NewDesc(ns+"wan_receive_packets_total", "WAN Receive Packets Total", labels, nil),
@@ -66,11 +63,11 @@ func descUSG(ns string) *usg {
 		LanTxBytes:     prometheus.NewDesc(ns+"lan_transmit_bytes_total", "LAN Transmit Bytes Total", labels, nil),
 		UplinkLatency:  prometheus.NewDesc(ns+"uplink_latency_seconds", "Uplink Latency", labels, nil),
 		UplinkSpeed:    prometheus.NewDesc(ns+"uplink_speed_mbps", "Uplink Speed", labels, nil),
-		Latency:        prometheus.NewDesc(ns+"speedtest_latency_seconds", "Speedtest Latency", labelSS, nil),
-		Runtime:        prometheus.NewDesc(ns+"speedtest_runtime_seconds", "Speedtest Run Time", labelSS, nil),
-		Rundate:        prometheus.NewDesc(ns+"speedtest_rundate_seconds", "Speedtest Run Date", labelSS, nil),
-		XputDownload:   prometheus.NewDesc(ns+"speedtest_download", "Speedtest Download Rate", labelSS, nil),
-		XputUpload:     prometheus.NewDesc(ns+"speedtest_upload", "Speedtest Upload Rate", labelSS, nil),
+		Latency:        prometheus.NewDesc(ns+"speedtest_latency_seconds", "Speedtest Latency", labels, nil),
+		Runtime:        prometheus.NewDesc(ns+"speedtest_runtime_seconds", "Speedtest Run Time", labels, nil),
+		Rundate:        prometheus.NewDesc(ns+"speedtest_rundate_seconds", "Speedtest Run Date", labels, nil),
+		XputDownload:   prometheus.NewDesc(ns+"speedtest_download", "Speedtest Download Rate", labels, nil),
+		XputUpload:     prometheus.NewDesc(ns+"speedtest_upload", "Speedtest Upload Rate", labels, nil),
 	}
 }
 
@@ -102,7 +99,6 @@ func (u *promUnifi) exportUSGstats(r report, labels []string, gw *unifi.Gw, st u
 
 	labelLan := []string{"lan", labels[1], labels[2], labels[3]}
 	labelWan := []string{"all", labels[1], labels[2], labels[3]}
-	labelSS := []string{"all", labels[1], labels[2], labels[3], time.Unix(int64(st.Rundate.Val), 0).String()}
 
 	r.send([]*metric{
 		{u.USG.LanRxPackets, counter, gw.LanRxPackets, labelLan},
@@ -113,11 +109,11 @@ func (u *promUnifi) exportUSGstats(r report, labels []string, gw *unifi.Gw, st u
 		{u.USG.UplinkLatency, gauge, ul.Latency.Val / 1000, labelWan},
 		{u.USG.UplinkSpeed, gauge, ul.Speed, labelWan},
 		// Speed Test Stats
-		{u.USG.Latency, gauge, st.Latency.Val / 1000, labelSS},
-		{u.USG.Runtime, gauge, st.Runtime, labelSS},
-		{u.USG.Rundate, gauge, st.Rundate, labelSS},
-		{u.USG.XputDownload, gauge, st.XputDownload, labelSS},
-		{u.USG.XputUpload, gauge, st.XputUpload, labelSS},
+		{u.USG.Latency, gauge, st.Latency.Val / 1000, labelWan},
+		{u.USG.Runtime, gauge, st.Runtime, labelWan},
+		{u.USG.Rundate, gauge, st.Rundate, labelWan},
+		{u.USG.XputDownload, gauge, st.XputDownload, labelWan},
+		{u.USG.XputUpload, gauge, st.XputUpload, labelWan},
 	})
 }
 
