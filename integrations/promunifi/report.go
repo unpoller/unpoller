@@ -45,7 +45,7 @@ func (r *Report) metrics() *poller.Metrics {
 
 func (r *Report) report(c poller.Collect, descs map[*prometheus.Desc]bool) {
 	m := r.Metrics
-	if m == nil {
+	if m == nil || m.Devices == nil || m.Clients == nil {
 		return
 	}
 
