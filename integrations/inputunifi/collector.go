@@ -64,7 +64,16 @@ func (u *InputUnifi) collectController(c *Controller) (*poller.Metrics, error) {
 		}
 	}
 
-	return u.pollController(c)
+	metrics, err := u.pollController(c)
+	if err != nil {
+		u.Logf("Re-authenticating to UniFi Controller: %s", c.URL)
+
+		if err := u.getUnifi(c); err != nil {
+			return metrics, fmt.Errorf("re-authenticating to %s: %v", c.Role, err)
+		}
+	}
+
+	return metrics, err
 }
 
 func (u *InputUnifi) pollController(c *Controller) (*poller.Metrics, error) {
@@ -77,10 +86,7 @@ func (u *InputUnifi) pollController(c *Controller) (*poller.Metrics, error) {
 
 	// Get the sites we care about.
 	if m.Sites, err = u.getFilteredSites(c); err != nil {
-		err = fmt.Errorf("unifi.GetSites(%v): %v", c.URL, err)
-		c = nil // reset for next time, so it will re-auth.
-
-		return nil, err
+		return nil, fmt.Errorf("unifi.GetSites(): %v", err)
 	}
 
 	if c.SaveDPI {
