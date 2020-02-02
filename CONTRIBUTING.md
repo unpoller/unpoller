@@ -5,6 +5,7 @@ _This doc is far from complete._
 Lets talk about how the software gets built for our users before we talk about
 making changes to it.
 
+
 ## TravisCI
 
 This repo is tested, built and deployed by [Travis-CI](https://travis-ci.org/unifi-poller/unifi-poller).
@@ -64,13 +65,14 @@ too much opinion. If you want to provide a way to do something, please also prov
 any alternatives you're aware of. If you're not sure, just open an issue and we can
 hash it out. I'm reasonable.
 
-## UniFi Library
+## UniFi Libraries
 
-If you're trying to fix something in the UniFi data collection (ie. you got an
-unmarshal error, or you want to add something I didn't include) then you
-should look at the [UniFi library](https://github.com/unifi-poller/unifi). All the
-data collection and export code lives there. Contributions and Issues are welcome
-on that code base as well.
+The UniFi data extraction is provided as an [external library](https://godoc.org/github.com/unifi-poller/unifi),
+and you can import that code directly without futzing with this application. That
+means, if you wanted to do something like make telegraf collect your data instead
+of UniFi Poller you can achieve that with a little bit of Go code. You could write
+a small app that acts as a telegraf input plugin using the [unifi](https://github.com/unifi-poller/unifi)
+library to grab the data from your controller.
 
 This application is very dynamic and built using several package repos.
 They are all in the [UniFi Poller GitHub Org](https://github.com/unifi-poller).

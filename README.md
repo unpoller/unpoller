@@ -19,6 +19,7 @@ of the documentation still needs to be updated; 12/2/2019.
 included; with screenshots. Five for InfluxDB and five for Prometheus.
 
 ## Installation
+
 [See the Wiki!](https://github.com/unifi-poller/unifi-poller/wiki/Installation)
 We have a special place for [Docker Users](https://github.com/unifi-poller/unifi-poller/wiki/Docker).
 I'm willing to help if you have troubles.
@@ -28,17 +29,19 @@ the #unifi-poller channel on the [Ubiquiti Discord server](https://discord.gg/Kn
 I've also [provided a forum post](https://community.ui.com/questions/Unifi-Poller-Store-Unifi-Controller-Metrics-in-InfluxDB-without-SNMP/58a0ea34-d2b3-41cd-93bb-d95d3896d1a1) you may use to get additional help.
 
 ## Description
+
 [Ubiquiti](https://www.ui.com) makes networking devices like switches, gateways
 (routers) and wireless access points. They have a line of equipment named
 [UniFi](https://www.ui.com/products/#unifi) that uses a
 [controller](https://www.ui.com/download/unifi/) to keep stats and simplify network
-device configuration. This controller can be installed on Windows, macOS and Linux.
-Ubiquiti also provides a dedicated hardware device called a
-[CloudKey](https://www.ui.com/unifi/unifi-cloud-key/) that runs the controller software. More recently they've developed the Dream Machine; it's still in
+device configuration. This controller can be installed on Windows, macOS, FreeBSD,
+Linux or Docker. Ubiquiti also provides a dedicated hardware device called a
+[CloudKey](https://www.ui.com/unifi/unifi-cloud-key/) that runs the controller software.
+More recently they've developed the Dream Machine; it's still in
 beta / early access, but UniFi Poller can collect its data!
 
-UniFi Poller is a small Golang application that runs on Windows, macOS, Linux or
-Docker. In Influx-mode it polls a UniFi controller every 30 seconds for
+UniFi Poller is a small Golang application that runs on Windows, macOS, FreeBSD,
+Linux or Docker. In Influx-mode it polls a UniFi controller every 30 seconds for
 measurements and exports the data to an Influx database. In Prometheus mode the
 poller opens a web port and accepts Prometheus polling. It converts the UniFi
 Controller API data into Prometheus exports on the fly.
@@ -52,18 +55,14 @@ You'll have a plethora of data at your fingertips and the ability to craft custo
 graphs to slice the data any way you choose. Good luck!
 
 ## Backstory
+
 I found a simple piece of code on GitHub that sorta did what I needed;
 we all know that story. I wanted more data, so I added more data collection.
 I probably wouldn't have made it this far if [Garrett](https://github.com/dewski/unifi)
 hadn't written the original code I started with. Many props my man.
-
 The original code pulled only the client data. This app now pulls data
-for clients, access points, security gateways, dream machines and switches. I
-used to own two UAP-AC-PROs, one USG-3 and one US-24-250W, but have since upgraded
-a few devices. Many other users have also provided feedback to improve this app,
-and we have reports of it working on nearly every switch, AP and gateway.
+for clients, access points, security gateways, dream machines and switches.
 
-## What's this data good for?
 I've been trying to get my UAP data into Grafana. Sure, google search that.
 You'll find [this](https://community.ubnt.com/t5/UniFi-Wireless/Grafana-dashboard-for-UniFi-APs-now-available/td-p/1833532). What if you don't want to deal with SNMP?
 Well, here you go. I've replicated 400% of what you see on those SNMP-powered
@@ -73,20 +72,11 @@ to [waterside](https://community.ubnt.com/t5/user/viewprofilepage/user-id/303058
 for making this dashboard; it gave me a fantastic start to making my own dashboards.
 
 ## Operation
+
 You can control this app with puppet, chef, saltstack, homebrew or a simple bash
-script if you needed to. Packages are available for macOS, Linux and Docker.
-It comes with a systemd service unit that allows you automatically start it up on most Linux hosts.
+script if you needed to. Packages are available for macOS, Linux, FreeBSD and Docker.
 It works just fine on [Windows](https://github.com/unifi-poller/unifi-poller/wiki/Windows) too.
 Most people prefer Docker, and this app is right at home in that environment.
-
-## Development
-The UniFi data extraction is provided as an [external library](https://godoc.org/golift.io/unifi),
-and you can import that code directly without futzing with this application. That
-means, if you wanted to do something like make telegraf collect your data instead
-of UniFi Poller you can achieve that with a little bit of Go code. You could write
-a small app that acts as a telegraf input plugin using the [unifi](https://github.com/golift/unifi)
-library to grab the data from your controller. As a bonus, all of the code in UniFi Poller is
-[in libraries](https://github.com/unifi-poller/) and can be used in other projects.
 
 ## What's it look like?
 
