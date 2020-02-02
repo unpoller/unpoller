@@ -4,8 +4,6 @@ go:
 before_install:
   # download super-linter: golangci-lint
 - curl -sL https://install.goreleaser.com/github.com/golangci/golangci-lint.sh | sh -s -- -b $(go env GOPATH)/bin latest
-install:
-- go mod download
 script:
-- golangci-lint run --enable-all -D gochecknoinits -D funlen -e gomnd
 - go test ./...
+- golangci-lint run --enable-all -D gochecknoinits -D funlen -D gomnd
