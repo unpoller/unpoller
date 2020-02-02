@@ -291,7 +291,7 @@ func (u *InfluxUnifi) loopDevicePoints(r report) {
 
 // LogInfluxReport writes a log message after exporting to influxdb.
 func (u *InfluxUnifi) LogInfluxReport(r *Report) {
-	if r == nil || r.Metrics == nil {
+	if r == nil || r.Metrics == nil || r.Metrics.Devices == nil {
 		return
 	}
 
