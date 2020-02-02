@@ -328,12 +328,12 @@ $(patsubst %,%.darwin.so,$(PLUGINS)):
 # Extras
 
 # Run code tests and lint.
-test: lint
+test:
 	# Testing.
 	go test -race -covermode=atomic ./...
-lint:
 	# Checking lint.
 	golangci-lint run $(GOLANGCI_LINT_ARGS)
+
 
 # Don't run this unless you're ready to debug untested vendored dependencies.
 deps:
