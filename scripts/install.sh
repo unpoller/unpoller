@@ -9,7 +9,7 @@
 # ----
 #
 # - If you're on RedHat/CentOS/Fedora, installs the latest rpm package.
-# - If you're on Debian/Ubuntu/Gentoo, installs the latest deb package.
+# - If you're on Debian/Ubuntu/Knoppix, installs the latest deb package.
 # - If you're on FreeBSD, installs the latest txz package.
 #
 # This is part of application-builder.
