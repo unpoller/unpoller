@@ -45,9 +45,6 @@ func (r *Report) metrics() *poller.Metrics {
 
 func (r *Report) report(c poller.Collect, descs map[*prometheus.Desc]bool) {
 	m := r.Metrics
-	if m == nil || m.Devices == nil || m.Clients == nil {
-		return
-	}
 
 	c.Logf("UniFi Measurements Exported. Site: %d, Client: %d, "+
 		"UAP: %d, USG/UDM: %d, USW: %d, Descs: %d, "+
