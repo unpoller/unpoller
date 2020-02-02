@@ -127,15 +127,18 @@ func reportClientDPItotals(r report, appTotal, catTotal totalsDPImap) {
 		val  totalsDPImap
 	}
 
+	// This produces 7000+ metrics per site. Disabled for now.
+	if appTotal != nil {
+		appTotal = nil
+	}
+
 	// This can allow us to aggregate other data types later, like `name` or `mac`, or anything else unifi adds.
 	a := all{
-		/*
-			// This produces 7000+ metrics per site. Disabled for now.
-			{
-				kind: "application",
-				val:  appTotal,
-			},
-		*/
+		// This produces 7000+ metrics per site. Disabled for now.
+		{
+			kind: "application",
+			val:  appTotal,
+		},
 		{
 			kind: "category",
 			val:  catTotal,
