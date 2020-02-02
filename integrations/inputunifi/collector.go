@@ -91,28 +91,28 @@ func (u *InputUnifi) pollController(c *Controller) (*poller.Metrics, error) {
 
 	if c.SaveDPI {
 		if m.SitesDPI, err = c.Unifi.GetSiteDPI(m.Sites); err != nil {
-			return m, fmt.Errorf("unifi.GetSiteDPI(%v): %v", c.URL, err)
+			return nil, fmt.Errorf("unifi.GetSiteDPI(%v): %v", c.URL, err)
 		}
 
 		if m.ClientsDPI, err = c.Unifi.GetClientsDPI(m.Sites); err != nil {
-			return m, fmt.Errorf("unifi.GetClientsDPI(%v): %v", c.URL, err)
+			return nil, fmt.Errorf("unifi.GetClientsDPI(%v): %v", c.URL, err)
 		}
 	}
 
 	if c.SaveIDS {
 		m.IDSList, err = c.Unifi.GetIDS(m.Sites, time.Now().Add(time.Minute), time.Now())
 		if err != nil {
-			return m, fmt.Errorf("unifi.GetIDS(%v): %v", c.URL, err)
+			return nil, fmt.Errorf("unifi.GetIDS(%v): %v", c.URL, err)
 		}
 	}
 
 	// Get all the points.
 	if m.Clients, err = c.Unifi.GetClients(m.Sites); err != nil {
-		return m, fmt.Errorf("unifi.GetClients(%v): %v", c.URL, err)
+		return nil, fmt.Errorf("unifi.GetClients(%v): %v", c.URL, err)
 	}
 
 	if m.Devices, err = c.Unifi.GetDevices(m.Sites); err != nil {
-		return m, fmt.Errorf("unifi.GetDevices(%v): %v", c.URL, err)
+		return nil, fmt.Errorf("unifi.GetDevices(%v): %v", c.URL, err)
 	}
 
 	return u.augmentMetrics(c, m), nil
