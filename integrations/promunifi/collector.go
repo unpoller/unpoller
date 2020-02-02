@@ -307,9 +307,14 @@ func (u *promUnifi) loopExports(r report) {
 	go func() {
 		defer r.done()
 
+		appTotal := make(totalsDPImap)
+		catTotal := make(totalsDPImap)
+
 		for _, c := range m.ClientsDPI {
-			u.exportClientDPI(r, c)
+			u.exportClientDPI(r, c, appTotal, catTotal)
 		}
+
+		u.exportClientDPItotals(r, appTotal, catTotal)
 	}()
 
 	go func() {

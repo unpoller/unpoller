@@ -72,17 +72,19 @@ func descClient(ns string) *uclient {
 	}
 }
 
-func (u *promUnifi) exportClientDPI(r report, s *unifi.DPITable) {
+func (u *promUnifi) exportClientDPI(r report, s *unifi.DPITable, appTotal, catTotal totalsDPImap) {
 	for _, dpi := range s.ByApp {
 		labelDPI := []string{s.Name, s.MAC, s.SiteName, s.SourceName,
 			unifi.DPICats.Get(dpi.Cat), unifi.DPIApps.GetApp(dpi.Cat, dpi.App)}
 
+		fillDPIMapTotals(appTotal, labelDPI[5], s.SourceName, s.SiteName, dpi)
+		fillDPIMapTotals(catTotal, labelDPI[4], s.SourceName, s.SiteName, dpi)
 		// log.Println(labelDPI, dpi.Cat, dpi.App, dpi.TxBytes, dpi.RxBytes, dpi.TxPackets, dpi.RxPackets)
 		r.send([]*metric{
-			{u.Client.DPITxPackets, gauge, dpi.TxPackets, labelDPI},
-			{u.Client.DPIRxPackets, gauge, dpi.RxPackets, labelDPI},
-			{u.Client.DPITxBytes, gauge, dpi.TxBytes, labelDPI},
-			{u.Client.DPIRxBytes, gauge, dpi.RxBytes, labelDPI},
+			{u.Client.DPITxPackets, counter, dpi.TxPackets, labelDPI},
+			{u.Client.DPIRxPackets, counter, dpi.RxPackets, labelDPI},
+			{u.Client.DPITxBytes, counter, dpi.TxBytes, labelDPI},
+			{u.Client.DPIRxBytes, counter, dpi.RxBytes, labelDPI},
 		})
 	}
 }
@@ -133,4 +135,85 @@ func (u *promUnifi) exportClient(r report, c *unifi.Client) {
 	}
 
 	r.send([]*metric{{u.Client.Uptime, gauge, c.Uptime, labelW}})
+}
+
+// totalsDPImap: controller, site, name (app/cat name), dpi
+type totalsDPImap map[string]map[string]map[string]unifi.DPIData
+
+// fillDPIMapTotals fills in totals for categories and applications. maybe clients too.
+// This allows less processing in InfluxDB to produce total transfer data per cat or app.
+func fillDPIMapTotals(m totalsDPImap, name, controller, site string, dpi unifi.DPIData) {
+	if _, ok := m[controller]; !ok {
+		m[controller] = make(map[string]map[string]unifi.DPIData)
+	}
+
+	if _, ok := m[controller][site]; !ok {
+		m[controller][site] = make(map[string]unifi.DPIData)
+	}
+
+	if _, ok := m[controller][site][name]; !ok {
+		m[controller][site][name] = dpi
+		return
+	}
+
+	oldDPI := m[controller][site][name]
+	oldDPI.TxPackets += dpi.TxPackets
+	oldDPI.RxPackets += dpi.RxPackets
+	oldDPI.TxBytes += dpi.TxBytes
+	oldDPI.RxBytes += dpi.RxBytes
+	m[controller][site][name] = oldDPI
+}
+
+func (u *promUnifi) exportClientDPItotals(r report, appTotal, catTotal totalsDPImap) {
+	type all []struct {
+		kind string
+		val  totalsDPImap
+	}
+	// This produces 7000+ metrics per site. Disabled for now.
+	if appTotal != nil {
+		appTotal = nil
+	}
+	// This can allow us to aggregate other data types later, like `name` or `mac`, or anything else unifi adds.
+	a := all{
+
+		{
+			kind: "application",
+			val:  appTotal,
+		},
+
+		{
+			kind: "category",
+			val:  catTotal,
+		},
+	}
+
+	for _, k := range a {
+		for controller, s := range k.val {
+			for site, c := range s {
+				for name, m := range c {
+					labelDPI := []string{"TOTAL", "TOTAL", site, controller, "TOTAL", "TOTAL"}
+
+					switch k.kind {
+					case "application":
+						labelDPI[5] = name
+					case "category":
+						labelDPI[4] = name
+					case "name":
+						labelDPI[0] = name
+					case "mac":
+						labelDPI[1] = name
+					}
+
+					m := []*metric{
+						{u.Client.DPITxPackets, counter, m.TxPackets, labelDPI},
+						{u.Client.DPIRxPackets, counter, m.RxPackets, labelDPI},
+						{u.Client.DPITxBytes, counter, m.TxBytes, labelDPI},
+						{u.Client.DPIRxBytes, counter, m.RxBytes, labelDPI},
+					}
+
+					r.send(m)
+				}
+			}
+		}
+	}
 }
