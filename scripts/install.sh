@@ -1,6 +1,6 @@
 #!/bin/sh
 
-# This is a quick and drity script to install the latest Linux package.
+# This is a quick and dirty script to install the latest Linux package.
 #
 # Use it like this, pick curl or wget:  (sudo is optional)
 # ----
