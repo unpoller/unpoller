@@ -70,9 +70,9 @@ func (u *InfluxUnifi) PollController() {
 	log.Printf("[INFO] Everything checks out! Poller started, InfluxDB interval: %v", interval)
 
 	for u.LastCheck = range ticker.C {
-		metrics, ok, err := u.Collector.Metrics()
-		if err != nil {
-			u.Collector.LogErrorf("%v", err)
+		metrics, ok, collectErr := u.Collector.Metrics()
+		if collectErr != nil {
+			u.Collector.LogErrorf("metric fetch for InfluxDB failed: %v", collectErr)
 
 			if !ok {
 				continue
@@ -86,6 +86,7 @@ func (u *InfluxUnifi) PollController() {
 			continue
 		}
 
+		report.error(collectErr)
 		u.LogInfluxReport(report)
 	}
 }
@@ -177,12 +178,11 @@ func (u *InfluxUnifi) ReportMetrics(m *poller.Metrics) (*Report, error) {
 func (u *InfluxUnifi) collect(r report, ch chan *metric) {
 	for m := range ch {
 		pt, err := influx.NewPoint(m.Table, m.Tags, m.Fields, r.metrics().TS)
-		if err != nil {
-			r.error(err)
-		} else {
+		if err == nil {
 			r.batch(m, pt)
 		}
 
+		r.error(err)
 		r.done()
 	}
 }

@@ -54,7 +54,9 @@ func (r *Report) send(m *metric) {
 /* The following methods are not thread safe. */
 
 func (r *Report) error(err error) {
-	r.Errors = append(r.Errors, err)
+	if err != nil {
+		r.Errors = append(r.Errors, err)
+	}
 }
 
 func (r *Report) batch(m *metric, p *influx.Point) {
