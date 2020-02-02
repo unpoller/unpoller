@@ -335,15 +335,14 @@ lint:
 	# Checking lint.
 	golangci-lint run $(GOLANGCI_LINT_ARGS)
 
-# This is safe; recommended even.
-dep: vendor
-vendor: go.mod go.sum
-	go mod download
-
 # Don't run this unless you're ready to debug untested vendored dependencies.
-deps: update vendor
-update:
-	go get -u -d
+deps:
+	go get -u github.com/unifi-poller/unifi
+	go get -u github.com/unifi-poller/influxunifi
+	go get -u github.com/unifi-poller/promunifi
+	go get -u github.com/unifi-poller/inputunifi
+	go get -u github.com/unifi-poller/poller
+
 
 # Homebrew stuff. macOS only.
 

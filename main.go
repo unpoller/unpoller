@@ -4,6 +4,7 @@ import (
 	"log"
 
 	"github.com/unifi-poller/poller"
+
 	// Load input plugins!
 	_ "github.com/unifi-poller/inputunifi"
 	_ "github.com/unifi-poller/unifi"
