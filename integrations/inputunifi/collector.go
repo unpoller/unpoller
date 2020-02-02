@@ -77,8 +77,10 @@ func (u *InputUnifi) pollController(c *Controller) (*poller.Metrics, error) {
 
 	// Get the sites we care about.
 	if m.Sites, err = u.getFilteredSites(c); err != nil {
-		c = nil // reset for next time.
-		return nil, fmt.Errorf("unifi.GetSites(%v): %v", c.URL, err)
+		err = fmt.Errorf("unifi.GetSites(%v): %v", c.URL, err)
+		c = nil // reset for next time, so it will re-auth.
+
+		return nil, err
 	}
 
 	if c.SaveDPI {
