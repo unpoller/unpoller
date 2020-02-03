@@ -173,6 +173,10 @@ func (u *InputUnifi) setDefaults(c *Controller, useDefaults bool) {
 			c.URL = defaultURL
 		}
 
+		if c.Role == "" {
+			c.Role = c.URL
+		}
+
 		if c.Pass == "" {
 			c.Pass = defaultPass
 		}
