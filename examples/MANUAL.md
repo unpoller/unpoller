@@ -24,10 +24,11 @@ examples and default configurations.
 
 OPTIONS
 ---
-`unifi-poller [-c <config-file>] [-j <filter>] [-h] [-v]`
+`unifi-poller [-c <config-file>,[config-file]] [-j <filter>] [-h] [-v]`
 
-    -c, --config <config-file>
-        Provide a configuration file (instead of the default).
+    -c, --config <config-file>,[config-file]
+        Provide a configuration file (instead of the default). You may provide
+        multiple file paths separated by commas. The first file found is used.
 
     -v, --version
         Display version and exit.
