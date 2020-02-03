@@ -96,6 +96,7 @@ func init() {
 // Should be run in a Go routine. Returns nil if not configured.
 func (u *promUnifi) Run(c poller.Collect) error {
 	if u.Config == nil || u.Disable {
+		c.Logf("Prometheus config missing (or disabled), Prometheus HTTP listener disabled!")
 		return nil
 	}
 
