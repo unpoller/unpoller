@@ -54,5 +54,4 @@ COPY --from=builder /${BINARY}/${BINARY}.${ARCH}.${OS} /image
 COPY --from=builder /${BINARY}/examples/${CONFIG_FILE}.example /etc/${BINARY}/${CONFIG_FILE}
 COPY --from=builder /etc/ssl /etc/ssl
 
-VOLUME [ "/etc/${BINARY}" ]
 ENTRYPOINT [ "/image" ]
