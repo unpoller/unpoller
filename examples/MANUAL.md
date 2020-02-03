@@ -72,7 +72,7 @@ Configuration file (up.conf) parameters are documented in the wiki.
 `Shell Environment Parameters`
 
 This application can be fully configured using shell environment variables.
-Find documentation for this feature on the Docker Wiki page.
+Find documentation for this feature on the Docker Wiki page, and the above Configuration wiki.
 
 *   [https://github.com/unifi-poller/unifi-poller/wiki/Docker](https://github.com/unifi-poller/unifi-poller/wiki/Docker)
 
@@ -96,6 +96,6 @@ AUTHOR
 
 LOCATION
 ---
-*   UniFi Poller: [https://github.com/unifi-poller/unifi-poller](https://github.com/unifi-poller/unifi-poller)
-*   UniFi Library: [https://github.com/golift/unifi](https://github.com/golift/unifi)
+*   UniFi Poller: [https://golift.io/unifi-poller/](https://golift.io/unifi-poller/)
+*   UniFi Library: [https://github.com/unifi-poller/unifi](https://github.com/unifi-poller/unifi)
 *   Grafana Dashboards: [https://grafana.com/dashboards?search=unifi-poller](https://grafana.com/dashboards?search=unifi-poller)

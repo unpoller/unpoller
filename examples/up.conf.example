@@ -61,9 +61,9 @@
 # The following section contains the default credentials/configuration for any
 # dynamic controller (see above section), or the primary controller if you do not
 # provide one and dynamic is disabled. In other words, you can just add your
-# controller here and delete the following section. Either works.
+# controller here and delete the following section.
 [unifi.defaults]
-  role       = "https://127.0.0.1:8443"
+  #role       = "main controller"
   url        = "https://127.0.0.1:8443"
   user       = "unifipoller"
   pass       = "unifipoller"
@@ -73,26 +73,28 @@
   save_sites = true
   verify_ssl = false
 
-# You may repeat the following section to poll additional controllers.
-[[unifi.controller]]
+# The following is optional and used for configurations with multiple controllers.
+
+# You may repeat the following section to poll multiple controllers.
+#[[unifi.controller]]
   # Friendly name used in dashboards. Uses URL if left empty; which is fine.
   # Avoid changing this later because it will live forever in your database.
   # Multiple controllers may share a role. This allows grouping during scrapes.
-  role = ""
+  #role = ""
+  #url = "https://127.0.0.1:8443"
 
-  url = "https://127.0.0.1:8443"
-  # Make a read-only user in the UniFi Admin Settings.
-  user = "unifipoller"
-  pass = "4BB9345C-2341-48D7-99F5-E01B583FF77F"
+  # Make a read-only user in the UniFi Admin Settings, allow it access to all sites.
+  #user = "unifipoller"
+  #pass = "4BB9345C-2341-48D7-99F5-E01B583FF77F"
 
   # If the controller has more than one site, specify which sites to poll here.
   # Set this to ["default"] to poll only the first site on the controller.
   # A setting of ["all"] will poll all sites; this works if you only have 1 site too.
-  sites = ["all"]
+  #sites = ["all"]
 
   # Enable collection of Intrusion Detection System Data (InfluxDB only).
   # Only useful if IDS or IPS are enabled on one of the sites.
-  save_ids = false
+  #save_ids = false
 
   # Enable collection of Deep Packet Inspection data. This data breaks down traffic
   # types for each client and site, it powers a dedicated DPI dashboard.
@@ -100,13 +102,13 @@
   # 40 clients.  This adds a little bit of poller run time per interval and causes
   # more API requests to your controller(s). Don't let these "cons" sway you:
   # it's cool data. Please provide feedback on your experience with this feature.
-  save_dpi = false
+  #save_dpi = false
 
   # Enable collection of site data. This data powers the Network Sites dashboard.
   # It's not valuable to everyone and setting this to false will save resources.
-  save_sites = true
+  #save_sites = true
 
   # If your UniFi controller has a valid SSL certificate (like lets encrypt),
   # you can enable this option to validate it. Otherwise, any SSL certificate is
   # valid. If you don't know if you have a valid SSL cert, then you don't have one.
-  verify_ssl = false
+  #verify_ssl = false
