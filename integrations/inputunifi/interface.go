@@ -23,7 +23,7 @@ func (u *InputUnifi) Initialize(l poller.Logger) error {
 		return nil
 	}
 
-	if u.setDefaults(&u.Default); len(u.Controllers) == 0 && !u.Dynamic {
+	if u.setDefaults(&u.Default, true); len(u.Controllers) == 0 && !u.Dynamic {
 		new := u.Default // copy defaults.
 		u.Controllers = []*Controller{&new}
 	}
@@ -36,7 +36,7 @@ func (u *InputUnifi) Initialize(l poller.Logger) error {
 	u.Logger = l
 
 	for _, c := range u.Controllers {
-		u.setDefaults(c)
+		u.setDefaults(c, false)
 
 		switch err := u.getUnifi(c); err {
 		case nil:

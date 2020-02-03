@@ -159,30 +159,58 @@ func (u *InputUnifi) dumpSitesJSON(c *Controller, path, name string, sites unifi
 	return allJSON, nil
 }
 
-func (u *InputUnifi) setDefaults(c *Controller) {
-	if c.SaveSites == nil {
-		t := true
-		c.SaveSites = &t
-	}
-
-	if c.URL == "" {
-		c.URL = defaultURL
-	}
-
+// setDefaults sets defaults for the defaults and for the controllers.
+// which one depends on the useDefaults boolean.
+func (u *InputUnifi) setDefaults(c *Controller, useDefaults bool) {
 	if c.Role == "" {
 		c.Role = c.URL
 	}
 
+	// Default defaults.
+	if useDefaults {
+		if c.SaveSites == nil {
+			t := true
+			c.SaveSites = &t
+		}
+
+		if c.URL == "" {
+			c.URL = defaultURL
+		}
+
+		if c.Pass == "" {
+			c.Pass = defaultPass
+		}
+
+		if c.User == "" {
+			c.User = defaultUser
+		}
+
+		if len(c.Sites) == 0 {
+			c.Sites = []string{defaultSite}
+		}
+
+		return
+	}
+
+	// Configured controller defaults.
+	if c.SaveSites == nil {
+		c.SaveSites = u.Default.SaveSites
+	}
+
+	if c.URL == "" {
+		c.URL = u.Default.URL
+	}
+
 	if c.Pass == "" {
-		c.Pass = defaultPass
+		c.Pass = u.Default.Pass
 	}
 
 	if c.User == "" {
-		c.User = defaultUser
+		c.User = u.Default.User
 	}
 
 	if len(c.Sites) == 0 {
-		c.Sites = []string{defaultSite}
+		c.Sites = u.Default.Sites
 	}
 }
 
