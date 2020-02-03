@@ -96,6 +96,7 @@ func (u *InfluxUnifi) Run(c poller.Collect) error {
 	var err error
 
 	if u.Config == nil || u.Disable {
+		c.Logf("InfluxDB config missing (or disabled), InfluxDB output disabled!")
 		return nil
 	}
 
