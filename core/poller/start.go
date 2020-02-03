@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"strings"
 
 	"github.com/prometheus/common/version"
 	"github.com/spf13/pflag"
@@ -28,6 +29,12 @@ func (u *UnifiPoller) Start() error {
 		return nil // don't run anything else w/ version request.
 	}
 
+	cfile, err := getFirstFile(strings.Split(u.Flags.ConfigFile, ","))
+	if err != nil {
+		return err
+	}
+
+	u.Flags.ConfigFile = cfile
 	if u.Flags.DumpJSON == "" { // do not print this when dumping JSON.
 		u.Logf("Loading Configuration File: %s", u.Flags.ConfigFile)
 	}
@@ -50,7 +57,8 @@ func (f *Flags) Parse(args []string) {
 
 	f.StringVarP(&f.DumpJSON, "dumpjson", "j", "",
 		"This debug option prints a json payload and exits. See man page for more info.")
-	f.StringVarP(&f.ConfigFile, "config", "c", DefaultConfFile, "Poller config file path.")
+	f.StringVarP(&f.ConfigFile, "config", "c", DefaultConfFile,
+		"Poller config file path. Separating multiple paths with a comma will load the first config file found.")
 	f.BoolVarP(&f.ShowVer, "version", "v", false, "Print the version and exit.")
 	_ = f.FlagSet.Parse(args) // pflag.ExitOnError means this will never return error.
 }

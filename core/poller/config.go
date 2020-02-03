@@ -108,6 +108,19 @@ func (u *UnifiPoller) ParseConfigs() error {
 	return u.parseOutputs()
 }
 
+// getFirstFile returns the first file that exists and is "reachable"
+func getFirstFile(files []string) (string, error) {
+	var err error
+
+	for _, f := range files {
+		if _, err = os.Stat(f); err == nil {
+			return f, nil
+		}
+	}
+
+	return "", err
+}
+
 // parseInterface parses the config file and environment variables into the provided interface.
 func (u *UnifiPoller) parseInterface(i interface{}) error {
 	// Parse config file into provided interface.
