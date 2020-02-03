@@ -162,10 +162,6 @@ func (u *InputUnifi) dumpSitesJSON(c *Controller, path, name string, sites unifi
 // setDefaults sets defaults for the defaults and for the controllers.
 // which one depends on the useDefaults boolean.
 func (u *InputUnifi) setDefaults(c *Controller, useDefaults bool) {
-	if c.Role == "" {
-		c.Role = c.URL
-	}
-
 	// Default defaults.
 	if useDefaults {
 		if c.SaveSites == nil {
@@ -199,6 +195,10 @@ func (u *InputUnifi) setDefaults(c *Controller, useDefaults bool) {
 
 	if c.URL == "" {
 		c.URL = u.Default.URL
+	}
+
+	if c.Role == "" {
+		c.Role = c.URL
 	}
 
 	if c.Pass == "" {
