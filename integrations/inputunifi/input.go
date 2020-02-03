@@ -173,7 +173,7 @@ func (u *InputUnifi) setDefaults(c *Controller, useDefaults bool) {
 			c.URL = defaultURL
 		}
 
-		if c.Role == defaultURL {
+		if c.Role == "" {
 			c.Role = c.URL
 		}
 
@@ -201,7 +201,9 @@ func (u *InputUnifi) setDefaults(c *Controller, useDefaults bool) {
 		c.URL = u.Default.URL
 	}
 
-	if c.Role == "" {
+	if c.Role == "" && u.Default.Role != u.Default.URL {
+		c.Role = u.Default.Role
+	} else if c.Role == "" {
 		c.Role = c.URL
 	}
 
