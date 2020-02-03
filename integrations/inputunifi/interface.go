@@ -24,8 +24,7 @@ func (u *InputUnifi) Initialize(l poller.Logger) error {
 	}
 
 	if u.setDefaults(&u.Default, true); len(u.Controllers) == 0 && !u.Dynamic {
-		new := u.Default // copy defaults.
-		u.Controllers = []*Controller{&new}
+		u.Controllers = []*Controller{&u.Default}
 	}
 
 	if len(u.Controllers) == 0 {
@@ -47,7 +46,7 @@ func (u *InputUnifi) Initialize(l poller.Logger) error {
 			u.Logf("Configured UniFi Controller at %s v%s as user %s. Sites: %v",
 				c.URL, c.Unifi.ServerVersion, c.User, c.Sites)
 		default:
-			u.LogErrorf("Controller Auth or Connection failed, but continuing to retry! %s: %v", c.Role, err)
+			u.LogErrorf("Controller Auth or Connection failed, but continuing to retry! %s @ %s: %v", c.User, c.Role, err)
 		}
 	}
 
