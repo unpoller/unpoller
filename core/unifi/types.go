@@ -87,6 +87,7 @@ type Unifi struct {
 	*Config
 	*server
 	isNew bool
+	csrf  string
 }
 
 // server is the /status endpoint from the Unifi controller.
