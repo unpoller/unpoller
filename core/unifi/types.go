@@ -74,9 +74,9 @@ type Config struct {
 	Pass      string
 	URL       string
 	VerifySSL bool
+	New       bool
 	ErrorLog  Logger
 	DebugLog  Logger
-	New       bool
 }
 
 // Unifi is what you get in return for providing a password! Unifi represents
