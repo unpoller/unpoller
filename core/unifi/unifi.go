@@ -14,15 +14,18 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/http/cookiejar"
+	"net/url"
 	"strings"
 	"time"
+
+	"golang.org/x/net/publicsuffix"
 )
 
 // NewUnifi creates a http.Client with authenticated cookies.
 // Used to make additional, authenticated requests to the APIs.
 // Start here.
 func NewUnifi(config *Config) (*Unifi, error) {
-	jar, err := cookiejar.New(nil)
+	jar, err := cookiejar.New(&cookiejar.Options{PublicSuffixList: publicsuffix.List})
 	if err != nil {
 		return nil, err
 	}
@@ -45,6 +48,11 @@ func NewUnifi(config *Config) (*Unifi, error) {
 			},
 		},
 	}
+
+	if err := u.checkNewStyleAPI(); err != nil {
+		return u, err
+	}
+
 	if err := u.Login(); err != nil {
 		return u, err
 	}
@@ -58,6 +66,7 @@ func NewUnifi(config *Config) (*Unifi, error) {
 
 // Login is a helper method. It can be called to grab a new authentication cookie.
 func (u *Unifi) Login() error {
+	APILoginPath := u.path(APILoginPath)
 	start := time.Now()
 
 	// magic login.
@@ -81,6 +90,47 @@ func (u *Unifi) Login() error {
 			u.User, u.URL+APILoginPath, resp.Status)
 	}
 
+	return nil
+}
+
+// with the release of controller version 5.12.55 on UDM in Jan 2020 the api paths
+// changed and broke this library. This function runs when `NewUnifi()` is called to
+// check if this is a newer controller or not. If it is, we set new to true.
+// Setting new to true makes the path() method return different (new) paths.
+func (u *Unifi) checkNewStyleAPI() error {
+	u.DebugLog("Requesting %s/ to determine API paths", u.URL)
+
+	req, err := http.NewRequest("GET", u.URL+"/", nil)
+	if err != nil {
+		return err
+	}
+
+	// We can't share these cookies with other requests, so make a new client.
+	// Checking the return code on the first request so don't follow a redirect.
+	client := &http.Client{
+		CheckRedirect: func(req *http.Request, via []*http.Request) error {
+			return http.ErrUseLastResponse
+		},
+		Transport: &http.Transport{
+			TLSClientConfig: &tls.Config{InsecureSkipVerify: !u.VerifySSL},
+		},
+	}
+
+	resp, err := client.Do(req)
+	if err != nil {
+		return err
+	}
+
+	defer resp.Body.Close()                   // we need no data here.
+	_, _ = io.Copy(ioutil.Discard, resp.Body) // avoid leaking.
+
+	if resp.StatusCode == http.StatusOK {
+		// The new version returns a "200" for a / request.
+		u.isNew = true
+		u.DebugLog("Using NEW UniFi controller API paths!")
+	}
+
+	// The old version returns a "302" (to /manage) for a / request
 	return nil
 }
 
@@ -116,7 +166,7 @@ func (u *Unifi) GetData(apiPath string, v interface{}, params ...string) error {
 // And if you're doing that... sumbut a pull request with your new struct. :)
 // This is a helper method that is exposed for convenience.
 func (u *Unifi) UniReq(apiPath string, params string) (req *http.Request, err error) {
-	switch params {
+	switch apiPath = u.path(apiPath); params {
 	case "":
 		req, err = http.NewRequest("GET", u.URL+apiPath, nil)
 	default:
@@ -128,7 +178,14 @@ func (u *Unifi) UniReq(apiPath string, params string) (req *http.Request, err er
 	}
 
 	req.Header.Add("Accept", "application/json")
-	u.DebugLog("Requesting %s, with params: %v", apiPath, params != "")
+	req.Header.Add("Content-Type", "application/json; charset=utf-8")
+
+	if u.Client.Jar != nil {
+		parsedURL, _ := url.Parse(u.URL + apiPath)
+		u.DebugLog("Requesting %s, with params: %v, cookies: %d", apiPath, params != "", len(u.Client.Jar.Cookies(parsedURL)))
+	} else {
+		u.DebugLog("Requesting %s, with params: %v,", apiPath, params != "")
+	}
 
 	return
 }
