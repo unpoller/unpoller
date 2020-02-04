@@ -36,7 +36,7 @@ const (
 // path returns the correct api path based on the new variable.
 // new is based on the unifi-controller output. is it new or old output?
 func (u *Unifi) path(path string) string {
-	if u.isNew {
+	if u.New {
 		if path == APILoginPath {
 			return APILoginPathNew
 		}
@@ -76,6 +76,7 @@ type Config struct {
 	VerifySSL bool
 	ErrorLog  Logger
 	DebugLog  Logger
+	New       bool
 }
 
 // Unifi is what you get in return for providing a password! Unifi represents
@@ -86,8 +87,7 @@ type Unifi struct {
 	*http.Client
 	*Config
 	*server
-	isNew bool
-	csrf  string
+	csrf string
 }
 
 // server is the /status endpoint from the Unifi controller.

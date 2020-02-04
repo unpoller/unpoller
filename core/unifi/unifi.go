@@ -125,7 +125,7 @@ func (u *Unifi) checkNewStyleAPI() error {
 
 	if resp.StatusCode == http.StatusOK {
 		// The new version returns a "200" for a / request.
-		u.isNew = true
+		u.New = true
 		u.DebugLog("Using NEW UniFi controller API paths for %s", req.URL)
 	}
 
