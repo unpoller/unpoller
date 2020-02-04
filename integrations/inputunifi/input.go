@@ -34,12 +34,12 @@ type Controller struct {
 	VerifySSL bool         `json:"verify_ssl" toml:"verify_ssl" xml:"verify_ssl" yaml:"verify_ssl"`
 	SaveIDS   bool         `json:"save_ids" toml:"save_ids" xml:"save_ids" yaml:"save_ids"`
 	SaveDPI   bool         `json:"save_dpi" toml:"save_dpi" xml:"save_dpi" yaml:"save_dpi"`
+	New       bool         `json:"new" toml:"new" xml:"new" yaml:"new"`
 	SaveSites *bool        `json:"save_sites" toml:"save_sites" xml:"save_sites" yaml:"save_sites"`
 	Role      string       `json:"role" toml:"role" xml:"role,attr" yaml:"role"`
 	User      string       `json:"user" toml:"user" xml:"user" yaml:"user"`
 	Pass      string       `json:"pass" toml:"pass" xml:"pass" yaml:"pass"`
 	URL       string       `json:"url" toml:"url" xml:"url" yaml:"url"`
-	New       bool         `json:"new" toml:"new" xml:"new" yaml:"new"`
 	Sites     []string     `json:"sites,omitempty" toml:"sites,omitempty" xml:"site" yaml:"sites"`
 	Unifi     *unifi.Unifi `json:"-" toml:"-" xml:"-" yaml:"-"`
 }
