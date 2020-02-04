@@ -39,6 +39,7 @@ type Controller struct {
 	User      string       `json:"user" toml:"user" xml:"user" yaml:"user"`
 	Pass      string       `json:"pass" toml:"pass" xml:"pass" yaml:"pass"`
 	URL       string       `json:"url" toml:"url" xml:"url" yaml:"url"`
+	New       bool         `json:"new" toml:"new" xml:"new" yaml:"new"`
 	Sites     []string     `json:"sites,omitempty" toml:"sites,omitempty" xml:"site" yaml:"sites"`
 	Unifi     *unifi.Unifi `json:"-" toml:"-" xml:"-" yaml:"-"`
 }
@@ -78,6 +79,7 @@ func (u *InputUnifi) getUnifi(c *Controller) error {
 		User:      c.User,
 		Pass:      c.Pass,
 		URL:       c.URL,
+		New:       c.New,
 		VerifySSL: c.VerifySSL,
 		ErrorLog:  u.LogErrorf, // Log all errors.
 		DebugLog:  u.LogDebugf, // Log debug messages.
