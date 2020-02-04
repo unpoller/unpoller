@@ -23,15 +23,31 @@ const (
 	APIClientPath string = "/api/s/%s/stat/sta"
 	// APIDevicePath is where we get data about Unifi devices.
 	APIDevicePath string = "/api/s/%s/stat/device"
-	// APINetworkPath contains network-configuration data. Not really graphable.
-	APINetworkPath string = "/api/s/%s/rest/networkconf"
-	// APIUserGroupPath contains usergroup configurations.
-	APIUserGroupPath string = "/api/s/%s/rest/usergroup"
 	// APILoginPath is Unifi Controller Login API Path
 	APILoginPath string = "/api/login"
+	// APILoginPathNew is how we log into UDM 5.12.55+
+	APILoginPathNew string = "/api/auth/login"
 	// APIIPSEvents returns Intrusion Detection Systems Events
 	APIIPSEvents string = "/api/s/%s/stat/ips/event"
+	// APIPrefixNew is the prefix added to the new API paths; except login. duh.
+	APIPrefixNew string = "/proxy/network"
 )
+
+// path returns the correct api path based on the new variable.
+// new is based on the unifi-controller output. is it new or old output?
+func (u *Unifi) path(path string) string {
+	if u.isNew {
+		if path == APILoginPath {
+			return APILoginPathNew
+		}
+
+		if !strings.HasPrefix(path, APIPrefixNew) && path != APILoginPathNew {
+			return APIPrefixNew + path
+		}
+	}
+
+	return path
+}
 
 // Logger is a base type to deal with changing log outputs. Create a logger
 // that matches this interface to capture debug and error logs.
@@ -70,6 +86,7 @@ type Unifi struct {
 	*http.Client
 	*Config
 	*server
+	isNew bool
 }
 
 // server is the /status endpoint from the Unifi controller.
