@@ -156,7 +156,7 @@ func (u *Unifi) GetData(apiPath string, v interface{}, params ...string) error {
 	}
 
 	u.DebugLog("Requested %s: elapsed %v, returned %d bytes",
-		apiPath, time.Since(start).Round(time.Millisecond), len(body))
+		u.path(apiPath), time.Since(start).Round(time.Millisecond), len(body))
 
 	return json.Unmarshal(body, v)
 }
