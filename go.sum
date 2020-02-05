@@ -68,6 +68,8 @@ github.com/stretchr/testify v1.3.0/go.mod h1:M5WIy9Dh21IEIfnGCwXGc5bZfKNJtfHm1UV
 github.com/stretchr/testify v1.4.0/go.mod h1:j7eGeouHqKxXV5pUuKE4zz7dFj8WfuZ+81PSLYec5m4=
 github.com/unifi-poller/influxunifi v0.0.7 h1:mQ34a6KRQ4+e18+Ba0gEIkMM+lGa1AVFIvU2/8dAynU=
 github.com/unifi-poller/influxunifi v0.0.7/go.mod h1:QcGZzDnkAl1IMfqhvyroyYOtCZs2VsSxekF/04Qe0XY=
+github.com/unifi-poller/influxunifi v0.0.8-0.20200205011639-5c4a3be8cbc7 h1:LWHANHIouTL7XmKmfGLMMJqSVitZLt37en/q9MaCvgQ=
+github.com/unifi-poller/influxunifi v0.0.8-0.20200205011639-5c4a3be8cbc7/go.mod h1:QcGZzDnkAl1IMfqhvyroyYOtCZs2VsSxekF/04Qe0XY=
 github.com/unifi-poller/inputunifi v0.0.5 h1:go+5j7WS1y0N/2pKKPvjzn8bkPpFXurQnoYGYajJD04=
 github.com/unifi-poller/inputunifi v0.0.5/go.mod h1:X1Vd5uAtO5etZveY0WpMVMQBM/iLoMwZ/SvN1iXLxHo=
 github.com/unifi-poller/inputunifi v0.0.6-0.20200203055955-411a49dea2e7 h1:CXMB+6tTJJZEoyMmH24PN/7evm3yuvily9Df4sujeT0=
