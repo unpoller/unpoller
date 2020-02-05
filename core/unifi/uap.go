@@ -63,7 +63,7 @@ type UAP struct {
 	HasFan                FlexBool        `json:"has_fan"`
 	HasTemperature        FlexBool        `json:"has_temperature"`
 	DeviceID              string          `json:"device_id"`
-	State                 int             `json:"state"`
+	State                 FlexInt         `json:"state"`
 	LastSeen              FlexInt         `json:"last_seen"`
 	Upgradable            FlexBool        `json:"upgradable"`
 	AdoptableWhenUpgraded FlexBool        `json:"adoptable_when_upgraded"`
