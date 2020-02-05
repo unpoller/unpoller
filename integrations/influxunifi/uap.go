@@ -28,7 +28,6 @@ func (u *InfluxUnifi) batchUAP(r report, s *unifi.UAP) {
 	fields["rx_bytes"] = s.RxBytes.Val
 	fields["tx_bytes"] = s.TxBytes.Val
 	fields["uptime"] = s.Uptime.Val
-	fields["state"] = s.State
 	fields["user-num_sta"] = int(s.UserNumSta.Val)
 	fields["guest-num_sta"] = int(s.GuestNumSta.Val)
 	fields["num_sta"] = s.NumSta.Val
