@@ -1,5 +1,8 @@
 # MYSQL Output Plugin Example
 
+This plugin is not finished and did not get finished for the release of poller v2.
+Sorry about that. I'll try to get it working soon! 2/4/20
+
 The code here, and the dynamic plugin provided shows an example of how you can
 write your own output for unifi-poller. This plugin records some very basic
 data about clients on a unifi network into a mysql database.
