@@ -84,6 +84,8 @@ github.com/unifi-poller/inputunifi v0.0.6-0.20200203080812-1b1ca43c1490 h1:4IJhm
 github.com/unifi-poller/inputunifi v0.0.6-0.20200203080812-1b1ca43c1490/go.mod h1:X1Vd5uAtO5etZveY0WpMVMQBM/iLoMwZ/SvN1iXLxHo=
 github.com/unifi-poller/inputunifi v0.0.6-0.20200204205922-001fafad6c50 h1:4E51DRV/EWHEcexyWct7ZXuXnS5w2VfR4L5eemNzORE=
 github.com/unifi-poller/inputunifi v0.0.6-0.20200204205922-001fafad6c50/go.mod h1:cVYQktoMCwzy09tAaBjDCbeuzIlwD0K5DKi8gBajQMg=
+github.com/unifi-poller/inputunifi v0.0.6-0.20200205010458-a1783e28d08a h1:v0vRd4iwBrrzunj+zL0g8eKSHOdirnqyB+Jontewep8=
+github.com/unifi-poller/inputunifi v0.0.6-0.20200205010458-a1783e28d08a/go.mod h1:tqEAc/Hp1bAYMilSiJnSr6JopGrB5xV719LDrN/YEsw=
 github.com/unifi-poller/poller v0.0.3/go.mod h1:ugy3FyZEH1rFyC3panBiJpXbLf7EZ4GkjiOtydB2CwQ=
 github.com/unifi-poller/poller v0.0.4 h1:TYCdQeCYwUmmFcj1H75iGKAFbAOBFwo/XIJDX2Id+cY=
 github.com/unifi-poller/poller v0.0.4/go.mod h1:LbOCEdNth7invhaOTpcadW/sDlD2WsU+IE3GRXKzOCg=
@@ -99,6 +101,8 @@ github.com/unifi-poller/unifi v0.0.4-0.20200204095152-a1669a0b6e3b/go.mod h1:bTU
 github.com/unifi-poller/unifi v0.0.4-0.20200204200450-0e3f394046d0/go.mod h1:bTUtctrf56aapjKH+L+98eThBaVFbQXw5iNGZI0g/+E=
 github.com/unifi-poller/unifi v0.0.4-0.20200204205816-4e0f82ec6586 h1:jpA5yAZ9oTUrbN5kKF6s8LYhvOeJ85DMfYXmz41RHEw=
 github.com/unifi-poller/unifi v0.0.4-0.20200204205816-4e0f82ec6586/go.mod h1:bTUtctrf56aapjKH+L+98eThBaVFbQXw5iNGZI0g/+E=
+github.com/unifi-poller/unifi v0.0.4-0.20200205010421-c48a6fc3abb7 h1:NulSYl6Ky9xLemgHY8Q/3QNV+ilJgB1p0uyzwZ8RtKg=
+github.com/unifi-poller/unifi v0.0.4-0.20200205010421-c48a6fc3abb7/go.mod h1:bTUtctrf56aapjKH+L+98eThBaVFbQXw5iNGZI0g/+E=
 golang.org/x/crypto v0.0.0-20180904163835-0709b304e793/go.mod h1:6SG95UA2DQfeDnfUPMdvaQW0Q7yPrPDi9nlGo2tz2b4=
 golang.org/x/crypto v0.0.0-20190308221718-c2843e01d9a2/go.mod h1:djNgcEr1/C05ACkg1iLfiJU5Ep61QUkGW8qpdssI0+w=
 golang.org/x/net v0.0.0-20181114220301-adae6a3d119a/go.mod h1:mL1N/T3taQHkDXs73rZJwtUhF3w3ftmwwsq0BUmARs4=
@@ -116,6 +120,8 @@ golang.org/x/sys v0.0.0-20190422165155-953cdadca894/go.mod h1:h1NjWce9XRLGQEsW7w
 golang.org/x/sys v0.0.0-20191026070338-33540a1f6037/go.mod h1:h1NjWce9XRLGQEsW7wpKNCjG9DtNlClVuFLEZdDNbEs=
 golang.org/x/sys v0.0.0-20200122134326-e047566fdf82/go.mod h1:h1NjWce9XRLGQEsW7wpKNCjG9DtNlClVuFLEZdDNbEs=
 golang.org/x/sys v0.0.0-20200124204421-9fbb57f87de9/go.mod h1:h1NjWce9XRLGQEsW7wpKNCjG9DtNlClVuFLEZdDNbEs=
+golang.org/x/sys v0.0.0-20200202164722-d101bd2416d5 h1:LfCXLvNmTYH9kEmVgqbnsWfruoXZIrh4YBgqVHtDvw0=
+golang.org/x/sys v0.0.0-20200202164722-d101bd2416d5/go.mod h1:h1NjWce9XRLGQEsW7wpKNCjG9DtNlClVuFLEZdDNbEs=
 golang.org/x/text v0.3.0/go.mod h1:NqM8EUOU14njkJ3fqMW+pc6Ldnwhi/IjpwHt7yyuwOQ=
 golang.org/x/xerrors v0.0.0-20191204190536-9bdfabe68543/go.mod h1:I/5z698sn9Ka8TeJc9MKroUUfqBBauWjQqLJ2OPfmY0=
 golift.io/cnfg v0.0.5/go.mod h1:ScFDIJg/rJGHbRaed/i7g1lBhywEjB0JiP2uZr3xC3A=
