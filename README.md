@@ -23,8 +23,9 @@ We have a special place for [Docker Users](https://github.com/unifi-poller/unifi
 I'm willing to help if you have troubles.
 Open an [Issue](https://github.com/unifi-poller/unifi-poller/issues) and
 we'll figure out how to get things working for you. You can also get help in
-the #unifi-poller channel on the [Ubiquiti Discord server](https://discord.gg/KnyKYt2).
-I've also [provided a forum post](https://community.ui.com/questions/Unifi-Poller-Store-Unifi-Controller-Metrics-in-InfluxDB-without-SNMP/58a0ea34-d2b3-41cd-93bb-d95d3896d1a1) you may use to get additional help.
+the #unifi-poller channel on the [Ubiquiti Discord server](https://discord.gg/KnyKYt2). I've also
+[provided a forum post](https://community.ui.com/questions/Unifi-Poller-Store-Unifi-Controller-Metrics-in-InfluxDB-without-SNMP/58a0ea34-d2b3-41cd-93bb-d95d3896d1a1)
+you may use to get additional help.
 
 ## Description
 
@@ -62,7 +63,8 @@ The original code pulled only the client data. This app now pulls data
 for clients, access points, security gateways, dream machines and switches.
 
 I've been trying to get my UAP data into Grafana. Sure, google search that.
-You'll find [this](https://community.ubnt.com/t5/UniFi-Wireless/Grafana-dashboard-for-UniFi-APs-now-available/td-p/1833532). What if you don't want to deal with SNMP?
+You'll find [this](https://community.ubnt.com/t5/UniFi-Wireless/Grafana-dashboard-for-UniFi-APs-now-available/td-p/1833532).
+What if you don't want to deal with SNMP?
 Well, here you go. I've replicated 400% of what you see on those SNMP-powered
 dashboards with this Go app running on the same mac as my UniFi controller.
 All without enabling SNMP nor trying to understand those OIDs. Mad props

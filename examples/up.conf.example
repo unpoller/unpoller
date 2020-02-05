@@ -1,14 +1,6 @@
 # UniFi Poller v2 primary configuration file. TOML FORMAT #
 ###########################################################
 
-### NOTICE ### 1-26-2020 ###
-
-# This config file, and all the config files in this same folder are for VERSION 2.
-# V2 is still alpha and not released. If you use Docker, specifically `latest` you
-# will get version 1.6.3. This is *not* the correct config file and will not work.
-# It will also not generate errors, and you will spend hours pulling your hair out.
-# Use this file for v1: https://github.com/unifi-poller/unifi-poller/blob/v1.6.3/examples/up.conf.example
-
 [poller]
   # Turns on line numbers, microsecond logging, and a per-device log.
   # The default is false, but I personally leave this on at home (four devices).
