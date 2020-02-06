@@ -3,7 +3,7 @@
 #############################################
 # UniFi Poller primary configuration file.  #
 # XML FORMAT. Provided values are defaults. #
-# See up.conf.example!                      #
+# See up.conf.example!         v2           #
 #############################################
 
 <plugin> and <site> are lists of strings and may be repeated.
