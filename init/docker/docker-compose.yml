@@ -1,5 +1,5 @@
 # This is for unifi-poller v2.
-version: '2'
+version: '3'
 services:
   influxdb:
     restart: always
@@ -10,8 +10,9 @@ services:
       - influxdb-storage:/var/lib/influxdb
     environment:
       - INFLUXDB_DB=${INFLUXDB_DB}
-      - INFLUXDB_ADMIN_USER=${INFLUXDB_USER}
-      - INFLUXDB_ADMIN_PASSWORD=${INFLUXDB_PASS}
+      - INFLUXDB_HTTP_AUTH_ENABLED=${INFLUXDB_HTTP_AUTH_ENABLED}
+      - INFLUXDB_ADMIN_USER=${INFLUXDB_ADMIN_USER}
+      - INFLUXDB_ADMIN_PASSWORD=${INFLUXDB_ADMIN_PASSWORD}
   chronograf:
     image: chronograf:latest
     restart: always
@@ -23,8 +24,8 @@ services:
       - influxdb
     environment:
       - INFLUXDB_URL=http://influxdb:8086
-      - INFLUXDB_USERNAME=${INFLUXDB_USERNAME}
-      - INFLUXDB_PASSWORD=${INFLUXDB_PASSWORD}
+      - INFLUXDB_USERNAME=${INFLUXDB_ADMIN_USER}
+      - INFLUXDB_PASSWORD=${INFLUXDB_ADMIN_PASSWORD}
   grafana:
     image: grafana/grafana:latest
     restart: always
@@ -43,8 +44,8 @@ services:
     image: golift/unifi-poller:${POLLER_TAG}
     environment:
       - UP_INFLUXDB_DB=${INFLUXDB_DB}
-      - UP_INFLUXDB_USER=${INFLUXDB_USER}
-      - UP_INFLUXDB_PASS=${INFLUXDB_PASS}
+      - UP_INFLUXDB_USER=${INFLUXDB_ADMIN_USER}
+      - UP_INFLUXDB_PASS=${INFLUXDB_ADMIN_PASSWORD}
       - UP_INFLUXDB_URL=http://influxdb:8086
       - UP_UNIFI_DEFAULT_USER=${UNIFI_USER}
       - UP_UNIFI_DEFAULT_PASS=${UNIFI_USER}
