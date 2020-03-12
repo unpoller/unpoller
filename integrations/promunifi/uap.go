@@ -169,6 +169,7 @@ func (u *promUnifi) exportUAP(r report, d *unifi.UAP) {
 	infoLabels := []string{d.Version, d.Model, d.Serial, d.Mac, d.IP, d.ID, d.Bytes.Txt, d.Uptime.Txt}
 	u.exportUAPstats(r, labels, d.Stat.Ap, d.BytesD, d.TxBytesD, d.RxBytesD, d.BytesR)
 	u.exportVAPtable(r, labels, d.VapTable)
+	u.exportPRTtable(r, labels, d.PortTable)
 	u.exportBYTstats(r, labels, d.TxBytes, d.RxBytes)
 	u.exportSYSstats(r, labels, d.SysStats, d.SystemStats)
 	u.exportSTAcount(r, labels, d.UserNumSta, d.GuestNumSta)
