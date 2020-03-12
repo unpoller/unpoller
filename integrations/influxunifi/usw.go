@@ -39,7 +39,7 @@ func (u *InfluxUnifi) batchUSW(r report, s *unifi.USW) {
 		})
 
 	r.send(&metric{Table: "usw", Tags: tags, Fields: fields})
-	u.batchPortTable(r, tags, s.PortTable)
+	u.batchPortTable(r, tags, "usw", s.PortTable)
 }
 
 func (u *InfluxUnifi) batchUSWstat(sw *unifi.Sw) map[string]interface{} {
@@ -63,7 +63,7 @@ func (u *InfluxUnifi) batchUSWstat(sw *unifi.Sw) map[string]interface{} {
 	}
 }
 
-func (u *InfluxUnifi) batchPortTable(r report, t map[string]string, pt []unifi.Port) {
+func (u *InfluxUnifi) batchPortTable(r report, t map[string]string, dev string, pt []unifi.Port) {
 	for _, p := range pt {
 		if !p.Up.Val || !p.Enable.Val {
 			continue // only record UP ports.
@@ -109,6 +109,6 @@ func (u *InfluxUnifi) batchPortTable(r report, t map[string]string, pt []unifi.P
 			fields["poe_voltage"] = p.PoeVoltage.Val
 		}
 
-		r.send(&metric{Table: "usw_ports", Tags: tags, Fields: fields})
+		r.send(&metric{Table: dev + "_ports", Tags: tags, Fields: fields})
 	}
 }
