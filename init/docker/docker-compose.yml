@@ -17,7 +17,7 @@ services:
     image: chronograf:latest
     restart: always
     ports:
-      - '127.0.0.1:8888:8888'
+      - '8888:8888'
     volumes:
       - chronograf-storage:/var/lib/chronograf
     depends_on:
