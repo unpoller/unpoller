@@ -32,12 +32,13 @@ type unifiDevice struct {
 
 func descDevice(ns string) *unifiDevice {
 	labels := []string{"type", "site_name", "name", "source"}
-	infoLabels := []string{"version", "model", "serial", "mac", "ip", "id", "bytes", "uptime"}
+	infoLabels := []string{"version", "model", "serial", "mac", "ip", "id"}
 
 	return &unifiDevice{
-		Info:          prometheus.NewDesc(ns+"info", "Device Information", append(labels, infoLabels...), nil),
-		Uptime:        prometheus.NewDesc(ns+"uptime_seconds", "Device Uptime", labels, nil),
-		Temperature:   prometheus.NewDesc(ns+"temperature_celsius", "Temperature", labels, nil),
+		Info:   prometheus.NewDesc(ns+"info", "Device Information", append(labels, infoLabels...), nil),
+		Uptime: prometheus.NewDesc(ns+"uptime_seconds", "Device Uptime", labels, nil),
+		Temperature: prometheus.NewDesc(ns+"temperature_celsius", "Temperature",
+			append(labels, "temp_area", "temp_type"), nil),
 		TotalMaxPower: prometheus.NewDesc(ns+"max_power_total", "Total Max Power", labels, nil),
 		FanLevel:      prometheus.NewDesc(ns+"fan_level", "Fan Level", labels, nil),
 		TotalTxBytes:  prometheus.NewDesc(ns+"transmit_bytes_total", "Total Transmitted Bytes", labels, nil),
@@ -66,7 +67,7 @@ func (u *promUnifi) exportUDM(r report, d *unifi.UDM) {
 	}
 
 	labels := []string{d.Type, d.SiteName, d.Name, d.SourceName}
-	infoLabels := []string{d.Version, d.Model, d.Serial, d.Mac, d.IP, d.ID, d.Bytes.Txt, d.Uptime.Txt}
+	infoLabels := []string{d.Version, d.Model, d.Serial, d.Mac, d.IP, d.ID}
 	// Shared data (all devices do this).
 	u.exportBYTstats(r, labels, d.TxBytes, d.RxBytes)
 	u.exportSYSstats(r, labels, d.SysStats, d.SystemStats)
@@ -82,6 +83,11 @@ func (u *promUnifi) exportUDM(r report, d *unifi.UDM) {
 		{u.Device.Info, gauge, 1.0, append(labels, infoLabels...)},
 		{u.Device.Uptime, gauge, d.Uptime, labels},
 	})
+
+	// UDM pro has special temp sensors. UDM non-pro may not have temp; not sure.
+	for _, t := range d.Temperatures {
+		r.send([]*metric{{u.Device.Temperature, gauge, t.Value, append(labels, t.Name, t.Type)}})
+	}
 
 	// Wireless Data - UDM (non-pro) only
 	if d.Stat.Ap != nil && d.VapTable != nil {

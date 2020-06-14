@@ -98,7 +98,7 @@ func (u *promUnifi) exportUSW(r report, d *unifi.USW) {
 	}
 
 	labels := []string{d.Type, d.SiteName, d.Name, d.SourceName}
-	infoLabels := []string{d.Version, d.Model, d.Serial, d.Mac, d.IP, d.ID, d.Bytes.Txt, d.Uptime.Txt}
+	infoLabels := []string{d.Version, d.Model, d.Serial, d.Mac, d.IP, d.ID}
 
 	u.exportUSWstats(r, labels, d.Stat.Sw)
 	u.exportPRTtable(r, labels, d.PortTable)
@@ -112,7 +112,7 @@ func (u *promUnifi) exportUSW(r report, d *unifi.USW) {
 
 	// Switch System Data.
 	if d.HasTemperature.Val {
-		r.send([]*metric{{u.Device.Temperature, gauge, d.GeneralTemperature, labels}})
+		r.send([]*metric{{u.Device.Temperature, gauge, d.GeneralTemperature, append(labels, "general", "board")}})
 	}
 
 	if d.HasFan.Val {
