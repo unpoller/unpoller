@@ -101,6 +101,8 @@ github.com/prometheus/procfs v0.0.10/go.mod h1:7Qr8sr6344vo1JqZ6HhLceV9o3AJ1Ff+G
 github.com/prometheus/procfs v0.0.11/go.mod h1:lV6e/gmhEcM9IjHGsFOCxxuZ+z1YqCvr4OA4YeYWdaU=
 github.com/prometheus/procfs v0.1.1 h1:/ZKcW+ixpq2dOl4yeH4qvACNXnkiDCp5e/F5Tq07X7o=
 github.com/prometheus/procfs v0.1.1/go.mod h1:lV6e/gmhEcM9IjHGsFOCxxuZ+z1YqCvr4OA4YeYWdaU=
+github.com/prometheus/procfs v0.1.2 h1:DS2izEFqEVp1gPg5yvEF/YzS6Ajo8YdKRJjQKiQm59A=
+github.com/prometheus/procfs v0.1.2/go.mod h1:lV6e/gmhEcM9IjHGsFOCxxuZ+z1YqCvr4OA4YeYWdaU=
 github.com/russross/blackfriday v2.0.0+incompatible h1:cBXrhZNUf9C+La9/YpS+UHpUT8YD6Td9ZMSU9APFcsk=
 github.com/russross/blackfriday v2.0.0+incompatible/go.mod h1:JO/DiYxRf+HjHt06OyowR9PTA263kcR/rfWxYHBV53g=
 github.com/shurcooL/sanitized_anchor_name v1.0.0 h1:PdmoCO6wvbs+7yrJyMORt4/BmY5IYyJwS/kOiWx8mHo=
@@ -126,6 +128,10 @@ github.com/unifi-poller/influxunifi v0.0.9-0.20200614012101-da8e25b3e1c0 h1:zh0w
 github.com/unifi-poller/influxunifi v0.0.9-0.20200614012101-da8e25b3e1c0/go.mod h1:ApW/E6XsiqbwDxQ1dKgDTb/7FqDI6ppYK5EMv+ziT/Y=
 github.com/unifi-poller/influxunifi v0.0.9-0.20200614034715-291e3c246d65 h1:oqzjPC+4p1D0JcuSd8T8Lpyhjm72uSPEVOiQvoTvhac=
 github.com/unifi-poller/influxunifi v0.0.9-0.20200614034715-291e3c246d65/go.mod h1:uFA5OXAMxxcDlIFd/LCyaA7iv1DAJR+bmPRH1IQVzco=
+github.com/unifi-poller/influxunifi v0.0.9-0.20200614082629-2a147938375e h1:PvuHWNPudQa156LgLYk+tMxfLVEfU8QCAwZYrvH7fro=
+github.com/unifi-poller/influxunifi v0.0.9-0.20200614082629-2a147938375e/go.mod h1:uFA5OXAMxxcDlIFd/LCyaA7iv1DAJR+bmPRH1IQVzco=
+github.com/unifi-poller/influxunifi v0.0.9-0.20200614084044-5974cdc8af4f h1:09QFwgqdbiNoVfAiQfHlDy+5TbPrkXpHTg4in0ubH+Y=
+github.com/unifi-poller/influxunifi v0.0.9-0.20200614084044-5974cdc8af4f/go.mod h1:CfMvHVp3TPnp8flNvsiUSz09LWop1kmig/Sukg+hkAg=
 github.com/unifi-poller/inputunifi v0.0.5 h1:go+5j7WS1y0N/2pKKPvjzn8bkPpFXurQnoYGYajJD04=
 github.com/unifi-poller/inputunifi v0.0.5/go.mod h1:X1Vd5uAtO5etZveY0WpMVMQBM/iLoMwZ/SvN1iXLxHo=
 github.com/unifi-poller/inputunifi v0.0.6-0.20200203055955-411a49dea2e7 h1:CXMB+6tTJJZEoyMmH24PN/7evm3yuvily9Df4sujeT0=
