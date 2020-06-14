@@ -69,8 +69,12 @@ type UDM struct {
 		MaxMirrorSessions    FlexInt `json:"max_mirror_sessions"`
 		MaxAggregateSessions FlexInt `json:"max_aggregate_sessions"`
 	} `json:"switch_caps"`
-	HasFan            FlexBool    `json:"has_fan"`
-	HasTemperature    FlexBool    `json:"has_temperature"`
+	HasFan       FlexBool `json:"has_fan"`
+	Temperatures []struct {
+		Name  string  `json:"name"`
+		Type  string  `json:"type"`
+		Value float64 `json:"value"`
+	} `json:"temperatures"`
 	RulesetInterfaces interface{} `json:"ruleset_interfaces"`
 	/* struct {
 		Br0  string `json:"br0"`
