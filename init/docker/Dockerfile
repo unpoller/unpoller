@@ -53,5 +53,8 @@ LABEL org.opencontainers.image.created="${BUILD_DATE}" \
 COPY --from=builder /${BINARY}/${BINARY}.${ARCH}.${OS} /image
 COPY --from=builder /${BINARY}/examples/${CONFIG_FILE}.example /etc/${BINARY}/${CONFIG_FILE}
 COPY --from=builder /etc/ssl /etc/ssl
+COPY --from=builder /usr/share/zoneinfo /usr/share/zoneinfo
+
+ENV TZ=UTC
 
 ENTRYPOINT [ "/image" ]
