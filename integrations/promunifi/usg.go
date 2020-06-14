@@ -77,7 +77,7 @@ func (u *promUnifi) exportUSG(r report, d *unifi.USG) {
 	}
 
 	labels := []string{d.Type, d.SiteName, d.Name, d.SourceName}
-	infoLabels := []string{d.Version, d.Model, d.Serial, d.Mac, d.IP, d.ID, d.Bytes.Txt, d.Uptime.Txt}
+	infoLabels := []string{d.Version, d.Model, d.Serial, d.Mac, d.IP, d.ID}
 
 	// Gateway System Data.
 	u.exportWANPorts(r, labels, d.Wan1, d.Wan2)
