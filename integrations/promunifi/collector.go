@@ -25,6 +25,10 @@ const (
 	gauge   = prometheus.GaugeValue
 )
 
+var (
+	errMetricFetchFailed = fmt.Errorf("metric fetch failed")
+)
+
 type promUnifi struct {
 	*Config `json:"prometheus" toml:"prometheus" xml:"prometheus" yaml:"prometheus"`
 	Client  *uclient
@@ -82,7 +86,9 @@ type target struct {
 	u *promUnifi
 }
 
-func init() {
+// init is how this modular code is initialized by the main app.
+// This module adds itself as an output module to the poller core.
+func init() { // nolint: gochecknoinits
 	u := &promUnifi{Config: &Config{}}
 
 	poller.NewOutput(&poller.Output{
@@ -223,7 +229,7 @@ func (u *promUnifi) collect(ch chan<- prometheus.Metric, filter *poller.Filter) 
 	r.Fetch = time.Since(r.Start)
 
 	if err != nil {
-		r.error(ch, prometheus.NewInvalidDesc(err), fmt.Errorf("metric fetch failed"))
+		r.error(ch, prometheus.NewInvalidDesc(err), errMetricFetchFailed)
 		u.Collector.LogErrorf("metric fetch failed: %v", err)
 
 		if !ok {
@@ -272,81 +278,40 @@ func (u *promUnifi) exportMetrics(r report, ch chan<- prometheus.Metric, ourChan
 func (u *promUnifi) loopExports(r report) {
 	m := r.metrics()
 
-	r.add()
-	r.add()
-	r.add()
-	r.add()
-	r.add()
-	r.add()
-	r.add()
-	r.add()
+	for _, s := range m.Sites {
+		u.exportSite(r, s)
+	}
 
-	go func() {
-		defer r.done()
+	for _, s := range m.SitesDPI {
+		u.exportSiteDPI(r, s)
+	}
 
-		for _, s := range m.Sites {
-			u.exportSite(r, s)
-		}
-	}()
+	for _, c := range m.Clients {
+		u.exportClient(r, c)
+	}
 
-	go func() {
-		defer r.done()
+	appTotal := make(totalsDPImap)
+	catTotal := make(totalsDPImap)
 
-		for _, s := range m.SitesDPI {
-			u.exportSiteDPI(r, s)
-		}
-	}()
+	for _, c := range m.ClientsDPI {
+		u.exportClientDPI(r, c, appTotal, catTotal)
+	}
 
-	go func() {
-		defer r.done()
+	u.exportClientDPItotals(r, appTotal, catTotal)
 
-		for _, c := range m.Clients {
-			u.exportClient(r, c)
-		}
-	}()
+	for _, d := range m.UAPs {
+		u.exportUAP(r, d)
+	}
 
-	go func() {
-		defer r.done()
+	for _, d := range m.UDMs {
+		u.exportUDM(r, d)
+	}
 
-		appTotal := make(totalsDPImap)
-		catTotal := make(totalsDPImap)
+	for _, d := range m.USGs {
+		u.exportUSG(r, d)
+	}
 
-		for _, c := range m.ClientsDPI {
-			u.exportClientDPI(r, c, appTotal, catTotal)
-		}
-
-		u.exportClientDPItotals(r, appTotal, catTotal)
-	}()
-
-	go func() {
-		defer r.done()
-
-		for _, d := range m.UAPs {
-			u.exportUAP(r, d)
-		}
-	}()
-
-	go func() {
-		defer r.done()
-
-		for _, d := range m.UDMs {
-			u.exportUDM(r, d)
-		}
-	}()
-
-	go func() {
-		defer r.done()
-
-		for _, d := range m.USGs {
-			u.exportUSG(r, d)
-		}
-	}()
-
-	go func() {
-		defer r.done()
-
-		for _, d := range m.USWs {
-			u.exportUSW(r, d)
-		}
-	}()
+	for _, d := range m.USWs {
+		u.exportUSW(r, d)
+	}
 }

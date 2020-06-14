@@ -5,7 +5,7 @@ import (
 	"github.com/unifi-poller/unifi"
 )
 
-// These are shared by all four device types: UDM, UAP, USG, USW
+// These are shared by all four device types: UDM, UAP, USG, USW.
 type unifiDevice struct {
 	Info          *prometheus.Desc
 	Uptime        *prometheus.Desc
@@ -91,7 +91,7 @@ func (u *promUnifi) exportUDM(r report, d *unifi.UDM) {
 	}
 }
 
-// shared by all
+// Shared by all.
 func (u *promUnifi) exportBYTstats(r report, labels []string, tx, rx unifi.FlexInt) {
 	r.send([]*metric{
 		{u.Device.TotalTxBytes, counter, tx, labels},
@@ -100,14 +100,14 @@ func (u *promUnifi) exportBYTstats(r report, labels []string, tx, rx unifi.FlexI
 	})
 }
 
-// shared by all, pass 2 or 5 stats.
+// Shared by all, pass 2 or 5 stats.
 func (u *promUnifi) exportSTAcount(r report, labels []string, stas ...unifi.FlexInt) {
 	r.send([]*metric{
 		{u.Device.Counter, gauge, stas[0], append(labels, "user")},
 		{u.Device.Counter, gauge, stas[1], append(labels, "guest")},
 	})
 
-	if len(stas) > 2 {
+	if len(stas) > 2 { // nolint: gomnd
 		r.send([]*metric{
 			{u.Device.Counter, gauge, stas[2], append(labels, "desktop")},
 			{u.Device.Counter, gauge, stas[3], append(labels, "mobile")},
@@ -116,7 +116,7 @@ func (u *promUnifi) exportSTAcount(r report, labels []string, stas ...unifi.Flex
 	}
 }
 
-// shared by all
+// Shared by all.
 func (u *promUnifi) exportSYSstats(r report, labels []string, s unifi.SysStats, ss unifi.SystemStats) {
 	r.send([]*metric{
 		{u.Device.Loadavg1, gauge, s.Loadavg1, labels},

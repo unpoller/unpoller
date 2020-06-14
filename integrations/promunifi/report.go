@@ -11,9 +11,8 @@ import (
 // This file contains the report interface.
 // This interface can be mocked and overridden for tests.
 
-// report is an internal interface used to "process metrics"
+// report is an internal interface used to "process metrics".
 type report interface {
-	add()
 	done()
 	send([]*metric)
 	metrics() *poller.Metrics
@@ -22,20 +21,15 @@ type report interface {
 	error(ch chan<- prometheus.Metric, d *prometheus.Desc, v interface{})
 }
 
-// satisfy gomnd
-const one = 1
+// Satisfy gomnd.
 const oneDecimalPoint = 10.0
 
-func (r *Report) add() {
-	r.wg.Add(one)
-}
-
 func (r *Report) done() {
-	r.wg.Add(-one)
+	r.wg.Done()
 }
 
 func (r *Report) send(m []*metric) {
-	r.wg.Add(one)
+	r.wg.Add(1) // notlint: gomnd
 	r.ch <- m
 }
 
@@ -69,7 +63,7 @@ func (r *Report) error(ch chan<- prometheus.Metric, d *prometheus.Desc, v interf
 	r.Errors++
 
 	if r.ReportErrors {
-		ch <- prometheus.NewInvalidMetric(d, fmt.Errorf("error: %v", v))
+		ch <- prometheus.NewInvalidMetric(d, fmt.Errorf("error: %v", v)) // nolint: goerr113
 	}
 }
 

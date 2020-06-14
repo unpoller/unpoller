@@ -91,7 +91,7 @@ func (u *promUnifi) exportUSG(r report, d *unifi.USG) {
 	})
 }
 
-// Gateway States
+// Gateway Stats.
 func (u *promUnifi) exportUSGstats(r report, labels []string, gw *unifi.Gw, st unifi.SpeedtestStatus, ul unifi.Uplink) {
 	if gw == nil {
 		return
@@ -117,7 +117,7 @@ func (u *promUnifi) exportUSGstats(r report, labels []string, gw *unifi.Gw, st u
 	})
 }
 
-// WAN Stats
+// WAN Stats.
 func (u *promUnifi) exportWANPorts(r report, labels []string, wans ...unifi.Wan) {
 	for _, wan := range wans {
 		if !wan.Up.Val {

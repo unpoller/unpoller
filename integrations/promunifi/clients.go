@@ -137,7 +137,7 @@ func (u *promUnifi) exportClient(r report, c *unifi.Client) {
 	r.send([]*metric{{u.Client.Uptime, gauge, c.Uptime, labelW}})
 }
 
-// totalsDPImap: controller, site, name (app/cat name), dpi
+// totalsDPImap: controller, site, name (app/cat name), dpi.
 type totalsDPImap map[string]map[string]map[string]unifi.DPIData
 
 // fillDPIMapTotals fills in totals for categories and applications. maybe clients too.

@@ -79,7 +79,7 @@ type uap struct {
 	RadioTxRetries          *prometheus.Desc
 }
 
-func descUAP(ns string) *uap {
+func descUAP(ns string) *uap { // nolint: funlen
 	labelA := []string{"stat", "site_name", "name", "source"} // stat + labels[1:]
 	labelV := []string{"vap_name", "bssid", "radio", "radio_name", "essid", "usage", "site_name", "name", "source"}
 	labelR := []string{"radio_name", "radio", "site_name", "name", "source"}
@@ -227,7 +227,7 @@ func (u *promUnifi) exportUAPstats(r report, labels []string, ap *unifi.Ap, byte
 	})
 }
 
-// UAP VAP Table
+// UAP VAP Table.
 func (u *promUnifi) exportVAPtable(r report, labels []string, vt unifi.VapTable) {
 	// vap table stats
 	for _, v := range vt {
@@ -278,7 +278,7 @@ func (u *promUnifi) exportVAPtable(r report, labels []string, vt unifi.VapTable)
 	}
 }
 
-// UAP Radio Table
+// UAP Radio Table.
 func (u *promUnifi) exportRADtable(r report, labels []string, rt unifi.RadioTable, rts unifi.RadioTableStats) {
 	// radio table
 	for _, p := range rt {

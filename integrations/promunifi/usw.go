@@ -124,7 +124,7 @@ func (u *promUnifi) exportUSW(r report, d *unifi.USW) {
 	}
 }
 
-// Switch Stats
+// Switch Stats.
 func (u *promUnifi) exportUSWstats(r report, labels []string, sw *unifi.Sw) {
 	if sw == nil {
 		return
@@ -152,7 +152,7 @@ func (u *promUnifi) exportUSWstats(r report, labels []string, sw *unifi.Sw) {
 	})
 }
 
-// Switch Port Table
+// Switch Port Table.
 func (u *promUnifi) exportPRTtable(r report, labels []string, pt []unifi.Port) {
 	// Per-port data on a switch
 	for _, p := range pt {
