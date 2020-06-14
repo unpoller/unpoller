@@ -109,7 +109,7 @@ func (u *InfluxUnifi) batchUDM(r report, s *unifi.UDM) { // nolint: funlen
 		})
 
 	r.send(&metric{Table: "usw", Tags: tags, Fields: fields})
-	u.batchPortTable(r, tags, "usw", s.PortTable) // udm has a usw in it.
+	u.batchPortTable(r, tags, s.PortTable) // udm has a usw in it.
 
 	if s.Stat.Ap == nil {
 		return // we're done now. the following code process UDM (non-pro) UAP data.

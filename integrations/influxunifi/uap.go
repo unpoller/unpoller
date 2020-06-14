@@ -35,7 +35,7 @@ func (u *InfluxUnifi) batchUAP(r report, s *unifi.UAP) {
 	r.send(&metric{Table: "uap", Tags: tags, Fields: fields})
 	u.processRadTable(r, tags, s.RadioTable, s.RadioTableStats)
 	u.processVAPTable(r, tags, s.VapTable)
-	u.batchPortTable(r, tags, "uap", s.PortTable)
+	u.batchPortTable(r, tags, s.PortTable)
 }
 
 func (u *InfluxUnifi) processUAPstats(ap *unifi.Ap) map[string]interface{} {
