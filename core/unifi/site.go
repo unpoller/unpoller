@@ -5,8 +5,9 @@ import (
 	"strings"
 )
 
-// Satisfy gomnd
-const oneItem = 1
+var (
+	errDPIDataBug = fmt.Errorf("dpi data table contains more than 1 item; please open a bug report")
+)
 
 // GetSites returns a list of configured sites on the UniFi controller.
 func (u *Unifi) GetSites() (Sites, error) {
@@ -24,7 +25,7 @@ func (u *Unifi) GetSites() (Sites, error) {
 		// Add special SourceName value.
 		response.Data[i].SourceName = u.URL
 		// If the human name is missing (description), set it to the cryptic name.
-		response.Data[i].Desc = pick(d.Desc, d.Name)
+		response.Data[i].Desc = strings.TrimSpace(pick(d.Desc, d.Name))
 		// Add the custom site name to each site. used as a Grafana filter somewhere.
 		response.Data[i].SiteName = d.Desc + " (" + d.Name + ")"
 		sites = append(sites, d.Name) // used for debug log only
@@ -51,9 +52,9 @@ func (u *Unifi) GetSiteDPI(sites Sites) ([]*DPITable, error) {
 			return nil, err
 		}
 
-		if l := len(response.Data); l > oneItem {
-			return nil, fmt.Errorf("dpi data table contains more than 1 item; please open a bug report")
-		} else if l != oneItem {
+		if l := len(response.Data); l > 1 {
+			return nil, errDPIDataBug
+		} else if l != 1 {
 			continue
 		}
 

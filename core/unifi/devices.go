@@ -3,6 +3,7 @@ package unifi
 import (
 	"encoding/json"
 	"fmt"
+	"strings"
 )
 
 // GetDevices returns a response full of devices' data from the UniFi Controller.
@@ -50,25 +51,25 @@ func (u *Unifi) parseDevices(data []json.RawMessage, siteName string) *Devices {
 		case "uap":
 			dev := &UAP{SiteName: siteName, SourceName: u.URL}
 			if u.unmarshalDevice(assetType, r, dev) == nil {
-				dev.Name = pick(dev.Name, dev.Mac)
+				dev.Name = strings.TrimSpace(pick(dev.Name, dev.Mac))
 				devices.UAPs = append(devices.UAPs, dev)
 			}
 		case "ugw", "usg": // in case they ever fix the name in the api.
 			dev := &USG{SiteName: siteName, SourceName: u.URL}
 			if u.unmarshalDevice(assetType, r, dev) == nil {
-				dev.Name = pick(dev.Name, dev.Mac)
+				dev.Name = strings.TrimSpace(pick(dev.Name, dev.Mac))
 				devices.USGs = append(devices.USGs, dev)
 			}
 		case "usw":
 			dev := &USW{SiteName: siteName, SourceName: u.URL}
 			if u.unmarshalDevice(assetType, r, dev) == nil {
-				dev.Name = pick(dev.Name, dev.Mac)
+				dev.Name = strings.TrimSpace(pick(dev.Name, dev.Mac))
 				devices.USWs = append(devices.USWs, dev)
 			}
 		case "udm":
 			dev := &UDM{SiteName: siteName, SourceName: u.URL}
 			if u.unmarshalDevice(assetType, r, dev) == nil {
-				dev.Name = pick(dev.Name, dev.Mac)
+				dev.Name = strings.TrimSpace(pick(dev.Name, dev.Mac))
 				devices.UDMs = append(devices.UDMs, dev)
 			}
 		default:

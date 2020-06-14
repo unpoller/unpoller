@@ -2,6 +2,7 @@ package unifi
 
 import (
 	"fmt"
+	"strings"
 )
 
 // GetClients returns a response full of clients' data from the UniFi Controller.
@@ -26,8 +27,8 @@ func (u *Unifi) GetClients(sites Sites) (Clients, error) {
 			// Add the special "Site Name" to each client. This becomes a Grafana filter somewhere.
 			response.Data[i].SiteName = site.Desc + " (" + site.Name + ")"
 			// Fix name and hostname fields. Sometimes one or the other is blank.
-			response.Data[i].Hostname = pick(d.Hostname, d.Name, d.Mac)
-			response.Data[i].Name = pick(d.Name, d.Hostname)
+			response.Data[i].Hostname = strings.TrimSpace(pick(d.Hostname, d.Name, d.Mac))
+			response.Data[i].Name = strings.TrimSpace(pick(d.Name, d.Hostname))
 		}
 
 		data = append(data, response.Data...)
