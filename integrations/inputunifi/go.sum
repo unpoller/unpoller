@@ -87,6 +87,8 @@ github.com/prometheus/procfs v0.0.8/go.mod h1:7Qr8sr6344vo1JqZ6HhLceV9o3AJ1Ff+Gx
 github.com/prometheus/procfs v0.0.11/go.mod h1:lV6e/gmhEcM9IjHGsFOCxxuZ+z1YqCvr4OA4YeYWdaU=
 github.com/prometheus/procfs v0.1.1 h1:/ZKcW+ixpq2dOl4yeH4qvACNXnkiDCp5e/F5Tq07X7o=
 github.com/prometheus/procfs v0.1.1/go.mod h1:lV6e/gmhEcM9IjHGsFOCxxuZ+z1YqCvr4OA4YeYWdaU=
+github.com/prometheus/procfs v0.1.2 h1:DS2izEFqEVp1gPg5yvEF/YzS6Ajo8YdKRJjQKiQm59A=
+github.com/prometheus/procfs v0.1.2/go.mod h1:lV6e/gmhEcM9IjHGsFOCxxuZ+z1YqCvr4OA4YeYWdaU=
 github.com/sirupsen/logrus v1.2.0/go.mod h1:LxeOpSwHxABJmUn/MG1IvRgCAasNZTLOkJPxbbu5VWo=
 github.com/sirupsen/logrus v1.4.2/go.mod h1:tLMulIdttU9McNUspp0xgXVQah82FyeX6MwdIuYE2rE=
 github.com/spf13/pflag v1.0.5 h1:iy+VFUOCP1a+8yFto/drg2CJ5u0yRoB7fZw3DKv/JXA=
@@ -102,6 +104,8 @@ github.com/unifi-poller/poller v0.0.6 h1:KhOWUeYI029Nn/4NOIk/yblQ3tEd9QhS+u/8/S9
 github.com/unifi-poller/poller v0.0.6/go.mod h1:RkRJ4pAc2dAN8Xu9+VOumeE3BdN5QDQ3PC+jBx8hWW0=
 github.com/unifi-poller/unifi v0.0.4 h1:NDTxHTdF0MAt1y1RU8J+MSqdYlO0CEIqlrktcj3y/og=
 github.com/unifi-poller/unifi v0.0.4/go.mod h1:bTUtctrf56aapjKH+L+98eThBaVFbQXw5iNGZI0g/+E=
+github.com/unifi-poller/unifi v0.0.5 h1:Izeun32YxcQOeKZUXY0Sy4ltKYFuYxWGcN9JS6xkIJU=
+github.com/unifi-poller/unifi v0.0.5/go.mod h1:L1kMRH2buZhB31vZnRC1im7Tk/4uD3ET4biwl2faYy8=
 golang.org/x/crypto v0.0.0-20180904163835-0709b304e793/go.mod h1:6SG95UA2DQfeDnfUPMdvaQW0Q7yPrPDi9nlGo2tz2b4=
 golang.org/x/crypto v0.0.0-20190308221718-c2843e01d9a2/go.mod h1:djNgcEr1/C05ACkg1iLfiJU5Ep61QUkGW8qpdssI0+w=
 golang.org/x/exp v0.0.0-20190121172915-509febef88a4/go.mod h1:CJ0aWSM057203Lf6IL+f9T1iT9GByDxfZKAQTCR3kQA=
