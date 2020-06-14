@@ -5,10 +5,13 @@ package influxunifi
 import (
 	"crypto/tls"
 	"fmt"
+	"io/ioutil"
 	"log"
+	"strings"
 	"time"
 
 	influx "github.com/influxdata/influxdb1-client/v2"
+	"github.com/pkg/errors"
 	"github.com/unifi-poller/poller"
 	"github.com/unifi-poller/unifi"
 	"golift.io/cnfg"
@@ -22,7 +25,7 @@ const (
 	defaultInfluxURL  = "http://127.0.0.1:8086"
 )
 
-// Config defines the data needed to store metrics in InfluxDB
+// Config defines the data needed to store metrics in InfluxDB.
 type Config struct {
 	Interval  cnfg.Duration `json:"interval,omitempty" toml:"interval,omitempty" xml:"interval" yaml:"interval"`
 	Disable   bool          `json:"disable" toml:"disable" xml:"disable,attr" yaml:"disable"`
@@ -52,7 +55,7 @@ type metric struct {
 	Fields map[string]interface{}
 }
 
-func init() {
+func init() { // nolint: gochecknoinits
 	u := &InfluxUnifi{InfluxDB: &InfluxDB{}, LastCheck: time.Now()}
 
 	poller.NewOutput(&poller.Output{
@@ -107,7 +110,7 @@ func (u *InfluxUnifi) Run(c poller.Collect) error {
 		Addr:      u.URL,
 		Username:  u.User,
 		Password:  u.Pass,
-		TLSConfig: &tls.Config{InsecureSkipVerify: !u.VerifySSL},
+		TLSConfig: &tls.Config{InsecureSkipVerify: !u.VerifySSL}, // nolint: gosec
 	})
 	if err != nil {
 		return err
@@ -127,6 +130,10 @@ func (u *InfluxUnifi) setConfigDefaults() {
 		u.User = defaultInfluxUser
 	}
 
+	if strings.HasPrefix(u.Pass, "file://") {
+		u.Pass = u.getPassFromFile(strings.TrimPrefix(u.Pass, "file://"))
+	}
+
 	if u.Pass == "" {
 		u.Pass = defaultInfluxUser
 	}
@@ -144,6 +151,15 @@ func (u *InfluxUnifi) setConfigDefaults() {
 	u.Interval = cnfg.Duration{Duration: u.Interval.Duration.Round(time.Second)}
 }
 
+func (u *InfluxUnifi) getPassFromFile(filename string) string {
+	b, err := ioutil.ReadFile(filename)
+	if err != nil {
+		u.Collector.LogErrorf("Reading InfluxDB Password File: %v", err)
+	}
+
+	return strings.TrimSpace(string(b))
+}
+
 // ReportMetrics batches all device and client data into influxdb data points.
 // Call this after you've collected all the data you care about.
 // Returns an error if influxdb calls fail, otherwise returns a report.
@@ -157,7 +173,7 @@ func (u *InfluxUnifi) ReportMetrics(m *poller.Metrics) (*Report, error) {
 	r.bp, err = influx.NewBatchPoints(influx.BatchPointsConfig{Database: u.DB})
 
 	if err != nil {
-		return nil, fmt.Errorf("influx.NewBatchPoints: %v", err)
+		return nil, errors.Wrap(err, "influx.NewBatchPoint")
 	}
 
 	go u.collect(r, r.ch)
@@ -167,7 +183,7 @@ func (u *InfluxUnifi) ReportMetrics(m *poller.Metrics) (*Report, error) {
 
 	// Send all the points.
 	if err = u.influx.Write(r.bp); err != nil {
-		return nil, fmt.Errorf("influxdb.Write(points): %v", err)
+		return nil, errors.Wrap(err, "influxdb.Write(points)")
 	}
 
 	r.Elapsed = time.Since(r.Start)
@@ -193,56 +209,30 @@ func (u *InfluxUnifi) collect(r report, ch chan *metric) {
 func (u *InfluxUnifi) loopPoints(r report) {
 	m := r.metrics()
 
-	r.add()
-	r.add()
-	r.add()
-	r.add()
-	r.add()
+	for _, s := range m.SitesDPI {
+		u.batchSiteDPI(r, s)
+	}
 
-	go func() {
-		defer r.done()
+	for _, s := range m.Sites {
+		u.batchSite(r, s)
+	}
 
-		for _, s := range m.SitesDPI {
-			u.batchSiteDPI(r, s)
-		}
-	}()
+	appTotal := make(totalsDPImap)
+	catTotal := make(totalsDPImap)
 
-	go func() {
-		defer r.done()
+	for _, s := range m.ClientsDPI {
+		u.batchClientDPI(r, s, appTotal, catTotal)
+	}
 
-		for _, s := range m.Sites {
-			u.batchSite(r, s)
-		}
-	}()
+	reportClientDPItotals(r, appTotal, catTotal)
 
-	go func() {
-		defer r.done()
+	for _, s := range m.Clients {
+		u.batchClient(r, s)
+	}
 
-		appTotal := make(totalsDPImap)
-		catTotal := make(totalsDPImap)
-
-		for _, s := range m.ClientsDPI {
-			u.batchClientDPI(r, s, appTotal, catTotal)
-		}
-
-		reportClientDPItotals(r, appTotal, catTotal)
-	}()
-
-	go func() {
-		defer r.done()
-
-		for _, s := range m.Clients {
-			u.batchClient(r, s)
-		}
-	}()
-
-	go func() {
-		defer r.done()
-
-		for _, s := range m.IDSList {
-			u.batchIDS(r, s)
-		}
-	}()
+	for _, s := range m.IDSList {
+		u.batchIDS(r, s)
+	}
 
 	u.loopDevicePoints(r)
 }
@@ -254,42 +244,21 @@ func (u *InfluxUnifi) loopDevicePoints(r report) {
 		return
 	}
 
-	r.add()
-	r.add()
-	r.add()
-	r.add()
+	for _, s := range m.UAPs {
+		u.batchUAP(r, s)
+	}
 
-	go func() {
-		defer r.done()
+	for _, s := range m.USGs {
+		u.batchUSG(r, s)
+	}
 
-		for _, s := range m.UAPs {
-			u.batchUAP(r, s)
-		}
-	}()
+	for _, s := range m.USWs {
+		u.batchUSW(r, s)
+	}
 
-	go func() {
-		defer r.done()
-
-		for _, s := range m.USGs {
-			u.batchUSG(r, s)
-		}
-	}()
-
-	go func() {
-		defer r.done()
-
-		for _, s := range m.USWs {
-			u.batchUSW(r, s)
-		}
-	}()
-
-	go func() {
-		defer r.done()
-
-		for _, s := range m.UDMs {
-			u.batchUDM(r, s)
-		}
-	}()
+	for _, s := range m.UDMs {
+		u.batchUDM(r, s)
+	}
 }
 
 // LogInfluxReport writes a log message after exporting to influxdb.

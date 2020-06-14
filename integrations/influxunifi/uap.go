@@ -81,7 +81,7 @@ func (u *InfluxUnifi) processUAPstats(ap *unifi.Ap) map[string]interface{} {
 }
 
 // processVAPTable creates points for Wifi Radios. This works with several types of UAP-capable devices.
-func (u *InfluxUnifi) processVAPTable(r report, t map[string]string, vt unifi.VapTable) {
+func (u *InfluxUnifi) processVAPTable(r report, t map[string]string, vt unifi.VapTable) { // nolint: funlen
 	for _, s := range vt {
 		tags := map[string]string{
 			"device_name": t["name"],

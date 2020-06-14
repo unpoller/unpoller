@@ -35,19 +35,16 @@ func (r *Report) metrics() *poller.Metrics {
 	return r.Metrics
 }
 
-// satisfy gomnd
-const one = 1
-
 func (r *Report) add() {
-	r.wg.Add(one)
+	r.wg.Add(1)
 }
 
 func (r *Report) done() {
-	r.wg.Add(-one)
+	r.wg.Done()
 }
 
 func (r *Report) send(m *metric) {
-	r.wg.Add(one)
+	r.wg.Add(1)
 	r.ch <- m
 }
 
