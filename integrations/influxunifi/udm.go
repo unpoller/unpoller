@@ -32,9 +32,19 @@ func (u *InfluxUnifi) batchSysStats(s unifi.SysStats, ss unifi.SystemStats) map[
 	}
 }
 
+func (u *InfluxUnifi) batchUDMtemps(temps []unifi.Temperature) map[string]interface{} {
+	output := make(map[string]interface{})
+
+	for _, t := range temps {
+		output["temp_"+t.Name] = t.Value
+	}
+
+	return output
+}
+
 // batchUDM generates Unifi Gateway datapoints for InfluxDB.
 // These points can be passed directly to influx.
-func (u *InfluxUnifi) batchUDM(r report, s *unifi.UDM) {
+func (u *InfluxUnifi) batchUDM(r report, s *unifi.UDM) { // nolint: funlen
 	if !s.Adopted.Val || s.Locating.Val {
 		return
 	}
@@ -50,7 +60,8 @@ func (u *InfluxUnifi) batchUDM(r report, s *unifi.UDM) {
 		"type":      s.Type,
 	}
 	fields := Combine(
-		u.batchUSGstat(s.SpeedtestStatus, s.Stat.Gw, s.Uplink),
+		u.batchUDMtemps(s.Temperatures),
+		u.batchUSGstats(s.SpeedtestStatus, s.Stat.Gw, s.Uplink),
 		u.batchSysStats(s.SysStats, s.SystemStats),
 		map[string]interface{}{
 			"source":        s.SourceName,
@@ -98,7 +109,7 @@ func (u *InfluxUnifi) batchUDM(r report, s *unifi.UDM) {
 		})
 
 	r.send(&metric{Table: "usw", Tags: tags, Fields: fields})
-	u.batchPortTable(r, tags, "usw", s.PortTable) // udm has a usw in it.
+	u.batchPortTable(r, tags, s.PortTable) // udm has a usw in it.
 
 	if s.Stat.Ap == nil {
 		return // we're done now. the following code process UDM (non-pro) UAP data.

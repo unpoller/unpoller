@@ -6,7 +6,7 @@ import (
 
 // batchClient generates Unifi Client datapoints for InfluxDB.
 // These points can be passed directly to influx.
-func (u *InfluxUnifi) batchClient(r report, s *unifi.Client) {
+func (u *InfluxUnifi) batchClient(r report, s *unifi.Client) { // nolint: funlen
 	tags := map[string]string{
 		"mac":         s.Mac,
 		"site_name":   s.SiteName,
@@ -72,7 +72,7 @@ func (u *InfluxUnifi) batchClient(r report, s *unifi.Client) {
 	r.send(&metric{Table: "clients", Tags: tags, Fields: fields})
 }
 
-// totalsDPImap: controller, site, name (app/cat name), dpi
+// totalsDPImap: controller, site, name (app/cat name), dpi.
 type totalsDPImap map[string]map[string]map[string]unifi.DPIData
 
 func (u *InfluxUnifi) batchClientDPI(r report, s *unifi.DPITable, appTotal, catTotal totalsDPImap) {

@@ -23,7 +23,7 @@ func (u *InfluxUnifi) batchUSG(r report, s *unifi.USG) {
 	}
 	fields := Combine(
 		u.batchSysStats(s.SysStats, s.SystemStats),
-		u.batchUSGstat(s.SpeedtestStatus, s.Stat.Gw, s.Uplink),
+		u.batchUSGstats(s.SpeedtestStatus, s.Stat.Gw, s.Uplink),
 		map[string]interface{}{
 			"ip":            s.IP,
 			"bytes":         s.Bytes.Val,
@@ -48,7 +48,7 @@ func (u *InfluxUnifi) batchUSG(r report, s *unifi.USG) {
 	u.batchUSGwans(r, tags, s.Wan1, s.Wan2)
 }
 
-func (u *InfluxUnifi) batchUSGstat(ss unifi.SpeedtestStatus, gw *unifi.Gw, ul unifi.Uplink) map[string]interface{} {
+func (u *InfluxUnifi) batchUSGstats(ss unifi.SpeedtestStatus, gw *unifi.Gw, ul unifi.Uplink) map[string]interface{} {
 	if gw == nil {
 		return map[string]interface{}{}
 	}
