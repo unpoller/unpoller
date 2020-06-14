@@ -18,7 +18,13 @@ import (
 	"strings"
 	"time"
 
+	"github.com/pkg/errors"
 	"golang.org/x/net/publicsuffix"
+)
+
+var (
+	errAuthenticationFailed = fmt.Errorf("authentication failed")
+	errInvalidStatusCode    = fmt.Errorf("invalid status code from server")
 )
 
 // NewUnifi creates a http.Client with authenticated cookies.
@@ -44,7 +50,7 @@ func NewUnifi(config *Config) (*Unifi, error) {
 		Client: &http.Client{
 			Jar: jar,
 			Transport: &http.Transport{
-				TLSClientConfig: &tls.Config{InsecureSkipVerify: !config.VerifySSL},
+				TLSClientConfig: &tls.Config{InsecureSkipVerify: !config.VerifySSL}, // nolint: gosec
 			},
 		},
 	}
@@ -58,7 +64,7 @@ func NewUnifi(config *Config) (*Unifi, error) {
 	}
 
 	if err := u.GetServerData(); err != nil {
-		return u, fmt.Errorf("unable to get server version: %v", err)
+		return u, errors.Wrap(err, "unable to get server version")
 	}
 
 	return u, nil
@@ -85,7 +91,7 @@ func (u *Unifi) Login() error {
 		req.URL, time.Since(start).Round(time.Millisecond), resp.ContentLength)
 
 	if resp.StatusCode != http.StatusOK {
-		return fmt.Errorf("authentication failed (user: %s): %s (status: %s)",
+		return errors.Wrapf(errAuthenticationFailed, "(user: %s): %s (status: %s)",
 			u.User, req.URL, resp.Status)
 	}
 
@@ -111,7 +117,7 @@ func (u *Unifi) checkNewStyleAPI() error {
 			return http.ErrUseLastResponse
 		},
 		Transport: &http.Transport{
-			TLSClientConfig: &tls.Config{InsecureSkipVerify: !u.VerifySSL},
+			TLSClientConfig: &tls.Config{InsecureSkipVerify: !u.VerifySSL}, // nolint: gosec
 		},
 	}
 
@@ -216,7 +222,7 @@ func (u *Unifi) GetJSON(apiPath string, params ...string) ([]byte, error) {
 	}
 
 	if resp.StatusCode != http.StatusOK {
-		err = fmt.Errorf("invalid status code from server for %s: %s", req.URL, resp.Status)
+		err = errors.Wrapf(errInvalidStatusCode, "%s: %s", req.URL, resp.Status)
 	}
 
 	return body, err

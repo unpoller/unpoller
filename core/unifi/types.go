@@ -6,6 +6,12 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
+
+	"github.com/pkg/errors"
+)
+
+var (
+	errCannotUnmarshalFlexInt = fmt.Errorf("cannot unmarshal to FlexInt")
 )
 
 // This is a list of unifi API paths.
@@ -124,7 +130,7 @@ func (f *FlexInt) UnmarshalJSON(b []byte) error {
 		f.Txt = "0"
 		f.Val = 0
 	default:
-		return fmt.Errorf("cannot unmarshal to FlexInt: %s", b)
+		return errors.Wrapf(errCannotUnmarshalFlexInt, "%v", b)
 	}
 
 	return nil

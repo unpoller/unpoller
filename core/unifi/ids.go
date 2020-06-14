@@ -6,6 +6,8 @@ import (
 	"io/ioutil"
 	"net/http"
 	"time"
+
+	"github.com/pkg/errors"
 )
 
 // IDSList contains a list that contains all of the IDS Events on a controller.
@@ -135,7 +137,7 @@ func (u *Unifi) GetSiteIDS(site *Site, from, to time.Time) ([]*IDS, error) {
 	}
 
 	if resp.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("invalid status code from server %s", resp.Status)
+		return nil, errors.Wrap(errInvalidStatusCode, resp.Status)
 	}
 
 	if err := json.Unmarshal(body, &response); err != nil {

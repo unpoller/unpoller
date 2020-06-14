@@ -399,7 +399,7 @@ type RadioTable []struct {
 	WlangroupID        string   `json:"wlangroup_id"`
 }
 
-// RadioTableStats is part of the data shared between UAP and UDM
+// RadioTableStats is part of the data shared between UAP and UDM.
 type RadioTableStats []struct {
 	Name         string      `json:"name"`
 	Channel      FlexInt     `json:"channel"`

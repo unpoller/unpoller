@@ -69,9 +69,9 @@ type UDM struct {
 		MaxMirrorSessions    FlexInt `json:"max_mirror_sessions"`
 		MaxAggregateSessions FlexInt `json:"max_aggregate_sessions"`
 	} `json:"switch_caps"`
-	HasFan            FlexBool    `json:"has_fan"`
-	HasTemperature    FlexBool    `json:"has_temperature"`
-	RulesetInterfaces interface{} `json:"ruleset_interfaces"`
+	HasFan            FlexBool      `json:"has_fan"`
+	Temperatures      []Temperature `json:"temperatures,omitempty"`
+	RulesetInterfaces interface{}   `json:"ruleset_interfaces"`
 	/* struct {
 		Br0  string `json:"br0"`
 		Eth0 string `json:"eth0"`
@@ -174,8 +174,14 @@ type NetworkTable []struct {
 	TxPackets              FlexInt  `json:"tx_packets"`
 }
 
+type Temperature struct {
+	Name  string  `json:"name"`
+	Type  string  `json:"type"`
+	Value float64 `json:"value"`
+}
+
 // UDMStat holds the "stat" data for a dream machine.
-// A dream machine is a USG + USW + Controller
+// A dream machine is a USG + USW + Controller.
 type UDMStat struct {
 	*Gw `json:"gw"`
 	*Sw `json:"sw"`

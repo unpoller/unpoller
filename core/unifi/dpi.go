@@ -56,7 +56,7 @@ func (d DPIMap) Keys() []string {
 
 // DPICats maps the categories to descriptions.
 // From: https://fw-download.ubnt.com/data/usg-dpi/1628-debian-v1.442.0-05f5a57eaef344358bd5a8e84a184c18.tar
-var DPICats = DPIMap{
+var DPICats = DPIMap{ // nolint: gochecknoglobals
 	0:   "Instant Messengers",
 	1:   "Peer-to-Peer Networks",
 	3:   "File Sharing",
@@ -83,7 +83,7 @@ var DPICats = DPIMap{
 
 // DPIApps maps the applications to names.
 // From: https://fw-download.ubnt.com/data/usg-dpi/1628-debian-v1.442.0-05f5a57eaef344358bd5a8e84a184c18.tar
-var DPIApps = DPIMap{
+var DPIApps = DPIMap{ // nolint: gochecknoglobals
 	1:        "MSN",
 	2:        "Yahoo Messenger",
 	3:        "AIM/ICQ/iIM",

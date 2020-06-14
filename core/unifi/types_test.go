@@ -1,4 +1,4 @@
-package unifi
+package unifi // nolint: testpackage
 
 import (
 	"encoding/json"
