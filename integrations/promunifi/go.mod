@@ -8,5 +8,5 @@ require (
 	github.com/prometheus/common v0.9.1
 	github.com/prometheus/procfs v0.0.10 // indirect
 	github.com/unifi-poller/poller v0.0.5
-	github.com/unifi-poller/unifi v0.0.5-0.20200614031431-bd4934fc585b
+	github.com/unifi-poller/unifi v0.0.5-0.20200614034623-f4c1d18157c2
 )
