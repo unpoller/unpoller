@@ -36,7 +36,7 @@ func (u *InfluxUnifi) batchUDMtemps(temps []unifi.Temperature) map[string]interf
 	output := make(map[string]interface{})
 
 	for _, t := range temps {
-		output["temp_"+t.Name+"_"+t.Type] = t.Value
+		output["temp_"+t.Name] = t.Value
 	}
 
 	return output
