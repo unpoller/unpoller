@@ -108,7 +108,7 @@ func (u *UnifiPoller) ParseConfigs() error {
 	return u.parseOutputs()
 }
 
-// getFirstFile returns the first file that exists and is "reachable"
+// getFirstFile returns the first file that exists and is "reachable".
 func getFirstFile(files []string) (string, error) {
 	var err error
 

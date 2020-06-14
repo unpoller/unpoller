@@ -9,8 +9,9 @@ import (
 )
 
 var (
-	inputs    []*InputPlugin
-	inputSync sync.Mutex
+	// These are used ot keep track of loaded input plugins.
+	inputs    []*InputPlugin // nolint: gochecknoglobals
+	inputSync sync.Mutex     // nolint: gochecknoglobals
 )
 
 // Input plugins must implement this interface.
@@ -101,7 +102,7 @@ func (u *UnifiPoller) Metrics() (*Metrics, bool, error) {
 	var err error
 
 	if len(errs) > 0 {
-		err = fmt.Errorf(strings.Join(errs, ", "))
+		err = fmt.Errorf(strings.Join(errs, ", ")) // nolint: goerr113
 	}
 
 	return metrics, ok, err
@@ -134,7 +135,7 @@ func (u *UnifiPoller) MetricsFrom(filter *Filter) (*Metrics, bool, error) {
 	var err error
 
 	if len(errs) > 0 {
-		err = fmt.Errorf(strings.Join(errs, ", "))
+		err = fmt.Errorf(strings.Join(errs, ", ")) // nolint: goerr113
 	}
 
 	return metrics, ok, err

@@ -5,6 +5,7 @@ import (
 	"log"
 )
 
+// Log the command that called these commands.
 const callDepth = 2
 
 // Logger is passed into input packages so they may write logs.
@@ -21,7 +22,7 @@ func (u *UnifiPoller) Logf(m string, v ...interface{}) {
 	}
 }
 
-// LogDebugf prints a debug log entry if debug is true and quite is false
+// LogDebugf prints a debug log entry if debug is true and quite is false.
 func (u *UnifiPoller) LogDebugf(m string, v ...interface{}) {
 	if u.Debug && !u.Quiet {
 		_ = log.Output(callDepth, fmt.Sprintf("[DEBUG] "+m, v...))

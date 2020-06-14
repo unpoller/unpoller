@@ -6,8 +6,11 @@ import (
 )
 
 var (
-	outputs    []*Output
-	outputSync sync.Mutex
+	// These are used to keep track of loaded output plugins.
+	outputs             []*Output  // nolint: gochecknoglobals
+	outputSync          sync.Mutex // nolint: gochecknoglobals
+	errNoOutputPlugins  = fmt.Errorf("no output plugins imported")
+	errAllOutputStopped = fmt.Errorf("all output plugins have stopped, or none enabled")
 )
 
 // Collect is passed into output packages so they may collect metrics to output.
@@ -55,7 +58,7 @@ func (u *UnifiPoller) InitializeOutputs() error {
 	}
 
 	if count < 1 {
-		return fmt.Errorf("no output plugins imported")
+		return errNoOutputPlugins
 	}
 
 	for err := range v {
@@ -64,7 +67,7 @@ func (u *UnifiPoller) InitializeOutputs() error {
 		}
 
 		if count--; count == 0 {
-			return fmt.Errorf("all output plugins have stopped, or none enabled")
+			return errAllOutputStopped
 		}
 	}
 
