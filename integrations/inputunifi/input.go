@@ -37,6 +37,7 @@ type Controller struct {
 	SaveIDS   bool         `json:"save_ids" toml:"save_ids" xml:"save_ids" yaml:"save_ids"`
 	SaveDPI   bool         `json:"save_dpi" toml:"save_dpi" xml:"save_dpi" yaml:"save_dpi"`
 	New       bool         `json:"new" toml:"new" xml:"new" yaml:"new"`
+	HashPII   bool         `json:"hash_pii" toml:"hash_pii" xml:"hash_pii" yaml:"hash_pii"`
 	SaveSites *bool        `json:"save_sites" toml:"save_sites" xml:"save_sites" yaml:"save_sites"`
 	Role      string       `json:"role" toml:"role" xml:"role,attr" yaml:"role"`
 	User      string       `json:"user" toml:"user" xml:"user" yaml:"user"`

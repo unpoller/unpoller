@@ -1,6 +1,7 @@
 package inputunifi
 
 import (
+	"crypto/md5" // nolint: gosec
 	"fmt"
 	"strings"
 	"time"
@@ -155,14 +156,17 @@ func (u *InputUnifi) augmentMetrics(c *Controller, metrics *poller.Metrics) *pol
 	}
 
 	// These come blank, so set them here.
-	for i, c := range metrics.Clients {
-		if devices[c.Mac] = c.Name; c.Name == "" {
-			devices[c.Mac] = c.Hostname
+	for i, client := range metrics.Clients {
+		if devices[client.Mac] = client.Name; client.Name == "" {
+			devices[client.Mac] = client.Hostname
 		}
 
-		metrics.Clients[i].SwName = devices[c.SwMac]
-		metrics.Clients[i].ApName = devices[c.ApMac]
-		metrics.Clients[i].GwName = devices[c.GwMac]
+		metrics.Clients[i].Mac = c.redactMacPII(metrics.Clients[i].Mac)
+		metrics.Clients[i].Name = c.redactNamePII(metrics.Clients[i].Name)
+		metrics.Clients[i].Hostname = c.redactNamePII(metrics.Clients[i].Hostname)
+		metrics.Clients[i].SwName = devices[client.SwMac]
+		metrics.Clients[i].ApName = devices[client.ApMac]
+		metrics.Clients[i].GwName = devices[client.GwMac]
 		metrics.Clients[i].RadioDescription = bssdIDs[metrics.Clients[i].Bssid] + metrics.Clients[i].RadioProto
 	}
 
@@ -172,6 +176,9 @@ func (u *InputUnifi) augmentMetrics(c *Controller, metrics *poller.Metrics) *pol
 		if metrics.ClientsDPI[i].Name == "" {
 			metrics.ClientsDPI[i].Name = metrics.ClientsDPI[i].MAC
 		}
+
+		metrics.ClientsDPI[i].Name = c.redactNamePII(metrics.ClientsDPI[i].Name)
+		metrics.ClientsDPI[i].MAC = c.redactMacPII(metrics.ClientsDPI[i].MAC)
 	}
 
 	if !*c.SaveSites {
@@ -179,6 +186,34 @@ func (u *InputUnifi) augmentMetrics(c *Controller, metrics *poller.Metrics) *pol
 	}
 
 	return metrics
+}
+
+// redactNamePII converts a name string to an md5 hash.
+// Useful for maskiing out personally identifying information.
+func (c *Controller) redactNamePII(pii string) string {
+	if !c.HashPII {
+		return pii
+	}
+
+	return fmt.Sprintf("%x", md5.Sum([]byte(pii))) // nolint: gosec
+}
+
+// redactMacPII converts a MAC address to an md5 hashed version of a MAC.
+// Useful for maskiing out personally identifying information.
+func (c *Controller) redactMacPII(pii string) (output string) {
+	if !c.HashPII {
+		return pii
+	}
+
+	s := fmt.Sprintf("%x", md5.Sum([]byte(pii))) // nolint: gosec
+	// This fancy code formats a "fake" mac address looking string.
+	for i, r := range s[0:14] {
+		if output += string(r); i != 13 && i%2 == 1 {
+			output += ":"
+		}
+	}
+
+	return output
 }
 
 // getFilteredSites returns a list of sites to fetch data for.
