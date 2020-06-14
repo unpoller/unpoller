@@ -32,6 +32,16 @@ func (u *InfluxUnifi) batchSysStats(s unifi.SysStats, ss unifi.SystemStats) map[
 	}
 }
 
+func (u *InfluxUnifi) batchUDMtemps(temps []unifi.Temperature) map[string]interface{} {
+	output := make(map[string]interface{})
+
+	for _, t := range temps {
+		output["temp_"+t.Name+"_"+t.Type] = t.Value
+	}
+
+	return output
+}
+
 // batchUDM generates Unifi Gateway datapoints for InfluxDB.
 // These points can be passed directly to influx.
 func (u *InfluxUnifi) batchUDM(r report, s *unifi.UDM) { // nolint: funlen
@@ -50,7 +60,8 @@ func (u *InfluxUnifi) batchUDM(r report, s *unifi.UDM) { // nolint: funlen
 		"type":      s.Type,
 	}
 	fields := Combine(
-		u.batchUSGstat(s.SpeedtestStatus, s.Stat.Gw, s.Uplink),
+		u.batchUDMtemps(s.Temperatures),
+		u.batchUSGstats(s.SpeedtestStatus, s.Stat.Gw, s.Uplink),
 		u.batchSysStats(s.SysStats, s.SystemStats),
 		map[string]interface{}{
 			"source":        s.SourceName,
