@@ -5,8 +5,13 @@ import (
 	"strings"
 	"time"
 
+	"github.com/pkg/errors"
 	"github.com/unifi-poller/poller"
 	"github.com/unifi-poller/unifi"
+)
+
+var (
+	errScrapeFilterMatchFailed = fmt.Errorf("scrape filter match failed, and filter is not http URL")
 )
 
 func (u *InputUnifi) isNill(c *Controller) bool {
@@ -39,7 +44,7 @@ func (u *InputUnifi) newDynamicCntrlr(url string) (bool, *Controller) {
 
 func (u *InputUnifi) dynamicController(url string) (*poller.Metrics, error) {
 	if !strings.HasPrefix(url, "http") {
-		return nil, fmt.Errorf("scrape filter match failed, and filter is not http URL")
+		return nil, errScrapeFilterMatchFailed
 	}
 
 	new, c := u.newDynamicCntrlr(url)
@@ -48,7 +53,7 @@ func (u *InputUnifi) dynamicController(url string) (*poller.Metrics, error) {
 		u.Logf("Authenticating to Dynamic UniFi Controller: %s", url)
 
 		if err := u.getUnifi(c); err != nil {
-			return nil, fmt.Errorf("authenticating to %s: %v", url, err)
+			return nil, errors.Wrapf(err, "authenticating to %s", url)
 		}
 	}
 
@@ -60,7 +65,7 @@ func (u *InputUnifi) collectController(c *Controller) (*poller.Metrics, error) {
 		u.Logf("Re-authenticating to UniFi Controller: %s", c.URL)
 
 		if err := u.getUnifi(c); err != nil {
-			return nil, fmt.Errorf("re-authenticating to %s: %v", c.Role, err)
+			return nil, errors.Wrapf(err, "re-authenticating to %s", c.Role)
 		}
 	}
 
@@ -69,7 +74,7 @@ func (u *InputUnifi) collectController(c *Controller) (*poller.Metrics, error) {
 		u.Logf("Re-authenticating to UniFi Controller: %s", c.URL)
 
 		if err := u.getUnifi(c); err != nil {
-			return metrics, fmt.Errorf("re-authenticating to %s: %v", c.Role, err)
+			return metrics, errors.Wrapf(err, "re-authenticating to %s", c.Role)
 		}
 	}
 
@@ -86,33 +91,33 @@ func (u *InputUnifi) pollController(c *Controller) (*poller.Metrics, error) {
 
 	// Get the sites we care about.
 	if m.Sites, err = u.getFilteredSites(c); err != nil {
-		return nil, fmt.Errorf("unifi.GetSites(): %v", err)
+		return nil, errors.Wrap(err, "unifi.GetSites()")
 	}
 
 	if c.SaveDPI {
 		if m.SitesDPI, err = c.Unifi.GetSiteDPI(m.Sites); err != nil {
-			return nil, fmt.Errorf("unifi.GetSiteDPI(%v): %v", c.URL, err)
+			return nil, errors.Wrapf(err, "unifi.GetSiteDPI(%s)", c.URL)
 		}
 
 		if m.ClientsDPI, err = c.Unifi.GetClientsDPI(m.Sites); err != nil {
-			return nil, fmt.Errorf("unifi.GetClientsDPI(%v): %v", c.URL, err)
+			return nil, errors.Wrapf(err, "unifi.GetClientsDPI(%s)", c.URL)
 		}
 	}
 
 	if c.SaveIDS {
 		m.IDSList, err = c.Unifi.GetIDS(m.Sites, time.Now().Add(time.Minute), time.Now())
 		if err != nil {
-			return nil, fmt.Errorf("unifi.GetIDS(%v): %v", c.URL, err)
+			return nil, errors.Wrapf(err, "unifi.GetIDS(%s)", c.URL)
 		}
 	}
 
 	// Get all the points.
 	if m.Clients, err = c.Unifi.GetClients(m.Sites); err != nil {
-		return nil, fmt.Errorf("unifi.GetClients(%v): %v", c.URL, err)
+		return nil, errors.Wrapf(err, "unifi.GetClients(%s)", c.URL)
 	}
 
 	if m.Devices, err = c.Unifi.GetDevices(m.Sites); err != nil {
-		return nil, fmt.Errorf("unifi.GetDevices(%v): %v", c.URL, err)
+		return nil, errors.Wrapf(err, "unifi.GetDevices(%s)", c.URL)
 	}
 
 	return u.augmentMetrics(c, m), nil

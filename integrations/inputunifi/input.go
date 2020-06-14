@@ -4,11 +4,13 @@ package inputunifi
 
 import (
 	"fmt"
+	"io/ioutil"
 	"os"
 	"strings"
 
 	"sync"
 
+	"github.com/pkg/errors"
 	"github.com/unifi-poller/poller"
 	"github.com/unifi-poller/unifi"
 )
@@ -44,7 +46,7 @@ type Controller struct {
 	Unifi     *unifi.Unifi `json:"-" toml:"-" xml:"-" yaml:"-"`
 }
 
-// Config contains our configuration data
+// Config contains our configuration data.
 type Config struct {
 	sync.RWMutex               // locks the Unifi struct member when re-authing to unifi.
 	Default      Controller    `json:"defaults" toml:"defaults" xml:"default" yaml:"defaults"`
@@ -53,7 +55,7 @@ type Config struct {
 	Controllers  []*Controller `json:"controllers" toml:"controller" xml:"controller" yaml:"controllers"`
 }
 
-func init() {
+func init() { // nolint: gochecknoinits
 	u := &InputUnifi{}
 
 	poller.NewInput(&poller.InputPlugin{
@@ -86,7 +88,7 @@ func (u *InputUnifi) getUnifi(c *Controller) error {
 	})
 	if err != nil {
 		c.Unifi = nil
-		return fmt.Errorf("unifi controller: %v", err)
+		return errors.Wrap(err, "unifi controller")
 	}
 
 	u.LogDebugf("Authenticated with controller successfully, %s", c.URL)
@@ -161,39 +163,51 @@ func (u *InputUnifi) dumpSitesJSON(c *Controller, path, name string, sites unifi
 	return allJSON, nil
 }
 
-// setDefaults sets defaults for the defaults and for the controllers.
-// which one depends on the useDefaults boolean.
-func (u *InputUnifi) setDefaults(c *Controller, useDefaults bool) {
-	// Default defaults.
-	if useDefaults {
-		if c.SaveSites == nil {
-			t := true
-			c.SaveSites = &t
-		}
-
-		if c.URL == "" {
-			c.URL = defaultURL
-		}
-
-		if c.Role == "" {
-			c.Role = c.URL
-		}
-
-		if c.Pass == "" {
-			c.Pass = defaultPass
-		}
-
-		if c.User == "" {
-			c.User = defaultUser
-		}
-
-		if len(c.Sites) == 0 {
-			c.Sites = []string{defaultSite}
-		}
-
-		return
+func (u *InputUnifi) getPassFromFile(filename string) string {
+	b, err := ioutil.ReadFile(filename)
+	if err != nil {
+		u.LogErrorf("Reading UniFi Password File: %v", err)
 	}
 
+	return strings.TrimSpace(string(b))
+}
+
+// setDefaults sets the default defaults.
+func (u *InputUnifi) setDefaults(c *Controller) {
+	// Default defaults.
+	if c.SaveSites == nil {
+		t := true
+		c.SaveSites = &t
+	}
+
+	if c.URL == "" {
+		c.URL = defaultURL
+	}
+
+	if c.Role == "" {
+		c.Role = c.URL
+	}
+
+	if strings.HasPrefix(c.Pass, "file://") {
+		c.Pass = u.getPassFromFile(strings.TrimPrefix(c.Pass, "file://"))
+	}
+
+	if c.Pass == "" {
+		c.Pass = defaultPass
+	}
+
+	if c.User == "" {
+		c.User = defaultUser
+	}
+
+	if len(c.Sites) == 0 {
+		c.Sites = []string{defaultSite}
+	}
+}
+
+// setControllerDefaults sets defaults for the for controllers.
+// Any missing values come from defaults (above).
+func (u *InputUnifi) setControllerDefaults(c *Controller) *Controller {
 	// Configured controller defaults.
 	if c.SaveSites == nil {
 		c.SaveSites = u.Default.SaveSites
@@ -209,6 +223,10 @@ func (u *InputUnifi) setDefaults(c *Controller, useDefaults bool) {
 		c.Role = c.URL
 	}
 
+	if strings.HasPrefix(c.Pass, "file://") {
+		c.Pass = u.getPassFromFile(strings.TrimPrefix(c.Pass, "file://"))
+	}
+
 	if c.Pass == "" {
 		c.Pass = u.Default.Pass
 	}
@@ -220,6 +238,8 @@ func (u *InputUnifi) setDefaults(c *Controller, useDefaults bool) {
 	if len(c.Sites) == 0 {
 		c.Sites = u.Default.Sites
 	}
+
+	return c
 }
 
 // StringInSlice returns true if a string is in a slice.

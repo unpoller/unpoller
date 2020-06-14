@@ -7,8 +7,15 @@ import (
 	"os"
 	"strings"
 
+	"github.com/pkg/errors"
 	"github.com/unifi-poller/poller"
 	"github.com/unifi-poller/unifi"
+)
+
+var (
+	errDynamicLookupsDisabled = fmt.Errorf("filter path requested but dynamic lookups disabled")
+	errControllerNumNotFound  = fmt.Errorf("controller number not found")
+	errNoFilterKindProvided   = fmt.Errorf("must provide filter: devices, clients, other")
 )
 
 // Initialize gets called one time when starting up.
@@ -23,7 +30,7 @@ func (u *InputUnifi) Initialize(l poller.Logger) error {
 		return nil
 	}
 
-	if u.setDefaults(&u.Default, true); len(u.Controllers) == 0 && !u.Dynamic {
+	if u.setDefaults(&u.Default); len(u.Controllers) == 0 && !u.Dynamic {
 		u.Controllers = []*Controller{&u.Default}
 	}
 
@@ -35,9 +42,7 @@ func (u *InputUnifi) Initialize(l poller.Logger) error {
 	u.Logger = l
 
 	for _, c := range u.Controllers {
-		u.setDefaults(c, false)
-
-		switch err := u.getUnifi(c); err {
+		switch err := u.getUnifi(u.setControllerDefaults(c)); err {
 		case nil:
 			if err := u.checkSites(c); err != nil {
 				u.LogErrorf("checking sites on %s: %v", c.Role, err)
@@ -70,7 +75,7 @@ func (u *InputUnifi) MetricsFrom(filter *poller.Filter) (*poller.Metrics, bool, 
 
 	if filter != nil && filter.Path != "" {
 		if !u.Dynamic {
-			return metrics, false, fmt.Errorf("filter path requested but dynamic lookups disabled")
+			return metrics, false, errDynamicLookupsDisabled
 		}
 
 		// Attempt a dynamic metrics fetch from an unconfigured controller.
@@ -99,7 +104,7 @@ func (u *InputUnifi) MetricsFrom(filter *poller.Filter) (*poller.Metrics, bool, 
 	}
 
 	if len(errs) > 0 {
-		return metrics, ok, fmt.Errorf(strings.Join(errs, ", "))
+		return metrics, ok, fmt.Errorf(strings.Join(errs, ", ")) // nolint: goerr113
 	}
 
 	return metrics, ok, nil
@@ -108,7 +113,7 @@ func (u *InputUnifi) MetricsFrom(filter *poller.Filter) (*poller.Metrics, bool, 
 // RawMetrics returns API output from the first configured unifi controller.
 func (u *InputUnifi) RawMetrics(filter *poller.Filter) ([]byte, error) {
 	if l := len(u.Controllers); filter.Unit >= l {
-		return nil, fmt.Errorf("control number %d not found, %d controller(s) configured (0 index)", filter.Unit, l)
+		return nil, errors.Wrapf(errControllerNumNotFound, "%d controller(s) configured, '%d'", l, filter.Unit)
 	}
 
 	c := u.Controllers[filter.Unit]
@@ -116,7 +121,7 @@ func (u *InputUnifi) RawMetrics(filter *poller.Filter) ([]byte, error) {
 		u.Logf("Re-authenticating to UniFi Controller: %s", c.URL)
 
 		if err := u.getUnifi(c); err != nil {
-			return nil, fmt.Errorf("re-authenticating to %s: %v", c.Role, err)
+			return nil, errors.Wrapf(err, "re-authenticating to %s", c.Role)
 		}
 	}
 
@@ -138,6 +143,6 @@ func (u *InputUnifi) RawMetrics(filter *poller.Filter) ([]byte, error) {
 		_, _ = fmt.Fprintf(os.Stderr, "[INFO] Dumping Path '%s':\n", filter.Path)
 		return c.Unifi.GetJSON(filter.Path)
 	default:
-		return []byte{}, fmt.Errorf("must provide filter: devices, clients, other")
+		return []byte{}, errNoFilterKindProvided
 	}
 }
