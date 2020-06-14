@@ -12,6 +12,6 @@ require (
 	github.com/unifi-poller/influxunifi v0.0.9-0.20200614012101-da8e25b3e1c0
 	github.com/unifi-poller/inputunifi v0.0.7-0.20200614011400-ccef115c2def
 	github.com/unifi-poller/poller v0.0.6
-	github.com/unifi-poller/promunifi v0.0.7-0.20200614002236-2fc578d330d8
-	github.com/unifi-poller/unifi v0.0.4
+	github.com/unifi-poller/promunifi v0.0.7-0.20200614032856-bb7f58485c41
+	github.com/unifi-poller/unifi v0.0.5-0.20200614031431-bd4934fc585b
 )
