@@ -12,10 +12,10 @@ follow the example provided here. All of the hooks are generic, and will work wi
 any build. Two environment variables must be passed in from Docker Cloud config.
 
 1.  `BUILDS` must be set to the builds you're trying to perform. This repo is currently set to:
-    -   `linux:armhf:arm: linux:arm64:arm64:armv8 linux:amd64:amd64: linux:i386:386:`
-    -   The format is `os:name:arch:variant`.
+    -   `linux:armhf:arm linux:arm64:arm64 linux:amd64:amd64 linux:i386:386`
+    -   The format is `os:name:arch`.
     -   `os` and `name` are passed into the Dockerfile.
-    -   `os`, `arch` and `variant` are passed into `docker manifest annotate`.
+    -   `os`, `arch` are passed into `docker manifest annotate`.
     -   This does not yet work with an OS other than `linux`.
 1.  Set `DOCKER_CLI_EXPERIMENTAL` to `enabled`. Not optional.
 

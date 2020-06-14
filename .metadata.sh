@@ -17,7 +17,10 @@ LICENSE="MIT"
 # This affects the homebrew formula (launchd) and linux packages (systemd).
 FORMULA="service"
 
-export BINARY HBREPO MAINT VENDOR DESC GOLANGCI_LINT_ARGS CONFIG_FILE LICENSE FORMULA
+# Defines docker manifest/build types.
+BUILDS="linux:armhf:arm linux:arm64:arm64 linux:amd64:amd64 linux:i386:386"
+
+export BINARY HBREPO MAINT VENDOR DESC GOLANGCI_LINT_ARGS CONFIG_FILE LICENSE FORMULA BUILDS
 
 # The rest is mostly automatic.
 # Fix the repo if it doesn't match the binary name.
