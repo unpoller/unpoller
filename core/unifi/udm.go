@@ -69,9 +69,9 @@ type UDM struct {
 		MaxMirrorSessions    FlexInt `json:"max_mirror_sessions"`
 		MaxAggregateSessions FlexInt `json:"max_aggregate_sessions"`
 	} `json:"switch_caps"`
-	HasFan            FlexBool     `json:"has_fan"`
-	Temperatures      Temperatures `json:"temperatures"`
-	RulesetInterfaces interface{}  `json:"ruleset_interfaces"`
+	HasFan            FlexBool      `json:"has_fan"`
+	Temperatures      *Temperatures `json:"temperatures,omitempty"`
+	RulesetInterfaces interface{}   `json:"ruleset_interfaces"`
 	/* struct {
 		Br0  string `json:"br0"`
 		Eth0 string `json:"eth0"`
@@ -131,12 +131,6 @@ type UDM struct {
 	NumHandheld     FlexInt `json:"num_handheld"`       // USG
 }
 
-type Temperatures []struct {
-	Name  string  `json:"name"`
-	Type  string  `json:"type"`
-	Value float64 `json:"value"`
-}
-
 // NetworkTable is the list of networks on a gateway.
 type NetworkTable []struct {
 	ID                     string   `json:"_id"`
@@ -178,6 +172,12 @@ type NetworkTable []struct {
 	RxPackets              FlexInt  `json:"rx_packets"`
 	TxBytes                FlexInt  `json:"tx_bytes"`
 	TxPackets              FlexInt  `json:"tx_packets"`
+}
+
+type Temperatures []struct {
+	Name  string  `json:"name"`
+	Type  string  `json:"type"`
+	Value float64 `json:"value"`
 }
 
 // UDMStat holds the "stat" data for a dream machine.
