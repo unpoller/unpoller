@@ -70,7 +70,7 @@ type UDM struct {
 		MaxAggregateSessions FlexInt `json:"max_aggregate_sessions"`
 	} `json:"switch_caps"`
 	HasFan            FlexBool      `json:"has_fan"`
-	Temperatures      *Temperatures `json:"temperatures,omitempty"`
+	Temperatures      []Temperature `json:"temperatures,omitempty"`
 	RulesetInterfaces interface{}   `json:"ruleset_interfaces"`
 	/* struct {
 		Br0  string `json:"br0"`
@@ -174,7 +174,7 @@ type NetworkTable []struct {
 	TxPackets              FlexInt  `json:"tx_packets"`
 }
 
-type Temperatures []struct {
+type Temperature struct {
 	Name  string  `json:"name"`
 	Type  string  `json:"type"`
 	Value float64 `json:"value"`
