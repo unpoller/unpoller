@@ -73,6 +73,7 @@ func (u *InfluxUnifi) batchPortTable(r report, t map[string]string, pt []unifi.P
 			"site_name":   t["site_name"],
 			"device_name": t["name"],
 			"source":      t["source"],
+			"type":        t["type"],
 			"name":        p.Name,
 			"poe_mode":    p.PoeMode,
 			"port_poe":    p.PortPoe.Txt,
