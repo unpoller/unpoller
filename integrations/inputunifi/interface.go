@@ -85,18 +85,27 @@ func (u *InputUnifi) MetricsFrom(filter *poller.Filter) (*poller.Metrics, bool, 
 		return nil, false, nil
 	}
 
-	// Check if the request is for an existing, configured controller.
+	metrics := &poller.Metrics{}
+
+	// Check if the request is for an existing, configured controller (or all controllers)
 	for _, c := range u.Controllers {
 		if filter != nil && !strings.EqualFold(c.URL, filter.Path) {
 			continue
 		}
 
 		m, err := u.collectController(c)
+		if err != nil {
+			return metrics, false, err
+		}
 
-		return m, err == nil && m != nil, err
+		metrics = poller.AppendMetrics(metrics, m)
 	}
 
-	if !u.Dynamic || filter == nil {
+	if filter == nil || len(metrics.Clients) != 0 {
+		return metrics, true, nil
+	}
+
+	if !u.Dynamic {
 		return nil, false, errDynamicLookupsDisabled
 	}
 
