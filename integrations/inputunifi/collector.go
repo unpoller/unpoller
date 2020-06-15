@@ -22,14 +22,13 @@ func (u *InputUnifi) isNill(c *Controller) bool {
 	return c.Unifi == nil
 }
 
-// newDynamicCntrlr creates and saves a controller (with auth cookie) for repeated use.
+// newDynamicCntrlr creates and saves a controller definition for further use.
 // This is called when an unconfigured controller is requested.
 func (u *InputUnifi) newDynamicCntrlr(url string) (bool, *Controller) {
 	u.Lock()
 	defer u.Unlock()
 
-	c := u.dynamic[url]
-	if c != nil {
+	if c := u.dynamic[url]; c != nil {
 		// it already exists.
 		return false, c
 	}
@@ -39,7 +38,7 @@ func (u *InputUnifi) newDynamicCntrlr(url string) (bool, *Controller) {
 	u.dynamic[url].Role = url
 	u.dynamic[url].URL = url
 
-	return true, c
+	return true, u.dynamic[url]
 }
 
 func (u *InputUnifi) dynamicController(url string) (*poller.Metrics, error) {
