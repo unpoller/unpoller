@@ -145,7 +145,7 @@ func (u *promUnifi) Run(c poller.Collect) error {
 func (u *promUnifi) ScrapeHandler(w http.ResponseWriter, r *http.Request) {
 	t := &target{u: u, Filter: &poller.Filter{
 		Name: r.URL.Query().Get("input"),  // "unifi"
-		Path: r.URL.Query().Get("target"), // NEW (target): "https://127.0.0.1:8443"
+		Path: r.URL.Query().Get("target"), // url: "https://127.0.0.1:8443"
 	}}
 
 	if t.Name == "" {
