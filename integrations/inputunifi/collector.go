@@ -52,8 +52,11 @@ func (u *InputUnifi) dynamicController(url string) (*poller.Metrics, error) {
 		u.Logf("Authenticating to Dynamic UniFi Controller: %s", url)
 
 		if err := u.getUnifi(c); err != nil {
+			u.logController(c)
 			return nil, errors.Wrapf(err, "authenticating to %s", url)
 		}
+
+		u.logController(c)
 	}
 
 	return u.collectController(c)

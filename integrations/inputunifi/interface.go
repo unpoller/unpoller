@@ -49,22 +49,30 @@ func (u *InputUnifi) Initialize(l poller.Logger) error {
 			}
 
 			u.Logf("Configured UniFi Controller %d:", i+1)
-			u.Logf("   => Version: %s", c.Unifi.ServerVersion)
 		default:
-			u.LogErrorf("Controller %d Auth or Connection failed, but continuing to retry! %v", i, err)
+			u.LogErrorf("Controller %d Auth or Connection Error, retrying: %v", i+1, err)
 		}
 
-		u.Logf("   => URL: %s", c.URL)
-		u.Logf("   => Username: %s (has password: %v)", c.User, c.Pass != "")
-		u.Logf("   => Role: %s", c.Role)
-		u.Logf("   => Hash PII: %v", *c.HashPII)
-		u.Logf("   => Verify SSL: %v", *c.VerifySSL)
-		u.Logf("   => Save DPI: %v", *c.SaveDPI)
-		u.Logf("   => Save IDS: %v", *c.SaveIDS)
-		u.Logf("   => Save Sites: %v", *c.SaveSites)
+		u.logController(c)
 	}
 
 	return nil
+}
+
+func (u *InputUnifi) logController(c *Controller) {
+	u.Logf("   => URL: %s", c.URL)
+
+	if c.Unifi != nil {
+		u.Logf("   => Version: %s", c.Unifi.ServerVersion)
+	}
+
+	u.Logf("   => Username: %s (has password: %v)", c.User, c.Pass != "")
+	u.Logf("   => Role: %s", c.Role)
+	u.Logf("   => Hash PII: %v", *c.HashPII)
+	u.Logf("   => Verify SSL: %v", *c.VerifySSL)
+	u.Logf("   => Save DPI: %v", *c.SaveDPI)
+	u.Logf("   => Save IDS: %v", *c.SaveIDS)
+	u.Logf("   => Save Sites: %v", *c.SaveSites)
 }
 
 // Metrics grabs all the measurements from a UniFi controller and returns them.
