@@ -45,7 +45,7 @@ func (u *InputUnifi) Initialize(l poller.Logger) error {
 		switch err := u.getUnifi(u.setControllerDefaults(c)); err {
 		case nil:
 			if err := u.checkSites(c); err != nil {
-				u.LogErrorf("checking sites on %s: %v", c.Role, err)
+				u.LogErrorf("checking sites on %s: %v", c.URL, err)
 			}
 
 			u.Logf("Configured UniFi Controller %d:", i+1)
@@ -67,7 +67,6 @@ func (u *InputUnifi) logController(c *Controller) {
 	}
 
 	u.Logf("   => Username: %s (has password: %v)", c.User, c.Pass != "")
-	u.Logf("   => Role: %s", c.Role)
 	u.Logf("   => Hash PII: %v", *c.HashPII)
 	u.Logf("   => Verify SSL: %v", *c.VerifySSL)
 	u.Logf("   => Save DPI: %v", *c.SaveDPI)
@@ -82,49 +81,29 @@ func (u *InputUnifi) Metrics() (*poller.Metrics, bool, error) {
 
 // MetricsFrom grabs all the measurements from a UniFi controller and returns them.
 func (u *InputUnifi) MetricsFrom(filter *poller.Filter) (*poller.Metrics, bool, error) {
-	if u.Disable {
+	if u.Disable || filter == nil || filter.Path == "" {
 		return nil, false, nil
-	}
-
-	errs := []string{}
-	metrics := &poller.Metrics{}
-	ok := false
-
-	if filter != nil && filter.Path != "" {
-		if !u.Dynamic {
-			return metrics, false, errDynamicLookupsDisabled
-		}
-
-		// Attempt a dynamic metrics fetch from an unconfigured controller.
-		m, err := u.dynamicController(filter.Path)
-
-		return m, err == nil && m != nil, err
 	}
 
 	// Check if the request is for an existing, configured controller.
 	for _, c := range u.Controllers {
-		if filter != nil && !strings.EqualFold(c.Role, filter.Role) {
+		if !strings.EqualFold(c.URL, filter.Path) {
 			continue
 		}
 
 		m, err := u.collectController(c)
-		if err != nil {
-			errs = append(errs, err.Error())
-		}
 
-		if m == nil {
-			continue
-		}
-
-		ok = true
-		metrics = poller.AppendMetrics(metrics, m)
+		return m, err == nil && m != nil, err
 	}
 
-	if len(errs) > 0 {
-		return metrics, ok, fmt.Errorf(strings.Join(errs, ", ")) // nolint: goerr113
+	if !u.Dynamic {
+		return nil, false, errDynamicLookupsDisabled
 	}
 
-	return metrics, ok, nil
+	// Attempt a dynamic metrics fetch from an unconfigured controller.
+	m, err := u.dynamicController(filter.Path)
+
+	return m, err == nil && m != nil, err
 }
 
 // RawMetrics returns API output from the first configured unifi controller.
@@ -138,7 +117,7 @@ func (u *InputUnifi) RawMetrics(filter *poller.Filter) ([]byte, error) {
 		u.Logf("Re-authenticating to UniFi Controller: %s", c.URL)
 
 		if err := u.getUnifi(c); err != nil {
-			return nil, errors.Wrapf(err, "re-authenticating to %s", c.Role)
+			return nil, errors.Wrapf(err, "re-authenticating to %s", c.URL)
 		}
 	}
 

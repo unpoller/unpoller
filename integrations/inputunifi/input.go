@@ -38,7 +38,6 @@ type Controller struct {
 	SaveDPI   *bool        `json:"save_dpi" toml:"save_dpi" xml:"save_dpi" yaml:"save_dpi"`
 	HashPII   *bool        `json:"hash_pii" toml:"hash_pii" xml:"hash_pii" yaml:"hash_pii"`
 	SaveSites *bool        `json:"save_sites" toml:"save_sites" xml:"save_sites" yaml:"save_sites"`
-	Role      string       `json:"role" toml:"role" xml:"role,attr" yaml:"role"`
 	User      string       `json:"user" toml:"user" xml:"user" yaml:"user"`
 	Pass      string       `json:"pass" toml:"pass" xml:"pass" yaml:"pass"`
 	URL       string       `json:"url" toml:"url" xml:"url" yaml:"url"`
@@ -117,7 +116,7 @@ func (u *InputUnifi) checkSites(c *Controller) error {
 		msg = append(msg, site.Name+" ("+site.Desc+")")
 	}
 
-	u.Logf("Found %d site(s) on controller %s: %v", len(msg), c.Role, strings.Join(msg, ", "))
+	u.Logf("Found %d site(s) on controller %s: %v", len(msg), c.URL, strings.Join(msg, ", "))
 
 	if StringInSlice("all", c.Sites) {
 		c.Sites = []string{"all"}
@@ -134,7 +133,7 @@ FIRST:
 				continue FIRST
 			}
 		}
-		u.LogErrorf("Configured site not found on controller %s: %v", c.Role, s)
+		u.LogErrorf("Configured site not found on controller %s: %v", c.URL, s)
 	}
 
 	if c.Sites = keep; len(keep) == 0 {
@@ -201,10 +200,6 @@ func (u *InputUnifi) setDefaults(c *Controller) {
 		c.URL = defaultURL
 	}
 
-	if c.Role == "" {
-		c.Role = c.URL
-	}
-
 	if strings.HasPrefix(c.Pass, "file://") {
 		c.Pass = u.getPassFromFile(strings.TrimPrefix(c.Pass, "file://"))
 	}
@@ -248,12 +243,6 @@ func (u *InputUnifi) setControllerDefaults(c *Controller) *Controller {
 
 	if c.URL == "" {
 		c.URL = u.Default.URL
-	}
-
-	if c.Role == "" && u.Default.Role != u.Default.URL {
-		c.Role = u.Default.Role
-	} else if c.Role == "" {
-		c.Role = c.URL
 	}
 
 	if strings.HasPrefix(c.Pass, "file://") {
