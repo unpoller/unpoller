@@ -225,12 +225,7 @@ func (u *promUnifi) collect(ch chan<- prometheus.Metric, filter *poller.Filter) 
 
 	ok := false
 
-	if filter == nil {
-		r.Metrics, ok, err = u.Collector.Metrics()
-	} else {
-		r.Metrics, ok, err = u.Collector.MetricsFrom(filter)
-	}
-
+	r.Metrics, ok, err = u.Collector.MetricsFrom(filter)
 	r.Fetch = time.Since(r.Start)
 
 	if err != nil {
