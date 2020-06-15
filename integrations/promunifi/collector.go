@@ -144,26 +144,33 @@ func (u *promUnifi) Run(c poller.Collect) error {
 // ScrapeHandler allows prometheus to scrape a single source, instead of all sources.
 func (u *promUnifi) ScrapeHandler(w http.ResponseWriter, r *http.Request) {
 	t := &target{u: u, Filter: &poller.Filter{
-		Name: r.URL.Query().Get("input"), // "unifi"
-		Path: r.URL.Query().Get("path"),  // url: "https://127.0.0.1:8443"
-		Role: r.URL.Query().Get("role"),  // configured role in up.conf.
+		Name: r.URL.Query().Get("input"),  // "unifi"
+		Path: r.URL.Query().Get("target"), // NEW (target): "https://127.0.0.1:8443"
 	}}
 
 	if t.Name == "" {
 		t.Name = "unifi" // the default
 	}
 
-	if t.Role != "" {
-		u.Collector.LogErrorf("deprecated 'role' parameter used; update your config to use 'path'")
+	if pathOld := r.URL.Query().Get("path"); pathOld != "" {
+		u.Collector.LogErrorf("deprecated 'path' parameter used; update your config to use 'target'")
 
 		if t.Path == "" {
-			t.Path = t.Role
+			t.Path = pathOld
+		}
+	}
+
+	if roleOld := r.URL.Query().Get("role"); roleOld != "" {
+		u.Collector.LogErrorf("deprecated 'role' parameter used; update your config to use 'target'")
+
+		if t.Path == "" {
+			t.Path = roleOld
 		}
 	}
 
 	if t.Path == "" {
-		u.Collector.LogErrorf("path parameter missing on scrape from %v", r.RemoteAddr)
-		http.Error(w, "'path' parameter must be specified: configured OR unconfigured url", 400)
+		u.Collector.LogErrorf("'target' parameter missing on scrape from %v", r.RemoteAddr)
+		http.Error(w, "'target' parameter must be specified: configured OR unconfigured url", 400)
 
 		return
 	}
