@@ -150,15 +150,20 @@ func (u *promUnifi) ScrapeHandler(w http.ResponseWriter, r *http.Request) {
 	}}
 
 	if t.Name == "" {
-		u.Collector.LogErrorf("input parameter missing on scrape from %v", r.RemoteAddr)
-		http.Error(w, `'input' parameter must be specified (try "unifi")`, 400)
-
-		return
+		t.Name = "unifi" // the default
 	}
 
-	if t.Role == "" && t.Path == "" {
-		u.Collector.LogErrorf("role and path parameters missing on scrape from %v", r.RemoteAddr)
-		http.Error(w, "'role' OR 'path' parameter must be specified: configured role OR unconfigured url", 400)
+	if t.Role != "" {
+		u.Collector.LogErrorf("deprecated 'role' parameter used; update your config to use 'path'")
+
+		if t.Path == "" {
+			t.Path = t.Role
+		}
+	}
+
+	if t.Path == "" {
+		u.Collector.LogErrorf("path parameter missing on scrape from %v", r.RemoteAddr)
+		http.Error(w, "'path' parameter must be specified: configured OR unconfigured url", 400)
 
 		return
 	}
