@@ -12,7 +12,7 @@ require (
 	github.com/shurcooL/sanitized_anchor_name v1.0.0 // indirect
 	github.com/unifi-poller/influxunifi v0.0.9
 	github.com/unifi-poller/inputunifi v0.0.7-0.20200615121955-129eacb5681d
-	github.com/unifi-poller/poller v0.0.6
+	github.com/unifi-poller/poller v0.0.7-0.20200615130505-b2becb340fdc
 	github.com/unifi-poller/promunifi v0.0.8-0.20200615120918-62e66b15dc1a
 	github.com/unifi-poller/unifi v0.0.5
 )

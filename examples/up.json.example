@@ -24,7 +24,6 @@
   "unifi": {
     "dynamic": false,
     "defaults": {
-      "role":      "main controller",
       "user":      "unifipoller",
       "pass":      "unifipoller",
       "url":       "https://127.0.0.1:8443",
@@ -37,7 +36,6 @@
     },
     "controllers": [
       {
-       "role": "",
        "user": "unifipoller",
        "pass": "unifipoller",
        "url": "https://127.0.0.1:8443",

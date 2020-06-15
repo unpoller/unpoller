@@ -26,7 +26,7 @@ NOTE: <plugin> and <site> are lists of strings and may be repeated.
   </influxdb>
 
   <unifi dynamic="false">
-    <default role="main controller">
+    <default>
       <site>all</site>
       <user>unifipoller</user>
       <pass>unifipoller</pass>
@@ -39,7 +39,7 @@ NOTE: <plugin> and <site> are lists of strings and may be repeated.
     </default>
 
     <!-- Repeat this stanza to poll additional controllers. -->
-    <controller role="">
+    <controller>
       <site>all</site>
       <user>unifipoller</user>
       <pass>unifipoller</pass>
