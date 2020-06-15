@@ -41,18 +41,27 @@ func (u *InputUnifi) Initialize(l poller.Logger) error {
 	u.dynamic = make(map[string]*Controller)
 	u.Logger = l
 
-	for _, c := range u.Controllers {
+	for i, c := range u.Controllers {
 		switch err := u.getUnifi(u.setControllerDefaults(c)); err {
 		case nil:
 			if err := u.checkSites(c); err != nil {
 				u.LogErrorf("checking sites on %s: %v", c.Role, err)
 			}
 
-			u.Logf("Configured UniFi Controller at %s v%s as user %s. Sites: %v",
-				c.URL, c.Unifi.ServerVersion, c.User, c.Sites)
+			u.Logf("Configured UniFi Controller %d:", i+1)
+			u.Logf("   => Version: %s", c.Unifi.ServerVersion)
 		default:
-			u.LogErrorf("Controller Auth or Connection failed, but continuing to retry! %s @ %s: %v", c.User, c.Role, err)
+			u.LogErrorf("Controller %d Auth or Connection failed, but continuing to retry! %v", i, err)
 		}
+
+		u.Logf("   => URL: %s", c.URL)
+		u.Logf("   => Username: %s (has password: %v)", c.User, c.Pass != "")
+		u.Logf("   => Role: %s", c.Role)
+		u.Logf("   => Hash PII: %v", *c.HashPII)
+		u.Logf("   => Verify SSL: %v", *c.VerifySSL)
+		u.Logf("   => Save DPI: %v", *c.SaveDPI)
+		u.Logf("   => Save IDS: %v", *c.SaveIDS)
+		u.Logf("   => Save Sites: %v", *c.SaveSites)
 	}
 
 	return nil
