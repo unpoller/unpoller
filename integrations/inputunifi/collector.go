@@ -35,10 +35,9 @@ func (u *InputUnifi) newDynamicCntrlr(url string) (bool, *Controller) {
 	}
 
 	ccopy := u.Default // copy defaults into new controller
-	c = &ccopy
-	u.dynamic[url] = c
-	c.Role = url
-	c.URL = url
+	u.dynamic[url] = &ccopy
+	u.dynamic[url].Role = url
+	u.dynamic[url].URL = url
 
 	return true, c
 }
@@ -95,7 +94,7 @@ func (u *InputUnifi) pollController(c *Controller) (*poller.Metrics, error) {
 		return nil, errors.Wrap(err, "unifi.GetSites()")
 	}
 
-	if c.SaveDPI {
+	if c.SaveDPI != nil && *c.SaveDPI {
 		if m.SitesDPI, err = c.Unifi.GetSiteDPI(m.Sites); err != nil {
 			return nil, errors.Wrapf(err, "unifi.GetSiteDPI(%s)", c.URL)
 		}
@@ -105,7 +104,7 @@ func (u *InputUnifi) pollController(c *Controller) (*poller.Metrics, error) {
 		}
 	}
 
-	if c.SaveIDS {
+	if c.SaveIDS != nil && *c.SaveIDS {
 		m.IDSList, err = c.Unifi.GetIDS(m.Sites, time.Now().Add(time.Minute), time.Now())
 		if err != nil {
 			return nil, errors.Wrapf(err, "unifi.GetIDS(%s)", c.URL)
@@ -161,9 +160,9 @@ func (u *InputUnifi) augmentMetrics(c *Controller, metrics *poller.Metrics) *pol
 			devices[client.Mac] = client.Hostname
 		}
 
-		metrics.Clients[i].Mac = c.redactMacPII(metrics.Clients[i].Mac)
-		metrics.Clients[i].Name = c.redactNamePII(metrics.Clients[i].Name)
-		metrics.Clients[i].Hostname = c.redactNamePII(metrics.Clients[i].Hostname)
+		metrics.Clients[i].Mac = RedactMacPII(metrics.Clients[i].Mac, c.HashPII)
+		metrics.Clients[i].Name = RedactNamePII(metrics.Clients[i].Name, c.HashPII)
+		metrics.Clients[i].Hostname = RedactNamePII(metrics.Clients[i].Hostname, c.HashPII)
 		metrics.Clients[i].SwName = devices[client.SwMac]
 		metrics.Clients[i].ApName = devices[client.ApMac]
 		metrics.Clients[i].GwName = devices[client.GwMac]
@@ -177,8 +176,8 @@ func (u *InputUnifi) augmentMetrics(c *Controller, metrics *poller.Metrics) *pol
 			metrics.ClientsDPI[i].Name = metrics.ClientsDPI[i].MAC
 		}
 
-		metrics.ClientsDPI[i].Name = c.redactNamePII(metrics.ClientsDPI[i].Name)
-		metrics.ClientsDPI[i].MAC = c.redactMacPII(metrics.ClientsDPI[i].MAC)
+		metrics.ClientsDPI[i].Name = RedactNamePII(metrics.ClientsDPI[i].Name, c.HashPII)
+		metrics.ClientsDPI[i].MAC = RedactMacPII(metrics.ClientsDPI[i].MAC, c.HashPII)
 	}
 
 	if !*c.SaveSites {
@@ -188,32 +187,28 @@ func (u *InputUnifi) augmentMetrics(c *Controller, metrics *poller.Metrics) *pol
 	return metrics
 }
 
-// redactNamePII converts a name string to an md5 hash.
+// RedactNamePII converts a name string to an md5 hash (first 24 chars only).
 // Useful for maskiing out personally identifying information.
-func (c *Controller) redactNamePII(pii string) string {
-	if !c.HashPII {
-		return pii
-	}
-
-	return fmt.Sprintf("%x", md5.Sum([]byte(pii))) // nolint: gosec
-}
-
-// redactMacPII converts a MAC address to an md5 hashed version of a MAC.
-// Useful for maskiing out personally identifying information.
-func (c *Controller) redactMacPII(pii string) (output string) {
-	if !c.HashPII {
+func RedactNamePII(pii string, hash *bool) string {
+	if hash == nil || !*hash {
 		return pii
 	}
 
 	s := fmt.Sprintf("%x", md5.Sum([]byte(pii))) // nolint: gosec
-	// This fancy code formats a "fake" mac address looking string.
-	for i, r := range s[0:14] {
-		if output += string(r); i != 13 && i%2 == 1 {
-			output += ":"
-		}
+	// instead of 32 characters, only use 24.
+	return s[:24]
+}
+
+// RedactMacPII converts a MAC address to an md5 hashed version (first 14 chars only).
+// Useful for maskiing out personally identifying information.
+func RedactMacPII(pii string, hash *bool) (output string) {
+	if hash == nil || !*hash {
+		return pii
 	}
 
-	return output
+	s := fmt.Sprintf("%x", md5.Sum([]byte(pii))) // nolint: gosec
+	// This formats a "fake" mac address looking string.
+	return fmt.Sprintf("%s:%s:%s:%s:%s:%s:%s", s[:2], s[2:4], s[4:6], s[6:8], s[8:10], s[10:12], s[12:14])
 }
 
 // getFilteredSites returns a list of sites to fetch data for.
