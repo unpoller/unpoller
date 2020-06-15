@@ -81,13 +81,13 @@ func (u *InputUnifi) Metrics() (*poller.Metrics, bool, error) {
 
 // MetricsFrom grabs all the measurements from a UniFi controller and returns them.
 func (u *InputUnifi) MetricsFrom(filter *poller.Filter) (*poller.Metrics, bool, error) {
-	if u.Disable || filter == nil || filter.Path == "" {
+	if u.Disable {
 		return nil, false, nil
 	}
 
 	// Check if the request is for an existing, configured controller.
 	for _, c := range u.Controllers {
-		if !strings.EqualFold(c.URL, filter.Path) {
+		if filter != nil && !strings.EqualFold(c.URL, filter.Path) {
 			continue
 		}
 
@@ -96,7 +96,7 @@ func (u *InputUnifi) MetricsFrom(filter *poller.Filter) (*poller.Metrics, bool, 
 		return m, err == nil && m != nil, err
 	}
 
-	if !u.Dynamic {
+	if !u.Dynamic || filter == nil {
 		return nil, false, errDynamicLookupsDisabled
 	}
 
