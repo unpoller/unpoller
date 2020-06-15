@@ -35,7 +35,6 @@ func (u *InputUnifi) newDynamicCntrlr(url string) (bool, *Controller) {
 
 	ccopy := u.Default // copy defaults into new controller
 	u.dynamic[url] = &ccopy
-	u.dynamic[url].Role = url
 	u.dynamic[url].URL = url
 
 	return true, u.dynamic[url]
@@ -67,7 +66,7 @@ func (u *InputUnifi) collectController(c *Controller) (*poller.Metrics, error) {
 		u.Logf("Re-authenticating to UniFi Controller: %s", c.URL)
 
 		if err := u.getUnifi(c); err != nil {
-			return nil, errors.Wrapf(err, "re-authenticating to %s", c.Role)
+			return nil, errors.Wrapf(err, "re-authenticating to %s", c.URL)
 		}
 	}
 
@@ -76,7 +75,7 @@ func (u *InputUnifi) collectController(c *Controller) (*poller.Metrics, error) {
 		u.Logf("Re-authenticating to UniFi Controller: %s", c.URL)
 
 		if err := u.getUnifi(c); err != nil {
-			return metrics, errors.Wrapf(err, "re-authenticating to %s", c.Role)
+			return metrics, errors.Wrapf(err, "re-authenticating to %s", c.URL)
 		}
 	}
 
