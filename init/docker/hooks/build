@@ -13,7 +13,7 @@ source .metadata.sh
 
 # Build each configured image from Docker Cloud.
 for build in $BUILDS; do
-  # os:name:arch:variant
+  # os:name:arch
   os=$(echo $build | cut -d: -f1)
   name=$(echo $build | cut -d: -f2)
   echo "Building Image ${IMAGE_NAME}_${os}_${name}"

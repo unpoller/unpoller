@@ -16,18 +16,12 @@ addons:
     - gnupg
     - expect
 go:
-- 1.13.x
+- 1.14.x
 services:
   - docker
 install:
-  - mkdir -p $GOPATH/bin
-  # Download the `dep` binary to bin folder in $GOPATH
-  - curl -sLo $GOPATH/bin/dep https://github.com/golang/dep/releases/download/v0.5.3/dep-linux-amd64
-  - chmod +x $GOPATH/bin/dep
-  # download super-linter: golangci-lint
-  - curl -sL https://install.goreleaser.com/github.com/golangci/golangci-lint.sh | sh -s -- -b $(go env GOPATH)/bin latest
-  - rvm install 2.0.0
-  - rvm 2.0.0 do gem install --no-document fpm
+  - rvm install 2.3.0
+  - rvm 2.3.0 do gem install --no-document fpm
 before_script:
   - gpg --import gpg.public.key
   # Create your own deploy key, tar it, and encrypt the file to make this work. Optionally add a bitly_token file to the archive.
@@ -38,12 +32,11 @@ before_script:
   - source .metadata.sh
 script:
   # Test Go and Docker.
-  - make test
   - make docker
   # Test built docker image.
   - docker run $BINARY -v 2>&1 | grep -Eq "^$BINARY v$VERSION"
   # Build everything
-  - rvm 2.0.0 do make release
+  - rvm 2.3.0 do make release
 after_success:
   # Display Release Folder
   - ls -l release/

@@ -80,18 +80,15 @@ clean:
 # This also turns the repo readme into an html file.
 # md2roff is needed to build the man file and html pages from the READMEs.
 man: $(BINARY).1.gz
-$(BINARY).1.gz: md2roff
+$(BINARY).1.gz:
 	# Building man page. Build dependency first: md2roff
 	go run $(MD2ROFF_BIN) --manual $(BINARY) --version $(VERSION) --date "$(DATE)" examples/MANUAL.md
 	gzip -9nc examples/MANUAL > $@
 	mv examples/MANUAL.html $(BINARY)_manual.html
 
-md2roff:
-	go get $(MD2ROFF_BIN)
-
 # TODO: provide a template that adds the date to the built html file.
 readme: README.html
-README.html: md2roff
+README.html:
 	# This turns README.md into README.html
 	go run $(MD2ROFF_BIN) --manual $(BINARY) --version $(VERSION) --date "$(DATE)" README.md
 
@@ -359,7 +356,6 @@ install: man readme $(BINARY) plugins_darwin
 	# Copying the binary, config file, unit file, and man page into the env.
 	/usr/bin/install -m 0755 -d $(PREFIX)/bin $(PREFIX)/share/man/man1 $(ETC)/$(BINARY) $(PREFIX)/share/doc/$(BINARY) $(PREFIX)/lib/$(BINARY)
 	/usr/bin/install -m 0755 -cp $(BINARY) $(PREFIX)/bin/$(BINARY)
-	/usr/bin/install -m 0755 -cp *darwin.so $(PREFIX)/lib/$(BINARY)/
 	/usr/bin/install -m 0644 -cp $(BINARY).1.gz $(PREFIX)/share/man/man1
 	/usr/bin/install -m 0644 -cp examples/$(CONFIG_FILE).example $(ETC)/$(BINARY)/
 	[ -f $(ETC)/$(BINARY)/$(CONFIG_FILE) ] || /usr/bin/install -m 0644 -cp  examples/$(CONFIG_FILE).example $(ETC)/$(BINARY)/$(CONFIG_FILE)
