@@ -1,12 +1,18 @@
 package inputunifi
 
 import (
+	"crypto/md5" // nolint: gosec
 	"fmt"
 	"strings"
 	"time"
 
+	"github.com/pkg/errors"
 	"github.com/unifi-poller/poller"
 	"github.com/unifi-poller/unifi"
+)
+
+var (
+	errScrapeFilterMatchFailed = fmt.Errorf("scrape filter match failed, and filter is not http URL")
 )
 
 func (u *InputUnifi) isNill(c *Controller) bool {
@@ -16,30 +22,28 @@ func (u *InputUnifi) isNill(c *Controller) bool {
 	return c.Unifi == nil
 }
 
-// newDynamicCntrlr creates and saves a controller (with auth cookie) for repeated use.
+// newDynamicCntrlr creates and saves a controller definition for further use.
 // This is called when an unconfigured controller is requested.
 func (u *InputUnifi) newDynamicCntrlr(url string) (bool, *Controller) {
 	u.Lock()
 	defer u.Unlock()
 
-	c := u.dynamic[url]
-	if c != nil {
+	if c := u.dynamic[url]; c != nil {
 		// it already exists.
 		return false, c
 	}
 
 	ccopy := u.Default // copy defaults into new controller
-	c = &ccopy
-	u.dynamic[url] = c
-	c.Role = url
-	c.URL = url
+	u.dynamic[url] = &ccopy
+	u.dynamic[url].Role = url
+	u.dynamic[url].URL = url
 
-	return true, c
+	return true, u.dynamic[url]
 }
 
 func (u *InputUnifi) dynamicController(url string) (*poller.Metrics, error) {
 	if !strings.HasPrefix(url, "http") {
-		return nil, fmt.Errorf("scrape filter match failed, and filter is not http URL")
+		return nil, errScrapeFilterMatchFailed
 	}
 
 	new, c := u.newDynamicCntrlr(url)
@@ -48,8 +52,11 @@ func (u *InputUnifi) dynamicController(url string) (*poller.Metrics, error) {
 		u.Logf("Authenticating to Dynamic UniFi Controller: %s", url)
 
 		if err := u.getUnifi(c); err != nil {
-			return nil, fmt.Errorf("authenticating to %s: %v", url, err)
+			u.logController(c)
+			return nil, errors.Wrapf(err, "authenticating to %s", url)
 		}
+
+		u.logController(c)
 	}
 
 	return u.collectController(c)
@@ -60,7 +67,7 @@ func (u *InputUnifi) collectController(c *Controller) (*poller.Metrics, error) {
 		u.Logf("Re-authenticating to UniFi Controller: %s", c.URL)
 
 		if err := u.getUnifi(c); err != nil {
-			return nil, fmt.Errorf("re-authenticating to %s: %v", c.Role, err)
+			return nil, errors.Wrapf(err, "re-authenticating to %s", c.Role)
 		}
 	}
 
@@ -69,7 +76,7 @@ func (u *InputUnifi) collectController(c *Controller) (*poller.Metrics, error) {
 		u.Logf("Re-authenticating to UniFi Controller: %s", c.URL)
 
 		if err := u.getUnifi(c); err != nil {
-			return metrics, fmt.Errorf("re-authenticating to %s: %v", c.Role, err)
+			return metrics, errors.Wrapf(err, "re-authenticating to %s", c.Role)
 		}
 	}
 
@@ -86,33 +93,33 @@ func (u *InputUnifi) pollController(c *Controller) (*poller.Metrics, error) {
 
 	// Get the sites we care about.
 	if m.Sites, err = u.getFilteredSites(c); err != nil {
-		return nil, fmt.Errorf("unifi.GetSites(): %v", err)
+		return nil, errors.Wrap(err, "unifi.GetSites()")
 	}
 
-	if c.SaveDPI {
+	if c.SaveDPI != nil && *c.SaveDPI {
 		if m.SitesDPI, err = c.Unifi.GetSiteDPI(m.Sites); err != nil {
-			return nil, fmt.Errorf("unifi.GetSiteDPI(%v): %v", c.URL, err)
+			return nil, errors.Wrapf(err, "unifi.GetSiteDPI(%s)", c.URL)
 		}
 
 		if m.ClientsDPI, err = c.Unifi.GetClientsDPI(m.Sites); err != nil {
-			return nil, fmt.Errorf("unifi.GetClientsDPI(%v): %v", c.URL, err)
+			return nil, errors.Wrapf(err, "unifi.GetClientsDPI(%s)", c.URL)
 		}
 	}
 
-	if c.SaveIDS {
+	if c.SaveIDS != nil && *c.SaveIDS {
 		m.IDSList, err = c.Unifi.GetIDS(m.Sites, time.Now().Add(time.Minute), time.Now())
 		if err != nil {
-			return nil, fmt.Errorf("unifi.GetIDS(%v): %v", c.URL, err)
+			return nil, errors.Wrapf(err, "unifi.GetIDS(%s)", c.URL)
 		}
 	}
 
 	// Get all the points.
 	if m.Clients, err = c.Unifi.GetClients(m.Sites); err != nil {
-		return nil, fmt.Errorf("unifi.GetClients(%v): %v", c.URL, err)
+		return nil, errors.Wrapf(err, "unifi.GetClients(%s)", c.URL)
 	}
 
 	if m.Devices, err = c.Unifi.GetDevices(m.Sites); err != nil {
-		return nil, fmt.Errorf("unifi.GetDevices(%v): %v", c.URL, err)
+		return nil, errors.Wrapf(err, "unifi.GetDevices(%s)", c.URL)
 	}
 
 	return u.augmentMetrics(c, m), nil
@@ -150,14 +157,17 @@ func (u *InputUnifi) augmentMetrics(c *Controller, metrics *poller.Metrics) *pol
 	}
 
 	// These come blank, so set them here.
-	for i, c := range metrics.Clients {
-		if devices[c.Mac] = c.Name; c.Name == "" {
-			devices[c.Mac] = c.Hostname
+	for i, client := range metrics.Clients {
+		if devices[client.Mac] = client.Name; client.Name == "" {
+			devices[client.Mac] = client.Hostname
 		}
 
-		metrics.Clients[i].SwName = devices[c.SwMac]
-		metrics.Clients[i].ApName = devices[c.ApMac]
-		metrics.Clients[i].GwName = devices[c.GwMac]
+		metrics.Clients[i].Mac = RedactMacPII(metrics.Clients[i].Mac, c.HashPII)
+		metrics.Clients[i].Name = RedactNamePII(metrics.Clients[i].Name, c.HashPII)
+		metrics.Clients[i].Hostname = RedactNamePII(metrics.Clients[i].Hostname, c.HashPII)
+		metrics.Clients[i].SwName = devices[client.SwMac]
+		metrics.Clients[i].ApName = devices[client.ApMac]
+		metrics.Clients[i].GwName = devices[client.GwMac]
 		metrics.Clients[i].RadioDescription = bssdIDs[metrics.Clients[i].Bssid] + metrics.Clients[i].RadioProto
 	}
 
@@ -167,6 +177,9 @@ func (u *InputUnifi) augmentMetrics(c *Controller, metrics *poller.Metrics) *pol
 		if metrics.ClientsDPI[i].Name == "" {
 			metrics.ClientsDPI[i].Name = metrics.ClientsDPI[i].MAC
 		}
+
+		metrics.ClientsDPI[i].Name = RedactNamePII(metrics.ClientsDPI[i].Name, c.HashPII)
+		metrics.ClientsDPI[i].MAC = RedactMacPII(metrics.ClientsDPI[i].MAC, c.HashPII)
 	}
 
 	if !*c.SaveSites {
@@ -174,6 +187,30 @@ func (u *InputUnifi) augmentMetrics(c *Controller, metrics *poller.Metrics) *pol
 	}
 
 	return metrics
+}
+
+// RedactNamePII converts a name string to an md5 hash (first 24 chars only).
+// Useful for maskiing out personally identifying information.
+func RedactNamePII(pii string, hash *bool) string {
+	if hash == nil || !*hash {
+		return pii
+	}
+
+	s := fmt.Sprintf("%x", md5.Sum([]byte(pii))) // nolint: gosec
+	// instead of 32 characters, only use 24.
+	return s[:24]
+}
+
+// RedactMacPII converts a MAC address to an md5 hashed version (first 14 chars only).
+// Useful for maskiing out personally identifying information.
+func RedactMacPII(pii string, hash *bool) (output string) {
+	if hash == nil || !*hash {
+		return pii
+	}
+
+	s := fmt.Sprintf("%x", md5.Sum([]byte(pii))) // nolint: gosec
+	// This formats a "fake" mac address looking string.
+	return fmt.Sprintf("%s:%s:%s:%s:%s:%s:%s", s[:2], s[2:4], s[4:6], s[6:8], s[8:10], s[10:12], s[12:14])
 }
 
 // getFilteredSites returns a list of sites to fetch data for.

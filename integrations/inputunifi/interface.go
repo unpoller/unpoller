@@ -7,8 +7,15 @@ import (
 	"os"
 	"strings"
 
+	"github.com/pkg/errors"
 	"github.com/unifi-poller/poller"
 	"github.com/unifi-poller/unifi"
+)
+
+var (
+	errDynamicLookupsDisabled = fmt.Errorf("filter path requested but dynamic lookups disabled")
+	errControllerNumNotFound  = fmt.Errorf("controller number not found")
+	errNoFilterKindProvided   = fmt.Errorf("must provide filter: devices, clients, other")
 )
 
 // Initialize gets called one time when starting up.
@@ -23,7 +30,7 @@ func (u *InputUnifi) Initialize(l poller.Logger) error {
 		return nil
 	}
 
-	if u.setDefaults(&u.Default, true); len(u.Controllers) == 0 && !u.Dynamic {
+	if u.setDefaults(&u.Default); len(u.Controllers) == 0 && !u.Dynamic {
 		u.Controllers = []*Controller{&u.Default}
 	}
 
@@ -34,23 +41,38 @@ func (u *InputUnifi) Initialize(l poller.Logger) error {
 	u.dynamic = make(map[string]*Controller)
 	u.Logger = l
 
-	for _, c := range u.Controllers {
-		u.setDefaults(c, false)
-
-		switch err := u.getUnifi(c); err {
+	for i, c := range u.Controllers {
+		switch err := u.getUnifi(u.setControllerDefaults(c)); err {
 		case nil:
 			if err := u.checkSites(c); err != nil {
 				u.LogErrorf("checking sites on %s: %v", c.Role, err)
 			}
 
-			u.Logf("Configured UniFi Controller at %s v%s as user %s. Sites: %v",
-				c.URL, c.Unifi.ServerVersion, c.User, c.Sites)
+			u.Logf("Configured UniFi Controller %d:", i+1)
 		default:
-			u.LogErrorf("Controller Auth or Connection failed, but continuing to retry! %s @ %s: %v", c.User, c.Role, err)
+			u.LogErrorf("Controller %d Auth or Connection Error, retrying: %v", i+1, err)
 		}
+
+		u.logController(c)
 	}
 
 	return nil
+}
+
+func (u *InputUnifi) logController(c *Controller) {
+	u.Logf("   => URL: %s", c.URL)
+
+	if c.Unifi != nil {
+		u.Logf("   => Version: %s", c.Unifi.ServerVersion)
+	}
+
+	u.Logf("   => Username: %s (has password: %v)", c.User, c.Pass != "")
+	u.Logf("   => Role: %s", c.Role)
+	u.Logf("   => Hash PII: %v", *c.HashPII)
+	u.Logf("   => Verify SSL: %v", *c.VerifySSL)
+	u.Logf("   => Save DPI: %v", *c.SaveDPI)
+	u.Logf("   => Save IDS: %v", *c.SaveIDS)
+	u.Logf("   => Save Sites: %v", *c.SaveSites)
 }
 
 // Metrics grabs all the measurements from a UniFi controller and returns them.
@@ -70,7 +92,7 @@ func (u *InputUnifi) MetricsFrom(filter *poller.Filter) (*poller.Metrics, bool, 
 
 	if filter != nil && filter.Path != "" {
 		if !u.Dynamic {
-			return metrics, false, fmt.Errorf("filter path requested but dynamic lookups disabled")
+			return metrics, false, errDynamicLookupsDisabled
 		}
 
 		// Attempt a dynamic metrics fetch from an unconfigured controller.
@@ -99,7 +121,7 @@ func (u *InputUnifi) MetricsFrom(filter *poller.Filter) (*poller.Metrics, bool, 
 	}
 
 	if len(errs) > 0 {
-		return metrics, ok, fmt.Errorf(strings.Join(errs, ", "))
+		return metrics, ok, fmt.Errorf(strings.Join(errs, ", ")) // nolint: goerr113
 	}
 
 	return metrics, ok, nil
@@ -108,7 +130,7 @@ func (u *InputUnifi) MetricsFrom(filter *poller.Filter) (*poller.Metrics, bool, 
 // RawMetrics returns API output from the first configured unifi controller.
 func (u *InputUnifi) RawMetrics(filter *poller.Filter) ([]byte, error) {
 	if l := len(u.Controllers); filter.Unit >= l {
-		return nil, fmt.Errorf("control number %d not found, %d controller(s) configured (0 index)", filter.Unit, l)
+		return nil, errors.Wrapf(errControllerNumNotFound, "%d controller(s) configured, '%d'", l, filter.Unit)
 	}
 
 	c := u.Controllers[filter.Unit]
@@ -116,7 +138,7 @@ func (u *InputUnifi) RawMetrics(filter *poller.Filter) ([]byte, error) {
 		u.Logf("Re-authenticating to UniFi Controller: %s", c.URL)
 
 		if err := u.getUnifi(c); err != nil {
-			return nil, fmt.Errorf("re-authenticating to %s: %v", c.Role, err)
+			return nil, errors.Wrapf(err, "re-authenticating to %s", c.Role)
 		}
 	}
 
@@ -138,6 +160,6 @@ func (u *InputUnifi) RawMetrics(filter *poller.Filter) ([]byte, error) {
 		_, _ = fmt.Fprintf(os.Stderr, "[INFO] Dumping Path '%s':\n", filter.Path)
 		return c.Unifi.GetJSON(filter.Path)
 	default:
-		return []byte{}, fmt.Errorf("must provide filter: devices, clients, other")
+		return []byte{}, errNoFilterKindProvided
 	}
 }
