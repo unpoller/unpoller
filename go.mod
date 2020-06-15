@@ -11,7 +11,7 @@ require (
 	github.com/russross/blackfriday v2.0.0+incompatible // indirect
 	github.com/shurcooL/sanitized_anchor_name v1.0.0 // indirect
 	github.com/unifi-poller/influxunifi v0.0.9
-	github.com/unifi-poller/inputunifi v0.0.7-0.20200615092048-70c79f08efca
+	github.com/unifi-poller/inputunifi v0.0.7-0.20200615102105-baf0b7ccd782
 	github.com/unifi-poller/poller v0.0.6
 	github.com/unifi-poller/promunifi v0.0.7
 	github.com/unifi-poller/unifi v0.0.5
