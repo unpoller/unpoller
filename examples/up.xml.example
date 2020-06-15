@@ -6,7 +6,7 @@
 # See up.conf.example!         v2           #
 #############################################
 
-<plugin> and <site> are lists of strings and may be repeated.
+NOTE: <plugin> and <site> are lists of strings and may be repeated.
 -->
 <poller debug="false" quiet="false">
   <!-- plugin></plugin -->
@@ -31,10 +31,11 @@
       <user>unifipoller</user>
       <pass>unifipoller</pass>
       <url>https://127.0.0.1:8443</url>
-      <verify_ssl>false</verify_ssl>
       <save_ids>false</save_ids>
       <save_dpi>false</save_dpi>
       <save_sites>true</save_sites>
+      <hash_pii>false</hash_pii>
+      <verify_ssl>false</verify_ssl>
     </default>
 
     <!-- Repeat this stanza to poll additional controllers. -->
@@ -43,10 +44,11 @@
       <user>unifipoller</user>
       <pass>unifipoller</pass>
       <url>https://127.0.0.1:8443</url>
-      <verify_ssl>false</verify_ssl>
       <save_ids>false</save_ids>
       <save_dpi>false</save_dpi>
       <save_sites>true</save_sites>
+      <hash_pii>false</hash_pii>
+      <verify_ssl>false</verify_ssl>
     </controller>
 
   </unifi>

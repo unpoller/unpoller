@@ -33,10 +33,11 @@ unifi:
     url:  "https://127.0.0.1:8443"
     sites:
       - all
-    verify_ssl: false
     save_ids:   false
     save_dpi:   false
     save_sites: true
+    hash_pii:   false
+    verify_ssl: false
 
 
   controllers:
@@ -47,7 +48,8 @@ unifi:
       url:  "https://127.0.0.1:8443"
       sites:
         - all
-      verify_ssl: false
       save_ids:   false
       save_dpi:   false
+      hash_pii:   false
       save_sites: true
+      verify_ssl: false

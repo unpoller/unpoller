@@ -53,7 +53,9 @@
 # The following section contains the default credentials/configuration for any
 # dynamic controller (see above section), or the primary controller if you do not
 # provide one and dynamic is disabled. In other words, you can just add your
-# controller here and delete the following section.
+# controller here and delete the following section. The internal defaults are
+# shown below. Any missing values will assume these displayed defaults, except
+# the role; if omitted the role is set to the url. See comments below for details.
 [unifi.defaults]
   #role       = "main controller"
   url        = "https://127.0.0.1:8443"
@@ -63,21 +65,27 @@
   save_ids   = false
   save_dpi   = false
   save_sites = true
+  hash_pii   = false
   verify_ssl = false
 
 # The following is optional and used for configurations with multiple controllers.
 
 # You may repeat the following section to poll multiple controllers.
+# Any ommitted variables will have their values taken from the defaults, above.
 #[[unifi.controller]]
-  # Friendly name used in dashboards. Uses URL if left empty; which is fine.
+  # Role is a friendly name used in dashboards. Uses URL if left empty; which is fine.
   # Avoid changing this later because it will live forever in your database.
   # Multiple controllers may share a role. This allows grouping during scrapes.
-  #role = ""
+  # --- This will be deprecated in a future version of UniFi Poller. ---
+  #role = "https://127.0.0.1:8443"
+
+  # URL for the UniFi Controller. Do not add any paths after the host:port.
+  # Do not use port 8443 if you have a UDM.
   #url = "https://127.0.0.1:8443"
 
   # Make a read-only user in the UniFi Admin Settings, allow it access to all sites.
   #user = "unifipoller"
-  #pass = "4BB9345C-2341-48D7-99F5-E01B583FF77F"
+  #pass = "unifipoller"
 
   # If the controller has more than one site, specify which sites to poll here.
   # Set this to ["default"] to poll only the first site on the controller.
@@ -99,6 +107,10 @@
   # Enable collection of site data. This data powers the Network Sites dashboard.
   # It's not valuable to everyone and setting this to false will save resources.
   #save_sites = true
+
+  # Hash, with md5, client names and MAC addresses. This attempts to protect
+  # personally identifiable information. Most users won't want to enable this.
+  #hash_pii = false
 
   # If your UniFi controller has a valid SSL certificate (like lets encrypt),
   # you can enable this option to validate it. Otherwise, any SSL certificate is

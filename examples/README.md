@@ -8,6 +8,7 @@ file with `.json`, and YAML with `.yaml`. The default
 format is always TOML and may have any _other_ suffix.
 
 #### Dashboards
-This folder used to contain Grafana Dashboards.
-**They are now located at [Grafana.com](https://grafana.com/dashboards?search=unifi-poller).**
-Also see [Grafana Dashboards](https://github.com/unifi-poller/unifi-poller/wiki/Grafana-Dashboards) Wiki.
+
+-   This folder used to contain Grafana Dashboards.
+-   **They are now located at [Grafana.com](https://grafana.com/dashboards?search=unifi-poller).**
+-   [Grafana Dashboards Wiki](https://github.com/unifi-poller/unifi-poller/wiki/Grafana-Dashboards)
