@@ -115,7 +115,7 @@ func (u *UnifiPoller) MetricsFrom(filter *Filter) (*Metrics, bool, error) {
 	ok := false
 
 	for _, input := range inputs {
-		if !strings.EqualFold(input.Name, filter.Name) {
+		if filter != nil && !strings.EqualFold(input.Name, filter.Name) {
 			continue
 		}
 
