@@ -1,13 +1,5 @@
 package poller
 
-/*
-	I consider this file the pinacle example of how to allow a Go application to be configured from a file.
-	You can put your configuration into any file format: XML, YAML, JSON, TOML, and you can override any
-	struct member using an environment variable. The Duration type is also supported. All of the Config{}
-	and Duration{} types and methods are reusable in other projects. Just adjust the data in the struct to
-	meet your app's needs. See the New() procedure and Start() method in start.go for example usage.
-*/
-
 import (
 	"os"
 	"path"
@@ -44,13 +36,14 @@ type Flags struct {
 
 // Metrics is a type shared by the exporting and reporting packages.
 type Metrics struct {
-	TS time.Time
-	unifi.Sites
-	unifi.IDSList
-	unifi.Clients
-	*unifi.Devices
+	TS         time.Time
+	Sites      []*unifi.Site
+	IDSList    []*unifi.IDS
+	Events     []*unifi.Event
+	Clients    []*unifi.Client
 	SitesDPI   []*unifi.DPITable
 	ClientsDPI []*unifi.DPITable
+	*unifi.Devices
 }
 
 // Config represents the core library input data.

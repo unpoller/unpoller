@@ -69,6 +69,7 @@ func (f *Flags) Parse(args []string) {
 // 3. Start a web server and wait for Prometheus to poll the application for metrics.
 func (u *UnifiPoller) Run() error {
 	if u.Flags.DumpJSON != "" {
+		u.Config.Quiet = true
 		if err := u.InitializeInputs(); err != nil {
 			return err
 		}
