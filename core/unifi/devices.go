@@ -7,7 +7,7 @@ import (
 )
 
 // GetDevices returns a response full of devices' data from the UniFi Controller.
-func (u *Unifi) GetDevices(sites Sites) (*Devices, error) {
+func (u *Unifi) GetDevices(sites []*Site) (*Devices, error) {
 	devices := new(Devices)
 
 	for _, site := range sites {
