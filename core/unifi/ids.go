@@ -8,7 +8,7 @@ import (
 // IDS holds an Intrusion Prevention System Event.
 type IDS struct {
 	Archived              FlexBool  `json:"archived"`
-	DstipCountry          FlexBool  `json:"dstipCountry"`
+	DstIPCountry          FlexBool  `json:"dstipCountry"`
 	DestPort              int       `json:"dest_port,omitempty"`
 	SrcPort               int       `json:"src_port,omitempty"`
 	InnerAlertRev         int64     `json:"inner_alert_rev"`
@@ -22,8 +22,8 @@ type IDS struct {
 	AppProto              string    `json:"app_proto,omitempty"`
 	Catname               string    `json:"catname"`
 	DestIP                string    `json:"dest_ip"`
-	DstMac                string    `json:"dst_mac"`
-	DstipASN              string    `json:"dstipASN"`
+	DstMAC                string    `json:"dst_mac"`
+	DstIPASN              string    `json:"dstipASN"`
 	EventType             string    `json:"event_type"`
 	Host                  string    `json:"host"`
 	ID                    string    `json:"_id"`
@@ -38,14 +38,14 @@ type IDS struct {
 	SiteName              string    `json:"-"`
 	SourceName            string    `json:"-"`
 	SrcIP                 string    `json:"src_ip"`
-	SrcMac                string    `json:"src_mac"`
-	SrcipASN              string    `json:"srcipASN"`
-	SrcipCountry          string    `json:"srcipCountry"`
+	SrcMAC                string    `json:"src_mac"`
+	SrcIPASN              string    `json:"srcipASN"`
+	SrcIPCountry          string    `json:"srcipCountry"`
 	Subsystem             string    `json:"subsystem"`
 	UniqueAlertID         string    `json:"unique_alertid"`
-	Usgip                 string    `json:"usgip"`
-	UsgipASN              string    `json:"usgipASN"`
-	UsgipCountry          string    `json:"usgipCountry"`
+	USGIP                 string    `json:"usgip"`
+	USGIPASN              string    `json:"usgipASN"`
+	USGIPCountry          string    `json:"usgipCountry"`
 	DestIPGeo             IPGeo     `json:"dstipGeo"`
 	SourceIPGeo           IPGeo     `json:"srcipGeo"`
 	USGIPGeo              IPGeo     `json:"usgipGeo"`

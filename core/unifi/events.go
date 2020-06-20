@@ -120,7 +120,7 @@ type Event struct {
 	ChannelFrom           string    `json:"channel_from"`
 	ChannelTo             string    `json:"channel_to"`
 	DestIP                string    `json:"dest_ip"`
-	DstMac                string    `json:"dst_mac"`
+	DstMAC                string    `json:"dst_mac"`
 	EventType             string    `json:"event_type"`
 	Guest                 string    `json:"guest"`
 	Gw                    string    `json:"gw"`
@@ -144,18 +144,18 @@ type Event struct {
 	SiteName              string    `json:"-"`
 	SourceName            string    `json:"-"`
 	SrcIP                 string    `json:"src_ip"`
-	SrcMac                string    `json:"src_mac"`
-	SrcipASN              string    `json:"srcipASN"`
-	SrcipCountry          string    `json:"srcipCountry"`
-	Ssid                  string    `json:"ssid"`
+	SrcMAC                string    `json:"src_mac"`
+	SrcIPASN              string    `json:"srcipASN"`
+	SrcIPCountry          string    `json:"srcipCountry"`
+	SSID                  string    `json:"ssid"`
 	Subsystem             string    `json:"subsystem"`
 	Sw                    string    `json:"sw"`
 	SwName                string    `json:"sw_name"`
 	UniqueAlertID         string    `json:"unique_alertid"`
 	User                  string    `json:"user"`
-	Usgip                 string    `json:"usgip"`
-	UsgipASN              string    `json:"usgipASN"`
-	UsgipCountry          string    `json:"usgipCountry"`
+	USGIP                 string    `json:"usgip"`
+	USGIPASN              string    `json:"usgipASN"`
+	USGIPCountry          string    `json:"usgipCountry"`
 	DestIPGeo             IPGeo     `json:"dstipGeo"`
 	SourceIPGeo           IPGeo     `json:"srcipGeo"`
 	USGIPGeo              IPGeo     `json:"usgipGeo"`
