@@ -30,8 +30,11 @@
   # InfluxDB does not require auth by default, so the user/password are probably unimportant.
   url  = "http://127.0.0.1:8086"
   user = "unifipoller"
+  # Password for InfluxDB user (above).
+  # If the password provided here begins with file:// then the password is read in from
+  # the file path that follows the file:// prefix. ex: file:///etc/influxdb/passwd.file
   pass = "unifipoller"
-  # Be sure to create this database.
+  # Be sure to create this database. See the InfluxDB Wiki page for more info.
   db = "unifi"
   # If your InfluxDB uses a valid SSL cert, set this to true.
   verify_ssl = false
@@ -47,7 +50,7 @@
   # configuring controllers in this config file. Instead you configure them in
   # your prometheus.yml config. Prometheus then sends the controller URL to
   # unifi-poller when it performs the scrape. This is useful if you have many,
-  # or changing controllers. Most people can leave this off. See wiki for more.
+  # or changing controllers. See wiki for more.
   dynamic = false
 
 # The following section contains the default credentials/configuration for any
@@ -69,7 +72,7 @@
 # The following is optional and used for configurations with multiple controllers.
 
 # You may repeat the following section to poll multiple controllers.
-# Any ommitted variables will have their values taken from the defaults, above.
+# Any omitted variables will have their values taken from the defaults, above.
 #[[unifi.controller]]
   # URL for the UniFi Controller. Do not add any paths after the host:port.
   # Do not use port 8443 if you have a UDM.
@@ -77,6 +80,10 @@
 
   # Make a read-only user in the UniFi Admin Settings, allow it access to all sites.
   #user = "unifipoller"
+  # Password for UniFi controller user (above).
+  # If the password provided here begins with file:// then the password is read in from
+  # the file path that follows the file:// prefix. ex: file:///etc/unifi/password.file
+  # ex: file:///etc/unifi/passwd.file
   #pass = "unifipoller"
 
   # If the controller has more than one site, specify which sites to poll here.
@@ -84,8 +91,18 @@
   # A setting of ["all"] will poll all sites; this works if you only have 1 site too.
   #sites = ["all"]
 
+  # Enable collection of UniFi Events (InfluxDB only).
+  # This may store a lot of information. Only recommended for testing and debugging.
+  # There are no dashboards to display this data. It can be used for annotations.
+  # This is a new (July, 2020) feature. Please provide feedback if you try it out!
+  # Enable this only if using InfluxDB. This may leak PII data!
+  #save_events = false
+
   # Enable collection of Intrusion Detection System Data (InfluxDB only).
-  # Only useful if IDS or IPS are enabled on one of the sites.
+  # Only useful if IDS or IPS are enabled on one of the sites. This may store
+  # a lot of information. Only recommended for testing and debugging. There
+  # may not be any dashboards to display this data. It can be used for annotations.
+  # Enable this only if using InfluxDB. This may leak PII data!
   #save_ids = false
 
   # Enable collection of Deep Packet Inspection data. This data breaks down traffic

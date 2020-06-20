@@ -1,50 +1,52 @@
 {
   "poller": {
-    "debug": false,
-    "quiet": false,
+    "debug":   false,
+    "quiet":   false,
     "plugins": []
   },
 
   "prometheus": {
-    "disable": false,
-    "http_listen": "0.0.0.0:9130",
+    "disable":       false,
+    "http_listen":   "0.0.0.0:9130",
     "report_errors": false
   },
 
   "influxdb": {
      "disable": false,
-     "url": "http://127.0.0.1:8086",
+     "url":  "http://127.0.0.1:8086",
      "user": "unifipoller",
      "pass": "unifipoller",
-     "db": "unifi",
+     "db":   "unifi",
      "verify_ssl": false,
-     "interval": "30s"
+     "interval":   "30s"
   },
 
   "unifi": {
     "dynamic": false,
     "defaults": {
-      "user":      "unifipoller",
-      "pass":      "unifipoller",
-      "url":       "https://127.0.0.1:8443",
-      "sites":     ["all"],
-      "save_ids":   false,
-      "save_dpi":   false,
-      "save_sites": true,
-      "hash_pii":   false,
-      "verify_ssl": false
+      "user":   "unifipoller",
+      "pass":   "unifipoller",
+      "url":    "https://127.0.0.1:8443",
+      "sites": ["all"],
+      "save_events": false,
+      "save_ids":    false,
+      "save_dpi":    false,
+      "save_sites":  true,
+      "hash_pii":    false,
+      "verify_ssl":  false
     },
     "controllers": [
       {
-       "user": "unifipoller",
-       "pass": "unifipoller",
-       "url": "https://127.0.0.1:8443",
+       "user":  "unifipoller",
+       "pass":  "unifipoller",
+       "url":   "https://127.0.0.1:8443",
        "sites": ["all"],
-       "save_ids": false,
-       "save_dpi": false,
-       "save_sites": true,
-       "hash_pii":   false,
-       "verify_ssl": false
+       "save_events": false,
+       "save_ids":    false,
+       "save_dpi":    false,
+       "save_sites":  true,
+       "hash_pii":    false,
+       "verify_ssl":  false
       }
     ]
   }

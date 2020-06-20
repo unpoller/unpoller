@@ -32,11 +32,12 @@ unifi:
     pass: "unifipoller"
     sites:
       - all
-    save_ids:   false
-    save_dpi:   false
-    save_sites: true
-    hash_pii:   false
-    verify_ssl: false
+    save_events: false
+    save_ids:    false
+    save_dpi:    false
+    save_sites:  true
+    hash_pii:    false
+    verify_ssl:  false
 
 
   controllers:
@@ -46,8 +47,9 @@ unifi:
       pass: "unifipoller"
       sites:
         - all
-      save_ids:   false
-      save_dpi:   false
-      hash_pii:   false
-      save_sites: true
-      verify_ssl: false
+      save_events: false
+      save_ids:    false
+      save_dpi:    false
+      save_sites:  true
+      hash_pii:    false
+      verify_ssl:  false
