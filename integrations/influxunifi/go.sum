@@ -122,6 +122,8 @@ github.com/unifi-poller/poller v0.0.5 h1:qnofARTx0JveNc9PqGJmNUs7xsjwFqCWpS8pwDS
 github.com/unifi-poller/poller v0.0.5/go.mod h1:45TyAHk+xYF4KoFKaaZyjMmSdhbq2I1pLniYWfOXdHs=
 github.com/unifi-poller/poller v0.0.6 h1:KhOWUeYI029Nn/4NOIk/yblQ3tEd9QhS+u/8/S9ZoDs=
 github.com/unifi-poller/poller v0.0.6/go.mod h1:RkRJ4pAc2dAN8Xu9+VOumeE3BdN5QDQ3PC+jBx8hWW0=
+github.com/unifi-poller/poller v0.0.8-0.20200619104117-a5e263a36ac9 h1:BYNOSvttR91a0F+ttG2ecD3DenVI9p9oi1W7m36zH98=
+github.com/unifi-poller/poller v0.0.8-0.20200619104117-a5e263a36ac9/go.mod h1:q2tufLljemUR/blyhjIj+T0sdAOZo0kdlv3h79kEMgU=
 github.com/unifi-poller/unifi v0.0.1/go.mod h1:DagVD/I+VMnVUHmTT4Fi76lPI+DHbuMwwtMIzanwMxM=
 github.com/unifi-poller/unifi v0.0.2 h1:FRa6G+VcxOdvy0/u/QLCHGCRYF6EDcxVYij0dDRCKxg=
 github.com/unifi-poller/unifi v0.0.2/go.mod h1:DagVD/I+VMnVUHmTT4Fi76lPI+DHbuMwwtMIzanwMxM=
@@ -135,6 +137,10 @@ github.com/unifi-poller/unifi v0.0.5-0.20200614034449-3f18c1be228b h1:bpQVeurqpl
 github.com/unifi-poller/unifi v0.0.5-0.20200614034449-3f18c1be228b/go.mod h1:L1kMRH2buZhB31vZnRC1im7Tk/4uD3ET4biwl2faYy8=
 github.com/unifi-poller/unifi v0.0.5-0.20200614034623-f4c1d18157c2 h1:iDOUe8UECHQoOyzWIarbGNVdwEth16iiUsw+1UgQ+sw=
 github.com/unifi-poller/unifi v0.0.5-0.20200614034623-f4c1d18157c2/go.mod h1:L1kMRH2buZhB31vZnRC1im7Tk/4uD3ET4biwl2faYy8=
+github.com/unifi-poller/unifi v0.0.5-0.20200619092006-d24c776a42f5 h1:DI1Dtq+2CY1t0Woesz7CRkbNrUT5GSX0h8mDsP3pgcw=
+github.com/unifi-poller/unifi v0.0.5-0.20200619092006-d24c776a42f5/go.mod h1:L1kMRH2buZhB31vZnRC1im7Tk/4uD3ET4biwl2faYy8=
+github.com/unifi-poller/unifi v0.0.5-0.20200620103801-b927287ea1cd h1:jrwuiY1AdoPi+b+R8zjt/e8h8ZqULNB9izcyQnf3pSw=
+github.com/unifi-poller/unifi v0.0.5-0.20200620103801-b927287ea1cd/go.mod h1:L1kMRH2buZhB31vZnRC1im7Tk/4uD3ET4biwl2faYy8=
 github.com/unifi-poller/unifi v0.0.5 h1:Izeun32YxcQOeKZUXY0Sy4ltKYFuYxWGcN9JS6xkIJU=
 github.com/unifi-poller/unifi v0.0.5/go.mod h1:L1kMRH2buZhB31vZnRC1im7Tk/4uD3ET4biwl2faYy8=
 golang.org/x/crypto v0.0.0-20180904163835-0709b304e793/go.mod h1:6SG95UA2DQfeDnfUPMdvaQW0Q7yPrPDi9nlGo2tz2b4=

@@ -4,7 +4,6 @@ package influxunifi
 
 import (
 	"crypto/tls"
-	"fmt"
 	"io/ioutil"
 	"log"
 	"strings"
@@ -53,6 +52,7 @@ type metric struct {
 	Table  string
 	Tags   map[string]string
 	Fields map[string]interface{}
+	TS     time.Time
 }
 
 func init() { // nolint: gochecknoinits
@@ -73,13 +73,10 @@ func (u *InfluxUnifi) PollController() {
 	log.Printf("[INFO] Everything checks out! Poller started, InfluxDB interval: %v", interval)
 
 	for u.LastCheck = range ticker.C {
-		metrics, ok, collectErr := u.Collector.Metrics()
-		if collectErr != nil {
-			u.Collector.LogErrorf("metric fetch for InfluxDB failed: %v", collectErr)
-
-			if !ok {
-				continue
-			}
+		metrics, err := u.Collector.Metrics(nil)
+		if err != nil {
+			u.Collector.LogErrorf("metric fetch for InfluxDB failed: %v", err)
+			continue
 		}
 
 		report, err := u.ReportMetrics(metrics)
@@ -89,7 +86,6 @@ func (u *InfluxUnifi) PollController() {
 			continue
 		}
 
-		report.error(collectErr)
 		u.LogInfluxReport(report)
 	}
 }
@@ -194,7 +190,11 @@ func (u *InfluxUnifi) ReportMetrics(m *poller.Metrics) (*Report, error) {
 // collect runs in a go routine and batches all the points.
 func (u *InfluxUnifi) collect(r report, ch chan *metric) {
 	for m := range ch {
-		pt, err := influx.NewPoint(m.Table, m.Tags, m.Fields, r.metrics().TS)
+		if m.TS.IsZero() {
+			m.TS = r.metrics().TS
+		}
+
+		pt, err := influx.NewPoint(m.Table, m.Tags, m.Fields, m.TS)
 		if err == nil {
 			r.batch(m, pt)
 		}
@@ -234,6 +234,10 @@ func (u *InfluxUnifi) loopPoints(r report) {
 		u.batchIDS(r, s)
 	}
 
+	for _, s := range m.Events {
+		u.batchEvent(r, s)
+	}
+
 	u.loopDevicePoints(r)
 }
 
@@ -264,11 +268,10 @@ func (u *InfluxUnifi) loopDevicePoints(r report) {
 // LogInfluxReport writes a log message after exporting to influxdb.
 func (u *InfluxUnifi) LogInfluxReport(r *Report) {
 	m := r.Metrics
-	idsMsg := fmt.Sprintf("IDS Events: %d, ", len(m.IDSList))
-
 	u.Collector.Logf("UniFi Metrics Recorded. Sites: %d, Clients: %d, "+
-		"UAP: %d, USG/UDM: %d, USW: %d, %sPoints: %d, Fields: %d, Errs: %d, Elapsed: %v",
-		len(m.Sites), len(m.Clients), len(m.UAPs),
-		len(m.UDMs)+len(m.USGs), len(m.USWs), idsMsg, r.Total,
+		"UAP: %d, USG/UDM: %d, USW: %d, IDS/Events: %d/%d, Points: %d, "+
+		"Fields: %d, Errs: %d, Elapsed: %v",
+		len(m.Sites), len(m.Clients), len(m.UAPs), len(m.UDMs)+len(m.USGs),
+		len(m.USWs), len(m.IDSList), len(m.Events), r.Total,
 		r.Fields, len(r.Errors), r.Elapsed.Round(time.Millisecond))
 }
