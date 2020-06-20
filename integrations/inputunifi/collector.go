@@ -105,8 +105,15 @@ func (u *InputUnifi) pollController(c *Controller) (*poller.Metrics, error) {
 		}
 	}
 
+	if c.SaveEvents != nil && *c.SaveEvents {
+		m.Events, err = c.Unifi.GetEvents(m.Sites, time.Now().Add(time.Minute))
+		if err != nil {
+			return nil, errors.Wrapf(err, "unifi.GetEvents(%s)", c.URL)
+		}
+	}
+
 	if c.SaveIDS != nil && *c.SaveIDS {
-		m.IDSList, err = c.Unifi.GetIDS(m.Sites, time.Now().Add(time.Minute), time.Now())
+		m.IDSList, err = c.Unifi.GetIDS(m.Sites, time.Now().Add(time.Minute))
 		if err != nil {
 			return nil, errors.Wrapf(err, "unifi.GetIDS(%s)", c.URL)
 		}
@@ -155,6 +162,17 @@ func (u *InputUnifi) augmentMetrics(c *Controller, metrics *poller.Metrics) *pol
 		devices[r.Mac] = r.Name
 	}
 
+	for i := range metrics.Events {
+		if *c.HashPII {
+			metrics.Events[i].DestIPGeo = unifi.IPGeo{}
+			metrics.Events[i].SourceIPGeo = unifi.IPGeo{}
+			metrics.Events[i].Host = RedactMacPII(metrics.Events[i].Host, c.HashPII)
+			metrics.Events[i].Hostname = RedactMacPII(metrics.Events[i].Hostname, c.HashPII)
+			metrics.Events[i].DstMAC = RedactMacPII(metrics.Events[i].DstMAC, c.HashPII)
+			metrics.Events[i].SrcMAC = RedactMacPII(metrics.Events[i].SrcMAC, c.HashPII)
+		}
+	}
+
 	// These come blank, so set them here.
 	for i, client := range metrics.Clients {
 		if devices[client.Mac] = client.Name; client.Name == "" {
@@ -191,7 +209,7 @@ func (u *InputUnifi) augmentMetrics(c *Controller, metrics *poller.Metrics) *pol
 // RedactNamePII converts a name string to an md5 hash (first 24 chars only).
 // Useful for maskiing out personally identifying information.
 func RedactNamePII(pii string, hash *bool) string {
-	if hash == nil || !*hash {
+	if hash == nil || !*hash || pii == "" {
 		return pii
 	}
 
@@ -203,7 +221,7 @@ func RedactNamePII(pii string, hash *bool) string {
 // RedactMacPII converts a MAC address to an md5 hashed version (first 14 chars only).
 // Useful for maskiing out personally identifying information.
 func RedactMacPII(pii string, hash *bool) (output string) {
-	if hash == nil || !*hash {
+	if hash == nil || !*hash || pii == "" {
 		return pii
 	}
 
@@ -215,7 +233,7 @@ func RedactMacPII(pii string, hash *bool) (output string) {
 // getFilteredSites returns a list of sites to fetch data for.
 // Omits requested but unconfigured sites. Grabs the full list from the
 // controller and returns the sites provided in the config file.
-func (u *InputUnifi) getFilteredSites(c *Controller) (unifi.Sites, error) {
+func (u *InputUnifi) getFilteredSites(c *Controller) ([]*unifi.Site, error) {
 	u.RLock()
 	defer u.RUnlock()
 

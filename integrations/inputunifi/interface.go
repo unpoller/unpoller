@@ -71,18 +71,14 @@ func (u *InputUnifi) logController(c *Controller) {
 	u.Logf("   => Verify SSL: %v", *c.VerifySSL)
 	u.Logf("   => Save DPI: %v", *c.SaveDPI)
 	u.Logf("   => Save IDS: %v", *c.SaveIDS)
+	u.Logf("   => Save Events: %v", *c.SaveEvents)
 	u.Logf("   => Save Sites: %v", *c.SaveSites)
 }
 
 // Metrics grabs all the measurements from a UniFi controller and returns them.
-func (u *InputUnifi) Metrics() (*poller.Metrics, bool, error) {
-	return u.MetricsFrom(nil)
-}
-
-// MetricsFrom grabs all the measurements from a UniFi controller and returns them.
-func (u *InputUnifi) MetricsFrom(filter *poller.Filter) (*poller.Metrics, bool, error) {
+func (u *InputUnifi) Metrics(filter *poller.Filter) (*poller.Metrics, error) {
 	if u.Disable {
-		return nil, false, nil
+		return nil, nil
 	}
 
 	metrics := &poller.Metrics{}
@@ -95,27 +91,26 @@ func (u *InputUnifi) MetricsFrom(filter *poller.Filter) (*poller.Metrics, bool, 
 
 		m, err := u.collectController(c)
 		if err != nil {
-			return metrics, false, err
+			return metrics, err
 		}
 
 		metrics = poller.AppendMetrics(metrics, m)
 	}
 
 	if filter == nil || len(metrics.Clients) != 0 {
-		return metrics, true, nil
+		return metrics, nil
 	}
 
 	if !u.Dynamic {
-		return nil, false, errDynamicLookupsDisabled
+		return nil, errDynamicLookupsDisabled
 	}
 
 	// Attempt a dynamic metrics fetch from an unconfigured controller.
-	m, err := u.dynamicController(filter.Path)
-
-	return m, err == nil && m != nil, err
+	return u.dynamicController(filter.Path)
 }
 
 // RawMetrics returns API output from the first configured unifi controller.
+// Adjust filter.Unit to pull from a controller other than the first.
 func (u *InputUnifi) RawMetrics(filter *poller.Filter) ([]byte, error) {
 	if l := len(u.Controllers); filter.Unit >= l {
 		return nil, errors.Wrapf(errControllerNumNotFound, "%d controller(s) configured, '%d'", l, filter.Unit)
@@ -150,4 +145,22 @@ func (u *InputUnifi) RawMetrics(filter *poller.Filter) ([]byte, error) {
 	default:
 		return []byte{}, errNoFilterKindProvided
 	}
+}
+
+func (u *InputUnifi) dumpSitesJSON(c *Controller, path, name string, sites []*unifi.Site) ([]byte, error) {
+	allJSON := []byte{}
+
+	for _, s := range sites {
+		apiPath := fmt.Sprintf(path, s.Name)
+		_, _ = fmt.Fprintf(os.Stderr, "[INFO] Dumping %s: '%s' JSON for site: %s (%s):\n", name, apiPath, s.Desc, s.Name)
+
+		body, err := c.Unifi.GetJSON(apiPath)
+		if err != nil {
+			return allJSON, err
+		}
+
+		allJSON = append(allJSON, body...)
+	}
+
+	return allJSON, nil
 }
