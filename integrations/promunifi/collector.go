@@ -230,18 +230,14 @@ func (u *promUnifi) collect(ch chan<- prometheus.Metric, filter *poller.Filter) 
 		Start:  time.Now()}
 	defer r.close()
 
-	ok := false
-
-	r.Metrics, ok, err = u.Collector.MetricsFrom(filter)
+	r.Metrics, err = u.Collector.Metrics(filter)
 	r.Fetch = time.Since(r.Start)
 
 	if err != nil {
 		r.error(ch, prometheus.NewInvalidDesc(err), errMetricFetchFailed)
 		u.Collector.LogErrorf("metric fetch failed: %v", err)
 
-		if !ok {
-			return
-		}
+		return
 	}
 
 	if r.Metrics.Devices == nil {
