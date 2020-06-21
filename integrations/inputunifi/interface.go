@@ -78,53 +78,33 @@ func (u *InputUnifi) logController(c *Controller) {
 
 // Events allows you to pull only events (and IDS) from the UniFi Controller.
 // This does not fully respect HashPII, but it may in the future!
+// Use Filter.Path to pick a specific controller, otherwise poll them all!
 // Use Filter.Dur to set a search duration into the past; 1 minute default.
 func (u *InputUnifi) Events(filter *poller.Filter) (*poller.Events, error) {
 	if u.Disable {
 		return nil, nil
 	}
 
-	events := &poller.Events{}
+	logs := []interface{}{}
+
+	if filter == nil || filter.Dur == 0 {
+		filter = &poller.Filter{Dur: time.Minute}
+	}
 
 	for _, c := range u.Controllers {
-		if filter == nil || filter.Dur == 0 {
-			filter = &poller.Filter{Dur: time.Minute}
-		}
-
 		if filter.Path != "" && !strings.EqualFold(c.URL, filter.Path) {
 			continue
 		}
 
-		// Get the sites we care about.
-		sites, err := u.getFilteredSites(c)
+		events, err := u.collectControllerEvents(c, time.Now().Add(-filter.Dur))
 		if err != nil {
-			return events, errors.Wrap(err, "unifi.GetSites()")
+			return nil, err
 		}
 
-		if *c.SaveEvents {
-			e, err := c.Unifi.GetEvents(sites, time.Now().Add(-filter.Dur))
-			if err != nil {
-				return events, errors.Wrap(err, "unifi.GetEvents()")
-			}
-
-			for _, l := range e {
-				events.Logs = append(events.Logs, redactEvent(l, c.HashPII))
-			}
-		}
-
-		if *c.SaveIDS {
-			i, err := c.Unifi.GetIDS(sites, time.Now().Add(-filter.Dur))
-			if err != nil {
-				return events, errors.Wrap(err, "unifi.GetIDS()")
-			}
-
-			for _, l := range i {
-				events.Logs = append(events.Logs, l)
-			}
-		}
+		logs = append(logs, events...)
 	}
 
-	return events, nil
+	return &poller.Events{Logs: logs}, nil
 }
 
 // Metrics grabs all the measurements from a UniFi controller and returns them.

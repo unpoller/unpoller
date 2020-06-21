@@ -82,6 +82,37 @@ func (u *InputUnifi) collectController(c *Controller) (*poller.Metrics, error) {
 	return metrics, err
 }
 
+func (u *InputUnifi) collectControllerEvents(c *Controller, from time.Time) ([]interface{}, error) {
+	var (
+		l    interface{}
+		logs []interface{}
+	)
+
+	// Get the sites we care about.
+	sites, err := u.getFilteredSites(c)
+	if err != nil {
+		return nil, errors.Wrap(err, "unifi.GetSites()")
+	}
+
+	if *c.SaveEvents {
+		if l, err = c.Unifi.GetEvents(sites, from); err != nil {
+			return nil, errors.Wrap(err, "unifi.GetEvents()")
+		}
+
+		logs = append(logs, l)
+	}
+
+	if *c.SaveIDS {
+		if l, err = c.Unifi.GetIDS(sites, from); err != nil {
+			return nil, errors.Wrap(err, "unifi.GetIDS()")
+		}
+
+		logs = append(logs, l)
+	}
+
+	return logs, nil
+}
+
 func (u *InputUnifi) pollController(c *Controller) (*poller.Metrics, error) {
 	var err error
 
