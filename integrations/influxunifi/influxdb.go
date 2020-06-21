@@ -73,13 +73,19 @@ func (u *InfluxUnifi) PollController() {
 	log.Printf("[INFO] Everything checks out! Poller started, InfluxDB interval: %v", interval)
 
 	for u.LastCheck = range ticker.C {
-		metrics, err := u.Collector.Metrics(&poller.Filter{Name: "unifi", Dur: interval})
+		metrics, err := u.Collector.Metrics(&poller.Filter{Name: "unifi"})
 		if err != nil {
 			u.Collector.LogErrorf("metric fetch for InfluxDB failed: %v", err)
 			continue
 		}
 
-		report, err := u.ReportMetrics(metrics)
+		events, err := u.Collector.Events(&poller.Filter{Name: "unifi", Dur: interval})
+		if err != nil {
+			u.Collector.LogErrorf("event fetch for InfluxDB failed: %v", err)
+			continue
+		}
+
+		report, err := u.ReportMetrics(metrics, events)
 		if err != nil {
 			// XXX: reset and re-auth? not sure..
 			u.Collector.LogErrorf("%v", err)
@@ -159,8 +165,8 @@ func (u *InfluxUnifi) getPassFromFile(filename string) string {
 // ReportMetrics batches all device and client data into influxdb data points.
 // Call this after you've collected all the data you care about.
 // Returns an error if influxdb calls fail, otherwise returns a report.
-func (u *InfluxUnifi) ReportMetrics(m *poller.Metrics) (*Report, error) {
-	r := &Report{Metrics: m, ch: make(chan *metric), Start: time.Now()}
+func (u *InfluxUnifi) ReportMetrics(m *poller.Metrics, e *poller.Events) (*Report, error) {
+	r := &Report{Metrics: m, Events: e, ch: make(chan *metric), Start: time.Now()}
 	defer close(r.ch)
 
 	var err error
@@ -230,12 +236,13 @@ func (u *InfluxUnifi) loopPoints(r report) {
 		u.batchClient(r, s)
 	}
 
-	for _, s := range m.IDSList {
-		u.batchIDS(r, s)
-	}
-
-	for _, s := range m.Events {
-		u.batchEvent(r, s)
+	for _, s := range r.events().Logs {
+		switch v := s.(type) {
+		case *unifi.Event:
+			u.batchEvent(r, v)
+		case *unifi.IDS:
+			u.batchIDS(r, v)
+		}
 	}
 
 	u.loopDevicePoints(r)
@@ -269,9 +276,9 @@ func (u *InfluxUnifi) loopDevicePoints(r report) {
 func (u *InfluxUnifi) LogInfluxReport(r *Report) {
 	m := r.Metrics
 	u.Collector.Logf("UniFi Metrics Recorded. Sites: %d, Clients: %d, "+
-		"UAP: %d, USG/UDM: %d, USW: %d, IDS/Events: %d/%d, Points: %d, "+
+		"UAP: %d, USG/UDM: %d, USW: %d, IDS+Events: %d, Points: %d, "+
 		"Fields: %d, Errs: %d, Elapsed: %v",
 		len(m.Sites), len(m.Clients), len(m.UAPs), len(m.UDMs)+len(m.USGs),
-		len(m.USWs), len(m.IDSList), len(m.Events), r.Total,
+		len(m.USWs), len(r.Events.Logs), r.Total,
 		r.Fields, len(r.Errors), r.Elapsed.Round(time.Millisecond))
 }

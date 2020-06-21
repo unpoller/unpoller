@@ -11,6 +11,7 @@ import (
 // Report is returned to the calling procedure after everything is processed.
 type Report struct {
 	Metrics *poller.Metrics
+	Events  *poller.Events
 	Errors  []error
 	Total   int
 	Fields  int
@@ -21,7 +22,7 @@ type Report struct {
 	bp      influx.BatchPoints
 }
 
-// report is an internal interface that can be mocked and overrridden for tests.
+// report is an internal interface that can be mocked and overridden for tests.
 type report interface {
 	add()
 	done()
@@ -29,10 +30,15 @@ type report interface {
 	error(err error)
 	batch(m *metric, pt *influx.Point)
 	metrics() *poller.Metrics
+	events() *poller.Events
 }
 
 func (r *Report) metrics() *poller.Metrics {
 	return r.Metrics
+}
+
+func (r *Report) events() *poller.Events {
+	return r.Events
 }
 
 func (r *Report) add() {

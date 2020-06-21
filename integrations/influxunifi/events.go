@@ -5,25 +5,8 @@ import (
 )
 
 // batchIDS generates intrusion detection datapoints for InfluxDB.
-func (u *InfluxUnifi) batchIDS(r report, i *unifi.IDS) { // nolint: funlen
+func (u *InfluxUnifi) batchIDS(r report, i *unifi.IDS) {
 	fields := map[string]interface{}{
-		/*
-			"site_id":                  i.SiteID,
-			"dstipASN":                 i.DstIPASN,
-			"dstipCountry":             i.DstIPCountry,
-			"flow_id":                  i.FlowID,
-			"inner_alert_category":     i.InnerAlertCategory,
-			"inner_alert_signature":    i.InnerAlertSignature,
-			"inner_alert_rev":          i.InnerAlertRev,
-			"inner_alert_severity":     i.InnerAlertSeverity,
-			"inner_alert_gid":          i.InnerAlertGID,
-			"inner_alert_signature_id": i.InnerAlertSignatureID,
-			"srcipASN":                 i.SrcIPASN,
-			"srcipCountry":             i.SrcIPCountry,
-			"unique_alertid":           i.UniqueAlertID,
-			"usgipASN":                 i.UsgIPASN,
-			"usgipCountry":             i.UsgIPCountry,
-		*/
 		"dest_port":            i.DestPort,
 		"src_port":             i.SrcPort,
 		"dest_ip":              i.DestIP,

@@ -98,6 +98,12 @@ github.com/unifi-poller/poller v0.0.8-0.20200621091816-fd5c7abd9f4b h1:AJKt/ZIDt
 github.com/unifi-poller/poller v0.0.8-0.20200621091816-fd5c7abd9f4b/go.mod h1:+Ppksi2wBCrByJke0B0lTutxFtKfv1zx6L1haALBrN4=
 github.com/unifi-poller/poller v0.0.8-0.20200621095143-fae3e391ade8 h1:GqWHa6Al2BJkbfF9SAEJIokpIOJjKIPvEXyMdppVGYo=
 github.com/unifi-poller/poller v0.0.8-0.20200621095143-fae3e391ade8/go.mod h1:+Ppksi2wBCrByJke0B0lTutxFtKfv1zx6L1haALBrN4=
+github.com/unifi-poller/poller v0.0.8-0.20200621101255-6d0d0b288ece h1:EsyR6cKuwAKzddS4gsKDugfN+OEHCm7bhNOvEfBCWWA=
+github.com/unifi-poller/poller v0.0.8-0.20200621101255-6d0d0b288ece/go.mod h1:+Ppksi2wBCrByJke0B0lTutxFtKfv1zx6L1haALBrN4=
+github.com/unifi-poller/poller v0.0.8-0.20200621103717-5f3d60890ed6 h1:V19WgXwjXxGY75Mn8Hc5Whl3+BC71YSGatRvKVRh9pA=
+github.com/unifi-poller/poller v0.0.8-0.20200621103717-5f3d60890ed6/go.mod h1:+Ppksi2wBCrByJke0B0lTutxFtKfv1zx6L1haALBrN4=
+github.com/unifi-poller/poller v0.0.8-0.20200621110949-33f1a1454d10 h1:1rGP4ISFpBj9xjJDXNak7EdaQtyoy3MwMZzo2+W1PLo=
+github.com/unifi-poller/poller v0.0.8-0.20200621110949-33f1a1454d10/go.mod h1:+Ppksi2wBCrByJke0B0lTutxFtKfv1zx6L1haALBrN4=
 github.com/unifi-poller/promunifi v0.0.9-0.20200620104707-26208eb4336b h1:HgmbS5cKfvw3x0ie6IV/FfhxNtKwAvICKxXL7gg2sgM=
 github.com/unifi-poller/promunifi v0.0.9-0.20200620104707-26208eb4336b/go.mod h1:jOcYehhsOrs4ctswSKEqGuqSgVBpConaWmRYskycbUc=
 github.com/unifi-poller/unifi v0.0.5-0.20200619092006-d24c776a42f5/go.mod h1:L1kMRH2buZhB31vZnRC1im7Tk/4uD3ET4biwl2faYy8=
