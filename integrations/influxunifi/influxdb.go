@@ -215,12 +215,24 @@ func (u *InfluxUnifi) collect(r report, ch chan *metric) {
 func (u *InfluxUnifi) loopPoints(r report) {
 	m := r.metrics()
 
+	for _, s := range m.Sites {
+		u.switchExport(r, s)
+	}
+
 	for _, s := range m.SitesDPI {
 		u.batchSiteDPI(r, s)
 	}
 
-	for _, s := range m.Sites {
-		u.batchSite(r, s)
+	for _, s := range m.Clients {
+		u.switchExport(r, s)
+	}
+
+	for _, s := range m.Devices {
+		u.switchExport(r, s)
+	}
+
+	for _, s := range r.events().Logs {
+		u.switchExport(r, s)
 	}
 
 	appTotal := make(totalsDPImap)
@@ -231,46 +243,32 @@ func (u *InfluxUnifi) loopPoints(r report) {
 	}
 
 	reportClientDPItotals(r, appTotal, catTotal)
-
-	for _, s := range m.Clients {
-		u.batchClient(r, s)
-	}
-
-	for _, s := range r.events().Logs {
-		switch v := s.(type) {
-		case *unifi.Event:
-			u.batchEvent(r, v)
-		case *unifi.IDS:
-			u.batchIDS(r, v)
-		default:
-			u.Collector.LogErrorf("invalid event: %T", v)
-		}
-	}
-
-	u.loopDevicePoints(r)
 }
 
-func (u *InfluxUnifi) loopDevicePoints(r report) {
-	m := r.metrics()
-	if m.Devices == nil {
-		m.Devices = &unifi.Devices{}
-		return
-	}
-
-	for _, s := range m.UAPs {
-		u.batchUAP(r, s)
-	}
-
-	for _, s := range m.USGs {
-		u.batchUSG(r, s)
-	}
-
-	for _, s := range m.USWs {
-		u.batchUSW(r, s)
-	}
-
-	for _, s := range m.UDMs {
-		u.batchUDM(r, s)
+func (u *InfluxUnifi) switchExport(r report, v interface{}) {
+	switch v := v.(type) {
+	case *unifi.UAP:
+		r.addUAP()
+		u.batchUAP(r, v)
+	case *unifi.USW:
+		r.addUSW()
+		u.batchUSW(r, v)
+	case *unifi.USG:
+		r.addUSG()
+		u.batchUSG(r, v)
+	case *unifi.UDM:
+		r.addUDM()
+		u.batchUDM(r, v)
+	case *unifi.Site:
+		u.batchSite(r, v)
+	case *unifi.Client:
+		u.batchClient(r, v)
+	case *unifi.Event:
+		u.batchEvent(r, v)
+	case *unifi.IDS:
+		u.batchIDS(r, v)
+	default:
+		u.Collector.LogErrorf("invalid export type: %T", v)
 	}
 }
 
@@ -280,7 +278,7 @@ func (u *InfluxUnifi) LogInfluxReport(r *Report) {
 	u.Collector.Logf("UniFi Metrics Recorded. Sites: %d, Clients: %d, "+
 		"UAP: %d, USG/UDM: %d, USW: %d, IDS+Events: %d, Points: %d, "+
 		"Fields: %d, Errs: %d, Elapsed: %v",
-		len(m.Sites), len(m.Clients), len(m.UAPs), len(m.UDMs)+len(m.USGs),
-		len(m.USWs), len(r.Events.Logs), r.Total,
+		len(m.Sites), len(m.Clients), r.UAP, r.UDM+r.USG,
+		r.USW, len(r.Events.Logs), r.Total,
 		r.Fields, len(r.Errors), r.Elapsed.Round(time.Millisecond))
 }

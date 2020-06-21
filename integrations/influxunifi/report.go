@@ -15,6 +15,10 @@ type Report struct {
 	Errors  []error
 	Total   int
 	Fields  int
+	USG     int // Total count of USG devices.
+	USW     int // Total count of USW devices.
+	UAP     int // Total count of UAP devices.
+	UDM     int // Total count of UDM devices.
 	Start   time.Time
 	Elapsed time.Duration
 	ch      chan *metric
@@ -31,6 +35,10 @@ type report interface {
 	batch(m *metric, pt *influx.Point)
 	metrics() *poller.Metrics
 	events() *poller.Events
+	addUDM()
+	addUSG()
+	addUAP()
+	addUSW()
 }
 
 func (r *Report) metrics() *poller.Metrics {
@@ -55,6 +63,22 @@ func (r *Report) send(m *metric) {
 }
 
 /* The following methods are not thread safe. */
+
+func (r *Report) addUSW() {
+	r.USW++
+}
+
+func (r *Report) addUAP() {
+	r.UAP++
+}
+
+func (r *Report) addUSG() {
+	r.USG++
+}
+
+func (r *Report) addUDM() {
+	r.UDM++
+}
 
 func (r *Report) error(err error) {
 	if err != nil {
