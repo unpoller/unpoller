@@ -122,9 +122,10 @@ func (u *InputUnifi) pollController(c *Controller) (*poller.Metrics, error) {
 	u.RLock()
 	defer u.RUnlock()
 
-	m := &poller.Metrics{TS: time.Now()} // At this point, it's the Current Check.
+	m := &Metrics{TS: time.Now()} // At this point, it's the Current Check.
 
 	// Get the sites we care about.
+
 	if m.Sites, err = u.getFilteredSites(c); err != nil {
 		return nil, errors.Wrap(err, "unifi.GetSites()")
 	}
@@ -154,65 +155,78 @@ func (u *InputUnifi) pollController(c *Controller) (*poller.Metrics, error) {
 // augmentMetrics is our middleware layer between collecting metrics and writing them.
 // This is where we can manipuate the returned data or make arbitrary decisions.
 // This function currently adds parent device names to client metrics.
-func (u *InputUnifi) augmentMetrics(c *Controller, metrics *poller.Metrics) *poller.Metrics {
-	if metrics == nil || metrics.Devices == nil || metrics.Clients == nil {
-		return metrics
+func (u *InputUnifi) augmentMetrics(c *Controller, metrics *Metrics) *poller.Metrics {
+	if metrics == nil {
+		return nil
 	}
 
+	m := &poller.Metrics{TS: metrics.TS}
 	devices := make(map[string]string)
 	bssdIDs := make(map[string]string)
 
-	for _, r := range metrics.UAPs {
+	for _, r := range metrics.Devices.UAPs {
 		devices[r.Mac] = r.Name
+		m.Devices = append(m.Devices, r)
 
 		for _, v := range r.VapTable {
 			bssdIDs[v.Bssid] = fmt.Sprintf("%s %s %s:", r.Name, v.Radio, v.RadioName)
 		}
 	}
 
-	for _, r := range metrics.USGs {
+	for _, r := range metrics.Devices.USGs {
 		devices[r.Mac] = r.Name
+		m.Devices = append(m.Devices, r)
 	}
 
-	for _, r := range metrics.USWs {
+	for _, r := range metrics.Devices.USWs {
 		devices[r.Mac] = r.Name
+		m.Devices = append(m.Devices, r)
 	}
 
-	for _, r := range metrics.UDMs {
+	for _, r := range metrics.Devices.UDMs {
 		devices[r.Mac] = r.Name
+		m.Devices = append(m.Devices, r)
 	}
 
 	// These come blank, so set them here.
-	for i, client := range metrics.Clients {
+	for _, client := range metrics.Clients {
 		if devices[client.Mac] = client.Name; client.Name == "" {
 			devices[client.Mac] = client.Hostname
 		}
 
-		metrics.Clients[i].Mac = RedactMacPII(metrics.Clients[i].Mac, c.HashPII)
-		metrics.Clients[i].Name = RedactNamePII(metrics.Clients[i].Name, c.HashPII)
-		metrics.Clients[i].Hostname = RedactNamePII(metrics.Clients[i].Hostname, c.HashPII)
-		metrics.Clients[i].SwName = devices[client.SwMac]
-		metrics.Clients[i].ApName = devices[client.ApMac]
-		metrics.Clients[i].GwName = devices[client.GwMac]
-		metrics.Clients[i].RadioDescription = bssdIDs[metrics.Clients[i].Bssid] + metrics.Clients[i].RadioProto
+		client.Mac = RedactMacPII(client.Mac, c.HashPII)
+		client.Name = RedactNamePII(client.Name, c.HashPII)
+		client.Hostname = RedactNamePII(client.Hostname, c.HashPII)
+		client.SwName = devices[client.SwMac]
+		client.ApName = devices[client.ApMac]
+		client.GwName = devices[client.GwMac]
+		client.RadioDescription = bssdIDs[client.Bssid] + client.RadioProto
+		m.Clients = append(m.Clients, client)
 	}
 
-	for i := range metrics.ClientsDPI {
+	for _, client := range metrics.ClientsDPI {
 		// Name on Client DPI data also comes blank, find it based on MAC address.
-		metrics.ClientsDPI[i].Name = devices[metrics.ClientsDPI[i].MAC]
-		if metrics.ClientsDPI[i].Name == "" {
-			metrics.ClientsDPI[i].Name = metrics.ClientsDPI[i].MAC
+		client.Name = devices[client.MAC]
+		if client.Name == "" {
+			client.Name = client.MAC
 		}
 
-		metrics.ClientsDPI[i].Name = RedactNamePII(metrics.ClientsDPI[i].Name, c.HashPII)
-		metrics.ClientsDPI[i].MAC = RedactMacPII(metrics.ClientsDPI[i].MAC, c.HashPII)
+		client.Name = RedactNamePII(client.Name, c.HashPII)
+		client.MAC = RedactMacPII(client.MAC, c.HashPII)
+		m.ClientsDPI = append(m.ClientsDPI, client)
 	}
 
-	if !*c.SaveSites {
-		metrics.Sites = nil
+	if *c.SaveSites {
+		for _, site := range metrics.Sites {
+			m.Sites = append(m.Sites, site)
+		}
+
+		for _, site := range metrics.SitesDPI {
+			m.SitesDPI = append(m.SitesDPI, site)
+		}
 	}
 
-	return metrics
+	return m
 }
 
 // redactEvent attempts to mask personally identying information from log messages.

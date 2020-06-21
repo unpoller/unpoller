@@ -5,6 +5,7 @@ package inputunifi
 import (
 	"io/ioutil"
 	"strings"
+	"time"
 
 	"sync"
 
@@ -51,6 +52,15 @@ type Config struct {
 	Disable      bool          `json:"disable" toml:"disable" xml:"disable,attr" yaml:"disable"`
 	Dynamic      bool          `json:"dynamic" toml:"dynamic" xml:"dynamic,attr" yaml:"dynamic"`
 	Controllers  []*Controller `json:"controllers" toml:"controller" xml:"controller" yaml:"controllers"`
+}
+
+type Metrics struct {
+	TS         time.Time
+	Sites      []*unifi.Site
+	Clients    []*unifi.Client
+	SitesDPI   []*unifi.DPITable
+	ClientsDPI []*unifi.DPITable
+	Devices    *unifi.Devices
 }
 
 func init() { // nolint: gochecknoinits
