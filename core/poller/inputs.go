@@ -17,6 +17,7 @@ var (
 type Input interface {
 	Initialize(Logger) error           // Called once on startup to initialize the plugin.
 	Metrics(*Filter) (*Metrics, error) // Called every time new metrics are requested.
+	Events(*Filter) (*Events, error)   // This is new.
 	RawMetrics(*Filter) ([]byte, error)
 }
 
@@ -77,6 +78,27 @@ func (u *UnifiPoller) InitializeInputs() error {
 	}
 
 	return nil
+}
+
+// Events aggregates log messages (events) from one or more sources.
+func (u *UnifiPoller) Events(filter *Filter) (*Events, error) {
+	events := Events{}
+
+	for _, input := range inputs {
+		if filter != nil && !strings.EqualFold(input.Name, filter.Name) {
+			continue
+		}
+
+		e, err := input.Events(filter)
+		if err != nil {
+			return &events, err
+		}
+
+		// Logs is the only member to extend at this time.
+		events.Logs = append(events.Logs, e)
+	}
+
+	return &events, nil
 }
 
 // Metrics aggregates all the measurements from filtered inputs and returns them.

@@ -46,6 +46,10 @@ type Metrics struct {
 	*unifi.Devices
 }
 
+type Events struct {
+	Logs []interface{}
+}
+
 // Config represents the core library input data.
 type Config struct {
 	*Poller `json:"poller" toml:"poller" xml:"poller" yaml:"poller"`

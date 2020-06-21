@@ -17,6 +17,7 @@ var (
 // Output packages must implement this interface.
 type Collect interface {
 	Metrics(*Filter) (*Metrics, error)
+	Events(*Filter) (*Events, error)
 	Logger
 }
 
