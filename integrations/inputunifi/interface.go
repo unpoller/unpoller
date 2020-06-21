@@ -77,9 +77,8 @@ func (u *InputUnifi) logController(c *Controller) {
 }
 
 // Events allows you to pull only events (and IDS) from the UniFi Controller.
-// This does not respect HashPII, but it may in the future!
+// This does not fully respect HashPII, but it may in the future!
 // Use Filter.Dur to set a search duration into the past; 1 minute default.
-// Set Filter.Skip to true to disable IDS collection.
 func (u *InputUnifi) Events(filter *poller.Filter) (*poller.Events, error) {
 	if u.Disable {
 		return nil, nil
@@ -88,14 +87,12 @@ func (u *InputUnifi) Events(filter *poller.Filter) (*poller.Events, error) {
 	events := &poller.Events{}
 
 	for _, c := range u.Controllers {
-		if filter != nil && filter.Path != "" &&
-			!strings.EqualFold(c.URL, filter.Path) {
-			// continue only if we have a filter path and it doesn't match.
-			continue
-		}
-
 		if filter == nil || filter.Dur == 0 {
 			filter = &poller.Filter{Dur: time.Minute}
+		}
+
+		if filter.Path != "" && !strings.EqualFold(c.URL, filter.Path) {
+			continue
 		}
 
 		// Get the sites we care about.
@@ -104,16 +101,18 @@ func (u *InputUnifi) Events(filter *poller.Filter) (*poller.Events, error) {
 			return events, errors.Wrap(err, "unifi.GetSites()")
 		}
 
-		e, err := c.Unifi.GetEvents(sites, time.Now().Add(-filter.Dur))
-		if err != nil {
-			return events, errors.Wrap(err, "unifi.GetEvents()")
+		if *c.SaveEvents {
+			e, err := c.Unifi.GetEvents(sites, time.Now().Add(-filter.Dur))
+			if err != nil {
+				return events, errors.Wrap(err, "unifi.GetEvents()")
+			}
+
+			for _, l := range e {
+				events.Logs = append(events.Logs, redactEvent(l, c.HashPII))
+			}
 		}
 
-		for _, l := range e {
-			events.Logs = append(events.Logs, l)
-		}
-
-		if !filter.Skip {
+		if *c.SaveIDS {
 			i, err := c.Unifi.GetIDS(sites, time.Now().Add(-filter.Dur))
 			if err != nil {
 				return events, errors.Wrap(err, "unifi.GetIDS()")
@@ -130,7 +129,6 @@ func (u *InputUnifi) Events(filter *poller.Filter) (*poller.Events, error) {
 
 // Metrics grabs all the measurements from a UniFi controller and returns them.
 // Set Filter.Path to a controller URL for a specific controller (or get them all).
-// Set Filter.Skip to true to Skip Events and IDS collection (Prometheus does this).
 func (u *InputUnifi) Metrics(filter *poller.Filter) (*poller.Metrics, error) {
 	if u.Disable {
 		return nil, nil

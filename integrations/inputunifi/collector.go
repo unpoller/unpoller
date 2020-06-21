@@ -105,28 +105,6 @@ func (u *InputUnifi) pollController(c *Controller, filter *poller.Filter) (*poll
 		}
 	}
 
-	if !filter.Skip && c.SaveEvents != nil && *c.SaveEvents {
-		e, err := c.Unifi.GetEvents(m.Sites, time.Now().Add(time.Minute))
-		if err != nil {
-			return nil, errors.Wrapf(err, "unifi.GetEvents(%s)", c.URL)
-		}
-
-		for _, l := range e {
-			m.Events = append(m.Events, redactEvent(l, c.HashPII))
-		}
-	}
-
-	if !filter.Skip && c.SaveIDS != nil && *c.SaveIDS {
-		e, err := c.Unifi.GetIDS(m.Sites, time.Now().Add(time.Minute))
-		if err != nil {
-			return nil, errors.Wrapf(err, "unifi.GetIDS(%s)", c.URL)
-		}
-
-		for _, l := range e {
-			m.Events = append(m.Events, l)
-		}
-	}
-
 	// Get all the points.
 	if m.Clients, err = c.Unifi.GetClients(m.Sites); err != nil {
 		return nil, errors.Wrapf(err, "unifi.GetClients(%s)", c.URL)
