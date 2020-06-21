@@ -9,7 +9,6 @@ import (
 
 	// Load input plugins!
 	_ "github.com/unifi-poller/inputunifi"
-	_ "github.com/unifi-poller/unifi"
 
 	// Load output plugins!
 	_ "github.com/unifi-poller/influxunifi"
