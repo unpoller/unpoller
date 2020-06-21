@@ -90,7 +90,7 @@ func (u *UnifiPoller) Events(filter *Filter) (*Events, error) {
 	events := Events{}
 
 	for _, input := range inputs {
-		if filter != nil && !strings.EqualFold(input.Name, filter.Name) {
+		if filter != nil && filter.Name != "" && !strings.EqualFold(input.Name, filter.Name) {
 			continue
 		}
 
@@ -112,7 +112,7 @@ func (u *UnifiPoller) Metrics(filter *Filter) (*Metrics, error) {
 	metrics := &Metrics{}
 
 	for _, input := range inputs {
-		if filter != nil && !strings.EqualFold(input.Name, filter.Name) {
+		if filter != nil && filter.Name != "" && !strings.EqualFold(input.Name, filter.Name) {
 			continue
 		}
 
