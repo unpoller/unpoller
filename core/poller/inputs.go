@@ -3,6 +3,7 @@ package poller
 import (
 	"strings"
 	"sync"
+	"time"
 
 	"github.com/unifi-poller/unifi"
 )
@@ -50,6 +51,10 @@ type Filter struct {
 	True bool
 	Done bool
 	Stop bool
+	Time time.Time
+	From time.Time
+	When time.Time
+	Dur  time.Duration
 }
 
 // NewInput creates a metric input. This should be called by input plugins
