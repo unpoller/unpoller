@@ -146,6 +146,7 @@ func (u *promUnifi) ScrapeHandler(w http.ResponseWriter, r *http.Request) {
 	t := &target{u: u, Filter: &poller.Filter{
 		Name: r.URL.Query().Get("input"),  // "unifi"
 		Path: r.URL.Query().Get("target"), // url: "https://127.0.0.1:8443"
+		Skip: true,                        // Skip IDS and Event collection, Prometheus can't use it.
 	}}
 
 	if t.Name == "" {
