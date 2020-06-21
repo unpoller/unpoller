@@ -34,26 +34,14 @@ type Filter struct {
 	Type string
 	Term string
 	Name string
-	Call string
-	Tags string
 	Role string
 	Kind string
 	Path string
 	Text string
-	Area int
-	Item int
 	Unit int
-	Sign int64
-	Mass int64
-	Rate float64
-	Cost float64
-	Free bool
-	True bool
-	Done bool
-	Stop bool
+	Pass bool
+	Skip bool
 	Time time.Time
-	From time.Time
-	When time.Time
 	Dur  time.Duration
 }
 
@@ -90,7 +78,9 @@ func (u *UnifiPoller) Events(filter *Filter) (*Events, error) {
 	events := Events{}
 
 	for _, input := range inputs {
-		if filter != nil && filter.Name != "" && !strings.EqualFold(input.Name, filter.Name) {
+		if filter != nil &&
+			filter.Name != "" &&
+			!strings.EqualFold(input.Name, filter.Name) {
 			continue
 		}
 
@@ -112,7 +102,9 @@ func (u *UnifiPoller) Metrics(filter *Filter) (*Metrics, error) {
 	metrics := &Metrics{}
 
 	for _, input := range inputs {
-		if filter != nil && filter.Name != "" && !strings.EqualFold(input.Name, filter.Name) {
+		if filter != nil &&
+			filter.Name != "" &&
+			!strings.EqualFold(input.Name, filter.Name) {
 			continue
 		}
 
