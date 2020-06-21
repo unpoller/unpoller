@@ -134,7 +134,7 @@ func (u *InputUnifi) pollController(c *Controller) (*poller.Metrics, error) {
 // augmentMetrics is our middleware layer between collecting metrics and writing them.
 // This is where we can manipuate the returned data or make arbitrary decisions.
 // This function currently adds parent device names to client metrics.
-func (u *InputUnifi) augmentMetrics(c *Controller, metrics *poller.Metrics) *poller.Metrics {
+func (u *InputUnifi) augmentMetrics(c *Controller, metrics *poller.Metrics) *poller.Metrics { // nolint: funlen
 	if metrics == nil || metrics.Devices == nil || metrics.Clients == nil {
 		return metrics
 	}
@@ -162,12 +162,13 @@ func (u *InputUnifi) augmentMetrics(c *Controller, metrics *poller.Metrics) *pol
 		devices[r.Mac] = r.Name
 	}
 
-	for i := range metrics.Events {
-		if *c.HashPII {
+	if *c.HashPII {
+		for i := range metrics.Events {
+			// metrics.Events[i].Msg <-- not sure what to do here.
 			metrics.Events[i].DestIPGeo = unifi.IPGeo{}
 			metrics.Events[i].SourceIPGeo = unifi.IPGeo{}
-			metrics.Events[i].Host = RedactMacPII(metrics.Events[i].Host, c.HashPII)
-			metrics.Events[i].Hostname = RedactMacPII(metrics.Events[i].Hostname, c.HashPII)
+			metrics.Events[i].Host = RedactNamePII(metrics.Events[i].Host, c.HashPII)
+			metrics.Events[i].Hostname = RedactNamePII(metrics.Events[i].Hostname, c.HashPII)
 			metrics.Events[i].DstMAC = RedactMacPII(metrics.Events[i].DstMAC, c.HashPII)
 			metrics.Events[i].SrcMAC = RedactMacPII(metrics.Events[i].SrcMAC, c.HashPII)
 		}
