@@ -73,7 +73,7 @@ func (u *InfluxUnifi) PollController() {
 	log.Printf("[INFO] Everything checks out! Poller started, InfluxDB interval: %v", interval)
 
 	for u.LastCheck = range ticker.C {
-		metrics, err := u.Collector.Metrics(nil)
+		metrics, err := u.Collector.Metrics(&poller.Filter{Name: "unifi", Dur: interval})
 		if err != nil {
 			u.Collector.LogErrorf("metric fetch for InfluxDB failed: %v", err)
 			continue
