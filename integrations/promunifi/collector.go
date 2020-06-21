@@ -72,6 +72,10 @@ type Report struct {
 	Total   int             // Total count of metrics recorded.
 	Errors  int             // Total count of errors recording metrics.
 	Zeros   int             // Total count of metrics equal to zero.
+	USG     int             // Total count of USG devices.
+	USW     int             // Total count of USW devices.
+	UAP     int             // Total count of UAP devices.
+	UDM     int             // Total count of UDM devices.
 	Metrics *poller.Metrics // Metrics collected and recorded.
 	Elapsed time.Duration   // Duration elapsed collecting and exporting.
 	Fetch   time.Duration   // Duration elapsed making controller requests.
@@ -240,10 +244,6 @@ func (u *promUnifi) collect(ch chan<- prometheus.Metric, filter *poller.Filter) 
 		return
 	}
 
-	if r.Metrics.Devices == nil {
-		r.Metrics.Devices = &unifi.Devices{}
-	}
-
 	// Pass Report interface into our collecting and reporting methods.
 	go u.exportMetrics(r, ch, r.ch)
 	u.loopExports(r)
@@ -282,7 +282,7 @@ func (u *promUnifi) loopExports(r report) {
 	m := r.metrics()
 
 	for _, s := range m.Sites {
-		u.exportSite(r, s)
+		u.switchExport(r, s)
 	}
 
 	for _, s := range m.SitesDPI {
@@ -290,7 +290,11 @@ func (u *promUnifi) loopExports(r report) {
 	}
 
 	for _, c := range m.Clients {
-		u.exportClient(r, c)
+		u.switchExport(r, c)
+	}
+
+	for _, d := range m.Devices {
+		u.switchExport(r, d)
 	}
 
 	appTotal := make(totalsDPImap)
@@ -301,20 +305,27 @@ func (u *promUnifi) loopExports(r report) {
 	}
 
 	u.exportClientDPItotals(r, appTotal, catTotal)
+}
 
-	for _, d := range m.UAPs {
-		u.exportUAP(r, d)
-	}
-
-	for _, d := range m.UDMs {
-		u.exportUDM(r, d)
-	}
-
-	for _, d := range m.USGs {
-		u.exportUSG(r, d)
-	}
-
-	for _, d := range m.USWs {
-		u.exportUSW(r, d)
+func (u *promUnifi) switchExport(r report, v interface{}) {
+	switch v := v.(type) {
+	case *unifi.UAP:
+		r.addUAP()
+		u.exportUAP(r, v)
+	case *unifi.USW:
+		r.addUSW()
+		u.exportUSW(r, v)
+	case *unifi.USG:
+		r.addUSG()
+		u.exportUSG(r, v)
+	case *unifi.UDM:
+		r.addUDM()
+		u.exportUDM(r, v)
+	case *unifi.Site:
+		u.exportSite(r, v)
+	case *unifi.Client:
+		u.exportClient(r, v)
+	default:
+		u.Collector.LogErrorf("invalid type: %T", v)
 	}
 }

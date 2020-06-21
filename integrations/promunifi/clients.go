@@ -72,7 +72,13 @@ func descClient(ns string) *uclient {
 	}
 }
 
-func (u *promUnifi) exportClientDPI(r report, s *unifi.DPITable, appTotal, catTotal totalsDPImap) {
+func (u *promUnifi) exportClientDPI(r report, v interface{}, appTotal, catTotal totalsDPImap) {
+	s, ok := v.(*unifi.DPITable)
+	if !ok {
+		u.Collector.LogErrorf("invalid type given to ClientsDPI: %T", v)
+		return
+	}
+
 	for _, dpi := range s.ByApp {
 		labelDPI := []string{s.Name, s.MAC, s.SiteName, s.SourceName,
 			unifi.DPICats.Get(dpi.Cat), unifi.DPIApps.GetApp(dpi.Cat, dpi.App)}

@@ -19,6 +19,10 @@ type report interface {
 	report(c poller.Collect, descs map[*prometheus.Desc]bool)
 	export(m *metric, v float64) prometheus.Metric
 	error(ch chan<- prometheus.Metric, d *prometheus.Desc, v interface{})
+	addUDM()
+	addUSG()
+	addUAP()
+	addUSW()
 }
 
 // Satisfy gomnd.
@@ -43,7 +47,7 @@ func (r *Report) report(c poller.Collect, descs map[*prometheus.Desc]bool) {
 	c.Logf("UniFi Measurements Exported. Site: %d, Client: %d, "+
 		"UAP: %d, USG/UDM: %d, USW: %d, Descs: %d, "+
 		"Metrics: %d, Errs: %d, 0s: %d, Reqs/Total: %v / %v",
-		len(m.Sites), len(m.Clients), len(m.UAPs), len(m.UDMs)+len(m.USGs), len(m.USWs),
+		len(m.Sites), len(m.Clients), r.UAP, r.UDM+r.USG, r.USW,
 		len(descs), r.Total, r.Errors, r.Zeros,
 		r.Fetch.Round(time.Millisecond/oneDecimalPoint),
 		r.Elapsed.Round(time.Millisecond/oneDecimalPoint))
@@ -65,6 +69,22 @@ func (r *Report) error(ch chan<- prometheus.Metric, d *prometheus.Desc, v interf
 	if r.ReportErrors {
 		ch <- prometheus.NewInvalidMetric(d, fmt.Errorf("error: %v", v)) // nolint: goerr113
 	}
+}
+
+func (r *Report) addUSW() {
+	r.USW++
+}
+
+func (r *Report) addUAP() {
+	r.UAP++
+}
+
+func (r *Report) addUSG() {
+	r.USG++
+}
+
+func (r *Report) addUDM() {
+	r.UDM++
 }
 
 // close is not part of the interface.
