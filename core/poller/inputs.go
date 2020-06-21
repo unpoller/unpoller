@@ -133,8 +133,6 @@ func AppendMetrics(existing *Metrics, m *Metrics) *Metrics {
 	existing.Sites = append(existing.Sites, m.Sites...)
 	existing.ClientsDPI = append(existing.ClientsDPI, m.ClientsDPI...)
 	existing.Clients = append(existing.Clients, m.Clients...)
-	existing.IDSList = append(existing.IDSList, m.IDSList...)
-	existing.Events = append(existing.Events, m.Events...)
 
 	if m.Devices == nil {
 		return existing

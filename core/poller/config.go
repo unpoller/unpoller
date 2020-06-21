@@ -38,8 +38,6 @@ type Flags struct {
 type Metrics struct {
 	TS         time.Time
 	Sites      []*unifi.Site
-	IDSList    []*unifi.IDS
-	Events     []*unifi.Event
 	Clients    []*unifi.Client
 	SitesDPI   []*unifi.DPITable
 	ClientsDPI []*unifi.DPITable
