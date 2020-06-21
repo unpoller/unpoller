@@ -6,6 +6,6 @@ require (
 	github.com/prometheus/client_golang v1.6.0
 	github.com/prometheus/common v0.10.0
 	github.com/prometheus/procfs v0.1.2 // indirect
-	github.com/unifi-poller/poller v0.0.8-0.20200621101255-6d0d0b288ece
+	github.com/unifi-poller/poller v0.0.8-0.20200621110949-33f1a1454d10
 	github.com/unifi-poller/unifi v0.0.5-0.20200620103801-b927287ea1cd
 )
