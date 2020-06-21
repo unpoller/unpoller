@@ -242,6 +242,8 @@ func (u *InfluxUnifi) loopPoints(r report) {
 			u.batchEvent(r, v)
 		case *unifi.IDS:
 			u.batchIDS(r, v)
+		default:
+			u.Collector.LogErrorf("invalid event: %T", v)
 		}
 	}
 
