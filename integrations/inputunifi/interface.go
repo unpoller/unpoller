@@ -79,7 +79,7 @@ func (u *InputUnifi) logController(c *Controller) {
 // Events allows you to pull only events (and IDS) from the UniFi Controller.
 // This does not respect HashPII, but it may in the future!
 // Use Filter.Dur to set a search duration into the past; 1 minute default.
-// Set Filter.True to true to disable IDS collection.
+// Set Filter.Skip to true to disable IDS collection.
 func (u *InputUnifi) Events(filter *poller.Filter) (*poller.Events, error) {
 	if u.Disable {
 		return nil, nil
@@ -88,7 +88,9 @@ func (u *InputUnifi) Events(filter *poller.Filter) (*poller.Events, error) {
 	events := &poller.Events{}
 
 	for _, c := range u.Controllers {
-		if filter != nil && filter.Path != "" && !strings.EqualFold(c.URL, filter.Path) {
+		if filter != nil && filter.Path != "" &&
+			!strings.EqualFold(c.URL, filter.Path) {
+			// continue only if we have a filter path and it doesn't match.
 			continue
 		}
 
@@ -111,7 +113,7 @@ func (u *InputUnifi) Events(filter *poller.Filter) (*poller.Events, error) {
 			events.Logs = append(events.Logs, l)
 		}
 
-		if !filter.True {
+		if !filter.Skip {
 			i, err := c.Unifi.GetIDS(sites, time.Now().Add(-filter.Dur))
 			if err != nil {
 				return events, errors.Wrap(err, "unifi.GetIDS()")
@@ -127,6 +129,8 @@ func (u *InputUnifi) Events(filter *poller.Filter) (*poller.Events, error) {
 }
 
 // Metrics grabs all the measurements from a UniFi controller and returns them.
+// Set Filter.Path to a controller URL for a specific controller (or get them all).
+// Set Filter.Skip to true to Skip Events and IDS collection (Prometheus does this).
 func (u *InputUnifi) Metrics(filter *poller.Filter) (*poller.Metrics, error) {
 	if u.Disable {
 		return nil, nil
@@ -134,13 +138,18 @@ func (u *InputUnifi) Metrics(filter *poller.Filter) (*poller.Metrics, error) {
 
 	metrics := &poller.Metrics{}
 
+	if filter == nil {
+		filter = &poller.Filter{}
+	}
+
 	// Check if the request is for an existing, configured controller (or all controllers)
 	for _, c := range u.Controllers {
-		if filter != nil && filter.Path != "" && !strings.EqualFold(c.URL, filter.Path) {
+		if filter.Path != "" && !strings.EqualFold(c.URL, filter.Path) {
+			// continue only if we have a filter path and it doesn't match.
 			continue
 		}
 
-		m, err := u.collectController(c)
+		m, err := u.collectController(c, filter)
 		if err != nil {
 			return metrics, err
 		}
@@ -148,7 +157,7 @@ func (u *InputUnifi) Metrics(filter *poller.Filter) (*poller.Metrics, error) {
 		metrics = poller.AppendMetrics(metrics, m)
 	}
 
-	if filter == nil || filter.Path == "" || len(metrics.Clients) != 0 {
+	if filter.Path == "" || len(metrics.Clients) != 0 {
 		return metrics, nil
 	}
 
@@ -157,7 +166,7 @@ func (u *InputUnifi) Metrics(filter *poller.Filter) (*poller.Metrics, error) {
 	}
 
 	// Attempt a dynamic metrics fetch from an unconfigured controller.
-	return u.dynamicController(filter.Path)
+	return u.dynamicController(filter)
 }
 
 // RawMetrics returns API output from the first configured UniFi controller.

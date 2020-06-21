@@ -40,28 +40,28 @@ func (u *InputUnifi) newDynamicCntrlr(url string) (bool, *Controller) {
 	return true, u.dynamic[url]
 }
 
-func (u *InputUnifi) dynamicController(url string) (*poller.Metrics, error) {
-	if !strings.HasPrefix(url, "http") {
+func (u *InputUnifi) dynamicController(filter *poller.Filter) (*poller.Metrics, error) {
+	if !strings.HasPrefix(filter.Path, "http") {
 		return nil, errScrapeFilterMatchFailed
 	}
 
-	new, c := u.newDynamicCntrlr(url)
+	new, c := u.newDynamicCntrlr(filter.Path)
 
 	if new {
-		u.Logf("Authenticating to Dynamic UniFi Controller: %s", url)
+		u.Logf("Authenticating to Dynamic UniFi Controller: %s", filter.Path)
 
 		if err := u.getUnifi(c); err != nil {
 			u.logController(c)
-			return nil, errors.Wrapf(err, "authenticating to %s", url)
+			return nil, errors.Wrapf(err, "authenticating to %s", filter.Path)
 		}
 
 		u.logController(c)
 	}
 
-	return u.collectController(c)
+	return u.collectController(c, filter)
 }
 
-func (u *InputUnifi) collectController(c *Controller) (*poller.Metrics, error) {
+func (u *InputUnifi) collectController(c *Controller, filter *poller.Filter) (*poller.Metrics, error) {
 	if u.isNill(c) {
 		u.Logf("Re-authenticating to UniFi Controller: %s", c.URL)
 
@@ -70,7 +70,7 @@ func (u *InputUnifi) collectController(c *Controller) (*poller.Metrics, error) {
 		}
 	}
 
-	metrics, err := u.pollController(c)
+	metrics, err := u.pollController(c, filter)
 	if err != nil {
 		u.Logf("Re-authenticating to UniFi Controller: %s", c.URL)
 
@@ -82,7 +82,7 @@ func (u *InputUnifi) collectController(c *Controller) (*poller.Metrics, error) {
 	return metrics, err
 }
 
-func (u *InputUnifi) pollController(c *Controller) (*poller.Metrics, error) {
+func (u *InputUnifi) pollController(c *Controller, filter *poller.Filter) (*poller.Metrics, error) {
 	var err error
 
 	u.RLock()
@@ -105,14 +105,14 @@ func (u *InputUnifi) pollController(c *Controller) (*poller.Metrics, error) {
 		}
 	}
 
-	if c.SaveEvents != nil && *c.SaveEvents {
+	if !filter.Skip && c.SaveEvents != nil && *c.SaveEvents {
 		m.Events, err = c.Unifi.GetEvents(m.Sites, time.Now().Add(time.Minute))
 		if err != nil {
 			return nil, errors.Wrapf(err, "unifi.GetEvents(%s)", c.URL)
 		}
 	}
 
-	if c.SaveIDS != nil && *c.SaveIDS {
+	if !filter.Skip && c.SaveIDS != nil && *c.SaveIDS {
 		m.IDSList, err = c.Unifi.GetIDS(m.Sites, time.Now().Add(time.Minute))
 		if err != nil {
 			return nil, errors.Wrapf(err, "unifi.GetIDS(%s)", c.URL)
