@@ -58,10 +58,10 @@ func (u *InputUnifi) dynamicController(filter *poller.Filter) (*poller.Metrics, 
 		u.logController(c)
 	}
 
-	return u.collectController(c, filter)
+	return u.collectController(c)
 }
 
-func (u *InputUnifi) collectController(c *Controller, filter *poller.Filter) (*poller.Metrics, error) {
+func (u *InputUnifi) collectController(c *Controller) (*poller.Metrics, error) {
 	if u.isNill(c) {
 		u.Logf("Re-authenticating to UniFi Controller: %s", c.URL)
 
@@ -70,7 +70,7 @@ func (u *InputUnifi) collectController(c *Controller, filter *poller.Filter) (*p
 		}
 	}
 
-	metrics, err := u.pollController(c, filter)
+	metrics, err := u.pollController(c)
 	if err != nil {
 		u.Logf("Re-authenticating to UniFi Controller: %s", c.URL)
 
@@ -82,7 +82,7 @@ func (u *InputUnifi) collectController(c *Controller, filter *poller.Filter) (*p
 	return metrics, err
 }
 
-func (u *InputUnifi) pollController(c *Controller, filter *poller.Filter) (*poller.Metrics, error) {
+func (u *InputUnifi) pollController(c *Controller) (*poller.Metrics, error) {
 	var err error
 
 	u.RLock()

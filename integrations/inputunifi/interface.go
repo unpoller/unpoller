@@ -147,7 +147,7 @@ func (u *InputUnifi) Metrics(filter *poller.Filter) (*poller.Metrics, error) {
 			continue
 		}
 
-		m, err := u.collectController(c, filter)
+		m, err := u.collectController(c)
 		if err != nil {
 			return metrics, err
 		}
