@@ -140,6 +140,8 @@ github.com/unifi-poller/influxunifi v0.0.9 h1:ZDiDbFwoGfNWTXgVOUkkxTOUvkvS8Rwwei
 github.com/unifi-poller/influxunifi v0.0.9/go.mod h1:CfMvHVp3TPnp8flNvsiUSz09LWop1kmig/Sukg+hkAg=
 github.com/unifi-poller/influxunifi v0.0.10-0.20200620104500-bd1a036c5754 h1:yp07xJG/OiYCl+2DtDEUghaYMBt1gxRgvjB4iE6v2Zg=
 github.com/unifi-poller/influxunifi v0.0.10-0.20200620104500-bd1a036c5754/go.mod h1:8uchM41Th2buvjKYsD5Lu/9fu4d8qBqs4f+ETA8O5a4=
+github.com/unifi-poller/influxunifi v0.0.10-0.20200621075823-77eac45b1298 h1:dbBsIr4vMTjlYtLgPEVRlKLiEhDTDsvDciVoM1odz60=
+github.com/unifi-poller/influxunifi v0.0.10-0.20200621075823-77eac45b1298/go.mod h1:YNXEniQvf9fS+AORF5Cu+OALev1bsOtsGXnV76AUKaQ=
 github.com/unifi-poller/inputunifi v0.0.5 h1:go+5j7WS1y0N/2pKKPvjzn8bkPpFXurQnoYGYajJD04=
 github.com/unifi-poller/inputunifi v0.0.5/go.mod h1:X1Vd5uAtO5etZveY0WpMVMQBM/iLoMwZ/SvN1iXLxHo=
 github.com/unifi-poller/inputunifi v0.0.6-0.20200203055955-411a49dea2e7 h1:CXMB+6tTJJZEoyMmH24PN/7evm3yuvily9Df4sujeT0=
@@ -241,6 +243,9 @@ github.com/unifi-poller/unifi v0.0.5-0.20200614034623-f4c1d18157c2/go.mod h1:L1k
 github.com/unifi-poller/unifi v0.0.5-0.20200619092006-d24c776a42f5/go.mod h1:L1kMRH2buZhB31vZnRC1im7Tk/4uD3ET4biwl2faYy8=
 github.com/unifi-poller/unifi v0.0.5-0.20200620103801-b927287ea1cd h1:jrwuiY1AdoPi+b+R8zjt/e8h8ZqULNB9izcyQnf3pSw=
 github.com/unifi-poller/unifi v0.0.5-0.20200620103801-b927287ea1cd/go.mod h1:L1kMRH2buZhB31vZnRC1im7Tk/4uD3ET4biwl2faYy8=
+github.com/unifi-poller/unifi v0.0.5-0.20200621023010-6a70dec929ba/go.mod h1:L1kMRH2buZhB31vZnRC1im7Tk/4uD3ET4biwl2faYy8=
+github.com/unifi-poller/unifi v0.0.5-0.20200621075746-253ccae7e106 h1:eKErSqWD656pLSWgxFwhDhHe/zfAXrm7F39Zn4R+si8=
+github.com/unifi-poller/unifi v0.0.5-0.20200621075746-253ccae7e106/go.mod h1:L1kMRH2buZhB31vZnRC1im7Tk/4uD3ET4biwl2faYy8=
 github.com/unifi-poller/unifi v0.0.5 h1:Izeun32YxcQOeKZUXY0Sy4ltKYFuYxWGcN9JS6xkIJU=
 github.com/unifi-poller/unifi v0.0.5/go.mod h1:L1kMRH2buZhB31vZnRC1im7Tk/4uD3ET4biwl2faYy8=
 golang.org/x/crypto v0.0.0-20180904163835-0709b304e793/go.mod h1:6SG95UA2DQfeDnfUPMdvaQW0Q7yPrPDi9nlGo2tz2b4=

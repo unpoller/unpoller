@@ -10,9 +10,9 @@ require (
 	github.com/prometheus/procfs v0.1.3 // indirect
 	github.com/russross/blackfriday v2.0.0+incompatible // indirect
 	github.com/shurcooL/sanitized_anchor_name v1.0.0 // indirect
-	github.com/unifi-poller/influxunifi v0.0.10-0.20200620104500-bd1a036c5754
+	github.com/unifi-poller/influxunifi v0.0.10-0.20200621075823-77eac45b1298
 	github.com/unifi-poller/inputunifi v0.0.8-0.20200620104121-47689f50d8e3
 	github.com/unifi-poller/poller v0.0.8-0.20200619104117-a5e263a36ac9
 	github.com/unifi-poller/promunifi v0.0.9-0.20200620104707-26208eb4336b
-	github.com/unifi-poller/unifi v0.0.5-0.20200620103801-b927287ea1cd
+	github.com/unifi-poller/unifi v0.0.5-0.20200621075746-253ccae7e106
 )
