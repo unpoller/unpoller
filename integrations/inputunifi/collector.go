@@ -106,16 +106,24 @@ func (u *InputUnifi) pollController(c *Controller, filter *poller.Filter) (*poll
 	}
 
 	if !filter.Skip && c.SaveEvents != nil && *c.SaveEvents {
-		m.Events, err = c.Unifi.GetEvents(m.Sites, time.Now().Add(time.Minute))
+		e, err := c.Unifi.GetEvents(m.Sites, time.Now().Add(time.Minute))
 		if err != nil {
 			return nil, errors.Wrapf(err, "unifi.GetEvents(%s)", c.URL)
+		}
+
+		for _, l := range e {
+			m.Events = append(m.Events, redactEvent(l, c.HashPII))
 		}
 	}
 
 	if !filter.Skip && c.SaveIDS != nil && *c.SaveIDS {
-		m.IDSList, err = c.Unifi.GetIDS(m.Sites, time.Now().Add(time.Minute))
+		e, err := c.Unifi.GetIDS(m.Sites, time.Now().Add(time.Minute))
 		if err != nil {
 			return nil, errors.Wrapf(err, "unifi.GetIDS(%s)", c.URL)
+		}
+
+		for _, l := range e {
+			m.Events = append(m.Events, l)
 		}
 	}
 
@@ -134,7 +142,7 @@ func (u *InputUnifi) pollController(c *Controller, filter *poller.Filter) (*poll
 // augmentMetrics is our middleware layer between collecting metrics and writing them.
 // This is where we can manipuate the returned data or make arbitrary decisions.
 // This function currently adds parent device names to client metrics.
-func (u *InputUnifi) augmentMetrics(c *Controller, metrics *poller.Metrics) *poller.Metrics { // nolint: funlen
+func (u *InputUnifi) augmentMetrics(c *Controller, metrics *poller.Metrics) *poller.Metrics {
 	if metrics == nil || metrics.Devices == nil || metrics.Clients == nil {
 		return metrics
 	}
@@ -160,18 +168,6 @@ func (u *InputUnifi) augmentMetrics(c *Controller, metrics *poller.Metrics) *pol
 
 	for _, r := range metrics.UDMs {
 		devices[r.Mac] = r.Name
-	}
-
-	if *c.HashPII {
-		for i := range metrics.Events {
-			// metrics.Events[i].Msg <-- not sure what to do here.
-			metrics.Events[i].DestIPGeo = unifi.IPGeo{}
-			metrics.Events[i].SourceIPGeo = unifi.IPGeo{}
-			metrics.Events[i].Host = RedactNamePII(metrics.Events[i].Host, c.HashPII)
-			metrics.Events[i].Hostname = RedactNamePII(metrics.Events[i].Hostname, c.HashPII)
-			metrics.Events[i].DstMAC = RedactMacPII(metrics.Events[i].DstMAC, c.HashPII)
-			metrics.Events[i].SrcMAC = RedactMacPII(metrics.Events[i].SrcMAC, c.HashPII)
-		}
 	}
 
 	// These come blank, so set them here.
@@ -205,6 +201,24 @@ func (u *InputUnifi) augmentMetrics(c *Controller, metrics *poller.Metrics) *pol
 	}
 
 	return metrics
+}
+
+// redactEvent attempts to mask personally identying information from log messages.
+// This currently misses the "msg" value entirely and leaks PII information.
+func redactEvent(e *unifi.Event, hash *bool) *unifi.Event {
+	if !*hash {
+		return e
+	}
+
+	// metrics.Events[i].Msg <-- not sure what to do here.
+	e.DestIPGeo = unifi.IPGeo{}
+	e.SourceIPGeo = unifi.IPGeo{}
+	e.Host = RedactNamePII(e.Host, hash)
+	e.Hostname = RedactNamePII(e.Hostname, hash)
+	e.DstMAC = RedactMacPII(e.DstMAC, hash)
+	e.SrcMAC = RedactMacPII(e.SrcMAC, hash)
+
+	return e
 }
 
 // RedactNamePII converts a name string to an md5 hash (first 24 chars only).
