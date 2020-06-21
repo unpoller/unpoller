@@ -8,7 +8,6 @@ import (
 	"time"
 
 	"github.com/spf13/pflag"
-	"github.com/unifi-poller/unifi"
 	"golift.io/cnfg"
 	"golift.io/cnfg/cnfgfile"
 )
@@ -37,11 +36,11 @@ type Flags struct {
 // Metrics is a type shared by the exporting and reporting packages.
 type Metrics struct {
 	TS         time.Time
-	Sites      []*unifi.Site
-	Clients    []*unifi.Client
-	SitesDPI   []*unifi.DPITable
-	ClientsDPI []*unifi.DPITable
-	*unifi.Devices
+	Sites      []interface{}
+	Clients    []interface{}
+	SitesDPI   []interface{}
+	ClientsDPI []interface{}
+	Devices    []interface{}
 }
 
 type Events struct {

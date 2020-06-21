@@ -4,8 +4,6 @@ import (
 	"strings"
 	"sync"
 	"time"
-
-	"github.com/unifi-poller/unifi"
 )
 
 var (
@@ -133,19 +131,7 @@ func AppendMetrics(existing *Metrics, m *Metrics) *Metrics {
 	existing.Sites = append(existing.Sites, m.Sites...)
 	existing.ClientsDPI = append(existing.ClientsDPI, m.ClientsDPI...)
 	existing.Clients = append(existing.Clients, m.Clients...)
-
-	if m.Devices == nil {
-		return existing
-	}
-
-	if existing.Devices == nil {
-		existing.Devices = &unifi.Devices{}
-	}
-
-	existing.UAPs = append(existing.UAPs, m.UAPs...)
-	existing.USGs = append(existing.USGs, m.USGs...)
-	existing.USWs = append(existing.USWs, m.USWs...)
-	existing.UDMs = append(existing.UDMs, m.UDMs...)
+	existing.Devices = append(existing.Devices, m.Devices...)
 
 	return existing
 }

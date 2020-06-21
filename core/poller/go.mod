@@ -9,7 +9,6 @@ require (
 	github.com/prometheus/common v0.10.0
 	github.com/prometheus/procfs v0.1.1 // indirect
 	github.com/spf13/pflag v1.0.5
-	github.com/unifi-poller/unifi v0.0.5-0.20200620103801-b927287ea1cd
 	golang.org/x/net v0.0.0-20200602114024-627f9648deb9 // indirect
 	golang.org/x/sys v0.0.0-20200610111108-226ff32320da // indirect
 	golift.io/cnfg v0.0.5
