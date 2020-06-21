@@ -149,6 +149,8 @@ github.com/unifi-poller/influxunifi v0.0.10-0.20200621085434-01cd04643679 h1:PB7
 github.com/unifi-poller/influxunifi v0.0.10-0.20200621085434-01cd04643679/go.mod h1:p6jHkvpcbqf84Qg+HrMJkYGo0MlFk+5ylH/889amK3M=
 github.com/unifi-poller/influxunifi v0.0.10-0.20200621111730-4fe24d61b4fe h1:9749csA5+Yj8IPoL0apBKXOUf7PhI3eWz1lkVi5WUQY=
 github.com/unifi-poller/influxunifi v0.0.10-0.20200621111730-4fe24d61b4fe/go.mod h1:5zz9S5zLWqpE1sH7v1PPpmydMajIo1Tj0w0PAxOvj7M=
+github.com/unifi-poller/influxunifi v0.0.10-0.20200621202825-d81be9b8a363 h1:4J/+UYtOvlELofvNV/sY3q0VtKG8AdQDvM9iM3GigVk=
+github.com/unifi-poller/influxunifi v0.0.10-0.20200621202825-d81be9b8a363/go.mod h1:5zz9S5zLWqpE1sH7v1PPpmydMajIo1Tj0w0PAxOvj7M=
 github.com/unifi-poller/inputunifi v0.0.5 h1:go+5j7WS1y0N/2pKKPvjzn8bkPpFXurQnoYGYajJD04=
 github.com/unifi-poller/inputunifi v0.0.5/go.mod h1:X1Vd5uAtO5etZveY0WpMVMQBM/iLoMwZ/SvN1iXLxHo=
 github.com/unifi-poller/inputunifi v0.0.6-0.20200203055955-411a49dea2e7 h1:CXMB+6tTJJZEoyMmH24PN/7evm3yuvily9Df4sujeT0=
@@ -195,6 +197,8 @@ github.com/unifi-poller/inputunifi v0.0.8-0.20200621094056-1f25f7cd1ec5 h1:lfasb
 github.com/unifi-poller/inputunifi v0.0.8-0.20200621094056-1f25f7cd1ec5/go.mod h1:bt70WpE/Kmoif9lBjsUpmy2cPlC8zHQkuYg2f7a1U14=
 github.com/unifi-poller/inputunifi v0.0.8-0.20200621111657-768a735debef h1:VjjX6iouAYIz+Bzikpjc509wfbFkndio2LHASRR3r0s=
 github.com/unifi-poller/inputunifi v0.0.8-0.20200621111657-768a735debef/go.mod h1:DJgRak363FXPYcoD2IFcyXKsrc/PGE1Z1zIDXpPff+A=
+github.com/unifi-poller/inputunifi v0.0.8-0.20200621192201-fa58d3bd9ede h1:b/B7RLSG/XyguwBLVFex4IKbbM2SUEIVkIo1Y5v21UA=
+github.com/unifi-poller/inputunifi v0.0.8-0.20200621192201-fa58d3bd9ede/go.mod h1:DJgRak363FXPYcoD2IFcyXKsrc/PGE1Z1zIDXpPff+A=
 github.com/unifi-poller/poller v0.0.3/go.mod h1:ugy3FyZEH1rFyC3panBiJpXbLf7EZ4GkjiOtydB2CwQ=
 github.com/unifi-poller/poller v0.0.4 h1:TYCdQeCYwUmmFcj1H75iGKAFbAOBFwo/XIJDX2Id+cY=
 github.com/unifi-poller/poller v0.0.4/go.mod h1:LbOCEdNth7invhaOTpcadW/sDlD2WsU+IE3GRXKzOCg=
