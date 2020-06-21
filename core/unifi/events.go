@@ -99,13 +99,16 @@ type Event struct {
 	IsAdmin               FlexBool  `json:"is_admin"`
 	DestPort              int       `json:"dest_port"`
 	SrcPort               int       `json:"src_port"`
-	Bytes                 int64     `json:"bytes"`
-	Duration              int64     `json:"duration"`
-	FlowID                int64     `json:"flow_id"`
-	InnerAlertGID         int64     `json:"inner_alert_gid"`
-	InnerAlertRev         int64     `json:"inner_alert_rev"`
-	InnerAlertSeverity    int64     `json:"inner_alert_severity"`
-	InnerAlertSignatureID int64     `json:"inner_alert_signature_id"`
+	Bytes                 FlexInt   `json:"bytes"`
+	Duration              FlexInt   `json:"duration"`
+	FlowID                FlexInt   `json:"flow_id"`
+	InnerAlertGID         FlexInt   `json:"inner_alert_gid"`
+	InnerAlertRev         FlexInt   `json:"inner_alert_rev"`
+	InnerAlertSeverity    FlexInt   `json:"inner_alert_severity"`
+	InnerAlertSignatureID FlexInt   `json:"inner_alert_signature_id"`
+	Channel               FlexInt   `json:"channel"`
+	ChannelFrom           FlexInt   `json:"channel_from"`
+	ChannelTo             FlexInt   `json:"channel_to"`
 	Time                  int64     `json:"time"`
 	Timestamp             int64     `json:"timestamp"`
 	Datetime              time.Time `json:"datetime"`
@@ -116,9 +119,6 @@ type Event struct {
 	ApTo                  string    `json:"ap_to"`
 	AppProto              string    `json:"app_proto"`
 	Catname               string    `json:"catname"`
-	Channel               string    `json:"channel"`
-	ChannelFrom           string    `json:"channel_from"`
-	ChannelTo             string    `json:"channel_to"`
 	DestIP                string    `json:"dest_ip"`
 	DstMAC                string    `json:"dst_mac"`
 	EventType             string    `json:"event_type"`
