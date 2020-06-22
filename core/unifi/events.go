@@ -164,6 +164,11 @@ type Event struct {
 // IPGeo is part of the UniFi Event data. Each event may have up to three of these.
 // One for source, one for dest and one for the USG location.
 type IPGeo struct {
+	GeoIP
+}
+
+// GeoIP is a struct in a struct to deal with weird UniFi output.
+type GeoIP struct {
 	Asn           int64   `json:"asn"`
 	Latitude      float64 `json:"latitude"`
 	Longitude     float64 `json:"longitude"`
@@ -172,4 +177,14 @@ type IPGeo struct {
 	CountryCode   string  `json:"country_code"`
 	CountryName   string  `json:"country_name"`
 	Organization  string  `json:"organization"`
+}
+
+// UnmarshalJSON is required because sometimes the unifi api returns
+// an empty array instead of a struct filled with data.
+func (v *IPGeo) UnmarshalJSON(data []byte) error {
+	if string(data) == "[]" {
+		return nil // it's empty
+	}
+
+	return json.Unmarshal(data, &v.GeoIP)
 }
