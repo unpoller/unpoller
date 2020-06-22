@@ -3,7 +3,6 @@ package unifi
 import (
 	"encoding/json"
 	"fmt"
-	"log"
 	"time"
 )
 
@@ -92,8 +91,6 @@ func makeEventParams(timeRange ...time.Time) (string, error) {
 	}
 
 	params, err := json.Marshal(&rp)
-
-	log.Println(string(params))
 
 	return string(params), err
 }
