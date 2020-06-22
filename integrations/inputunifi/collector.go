@@ -125,7 +125,6 @@ func (u *InputUnifi) pollController(c *Controller) (*poller.Metrics, error) {
 	m := &Metrics{TS: time.Now()} // At this point, it's the Current Check.
 
 	// Get the sites we care about.
-
 	if m.Sites, err = u.getFilteredSites(c); err != nil {
 		return nil, errors.Wrap(err, "unifi.GetSites()")
 	}
@@ -160,33 +159,7 @@ func (u *InputUnifi) augmentMetrics(c *Controller, metrics *Metrics) *poller.Met
 		return nil
 	}
 
-	m := &poller.Metrics{TS: metrics.TS}
-	devices := make(map[string]string)
-	bssdIDs := make(map[string]string)
-
-	for _, r := range metrics.Devices.UAPs {
-		devices[r.Mac] = r.Name
-		m.Devices = append(m.Devices, r)
-
-		for _, v := range r.VapTable {
-			bssdIDs[v.Bssid] = fmt.Sprintf("%s %s %s:", r.Name, v.Radio, v.RadioName)
-		}
-	}
-
-	for _, r := range metrics.Devices.USGs {
-		devices[r.Mac] = r.Name
-		m.Devices = append(m.Devices, r)
-	}
-
-	for _, r := range metrics.Devices.USWs {
-		devices[r.Mac] = r.Name
-		m.Devices = append(m.Devices, r)
-	}
-
-	for _, r := range metrics.Devices.UDMs {
-		devices[r.Mac] = r.Name
-		m.Devices = append(m.Devices, r)
-	}
+	m, devices, bssdIDs := extractDevices(metrics)
 
 	// These come blank, so set them here.
 	for _, client := range metrics.Clients {
@@ -227,6 +200,39 @@ func (u *InputUnifi) augmentMetrics(c *Controller, metrics *Metrics) *poller.Met
 	}
 
 	return m
+}
+
+// this is a helper function for augmentMetrics.
+func extractDevices(metrics *Metrics) (*poller.Metrics, map[string]string, map[string]string) {
+	m := &poller.Metrics{TS: metrics.TS}
+	devices := make(map[string]string)
+	bssdIDs := make(map[string]string)
+
+	for _, r := range metrics.Devices.UAPs {
+		devices[r.Mac] = r.Name
+		m.Devices = append(m.Devices, r)
+
+		for _, v := range r.VapTable {
+			bssdIDs[v.Bssid] = fmt.Sprintf("%s %s %s:", r.Name, v.Radio, v.RadioName)
+		}
+	}
+
+	for _, r := range metrics.Devices.USGs {
+		devices[r.Mac] = r.Name
+		m.Devices = append(m.Devices, r)
+	}
+
+	for _, r := range metrics.Devices.USWs {
+		devices[r.Mac] = r.Name
+		m.Devices = append(m.Devices, r)
+	}
+
+	for _, r := range metrics.Devices.UDMs {
+		devices[r.Mac] = r.Name
+		m.Devices = append(m.Devices, r)
+	}
+
+	return m, devices, bssdIDs
 }
 
 // redactEvent attempts to mask personally identying information from log messages.
