@@ -69,12 +69,14 @@ func (u *Unifi) GetSiteEvents(site *Site, timeRange ...time.Time) ([]*Event, err
 
 func makeEventParams(timeRange ...time.Time) (string, error) {
 	type eventReq struct {
-		Start int64 `json:"start,omitempty"`
-		End   int64 `json:"end,omitempty"`
-		Limit int   `json:"_limit,omitempty"`
+		Start  int64  `json:"start,omitempty"`
+		End    int64  `json:"end,omitempty"`
+		Limit  int    `json:"_limit,omitempty"`
+		Within int    `json:"within"`
+		Sort   string `json:"_sort"`
 	}
 
-	rp := eventReq{Limit: eventLimit}
+	rp := eventReq{Limit: eventLimit, Sort: "-time", Within: 1}
 
 	switch len(timeRange) {
 	case 0:
