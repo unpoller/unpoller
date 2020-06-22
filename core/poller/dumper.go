@@ -6,9 +6,9 @@ import (
 	"strings"
 )
 
-// DumpJSONPayload prints raw json from the UniFi Controller. This is currently
+// PrintRawMetrics prints raw json from the UniFi Controller. This is currently
 // tied into the -j CLI arg, and is probably not very useful outside that context.
-func (u *UnifiPoller) DumpJSONPayload() (err error) {
+func (u *UnifiPoller) PrintRawMetrics() (err error) {
 	split := strings.SplitN(u.Flags.DumpJSON, " ", 2)
 	filter := &Filter{Kind: split[0]}
 

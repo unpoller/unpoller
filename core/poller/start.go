@@ -74,7 +74,7 @@ func (u *UnifiPoller) Run() error {
 			return err
 		}
 
-		return u.DumpJSONPayload()
+		return u.PrintRawMetrics()
 	}
 
 	if u.Debug {

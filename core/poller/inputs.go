@@ -88,7 +88,7 @@ func (u *UnifiPoller) Events(filter *Filter) (*Events, error) {
 		}
 
 		// Logs is the only member to extend at this time.
-		events.Logs = append(events.Logs, e)
+		events.Logs = append(events.Logs, e.Logs...)
 	}
 
 	return &events, nil
