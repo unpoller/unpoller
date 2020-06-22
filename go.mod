@@ -15,7 +15,7 @@ require (
 	github.com/spf13/pflag v1.0.5 // indirect
 	github.com/unifi-poller/influxunifi v0.0.10-0.20200621233659-46c84c7e6253
 	github.com/unifi-poller/inputunifi v0.0.8-0.20200622013432-300295023003
-	github.com/unifi-poller/poller v0.0.8-0.20200621214016-5d1ed3324a46
+	github.com/unifi-poller/poller v0.0.8-0.20200622041812-dd79a3e3073e
 	github.com/unifi-poller/promunifi v0.0.9-0.20200621232051-90645ba5c482
 	github.com/unifi-poller/unifi v0.0.5-0.20200621075746-253ccae7e106
 	golang.org/x/sys v0.0.0-20200620081246-981b61492c35 // indirect
