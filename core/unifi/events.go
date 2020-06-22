@@ -15,14 +15,12 @@ const (
 	eventLimit = 50000
 )
 
-// GetEvents returns a response full of UniFi Events from multiple sites.
-// timeRange may have a length of 0, 1 or 2. The first time is Start, the second is End.
-// Events between start and end are returned. End defaults to time.Now().
-func (u *Unifi) GetEvents(sites []*Site, timeRange ...time.Time) ([]*Event, error) {
+// GetEvents returns a response full of UniFi Events for the last 1 hour from multiple sites.
+func (u *Unifi) GetEvents(sites []*Site, hours time.Duration) ([]*Event, error) {
 	data := make([]*Event, 0)
 
 	for _, site := range sites {
-		response, err := u.GetSiteEvents(site, timeRange...)
+		response, err := u.GetSiteEvents(site, hours)
 		if err != nil {
 			return data, err
 		}
@@ -33,26 +31,28 @@ func (u *Unifi) GetEvents(sites []*Site, timeRange ...time.Time) ([]*Event, erro
 	return data, nil
 }
 
-// GetSiteEvents retreives the events from a single site.
-// timeRange may have a length of 0, 1 or 2. The first time is Start, the second is End.
-// Events between start and end are returned. End defaults to time.Now().
-func (u *Unifi) GetSiteEvents(site *Site, timeRange ...time.Time) ([]*Event, error) { // nolint: dupl
+// GetSiteEvents retrieves the last 1 hour's worth of events from a single site.
+func (u *Unifi) GetSiteEvents(site *Site, hours time.Duration) ([]*Event, error) {
 	if site == nil || site.Name == "" {
 		return nil, errNoSiteProvided
+	}
+
+	if hours < time.Hour {
+		hours = time.Hour
 	}
 
 	u.DebugLog("Polling Controller, retreiving UniFi Events, site %s (%s)", site.Name, site.Desc)
 
 	var (
-		path  = fmt.Sprintf(APIEventPath, site.Name)
+		path   = fmt.Sprintf(APIEventPath, site.Name)
+		params = fmt.Sprintf(`{"_limit":%d,"within":%d,"_sort":"-time"}}`,
+			eventLimit, int(hours.Round(time.Hour).Hours()))
 		event struct {
 			Data []*Event `json:"data"`
 		}
 	)
 
-	if params, err := makeEventParams(timeRange...); err != nil {
-		return event.Data, err
-	} else if err = u.GetData(path, &event, params); err != nil {
+	if err := u.GetData(path, &event, params); err != nil {
 		return event.Data, err
 	}
 
@@ -64,35 +64,6 @@ func (u *Unifi) GetSiteEvents(site *Site, timeRange ...time.Time) ([]*Event, err
 	}
 
 	return event.Data, nil
-}
-
-func makeEventParams(timeRange ...time.Time) (string, error) {
-	type eventReq struct {
-		Start  int64  `json:"start,omitempty"`
-		End    int64  `json:"end,omitempty"`
-		Limit  int    `json:"_limit,omitempty"`
-		Within int    `json:"within"`
-		Sort   string `json:"_sort"`
-	}
-
-	rp := eventReq{Limit: eventLimit, Sort: "-time", Within: 1}
-
-	switch len(timeRange) {
-	case 0:
-		rp.End = time.Now().Unix() * int64(time.Microsecond)
-	case 1:
-		rp.Start = timeRange[0].Unix() * int64(time.Microsecond)
-		rp.End = time.Now().Unix() * int64(time.Microsecond)
-	case 2: // nolint: gomnd
-		rp.Start = timeRange[0].Unix() * int64(time.Microsecond)
-		rp.End = timeRange[1].Unix() * int64(time.Microsecond)
-	default:
-		return "", errInvalidTimeRange
-	}
-
-	params, err := json.Marshal(&rp)
-
-	return string(params), err
 }
 
 // Event describes a UniFi Event.

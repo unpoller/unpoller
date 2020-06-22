@@ -1,6 +1,7 @@
 package unifi
 
 import (
+	"encoding/json"
 	"fmt"
 	"time"
 )
@@ -72,7 +73,7 @@ func (u *Unifi) GetIDS(sites []*Site, timeRange ...time.Time) ([]*IDS, error) {
 // GetIDSSite retreives the Intrusion Detection System Data for a single Site.
 // timeRange may have a length of 0, 1 or 2. The first time is Start, the second is End.
 // Events between start and end are returned. End defaults to time.Now().
-func (u *Unifi) GetIDSSite(site *Site, timeRange ...time.Time) ([]*IDS, error) { // nolint: dupl
+func (u *Unifi) GetIDSSite(site *Site, timeRange ...time.Time) ([]*IDS, error) {
 	if site == nil || site.Name == "" {
 		return nil, errNoSiteProvided
 	}
@@ -100,4 +101,32 @@ func (u *Unifi) GetIDSSite(site *Site, timeRange ...time.Time) ([]*IDS, error) {
 	}
 
 	return ids.Data, nil
+}
+
+func makeEventParams(timeRange ...time.Time) (string, error) {
+	type eventReq struct {
+		Start int64  `json:"start,omitempty"`
+		End   int64  `json:"end,omitempty"`
+		Limit int    `json:"_limit,omitempty"`
+		Sort  string `json:"_sort"`
+	}
+
+	rp := eventReq{Limit: eventLimit, Sort: "-time"}
+
+	switch len(timeRange) {
+	case 0:
+		rp.End = time.Now().Unix() * int64(time.Microsecond)
+	case 1:
+		rp.Start = timeRange[0].Unix() * int64(time.Microsecond)
+		rp.End = time.Now().Unix() * int64(time.Microsecond)
+	case 2: // nolint: gomnd
+		rp.Start = timeRange[0].Unix() * int64(time.Microsecond)
+		rp.End = timeRange[1].Unix() * int64(time.Microsecond)
+	default:
+		return "", errInvalidTimeRange
+	}
+
+	params, err := json.Marshal(&rp)
+
+	return string(params), err
 }
