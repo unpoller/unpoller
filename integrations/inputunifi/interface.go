@@ -171,9 +171,9 @@ func (u *InputUnifi) RawMetrics(filter *poller.Filter) ([]byte, error) {
 
 	switch filter.Kind {
 	case "d", "device", "devices":
-		return u.dumpSitesJSON(c, unifi.APIDevicePath, sites)
+		return u.getSitesJSON(c, unifi.APIDevicePath, sites)
 	case "client", "clients", "c":
-		return u.dumpSitesJSON(c, unifi.APIClientPath, sites)
+		return u.getSitesJSON(c, unifi.APIClientPath, sites)
 	case "other", "o":
 		return c.Unifi.GetJSON(filter.Path)
 	default:
@@ -181,11 +181,14 @@ func (u *InputUnifi) RawMetrics(filter *poller.Filter) ([]byte, error) {
 	}
 }
 
-func (u *InputUnifi) dumpSitesJSON(c *Controller, path string, sites []*unifi.Site) ([]byte, error) {
+func (u *InputUnifi) getSitesJSON(c *Controller, path string, sites []*unifi.Site) ([]byte, error) {
 	allJSON := []byte{}
 
 	for _, s := range sites {
-		body, err := c.Unifi.GetJSON(fmt.Sprintf(path, s.Name))
+		apiPath := fmt.Sprintf(path, s.Name)
+		u.LogDebugf("Returning Path '%s' for site: %s (%s):\n", apiPath, s.Desc, s.Name)
+
+		body, err := c.Unifi.GetJSON(apiPath)
 		if err != nil {
 			return allJSON, err
 		}
