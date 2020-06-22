@@ -172,23 +172,25 @@ func (u *InputUnifi) RawMetrics(filter *poller.Filter) ([]byte, error) {
 
 	switch filter.Kind {
 	case "d", "device", "devices":
-		return u.dumpSitesJSON(c, unifi.APIDevicePath, "Devices", sites)
+		return u.dumpSitesJSON(c, unifi.APIDevicePath, "Devices", sites, !filter.Skip)
 	case "client", "clients", "c":
-		return u.dumpSitesJSON(c, unifi.APIClientPath, "Clients", sites)
+		return u.dumpSitesJSON(c, unifi.APIClientPath, "Clients", sites, !filter.Skip)
 	case "other", "o":
-		_, _ = fmt.Fprintf(os.Stderr, "[INFO] Dumping Path '%s':\n", filter.Path)
-		return c.Unifi.GetJSON(filter.Path)
+		return u.dumpSitesJSON(c, filter.Path, "Path", sites, !filter.Skip)
 	default:
 		return []byte{}, errNoFilterKindProvided
 	}
 }
 
-func (u *InputUnifi) dumpSitesJSON(c *Controller, path, name string, sites []*unifi.Site) ([]byte, error) {
+func (u *InputUnifi) dumpSitesJSON(c *Controller, path, name string, sites []*unifi.Site, print bool) ([]byte, error) {
 	allJSON := []byte{}
 
 	for _, s := range sites {
 		apiPath := fmt.Sprintf(path, s.Name)
-		_, _ = fmt.Fprintf(os.Stderr, "[INFO] Dumping %s: '%s' JSON for site: %s (%s):\n", name, apiPath, s.Desc, s.Name)
+
+		if print {
+			_, _ = fmt.Fprintf(os.Stderr, "[INFO] Printing %s: '%s' JSON for site: %s (%s):\n", name, apiPath, s.Desc, s.Name)
+		}
 
 		body, err := c.Unifi.GetJSON(apiPath)
 		if err != nil {
