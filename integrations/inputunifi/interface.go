@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"os"
 	"strings"
-	"time"
 
 	"github.com/pkg/errors"
 	"github.com/unifi-poller/poller"
@@ -79,7 +78,6 @@ func (u *InputUnifi) logController(c *Controller) {
 // Events allows you to pull only events (and IDS) from the UniFi Controller.
 // This does not fully respect HashPII, but it may in the future!
 // Use Filter.Path to pick a specific controller, otherwise poll them all!
-// Use Filter.Dur to set a search duration into the past; 1 minute default.
 func (u *InputUnifi) Events(filter *poller.Filter) (*poller.Events, error) {
 	if u.Disable {
 		return nil, nil
@@ -87,8 +85,8 @@ func (u *InputUnifi) Events(filter *poller.Filter) (*poller.Events, error) {
 
 	logs := []interface{}{}
 
-	if filter == nil || filter.Dur == 0 {
-		filter = &poller.Filter{Dur: time.Minute}
+	if filter == nil {
+		filter = &poller.Filter{}
 	}
 
 	for _, c := range u.Controllers {
@@ -96,7 +94,7 @@ func (u *InputUnifi) Events(filter *poller.Filter) (*poller.Events, error) {
 			continue
 		}
 
-		events, err := u.collectControllerEvents(c, time.Now().Add(-filter.Dur))
+		events, err := u.collectControllerEvents(c)
 		if err != nil {
 			return nil, err
 		}

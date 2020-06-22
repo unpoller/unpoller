@@ -82,7 +82,7 @@ func (u *InputUnifi) collectController(c *Controller) (*poller.Metrics, error) {
 	return metrics, err
 }
 
-func (u *InputUnifi) collectControllerEvents(c *Controller, from time.Time) ([]interface{}, error) {
+func (u *InputUnifi) collectControllerEvents(c *Controller) ([]interface{}, error) {
 	logs := []interface{}{}
 
 	// Get the sites we care about.
@@ -92,7 +92,7 @@ func (u *InputUnifi) collectControllerEvents(c *Controller, from time.Time) ([]i
 	}
 
 	if *c.SaveEvents {
-		events, err := c.Unifi.GetEvents(sites, from)
+		events, err := c.Unifi.GetEvents(sites, time.Hour)
 		if err != nil {
 			return nil, errors.Wrap(err, "unifi.GetEvents()")
 		}
@@ -103,7 +103,7 @@ func (u *InputUnifi) collectControllerEvents(c *Controller, from time.Time) ([]i
 	}
 
 	if *c.SaveIDS {
-		events, err := c.Unifi.GetIDS(sites, from)
+		events, err := c.Unifi.GetIDS(sites, time.Now().Add(-time.Hour))
 		if err != nil {
 			return nil, errors.Wrap(err, "unifi.GetIDS()")
 		}
