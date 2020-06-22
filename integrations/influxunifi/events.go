@@ -1,11 +1,19 @@
 package influxunifi
 
 import (
+	"time"
+
 	"github.com/unifi-poller/unifi"
 )
 
 // batchIDS generates intrusion detection datapoints for InfluxDB.
 func (u *InfluxUnifi) batchIDS(r report, i *unifi.IDS) {
+	if time.Since(i.Datetime) > u.Interval.Duration+time.Second {
+		return // The event is older than our interval, ignore it.
+	}
+
+	r.addIDS()
+
 	fields := map[string]interface{}{
 		"dest_port":            i.DestPort,
 		"src_port":             i.SrcPort,
@@ -56,6 +64,12 @@ func (u *InfluxUnifi) batchIDS(r report, i *unifi.IDS) {
 
 // batchEvents generates events from UniFi for InfluxDB.
 func (u *InfluxUnifi) batchEvent(r report, i *unifi.Event) { // nolint: funlen
+	if time.Since(i.Datetime) > u.Interval.Duration+time.Second {
+		return // The event is older than our interval, ignore it.
+	}
+
+	r.addEvent()
+
 	fields := map[string]interface{}{
 		"msg":                  i.Msg,          // contains user[] or guest[] or admin[]
 		"duration":             i.Duration.Val, // probably microseconds?

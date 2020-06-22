@@ -264,10 +264,8 @@ func (u *InfluxUnifi) switchExport(r report, v interface{}) {
 	case *unifi.Client:
 		u.batchClient(r, v)
 	case *unifi.Event:
-		r.addEvent()
 		u.batchEvent(r, v)
 	case *unifi.IDS:
-		r.addIDS()
 		u.batchIDS(r, v)
 	default:
 		u.Collector.LogErrorf("invalid export type: %T", v)
