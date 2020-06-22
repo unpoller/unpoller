@@ -19,6 +19,8 @@ type Report struct {
 	USW     int // Total count of USW devices.
 	UAP     int // Total count of UAP devices.
 	UDM     int // Total count of UDM devices.
+	Eve     int // Total count of Events.
+	IDS     int // Total count of IDS/IPS Events.
 	Start   time.Time
 	Elapsed time.Duration
 	ch      chan *metric
@@ -39,6 +41,8 @@ type report interface {
 	addUSG()
 	addUAP()
 	addUSW()
+	addEvent()
+	addIDS()
 }
 
 func (r *Report) metrics() *poller.Metrics {
@@ -67,17 +71,20 @@ func (r *Report) send(m *metric) {
 func (r *Report) addUSW() {
 	r.USW++
 }
-
 func (r *Report) addUAP() {
 	r.UAP++
 }
-
 func (r *Report) addUSG() {
 	r.USG++
 }
-
 func (r *Report) addUDM() {
 	r.UDM++
+}
+func (r *Report) addEvent() {
+	r.Eve++
+}
+func (r *Report) addIDS() {
+	r.IDS++
 }
 
 func (r *Report) error(err error) {

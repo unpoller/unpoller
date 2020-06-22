@@ -264,8 +264,10 @@ func (u *InfluxUnifi) switchExport(r report, v interface{}) {
 	case *unifi.Client:
 		u.batchClient(r, v)
 	case *unifi.Event:
+		r.addEvent()
 		u.batchEvent(r, v)
 	case *unifi.IDS:
+		r.addIDS()
 		u.batchIDS(r, v)
 	default:
 		u.Collector.LogErrorf("invalid export type: %T", v)
@@ -276,9 +278,9 @@ func (u *InfluxUnifi) switchExport(r report, v interface{}) {
 func (u *InfluxUnifi) LogInfluxReport(r *Report) {
 	m := r.Metrics
 	u.Collector.Logf("UniFi Metrics Recorded. Sites: %d, Clients: %d, "+
-		"UAP: %d, USG/UDM: %d, USW: %d, IDS+Events: %d, Points: %d, "+
+		"UAP: %d, USG/UDM: %d, USW: %d, IDS/Events: %d/%d, Points: %d, "+
 		"Fields: %d, Errs: %d, Elapsed: %v",
 		len(m.Sites), len(m.Clients), r.UAP, r.UDM+r.USG,
-		r.USW, len(r.Events.Logs), r.Total,
+		r.USW, r.IDS, r.Eve, r.Total,
 		r.Fields, len(r.Errors), r.Elapsed.Round(time.Millisecond))
 }
