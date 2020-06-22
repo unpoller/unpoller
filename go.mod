@@ -17,7 +17,7 @@ require (
 	github.com/unifi-poller/inputunifi v0.0.8-0.20200622013432-300295023003
 	github.com/unifi-poller/poller v0.0.8-0.20200622041812-dd79a3e3073e
 	github.com/unifi-poller/promunifi v0.0.9-0.20200621232051-90645ba5c482
-	github.com/unifi-poller/unifi v0.0.5-0.20200621075746-253ccae7e106
+	github.com/unifi-poller/unifi v0.0.5-0.20200622062110-c9e26760b47d
 	golang.org/x/sys v0.0.0-20200620081246-981b61492c35 // indirect
 	golift.io/cnfg v0.0.5 // indirect
 )
