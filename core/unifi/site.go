@@ -54,7 +54,8 @@ func (u *Unifi) GetSiteDPI(sites []*Site) ([]*DPITable, error) {
 
 		if l := len(response.Data); l > 1 {
 			return nil, errDPIDataBug
-		} else if l != 1 {
+		} else if l == 0 {
+			u.DebugLog("Site DPI data missing! Is DPI enabled in UniFi controller? Site %s (%s) ", site.Name, site.Desc)
 			continue
 		}
 
