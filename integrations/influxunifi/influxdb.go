@@ -275,10 +275,10 @@ func (u *InfluxUnifi) switchExport(r report, v interface{}) {
 // LogInfluxReport writes a log message after exporting to influxdb.
 func (u *InfluxUnifi) LogInfluxReport(r *Report) {
 	m := r.Metrics
-	u.Collector.Logf("UniFi Metrics Recorded. Sites: %d, Clients: %d, "+
-		"UAP: %d, USG/UDM: %d, USW: %d, IDS/Events: %d/%d, Points: %d, "+
-		"Fields: %d, Errs: %d, Elapsed: %v",
+	u.Collector.Logf("UniFi Metrics Recorded. Site: %d, Client: %d, "+
+		"UAP: %d, USG/UDM: %d, USW: %d, IDS/Events: %d/%d, DPI Site/Client: %d/%d, "+
+		"Point: %d, Field: %d, Err: %d, Dur: %v",
 		len(m.Sites), len(m.Clients), r.UAP, r.UDM+r.USG,
-		r.USW, r.IDS, r.Eve, r.Total,
+		r.USW, r.IDS, r.Eve, len(m.SitesDPI), len(m.ClientsDPI), r.Total,
 		r.Fields, len(r.Errors), r.Elapsed.Round(time.Millisecond))
 }
