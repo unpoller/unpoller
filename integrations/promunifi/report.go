@@ -45,10 +45,10 @@ func (r *Report) report(c poller.Collect, descs map[*prometheus.Desc]bool) {
 	m := r.Metrics
 
 	c.Logf("UniFi Measurements Exported. Site: %d, Client: %d, "+
-		"UAP: %d, USG/UDM: %d, USW: %d, Descs: %d, "+
-		"Metrics: %d, Errs: %d, 0s: %d, Reqs/Total: %v / %v",
-		len(m.Sites), len(m.Clients), r.UAP, r.UDM+r.USG, r.USW,
-		len(descs), r.Total, r.Errors, r.Zeros,
+		"UAP: %d, USG/UDM: %d, USW: %d, DPI Site/Client: %d/%d, Desc: %d, "+
+		"Metric: %d, Err: %d, 0s: %d, Req/Total: %v / %v",
+		len(m.Sites), len(m.Clients), r.UAP, r.UDM+r.USG, r.USW, len(m.SitesDPI),
+		len(m.ClientsDPI), len(descs), r.Total, r.Errors, r.Zeros,
 		r.Fetch.Round(time.Millisecond/oneDecimalPoint),
 		r.Elapsed.Round(time.Millisecond/oneDecimalPoint))
 }
