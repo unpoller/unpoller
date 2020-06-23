@@ -117,34 +117,33 @@ func (u *InputUnifi) collectControllerEvents(c *Controller) ([]interface{}, erro
 }
 
 func (u *InputUnifi) pollController(c *Controller) (*poller.Metrics, error) {
-	var err error
-
 	u.RLock()
 	defer u.RUnlock()
 
-	m := &Metrics{TS: time.Now()} // At this point, it's the Current Check.
-
 	// Get the sites we care about.
-	if m.Sites, err = u.getFilteredSites(c); err != nil {
+	sites, err := u.getFilteredSites(c)
+	if err != nil {
 		return nil, errors.Wrap(err, "unifi.GetSites()")
 	}
 
+	m := &Metrics{TS: time.Now(), Sites: sites}
+
 	if c.SaveDPI != nil && *c.SaveDPI {
-		if m.SitesDPI, err = c.Unifi.GetSiteDPI(m.Sites); err != nil {
+		if m.SitesDPI, err = c.Unifi.GetSiteDPI(sites); err != nil {
 			return nil, errors.Wrapf(err, "unifi.GetSiteDPI(%s)", c.URL)
 		}
 
-		if m.ClientsDPI, err = c.Unifi.GetClientsDPI(m.Sites); err != nil {
+		if m.ClientsDPI, err = c.Unifi.GetClientsDPI(sites); err != nil {
 			return nil, errors.Wrapf(err, "unifi.GetClientsDPI(%s)", c.URL)
 		}
 	}
 
 	// Get all the points.
-	if m.Clients, err = c.Unifi.GetClients(m.Sites); err != nil {
+	if m.Clients, err = c.Unifi.GetClients(sites); err != nil {
 		return nil, errors.Wrapf(err, "unifi.GetClients(%s)", c.URL)
 	}
 
-	if m.Devices, err = c.Unifi.GetDevices(m.Sites); err != nil {
+	if m.Devices, err = c.Unifi.GetDevices(sites); err != nil {
 		return nil, errors.Wrapf(err, "unifi.GetDevices(%s)", c.URL)
 	}
 
