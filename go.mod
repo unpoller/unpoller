@@ -13,11 +13,11 @@ require (
 	github.com/russross/blackfriday v2.0.0+incompatible // indirect
 	github.com/shurcooL/sanitized_anchor_name v1.0.0 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
-	github.com/unifi-poller/influxunifi v0.0.10-0.20200622071547-037b0f8d5d5e
-	github.com/unifi-poller/inputunifi v0.0.8-0.20200622082837-e666c89e4832
+	github.com/unifi-poller/influxunifi v0.0.10-0.20200623073300-b56c0b474733
+	github.com/unifi-poller/inputunifi v0.0.8-0.20200623073237-105e56b53d2e
 	github.com/unifi-poller/poller v0.0.8-0.20200622041812-dd79a3e3073e
-	github.com/unifi-poller/promunifi v0.0.9-0.20200621232051-90645ba5c482
-	github.com/unifi-poller/unifi v0.0.5-0.20200622073824-4a29471d80f6
+	github.com/unifi-poller/promunifi v0.0.9-0.20200623073250-24621ebb306a
+	github.com/unifi-poller/unifi v0.0.5-0.20200623080800-1766e7bde07c
 	golang.org/x/sys v0.0.0-20200620081246-981b61492c35 // indirect
 	golift.io/cnfg v0.0.5 // indirect
 )
