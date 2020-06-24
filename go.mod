@@ -15,7 +15,7 @@ require (
 	github.com/spf13/pflag v1.0.5 // indirect
 	github.com/unifi-poller/influxunifi v0.0.10-0.20200623073300-b56c0b474733
 	github.com/unifi-poller/inputunifi v0.0.8-0.20200623073237-105e56b53d2e
-	github.com/unifi-poller/lokiunifi v0.0.0-20200624101250-d682ecc67db1
+	github.com/unifi-poller/lokiunifi v0.0.0-20200624111242-0c902d3a56ce
 	github.com/unifi-poller/poller v0.0.8-0.20200622041812-dd79a3e3073e
 	github.com/unifi-poller/promunifi v0.0.9-0.20200623073250-24621ebb306a
 	github.com/unifi-poller/unifi v0.0.5-0.20200624101133-921ff05afda7
