@@ -107,12 +107,20 @@ func (l *Loki) pollController(start time.Time) error {
 		return errors.Wrap(err, "event fetch for Loki failed")
 	}
 
-	return l.ReportEvents(l.NewReport(events), start)
+	report := &Report{
+		Events: events,
+		Start:  start,
+		Logger: l.Collect,
+		Loki:   l.client,
+		Last:   l.last,
+	}
+
+	return l.ReportEvents(report)
 }
 
 // ReportEvents should be easy to test.
 // Reports events to Loki, updates last check time, and prints a log message.
-func (l *Loki) ReportEvents(r *Report, start time.Time) error {
+func (l *Loki) ReportEvents(r *Report) error {
 	// Sometimes it gets stuck on old messages. This gets it past that.
 	if time.Since(l.last) > 4*l.Interval.Duration {
 		l.last = time.Now().Add(-4 * l.Interval.Duration)
@@ -122,19 +130,9 @@ func (l *Loki) ReportEvents(r *Report, start time.Time) error {
 		return errors.Wrap(err, "sending to Loki failed")
 	}
 
-	l.last = start
+	l.last = r.Start
 	l.Logf("Events sent to Loki. Events: %d, IDS: %d, Dur: %v", r.Eve, r.IDS,
-		time.Since(start).Round(time.Millisecond))
+		time.Since(l.last).Round(time.Millisecond))
 
 	return nil
-}
-
-// NewReport creates a new [interval] report from the input config data.
-func (l *Loki) NewReport(events *poller.Events) *Report {
-	return &Report{
-		Events: events,
-		Logger: l.Collect,
-		Loki:   l.client,
-		Last:   l.last,
-	}
 }

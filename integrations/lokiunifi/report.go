@@ -25,6 +25,7 @@ type Logs struct {
 type Report struct {
 	Eve    int // Total count of Events.
 	IDS    int // Total count of IDS/IPS Events.
+	Start  time.Time
 	Last   time.Time
 	Loki   *Client
 	Events *poller.Events
