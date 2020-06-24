@@ -12,6 +12,7 @@ import (
 
 	// Load output plugins!
 	_ "github.com/unifi-poller/influxunifi"
+	_ "github.com/unifi-poller/lokiunifi"
 	_ "github.com/unifi-poller/promunifi"
 )
 
