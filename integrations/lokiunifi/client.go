@@ -20,13 +20,13 @@ var (
 	errStatusCode = fmt.Errorf("unexpected HTTP status code")
 )
 
-type client struct {
+type Client struct {
 	*Config
 	*http.Client
 }
 
-func (l *Loki) httpClient() *client {
-	return &client{
+func (l *Loki) httpClient() *Client {
+	return &Client{
 		Config: l.Config,
 		Client: &http.Client{
 			Timeout: l.Timeout.Duration,
@@ -40,7 +40,7 @@ func (l *Loki) httpClient() *client {
 }
 
 // Send marshals and posts a batch of log messages.
-func (c *client) Send(logs Logs) error {
+func (c *Client) Send(logs Logs) error {
 	msg, err := json.Marshal(logs)
 	if err != nil {
 		return err
@@ -48,8 +48,12 @@ func (c *client) Send(logs Logs) error {
 
 	u := strings.TrimSuffix(c.URL, lokiPushPath) + lokiPushPath
 
-	code, body, err := c.PostReq(u, "application/json", msg)
+	req, err := c.NewRequest(u, "POST", "application/json", msg)
 	if err != nil {
+		return err
+	}
+
+	if code, body, err := c.Do(req); err != nil {
 		return err
 	} else if code != http.StatusNoContent {
 		m := fmt.Sprintf("%s (%d/%s) %s, msg: %s", u, code, http.StatusText(code),
@@ -61,17 +65,31 @@ func (c *client) Send(logs Logs) error {
 	return nil
 }
 
-// PostReq posts data to a url with a custom content type.
-// Returns the status code, body and/or an error.
-func (c *client) PostReq(url, cType string, msg []byte) (int, []byte, error) {
-	req, err := http.NewRequest("POST", url, bytes.NewBuffer(msg))
+// NewRequest creates the http request based on input data.
+func (c *Client) NewRequest(url, method, cType string, msg []byte) (*http.Request, error) {
+	req, err := http.NewRequest(method, url, bytes.NewBuffer(msg))
 	if err != nil {
-		return 0, nil, err
+		return nil, err
 	}
 
-	req.Header.Set("Content-Type", cType)
+	if cType != "" {
+		req.Header.Set("Content-Type", cType)
+	}
 
-	resp, err := c.Do(req)
+	if c.Config.Username != "" || c.Config.Password != "" {
+		req.SetBasicAuth(c.Config.Username, c.Config.Password)
+	}
+
+	if c.Config.TenantID != "" {
+		req.Header.Set("X-Scope-OrgID", c.Config.TenantID)
+	}
+
+	return req, nil
+}
+
+// Do makes an http request and returns the status code, body and/or an error.
+func (c *Client) Do(req *http.Request) (int, []byte, error) {
+	resp, err := c.Client.Do(req)
 	if err != nil {
 		return 0, nil, err
 	}
