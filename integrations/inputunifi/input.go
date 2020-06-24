@@ -15,6 +15,7 @@ import (
 )
 
 const (
+	PluginName  = "unifi" // PluginName is the name of this input plugin.
 	defaultURL  = "https://127.0.0.1:8443"
 	defaultUser = "unifipoller"
 	defaultPass = "unifipoller"
@@ -67,7 +68,7 @@ func init() { // nolint: gochecknoinits
 	u := &InputUnifi{}
 
 	poller.NewInput(&poller.InputPlugin{
-		Name:   "unifi",
+		Name:   PluginName,
 		Input:  u, // this library implements poller.Input interface for Metrics().
 		Config: u, // Defines our config data interface.
 	})

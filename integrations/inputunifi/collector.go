@@ -152,7 +152,8 @@ func (u *InputUnifi) pollController(c *Controller) (*poller.Metrics, error) {
 
 // augmentMetrics is our middleware layer between collecting metrics and writing them.
 // This is where we can manipuate the returned data or make arbitrary decisions.
-// This function currently adds parent device names to client metrics.
+// This method currently adds parent device names to client metrics and hashes PII.
+// This method also converts our local *Metrics type into a slice of interfaces for poller.
 func (u *InputUnifi) augmentMetrics(c *Controller, metrics *Metrics) *poller.Metrics {
 	if metrics == nil {
 		return nil
