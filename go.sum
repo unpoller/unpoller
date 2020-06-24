@@ -224,6 +224,8 @@ github.com/unifi-poller/lokiunifi v0.0.0-20200624101250-d682ecc67db1 h1:T85QCOjt
 github.com/unifi-poller/lokiunifi v0.0.0-20200624101250-d682ecc67db1/go.mod h1:ZsTuIt3//vACn8IyMhXlI45aOaQiitmI88cy4Ex+lKI=
 github.com/unifi-poller/lokiunifi v0.0.0-20200624111242-0c902d3a56ce h1:1rvDepdHE8Ki7J63CxeiGfLTHvDWmrUXG/NZ9RFgcoM=
 github.com/unifi-poller/lokiunifi v0.0.0-20200624111242-0c902d3a56ce/go.mod h1:ZsTuIt3//vACn8IyMhXlI45aOaQiitmI88cy4Ex+lKI=
+github.com/unifi-poller/lokiunifi v0.0.0-20200624200349-c5eff00ceaca h1:JawgH0pS+/G+twqbRjmRrxAb0bVyX8Ph/p34nhsOdIg=
+github.com/unifi-poller/lokiunifi v0.0.0-20200624200349-c5eff00ceaca/go.mod h1:ZsTuIt3//vACn8IyMhXlI45aOaQiitmI88cy4Ex+lKI=
 github.com/unifi-poller/poller v0.0.3/go.mod h1:ugy3FyZEH1rFyC3panBiJpXbLf7EZ4GkjiOtydB2CwQ=
 github.com/unifi-poller/poller v0.0.4 h1:TYCdQeCYwUmmFcj1H75iGKAFbAOBFwo/XIJDX2Id+cY=
 github.com/unifi-poller/poller v0.0.4/go.mod h1:LbOCEdNth7invhaOTpcadW/sDlD2WsU+IE3GRXKzOCg=
