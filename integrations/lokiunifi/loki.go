@@ -12,8 +12,8 @@ import (
 const (
 	maxInterval     = time.Hour
 	minInterval     = 10 * time.Second
-	defaultInterval = time.Minute
-	defaultTimeout  = 8 * time.Second
+	defaultTimeout  = 10 * time.Second
+	defaultInterval = 2 * time.Minute
 )
 
 const (
@@ -65,16 +65,16 @@ func (l *Loki) Run(collect poller.Collect) error {
 		return nil
 	}
 
-	l.validateConfig()
+	l.ValidateConfig()
 	l.PollController()
 	l.LogErrorf("Loki Output Plugin Stopped!")
 
 	return nil
 }
 
-// validateConfig sets initial "last" update time. Also creates an http client,
+// ValidateConfig sets initial "last" update time. Also creates an http client,
 // makes sure URL is sane, and sets interval within min/max limits.
-func (l *Loki) validateConfig() {
+func (l *Loki) ValidateConfig() {
 	if l.Interval.Duration > maxInterval {
 		l.Interval.Duration = maxInterval
 	} else if l.Interval.Duration < minInterval {
@@ -107,7 +107,7 @@ func (l *Loki) pollController(start time.Time) error {
 		return errors.Wrap(err, "event fetch for Loki failed")
 	}
 
-	report := &Report{
+	r := &Report{
 		Events: events,
 		Start:  start,
 		Logger: l.Collect,
@@ -115,7 +115,7 @@ func (l *Loki) pollController(start time.Time) error {
 		Last:   l.last,
 	}
 
-	return l.ReportEvents(report)
+	return l.ReportEvents(r)
 }
 
 // ReportEvents should be easy to test.
@@ -131,8 +131,8 @@ func (l *Loki) ReportEvents(r *Report) error {
 	}
 
 	l.last = r.Start
-	l.Logf("Events sent to Loki. Events: %d, IDS: %d, Dur: %v", r.Eve, r.IDS,
-		time.Since(l.last).Round(time.Millisecond))
+	l.Logf("Events sent to Loki. Events: %d, IDS: %d, Dur: %v",
+		r.Eve, r.IDS, time.Since(l.last).Round(time.Millisecond))
 
 	return nil
 }
