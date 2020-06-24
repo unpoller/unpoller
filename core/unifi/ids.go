@@ -3,8 +3,11 @@ package unifi
 import (
 	"encoding/json"
 	"fmt"
+	"sort"
 	"time"
 )
+
+type idsList []*IDS
 
 // IDS holds an Intrusion Prevention System Event.
 type IDS struct {
@@ -52,6 +55,21 @@ type IDS struct {
 	USGIPGeo              IPGeo     `json:"usgipGeo"`
 }
 
+// Len satisfies sort.Interface.
+func (e idsList) Len() int {
+	return len(e)
+}
+
+// Swap satisfies sort.Interface.
+func (e idsList) Swap(i, j int) {
+	e[i], e[j] = e[j], e[i]
+}
+
+// Less satisfies sort.Interface. Sort our list by Datetime.
+func (e idsList) Less(i, j int) bool {
+	return e[i].Datetime.Before(e[j].Datetime)
+}
+
 // GetIDS returns Intrusion Detection Systems events for a list of Sites.
 // timeRange may have a length of 0, 1 or 2. The first time is Start, the second is End.
 // Events between start and end are returned. End defaults to time.Now().
@@ -83,7 +101,7 @@ func (u *Unifi) GetIDSSite(site *Site, timeRange ...time.Time) ([]*IDS, error) {
 	var (
 		path = fmt.Sprintf(APIEventPathIDS, site.Name)
 		ids  struct {
-			Data []*IDS `json:"data"`
+			Data idsList `json:"data"`
 		}
 	)
 
@@ -99,6 +117,8 @@ func (u *Unifi) GetIDSSite(site *Site, timeRange ...time.Time) ([]*IDS, error) {
 		// Add the special "Site Name" to each event. This becomes a Grafana filter somewhere.
 		ids.Data[i].SiteName = site.Desc + " (" + site.Name + ")"
 	}
+
+	sort.Sort(ids.Data)
 
 	return ids.Data, nil
 }

@@ -3,6 +3,7 @@ package unifi
 import (
 	"encoding/json"
 	"fmt"
+	"sort"
 	"time"
 )
 
@@ -48,7 +49,7 @@ func (u *Unifi) GetSiteEvents(site *Site, hours time.Duration) ([]*Event, error)
 		params = fmt.Sprintf(`{"_limit":%d,"within":%d,"_sort":"-time"}}`,
 			eventLimit, int(hours.Round(time.Hour).Hours()))
 		event struct {
-			Data []*Event `json:"data"`
+			Data events `json:"data"`
 		}
 	)
 
@@ -63,8 +64,13 @@ func (u *Unifi) GetSiteEvents(site *Site, hours time.Duration) ([]*Event, error)
 		event.Data[i].SiteName = site.Desc + " (" + site.Name + ")"
 	}
 
+	sort.Sort(event.Data)
+
 	return event.Data, nil
 }
+
+// Events satisfied the sort.Interface.
+type events []*Event
 
 // Event describes a UniFi Event.
 // API Path: /api/s/default/stat/event.
@@ -150,6 +156,21 @@ type GeoIP struct {
 	CountryCode   string  `json:"country_code"`
 	CountryName   string  `json:"country_name"`
 	Organization  string  `json:"organization"`
+}
+
+// Len satisfies sort.Interface.
+func (e events) Len() int {
+	return len(e)
+}
+
+// Swap satisfies sort.Interface.
+func (e events) Swap(i, j int) {
+	e[i], e[j] = e[j], e[i]
+}
+
+// Less satisfies sort.Interface. Sort our list by date/time.
+func (e events) Less(i, j int) bool {
+	return e[i].Datetime.Before(e[j].Datetime)
 }
 
 // UnmarshalJSON is required because sometimes the unifi api returns
