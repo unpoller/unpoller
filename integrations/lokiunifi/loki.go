@@ -107,32 +107,13 @@ func (l *Loki) pollController(start time.Time) error {
 		return errors.Wrap(err, "event fetch for Loki failed")
 	}
 
-	r := &Report{
+	report := &Report{
 		Events: events,
 		Start:  start,
 		Logger: l.Collect,
-		Loki:   l.client,
-		Last:   l.last,
+		Client: l.client,
+		Last:   &l.last,
 	}
 
-	return l.ReportEvents(r)
-}
-
-// ReportEvents should be easy to test.
-// Reports events to Loki, updates last check time, and prints a log message.
-func (l *Loki) ReportEvents(r *Report) error {
-	// Sometimes it gets stuck on old messages. This gets it past that.
-	if time.Since(l.last) > 4*l.Interval.Duration {
-		l.last = time.Now().Add(-4 * l.Interval.Duration)
-	}
-
-	if err := r.SendEvents(); err != nil {
-		return errors.Wrap(err, "sending to Loki failed")
-	}
-
-	l.last = r.Start
-	l.Logf("Events sent to Loki. Events: %d, IDS: %d, Dur: %v",
-		r.Eve, r.IDS, time.Since(l.last).Round(time.Millisecond))
-
-	return nil
+	return report.Execute(4 * l.Interval.Duration) // nolint: gomnd
 }
