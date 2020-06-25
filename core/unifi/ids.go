@@ -7,19 +7,16 @@ import (
 	"time"
 )
 
-type idsList []*IDS
-
 // IDS holds an Intrusion Prevention System Event.
 type IDS struct {
 	Archived              FlexBool  `json:"archived"`
-	DstIPCountry          FlexBool  `json:"dstipCountry"`
 	DestPort              int       `json:"dest_port,omitempty"`
 	SrcPort               int       `json:"src_port,omitempty"`
+	FlowID                int64     `json:"flow_id"`
 	InnerAlertRev         int64     `json:"inner_alert_rev"`
 	InnerAlertSeverity    int64     `json:"inner_alert_severity"`
 	InnerAlertGID         int64     `json:"inner_alert_gid"`
 	InnerAlertSignatureID int64     `json:"inner_alert_signature_id"`
-	FlowID                int64     `json:"flow_id"`
 	Time                  int64     `json:"time"`
 	Timestamp             int64     `json:"timestamp"`
 	Datetime              time.Time `json:"datetime"`
@@ -28,6 +25,7 @@ type IDS struct {
 	DestIP                string    `json:"dest_ip"`
 	DstMAC                string    `json:"dst_mac"`
 	DstIPASN              string    `json:"dstipASN"`
+	DstIPCountry          string    `json:"dstipCountry"`
 	EventType             string    `json:"event_type"`
 	Host                  string    `json:"host"`
 	ID                    string    `json:"_id"`
@@ -42,9 +40,9 @@ type IDS struct {
 	SiteName              string    `json:"-"`
 	SourceName            string    `json:"-"`
 	SrcIP                 string    `json:"src_ip"`
-	SrcMAC                string    `json:"src_mac"`
 	SrcIPASN              string    `json:"srcipASN"`
 	SrcIPCountry          string    `json:"srcipCountry"`
+	SrcMAC                string    `json:"src_mac"`
 	Subsystem             string    `json:"subsystem"`
 	UniqueAlertID         string    `json:"unique_alertid"`
 	USGIP                 string    `json:"usgip"`
@@ -53,21 +51,6 @@ type IDS struct {
 	DestIPGeo             IPGeo     `json:"dstipGeo"`
 	SourceIPGeo           IPGeo     `json:"srcipGeo"`
 	USGIPGeo              IPGeo     `json:"usgipGeo"`
-}
-
-// Len satisfies sort.Interface.
-func (e idsList) Len() int {
-	return len(e)
-}
-
-// Swap satisfies sort.Interface.
-func (e idsList) Swap(i, j int) {
-	e[i], e[j] = e[j], e[i]
-}
-
-// Less satisfies sort.Interface. Sort our list by Datetime.
-func (e idsList) Less(i, j int) bool {
-	return e[i].Datetime.Before(e[j].Datetime)
 }
 
 // GetIDS returns Intrusion Detection Systems events for a list of Sites.
@@ -149,4 +132,21 @@ func makeEventParams(timeRange ...time.Time) (string, error) {
 	params, err := json.Marshal(&rp)
 
 	return string(params), err
+}
+
+type idsList []*IDS
+
+// Len satisfies sort.Interface.
+func (e idsList) Len() int {
+	return len(e)
+}
+
+// Swap satisfies sort.Interface.
+func (e idsList) Swap(i, j int) {
+	e[i], e[j] = e[j], e[i]
+}
+
+// Less satisfies sort.Interface. Sort our list by Datetime.
+func (e idsList) Less(i, j int) bool {
+	return e[i].Datetime.Before(e[j].Datetime)
 }

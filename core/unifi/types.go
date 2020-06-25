@@ -37,8 +37,12 @@ const (
 	APILoginPathNew string = "/api/auth/login"
 	// APIEventPathIDS returns Intrusion Detection/Prevention Systems Events
 	APIEventPathIDS string = "/api/s/%s/stat/ips/event"
+	// APIEventPathAlarms contains the site alarms.
+	APIEventPathAlarms string = "/api/s/%s/list/alarm"
 	// APIPrefixNew is the prefix added to the new API paths; except login. duh.
 	APIPrefixNew string = "/proxy/network"
+	// APIAnomaliesPath returns site anomalies.
+	APIAnomaliesPath string = "/api/s/%s/stat/anomalies"
 )
 
 // path returns the correct api path based on the new variable.

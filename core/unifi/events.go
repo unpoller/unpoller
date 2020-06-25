@@ -69,9 +69,6 @@ func (u *Unifi) GetSiteEvents(site *Site, hours time.Duration) ([]*Event, error)
 	return event.Data, nil
 }
 
-// Events satisfied the sort.Interface.
-type events []*Event
-
 // Event describes a UniFi Event.
 // API Path: /api/s/default/stat/event.
 type Event struct {
@@ -143,11 +140,6 @@ type Event struct {
 // IPGeo is part of the UniFi Event data. Each event may have up to three of these.
 // One for source, one for dest and one for the USG location.
 type IPGeo struct {
-	GeoIP
-}
-
-// GeoIP is a struct in a struct to deal with weird UniFi output.
-type GeoIP struct {
 	Asn           int64   `json:"asn"`
 	Latitude      float64 `json:"latitude"`
 	Longitude     float64 `json:"longitude"`
@@ -157,6 +149,9 @@ type GeoIP struct {
 	CountryName   string  `json:"country_name"`
 	Organization  string  `json:"organization"`
 }
+
+// Events satisfied the sort.Interface.
+type events []*Event
 
 // Len satisfies sort.Interface.
 func (e events) Len() int {
@@ -180,5 +175,26 @@ func (v *IPGeo) UnmarshalJSON(data []byte) error {
 		return nil // it's empty
 	}
 
-	return json.Unmarshal(data, &v.GeoIP)
+	g := struct {
+		Asn           int64   `json:"asn"`
+		Latitude      float64 `json:"latitude"`
+		Longitude     float64 `json:"longitude"`
+		City          string  `json:"city"`
+		ContinentCode string  `json:"continent_code"`
+		CountryCode   string  `json:"country_code"`
+		CountryName   string  `json:"country_name"`
+		Organization  string  `json:"organization"`
+	}{}
+
+	err := json.Unmarshal(data, &g)
+	v.Asn = g.Asn
+	v.Latitude = g.Latitude
+	v.Longitude = g.Longitude
+	v.City = g.City
+	v.ContinentCode = g.ContinentCode
+	v.CountryCode = g.CountryCode
+	v.CountryName = g.CountryName
+	v.Organization = g.Organization
+
+	return err
 }
