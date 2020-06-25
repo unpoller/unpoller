@@ -27,20 +27,18 @@ type Report struct {
 	Start  time.Time
 	Last   *time.Time
 	Client *Client
-	Events *poller.Events
 	LogStreams
 	poller.Logger
 }
 
-// ReportEvents should be easy to test.
-// Reports events to Loki, updates last check time, and prints a log message.
-func (r *Report) Execute(skipDur time.Duration) error {
+// Execute processes events, reports events to Loki, updates last check time, and prints a log message.
+func (r *Report) Execute(events *poller.Events, skipDur time.Duration) error {
 	// Sometimes it gets stuck on old messages. This gets it past that.
 	if time.Since(*r.Last) > skipDur {
 		*r.Last = time.Now().Add(-skipDur)
 	}
 
-	r.ProcessEventLogs() // Compile report.
+	r.ProcessEventLogs(events) // Compile report.
 
 	// Send report to Loki.
 	if err := r.Client.Post(r.LogStreams); err != nil {
@@ -48,7 +46,7 @@ func (r *Report) Execute(skipDur time.Duration) error {
 	}
 
 	*r.Last = r.Start
-	r.Logf("Events sent to Loki. Events: %d, IDS: %d, Alarm: %d, Anomalies: %d, Dur: %v",
+	r.Logf("Events sent to Loki. Event: %d, IDS: %d, Alarm: %d, Anomaly: %d, Dur: %v",
 		r.Counts[typeEvent], r.Counts[typeIDS], r.Counts[typeAlarm], r.Counts[typeAnomaly],
 		time.Since(r.Start).Round(time.Millisecond))
 
@@ -58,8 +56,8 @@ func (r *Report) Execute(skipDur time.Duration) error {
 // ProcessEventLogs loops the event Logs, matches the interface
 // type, calls the appropriate method for the data, and compiles the report.
 // This runs once per interval, if there was no collection error.
-func (r *Report) ProcessEventLogs() {
-	for _, e := range r.Events.Logs {
+func (r *Report) ProcessEventLogs(events *poller.Events) {
+	for _, e := range events.Logs {
 		switch event := e.(type) {
 		case *unifi.IDS:
 			r.IDS(event)

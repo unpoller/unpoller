@@ -108,12 +108,11 @@ func (l *Loki) pollController(start time.Time) error {
 	}
 
 	report := &Report{
-		Events: events,
 		Start:  start,
 		Logger: l.Collect,
 		Client: l.client,
 		Last:   &l.last,
 	}
 
-	return report.Execute(4 * l.Interval.Duration) // nolint: gomnd
+	return report.Execute(events, 4*l.Interval.Duration) // nolint: gomnd
 }
