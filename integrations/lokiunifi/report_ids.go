@@ -10,7 +10,7 @@ const typeIDS = "ids"
 
 // event stores a structured event Event for batch sending to Loki.
 func (r *Report) IDS(event *unifi.IDS) {
-	if event.Datetime.Before(*r.Last) {
+	if event.Datetime.Before(r.Oldest) {
 		return
 	}
 

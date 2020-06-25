@@ -10,7 +10,7 @@ const typeAnomaly = "anomaly"
 
 // Anomaly stores a structured Anomaly for batch sending to Loki.
 func (r *Report) Anomaly(event *unifi.Anomaly) {
-	if event.Datetime.Before(*r.Last) {
+	if event.Datetime.Before(r.Oldest) {
 		return
 	}
 

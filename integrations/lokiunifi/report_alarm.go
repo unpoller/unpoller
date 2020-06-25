@@ -10,7 +10,7 @@ const typeAlarm = "alarm"
 
 // Alarm stores a structured Alarm for batch sending to Loki.
 func (r *Report) Alarm(event *unifi.Alarm) {
-	if event.Datetime.Before(*r.Last) {
+	if event.Datetime.Before(r.Oldest) {
 		return
 	}
 

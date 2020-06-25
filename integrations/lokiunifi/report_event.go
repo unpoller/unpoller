@@ -10,7 +10,7 @@ const typeEvent = "event"
 
 // Event stores a structured UniFi Event for batch sending to Loki.
 func (r *Report) Event(event *unifi.Event) {
-	if event.Datetime.Before(*r.Last) {
+	if event.Datetime.Before(r.Oldest) {
 		return
 	}
 

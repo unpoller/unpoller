@@ -4,7 +4,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/pkg/errors"
 	"github.com/unifi-poller/poller"
 	"github.com/unifi-poller/unifi"
 )
@@ -16,41 +15,31 @@ type LogStream struct {
 	Entries [][]string        `json:"values"` // "the log lines"
 }
 
-// LogStreams is the main logs-holding structure.
-type LogStreams struct {
+// Logs is the main logs-holding structure.
+type Logs struct {
 	Streams []LogStream `json:"streams"` // "multiple files"
 }
 
 // Report is the temporary data generated and sent to Loki at every interval.
 type Report struct {
+	Logs
 	Counts map[string]int
-	Start  time.Time
-	Last   *time.Time
-	Client *Client
-	LogStreams
+	Oldest time.Time
 	poller.Logger
 }
 
-// Execute processes events, reports events to Loki, updates last check time, and prints a log message.
-func (r *Report) Execute(events *poller.Events, skipDur time.Duration) error {
-	// Sometimes it gets stuck on old messages. This gets it past that.
-	if time.Since(*r.Last) > skipDur {
-		*r.Last = time.Now().Add(-skipDur)
+// NewReport makes a new report.
+func (l *Loki) NewReport() *Report {
+	return &Report{
+		Logger: l.Collect,
+		Oldest: l.last,
 	}
+}
 
-	r.ProcessEventLogs(events) // Compile report.
-
-	// Send report to Loki.
-	if err := r.Client.Post(r.LogStreams); err != nil {
-		return errors.Wrap(err, "sending to Loki failed")
-	}
-
-	*r.Last = r.Start
+func (r *Report) LogOutput(start time.Time) {
 	r.Logf("Events sent to Loki. Event: %d, IDS: %d, Alarm: %d, Anomaly: %d, Dur: %v",
 		r.Counts[typeEvent], r.Counts[typeIDS], r.Counts[typeAlarm], r.Counts[typeAnomaly],
-		time.Since(r.Start).Round(time.Millisecond))
-
-	return nil
+		time.Since(start).Round(time.Millisecond))
 }
 
 // ProcessEventLogs loops the event Logs, matches the interface

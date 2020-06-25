@@ -40,7 +40,7 @@ func (l *Loki) httpClient() *Client {
 }
 
 // Post marshals and posts a batch of log messages.
-func (c *Client) Post(logs LogStreams) error {
+func (c *Client) Post(logs interface{}) error {
 	msg, err := json.Marshal(logs)
 	if err != nil {
 		return err

@@ -94,25 +94,34 @@ func (l *Loki) PollController() {
 
 	ticker := time.NewTicker(interval)
 	for start := range ticker.C {
-		if err := l.pollController(start); err != nil {
+		events, err := l.Events(&poller.Filter{Name: InputName})
+		if err != nil {
+			l.LogErrorf("event fetch for Loki failed: %v", err)
+			continue
+		}
+
+		err = l.ProcessEvents(l.NewReport(), events, start)
+		if err != nil {
 			l.LogErrorf("%v", err)
 		}
 	}
 }
 
-// pollController offloads the loop from PollController.
-func (l *Loki) pollController(start time.Time) error {
-	events, err := l.Events(&poller.Filter{Name: InputName})
-	if err != nil {
-		return errors.Wrap(err, "event fetch for Loki failed")
+// ProcessEvents offloads some of the loop from PollController.
+func (l *Loki) ProcessEvents(report *Report, events *poller.Events, start time.Time) error {
+	// Sometimes it gets stuck on old messages. This gets it past that.
+	if time.Since(l.last) > 4*l.Interval.Duration {
+		l.last = time.Now().Add(-4 * l.Interval.Duration)
 	}
 
-	report := &Report{
-		Start:  start,
-		Logger: l.Collect,
-		Client: l.client,
-		Last:   &l.last,
+	report.ProcessEventLogs(events)
+
+	if err := l.client.Post(report.Logs); err != nil {
+		return errors.Wrap(err, "sending to Loki failed")
 	}
 
-	return report.Execute(events, 4*l.Interval.Duration) // nolint: gomnd
+	l.last = start
+	report.LogOutput(l.last)
+
+	return nil
 }
