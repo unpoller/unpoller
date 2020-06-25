@@ -16,8 +16,8 @@ var (
 // Collect is passed into output packages so they may collect metrics to output.
 // Output packages must implement this interface.
 type Collect interface {
-	Metrics() (*Metrics, bool, error)
-	MetricsFrom(*Filter) (*Metrics, bool, error)
+	Metrics(*Filter) (*Metrics, error)
+	Events(*Filter) (*Events, error)
 	Logger
 }
 

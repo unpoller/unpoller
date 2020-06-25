@@ -1,11 +1,9 @@
 package poller
 
 import (
-	"fmt"
 	"strings"
 	"sync"
-
-	"github.com/unifi-poller/unifi"
+	"time"
 )
 
 var (
@@ -16,9 +14,9 @@ var (
 
 // Input plugins must implement this interface.
 type Input interface {
-	Initialize(Logger) error                     // Called once on startup to initialize the plugin.
-	Metrics() (*Metrics, bool, error)            // Called every time new metrics are requested.
-	MetricsFrom(*Filter) (*Metrics, bool, error) // Called every time new metrics are requested.
+	Initialize(Logger) error           // Called once on startup to initialize the plugin.
+	Metrics(*Filter) (*Metrics, error) // Called every time new metrics are requested.
+	Events(*Filter) (*Events, error)   // This is new.
 	RawMetrics(*Filter) ([]byte, error)
 }
 
@@ -34,21 +32,15 @@ type Filter struct {
 	Type string
 	Term string
 	Name string
-	Tags string
 	Role string
 	Kind string
 	Path string
-	Area int
-	Item int
+	Text string
 	Unit int
-	Sign int64
-	Mass int64
-	Rate float64
-	Cost float64
-	Free bool
-	True bool
-	Done bool
-	Stop bool
+	Pass bool
+	Skip bool
+	Time time.Time
+	Dur  time.Duration
 }
 
 // NewInput creates a metric input. This should be called by input plugins
@@ -79,88 +71,67 @@ func (u *UnifiPoller) InitializeInputs() error {
 	return nil
 }
 
-// Metrics aggregates all the measurements from all configured inputs and returns them.
-func (u *UnifiPoller) Metrics() (*Metrics, bool, error) {
-	errs := []string{}
-	metrics := &Metrics{}
-	ok := false
+// Events aggregates log messages (events) from one or more sources.
+func (u *UnifiPoller) Events(filter *Filter) (*Events, error) {
+	events := Events{}
 
 	for _, input := range inputs {
-		m, _, err := input.Metrics()
-		if err != nil {
-			errs = append(errs, err.Error())
-		}
-
-		if m == nil {
+		if filter != nil &&
+			filter.Name != "" &&
+			!strings.EqualFold(input.Name, filter.Name) {
 			continue
 		}
 
-		ok = true
+		e, err := input.Events(filter)
+		if err != nil {
+			return &events, err
+		}
+
+		// Logs is the only member to extend at this time.
+		events.Logs = append(events.Logs, e.Logs...)
+	}
+
+	return &events, nil
+}
+
+// Metrics aggregates all the measurements from filtered inputs and returns them.
+// Passing a null filter returns everything!
+func (u *UnifiPoller) Metrics(filter *Filter) (*Metrics, error) {
+	metrics := &Metrics{}
+
+	for _, input := range inputs {
+		if filter != nil &&
+			filter.Name != "" &&
+			!strings.EqualFold(input.Name, filter.Name) {
+			continue
+		}
+
+		m, err := input.Metrics(filter)
+		if err != nil {
+			return metrics, err
+		}
+
 		metrics = AppendMetrics(metrics, m)
 	}
 
-	var err error
-
-	if len(errs) > 0 {
-		err = fmt.Errorf(strings.Join(errs, ", ")) // nolint: goerr113
-	}
-
-	return metrics, ok, err
+	return metrics, nil
 }
 
-// MetricsFrom aggregates all the measurements from filtered inputs and returns them.
-func (u *UnifiPoller) MetricsFrom(filter *Filter) (*Metrics, bool, error) {
-	errs := []string{}
-	metrics := &Metrics{}
-	ok := false
-
-	for _, input := range inputs {
-		if filter != nil && !strings.EqualFold(input.Name, filter.Name) {
-			continue
-		}
-
-		m, _, err := input.MetricsFrom(filter)
-		if err != nil {
-			errs = append(errs, err.Error())
-		}
-
-		if m == nil {
-			continue
-		}
-
-		ok = true
-		metrics = AppendMetrics(metrics, m)
-	}
-
-	var err error
-
-	if len(errs) > 0 {
-		err = fmt.Errorf(strings.Join(errs, ", ")) // nolint: goerr113
-	}
-
-	return metrics, ok, err
-}
-
-// AppendMetrics combined the metrics from two sources.
+// AppendMetrics combines the metrics from two sources.
 func AppendMetrics(existing *Metrics, m *Metrics) *Metrics {
+	if existing == nil {
+		return m
+	}
+
+	if m == nil {
+		return existing
+	}
+
 	existing.SitesDPI = append(existing.SitesDPI, m.SitesDPI...)
 	existing.Sites = append(existing.Sites, m.Sites...)
 	existing.ClientsDPI = append(existing.ClientsDPI, m.ClientsDPI...)
 	existing.Clients = append(existing.Clients, m.Clients...)
-	existing.IDSList = append(existing.IDSList, m.IDSList...)
-
-	if m.Devices == nil {
-		return existing
-	}
-
-	if existing.Devices == nil {
-		existing.Devices = &unifi.Devices{}
-	}
-
-	existing.UAPs = append(existing.UAPs, m.UAPs...)
-	existing.USGs = append(existing.USGs, m.USGs...)
-	existing.USWs = append(existing.USWs, m.USWs...)
-	existing.UDMs = append(existing.UDMs, m.UDMs...)
+	existing.Devices = append(existing.Devices, m.Devices...)
 
 	return existing
 }
