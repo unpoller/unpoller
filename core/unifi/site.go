@@ -10,7 +10,7 @@ var (
 )
 
 // GetSites returns a list of configured sites on the UniFi controller.
-func (u *Unifi) GetSites() (Sites, error) {
+func (u *Unifi) GetSites() ([]*Site, error) {
 	var response struct {
 		Data []*Site `json:"data"`
 	}
@@ -37,7 +37,7 @@ func (u *Unifi) GetSites() (Sites, error) {
 }
 
 // GetSiteDPI garners dpi data for sites.
-func (u *Unifi) GetSiteDPI(sites Sites) ([]*DPITable, error) {
+func (u *Unifi) GetSiteDPI(sites []*Site) ([]*DPITable, error) {
 	data := []*DPITable{}
 
 	for _, site := range sites {
@@ -54,7 +54,8 @@ func (u *Unifi) GetSiteDPI(sites Sites) ([]*DPITable, error) {
 
 		if l := len(response.Data); l > 1 {
 			return nil, errDPIDataBug
-		} else if l != 1 {
+		} else if l == 0 {
+			u.DebugLog("Site DPI data missing! Is DPI enabled in UniFi controller? Site %s (%s) ", site.Name, site.Desc)
 			continue
 		}
 
@@ -65,9 +66,6 @@ func (u *Unifi) GetSiteDPI(sites Sites) ([]*DPITable, error) {
 
 	return data, nil
 }
-
-// Sites is a struct to match Devices and Clients.
-type Sites []*Site
 
 // Site represents a site's data.
 type Site struct {

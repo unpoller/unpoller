@@ -19,6 +19,8 @@ var (
 const (
 	// APIStatusPath shows Controller version.
 	APIStatusPath string = "/status"
+	// APIEventPath contains UniFi Event data.
+	APIEventPath string = "/api/s/%s/stat/event"
 	// APISiteList is the path to the api site list.
 	APISiteList string = "/api/stat/sites"
 	// APISiteDPI is site DPI data.
@@ -33,8 +35,8 @@ const (
 	APILoginPath string = "/api/login"
 	// APILoginPathNew is how we log into UDM 5.12.55+
 	APILoginPathNew string = "/api/auth/login"
-	// APIIPSEvents returns Intrusion Detection Systems Events
-	APIIPSEvents string = "/api/s/%s/stat/ips/event"
+	// APIEventPathIDS returns Intrusion Detection/Prevention Systems Events
+	APIEventPathIDS string = "/api/s/%s/stat/ips/event"
 	// APIPrefixNew is the prefix added to the new API paths; except login. duh.
 	APIPrefixNew string = "/proxy/network"
 )

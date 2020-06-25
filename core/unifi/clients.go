@@ -6,7 +6,7 @@ import (
 )
 
 // GetClients returns a response full of clients' data from the UniFi Controller.
-func (u *Unifi) GetClients(sites Sites) (Clients, error) {
+func (u *Unifi) GetClients(sites []*Site) ([]*Client, error) {
 	data := make([]*Client, 0)
 
 	for _, site := range sites {
@@ -38,7 +38,7 @@ func (u *Unifi) GetClients(sites Sites) (Clients, error) {
 }
 
 // GetClientsDPI garners dpi data for clients.
-func (u *Unifi) GetClientsDPI(sites Sites) ([]*DPITable, error) {
+func (u *Unifi) GetClientsDPI(sites []*Site) ([]*DPITable, error) {
 	var data []*DPITable
 
 	for _, site := range sites {
@@ -62,9 +62,6 @@ func (u *Unifi) GetClientsDPI(sites Sites) ([]*DPITable, error) {
 
 	return data, nil
 }
-
-// Clients contains a list that contains all of the unifi clients from a controller.
-type Clients []*Client
 
 // Client defines all the data a connected-network client contains.
 type Client struct {

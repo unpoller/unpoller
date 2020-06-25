@@ -1,10 +1,11 @@
-package unifi // nolint: testpackage
+package unifi_test
 
 import (
 	"encoding/json"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/unifi-poller/unifi"
 )
 
 func TestFlexInt(t *testing.T) {
@@ -13,11 +14,11 @@ func TestFlexInt(t *testing.T) {
 	five, seven := 5, 7
 
 	var r struct {
-		Five    FlexInt `json:"five"`
-		Seven   FlexInt `json:"seven"`
-		Auto    FlexInt `json:"auto"`
-		Channel FlexInt `json:"channel"`
-		Nil     FlexInt `json:"nil"`
+		Five    unifi.FlexInt `json:"five"`
+		Seven   unifi.FlexInt `json:"seven"`
+		Auto    unifi.FlexInt `json:"auto"`
+		Channel unifi.FlexInt `json:"channel"`
+		Nil     unifi.FlexInt `json:"nil"`
 	}
 
 	// test unmarshalling the custom type three times with different values.
