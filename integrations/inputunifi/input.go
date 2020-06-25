@@ -34,6 +34,8 @@ type InputUnifi struct {
 // Each polled controller may have its own configuration.
 type Controller struct {
 	VerifySSL  *bool        `json:"verify_ssl" toml:"verify_ssl" xml:"verify_ssl" yaml:"verify_ssl"`
+	SaveAnomal *bool        `json:"save_anomalies" toml:"save_anomalies" xml:"save_anomalies" yaml:"save_anomalies"`
+	SaveAlarms *bool        `json:"save_alarms" toml:"save_alarms" xml:"save_alarms" yaml:"save_alarms"`
 	SaveEvents *bool        `json:"save_events" toml:"save_events" xml:"save_events" yaml:"save_events"`
 	SaveIDS    *bool        `json:"save_ids" toml:"save_ids" xml:"save_ids" yaml:"save_ids"`
 	SaveDPI    *bool        `json:"save_dpi" toml:"save_dpi" xml:"save_dpi" yaml:"save_dpi"`
@@ -192,6 +194,14 @@ func (u *InputUnifi) setDefaults(c *Controller) {
 		c.SaveEvents = &f
 	}
 
+	if c.SaveAlarms == nil {
+		c.SaveAlarms = &f
+	}
+
+	if c.SaveAnomal == nil {
+		c.SaveAnomal = &f
+	}
+
 	if c.URL == "" {
 		c.URL = defaultURL
 	}
@@ -239,6 +249,14 @@ func (u *InputUnifi) setControllerDefaults(c *Controller) *Controller {
 
 	if c.SaveEvents == nil {
 		c.SaveEvents = u.Default.SaveEvents
+	}
+
+	if c.SaveAlarms == nil {
+		c.SaveAlarms = u.Default.SaveAlarms
+	}
+
+	if c.SaveAnomal == nil {
+		c.SaveAnomal = u.Default.SaveAnomal
 	}
 
 	if c.URL == "" {

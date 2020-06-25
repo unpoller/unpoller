@@ -91,6 +91,28 @@ func (u *InputUnifi) collectControllerEvents(c *Controller) ([]interface{}, erro
 		return nil, errors.Wrap(err, "unifi.GetSites()")
 	}
 
+	if *c.SaveAnomal {
+		anom, err := c.Unifi.GetAnomalies(sites, time.Now().Add(-time.Hour))
+		if err != nil {
+			return nil, errors.Wrap(err, "unifi.GetAnomalies()")
+		}
+
+		for _, a := range anom {
+			logs = append(logs, a)
+		}
+	}
+
+	if *c.SaveAlarms {
+		alarms, err := c.Unifi.GetAlarms(sites)
+		if err != nil {
+			return nil, errors.Wrap(err, "unifi.GetAlarms()")
+		}
+
+		for _, a := range alarms {
+			logs = append(logs, a)
+		}
+	}
+
 	if *c.SaveEvents {
 		events, err := c.Unifi.GetEvents(sites, time.Hour)
 		if err != nil {
