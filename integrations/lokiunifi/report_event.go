@@ -6,16 +6,17 @@ import (
 	"github.com/unifi-poller/unifi"
 )
 
-const typeEvent = "event"
+const typeEvent = "Event"
 
 // Event stores a structured UniFi Event for batch sending to Loki.
-func (r *Report) Event(event *unifi.Event) {
+func (r *Report) Event(event *unifi.Event, logs *Logs) {
 	if event.Datetime.Before(r.Oldest) {
 		return
 	}
 
 	r.Counts[typeEvent]++ // increase counter and append new log line.
-	r.Streams = append(r.Streams, LogStream{
+
+	logs.Streams = append(logs.Streams, LogStream{
 		Entries: [][]string{{strconv.FormatInt(event.Datetime.UnixNano(), 10), event.Msg}},
 		Labels: CleanLabels(map[string]string{
 			"application":  "unifi_event",

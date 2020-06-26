@@ -1,6 +1,7 @@
 package lokiunifi
 
 import (
+	"io/ioutil"
 	"strings"
 	"time"
 
@@ -10,7 +11,7 @@ import (
 )
 
 const (
-	maxInterval     = time.Hour
+	maxInterval     = 10 * time.Minute
 	minInterval     = 10 * time.Second
 	defaultTimeout  = 10 * time.Second
 	defaultInterval = 2 * time.Minute
@@ -20,7 +21,7 @@ const (
 	// InputName is the name of plugin that gives us data.
 	InputName = "unifi"
 	// PluginName is the name of this plugin.
-	PluginName = "loki"
+	PluginName = "Loki"
 )
 
 // Config is the plugin's input data.
@@ -81,6 +82,15 @@ func (l *Loki) ValidateConfig() {
 		l.Interval.Duration = minInterval
 	}
 
+	if strings.HasPrefix(l.Password, "file://") {
+		pass, err := ioutil.ReadFile(strings.TrimPrefix(l.Password, "file://"))
+		if err != nil {
+			l.LogErrorf("Reading Loki Password File: %v", err)
+		}
+
+		l.Password = strings.TrimSpace(string(pass))
+	}
+
 	l.last = time.Now().Add(-l.Interval.Duration)
 	l.client = l.httpClient()
 	l.URL = strings.TrimRight(l.URL, "/") // gets a path appended to it later.
@@ -100,7 +110,7 @@ func (l *Loki) PollController() {
 			continue
 		}
 
-		err = l.ProcessEvents(l.NewReport(), events, start)
+		err = l.ProcessEvents(l.NewReport(start), events)
 		if err != nil {
 			l.LogErrorf("%v", err)
 		}
@@ -108,20 +118,19 @@ func (l *Loki) PollController() {
 }
 
 // ProcessEvents offloads some of the loop from PollController.
-func (l *Loki) ProcessEvents(report *Report, events *poller.Events, start time.Time) error {
+func (l *Loki) ProcessEvents(report *Report, events *poller.Events) error {
 	// Sometimes it gets stuck on old messages. This gets it past that.
 	if time.Since(l.last) > 4*l.Interval.Duration {
 		l.last = time.Now().Add(-4 * l.Interval.Duration)
 	}
 
-	report.ProcessEventLogs(events)
-
-	if err := l.client.Post(report.Logs); err != nil {
+	logs := report.ProcessEventLogs(events)
+	if err := l.client.Post(logs); err != nil {
 		return errors.Wrap(err, "sending to Loki failed")
 	}
 
-	l.last = start
-	report.LogOutput(l.last)
+	l.last = report.Start
+	l.Logf("Events sent to Loki. %v", report)
 
 	return nil
 }

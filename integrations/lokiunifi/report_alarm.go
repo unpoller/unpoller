@@ -6,16 +6,17 @@ import (
 	"github.com/unifi-poller/unifi"
 )
 
-const typeAlarm = "alarm"
+const typeAlarm = "Alarm"
 
 // Alarm stores a structured Alarm for batch sending to Loki.
-func (r *Report) Alarm(event *unifi.Alarm) {
+func (r *Report) Alarm(event *unifi.Alarm, logs *Logs) {
 	if event.Datetime.Before(r.Oldest) {
 		return
 	}
 
 	r.Counts[typeAlarm]++ // increase counter and append new log line.
-	r.Streams = append(r.Streams, LogStream{
+
+	logs.Streams = append(logs.Streams, LogStream{
 		Entries: [][]string{{strconv.FormatInt(event.Datetime.UnixNano(), 10), event.Msg}},
 		Labels: CleanLabels(map[string]string{
 			"application":  "unifi_alarm",
