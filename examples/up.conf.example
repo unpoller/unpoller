@@ -59,15 +59,18 @@
 # controller here and delete the following section. The internal defaults are
 # shown below. Any missing values will assume these displayed defaults.
 [unifi.defaults]
-  url        = "https://127.0.0.1:8443"
-  user       = "unifipoller"
-  pass       = "unifipoller"
-  sites      = ["all"]
-  save_ids   = false
-  save_dpi   = false
-  save_sites = true
-  hash_pii   = false
-  verify_ssl = false
+  url         = "https://127.0.0.1:8443"
+  user        = "unifipoller"
+  pass        = "unifipoller"
+  sites       = ["all"]
+  save_ids    = false
+  save_events = false
+  save_alarms = false
+  save_anomalies = false
+  save_dpi    = false
+  save_sites  = true
+  hash_pii    = false
+  verify_ssl  = false
 
 # The following is optional and used for configurations with multiple controllers.
 
@@ -91,19 +94,31 @@
   # A setting of ["all"] will poll all sites; this works if you only have 1 site too.
   #sites = ["all"]
 
-  # Enable collection of UniFi Events (InfluxDB only).
-  # This may store a lot of information. Only recommended for testing and debugging.
-  # There are no dashboards to display this data. It can be used for annotations.
-  # This is a new (July, 2020) feature. Please provide feedback if you try it out!
-  # Enable this only if using InfluxDB. This may leak PII data!
-  #save_events = false
-
-  # Enable collection of Intrusion Detection System Data (InfluxDB only).
+  # Enable collection of Intrusion Detection System Data (InfluxDB/Loki only).
   # Only useful if IDS or IPS are enabled on one of the sites. This may store
   # a lot of information. Only recommended for testing and debugging. There
   # may not be any dashboards to display this data. It can be used for annotations.
-  # Enable this only if using InfluxDB. This may leak PII data!
+  # Enable this only if using InfluxDB or Loki. This will leak PII data!
   #save_ids = false
+
+  # Enable collection of UniFi Events (InfluxDB/Loki only).
+  # This may store a lot of information. Only recommended for testing and debugging.
+  # There are no dashboards to display this data. It can be used for annotations.
+  # This is a new (June, 2020) feature. Please provide feedback if you try it out!
+  # Enable this only if using InfluxDB or Loki. This will leak PII data!
+  #save_events = false
+
+  # Enable collection of UniFi Alarms (InfluxDB/Loki only).
+  # There are no dashboards to display this data. It can be used for annotations.
+  # This is a new (June, 2020) feature. Please provide feedback if you try it out!
+  # Enable this only if using InfluxDB or Loki. This will leak PII data!
+  #save_alarms = false
+
+  # Enable collection of UniFi Anomalies (InfluxDB/Loki only).
+  # There are no dashboards to display this data. It can be used for annotations.
+  # This is a new (June, 2020) feature. Please provide feedback if you try it out!
+  # Enable this only if using InfluxDB or Loki.
+  #save_anomalies = false
 
   # Enable collection of Deep Packet Inspection data. This data breaks down traffic
   # types for each client and site, it powers a dedicated DPI dashboard.

@@ -32,8 +32,10 @@ unifi:
     pass: "unifipoller"
     sites:
       - all
-    save_events: false
     save_ids:    false
+    save_events: false
+    save_alarms: false
+    save_anomalies: false
     save_dpi:    false
     save_sites:  true
     hash_pii:    false
@@ -47,8 +49,10 @@ unifi:
       pass: "unifipoller"
       sites:
         - all
-      save_events: false
       save_ids:    false
+      save_events: false
+      save_alarms: false
+      save_anomalies: false
       save_dpi:    false
       save_sites:  true
       hash_pii:    false

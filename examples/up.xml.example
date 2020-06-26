@@ -31,8 +31,10 @@ NOTE: <plugin> and <site> are lists of strings and may be repeated.
       <user>unifipoller</user>
       <pass>unifipoller</pass>
       <url>https://127.0.0.1:8443</url>
-      <save_events>false</save_events>
       <save_ids>false</save_ids>
+      <save_events>false</save_events>
+      <save_alarms>false</save_alarms>
+      <save_anomalies>false</save_anomalies>
       <save_dpi>false</save_dpi>
       <save_sites>true</save_sites>
       <hash_pii>false</hash_pii>
@@ -45,8 +47,10 @@ NOTE: <plugin> and <site> are lists of strings and may be repeated.
       <user>unifipoller</user>
       <pass>unifipoller</pass>
       <url>https://127.0.0.1:8443</url>
-      <save_events>false</save_events>
       <save_ids>false</save_ids>
+      <save_events>false</save_events>
+      <save_alarms>false</save_alarms>
+      <save_anomalies>false</save_anomalies>
       <save_dpi>false</save_dpi>
       <save_sites>true</save_sites>
       <hash_pii>false</hash_pii>
