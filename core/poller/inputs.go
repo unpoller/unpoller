@@ -9,7 +9,7 @@ import (
 var (
 	// These are used ot keep track of loaded input plugins.
 	inputs    []*InputPlugin // nolint: gochecknoglobals
-	inputSync sync.Mutex     // nolint: gochecknoglobals
+	inputSync sync.RWMutex   // nolint: gochecknoglobals
 )
 
 // Input plugins must implement this interface.
@@ -58,8 +58,8 @@ func NewInput(i *InputPlugin) {
 
 // InitializeInputs runs the passed-in initializer method for each input plugin.
 func (u *UnifiPoller) InitializeInputs() error {
-	inputSync.Lock()
-	defer inputSync.Unlock()
+	inputSync.RLock()
+	defer inputSync.RUnlock()
 
 	for _, input := range inputs {
 		// This must return, or the app locks up here.
@@ -73,6 +73,9 @@ func (u *UnifiPoller) InitializeInputs() error {
 
 // Events aggregates log messages (events) from one or more sources.
 func (u *UnifiPoller) Events(filter *Filter) (*Events, error) {
+	inputSync.RLock()
+	defer inputSync.RUnlock()
+
 	events := Events{}
 
 	for _, input := range inputs {
@@ -97,6 +100,9 @@ func (u *UnifiPoller) Events(filter *Filter) (*Events, error) {
 // Metrics aggregates all the measurements from filtered inputs and returns them.
 // Passing a null filter returns everything!
 func (u *UnifiPoller) Metrics(filter *Filter) (*Metrics, error) {
+	inputSync.RLock()
+	defer inputSync.RUnlock()
+
 	metrics := &Metrics{}
 
 	for _, input := range inputs {
@@ -134,4 +140,16 @@ func AppendMetrics(existing *Metrics, m *Metrics) *Metrics {
 	existing.Devices = append(existing.Devices, m.Devices...)
 
 	return existing
+}
+
+// Inputs allows output plugins to see the list of loaded input plugins.
+func (u *UnifiPoller) Inputs() (names []string) {
+	inputSync.RLock()
+	defer inputSync.RUnlock()
+
+	for i := range inputs {
+		names = append(names, inputs[i].Name)
+	}
+
+	return names
 }

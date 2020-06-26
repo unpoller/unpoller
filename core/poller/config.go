@@ -43,6 +43,7 @@ type Metrics struct {
 	Devices    []interface{}
 }
 
+// Events defines the type for log entries.
 type Events struct {
 	Logs []interface{}
 }
