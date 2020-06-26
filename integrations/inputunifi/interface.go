@@ -24,8 +24,8 @@ func (u *InputUnifi) Initialize(l poller.Logger) error {
 		u.Config = &Config{Disable: true}
 	}
 
-	if u.Disable {
-		l.Logf("UniFi input plugin disabled or missing configuration!")
+	if u.Logger = l; u.Disable {
+		u.Logf("UniFi input plugin disabled or missing configuration!")
 		return nil
 	}
 
@@ -34,11 +34,9 @@ func (u *InputUnifi) Initialize(l poller.Logger) error {
 	}
 
 	if len(u.Controllers) == 0 {
-		l.Logf("No controllers configured. Polling dynamic controllers only!")
+		u.Logf("No controllers configured. Polling dynamic controllers only! Defaults:")
+		u.logController(&u.Default)
 	}
-
-	u.dynamic = make(map[string]*Controller)
-	u.Logger = l
 
 	for i, c := range u.Controllers {
 		switch err := u.getUnifi(u.setControllerDefaults(c)); err {
@@ -47,9 +45,9 @@ func (u *InputUnifi) Initialize(l poller.Logger) error {
 				u.LogErrorf("checking sites on %s: %v", c.URL, err)
 			}
 
-			u.Logf("Configured UniFi Controller %d:", i+1)
+			u.Logf("Configured UniFi Controller %d of %d:", i+1, len(u.Controllers))
 		default:
-			u.LogErrorf("Controller %d Auth or Connection Error, retrying: %v", i+1, err)
+			u.LogErrorf("Controller %d of %d Auth or Connection Error, retrying: %v", i+1, len(u.Controllers), err)
 		}
 
 		u.logController(c)
@@ -59,19 +57,17 @@ func (u *InputUnifi) Initialize(l poller.Logger) error {
 }
 
 func (u *InputUnifi) logController(c *Controller) {
-	u.Logf("   => URL: %s", c.URL)
+	u.Logf("   => URL: %s (verify SSL: %v)", c.URL, *c.VerifySSL)
 
 	if c.Unifi != nil {
-		u.Logf("   => Version: %s", c.Unifi.ServerVersion)
+		u.Logf("   => Version: %s (%s)", c.Unifi.ServerVersion, c.Unifi.UUID)
 	}
 
 	u.Logf("   => Username: %s (has password: %v)", c.User, c.Pass != "")
-	u.Logf("   => Hash PII: %v", *c.HashPII)
-	u.Logf("   => Verify SSL: %v", *c.VerifySSL)
-	u.Logf("   => Save DPI: %v", *c.SaveDPI)
-	u.Logf("   => Save IDS: %v", *c.SaveIDS)
-	u.Logf("   => Save Events: %v", *c.SaveEvents)
-	u.Logf("   => Save Sites: %v", *c.SaveSites)
+	u.Logf("   => Hash PII / Poll Sites: %v / %s", *c.HashPII, strings.Join(c.Sites, ", "))
+	u.Logf("   => Save Sites / Save DPI: %v / %v (metrics)", *c.SaveSites, *c.SaveDPI)
+	u.Logf("   => Save Events / Save IDS: %v / %v (logs)", *c.SaveEvents, *c.SaveIDS)
+	u.Logf("   => Save Alarms / Anomalies: %v / %v (logs)", *c.SaveAlarms, *c.SaveAnomal)
 }
 
 // Events allows you to pull only events (and IDS) from the UniFi Controller.

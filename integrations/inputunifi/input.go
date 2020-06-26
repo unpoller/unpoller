@@ -67,7 +67,9 @@ type Metrics struct {
 }
 
 func init() { // nolint: gochecknoinits
-	u := &InputUnifi{}
+	u := &InputUnifi{
+		dynamic: make(map[string]*Controller),
+	}
 
 	poller.NewInput(&poller.InputPlugin{
 		Name:   PluginName,
