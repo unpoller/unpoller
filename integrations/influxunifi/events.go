@@ -6,13 +6,16 @@ import (
 	"github.com/unifi-poller/unifi"
 )
 
+const (
+	Tevent = item("Event")
+	TIDS   = item("IDS")
+)
+
 // batchIDS generates intrusion detection datapoints for InfluxDB.
-func (u *InfluxUnifi) batchIDS(r report, i *unifi.IDS) {
+func (u *InfluxUnifi) batchIDS(r report, i *unifi.IDS) { // nolint: godupl
 	if time.Since(i.Datetime) > u.Interval.Duration+time.Second {
 		return // The event is older than our interval, ignore it.
 	}
-
-	r.addIDS()
 
 	fields := map[string]interface{}{
 		"dest_port":            i.DestPort,
@@ -41,23 +44,24 @@ func (u *InfluxUnifi) batchIDS(r report, i *unifi.IDS) {
 		"srcip_organization":   i.SourceIPGeo.Organization,
 	}
 
+	r.addCount(TIDS)
 	r.send(&metric{
 		Table:  "unifi_ids",
 		TS:     i.Datetime,
 		Fields: cleanFields(fields),
 		Tags: cleanTags(map[string]string{
-			"site_name":          i.SiteName,
-			"source":             i.SourceName,
-			"in_iface":           i.InIface,
-			"event_type":         i.EventType,
-			"subsystem":          i.Subsystem,
-			"archived":           i.Archived.Txt,
-			"usgip":              i.USGIP,
-			"proto":              i.Proto,
-			"key":                i.Key,
-			"catname":            i.Catname,
-			"app_proto":          i.AppProto,
-			"inner_alert_action": i.InnerAlertAction,
+			"site_name":  i.SiteName,
+			"source":     i.SourceName,
+			"in_iface":   i.InIface,
+			"event_type": i.EventType,
+			"subsystem":  i.Subsystem,
+			"archived":   i.Archived.Txt,
+			"usgip":      i.USGIP,
+			"proto":      i.Proto,
+			"key":        i.Key,
+			"catname":    i.Catname,
+			"app_proto":  i.AppProto,
+			"action":     i.InnerAlertAction,
 		}),
 	})
 }
@@ -67,8 +71,6 @@ func (u *InfluxUnifi) batchEvent(r report, i *unifi.Event) { // nolint: funlen
 	if time.Since(i.Datetime) > u.Interval.Duration+time.Second {
 		return // The event is older than our interval, ignore it.
 	}
-
-	r.addEvent()
 
 	fields := map[string]interface{}{
 		"msg":                  i.Msg,          // contains user[] or guest[] or admin[]
@@ -103,6 +105,7 @@ func (u *InfluxUnifi) batchEvent(r report, i *unifi.Event) { // nolint: funlen
 		"srcip_organization":   i.SourceIPGeo.Organization,
 	}
 
+	r.addCount(Tevent)
 	r.send(&metric{
 		TS:     i.Datetime,
 		Table:  "unifi_events",

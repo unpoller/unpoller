@@ -92,7 +92,7 @@ func (u *InfluxUnifi) PollController() {
 			continue
 		}
 
-		u.LogInfluxReport(report)
+		u.Collector.Logf("UniFi Metrics Recorded. %v", report)
 	}
 }
 
@@ -166,7 +166,13 @@ func (u *InfluxUnifi) getPassFromFile(filename string) string {
 // Call this after you've collected all the data you care about.
 // Returns an error if influxdb calls fail, otherwise returns a report.
 func (u *InfluxUnifi) ReportMetrics(m *poller.Metrics, e *poller.Events) (*Report, error) {
-	r := &Report{Metrics: m, Events: e, ch: make(chan *metric), Start: time.Now()}
+	r := &Report{
+		Metrics: m,
+		Events:  e,
+		ch:      make(chan *metric),
+		Start:   time.Now(),
+		Counts:  make(map[item]int),
+	}
 	defer close(r.ch)
 
 	var err error
@@ -248,16 +254,12 @@ func (u *InfluxUnifi) loopPoints(r report) {
 func (u *InfluxUnifi) switchExport(r report, v interface{}) {
 	switch v := v.(type) {
 	case *unifi.UAP:
-		r.addUAP()
 		u.batchUAP(r, v)
 	case *unifi.USW:
-		r.addUSW()
 		u.batchUSW(r, v)
 	case *unifi.USG:
-		r.addUSG()
 		u.batchUSG(r, v)
 	case *unifi.UDM:
-		r.addUDM()
 		u.batchUDM(r, v)
 	case *unifi.Site:
 		u.batchSite(r, v)
@@ -267,18 +269,11 @@ func (u *InfluxUnifi) switchExport(r report, v interface{}) {
 		u.batchEvent(r, v)
 	case *unifi.IDS:
 		u.batchIDS(r, v)
+	case *unifi.Alarm:
+		u.batchAlarms(r, v)
+	case *unifi.Anomaly:
+		u.batchAnomaly(r, v)
 	default:
 		u.Collector.LogErrorf("invalid export type: %T", v)
 	}
-}
-
-// LogInfluxReport writes a log message after exporting to influxdb.
-func (u *InfluxUnifi) LogInfluxReport(r *Report) {
-	m := r.Metrics
-	u.Collector.Logf("UniFi Metrics Recorded. Site: %d, Client: %d, "+
-		"UAP: %d, USG/UDM: %d, USW: %d, IDS/Events: %d/%d, DPI Site/Client: %d/%d, "+
-		"Point: %d, Field: %d, Err: %d, Dur: %v",
-		len(m.Sites), len(m.Clients), r.UAP, r.UDM+r.USG,
-		r.USW, r.IDS, r.Eve, len(m.SitesDPI), len(m.ClientsDPI), r.Total,
-		r.Fields, len(r.Errors), r.Elapsed.Round(time.Millisecond))
 }

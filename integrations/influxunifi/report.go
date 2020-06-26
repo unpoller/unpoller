@@ -1,6 +1,7 @@
 package influxunifi
 
 import (
+	"fmt"
 	"sync"
 	"time"
 
@@ -13,14 +14,7 @@ type Report struct {
 	Metrics *poller.Metrics
 	Events  *poller.Events
 	Errors  []error
-	Total   int
-	Fields  int
-	USG     int // Total count of USG devices.
-	USW     int // Total count of USW devices.
-	UAP     int // Total count of UAP devices.
-	UDM     int // Total count of UDM devices.
-	Eve     int // Total count of Events.
-	IDS     int // Total count of IDS/IPS Events.
+	Counts  map[item]int
 	Start   time.Time
 	Elapsed time.Duration
 	ch      chan *metric
@@ -37,12 +31,7 @@ type report interface {
 	batch(m *metric, pt *influx.Point)
 	metrics() *poller.Metrics
 	events() *poller.Events
-	addUDM()
-	addUSG()
-	addUAP()
-	addUSW()
-	addEvent()
-	addIDS()
+	addCount(item, ...int)
 }
 
 func (r *Report) metrics() *poller.Metrics {
@@ -68,23 +57,16 @@ func (r *Report) send(m *metric) {
 
 /* The following methods are not thread safe. */
 
-func (r *Report) addUSW() {
-	r.USW++
-}
-func (r *Report) addUAP() {
-	r.UAP++
-}
-func (r *Report) addUSG() {
-	r.USG++
-}
-func (r *Report) addUDM() {
-	r.UDM++
-}
-func (r *Report) addEvent() {
-	r.Eve++
-}
-func (r *Report) addIDS() {
-	r.IDS++
+type item string
+
+func (r *Report) addCount(name item, counts ...int) {
+	if len(counts) == 0 {
+		r.Counts[name]++
+	}
+
+	for _, c := range counts {
+		r.Counts[name] += c
+	}
 }
 
 func (r *Report) error(err error) {
@@ -93,8 +75,24 @@ func (r *Report) error(err error) {
 	}
 }
 
+const (
+	Ttotal = item("Point")
+	Tfield = item("Fields")
+)
+
 func (r *Report) batch(m *metric, p *influx.Point) {
-	r.Total++
-	r.Fields += len(m.Fields)
+	r.addCount(Ttotal)
+	r.addCount(Tfield, len(m.Fields))
 	r.bp.AddPoint(p)
+}
+
+func (r *Report) String() string {
+	return fmt.Sprintf("Site: %d, Client: %d, "+
+		"%s: %d, %s/%s: %d, %s: %d, %s/%s/%s/%s: %d/%d/%d/%d, "+
+		"DPI Site/Client: %d/%d, %s: %d, %s: %d, Err: %d, Dur: %v",
+		len(r.Metrics.Sites), len(r.Metrics.Clients),
+		TUAP, r.Counts[TUAP], TUDM, TUSG, r.Counts[TUDM]+r.Counts[TUSG], TUSW, r.Counts[TUSW],
+		TIDS, Tevent, Talarm, Tanomaly, r.Counts[TIDS], r.Counts[Tevent], r.Counts[Talarm], r.Counts[Tanomaly],
+		len(r.Metrics.SitesDPI), len(r.Metrics.ClientsDPI), Ttotal, r.Counts[Ttotal],
+		Tfield, r.Counts[Tfield], len(r.Errors), r.Elapsed.Round(time.Millisecond))
 }

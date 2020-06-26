@@ -4,6 +4,8 @@ import (
 	"github.com/unifi-poller/unifi"
 )
 
+const TUSW = item("USW")
+
 // batchUSW generates Unifi Switch datapoints for InfluxDB.
 // These points can be passed directly to influx.
 func (u *InfluxUnifi) batchUSW(r report, s *unifi.USW) {
@@ -38,6 +40,7 @@ func (u *InfluxUnifi) batchUSW(r report, s *unifi.USW) {
 			"user-num_sta":        s.UserNumSta.Val,
 		})
 
+	r.addCount(TUSW)
 	r.send(&metric{Table: "usw", Tags: tags, Fields: fields})
 	u.batchPortTable(r, tags, s.PortTable)
 }
