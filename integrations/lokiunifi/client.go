@@ -76,12 +76,12 @@ func (c *Client) NewRequest(url, method, cType string, msg []byte) (*http.Reques
 		req.Header.Set("Content-Type", cType)
 	}
 
-	if c.Config.Username != "" || c.Config.Password != "" {
-		req.SetBasicAuth(c.Config.Username, c.Config.Password)
+	if c.Username != "" || c.Password != "" {
+		req.SetBasicAuth(c.Username, c.Password)
 	}
 
-	if c.Config.TenantID != "" {
-		req.Header.Set("X-Scope-OrgID", c.Config.TenantID)
+	if c.TenantID != "" {
+		req.Header.Set("X-Scope-OrgID", c.TenantID)
 	}
 
 	return req, nil
