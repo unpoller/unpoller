@@ -57,7 +57,7 @@ type Config struct {
 type Poller struct {
 	Plugins []string `json:"plugins" toml:"plugins" xml:"plugin" yaml:"plugins"`
 	Debug   bool     `json:"debug" toml:"debug" xml:"debug,attr" yaml:"debug"`
-	Quiet   bool     `json:"quiet,omitempty" toml:"quiet,omitempty" xml:"quiet,attr" yaml:"quiet"`
+	Quiet   bool     `json:"quiet" toml:"quiet" xml:"quiet,attr" yaml:"quiet"`
 }
 
 // LoadPlugins reads-in dynamic shared libraries.
