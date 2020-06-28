@@ -9,6 +9,7 @@ import (
 	"github.com/pkg/errors"
 	"github.com/unifi-poller/poller"
 	"github.com/unifi-poller/unifi"
+	"github.com/unifi-poller/webserver"
 )
 
 var (
@@ -52,6 +53,8 @@ func (u *InputUnifi) Initialize(l poller.Logger) error {
 
 		u.logController(c)
 	}
+
+	webserver.UpdateInput(&webserver.Input{Name: PluginName, Config: formatConfig(u.Config)})
 
 	return nil
 }

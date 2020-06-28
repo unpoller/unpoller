@@ -82,62 +82,6 @@ func (u *InputUnifi) collectController(c *Controller) (*poller.Metrics, error) {
 	return metrics, err
 }
 
-func (u *InputUnifi) collectControllerEvents(c *Controller) ([]interface{}, error) {
-	logs := []interface{}{}
-
-	// Get the sites we care about.
-	sites, err := u.getFilteredSites(c)
-	if err != nil {
-		return nil, errors.Wrap(err, "unifi.GetSites()")
-	}
-
-	if *c.SaveAnomal {
-		anom, err := c.Unifi.GetAnomalies(sites, time.Now().Add(-time.Hour))
-		if err != nil {
-			return nil, errors.Wrap(err, "unifi.GetAnomalies()")
-		}
-
-		for _, a := range anom {
-			logs = append(logs, a)
-		}
-	}
-
-	if *c.SaveAlarms {
-		alarms, err := c.Unifi.GetAlarms(sites)
-		if err != nil {
-			return nil, errors.Wrap(err, "unifi.GetAlarms()")
-		}
-
-		for _, a := range alarms {
-			logs = append(logs, a)
-		}
-	}
-
-	if *c.SaveEvents {
-		events, err := c.Unifi.GetEvents(sites, time.Hour)
-		if err != nil {
-			return nil, errors.Wrap(err, "unifi.GetEvents()")
-		}
-
-		for _, e := range events {
-			logs = append(logs, redactEvent(e, c.HashPII))
-		}
-	}
-
-	if *c.SaveIDS {
-		events, err := c.Unifi.GetIDS(sites, time.Now().Add(-time.Hour))
-		if err != nil {
-			return nil, errors.Wrap(err, "unifi.GetIDS()")
-		}
-
-		for _, e := range events {
-			logs = append(logs, e)
-		}
-	}
-
-	return logs, nil
-}
-
 func (u *InputUnifi) pollController(c *Controller) (*poller.Metrics, error) {
 	u.RLock()
 	defer u.RUnlock()
@@ -168,6 +112,8 @@ func (u *InputUnifi) pollController(c *Controller) (*poller.Metrics, error) {
 	if m.Devices, err = c.Unifi.GetDevices(sites); err != nil {
 		return nil, errors.Wrapf(err, "unifi.GetDevices(%s)", c.URL)
 	}
+
+	defer updateWeb(m)
 
 	return u.augmentMetrics(c, m), nil
 }
@@ -255,24 +201,6 @@ func extractDevices(metrics *Metrics) (*poller.Metrics, map[string]string, map[s
 	}
 
 	return m, devices, bssdIDs
-}
-
-// redactEvent attempts to mask personally identying information from log messages.
-// This currently misses the "msg" value entirely and leaks PII information.
-func redactEvent(e *unifi.Event, hash *bool) *unifi.Event {
-	if !*hash {
-		return e
-	}
-
-	// metrics.Events[i].Msg <-- not sure what to do here.
-	e.DestIPGeo = unifi.IPGeo{}
-	e.SourceIPGeo = unifi.IPGeo{}
-	e.Host = RedactNamePII(e.Host, hash)
-	e.Hostname = RedactNamePII(e.Hostname, hash)
-	e.DstMAC = RedactMacPII(e.DstMAC, hash)
-	e.SrcMAC = RedactMacPII(e.SrcMAC, hash)
-
-	return e
 }
 
 // RedactNamePII converts a name string to an md5 hash (first 24 chars only).
