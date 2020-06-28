@@ -41,7 +41,7 @@ func (u *UnifiPoller) PrintPasswordHash() (err error) {
 	if u.Flags.HashPW == "-" {
 		fmt.Print("Enter Password: ")
 
-		pwd, err = terminal.ReadPassword(syscall.Stdin)
+		pwd, err = terminal.ReadPassword(int(syscall.Stdin))
 		if err != nil {
 			return err
 		}
