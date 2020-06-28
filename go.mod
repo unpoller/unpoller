@@ -20,7 +20,7 @@ require (
 	github.com/unifi-poller/poller v0.0.8-0.20200628131550-26430cac16c1
 	github.com/unifi-poller/promunifi v0.0.9-0.20200628212620-13ccb1ce3beb
 	github.com/unifi-poller/unifi v0.0.6-0.20200625090439-421046871a37
-	github.com/unifi-poller/webserver v0.0.0-20200628212441-340749c94743
+	github.com/unifi-poller/webserver v0.0.0-20200628220857-bb444cf7da24
 	golang.org/x/net v0.0.0-20200625001655-4c5254603344 // indirect
 	golang.org/x/sys v0.0.0-20200625212154-ddb9806d33ae // indirect
 	golift.io/cnfg v0.0.5 // indirect
