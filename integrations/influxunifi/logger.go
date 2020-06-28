@@ -9,7 +9,7 @@ import (
 
 // Logf logs a message.
 func (u *InfluxUnifi) Logf(msg string, v ...interface{}) {
-	webserver.NewInputEvent(PluginName, PluginName, &webserver.Event{
+	webserver.NewOutputEvent(PluginName, PluginName, &webserver.Event{
 		Ts:   time.Now(),
 		Msg:  fmt.Sprintf(msg, v...),
 		Tags: map[string]string{"type": "info"},
@@ -19,7 +19,7 @@ func (u *InfluxUnifi) Logf(msg string, v ...interface{}) {
 
 // LogErrorf logs an error message.
 func (u *InfluxUnifi) LogErrorf(msg string, v ...interface{}) {
-	webserver.NewInputEvent(PluginName, PluginName, &webserver.Event{
+	webserver.NewOutputEvent(PluginName, PluginName, &webserver.Event{
 		Ts:   time.Now(),
 		Msg:  fmt.Sprintf(msg, v...),
 		Tags: map[string]string{"type": "error"},
@@ -29,7 +29,7 @@ func (u *InfluxUnifi) LogErrorf(msg string, v ...interface{}) {
 
 // LogDebugf logs a debug message.
 func (u *InfluxUnifi) LogDebugf(msg string, v ...interface{}) {
-	webserver.NewInputEvent(PluginName, PluginName, &webserver.Event{
+	webserver.NewOutputEvent(PluginName, PluginName, &webserver.Event{
 		Ts:   time.Now(),
 		Msg:  fmt.Sprintf(msg, v...),
 		Tags: map[string]string{"type": "debug"},
