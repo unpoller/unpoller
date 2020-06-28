@@ -14,7 +14,11 @@ import (
 	"github.com/prometheus/common/version"
 	"github.com/unifi-poller/poller"
 	"github.com/unifi-poller/unifi"
+	"github.com/unifi-poller/webserver"
 )
+
+// PluginName is the name of this plugin.
+const PluginName = "prometheus"
 
 const (
 	// channel buffer, fits at least one batch.
@@ -96,7 +100,7 @@ func init() { // nolint: gochecknoinits
 	u := &promUnifi{Config: &Config{}}
 
 	poller.NewOutput(&poller.Output{
-		Name:   "prometheus",
+		Name:   PluginName,
 		Config: u,
 		Method: u.Run,
 	})
@@ -105,8 +109,8 @@ func init() { // nolint: gochecknoinits
 // Run creates the collectors and starts the web server up.
 // Should be run in a Go routine. Returns nil if not configured.
 func (u *promUnifi) Run(c poller.Collect) error {
-	if u.Config == nil || u.Disable {
-		c.Logf("Prometheus config missing (or disabled), Prometheus HTTP listener disabled!")
+	if u.Collector = c; u.Config == nil || u.Disable {
+		u.Logf("Prometheus config missing (or disabled), Prometheus HTTP listener disabled!")
 		return nil
 	}
 
@@ -123,8 +127,6 @@ func (u *promUnifi) Run(c poller.Collect) error {
 		u.Buffer = defaultBuffer
 	}
 
-	// Later can pass this in from poller by adding a method to the interface.
-	u.Collector = c
 	u.Client = descClient(u.Namespace + "_client_")
 	u.Device = descDevice(u.Namespace + "_device_") // stats for all device types.
 	u.UAP = descUAP(u.Namespace + "_device_")
@@ -133,9 +135,10 @@ func (u *promUnifi) Run(c poller.Collect) error {
 	u.Site = descSite(u.Namespace + "_site_")
 	mux := http.NewServeMux()
 
+	webserver.UpdateOutput(&webserver.Output{Name: PluginName, Config: u.Config})
 	prometheus.MustRegister(version.NewCollector(u.Namespace))
 	prometheus.MustRegister(u)
-	c.Logf("Prometheus exported at https://%s/ - namespace: %s", u.HTTPListen, u.Namespace)
+	u.Logf("Prometheus exported at https://%s/ - namespace: %s", u.HTTPListen, u.Namespace)
 	mux.Handle("/metrics", promhttp.HandlerFor(prometheus.DefaultGatherer,
 		promhttp.HandlerOpts{ErrorHandling: promhttp.ContinueOnError},
 	))
@@ -157,7 +160,7 @@ func (u *promUnifi) ScrapeHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if pathOld := r.URL.Query().Get("path"); pathOld != "" {
-		u.Collector.LogErrorf("deprecated 'path' parameter used; update your config to use 'target'")
+		u.LogErrorf("deprecated 'path' parameter used; update your config to use 'target'")
 
 		if t.Path == "" {
 			t.Path = pathOld
@@ -165,7 +168,7 @@ func (u *promUnifi) ScrapeHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if roleOld := r.URL.Query().Get("role"); roleOld != "" {
-		u.Collector.LogErrorf("deprecated 'role' parameter used; update your config to use 'target'")
+		u.LogErrorf("deprecated 'role' parameter used; update your config to use 'target'")
 
 		if t.Path == "" {
 			t.Path = roleOld
@@ -173,7 +176,7 @@ func (u *promUnifi) ScrapeHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if t.Path == "" {
-		u.Collector.LogErrorf("'target' parameter missing on scrape from %v", r.RemoteAddr)
+		u.LogErrorf("'target' parameter missing on scrape from %v", r.RemoteAddr)
 		http.Error(w, "'target' parameter must be specified: configured OR unconfigured url", 400)
 
 		return
@@ -239,7 +242,7 @@ func (u *promUnifi) collect(ch chan<- prometheus.Metric, filter *poller.Filter) 
 
 	if err != nil {
 		r.error(ch, prometheus.NewInvalidDesc(err), errMetricFetchFailed)
-		u.Collector.LogErrorf("metric fetch failed: %v", err)
+		u.LogErrorf("metric fetch failed: %v", err)
 
 		return
 	}
@@ -254,7 +257,7 @@ func (u *promUnifi) collect(ch chan<- prometheus.Metric, filter *poller.Filter) 
 // This is where our channels connects to the prometheus channel.
 func (u *promUnifi) exportMetrics(r report, ch chan<- prometheus.Metric, ourChan chan []*metric) {
 	descs := make(map[*prometheus.Desc]bool) // used as a counter
-	defer r.report(u.Collector, descs)
+	defer r.report(u, descs)
 
 	for newMetrics := range ourChan {
 		for _, m := range newMetrics {
@@ -326,6 +329,6 @@ func (u *promUnifi) switchExport(r report, v interface{}) {
 	case *unifi.Client:
 		u.exportClient(r, v)
 	default:
-		u.Collector.LogErrorf("invalid type: %T", v)
+		u.LogErrorf("invalid type: %T", v)
 	}
 }

@@ -16,7 +16,7 @@ type report interface {
 	done()
 	send([]*metric)
 	metrics() *poller.Metrics
-	report(c poller.Collect, descs map[*prometheus.Desc]bool)
+	report(c poller.Logger, descs map[*prometheus.Desc]bool)
 	export(m *metric, v float64) prometheus.Metric
 	error(ch chan<- prometheus.Metric, d *prometheus.Desc, v interface{})
 	addUDM()
@@ -41,7 +41,7 @@ func (r *Report) metrics() *poller.Metrics {
 	return r.Metrics
 }
 
-func (r *Report) report(c poller.Collect, descs map[*prometheus.Desc]bool) {
+func (r *Report) report(c poller.Logger, descs map[*prometheus.Desc]bool) {
 	m := r.Metrics
 
 	c.Logf("UniFi Measurements Exported. Site: %d, Client: %d, "+
