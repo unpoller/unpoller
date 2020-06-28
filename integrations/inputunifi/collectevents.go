@@ -46,7 +46,8 @@ func (u *InputUnifi) collectAlarms(logs []interface{}, sites []*unifi.Site, c *C
 			logs = append(logs, e)
 
 			webserver.NewInputEvent(PluginName, c.URL+" alarms", &webserver.Event{Ts: e.Datetime, Msg: e.Msg,
-				Tags: map[string]string{"key": e.Key, "site_id": e.SiteID, "site_name": e.SiteName, "source": e.SourceName},
+				Tags: map[string]string{"type": "alarm", "key": e.Key, "site_id": e.SiteID,
+					"site_name": e.SiteName, "source": e.SourceName},
 			})
 		}
 	}
@@ -65,7 +66,7 @@ func (u *InputUnifi) collectAnomalies(logs []interface{}, sites []*unifi.Site, c
 			logs = append(logs, e)
 
 			webserver.NewInputEvent(PluginName, c.URL+" anomalies", &webserver.Event{Ts: e.Datetime, Msg: e.Anomaly,
-				Tags: map[string]string{"site_name": e.SiteName, "source": e.SourceName},
+				Tags: map[string]string{"type": "anomaly", "site_name": e.SiteName, "source": e.SourceName},
 			})
 		}
 	}
@@ -85,7 +86,8 @@ func (u *InputUnifi) collectEvents(logs []interface{}, sites []*unifi.Site, c *C
 			logs = append(logs, e)
 
 			webserver.NewInputEvent(PluginName, c.URL+" events", &webserver.Event{Msg: e.Msg, Ts: e.Datetime,
-				Tags: map[string]string{"key": e.Key, "site_id": e.SiteID, "site_name": e.SiteName, "source": e.SourceName},
+				Tags: map[string]string{"type": "event", "key": e.Key, "site_id": e.SiteID,
+					"site_name": e.SiteName, "source": e.SourceName},
 			})
 		}
 	}
@@ -104,7 +106,8 @@ func (u *InputUnifi) collectIDS(logs []interface{}, sites []*unifi.Site, c *Cont
 			logs = append(logs, e)
 
 			webserver.NewInputEvent(PluginName, c.URL+" ids", &webserver.Event{Ts: e.Datetime, Msg: e.Msg,
-				Tags: map[string]string{"key": e.Key, "site_id": e.SiteID, "site_name": e.SiteName, "source": e.SourceName},
+				Tags: map[string]string{"type": "ids", "key": e.Key, "site_id": e.SiteID,
+					"site_name": e.SiteName, "source": e.SourceName},
 			})
 		}
 	}
