@@ -2,9 +2,9 @@ package poller
 
 import (
 	"fmt"
+	"os"
 	"strconv"
 	"strings"
-	"syscall"
 
 	"golang.org/x/crypto/bcrypt"
 	"golang.org/x/crypto/ssh/terminal"
@@ -41,7 +41,7 @@ func (u *UnifiPoller) PrintPasswordHash() (err error) {
 	if u.Flags.HashPW == "-" {
 		fmt.Print("Enter Password: ")
 
-		pwd, err = terminal.ReadPassword(int(syscall.Stdin))
+		pwd, err = terminal.ReadPassword(int(os.Stdin.Fd()))
 		if err != nil {
 			return err
 		}
