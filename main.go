@@ -14,6 +14,7 @@ import (
 	_ "github.com/unifi-poller/influxunifi"
 	_ "github.com/unifi-poller/lokiunifi"
 	_ "github.com/unifi-poller/promunifi"
+	_ "github.com/unifi-poller/webserver"
 )
 
 // Keep it simple.
