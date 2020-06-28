@@ -29,6 +29,10 @@ func (u *UnifiPoller) Start() error {
 		return nil // don't run anything else w/ version request.
 	}
 
+	if u.Flags.HashPW != "" {
+		return u.PrintPasswordHash()
+	}
+
 	cfile, err := getFirstFile(strings.Split(u.Flags.ConfigFile, ","))
 	if err != nil {
 		return err
@@ -55,6 +59,8 @@ func (f *Flags) Parse(args []string) {
 		f.PrintDefaults()
 	}
 
+	f.StringVarP(&f.HashPW, "encrypt", "e", "",
+		"This option bcrypts a provided string. Useful for the webserver password. Use - to be prompted.")
 	f.StringVarP(&f.DumpJSON, "dumpjson", "j", "",
 		"This debug option prints a json payload and exits. See man page for more info.")
 	f.StringVarP(&f.ConfigFile, "config", "c", DefaultConfFile,

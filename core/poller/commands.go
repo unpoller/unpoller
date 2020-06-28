@@ -4,6 +4,10 @@ import (
 	"fmt"
 	"strconv"
 	"strings"
+	"syscall"
+
+	"golang.org/x/crypto/bcrypt"
+	"golang.org/x/crypto/ssh/terminal"
 )
 
 // PrintRawMetrics prints raw json from the UniFi Controller. This is currently
@@ -26,6 +30,27 @@ func (u *UnifiPoller) PrintRawMetrics() (err error) {
 	// As of now we only have one input plugin, so target that [0].
 	m, err := inputs[0].RawMetrics(filter)
 	fmt.Println(string(m))
+
+	return err
+}
+
+// PrintPasswordHash prints a bcrypt'd password. Useful for the web server.
+func (u *UnifiPoller) PrintPasswordHash() (err error) {
+	pwd := []byte(u.Flags.HashPW)
+
+	if u.Flags.HashPW == "-" {
+		fmt.Print("Enter Password: ")
+
+		pwd, err = terminal.ReadPassword(syscall.Stdin)
+		if err != nil {
+			return err
+		}
+
+		fmt.Println() // print a newline.
+	}
+
+	hash, err := bcrypt.GenerateFromPassword(pwd, bcrypt.MinCost)
+	fmt.Println(string(hash))
 
 	return err
 }

@@ -9,6 +9,7 @@ require (
 	github.com/prometheus/common v0.10.0
 	github.com/prometheus/procfs v0.1.1 // indirect
 	github.com/spf13/pflag v1.0.5
+	golang.org/x/crypto v0.0.0-20190308221718-c2843e01d9a2
 	golang.org/x/net v0.0.0-20200602114024-627f9648deb9 // indirect
 	golang.org/x/sys v0.0.0-20200610111108-226ff32320da // indirect
 	golift.io/cnfg v0.0.5

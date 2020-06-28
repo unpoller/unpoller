@@ -29,6 +29,7 @@ type UnifiPoller struct {
 type Flags struct {
 	ConfigFile string
 	DumpJSON   string
+	HashPW     string
 	ShowVer    bool
 	*pflag.FlagSet
 }
