@@ -2,11 +2,13 @@ package lokiunifi
 
 import (
 	"io/ioutil"
+	"strconv"
 	"strings"
 	"time"
 
 	"github.com/pkg/errors"
 	"github.com/unifi-poller/poller"
+	"github.com/unifi-poller/webserver"
 	"golift.io/cnfg"
 )
 
@@ -38,7 +40,7 @@ type Config struct {
 
 // Loki is the main library struct. This satisfies the poller.Output interface.
 type Loki struct {
-	poller.Collect
+	Collect poller.Collect
 	*Config `json:"loki" toml:"loki" xml:"loki" yaml:"loki"`
 	client  *Client
 	last    time.Time
@@ -67,6 +69,11 @@ func (l *Loki) Run(collect poller.Collect) error {
 	}
 
 	l.ValidateConfig()
+
+	fake := *l.Config
+	fake.Password = strconv.FormatBool(fake.Password != "")
+
+	webserver.UpdateOutput(&webserver.Output{Name: PluginName, Config: fake})
 	l.PollController()
 	l.LogErrorf("Loki Output Plugin Stopped!")
 
@@ -104,7 +111,7 @@ func (l *Loki) PollController() {
 
 	ticker := time.NewTicker(interval)
 	for start := range ticker.C {
-		events, err := l.Events(&poller.Filter{Name: InputName})
+		events, err := l.Collect.Events(&poller.Filter{Name: InputName})
 		if err != nil {
 			l.LogErrorf("event fetch for Loki failed: %v", err)
 			continue

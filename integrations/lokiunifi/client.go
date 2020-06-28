@@ -20,6 +20,7 @@ var (
 	errStatusCode = fmt.Errorf("unexpected HTTP status code")
 )
 
+// Client holds the http client for contacting Loki.
 type Client struct {
 	*Config
 	*http.Client
