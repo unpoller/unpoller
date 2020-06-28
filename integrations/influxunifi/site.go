@@ -60,7 +60,7 @@ func (u *InfluxUnifi) batchSite(r report, s *unifi.Site) {
 func (u *InfluxUnifi) batchSiteDPI(r report, v interface{}) {
 	s, ok := v.(*unifi.DPITable)
 	if !ok {
-		u.Collector.LogErrorf("invalid type given to batchSiteDPI: %T", v)
+		u.LogErrorf("invalid type given to batchSiteDPI: %T", v)
 		return
 	}
 

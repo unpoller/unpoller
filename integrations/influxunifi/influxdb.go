@@ -6,6 +6,7 @@ import (
 	"crypto/tls"
 	"io/ioutil"
 	"log"
+	"strconv"
 	"strings"
 	"time"
 
@@ -13,8 +14,12 @@ import (
 	"github.com/pkg/errors"
 	"github.com/unifi-poller/poller"
 	"github.com/unifi-poller/unifi"
+	"github.com/unifi-poller/webserver"
 	"golift.io/cnfg"
 )
+
+// PluginName is the name of this plugin.
+const PluginName = "influxdb"
 
 const (
 	defaultInterval   = 30 * time.Second
@@ -59,7 +64,7 @@ func init() { // nolint: gochecknoinits
 	u := &InfluxUnifi{InfluxDB: &InfluxDB{}, LastCheck: time.Now()}
 
 	poller.NewOutput(&poller.Output{
-		Name:   "influxdb",
+		Name:   PluginName,
 		Config: u.InfluxDB,
 		Method: u.Run,
 	})
@@ -75,24 +80,24 @@ func (u *InfluxUnifi) PollController() {
 	for u.LastCheck = range ticker.C {
 		metrics, err := u.Collector.Metrics(&poller.Filter{Name: "unifi"})
 		if err != nil {
-			u.Collector.LogErrorf("metric fetch for InfluxDB failed: %v", err)
+			u.LogErrorf("metric fetch for InfluxDB failed: %v", err)
 			continue
 		}
 
 		events, err := u.Collector.Events(&poller.Filter{Name: "unifi", Dur: interval})
 		if err != nil {
-			u.Collector.LogErrorf("event fetch for InfluxDB failed: %v", err)
+			u.LogErrorf("event fetch for InfluxDB failed: %v", err)
 			continue
 		}
 
 		report, err := u.ReportMetrics(metrics, events)
 		if err != nil {
 			// XXX: reset and re-auth? not sure..
-			u.Collector.LogErrorf("%v", err)
+			u.LogErrorf("%v", err)
 			continue
 		}
 
-		u.Collector.Logf("UniFi Metrics Recorded. %v", report)
+		u.Logf("UniFi Metrics Recorded. %v", report)
 	}
 }
 
@@ -100,12 +105,11 @@ func (u *InfluxUnifi) PollController() {
 func (u *InfluxUnifi) Run(c poller.Collect) error {
 	var err error
 
-	if u.Config == nil || u.Disable {
-		c.Logf("InfluxDB config missing (or disabled), InfluxDB output disabled!")
+	if u.Collector = c; u.Config == nil || u.Disable {
+		u.Logf("InfluxDB config missing (or disabled), InfluxDB output disabled!")
 		return nil
 	}
 
-	u.Collector = c
 	u.setConfigDefaults()
 
 	u.influx, err = influx.NewHTTPClient(influx.HTTPConfig{
@@ -118,6 +122,10 @@ func (u *InfluxUnifi) Run(c poller.Collect) error {
 		return err
 	}
 
+	fake := *u.Config
+	fake.Pass = strconv.FormatBool(fake.Pass != "")
+
+	webserver.UpdateOutput(&webserver.Output{Name: PluginName, Config: fake})
 	u.PollController()
 
 	return nil
@@ -156,7 +164,7 @@ func (u *InfluxUnifi) setConfigDefaults() {
 func (u *InfluxUnifi) getPassFromFile(filename string) string {
 	b, err := ioutil.ReadFile(filename)
 	if err != nil {
-		u.Collector.LogErrorf("Reading InfluxDB Password File: %v", err)
+		u.LogErrorf("Reading InfluxDB Password File: %v", err)
 	}
 
 	return strings.TrimSpace(string(b))
@@ -274,6 +282,6 @@ func (u *InfluxUnifi) switchExport(r report, v interface{}) {
 	case *unifi.Anomaly:
 		u.batchAnomaly(r, v)
 	default:
-		u.Collector.LogErrorf("invalid export type: %T", v)
+		u.LogErrorf("invalid export type: %T", v)
 	}
 }

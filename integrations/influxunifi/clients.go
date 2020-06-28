@@ -78,7 +78,7 @@ type totalsDPImap map[string]map[string]map[string]unifi.DPIData
 func (u *InfluxUnifi) batchClientDPI(r report, v interface{}, appTotal, catTotal totalsDPImap) {
 	s, ok := v.(*unifi.DPITable)
 	if !ok {
-		u.Collector.LogErrorf("invalid type given to batchClientDPI: %T", v)
+		u.LogErrorf("invalid type given to batchClientDPI: %T", v)
 		return
 	}
 
