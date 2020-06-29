@@ -2,7 +2,6 @@ package inputunifi
 
 import (
 	"fmt"
-	"log"
 	"strconv"
 	"time"
 
@@ -13,8 +12,8 @@ import (
 /* This code reformats our data to be displayed on the built-in web interface. */
 
 func updateWeb(metrics *Metrics) {
-	log.Println("here")
 	webserver.UpdateInput(&webserver.Input{
+		Name:    PluginName, // Forgetting this leads to 3 hours of head scratching.
 		Sites:   formatSites(metrics.Sites),
 		Clients: formatClients(metrics.Clients),
 		Devices: formatDevices(metrics.Devices),
