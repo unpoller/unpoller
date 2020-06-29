@@ -113,9 +113,10 @@ func (u *InputUnifi) pollController(c *Controller) (*poller.Metrics, error) {
 		return nil, errors.Wrapf(err, "unifi.GetDevices(%s)", c.URL)
 	}
 
-	defer updateWeb(m)
+	n := u.augmentMetrics(c, m)
+	updateWeb(m)
 
-	return u.augmentMetrics(c, m), nil
+	return n, nil
 }
 
 // augmentMetrics is our middleware layer between collecting metrics and writing them.

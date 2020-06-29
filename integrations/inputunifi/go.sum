@@ -108,6 +108,7 @@ github.com/unifi-poller/poller v0.0.8-0.20200621110949-33f1a1454d10 h1:1rGP4ISFp
 github.com/unifi-poller/poller v0.0.8-0.20200621110949-33f1a1454d10/go.mod h1:+Ppksi2wBCrByJke0B0lTutxFtKfv1zx6L1haALBrN4=
 github.com/unifi-poller/poller v0.0.8-0.20200621214016-5d1ed3324a46 h1:OhbVj3VVgbpUMQFSwD0NszDsbEL7DdbTcJuU+p9DwIM=
 github.com/unifi-poller/poller v0.0.8-0.20200621214016-5d1ed3324a46/go.mod h1:pJ/MeYaakLOOpbyc7s4zeZ92UzNK/rir5jkA7t5jIjo=
+github.com/unifi-poller/poller v0.0.8-0.20200628131550-26430cac16c1 h1:SHKYtAu4yB5bVhMuRkoHr8Ss1Ffu5dKLJ13rGWufLFI=
 github.com/unifi-poller/poller v0.0.8-0.20200628131550-26430cac16c1/go.mod h1:fObadG7weiVnSpFu8pFpGfo2bYYFc7hUMe770FovSc8=
 github.com/unifi-poller/unifi v0.0.5-0.20200620103801-b927287ea1cd/go.mod h1:L1kMRH2buZhB31vZnRC1im7Tk/4uD3ET4biwl2faYy8=
 github.com/unifi-poller/unifi v0.0.5-0.20200621075746-253ccae7e106 h1:eKErSqWD656pLSWgxFwhDhHe/zfAXrm7F39Zn4R+si8=
@@ -122,6 +123,7 @@ github.com/unifi-poller/unifi v0.0.6-0.20200628131946-cd307d4b367b h1:FtVkk4XEv4
 github.com/unifi-poller/unifi v0.0.6-0.20200628131946-cd307d4b367b/go.mod h1:M2sUlRYI31rTd4jmsDuSC+OuYTskcl6v+bgAncr4wa8=
 github.com/unifi-poller/unifi v0.0.6-0.20200628213309-a22ea217874f h1:5aLy4Ac0vFhaEikq04oPAFqhygVv0lq77/ZJ4aBEnkc=
 github.com/unifi-poller/unifi v0.0.6-0.20200628213309-a22ea217874f/go.mod h1:uqBaNCon8FTw6nwGsAYHz/HwBgEYepS0XB5XW+OdBts=
+github.com/unifi-poller/webserver v0.0.0-20200628214116-5bead091e113 h1:W4mnKUc+JtKLiajAv1Np+9KHBTR+TC2o0NA1H4IGzjo=
 github.com/unifi-poller/webserver v0.0.0-20200628214116-5bead091e113/go.mod h1:08IX30eb93+VbhiFqgMBXQD52+djPwivBcx5C8fH92M=
 golang.org/x/crypto v0.0.0-20180904163835-0709b304e793/go.mod h1:6SG95UA2DQfeDnfUPMdvaQW0Q7yPrPDi9nlGo2tz2b4=
 golang.org/x/crypto v0.0.0-20190308221718-c2843e01d9a2 h1:VklqNMn3ovrHsnt90PveolxSbWFaJdECFbxSq0Mqo2M=
