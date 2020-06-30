@@ -58,16 +58,23 @@ func (s *Server) handleOutput(w http.ResponseWriter, r *http.Request) {
 	c.RLock()
 	defer c.RUnlock()
 
-	switch value := vars["value"]; vars["sub"] {
+	switch val := vars["value"]; vars["sub"] {
 	default:
 		s.handleJSON(w, c.Config)
 	case "events":
-		s.handleJSON(w, c.Events)
+		switch events, ok := c.Events[val]; {
+		case val == "":
+			s.handleJSON(w, c.Events)
+		case ok:
+			s.handleJSON(w, events)
+		case !ok:
+			s.handleMissing(w, r)
+		}
 	case "counters":
-		if value == "" {
+		if val == "" {
 			s.handleJSON(w, c.Counter)
 		} else {
-			s.handleJSON(w, map[string]int64{value: c.Counter[value]})
+			s.handleJSON(w, map[string]int64{val: c.Counter[val]})
 		}
 	}
 }
@@ -85,11 +92,18 @@ func (s *Server) handleInput(w http.ResponseWriter, r *http.Request) {
 	c.RLock()
 	defer c.RUnlock()
 
-	switch value := vars["value"]; vars["sub"] {
+	switch val := vars["value"]; vars["sub"] {
 	default:
 		s.handleJSON(w, c.Config)
 	case "events":
-		s.handleJSON(w, c.Events)
+		switch events, ok := c.Events[val]; {
+		case val == "":
+			s.handleJSON(w, c.Events)
+		case ok:
+			s.handleJSON(w, events)
+		case !ok:
+			s.handleMissing(w, r)
+		}
 	case "sites":
 		s.handleJSON(w, c.Sites)
 	case "devices":
@@ -97,8 +111,8 @@ func (s *Server) handleInput(w http.ResponseWriter, r *http.Request) {
 	case "clients":
 		s.handleJSON(w, c.Clients)
 	case "counters":
-		if value != "" {
-			s.handleJSON(w, map[string]int64{value: c.Counter[value]})
+		if val != "" {
+			s.handleJSON(w, map[string]int64{val: c.Counter[val]})
 		} else {
 			s.handleJSON(w, c.Counter)
 		}
