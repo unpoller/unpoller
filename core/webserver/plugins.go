@@ -110,8 +110,8 @@ func (w *webPlugins) updateInput(config *Input) {
 		return
 	}
 
-	config.Lock()
-	defer config.Unlock()
+	input.Lock()
+	defer input.Unlock()
 
 	if config.Clients != nil {
 		input.Clients = config.Clients
@@ -145,8 +145,8 @@ func (w *webPlugins) updateOutput(config *Output) {
 		return
 	}
 
-	config.Lock()
-	defer config.Unlock()
+	output.Lock()
+	defer output.Unlock()
 
 	if config.Config != nil {
 		output.Config = config.Config
