@@ -75,14 +75,15 @@ func (r *Report) error(err error) {
 	}
 }
 
+// These constants are used as names for printed/logged counters.
 const (
-	Ttotal = item("Point")
-	Tfield = item("Fields")
+	pointT = item("Point")
+	fieldT = item("Fields")
 )
 
 func (r *Report) batch(m *metric, p *influx.Point) {
-	r.addCount(Ttotal)
-	r.addCount(Tfield, len(m.Fields))
+	r.addCount(pointT)
+	r.addCount(fieldT, len(m.Fields))
 	r.bp.AddPoint(p)
 }
 
@@ -91,8 +92,8 @@ func (r *Report) String() string {
 		"%s: %d, %s/%s: %d, %s: %d, %s/%s/%s/%s: %d/%d/%d/%d, "+
 		"DPI Site/Client: %d/%d, %s: %d, %s: %d, Err: %d, Dur: %v",
 		len(r.Metrics.Sites), len(r.Metrics.Clients),
-		TUAP, r.Counts[TUAP], TUDM, TUSG, r.Counts[TUDM]+r.Counts[TUSG], TUSW, r.Counts[TUSW],
-		TIDS, Tevent, Talarm, Tanomaly, r.Counts[TIDS], r.Counts[Tevent], r.Counts[Talarm], r.Counts[Tanomaly],
-		len(r.Metrics.SitesDPI), len(r.Metrics.ClientsDPI), Ttotal, r.Counts[Ttotal],
-		Tfield, r.Counts[Tfield], len(r.Errors), r.Elapsed.Round(time.Millisecond))
+		uapT, r.Counts[uapT], udmT, usgT, r.Counts[udmT]+r.Counts[usgT], uswT, r.Counts[uswT],
+		idsT, eventT, alarmT, anomalyT, r.Counts[idsT], r.Counts[eventT], r.Counts[alarmT], r.Counts[anomalyT],
+		len(r.Metrics.SitesDPI), len(r.Metrics.ClientsDPI), pointT, r.Counts[pointT],
+		fieldT, r.Counts[fieldT], len(r.Errors), r.Elapsed.Round(time.Millisecond))
 }

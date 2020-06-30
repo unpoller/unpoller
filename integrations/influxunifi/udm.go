@@ -4,7 +4,8 @@ import (
 	"github.com/unifi-poller/unifi"
 )
 
-const TUDM = item("UDM")
+// udmT is used as a name for printed/logged counters.
+const udmT = item("UDM")
 
 // Combine concatenates N maps. This will delete things if not used with caution.
 func Combine(in ...map[string]interface{}) map[string]interface{} {
@@ -84,7 +85,7 @@ func (u *InfluxUnifi) batchUDM(r report, s *unifi.UDM) { // nolint: funlen
 		},
 	)
 
-	r.addCount(TUDM)
+	r.addCount(udmT)
 	r.send(&metric{Table: "usg", Tags: tags, Fields: fields})
 	u.batchNetTable(r, tags, s.NetworkTable)
 	u.batchUSGwans(r, tags, s.Wan1, s.Wan2)

@@ -7,8 +7,8 @@ import (
 )
 
 const (
-	Talarm   = item("Alarm")
-	Tanomaly = item("Anomaly")
+	alarmT   = item("Alarm")
+	anomalyT = item("Anomaly")
 )
 
 // batchAlarms generates alarm datapoints for InfluxDB.
@@ -44,7 +44,7 @@ func (u *InfluxUnifi) batchAlarms(r report, event *unifi.Alarm) { // nolint: god
 		"srcip_organization":   event.SourceIPGeo.Organization,
 	}
 
-	r.addCount(Talarm)
+	r.addCount(alarmT)
 	r.send(&metric{
 		Table:  "unifi_alarm",
 		TS:     event.Datetime,
@@ -72,7 +72,7 @@ func (u *InfluxUnifi) batchAnomaly(r report, event *unifi.Anomaly) {
 		return // The event is older than our interval, ignore it.
 	}
 
-	r.addCount(Tanomaly)
+	r.addCount(anomalyT)
 	r.send(&metric{
 		TS:     event.Datetime,
 		Table:  "unifi_anomaly",

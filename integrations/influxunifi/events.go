@@ -6,9 +6,10 @@ import (
 	"github.com/unifi-poller/unifi"
 )
 
+// These constants are used as names for printed/logged counters.
 const (
-	Tevent = item("Event")
-	TIDS   = item("IDS")
+	eventT = item("Event")
+	idsT   = item("IDS")
 )
 
 // batchIDS generates intrusion detection datapoints for InfluxDB.
@@ -44,7 +45,7 @@ func (u *InfluxUnifi) batchIDS(r report, i *unifi.IDS) { // nolint: godupl
 		"srcip_organization":   i.SourceIPGeo.Organization,
 	}
 
-	r.addCount(TIDS)
+	r.addCount(idsT)
 	r.send(&metric{
 		Table:  "unifi_ids",
 		TS:     i.Datetime,
@@ -105,7 +106,7 @@ func (u *InfluxUnifi) batchEvent(r report, i *unifi.Event) { // nolint: funlen
 		"srcip_organization":   i.SourceIPGeo.Organization,
 	}
 
-	r.addCount(Tevent)
+	r.addCount(eventT)
 	r.send(&metric{
 		TS:     i.Datetime,
 		Table:  "unifi_events",
