@@ -43,6 +43,42 @@
   # If you're getting zeros now, set this to "1m"
   interval = "30s"
 
+# To enable output of UniFi Events to Loki, add a URL.
+# User, pass and tenant_id are optional and most folks wont set them.
+# Pick which logs you want per-controller in the [unifi.controller] section.
+# This is a new feature. Feedback welcome!
+[loki]
+  url = ""
+  # The rest of this is advanced & optional.
+  user = ""
+  pass = ""
+  verify_ssl = false
+  tenant_id = ""
+  interval = "2m"
+  timeout = "10s"
+
+# Poller has an optional web server. To turn it on, set enable to true. If you
+# wish to use SSL, provide SSL cert and key paths. This interface is currently
+# read-only; it just displays information, like logs, devices and clients.
+# Notice: Enabling the web server with many clients will increase memory usage.
+# This is a new feature. Feedback welcome!
+[webserver]
+  enable = false
+  port = 37288
+  # The HTML path is different on Windows and BSD/macOS.
+  html_path = "/usr/lib/unifi-poller/web"
+  ssl_cert_path = ""
+  ssl_key_path = ""
+  # How many events per source to hold. 200-2000. Use fewer with many clients.
+  max_events = 200
+
+# By default the web interface does not require authentication. You can change
+# that by adding a username and password hash (or multiple) below.
+# To create a hash, run unifi-poller with the -e CLI argument.
+[webserver.accounts]
+# username = "password-hash"
+# captain = "$2a$04$mxw6i0LKH6u46oaLK2cq5eCTAAFkfNiRpzNbz.EyvJZZWNa2FzIlS"
+
 #### INPUTS
 
 [unifi]

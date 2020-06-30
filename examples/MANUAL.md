@@ -24,11 +24,17 @@ examples and default configurations.
 
 OPTIONS
 ---
-`unifi-poller [-c <config-file>,[config-file]] [-j <filter>] [-h] [-v]`
+`unifi-poller [-c <config-file>,[config-file]] [-j <filter>] [-e <pass>] [-h] [-v]`
 
     -c, --config <config-file>,[config-file]
         Provide a configuration file (instead of the default). You may provide
         multiple file paths separated by commas. The first file found is used.
+
+    -e, --encrypt <password|->
+        Encrypts a password with bcrypt. This is useful to make an account
+        password for the built-in web server. You may provide the password
+        on the CLI, or use "-" as the pass to be prompted for the password
+        without echo.
 
     -v, --version
         Display version and exit.
@@ -56,13 +62,14 @@ CONFIGURATION
     *   Windows: `C:\\ProgramData\\unifi-poller\\up.conf`
     *   Others:  `/etc/unifi-poller/up.conf`
 *   Config File Default Format: `TOML`
-*   Possible formats: `XML`, `JSON`, `TOML`, `YAML`
+*   Possible formats: `JSON`, `TOML`, `YAML`
 
 The config file can be written in four different syntax formats. The application
-decides which one to use based on the file's name. If it contains `.xml` it will
-be parsed as XML. The same goes for `.json` and `.yaml`. If the filename contains
-none of these strings, then it is parsed as the default format, TOML. This option
-is provided so the application can be easily adapted to any environment.
+decides which one to use based on the file's name. If it contains `.json` it will
+be parsed as JSON. The same goes for `.yaml`. If the filename contains neither
+of these strings, then it is parsed as the default format, TOML. This feature
+is provided so the application can be easily adapted to any environment. `XML`
+used to work but no longer does.
 
 `Config File Parameters`
 

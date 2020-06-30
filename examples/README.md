@@ -3,9 +3,9 @@
 This folder contains example configuration files in four
 supported formats. You can use any format you want for
 the config file, just give it the appropriate suffix for
-the format. An XML file should end with `.xml`, a JSON
-file with `.json`, and YAML with `.yaml`. The default
-format is always TOML and may have any _other_ suffix.
+the format. A JSON file should end with `.json`, and
+YAML with `.yaml`. The default format is always TOML and
+may have any _other_ suffix.
 
 #### Dashboards
 
