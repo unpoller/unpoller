@@ -57,7 +57,7 @@ func (u *InputUnifi) collectAlarms(logs []interface{}, sites []*unifi.Site, c *C
 
 func (u *InputUnifi) collectAnomalies(logs []interface{}, sites []*unifi.Site, c *Controller) ([]interface{}, error) {
 	if *c.SaveAnomal {
-		events, err := c.Unifi.GetAnomalies(sites, time.Now().Add(-time.Hour))
+		events, err := c.Unifi.GetAnomalies(sites)
 		if err != nil {
 			return logs, errors.Wrap(err, "unifi.GetAnomalies()")
 		}
@@ -97,7 +97,7 @@ func (u *InputUnifi) collectEvents(logs []interface{}, sites []*unifi.Site, c *C
 
 func (u *InputUnifi) collectIDS(logs []interface{}, sites []*unifi.Site, c *Controller) ([]interface{}, error) {
 	if *c.SaveIDS {
-		events, err := c.Unifi.GetIDS(sites, time.Now().Add(-time.Hour))
+		events, err := c.Unifi.GetIDS(sites)
 		if err != nil {
 			return logs, errors.Wrap(err, "unifi.GetIDS()")
 		}
