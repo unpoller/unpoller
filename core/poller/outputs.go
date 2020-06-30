@@ -52,30 +52,15 @@ func (u *UnifiPoller) Poller() Poller {
 // InitializeOutputs runs all the configured output plugins.
 // If none exist, or they all exit an error is returned.
 func (u *UnifiPoller) InitializeOutputs() error {
-	// Output plugin errors go into this channel.
-	v := make(chan error)
-	defer close(v)
+	count, errChan := u.runOutputMethods()
+	defer close(errChan)
 
-	var count int // keep track of running output plugin count.
-
-	outputSync.RLock()
-
-	for _, o := range outputs {
-		count++
-
-		go func(o *Output) {
-			v <- o.Method(u)
-		}(o)
-	}
-
-	outputSync.RUnlock() // the loop below never exits, so cannot defer this.
-
-	if count < 1 {
+	if count == 0 {
 		return errNoOutputPlugins
 	}
 
 	// Wait for and return an error from any output plugin.
-	for err := range v {
+	for err := range errChan {
 		if err != nil {
 			return err
 		}
@@ -86,6 +71,22 @@ func (u *UnifiPoller) InitializeOutputs() error {
 	}
 
 	return nil
+}
+
+func (u *UnifiPoller) runOutputMethods() (int, chan error) {
+	// Output plugin errors go into this channel.
+	err := make(chan error)
+
+	outputSync.RLock()
+	defer outputSync.RUnlock()
+
+	for _, o := range outputs {
+		go func(o *Output) {
+			err <- o.Method(u) // Run each output plugin
+		}(o)
+	}
+
+	return len(outputs), err
 }
 
 // Outputs allows other output plugins to see the list of loaded output plugins.
