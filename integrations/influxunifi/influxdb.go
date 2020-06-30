@@ -19,7 +19,7 @@ import (
 )
 
 // PluginName is the name of this plugin.
-const PluginName = "influxdb"
+const PluginName = "InfluxDB"
 
 const (
 	defaultInterval   = 30 * time.Second
