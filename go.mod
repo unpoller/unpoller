@@ -15,7 +15,7 @@ require (
 	github.com/shurcooL/sanitized_anchor_name v1.0.0 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
 	github.com/unifi-poller/influxunifi v0.0.10-0.20200630103608-fb25b5bc3fa7
-	github.com/unifi-poller/inputunifi v0.0.8-0.20200630101705-1f36fb078fcb
+	github.com/unifi-poller/inputunifi v0.0.8-0.20200630105934-93e63a1b6752
 	github.com/unifi-poller/lokiunifi v0.0.0-20200628212531-964d320957e4
 	github.com/unifi-poller/poller v0.0.8-0.20200628131550-26430cac16c1
 	github.com/unifi-poller/promunifi v0.0.9-0.20200630103619-c2b0b27aa0c7
