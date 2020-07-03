@@ -179,7 +179,7 @@ func (u *InfluxUnifi) ReportMetrics(m *poller.Metrics, e *poller.Events) (*Repor
 		Events:  e,
 		ch:      make(chan *metric),
 		Start:   time.Now(),
-		Counts:  make(map[item]int),
+		Counts:  &Counts{Val: make(map[item]int)},
 	}
 	defer close(r.ch)
 

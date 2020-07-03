@@ -14,12 +14,18 @@ type Report struct {
 	Metrics *poller.Metrics
 	Events  *poller.Events
 	Errors  []error
-	Counts  map[item]int
+	Counts  *Counts
 	Start   time.Time
 	Elapsed time.Duration
 	ch      chan *metric
 	wg      sync.WaitGroup
 	bp      influx.BatchPoints
+}
+
+// Counts holds counters and has a lock to deal with routines.
+type Counts struct {
+	Val map[item]int
+	sync.RWMutex
 }
 
 // report is an internal interface that can be mocked and overridden for tests.
@@ -60,12 +66,15 @@ func (r *Report) send(m *metric) {
 type item string
 
 func (r *Report) addCount(name item, counts ...int) {
+	r.Counts.Lock()
+	defer r.Counts.Unlock()
+
 	if len(counts) == 0 {
-		r.Counts[name]++
+		r.Counts.Val[name]++
 	}
 
 	for _, c := range counts {
-		r.Counts[name] += c
+		r.Counts.Val[name] += c
 	}
 }
 
@@ -88,12 +97,17 @@ func (r *Report) batch(m *metric, p *influx.Point) {
 }
 
 func (r *Report) String() string {
+	r.Counts.RLock()
+	defer r.Counts.RUnlock()
+
+	m, c := r.Metrics, r.Counts.Val
+
 	return fmt.Sprintf("Site: %d, Client: %d, "+
 		"%s: %d, %s/%s: %d, %s: %d, %s/%s/%s/%s: %d/%d/%d/%d, "+
 		"DPI Site/Client: %d/%d, %s: %d, %s: %d, Err: %d, Dur: %v",
-		len(r.Metrics.Sites), len(r.Metrics.Clients),
-		uapT, r.Counts[uapT], udmT, usgT, r.Counts[udmT]+r.Counts[usgT], uswT, r.Counts[uswT],
-		idsT, eventT, alarmT, anomalyT, r.Counts[idsT], r.Counts[eventT], r.Counts[alarmT], r.Counts[anomalyT],
-		len(r.Metrics.SitesDPI), len(r.Metrics.ClientsDPI), pointT, r.Counts[pointT],
-		fieldT, r.Counts[fieldT], len(r.Errors), r.Elapsed.Round(time.Millisecond))
+		len(m.Sites), len(m.Clients),
+		uapT, c[uapT], udmT, usgT, c[udmT]+c[usgT], uswT, c[uswT],
+		idsT, eventT, alarmT, anomalyT, c[idsT], c[eventT], c[alarmT], c[anomalyT],
+		len(m.SitesDPI), len(m.ClientsDPI), pointT, c[pointT], fieldT, c[fieldT],
+		len(r.Errors), r.Elapsed.Round(time.Millisecond))
 }
