@@ -167,11 +167,11 @@ func (w *webPlugins) newInputEvent(plugin, id string, event *Event) {
 	defer input.Unlock()
 
 	if input.Events == nil {
-		input.Events = make(map[string]*Events)
+		input.Events = make(Events)
 	}
 
 	if _, ok := input.Events[id]; !ok {
-		input.Events[id] = &Events{}
+		input.Events[id] = &EventGroup{}
 	}
 
 	input.Events[id].add(event, int(w.Config.MaxEvents))
@@ -187,11 +187,11 @@ func (w *webPlugins) newOutputEvent(plugin, id string, event *Event) {
 	defer output.Unlock()
 
 	if output.Events == nil {
-		output.Events = make(map[string]*Events)
+		output.Events = make(Events)
 	}
 
 	if _, ok := output.Events[id]; !ok {
-		output.Events[id] = &Events{}
+		output.Events[id] = &EventGroup{}
 	}
 
 	output.Events[id].add(event, int(w.Config.MaxEvents))

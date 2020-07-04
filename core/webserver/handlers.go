@@ -3,6 +3,7 @@ package webserver
 import (
 	"net/http"
 	"path/filepath"
+	"time"
 
 	"github.com/gorilla/mux"
 )
@@ -35,13 +36,19 @@ func (s *Server) handleStatic(w http.ResponseWriter, r *http.Request) {
 
 // Returns web server and poller configs. /api/v1/config.
 func (s *Server) handleConfig(w http.ResponseWriter, r *http.Request) {
-	data := map[string]interface{}{"poller": s.Collect.Poller()}
+	data := map[string]interface{}{
+		"poller": s.Collect.Poller(),
+		"uptime": int(time.Since(s.start).Round(time.Second).Seconds()),
+	}
 	s.handleJSON(w, data)
 }
 
 // Returns a list of input and output plugins: /api/v1/plugins.
 func (s *Server) handlePlugins(w http.ResponseWriter, r *http.Request) {
-	data := map[string][]string{"inputs": s.Collect.Inputs(), "outputs": s.Collect.Outputs()}
+	data := map[string][]string{
+		"inputs":  s.Collect.Inputs(),
+		"outputs": s.Collect.Outputs(),
+	}
 	s.handleJSON(w, data)
 }
 
@@ -61,6 +68,8 @@ func (s *Server) handleOutput(w http.ResponseWriter, r *http.Request) {
 	switch val := vars["value"]; vars["sub"] {
 	default:
 		s.handleJSON(w, c.Config)
+	case "eventgroups":
+		s.handleJSON(w, c.Events.Groups())
 	case "events":
 		switch events, ok := c.Events[val]; {
 		case val == "":
@@ -95,6 +104,8 @@ func (s *Server) handleInput(w http.ResponseWriter, r *http.Request) {
 	switch val := vars["value"]; vars["sub"] {
 	default:
 		s.handleJSON(w, c.Config)
+	case "eventgroups":
+		s.handleJSON(w, c.Events.Groups())
 	case "events":
 		switch events, ok := c.Events[val]; {
 		case val == "":

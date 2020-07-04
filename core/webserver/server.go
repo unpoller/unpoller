@@ -43,12 +43,13 @@ type Server struct {
 	server  *http.Server
 	plugins *webPlugins
 	Collect poller.Collect
+	start   time.Time
 }
 
 // init is how this modular code is initialized by the main app.
 // This module adds itself as an output module to the poller core.
 func init() { // nolint: gochecknoinits
-	s := &Server{plugins: plugins, Config: &Config{
+	s := &Server{plugins: plugins, start: time.Now(), Config: &Config{
 		Port:      DefaultPort,
 		HTMLPath:  filepath.Join(poller.DefaultObjPath, "web"),
 		MaxEvents: DefaultEvents,
