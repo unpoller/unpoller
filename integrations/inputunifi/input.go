@@ -48,6 +48,7 @@ type Controller struct {
 	URL        string       `json:"url" toml:"url" xml:"url" yaml:"url"`
 	Sites      []string     `json:"sites" toml:"sites" xml:"site" yaml:"sites"`
 	Unifi      *unifi.Unifi `json:"-" toml:"-" xml:"-" yaml:"-"`
+	ID         string       `json:"id,omitempty"` // this is an output, not an input.
 }
 
 // Config contains our configuration data.

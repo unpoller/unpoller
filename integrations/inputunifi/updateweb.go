@@ -11,12 +11,12 @@ import (
 
 /* This code reformats our data to be displayed on the built-in web interface. */
 
-func updateWeb(metrics *Metrics) {
+func updateWeb(c *Controller, metrics *Metrics) {
 	webserver.UpdateInput(&webserver.Input{
 		Name:    PluginName, // Forgetting this leads to 3 hours of head scratching.
-		Sites:   formatSites(metrics.Sites),
-		Clients: formatClients(metrics.Clients),
-		Devices: formatDevices(metrics.Devices),
+		Sites:   formatSites(c, metrics.Sites),
+		Clients: formatClients(c, metrics.Clients),
+		Devices: formatDevices(c, metrics.Devices),
 	})
 }
 
@@ -31,7 +31,13 @@ func formatConfig(config *Config) *Config {
 
 func formatControllers(controllers []*Controller) []*Controller {
 	fixed := []*Controller{}
+
 	for _, c := range controllers {
+		id := ""
+		if c.Unifi != nil {
+			id = c.Unifi.UUID
+		}
+
 		fixed = append(fixed, &Controller{
 			VerifySSL:  c.VerifySSL,
 			SaveAnomal: c.SaveAnomal,
@@ -45,26 +51,28 @@ func formatControllers(controllers []*Controller) []*Controller {
 			Pass:       strconv.FormatBool(c.Pass != ""),
 			URL:        c.URL,
 			Sites:      c.Sites,
+			ID:         id,
 		})
 	}
 
 	return fixed
 }
 
-func formatSites(sites []*unifi.Site) (s webserver.Sites) {
+func formatSites(c *Controller, sites []*unifi.Site) (s webserver.Sites) {
 	for _, site := range sites {
 		s = append(s, &webserver.Site{
-			ID:     site.ID,
-			Name:   site.Name,
-			Desc:   site.Desc,
-			Source: site.SourceName,
+			ID:         site.ID,
+			Name:       site.Name,
+			Desc:       site.Desc,
+			Source:     site.SourceName,
+			Controller: c.Unifi.UUID,
 		})
 	}
 
 	return s
 }
 
-func formatClients(clients []*unifi.Client) (c webserver.Clients) {
+func formatClients(c *Controller, clients []*unifi.Client) (d webserver.Clients) {
 	for _, client := range clients {
 		clientType, deviceMAC := "unknown", "unknown"
 		if client.ApMac != "" {
@@ -79,76 +87,91 @@ func formatClients(clients []*unifi.Client) (c webserver.Clients) {
 			deviceMAC = client.GwMac
 		}
 
-		c = append(c, &webserver.Client{
-			Name:      client.Name,
-			SiteID:    client.SiteID,
-			Source:    client.SourceName,
-			MAC:       client.Mac,
-			IP:        client.IP,
-			Type:      clientType,
-			DeviceMAC: deviceMAC,
-			Since:     time.Unix(client.FirstSeen, 0),
-			Last:      time.Unix(client.LastSeen, 0),
+		d = append(d, &webserver.Client{
+			Name:       client.Name,
+			SiteID:     client.SiteID,
+			Source:     client.SourceName,
+			Controller: c.Unifi.UUID,
+			MAC:        client.Mac,
+			IP:         client.IP,
+			Type:       clientType,
+			DeviceMAC:  deviceMAC,
+			Rx:         client.RxBytes,
+			Tx:         client.TxBytes,
+			Since:      time.Unix(client.FirstSeen, 0),
+			Last:       time.Unix(client.LastSeen, 0),
 		})
 	}
 
-	return c
+	return d
 }
 
-func formatDevices(devices *unifi.Devices) (d webserver.Devices) {
+func formatDevices(c *Controller, devices *unifi.Devices) (d webserver.Devices) { // nolint: funlen
 	for _, device := range devices.UAPs {
 		d = append(d, &webserver.Device{
-			Name:    device.Name,
-			SiteID:  device.SiteID,
-			Source:  device.SourceName,
-			MAC:     device.Mac,
-			IP:      device.IP,
-			Type:    device.Type,
-			Model:   device.Model,
-			Version: device.Version,
-			Config:  nil,
+			Name:       device.Name,
+			SiteID:     device.SiteID,
+			Source:     device.SourceName,
+			Controller: c.Unifi.UUID,
+			MAC:        device.Mac,
+			IP:         device.IP,
+			Type:       device.Type,
+			Model:      device.Model,
+			Version:    device.Version,
+			Uptime:     int(device.Uptime.Val),
+			Clients:    int(device.NumSta.Val),
+			Config:     nil,
 		})
 	}
 
 	for _, device := range devices.UDMs {
 		d = append(d, &webserver.Device{
-			Name:    device.Name,
-			SiteID:  device.SiteID,
-			Source:  device.SourceName,
-			MAC:     device.Mac,
-			IP:      device.IP,
-			Type:    device.Type,
-			Model:   device.Model,
-			Version: device.Version,
-			Config:  nil,
+			Name:       device.Name,
+			SiteID:     device.SiteID,
+			Source:     device.SourceName,
+			Controller: c.Unifi.UUID,
+			MAC:        device.Mac,
+			IP:         device.IP,
+			Type:       device.Type,
+			Model:      device.Model,
+			Version:    device.Version,
+			Uptime:     int(device.Uptime.Val),
+			Clients:    int(device.NumSta.Val),
+			Config:     nil,
 		})
 	}
 
 	for _, device := range devices.USWs {
 		d = append(d, &webserver.Device{
-			Name:    device.Name,
-			SiteID:  device.SiteID,
-			Source:  device.SourceName,
-			MAC:     device.Mac,
-			IP:      device.IP,
-			Type:    device.Type,
-			Model:   device.Model,
-			Version: device.Version,
-			Config:  nil,
+			Name:       device.Name,
+			SiteID:     device.SiteID,
+			Source:     device.SourceName,
+			Controller: c.Unifi.UUID,
+			MAC:        device.Mac,
+			IP:         device.IP,
+			Type:       device.Type,
+			Model:      device.Model,
+			Version:    device.Version,
+			Uptime:     int(device.Uptime.Val),
+			Clients:    int(device.NumSta.Val),
+			Config:     nil,
 		})
 	}
 
 	for _, device := range devices.USGs {
 		d = append(d, &webserver.Device{
-			Name:    device.Name,
-			SiteID:  device.SiteID,
-			Source:  device.SourceName,
-			MAC:     device.Mac,
-			IP:      device.IP,
-			Type:    device.Type,
-			Model:   device.Model,
-			Version: device.Version,
-			Config:  nil,
+			Name:       device.Name,
+			SiteID:     device.SiteID,
+			Source:     device.SourceName,
+			Controller: c.Unifi.UUID,
+			MAC:        device.Mac,
+			IP:         device.IP,
+			Type:       device.Type,
+			Model:      device.Model,
+			Version:    device.Version,
+			Uptime:     int(device.Uptime.Val),
+			Clients:    int(device.NumSta.Val),
+			Config:     nil,
 		})
 	}
 

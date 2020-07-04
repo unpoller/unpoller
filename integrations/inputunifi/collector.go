@@ -93,7 +93,7 @@ func (u *InputUnifi) pollController(c *Controller) (*poller.Metrics, error) {
 	}
 
 	m := &Metrics{TS: time.Now(), Sites: sites}
-	defer updateWeb(m)
+	defer updateWeb(c, m)
 
 	if c.SaveDPI != nil && *c.SaveDPI {
 		if m.SitesDPI, err = c.Unifi.GetSiteDPI(sites); err != nil {
