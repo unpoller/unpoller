@@ -37,18 +37,20 @@ func (u *InputUnifi) collectControllerEvents(c *Controller) ([]interface{}, erro
 
 func (u *InputUnifi) collectAlarms(logs []interface{}, sites []*unifi.Site, c *Controller) ([]interface{}, error) {
 	if *c.SaveAlarms {
-		events, err := c.Unifi.GetAlarms(sites)
-		if err != nil {
-			return logs, errors.Wrap(err, "unifi.GetAlarms()")
-		}
+		for _, s := range sites {
+			events, err := c.Unifi.GetAlarmsSite(s)
+			if err != nil {
+				return logs, errors.Wrap(err, "unifi.GetAlarms()")
+			}
 
-		for _, e := range events {
-			logs = append(logs, e)
+			for _, e := range events {
+				logs = append(logs, e)
 
-			webserver.NewInputEvent(PluginName, c.Unifi.UUID+"_alarms", &webserver.Event{Ts: e.Datetime, Msg: e.Msg,
-				Tags: map[string]string{"type": "alarm", "key": e.Key, "site_id": e.SiteID,
-					"site_name": e.SiteName, "source": e.SourceName},
-			})
+				webserver.NewInputEvent(PluginName, s.Name+"_alarms", &webserver.Event{Ts: e.Datetime, Msg: e.Msg,
+					Tags: map[string]string{"type": "alarm", "key": e.Key, "site_id": e.SiteID,
+						"site_name": e.SiteName, "source": e.SourceName},
+				})
+			}
 		}
 	}
 
@@ -57,17 +59,19 @@ func (u *InputUnifi) collectAlarms(logs []interface{}, sites []*unifi.Site, c *C
 
 func (u *InputUnifi) collectAnomalies(logs []interface{}, sites []*unifi.Site, c *Controller) ([]interface{}, error) {
 	if *c.SaveAnomal {
-		events, err := c.Unifi.GetAnomalies(sites)
-		if err != nil {
-			return logs, errors.Wrap(err, "unifi.GetAnomalies()")
-		}
+		for _, s := range sites {
+			events, err := c.Unifi.GetAnomaliesSite(s)
+			if err != nil {
+				return logs, errors.Wrap(err, "unifi.GetAnomalies()")
+			}
 
-		for _, e := range events {
-			logs = append(logs, e)
+			for _, e := range events {
+				logs = append(logs, e)
 
-			webserver.NewInputEvent(PluginName, c.Unifi.UUID+"_anomalies", &webserver.Event{Ts: e.Datetime, Msg: e.Anomaly,
-				Tags: map[string]string{"type": "anomaly", "site_name": e.SiteName, "source": e.SourceName},
-			})
+				webserver.NewInputEvent(PluginName, s.Name+"_anomalies", &webserver.Event{Ts: e.Datetime, Msg: e.Anomaly,
+					Tags: map[string]string{"type": "anomaly", "site_name": e.SiteName, "source": e.SourceName},
+				})
+			}
 		}
 	}
 
@@ -76,19 +80,21 @@ func (u *InputUnifi) collectAnomalies(logs []interface{}, sites []*unifi.Site, c
 
 func (u *InputUnifi) collectEvents(logs []interface{}, sites []*unifi.Site, c *Controller) ([]interface{}, error) {
 	if *c.SaveEvents {
-		events, err := c.Unifi.GetEvents(sites, time.Hour)
-		if err != nil {
-			return logs, errors.Wrap(err, "unifi.GetEvents()")
-		}
+		for _, s := range sites {
+			events, err := c.Unifi.GetSiteEvents(s, time.Hour)
+			if err != nil {
+				return logs, errors.Wrap(err, "unifi.GetEvents()")
+			}
 
-		for _, e := range events {
-			e := redactEvent(e, c.HashPII)
-			logs = append(logs, e)
+			for _, e := range events {
+				e := redactEvent(e, c.HashPII)
+				logs = append(logs, e)
 
-			webserver.NewInputEvent(PluginName, c.Unifi.UUID+"_events", &webserver.Event{Msg: e.Msg, Ts: e.Datetime,
-				Tags: map[string]string{"type": "event", "key": e.Key, "site_id": e.SiteID,
-					"site_name": e.SiteName, "source": e.SourceName},
-			})
+				webserver.NewInputEvent(PluginName, s.Name+"_events", &webserver.Event{Msg: e.Msg, Ts: e.Datetime,
+					Tags: map[string]string{"type": "event", "key": e.Key, "site_id": e.SiteID,
+						"site_name": e.SiteName, "source": e.SourceName},
+				})
+			}
 		}
 	}
 
@@ -97,18 +103,20 @@ func (u *InputUnifi) collectEvents(logs []interface{}, sites []*unifi.Site, c *C
 
 func (u *InputUnifi) collectIDS(logs []interface{}, sites []*unifi.Site, c *Controller) ([]interface{}, error) {
 	if *c.SaveIDS {
-		events, err := c.Unifi.GetIDS(sites)
-		if err != nil {
-			return logs, errors.Wrap(err, "unifi.GetIDS()")
-		}
+		for _, s := range sites {
+			events, err := c.Unifi.GetIDSSite(s)
+			if err != nil {
+				return logs, errors.Wrap(err, "unifi.GetIDS()")
+			}
 
-		for _, e := range events {
-			logs = append(logs, e)
+			for _, e := range events {
+				logs = append(logs, e)
 
-			webserver.NewInputEvent(PluginName, c.Unifi.UUID+"_ids", &webserver.Event{Ts: e.Datetime, Msg: e.Msg,
-				Tags: map[string]string{"type": "ids", "key": e.Key, "site_id": e.SiteID,
-					"site_name": e.SiteName, "source": e.SourceName},
-			})
+				webserver.NewInputEvent(PluginName, s.Name+"_ids", &webserver.Event{Ts: e.Datetime, Msg: e.Msg,
+					Tags: map[string]string{"type": "ids", "key": e.Key, "site_id": e.SiteID,
+						"site_name": e.SiteName, "source": e.SourceName},
+				})
+			}
 		}
 	}
 
