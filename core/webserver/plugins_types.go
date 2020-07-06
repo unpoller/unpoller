@@ -1,6 +1,7 @@
 package webserver
 
 import (
+	"strings"
 	"sync"
 	"time"
 )
@@ -64,9 +65,11 @@ type Event struct {
 	Tags map[string]string `json:"tags,omitempty"`
 }
 
-func (e Events) Groups() (groups []string) {
+func (e Events) Groups(filter string) (groups []string) {
 	for n := range e {
-		groups = append(groups, n)
+		if filter == "" || strings.HasPrefix(n, filter) {
+			groups = append(groups, n)
+		}
 	}
 
 	return groups
@@ -105,6 +108,16 @@ type Device struct {
 	Config     interface{} `json:"config,omitempty"`
 }
 
+func (c Devices) Filter(siteid string) (devices []*Device) {
+	for _, n := range c {
+		if siteid == "" || n.SiteID == siteid {
+			devices = append(devices, n)
+		}
+	}
+
+	return devices
+}
+
 // Clients is a list of clients with their data.
 type Clients []*Client
 
@@ -122,4 +135,14 @@ type Client struct {
 	DeviceMAC  string    `json:"device_mac"`
 	Since      time.Time `json:"since"`
 	Last       time.Time `json:"last"`
+}
+
+func (c Clients) Filter(siteid string) (clients []*Client) {
+	for _, n := range c {
+		if siteid == "" || n.SiteID == siteid {
+			clients = append(clients, n)
+		}
+	}
+
+	return clients
 }

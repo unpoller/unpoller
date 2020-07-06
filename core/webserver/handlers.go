@@ -69,7 +69,7 @@ func (s *Server) handleOutput(w http.ResponseWriter, r *http.Request) {
 	default:
 		s.handleJSON(w, c.Config)
 	case "eventgroups":
-		s.handleJSON(w, c.Events.Groups())
+		s.handleJSON(w, c.Events.Groups(val))
 	case "events":
 		switch events, ok := c.Events[val]; {
 		case val == "":
@@ -105,7 +105,7 @@ func (s *Server) handleInput(w http.ResponseWriter, r *http.Request) {
 	default:
 		s.handleJSON(w, c.Config)
 	case "eventgroups":
-		s.handleJSON(w, c.Events.Groups())
+		s.handleJSON(w, c.Events.Groups(val))
 	case "events":
 		switch events, ok := c.Events[val]; {
 		case val == "":
@@ -118,9 +118,9 @@ func (s *Server) handleInput(w http.ResponseWriter, r *http.Request) {
 	case "sites":
 		s.handleJSON(w, c.Sites)
 	case "devices":
-		s.handleJSON(w, c.Devices)
+		s.handleJSON(w, c.Devices.Filter(val))
 	case "clients":
-		s.handleJSON(w, c.Clients)
+		s.handleJSON(w, c.Clients.Filter(val))
 	case "counters":
 		if val != "" {
 			s.handleJSON(w, map[string]int64{val: c.Counter[val]})
