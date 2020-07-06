@@ -77,7 +77,7 @@
 
 # By default the web interface does not require authentication. You can change
 # that by adding a username and password hash (or multiple) below.
-# To create a hash, run unifi-poller with the -e CLI argument.
+# To create a hash, run unifi-poller with the -e CLI argument. See Wiki for more!
 [webserver.accounts]
 # username = "password-hash"
 # captain = "$2a$04$mxw6i0LKH6u46oaLK2cq5eCTAAFkfNiRpzNbz.EyvJZZWNa2FzIlS"
