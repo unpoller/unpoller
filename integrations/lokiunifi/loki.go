@@ -7,8 +7,8 @@ import (
 	"time"
 
 	"github.com/pkg/errors"
-	"github.com/unifi-poller/poller"
-	"github.com/unifi-poller/webserver"
+	"github.com/unifi-poller/poller/pkg/poller"
+	"github.com/unifi-poller/poller/pkg/webserver"
 	"golift.io/cnfg"
 )
 
