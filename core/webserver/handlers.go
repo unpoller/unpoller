@@ -34,22 +34,28 @@ func (s *Server) handleStatic(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// Returns web server and poller configs. /api/v1/config.
+// Returns poller configs and/or plugins. /api/v1/config.
 func (s *Server) handleConfig(w http.ResponseWriter, r *http.Request) {
-	data := map[string]interface{}{
-		"poller": s.Collect.Poller(),
-		"uptime": int(time.Since(s.start).Round(time.Second).Seconds()),
-	}
-	s.handleJSON(w, data)
-}
+	vars := mux.Vars(r)
 
-// Returns a list of input and output plugins: /api/v1/plugins.
-func (s *Server) handlePlugins(w http.ResponseWriter, r *http.Request) {
-	data := map[string][]string{
-		"inputs":  s.Collect.Inputs(),
-		"outputs": s.Collect.Outputs(),
+	switch vars["sub"] {
+	case "":
+		data := map[string]interface{}{
+			"inputs":  s.Collect.Inputs(),
+			"outputs": s.Collect.Outputs(),
+			"poller":  s.Collect.Poller(),
+			"uptime":  int(time.Since(s.start).Round(time.Second).Seconds()),
+		}
+		s.handleJSON(w, data)
+	case "plugins":
+		data := map[string][]string{
+			"inputs":  s.Collect.Inputs(),
+			"outputs": s.Collect.Outputs(),
+		}
+		s.handleJSON(w, data)
+	default:
+		s.handleMissing(w, r)
 	}
-	s.handleJSON(w, data)
 }
 
 // Returns an output plugin's data: /api/v1/output/{output}.
@@ -76,7 +82,7 @@ func (s *Server) handleOutput(w http.ResponseWriter, r *http.Request) {
 			s.handleJSON(w, c.Events)
 		case ok:
 			s.handleJSON(w, events)
-		case !ok:
+		default:
 			s.handleMissing(w, r)
 		}
 	case "counters":
@@ -112,7 +118,7 @@ func (s *Server) handleInput(w http.ResponseWriter, r *http.Request) {
 			s.handleJSON(w, c.Events)
 		case ok:
 			s.handleJSON(w, events)
-		case !ok:
+		default:
 			s.handleMissing(w, r)
 		}
 	case "sites":

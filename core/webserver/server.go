@@ -114,13 +114,14 @@ func (s *Server) newRouter() *mux.Router {
 	router.PathPrefix("/{sub:css|js|img|image|images}/").Handler((s.basicAuth(s.handleStatic))).Methods("GET")
 	// api paths for json dumps
 	router.HandleFunc("/api/v1/config", s.basicAuth(s.handleConfig)).Methods("GET")
-	router.HandleFunc("/api/v1/plugins", s.basicAuth(s.handlePlugins)).Methods("GET")
+	router.HandleFunc("/api/v1/config/{sub}", s.basicAuth(s.handleConfig)).Methods("GET")
+	router.HandleFunc("/api/v1/config/{sub}/{value}", s.basicAuth(s.handleConfig)).Methods("GET", "POST")
 	router.HandleFunc("/api/v1/input/{input}", s.basicAuth(s.handleInput)).Methods("GET")
 	router.HandleFunc("/api/v1/input/{input}/{sub}", s.basicAuth(s.handleInput)).Methods("GET")
-	router.HandleFunc("/api/v1/input/{input}/{sub}/{value}", s.basicAuth(s.handleInput)).Methods("GET")
+	router.HandleFunc("/api/v1/input/{input}/{sub}/{value}", s.basicAuth(s.handleInput)).Methods("GET", "POST")
 	router.HandleFunc("/api/v1/output/{output}", s.basicAuth(s.handleOutput)).Methods("GET")
 	router.HandleFunc("/api/v1/output/{output}/{sub}", s.basicAuth(s.handleOutput)).Methods("GET")
-	router.HandleFunc("/api/v1/output/{output}/{sub}/{value}", s.basicAuth(s.handleOutput)).Methods("GET")
+	router.HandleFunc("/api/v1/output/{output}/{sub}/{value}", s.basicAuth(s.handleOutput)).Methods("GET", "POST")
 	router.PathPrefix("/").Handler(s.basicAuth(s.handleMissing)).Methods("GET", "POST", "PUT") // 404 everything.
 
 	return router
