@@ -66,7 +66,7 @@ func init() { // nolint: gochecknoinits
 // Run starts the server and gets things going.
 func (s *Server) Run(c poller.Collect) error {
 	if s.Collect = c; s.Config == nil || s.Port == 0 || s.HTMLPath == "" || !s.Enable {
-		s.Logf("Web server disabled!")
+		s.Logf("Internal web server disabled!")
 		return nil
 	}
 
@@ -97,11 +97,11 @@ func (s *Server) Start() (err error) {
 		err = s.server.ListenAndServeTLS(s.SSLCrtPath, s.SSLKeyPath)
 	}
 
-	if errors.Is(err, http.ErrServerClosed) {
-		return nil
+	if !errors.Is(err, http.ErrServerClosed) {
+		return err
 	}
 
-	return err
+	return nil
 }
 
 func (s *Server) newRouter() *mux.Router {
@@ -129,13 +129,14 @@ func (s *Server) newRouter() *mux.Router {
 
 // PasswordIsCorrect returns true if the provided password matches a user's account.
 func (a accounts) PasswordIsCorrect(user, pass string, ok bool) bool {
-	if len(a) == 0 { // If true then no accounts defined in config; allow anyone.
-		return true
-	} else if !ok { // If true then r.BasicAuth() failed, not a valid user.
-		return false
+	if len(a) == 0 {
+		return true // No accounts defined in config; allow anyone.
+	} else if !ok {
+		return false // r.BasicAuth() failed, not a valid user.
 	} else if user, ok = a[user]; !ok { // The user var is now the password hash.
-		return false
+		return false // The username provided doesn't exist.
 	}
 
+	// If this is returns nil, the provided password matches, so return true.
 	return bcrypt.CompareHashAndPassword([]byte(user), []byte(pass)) == nil
 }

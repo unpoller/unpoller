@@ -49,7 +49,7 @@ type Site struct {
 	Controller string `json:"controller"`
 }
 
-// Events is all the events a plugin has. string = Controller.UUID + text.
+// Events is all the events a plugin has. string = SiteID + text, or plugin name, or "whatever".
 type Events map[string]*EventGroup
 
 // EventGroup allows each plugin to have a map of events. ie. one map per controller.
@@ -60,14 +60,14 @@ type EventGroup struct {
 
 // Event is like a log message.
 type Event struct {
-	Ts   time.Time         `json:"ts"`
+	Ts   time.Time         `json:"ts"` // nolint: stylecheck
 	Msg  string            `json:"msg"`
 	Tags map[string]string `json:"tags,omitempty"`
 }
 
-func (e Events) Groups(filter string) (groups []string) {
+func (e Events) Groups(prefix string) (groups []string) {
 	for n := range e {
-		if filter == "" || strings.HasPrefix(n, filter) {
+		if prefix == "" || strings.HasPrefix(n, prefix) {
 			groups = append(groups, n)
 		}
 	}

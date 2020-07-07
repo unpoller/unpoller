@@ -13,8 +13,7 @@ import (
 // Returns the main index file.
 // If index.html becomes a template, this is where it can be compiled.
 func (s *Server) handleIndex(w http.ResponseWriter, r *http.Request) {
-	index := filepath.Join(s.HTMLPath, "index.html")
-	http.ServeFile(w, r, index)
+	http.ServeFile(w, r, filepath.Join(s.HTMLPath, "index.html"))
 }
 
 // Arbitrary /health handler.
