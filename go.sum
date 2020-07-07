@@ -200,6 +200,8 @@ github.com/unifi-poller/webserver v0.0.0-20200704065911-79e4fe954ce1 h1:xjUOu//O
 github.com/unifi-poller/webserver v0.0.0-20200704065911-79e4fe954ce1/go.mod h1:08IX30eb93+VbhiFqgMBXQD52+djPwivBcx5C8fH92M=
 github.com/unifi-poller/webserver v0.0.0-20200706074454-a16e32b70121 h1:eK1wHVCUHcH9I8YzeWaiuS8kYgCqn1wXnyMmNH0g27A=
 github.com/unifi-poller/webserver v0.0.0-20200706074454-a16e32b70121/go.mod h1:08IX30eb93+VbhiFqgMBXQD52+djPwivBcx5C8fH92M=
+github.com/unifi-poller/webserver v0.0.0-20200707093910-adce7be3b1df h1:Opjv4SYuP595d0kb7tKzrX2aHH2EFrFER3Uu9cS7Frk=
+github.com/unifi-poller/webserver v0.0.0-20200707093910-adce7be3b1df/go.mod h1:08IX30eb93+VbhiFqgMBXQD52+djPwivBcx5C8fH92M=
 golang.org/x/crypto v0.0.0-20180904163835-0709b304e793/go.mod h1:6SG95UA2DQfeDnfUPMdvaQW0Q7yPrPDi9nlGo2tz2b4=
 golang.org/x/crypto v0.0.0-20190308221718-c2843e01d9a2/go.mod h1:djNgcEr1/C05ACkg1iLfiJU5Ep61QUkGW8qpdssI0+w=
 golang.org/x/crypto v0.0.0-20200622213623-75b288015ac9 h1:psW17arqaxU48Z5kZ0CQnkZWQJsqcURM6tKiBApRjXI=
