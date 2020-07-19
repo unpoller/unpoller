@@ -15,10 +15,10 @@ require (
 	github.com/shurcooL/sanitized_anchor_name v1.0.0 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
 	github.com/unifi-poller/influxunifi v0.0.10-0.20200719070803-1fb36a5a9829
-	github.com/unifi-poller/inputunifi v0.0.8-0.20200719070501-75a24241ef36
+	github.com/unifi-poller/inputunifi v0.0.8-0.20200719194021-3d07f5886bf0
 	github.com/unifi-poller/lokiunifi v0.0.0-20200719070442-d6d2338713d6
-	github.com/unifi-poller/poller v0.0.8-0.20200719070110-8d67d8eb73d5
-	github.com/unifi-poller/promunifi v0.0.9-0.20200719070533-e4b440d85f53
+	github.com/unifi-poller/poller v0.0.8-0.20200719081209-e80aa9ed401d
+	github.com/unifi-poller/promunifi v0.0.9-0.20200719071215-657f39d26691
 	github.com/unifi-poller/unifi v0.0.6-0.20200628213309-a22ea217874f
 	golang.org/x/net v0.0.0-20200625001655-4c5254603344 // indirect
 	golang.org/x/sys v0.0.0-20200625212154-ddb9806d33ae // indirect
