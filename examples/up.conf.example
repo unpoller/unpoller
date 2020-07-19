@@ -23,6 +23,10 @@
   # This controls on which ip and port /metrics is exported when mode is "prometheus".
   # This has no effect in other modes. Must contain a colon and port.
   http_listen = "0.0.0.0:9130"
+  # Adding an SSL Cert and Cert Key will make Poller listen with SSL/https.
+  ssl_cert_path = ""
+  ssl_key_path  = ""
+  # Errors are rare. Setting this to true will report them to Prometheus.
   report_errors = false
 
 [influxdb]

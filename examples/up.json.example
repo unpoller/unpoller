@@ -8,6 +8,8 @@
   "prometheus": {
     "disable":       false,
     "http_listen":   "0.0.0.0:9130",
+    "ssl_cert_path": "",
+    "ssl_key_path":  "",
     "report_errors": false
   },
 
@@ -25,9 +27,9 @@
      "enable":        false,
      "port":          37288,
      "html_path":     "/usr/lib/unifi-poller/web",
-     "ssl_cert_path": ""
-     "ssl_key_path":  ""
-     "max_events":    200
+     "ssl_cert_path": "",
+     "ssl_key_path":  "",
+     "max_events":    200,
      "accounts": {
         "captain": "$2a$04$mxw6i0LKH6u46oaLK2cq5eCTAAFkfNiRpzNbz.EyvJZZWNa2FzIlS"
      }

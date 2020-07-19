@@ -11,8 +11,10 @@ poller:
   plugins: []
 
 prometheus:
-  disable: false
-  http_listen: "0.0.0.0:9130"
+  disable:       false
+  http_listen:   "0.0.0.0:9130"
+  ssl_cert_path: ""
+  ssl_key_path:  ""
   report_errors: false
 
 influxdb:
