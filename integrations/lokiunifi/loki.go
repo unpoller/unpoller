@@ -2,6 +2,7 @@ package lokiunifi
 
 import (
 	"io/ioutil"
+	"reflect"
 	"strconv"
 	"strings"
 	"time"
@@ -56,6 +57,7 @@ func init() { // nolint: gochecknoinits
 
 	poller.NewOutput(&poller.Output{
 		Name:   PluginName,
+		Path:   reflect.TypeOf(Config{}).PkgPath(),
 		Config: l,
 		Method: l.Run,
 	})

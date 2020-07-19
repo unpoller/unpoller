@@ -104,6 +104,8 @@ github.com/unifi-poller/poller v0.0.8-0.20200628131550-26430cac16c1 h1:SHKYtAu4y
 github.com/unifi-poller/poller v0.0.8-0.20200628131550-26430cac16c1/go.mod h1:fObadG7weiVnSpFu8pFpGfo2bYYFc7hUMe770FovSc8=
 github.com/unifi-poller/poller v0.0.8-0.20200707102001-a78974b290b0 h1:PRhR0XJ+ajhYOnzRhIdgbjvbASteLA+NRTrvQUubJi4=
 github.com/unifi-poller/poller v0.0.8-0.20200707102001-a78974b290b0/go.mod h1:MiuDGaMWDOAv2SqzqgV5P8t8KWzN00say/Cd5LbiFTI=
+github.com/unifi-poller/poller v0.0.8-0.20200719070110-8d67d8eb73d5 h1:16SKHzP5jNBiMhiVxZwGwewSvdP2f5lUToT474roNn0=
+github.com/unifi-poller/poller v0.0.8-0.20200719070110-8d67d8eb73d5/go.mod h1:MiuDGaMWDOAv2SqzqgV5P8t8KWzN00say/Cd5LbiFTI=
 github.com/unifi-poller/unifi v0.0.5-0.20200623080800-1766e7bde07c h1:pW5Z6cE1DC2GAHy6CdWnkgy5t/wehBvOW19viQXxUVo=
 github.com/unifi-poller/unifi v0.0.5-0.20200623080800-1766e7bde07c/go.mod h1:L1kMRH2buZhB31vZnRC1im7Tk/4uD3ET4biwl2faYy8=
 github.com/unifi-poller/unifi v0.0.6-0.20200625090439-421046871a37 h1:T2y8JWkjZd1vz2ZKu4vmmAk9s6PUwupuTldwhfww5xY=
