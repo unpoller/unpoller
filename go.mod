@@ -17,7 +17,7 @@ require (
 	github.com/unifi-poller/influxunifi v0.0.10-0.20200719070803-1fb36a5a9829
 	github.com/unifi-poller/inputunifi v0.0.8-0.20200719194021-3d07f5886bf0
 	github.com/unifi-poller/lokiunifi v0.0.0-20200719070442-d6d2338713d6
-	github.com/unifi-poller/poller v0.0.8-0.20200719081209-e80aa9ed401d
+	github.com/unifi-poller/poller v0.0.8-0.20200720031633-f6348e2bc478
 	github.com/unifi-poller/promunifi v0.0.9-0.20200719071215-657f39d26691
 	github.com/unifi-poller/unifi v0.0.6-0.20200628213309-a22ea217874f
 	golang.org/x/net v0.0.0-20200625001655-4c5254603344 // indirect
