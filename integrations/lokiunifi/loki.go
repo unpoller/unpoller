@@ -24,7 +24,7 @@ const (
 	// InputName is the name of plugin that gives us data.
 	InputName = "unifi"
 	// PluginName is the name of this plugin.
-	PluginName = "Loki"
+	PluginName = "loki"
 )
 
 // Config is the plugin's input data.
