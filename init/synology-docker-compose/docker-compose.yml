@@ -1,0 +1,52 @@
+# This is for unifi-poller v2.
+version: '3'
+services:
+  influxdb:
+    restart: always
+    image: influxdb:latest
+    ports:
+      - '3456:8086'
+    volumes:
+      - /volume2/General/influxdb:/var/lib/influxdb
+    environment:
+      - INFLUXDB_DATA_DIR=/var/lib/influxdb/data
+      - INFLUXDB_DATA_WAL_DIR=/var/lib/influxdb/wal
+      - INFLUXDB_DATA_META_DIR=/var/lib/influxdb/meta 
+    networks:
+      - Grafana_Net
+  grafana:
+    image: grafana/grafana:latest
+    restart: always
+    ports:
+      - '3000:3000'
+    volumes:
+      - /volume2/General/grafana:/var/lib/grafana
+    depends_on:
+      - influxdb
+    user: "1029"
+    environment:
+      - GF_SECURITY_ADMIN_USER=${GRAFANA_USERNAME}
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_PASSWORD}
+      - GF_INSTALL_PLUGINS=grafana-clock-panel,natel-discrete-panel,grafana-piechart-panel
+      - GF_SERVER_DOMAIN=boards.jpcdi.com
+      - GF_ENFORCE_DOMAIN=true
+      - GF_RENDERING_CALLBACK_URL=boards.jpcdi.com
+      - GF_RENDERING_SERVER_URL=boards.jpcdi.com
+    networks:
+      - Grafana_Net
+  unifi-poller:
+    restart: always
+    image: golift/unifi-poller:latest
+    environment:
+      - UP_INFLUXDB_USER=${INFLUXDB_ADMIN_USER}
+      - UP_INFLUXDB_PASS=${INFLUXDB_ADMIN_PASSWORD}
+      - UP_INFLUXDB_URL=http://influxdb:8086
+      - UP_UNIFI_DEFAULT_USER=${UNIFI_USER}
+      - UP_UNIFI_DEFAULT_PASS=${UNIFI_PASS}
+      - UP_UNIFI_DEFAULT_URL=${UNIFI_URL}
+      - UP_POLLER_DEBUG=${POLLER_DEBUG}
+      - UP_UNIFI_DEFAULT_SAVE_DPI=${POLLER_SAVE_DPI}
+    networks:
+      - Grafana_Net
+networks:
+  Grafana_Net:
