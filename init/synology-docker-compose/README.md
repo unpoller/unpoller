@@ -25,3 +25,23 @@ You still have to [do this prep work](https://github.com/unifi-poller/unifi-poll
 #. Run the following command to find the PID of the user you created and set the variable `GRAFANA_LOCAL_USERID` in your `.env` file:
     - `sudo id grafana`
     - `GRAFANA_LOCAL_USERID=1026`
+
+##Variables
+
+For all of the variables used in the docker-compose file, make sure to not only read over but make important edits to the `docker-compose.example.env file. As well as making a copy and naming it `.env`
+
+For the `/local/storage/location/` lines, change those to match your directories.
+
+```bash
+#influxdb
+INFLUXDB_ADMIN_PASSWORD=changeme
+INFLUXDB_LOCAL_VOLUME=/local/storage/location/influxdb
+
+#grafana
+GRAFANA_USERNAME=grafana_username
+GRAFANA_PASSWORD=changeme
+GRAFANA_LOCAL_USERID=1026
+
+UNIFI_PASS=set_this_on_your_controller
+UNIFI_URL=https://127.0.0.1:8443
+```
