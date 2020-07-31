@@ -3,6 +3,7 @@
 This folder is an example `docker-compose.yml` file and a `.env` file for using docker through a Synology Server.
 
 ## Directions
+
 First, create the directories where you want the containers to save everything. I use the same base directory for them, like: `/volume1/Docker/grafana`, then inside the `./grafana` directory: `./grafana` and `./influxdb`. Its best to use the command line over SSH to create these directories, AFTER you have the primary shared directory already created. (`Control Panel -> Shared Folder -> Create`)
 
 `sudo mkdir -p /volume[#]/[Shared Directory]/Grafana/{grafana,influxdb}`
