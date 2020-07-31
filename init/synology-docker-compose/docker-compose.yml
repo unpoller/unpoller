@@ -4,36 +4,34 @@ services:
   influxdb:
     restart: always
     image: influxdb:latest
-    ports:
-      - '3456:8086'
     volumes:
-      - /volume2/General/influxdb:/var/lib/influxdb
+      - ${INFLUXDB_LOCAL_VOLUME}:/var/lib/influxdb
     environment:
       - INFLUXDB_DATA_DIR=/var/lib/influxdb/data
       - INFLUXDB_DATA_WAL_DIR=/var/lib/influxdb/wal
-      - INFLUXDB_DATA_META_DIR=/var/lib/influxdb/meta 
+      - INFLUXDB_DATA_META_DIR=/var/lib/influxdb/meta
     networks:
-      - Grafana_Net
+      - ${GRAFANA_NETWORK}
   grafana:
     image: grafana/grafana:latest
     restart: always
     ports:
       - '3000:3000'
     volumes:
-      - /volume2/General/grafana:/var/lib/grafana
+      - ${GRAFANA_LOCAL_VOLUME}:/var/lib/grafana
     depends_on:
       - influxdb
-    user: "1029"
+    user: "${GRAFANA_LOCAL_USERID}"
     environment:
       - GF_SECURITY_ADMIN_USER=${GRAFANA_USERNAME}
       - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_PASSWORD}
       - GF_INSTALL_PLUGINS=grafana-clock-panel,natel-discrete-panel,grafana-piechart-panel
-      - GF_SERVER_DOMAIN=boards.jpcdi.com
+      - GF_SERVER_DOMAIN=${GRAFANA_SERVER_DOMAIN}
       - GF_ENFORCE_DOMAIN=true
-      - GF_RENDERING_CALLBACK_URL=boards.jpcdi.com
-      - GF_RENDERING_SERVER_URL=boards.jpcdi.com
+      - GF_RENDERING_CALLBACK_URL=${GF_RENDERING_CALLBACK_URL}
+      - GF_RENDERING_SERVER_URL=${GF_RENDERING_SERVER_URL}
     networks:
-      - Grafana_Net
+      - ${GRAFANA_NETWORK}
   unifi-poller:
     restart: always
     image: golift/unifi-poller:latest
@@ -47,6 +45,6 @@ services:
       - UP_POLLER_DEBUG=${POLLER_DEBUG}
       - UP_UNIFI_DEFAULT_SAVE_DPI=${POLLER_SAVE_DPI}
     networks:
-      - Grafana_Net
+      - ${GRAFANA_NETWORK}
 networks:
-  Grafana_Net:
+  ${GRAFANA_NETWORK}:
