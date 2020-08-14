@@ -2,28 +2,35 @@
 
 This folder is an example `docker-compose.yml` file and a `.env` file for using docker through a Synology Server.
 
+The `.env` file is a special environment/variable file that `docker-compose` automatically uses to make configuration of your containers easier.
+
 ## Directions
 
-First, create the directories where you want the containers to save everything. I use the same base directory for them, like: `/volume1/Docker/grafana`, then inside the `./grafana` directory: `./grafana` and `./influxdb`. Its best to use the command line over SSH to create these directories, AFTER you have the primary shared directory already created. (`Control Panel -> Shared Folder -> Create`)
+First, create the directories where you want the containers to save everything. I use the same base directory for them, like: `/volume1/Docker/unifi-poller`, then inside the `./unifi-poller` directory: `./grafana` and `./influxdb`.
 
-`sudo mkdir -p /volume[#]/[Shared Directory]/Grafana/{grafana,influxdb}`
+  NOTE: Its best to use the command line over SSH to create these directories, AFTER you have the root shared directory created. (`Control Panel -> Shared Folder -> Create`)
 
-Where `/volume[#]` is the volume number,
+```bash
+sudo mkdir -p /volume[#]/[Shared Directory]/unifi-poller/grafana
+sudo mkdir -p /volume[#]/[Shared Directory/unifi-poller/influxdbx
+```
+
+Where `/volume[#]` is the volume number corresponding to your volumes in Synology;
 `[Shared Directory]` is the shared directory from above, and then
-`{grafana,influxdb}` needs to be copied as-is, curly brackets and all.
+create the `grafana and influxdb` directories.
 
-You still have to [do this prep work](https://github.com/unifi-poller/unifi-poller/wiki/Synology-HOWTO#method-2) creating the `unifipoller` user, which I'll re-iterate here:
+You still have to [do this prep work](https://github.com/unifi-poller/unifi-poller/wiki/Synology-HOWTO#method-2) creating the `unifi-poller` user, which I'll re-iterate here:
 
 #. Create a new user account on the Synology from the Control Panel:
-    - Name the user `grafana`
-    - Set the password (you don't need to logon as grafana and change it)
+    - Name the user `unifi-poller`
+    - Set the password (you don't need to logon as unifipoller and change it)
     - `Disallow Password Change`
     - Assign them to the user group `users`
-    - Give them `r/w` permission to the folder you created e.g. `/docker/grafana`
+    - Give them `r/w` permission to the folder you created e.g. `/docker/unifi-poller`
     - Don't assign them **anything** else - the point of this user is for security's sake.
 #. SSH into your Synology
 #. Run the following command to find the PID of the user you created and set the variable `GRAFANA_LOCAL_USERID` in your `.env` file:
-    - `sudo id grafana`
+    - `sudo id unifi-poller`
     - `GRAFANA_LOCAL_USERID=1026`
 
 ##Variables
@@ -38,7 +45,7 @@ INFLUXDB_ADMIN_PASSWORD=changeme
 INFLUXDB_LOCAL_VOLUME=/local/storage/location/influxdb
 
 #grafana
-GRAFANA_USERNAME=grafana_username
+GRAFANA_USERNAME=unifi-poller_username
 GRAFANA_PASSWORD=changeme
 GRAFANA_LOCAL_USERID=1026
 
