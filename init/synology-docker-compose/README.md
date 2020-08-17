@@ -12,14 +12,14 @@ First, create the directories where you want the containers to save everything. 
 
 ```bash
 sudo mkdir -p /volume[#]/[Shared Directory]/unifi-poller/grafana
-sudo mkdir -p /volume[#]/[Shared Directory/unifi-poller/influxdbx
+sudo mkdir -p /volume[#]/[Shared Directory]/unifi-poller/influxdbx
 ```
 
 Where `/volume[#]` is the volume number corresponding to your volumes in Synology;
 `[Shared Directory]` is the shared directory from above, and then
-create the `grafana and influxdb` directories.
+creating the `grafana and influxdb` directories.
 
-You still have to [do this prep work](https://github.com/unifi-poller/unifi-poller/wiki/Synology-HOWTO#method-2) creating the `unifi-poller` user, which I'll re-iterate here:
+You still have to [do this prep work](https://github.com/unifi-poller/unifi-poller/wiki/Synology-HOWTO#method-2), creating the `unifi-poller` user, which I'll re-iterate here:
 
 #. Create a new user account on the Synology from the Control Panel:
     - Name the user `unifi-poller`
@@ -33,9 +33,36 @@ You still have to [do this prep work](https://github.com/unifi-poller/unifi-poll
     - `sudo id unifi-poller`
     - `GRAFANA_LOCAL_USERID=1026`
 
-##Variables
+## Spin Up the Containers
 
-For all of the variables used in the docker-compose file, make sure to not only read over but make important edits to the `docker-compose.example.env file. As well as making a copy and naming it `.env`
+At this point, you are able to run `sudo docker-compose up -d` from within the directory that you have the `docker-compose.yml` file and the `.env` file saved on your Synology. 
+
+And now we have to create the Influx Database.
+
+## Create Influx Database
+
+#. Click `Containers` and then double click the running `influxdb1` container
+#. Switch to the `terminal` tab
+#. Click the drop down next to `Create` and select `launch with command`
+#. Enter `bash` and click `ok`
+#. Select `bash` from the left hand side. You should now see an active `command prompt`
+#. In the command prompt, enter these commands: (note: pasting IS possible! You have to right click in the terminal window and select `paste`)
+        
+`influx`
+After a couple of seconds you should be in the InfluxDB shell. 
+Run the following commands in the InfluxDB shell, then close the window:
+
+```
+CREATE DATABASE unifi
+USE unifi
+CREATE USER unifipoller WITH PASSWORD 'unifipoller' WITH ALL PRIVILEGES
+GRANT ALL ON unifi TO unifipoller
+exit
+```
+
+## Variables
+
+For all of the variables used in the docker-compose file, you'll find them in the `docker-compose.example.env` file. Please, `cp docker-compose.example.env .env` and open it in your favorite text editor. `nano .env`
 
 For the `/local/storage/location/` lines, change those to match your directories.
 
