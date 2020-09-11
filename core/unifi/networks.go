@@ -20,7 +20,11 @@ func (u *Unifi) GetNetworks(sites []*Site) ([]Network, error) {
 		}
 
 		for _, data := range response.Data {
-			network := u.parseNetwork(data, site.SiteName)
+			network, err := u.parseNetwork(data, site.SiteName)
+			if err != nil {
+				return networks, err
+			}
+
 			networks = append(networks, *network)
 		}
 	}
