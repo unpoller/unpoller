@@ -35,21 +35,6 @@ func (u *Unifi) parseNetwork(data json.RawMessage, siteName string) *Network {
 	return network
 }
 
-// unmarshalNetwork handles logging for the unmarshal operations in parseNetwork().
-func (u *Unifi) unmarshalNetwork(data json.RawMessage, v interface{}) (err error) {
-	if err = json.Unmarshal(data, v); err != nil {
-		u.ErrorLog("json.Unmarshal(): %v", err)
-		u.ErrorLog("Enable Debug Logging to output the failed payload.")
-
-		json, err := data.MarshalJSON()
-		u.DebugLog("Failed Payload: %s (marshal err: %v)", json, err)
-		u.DebugLog("The above payload can prove useful during torubleshooting when you open an Issue:")
-		u.DebugLog("==- https://github.com/unifi-poller/unifi/issues/new -==")
-	}
-
-	return err
-}
-
 // Network is metadata about a network managed by a UniFi controller
 type Network struct {
 	DhcpdDNSEnabled        FlexBool `json:"dhcpd_dns_enabled"`
