@@ -25,15 +25,15 @@ creating the `grafana and influxdb` directories.
 
 You still have to [do this prep work](https://github.com/unifi-poller/unifi-poller/wiki/Synology-HOWTO#method-2), creating the `unifi-poller` user, which I'll re-iterate here:
 
-#. Create a new user account on the Synology from the Control Panel:
+1. Create a new user account on the Synology from the Control Panel:
     - Name the user `unifi-poller`
     - Set the password (you don't need to logon as unifipoller and change it)
     - `Disallow Password Change`
     - Assign them to the user group `users`
     - Give them `r/w` permission to the folder you created e.g. `/docker/unifi-poller`
     - Don't assign them **anything** else - the point of this user is for security's sake.
-#. SSH into your Synology
-#. Run the following command to find the PID of the user you created and set the variable `GRAFANA_LOCAL_USERID` in your `.env` file:
+2. SSH into your Synology
+3. Run the following command to find the PID of the user you created and set the variable `GRAFANA_LOCAL_USERID` in your `.env` file:
     - `sudo id unifi-poller`
     - `GRAFANA_LOCAL_USERID=1026`
 
@@ -45,13 +45,13 @@ And now, using your Synology's Web GUI, we have to create the Influx Database.
 
 ### Create Influx Database
 
-#. Click `Containers` and then double click the running `influxdb1` container
-#. Switch to the `terminal` tab
-#. Click the drop down next to `Create` and select `launch with command`
-#. Enter `bash` and click `ok`
-#. Select `bash` from the left hand side. You should now see an active `command prompt`
-#. In the command prompt, enter these commands: (note: pasting IS possible! You have to right click in the terminal window and select `paste`)
-
+1. Click `Containers` and then double click the running `influxdb1` container
+2. Switch to the `terminal` tab
+3. Click the drop down next to `Create` and select `launch with command`
+4. Enter `bash` and click `ok`
+5. Select `bash` from the left hand side. You should now see an active `command prompt`
+6. In the command prompt, enter these commands: (note: pasting IS possible! You have to right click in the terminal window and select `paste`)
+        
 `influx`
 
 After a couple of seconds you should be in the InfluxDB shell.
