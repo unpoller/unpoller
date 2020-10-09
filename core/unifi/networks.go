@@ -35,7 +35,7 @@ func (u *Unifi) GetNetworks(sites []*Site) ([]Network, error) {
 // parseNetwork parses the raw JSON from the Unifi Controller into network structures.
 func (u *Unifi) parseNetwork(data json.RawMessage, siteName string) (*Network, error) {
 	network := new(Network)
-	return network, u.unmarshalDevice(data, network)
+	return network, u.unmarshalDevice(siteName, data, network)
 }
 
 // Network is metadata about a network managed by a UniFi controller
