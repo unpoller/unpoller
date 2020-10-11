@@ -34,32 +34,41 @@ type Config struct {
 
 	// Namespace to prepend to all metrics, events and service checks name.
 	Namespace *string `json:"namespace" toml:"namespace" xml:"namespace,attr" yaml:"namespace"`
+
 	// Tags are global tags to be applied to every metrics, events and service checks.
 	Tags []string `json:"tags" toml:"tags" xml:"tags,attr" yaml:"tags"`
+
 	// MaxBytesPerPayload is the maximum number of bytes a single payload will contain.
 	// The magic value 0 will set the option to the optimal size for the transport
 	// protocol used when creating the client: 1432 for UDP and 8192 for UDS.
 	MaxBytesPerPayload *int `json:"max_bytes_per_payload" toml:"max_bytes_per_payload" xml:"max_bytes_per_payload,attr" yaml:"max_bytes_per_payload"`
+
 	// MaxMessagesPerPayload is the maximum number of metrics, events and/or service checks a single payload will contain.
 	// This option can be set to `1` to create an unbuffered client.
 	MaxMessagesPerPayload *int `json:"max_messages_per_payload" toml:"max_messages_per_payload" xml:"max_messages_per_payload,attr" yaml:"max_messages_per_payload"`
+
 	// BufferPoolSize is the size of the pool of buffers in number of buffers.
 	// The magic value 0 will set the option to the optimal size for the transport
 	// protocol used when creating the client: 2048 for UDP and 512 for UDS.
 	BufferPoolSize *int `json:"buffer_pool_size" toml:"buffer_pool_size" xml:"buffer_pool_size,attr" yaml:"buffer_pool_size"`
+
 	// BufferFlushInterval is the interval after which the current buffer will get flushed.
 	BufferFlushInterval *cnfg.Duration `json:"buffer_flush_interval" toml:"buffer_flush_interval" xml:"buffer_flush_interval,attr" yaml:"buffer_flush_interval"`
+
 	// BufferShardCount is the number of buffer "shards" that will be used.
 	// Those shards allows the use of multiple buffers at the same time to reduce
 	// lock contention.
 	BufferShardCount *int `json:"buffer_shard_count" toml:"buffer_shard_count" xml:"buffer_shard_count,attr" yaml:"buffer_shard_count"`
+
 	// SenderQueueSize is the size of the sender queue in number of buffers.
 	// The magic value 0 will set the option to the optimal size for the transport
 	// protocol used when creating the client: 2048 for UDP and 512 for UDS.
 	SenderQueueSize *int `json:"sender_queue_size" toml:"sender_queue_size" xml:"sender_queue_size,attr" yaml:"sender_queue_size"`
+
 	// WriteTimeoutUDS is the timeout after which a UDS packet is dropped.
 	WriteTimeoutUDS *cnfg.Duration `json:"write_timeout_uds" toml:"write_timeout_uds" xml:"write_timeout_uds,attr" yaml:"write_timeout_uds"`
-	// ReceiveMode determins the behavior of the client when receiving to many
+
+	// ReceiveMode determines the behavior of the client when receiving to many
 	// metrics. The client will either drop the metrics if its buffers are
 	// full (ChannelMode mode) or block the caller until the metric can be
 	// handled (MutexMode mode). By default the client will MutexMode. This
@@ -79,8 +88,10 @@ type Config struct {
 	// volume. The goal is to not slow down the application at the cost of
 	// dropping metrics and having a lower max throughput.
 	ReceiveMode *statsd.ReceivingMode `json:"receive_mode" toml:"receive_mode" xml:"receive_mode,attr" yaml:"receive_mode"`
+
 	// ChannelModeBufferSize is the size of the channel holding incoming metrics
 	ChannelModeBufferSize *int `json:"channel_mode_buffer_size" toml:"channel_mode_buffer_size" xml:"channel_mode_buffer_size,attr" yaml:"channel_mode_buffer_size"`
+
 	// AggregationFlushInterval is the interval for the aggregator to flush metrics
 	AggregationFlushInterval *time.Duration `json:"aggregation_flush_interval" toml:"aggregation_flush_interval" xml:"aggregation_flush_interval,attr" yaml:"aggregation_flush_interval"`
 }
