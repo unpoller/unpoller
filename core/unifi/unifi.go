@@ -166,6 +166,21 @@ func (u *Unifi) GetData(apiPath string, v interface{}, params ...string) error {
 	return json.Unmarshal(body, v)
 }
 
+// PutData makes a unifi request and unmarshals the response into a provided pointer.
+func (u *Unifi) PutData(apiPath string, v interface{}, params ...string) error {
+	start := time.Now()
+
+	body, err := u.PutJSON(apiPath, params...)
+	if err != nil {
+		return err
+	}
+
+	u.DebugLog("Requested %s: elapsed %v, returned %d bytes",
+		u.URL+u.path(apiPath), time.Since(start).Round(time.Millisecond), len(body))
+
+	return json.Unmarshal(body, v)
+}
+
 // UniReq is a small helper function that adds an Accept header.
 // Use this if you're unmarshalling UniFi data into custom types.
 // And if you're doing that... sumbut a pull request with your new struct. :)
@@ -182,17 +197,25 @@ func (u *Unifi) UniReq(apiPath string, params string) (req *http.Request, err er
 		return
 	}
 
-	// Add the saved CSRF header.
-	req.Header.Set("X-CSRF-Token", u.csrf)
-	req.Header.Add("Accept", "application/json")
-	req.Header.Add("Content-Type", "application/json; charset=utf-8")
+	u.setHeaders(req, params)
 
-	if u.Client.Jar != nil {
-		parsedURL, _ := url.Parse(req.URL.String())
-		u.DebugLog("Requesting %s, with params: %v, cookies: %d", req.URL, params != "", len(u.Client.Jar.Cookies(parsedURL)))
-	} else {
-		u.DebugLog("Requesting %s, with params: %v,", req.URL, params != "")
+	return
+}
+
+// UniReqPut is the Put call equivalent to UniReq
+func (u *Unifi) UniReqPut(apiPath string, params string) (req *http.Request, err error) {
+	switch apiPath = u.path(apiPath); params {
+	case "":
+		err = fmt.Errorf("Put with no parameters. Use UniReq()")
+	default:
+		req, err = http.NewRequest("PUT", u.URL+apiPath, bytes.NewBufferString(params))
 	}
+
+	if err != nil {
+		return
+	}
+
+	u.setHeaders(req, params)
 
 	return
 }
@@ -204,6 +227,21 @@ func (u *Unifi) GetJSON(apiPath string, params ...string) ([]byte, error) {
 		return []byte{}, err
 	}
 
+	return u.do(req)
+}
+
+// PutJSON uses a PUT call and returns the raw JSON in the same way as GetData
+// Use this if you want to change data via the REST API
+func (u *Unifi) PutJSON(apiPath string, params ...string) ([]byte, error) {
+	req, err := u.UniReqPut(apiPath, strings.Join(params, " "))
+	if err != nil {
+		return []byte{}, err
+	}
+
+	return u.do(req)
+}
+
+func (u *Unifi) do(req *http.Request) ([]byte, error) {
 	resp, err := u.Do(req)
 	if err != nil {
 		return []byte{}, err
@@ -226,4 +264,18 @@ func (u *Unifi) GetJSON(apiPath string, params ...string) ([]byte, error) {
 	}
 
 	return body, err
+}
+
+func (u *Unifi) setHeaders(req *http.Request, params string) {
+	// Add the saved CSRF header.
+	req.Header.Set("X-CSRF-Token", u.csrf)
+	req.Header.Add("Accept", "application/json")
+	req.Header.Add("Content-Type", "application/json; charset=utf-8")
+
+	if u.Client.Jar != nil {
+		parsedURL, _ := url.Parse(req.URL.String())
+		u.DebugLog("Requesting %s, with params: %v, cookies: %d", req.URL, params != "", len(u.Client.Jar.Cookies(parsedURL)))
+	} else {
+		u.DebugLog("Requesting %s, with params: %v,", req.URL, params != "")
+	}
 }
