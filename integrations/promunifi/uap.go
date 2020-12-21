@@ -72,6 +72,7 @@ type uap struct {
 	RadioChannel            *prometheus.Desc
 	RadioCuSelfRx           *prometheus.Desc
 	RadioCuSelfTx           *prometheus.Desc
+	RadioCuTotal            *prometheus.Desc
 	RadioExtchannel         *prometheus.Desc
 	RadioGain               *prometheus.Desc
 	RadioNumSta             *prometheus.Desc
@@ -152,6 +153,7 @@ func descUAP(ns string) *uap { // nolint: funlen
 		RadioChannel:            nd(ns+"radio_channel", "Radio Channel", labelR, nil),
 		RadioCuSelfRx:           nd(ns+"radio_channel_utilization_receive_ratio", "Channel Utilization Rx", labelR, nil),
 		RadioCuSelfTx:           nd(ns+"radio_channel_utilization_transmit_ratio", "Channel Utilization Tx", labelR, nil),
+		RadioCuTotal:            nd(ns+"radio_channel_utilization_total_ratio", "Channel Utilization Total", labelR, nil),
 		RadioExtchannel:         nd(ns+"radio_ext_channel", "Radio Ext Channel", labelR, nil),
 		RadioGain:               nd(ns+"radio_gain", "Radio Gain", labelR, nil),
 		RadioNumSta:             nd(ns+"radio_stations", "Radio Total Station Count", append(labelR, "station_type"), nil),
@@ -307,6 +309,7 @@ func (u *promUnifi) exportRADtable(r report, labels []string, rt unifi.RadioTabl
 				{u.UAP.RadioChannel, gauge, t.Channel, labelR},
 				{u.UAP.RadioCuSelfRx, gauge, t.CuSelfRx.Val / 100.0, labelR},
 				{u.UAP.RadioCuSelfTx, gauge, t.CuSelfTx.Val / 100.0, labelR},
+				{u.UAP.RadioCuTotal, gauge, t.CuTotal.Val / 100.0, labelR},
 				{u.UAP.RadioExtchannel, gauge, t.Extchannel, labelR},
 				{u.UAP.RadioGain, gauge, t.Gain, labelR},
 				{u.UAP.RadioNumSta, gauge, t.GuestNumSta, labelRGuest},
