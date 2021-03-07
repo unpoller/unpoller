@@ -1,11 +1,11 @@
 package lokiunifi
 
 import (
+	"fmt"
 	"io/ioutil"
 	"strings"
 	"time"
 
-	"github.com/pkg/errors"
 	"github.com/unifi-poller/poller"
 	"golift.io/cnfg"
 )
@@ -126,7 +126,7 @@ func (l *Loki) ProcessEvents(report *Report, events *poller.Events) error {
 
 	logs := report.ProcessEventLogs(events)
 	if err := l.client.Post(logs); err != nil {
-		return errors.Wrap(err, "sending to Loki failed")
+		return fmt.Errorf("sending to Loki failed: %w", err)
 	}
 
 	l.last = report.Start

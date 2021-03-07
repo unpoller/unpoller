@@ -8,17 +8,13 @@ import (
 	"io/ioutil"
 	"net/http"
 	"strings"
-
-	"github.com/pkg/errors"
 )
 
 const (
 	lokiPushPath = "/loki/api/v1/push"
 )
 
-var (
-	errStatusCode = fmt.Errorf("unexpected HTTP status code")
-)
+var errStatusCode = fmt.Errorf("unexpected HTTP status code")
 
 type Client struct {
 	*Config
@@ -43,7 +39,7 @@ func (l *Loki) httpClient() *Client {
 func (c *Client) Post(logs interface{}) error {
 	msg, err := json.Marshal(logs)
 	if err != nil {
-		return err
+		return fmt.Errorf("json marshal: %w", err)
 	}
 
 	u := strings.TrimSuffix(c.URL, lokiPushPath) + lokiPushPath
@@ -59,7 +55,7 @@ func (c *Client) Post(logs interface{}) error {
 		m := fmt.Sprintf("%s (%d/%s) %s, msg: %s", u, code, http.StatusText(code),
 			strings.TrimSpace(strings.ReplaceAll(string(body), "\n", " ")), msg)
 
-		return errors.Wrap(errStatusCode, m)
+		return fmt.Errorf("%s: %w", m, errStatusCode)
 	}
 
 	return nil
@@ -67,9 +63,9 @@ func (c *Client) Post(logs interface{}) error {
 
 // NewRequest creates the http request based on input data.
 func (c *Client) NewRequest(url, method, cType string, msg []byte) (*http.Request, error) {
-	req, err := http.NewRequest(method, url, bytes.NewBuffer(msg))
+	req, err := http.NewRequest(method, url, bytes.NewBuffer(msg)) //nolint:noctx
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("creating request: %w", err)
 	}
 
 	if cType != "" {
@@ -91,11 +87,14 @@ func (c *Client) NewRequest(url, method, cType string, msg []byte) (*http.Reques
 func (c *Client) Do(req *http.Request) (int, []byte, error) {
 	resp, err := c.Client.Do(req)
 	if err != nil {
-		return 0, nil, err
+		return 0, nil, fmt.Errorf("making request: %w", err)
 	}
 	defer resp.Body.Close()
 
 	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return resp.StatusCode, body, fmt.Errorf("reading body: %w", err)
+	}
 
-	return resp.StatusCode, body, err
+	return resp.StatusCode, body, nil
 }
