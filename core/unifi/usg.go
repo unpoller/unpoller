@@ -47,6 +47,7 @@ type USG struct {
 	ConnectRequestIP      string               `json:"connect_request_ip"`
 	ConnectRequestPort    string               `json:"connect_request_port"`
 	SysStats              SysStats             `json:"sys_stats"`
+	Temperatures          []Temperature        `json:"temperatures,omitempty"`
 	SystemStats           SystemStats          `json:"system-stats"`
 	GuestToken            string               `json:"guest_token"`
 	SpeedtestStatus       SpeedtestStatus      `json:"speedtest-status"`
