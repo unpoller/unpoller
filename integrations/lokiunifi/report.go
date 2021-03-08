@@ -34,7 +34,7 @@ func (l *Loki) NewReport(start time.Time) *Report {
 	return &Report{
 		Start:  start,
 		Oldest: l.last,
-		Logger: l.Collect,
+		Logger: l,
 		Counts: make(map[string]int),
 	}
 }
