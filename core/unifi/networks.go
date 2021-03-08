@@ -38,7 +38,7 @@ func (u *Unifi) parseNetwork(data json.RawMessage, siteName string) (*Network, e
 	return network, u.unmarshalDevice(siteName, data, network)
 }
 
-// Network is metadata about a network managed by a UniFi controller
+// Network is metadata about a network managed by a UniFi controller.
 type Network struct {
 	DhcpdDNSEnabled        FlexBool `json:"dhcpd_dns_enabled"`
 	DhcpdEnabled           FlexBool `json:"dhcpd_enabled"`

@@ -196,5 +196,9 @@ func (v *IPGeo) UnmarshalJSON(data []byte) error {
 	v.CountryName = g.CountryName
 	v.Organization = g.Organization
 
-	return err
+	if err != nil {
+		return fmt.Errorf("json unmarshal: %w", err)
+	}
+
+	return nil
 }

@@ -34,7 +34,7 @@ var (
 func NewUnifi(config *Config) (*Unifi, error) {
 	jar, err := cookiejar.New(&cookiejar.Options{PublicSuffixList: publicsuffix.List})
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("creating cookiejar: %w", err)
 	}
 
 	config.URL = strings.TrimRight(config.URL, "/")
@@ -85,7 +85,7 @@ func (u *Unifi) Login() error {
 
 	resp, err := u.Do(req)
 	if err != nil {
-		return err
+		return fmt.Errorf("making request: %w", err)
 	}
 
 	defer resp.Body.Close()                   // we need no data here.
@@ -106,11 +106,21 @@ func (u *Unifi) Login() error {
 // check if this is a newer controller or not. If it is, we set new to true.
 // Setting new to true makes the path() method return different (new) paths.
 func (u *Unifi) checkNewStyleAPI() error {
+	var (
+		ctx    = context.Background()
+		cancel func()
+	)
+
+	if u.Config.Timeout != 0 {
+		ctx, cancel = context.WithTimeout(ctx, u.Config.Timeout)
+		defer cancel()
+	}
+
 	u.DebugLog("Requesting %s/ to determine API paths", u.URL)
 
-	req, err := http.NewRequest("GET", u.URL+"/", nil)
+	req, err := http.NewRequestWithContext(ctx, "GET", u.URL+"/", nil)
 	if err != nil {
-		return err
+		return fmt.Errorf("creating request: %w", err)
 	}
 
 	// We can't share these cookies with other requests, so make a new client.
@@ -126,7 +136,7 @@ func (u *Unifi) checkNewStyleAPI() error {
 
 	resp, err := client.Do(req)
 	if err != nil {
-		return err
+		return fmt.Errorf("making request: %w", err)
 	}
 
 	defer resp.Body.Close()                   // we need no data here.
@@ -210,7 +220,7 @@ func (u *Unifi) UniReq(apiPath string, params string) (*http.Request, error) {
 	return req, nil
 }
 
-// UniReqPut is the Put call equivalent to UniReq
+// UniReqPut is the Put call equivalent to UniReq.
 func (u *Unifi) UniReqPut(apiPath string, params string) (*http.Request, error) {
 	if params == "" {
 		return nil, ErrNoParams
@@ -239,7 +249,7 @@ func (u *Unifi) GetJSON(apiPath string, params ...string) ([]byte, error) {
 }
 
 // PutJSON uses a PUT call and returns the raw JSON in the same way as GetData
-// Use this if you want to change data via the REST API
+// Use this if you want to change data via the REST API.
 func (u *Unifi) PutJSON(apiPath string, params ...string) ([]byte, error) {
 	req, err := u.UniReqPut(apiPath, strings.Join(params, " "))
 	if err != nil {
@@ -262,14 +272,14 @@ func (u *Unifi) do(req *http.Request) ([]byte, error) {
 
 	resp, err := u.Do(req.WithContext(ctx))
 	if err != nil {
-		return []byte{}, err
+		return []byte{}, fmt.Errorf("making request: %w", err)
 	}
 
 	defer resp.Body.Close()
 
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		return body, err
+		return body, fmt.Errorf("reading response: %w", err)
 	}
 
 	// Save the returned CSRF header.

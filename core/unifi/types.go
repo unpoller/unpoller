@@ -7,13 +7,9 @@ import (
 	"strconv"
 	"strings"
 	"time"
-
-	"github.com/pkg/errors"
 )
 
-var (
-	errCannotUnmarshalFlexInt = fmt.Errorf("cannot unmarshal to FlexInt")
-)
+var ErrCannotUnmarshalFlexInt = fmt.Errorf("cannot unmarshal to FlexInt")
 
 // This is a list of unifi API paths.
 // The %s in each string must be replaced with a Site.Name.
@@ -28,17 +24,17 @@ const (
 	APISiteDPI string = "/api/s/%s/stat/sitedpi"
 	// APISiteDPI is site DPI data.
 	APIClientDPI string = "/api/s/%s/stat/stadpi"
-	// APIClientPath is Unifi Clients API Path
+	// APIClientPath is Unifi Clients API Path.
 	APIClientPath string = "/api/s/%s/stat/sta"
 	// APINetworkPath is where we get data about Unifi networks.
 	APINetworkPath string = "/api/s/%s/rest/networkconf"
 	// APIDevicePath is where we get data about Unifi devices.
 	APIDevicePath string = "/api/s/%s/stat/device"
-	// APILoginPath is Unifi Controller Login API Path
+	// APILoginPath is Unifi Controller Login API Path.
 	APILoginPath string = "/api/login"
-	// APILoginPathNew is how we log into UDM 5.12.55+
+	// APILoginPathNew is how we log into UDM 5.12.55+.
 	APILoginPathNew string = "/api/auth/login"
-	// APIEventPathIDS returns Intrusion Detection/Prevention Systems Events
+	// APIEventPathIDS returns Intrusion Detection/Prevention Systems Events.
 	APIEventPathIDS string = "/api/s/%s/stat/ips/event"
 	// APIEventPathAlarms contains the site alarms.
 	APIEventPathAlarms string = "/api/s/%s/list/alarm"
@@ -127,7 +123,7 @@ func (f *FlexInt) UnmarshalJSON(b []byte) error {
 	var unk interface{}
 
 	if err := json.Unmarshal(b, &unk); err != nil {
-		return err
+		return fmt.Errorf("json unmarshal: %w", err)
 	}
 
 	switch i := unk.(type) {
@@ -141,7 +137,7 @@ func (f *FlexInt) UnmarshalJSON(b []byte) error {
 		f.Txt = "0"
 		f.Val = 0
 	default:
-		return errors.Wrapf(errCannotUnmarshalFlexInt, "%v", b)
+		return fmt.Errorf("%v: %w", b, ErrCannotUnmarshalFlexInt)
 	}
 
 	return nil
