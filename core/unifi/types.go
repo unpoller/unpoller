@@ -47,7 +47,7 @@ const (
 // path returns the correct api path based on the new variable.
 // new is based on the unifi-controller output. is it new or old output?
 func (u *Unifi) path(path string) string {
-	if u.New {
+	if u.new {
 		if path == APILoginPath {
 			return APILoginPathNew
 		}
@@ -80,16 +80,17 @@ type Devices struct {
 }
 
 // Config is the data passed into our library. This configures things and allows
-// us to connect to a controller and write log messages.
+// us to connect to a controller and write log messages. Optional SSLCert is used
+// for ssl cert pinning; provide the content of a PEM to validate the server's cert.
 type Config struct {
 	User      string
 	Pass      string
 	URL       string
-	VerifySSL bool
-	New       bool
+	SSLCert   [][]byte
 	ErrorLog  Logger
 	DebugLog  Logger
 	Timeout   time.Duration // how long to wait for replies, default: forever.
+	VerifySSL bool
 }
 
 // Unifi is what you get in return for providing a password! Unifi represents
@@ -100,7 +101,21 @@ type Unifi struct {
 	*http.Client
 	*Config
 	*server
-	csrf string
+	csrf         string
+	fingerprints fingerprints
+	new          bool
+}
+
+type fingerprints []string
+
+func (f fingerprints) Contains(s string) bool {
+	for i := range f {
+		if s == f[i] {
+			return true
+		}
+	}
+
+	return false
 }
 
 // server is the /status endpoint from the Unifi controller.
