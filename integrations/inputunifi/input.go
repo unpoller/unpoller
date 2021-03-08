@@ -3,10 +3,9 @@
 package inputunifi
 
 import (
-	"fmt"
 	"io/ioutil"
-	"os"
 	"strings"
+	"time"
 
 	"sync"
 
@@ -16,6 +15,7 @@ import (
 )
 
 const (
+	PluginName  = "unifi" // PluginName is the name of this input plugin.
 	defaultURL  = "https://127.0.0.1:8443"
 	defaultUser = "unifipoller"
 	defaultPass = "unifipoller"
@@ -33,16 +33,19 @@ type InputUnifi struct {
 // Controller represents the configuration for a UniFi Controller.
 // Each polled controller may have its own configuration.
 type Controller struct {
-	VerifySSL *bool        `json:"verify_ssl" toml:"verify_ssl" xml:"verify_ssl" yaml:"verify_ssl"`
-	SaveIDS   *bool        `json:"save_ids" toml:"save_ids" xml:"save_ids" yaml:"save_ids"`
-	SaveDPI   *bool        `json:"save_dpi" toml:"save_dpi" xml:"save_dpi" yaml:"save_dpi"`
-	HashPII   *bool        `json:"hash_pii" toml:"hash_pii" xml:"hash_pii" yaml:"hash_pii"`
-	SaveSites *bool        `json:"save_sites" toml:"save_sites" xml:"save_sites" yaml:"save_sites"`
-	User      string       `json:"user" toml:"user" xml:"user" yaml:"user"`
-	Pass      string       `json:"pass" toml:"pass" xml:"pass" yaml:"pass"`
-	URL       string       `json:"url" toml:"url" xml:"url" yaml:"url"`
-	Sites     []string     `json:"sites,omitempty" toml:"sites,omitempty" xml:"site" yaml:"sites"`
-	Unifi     *unifi.Unifi `json:"-" toml:"-" xml:"-" yaml:"-"`
+	VerifySSL  *bool        `json:"verify_ssl" toml:"verify_ssl" xml:"verify_ssl" yaml:"verify_ssl"`
+	SaveAnomal *bool        `json:"save_anomalies" toml:"save_anomalies" xml:"save_anomalies" yaml:"save_anomalies"`
+	SaveAlarms *bool        `json:"save_alarms" toml:"save_alarms" xml:"save_alarms" yaml:"save_alarms"`
+	SaveEvents *bool        `json:"save_events" toml:"save_events" xml:"save_events" yaml:"save_events"`
+	SaveIDS    *bool        `json:"save_ids" toml:"save_ids" xml:"save_ids" yaml:"save_ids"`
+	SaveDPI    *bool        `json:"save_dpi" toml:"save_dpi" xml:"save_dpi" yaml:"save_dpi"`
+	HashPII    *bool        `json:"hash_pii" toml:"hash_pii" xml:"hash_pii" yaml:"hash_pii"`
+	SaveSites  *bool        `json:"save_sites" toml:"save_sites" xml:"save_sites" yaml:"save_sites"`
+	User       string       `json:"user" toml:"user" xml:"user" yaml:"user"`
+	Pass       string       `json:"pass" toml:"pass" xml:"pass" yaml:"pass"`
+	URL        string       `json:"url" toml:"url" xml:"url" yaml:"url"`
+	Sites      []string     `json:"sites,omitempty" toml:"sites,omitempty" xml:"site" yaml:"sites"`
+	Unifi      *unifi.Unifi `json:"-" toml:"-" xml:"-" yaml:"-"`
 }
 
 // Config contains our configuration data.
@@ -54,11 +57,22 @@ type Config struct {
 	Controllers  []*Controller `json:"controllers" toml:"controller" xml:"controller" yaml:"controllers"`
 }
 
+type Metrics struct {
+	TS         time.Time
+	Sites      []*unifi.Site
+	Clients    []*unifi.Client
+	SitesDPI   []*unifi.DPITable
+	ClientsDPI []*unifi.DPITable
+	Devices    *unifi.Devices
+}
+
 func init() { // nolint: gochecknoinits
-	u := &InputUnifi{}
+	u := &InputUnifi{
+		dynamic: make(map[string]*Controller),
+	}
 
 	poller.NewInput(&poller.InputPlugin{
-		Name:   "unifi",
+		Name:   PluginName,
 		Input:  u, // this library implements poller.Input interface for Metrics().
 		Config: u, // Defines our config data interface.
 	})
@@ -143,24 +157,6 @@ FIRST:
 	return nil
 }
 
-func (u *InputUnifi) dumpSitesJSON(c *Controller, path, name string, sites unifi.Sites) ([]byte, error) {
-	allJSON := []byte{}
-
-	for _, s := range sites {
-		apiPath := fmt.Sprintf(path, s.Name)
-		_, _ = fmt.Fprintf(os.Stderr, "[INFO] Dumping %s: '%s' JSON for site: %s (%s):\n", name, apiPath, s.Desc, s.Name)
-
-		body, err := c.Unifi.GetJSON(apiPath)
-		if err != nil {
-			return allJSON, err
-		}
-
-		allJSON = append(allJSON, body...)
-	}
-
-	return allJSON, nil
-}
-
 func (u *InputUnifi) getPassFromFile(filename string) string {
 	b, err := ioutil.ReadFile(filename)
 	if err != nil {
@@ -194,6 +190,18 @@ func (u *InputUnifi) setDefaults(c *Controller) {
 
 	if c.SaveIDS == nil {
 		c.SaveIDS = &f
+	}
+
+	if c.SaveEvents == nil {
+		c.SaveEvents = &f
+	}
+
+	if c.SaveAlarms == nil {
+		c.SaveAlarms = &f
+	}
+
+	if c.SaveAnomal == nil {
+		c.SaveAnomal = &f
 	}
 
 	if c.URL == "" {
@@ -239,6 +247,18 @@ func (u *InputUnifi) setControllerDefaults(c *Controller) *Controller {
 
 	if c.SaveIDS == nil {
 		c.SaveIDS = u.Default.SaveIDS
+	}
+
+	if c.SaveEvents == nil {
+		c.SaveEvents = u.Default.SaveEvents
+	}
+
+	if c.SaveAlarms == nil {
+		c.SaveAlarms = u.Default.SaveAlarms
+	}
+
+	if c.SaveAnomal == nil {
+		c.SaveAnomal = u.Default.SaveAnomal
 	}
 
 	if c.URL == "" {

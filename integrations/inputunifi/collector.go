@@ -40,19 +40,19 @@ func (u *InputUnifi) newDynamicCntrlr(url string) (bool, *Controller) {
 	return true, u.dynamic[url]
 }
 
-func (u *InputUnifi) dynamicController(url string) (*poller.Metrics, error) {
-	if !strings.HasPrefix(url, "http") {
+func (u *InputUnifi) dynamicController(filter *poller.Filter) (*poller.Metrics, error) {
+	if !strings.HasPrefix(filter.Path, "http") {
 		return nil, errScrapeFilterMatchFailed
 	}
 
-	new, c := u.newDynamicCntrlr(url)
+	new, c := u.newDynamicCntrlr(filter.Path)
 
 	if new {
-		u.Logf("Authenticating to Dynamic UniFi Controller: %s", url)
+		u.Logf("Authenticating to Dynamic UniFi Controller: %s", filter.Path)
 
 		if err := u.getUnifi(c); err != nil {
 			u.logController(c)
-			return nil, errors.Wrapf(err, "authenticating to %s", url)
+			return nil, errors.Wrapf(err, "authenticating to %s", filter.Path)
 		}
 
 		u.logController(c)
@@ -82,42 +82,90 @@ func (u *InputUnifi) collectController(c *Controller) (*poller.Metrics, error) {
 	return metrics, err
 }
 
-func (u *InputUnifi) pollController(c *Controller) (*poller.Metrics, error) {
-	var err error
-
-	u.RLock()
-	defer u.RUnlock()
-
-	m := &poller.Metrics{TS: time.Now()} // At this point, it's the Current Check.
+func (u *InputUnifi) collectControllerEvents(c *Controller) ([]interface{}, error) {
+	logs := []interface{}{}
 
 	// Get the sites we care about.
-	if m.Sites, err = u.getFilteredSites(c); err != nil {
+	sites, err := u.getFilteredSites(c)
+	if err != nil {
 		return nil, errors.Wrap(err, "unifi.GetSites()")
 	}
 
+	if *c.SaveAnomal {
+		anom, err := c.Unifi.GetAnomalies(sites, time.Now().Add(-time.Hour))
+		if err != nil {
+			return nil, errors.Wrap(err, "unifi.GetAnomalies()")
+		}
+
+		for _, a := range anom {
+			logs = append(logs, a)
+		}
+	}
+
+	if *c.SaveAlarms {
+		alarms, err := c.Unifi.GetAlarms(sites)
+		if err != nil {
+			return nil, errors.Wrap(err, "unifi.GetAlarms()")
+		}
+
+		for _, a := range alarms {
+			logs = append(logs, a)
+		}
+	}
+
+	if *c.SaveEvents {
+		events, err := c.Unifi.GetEvents(sites, time.Hour)
+		if err != nil {
+			return nil, errors.Wrap(err, "unifi.GetEvents()")
+		}
+
+		for _, e := range events {
+			logs = append(logs, redactEvent(e, c.HashPII))
+		}
+	}
+
+	if *c.SaveIDS {
+		events, err := c.Unifi.GetIDS(sites, time.Now().Add(-time.Hour))
+		if err != nil {
+			return nil, errors.Wrap(err, "unifi.GetIDS()")
+		}
+
+		for _, e := range events {
+			logs = append(logs, e)
+		}
+	}
+
+	return logs, nil
+}
+
+func (u *InputUnifi) pollController(c *Controller) (*poller.Metrics, error) {
+	u.RLock()
+	defer u.RUnlock()
+
+	// Get the sites we care about.
+	sites, err := u.getFilteredSites(c)
+	if err != nil {
+		return nil, errors.Wrap(err, "unifi.GetSites()")
+	}
+
+	m := &Metrics{TS: time.Now(), Sites: sites}
+
 	if c.SaveDPI != nil && *c.SaveDPI {
-		if m.SitesDPI, err = c.Unifi.GetSiteDPI(m.Sites); err != nil {
+		if m.SitesDPI, err = c.Unifi.GetSiteDPI(sites); err != nil {
 			return nil, errors.Wrapf(err, "unifi.GetSiteDPI(%s)", c.URL)
 		}
 
-		if m.ClientsDPI, err = c.Unifi.GetClientsDPI(m.Sites); err != nil {
+		if m.ClientsDPI, err = c.Unifi.GetClientsDPI(sites); err != nil {
 			return nil, errors.Wrapf(err, "unifi.GetClientsDPI(%s)", c.URL)
 		}
 	}
 
-	if c.SaveIDS != nil && *c.SaveIDS {
-		m.IDSList, err = c.Unifi.GetIDS(m.Sites, time.Now().Add(time.Minute), time.Now())
-		if err != nil {
-			return nil, errors.Wrapf(err, "unifi.GetIDS(%s)", c.URL)
-		}
-	}
-
 	// Get all the points.
-	if m.Clients, err = c.Unifi.GetClients(m.Sites); err != nil {
+	if m.Clients, err = c.Unifi.GetClients(sites); err != nil {
 		return nil, errors.Wrapf(err, "unifi.GetClients(%s)", c.URL)
 	}
 
-	if m.Devices, err = c.Unifi.GetDevices(m.Sites); err != nil {
+	if m.Devices, err = c.Unifi.GetDevices(sites); err != nil {
 		return nil, errors.Wrapf(err, "unifi.GetDevices(%s)", c.URL)
 	}
 
@@ -126,72 +174,111 @@ func (u *InputUnifi) pollController(c *Controller) (*poller.Metrics, error) {
 
 // augmentMetrics is our middleware layer between collecting metrics and writing them.
 // This is where we can manipuate the returned data or make arbitrary decisions.
-// This function currently adds parent device names to client metrics.
-func (u *InputUnifi) augmentMetrics(c *Controller, metrics *poller.Metrics) *poller.Metrics {
-	if metrics == nil || metrics.Devices == nil || metrics.Clients == nil {
-		return metrics
+// This method currently adds parent device names to client metrics and hashes PII.
+// This method also converts our local *Metrics type into a slice of interfaces for poller.
+func (u *InputUnifi) augmentMetrics(c *Controller, metrics *Metrics) *poller.Metrics {
+	if metrics == nil {
+		return nil
 	}
 
+	m, devices, bssdIDs := extractDevices(metrics)
+
+	// These come blank, so set them here.
+	for _, client := range metrics.Clients {
+		if devices[client.Mac] = client.Name; client.Name == "" {
+			devices[client.Mac] = client.Hostname
+		}
+
+		client.Mac = RedactMacPII(client.Mac, c.HashPII)
+		client.Name = RedactNamePII(client.Name, c.HashPII)
+		client.Hostname = RedactNamePII(client.Hostname, c.HashPII)
+		client.SwName = devices[client.SwMac]
+		client.ApName = devices[client.ApMac]
+		client.GwName = devices[client.GwMac]
+		client.RadioDescription = bssdIDs[client.Bssid] + client.RadioProto
+		m.Clients = append(m.Clients, client)
+	}
+
+	for _, client := range metrics.ClientsDPI {
+		// Name on Client DPI data also comes blank, find it based on MAC address.
+		client.Name = devices[client.MAC]
+		if client.Name == "" {
+			client.Name = client.MAC
+		}
+
+		client.Name = RedactNamePII(client.Name, c.HashPII)
+		client.MAC = RedactMacPII(client.MAC, c.HashPII)
+		m.ClientsDPI = append(m.ClientsDPI, client)
+	}
+
+	if *c.SaveSites {
+		for _, site := range metrics.Sites {
+			m.Sites = append(m.Sites, site)
+		}
+
+		for _, site := range metrics.SitesDPI {
+			m.SitesDPI = append(m.SitesDPI, site)
+		}
+	}
+
+	return m
+}
+
+// this is a helper function for augmentMetrics.
+func extractDevices(metrics *Metrics) (*poller.Metrics, map[string]string, map[string]string) {
+	m := &poller.Metrics{TS: metrics.TS}
 	devices := make(map[string]string)
 	bssdIDs := make(map[string]string)
 
-	for _, r := range metrics.UAPs {
+	for _, r := range metrics.Devices.UAPs {
 		devices[r.Mac] = r.Name
+		m.Devices = append(m.Devices, r)
 
 		for _, v := range r.VapTable {
 			bssdIDs[v.Bssid] = fmt.Sprintf("%s %s %s:", r.Name, v.Radio, v.RadioName)
 		}
 	}
 
-	for _, r := range metrics.USGs {
+	for _, r := range metrics.Devices.USGs {
 		devices[r.Mac] = r.Name
+		m.Devices = append(m.Devices, r)
 	}
 
-	for _, r := range metrics.USWs {
+	for _, r := range metrics.Devices.USWs {
 		devices[r.Mac] = r.Name
+		m.Devices = append(m.Devices, r)
 	}
 
-	for _, r := range metrics.UDMs {
+	for _, r := range metrics.Devices.UDMs {
 		devices[r.Mac] = r.Name
+		m.Devices = append(m.Devices, r)
 	}
 
-	// These come blank, so set them here.
-	for i, client := range metrics.Clients {
-		if devices[client.Mac] = client.Name; client.Name == "" {
-			devices[client.Mac] = client.Hostname
-		}
+	return m, devices, bssdIDs
+}
 
-		metrics.Clients[i].Mac = RedactMacPII(metrics.Clients[i].Mac, c.HashPII)
-		metrics.Clients[i].Name = RedactNamePII(metrics.Clients[i].Name, c.HashPII)
-		metrics.Clients[i].Hostname = RedactNamePII(metrics.Clients[i].Hostname, c.HashPII)
-		metrics.Clients[i].SwName = devices[client.SwMac]
-		metrics.Clients[i].ApName = devices[client.ApMac]
-		metrics.Clients[i].GwName = devices[client.GwMac]
-		metrics.Clients[i].RadioDescription = bssdIDs[metrics.Clients[i].Bssid] + metrics.Clients[i].RadioProto
+// redactEvent attempts to mask personally identying information from log messages.
+// This currently misses the "msg" value entirely and leaks PII information.
+func redactEvent(e *unifi.Event, hash *bool) *unifi.Event {
+	if !*hash {
+		return e
 	}
 
-	for i := range metrics.ClientsDPI {
-		// Name on Client DPI data also comes blank, find it based on MAC address.
-		metrics.ClientsDPI[i].Name = devices[metrics.ClientsDPI[i].MAC]
-		if metrics.ClientsDPI[i].Name == "" {
-			metrics.ClientsDPI[i].Name = metrics.ClientsDPI[i].MAC
-		}
+	// metrics.Events[i].Msg <-- not sure what to do here.
+	e.DestIPGeo = unifi.IPGeo{}
+	e.SourceIPGeo = unifi.IPGeo{}
+	e.Host = RedactNamePII(e.Host, hash)
+	e.Hostname = RedactNamePII(e.Hostname, hash)
+	e.DstMAC = RedactMacPII(e.DstMAC, hash)
+	e.SrcMAC = RedactMacPII(e.SrcMAC, hash)
 
-		metrics.ClientsDPI[i].Name = RedactNamePII(metrics.ClientsDPI[i].Name, c.HashPII)
-		metrics.ClientsDPI[i].MAC = RedactMacPII(metrics.ClientsDPI[i].MAC, c.HashPII)
-	}
-
-	if !*c.SaveSites {
-		metrics.Sites = nil
-	}
-
-	return metrics
+	return e
 }
 
 // RedactNamePII converts a name string to an md5 hash (first 24 chars only).
 // Useful for maskiing out personally identifying information.
 func RedactNamePII(pii string, hash *bool) string {
-	if hash == nil || !*hash {
+	if hash == nil || !*hash || pii == "" {
 		return pii
 	}
 
@@ -203,7 +290,7 @@ func RedactNamePII(pii string, hash *bool) string {
 // RedactMacPII converts a MAC address to an md5 hashed version (first 14 chars only).
 // Useful for maskiing out personally identifying information.
 func RedactMacPII(pii string, hash *bool) (output string) {
-	if hash == nil || !*hash {
+	if hash == nil || !*hash || pii == "" {
 		return pii
 	}
 
@@ -215,7 +302,7 @@ func RedactMacPII(pii string, hash *bool) (output string) {
 // getFilteredSites returns a list of sites to fetch data for.
 // Omits requested but unconfigured sites. Grabs the full list from the
 // controller and returns the sites provided in the config file.
-func (u *InputUnifi) getFilteredSites(c *Controller) (unifi.Sites, error) {
+func (u *InputUnifi) getFilteredSites(c *Controller) ([]*unifi.Site, error) {
 	u.RLock()
 	defer u.RUnlock()
 

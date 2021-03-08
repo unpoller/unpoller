@@ -4,7 +4,6 @@ package inputunifi
 
 import (
 	"fmt"
-	"os"
 	"strings"
 
 	"github.com/pkg/errors"
@@ -25,8 +24,8 @@ func (u *InputUnifi) Initialize(l poller.Logger) error {
 		u.Config = &Config{Disable: true}
 	}
 
-	if u.Disable {
-		l.Logf("UniFi input plugin disabled or missing configuration!")
+	if u.Logger = l; u.Disable {
+		u.Logf("UniFi input plugin disabled or missing configuration!")
 		return nil
 	}
 
@@ -35,11 +34,9 @@ func (u *InputUnifi) Initialize(l poller.Logger) error {
 	}
 
 	if len(u.Controllers) == 0 {
-		l.Logf("No controllers configured. Polling dynamic controllers only!")
+		u.Logf("No controllers configured. Polling dynamic controllers only! Defaults:")
+		u.logController(&u.Default)
 	}
-
-	u.dynamic = make(map[string]*Controller)
-	u.Logger = l
 
 	for i, c := range u.Controllers {
 		switch err := u.getUnifi(u.setControllerDefaults(c)); err {
@@ -48,9 +45,9 @@ func (u *InputUnifi) Initialize(l poller.Logger) error {
 				u.LogErrorf("checking sites on %s: %v", c.URL, err)
 			}
 
-			u.Logf("Configured UniFi Controller %d:", i+1)
+			u.Logf("Configured UniFi Controller %d of %d:", i+1, len(u.Controllers))
 		default:
-			u.LogErrorf("Controller %d Auth or Connection Error, retrying: %v", i+1, err)
+			u.LogErrorf("Controller %d of %d Auth or Connection Error, retrying: %v", i+1, len(u.Controllers), err)
 		}
 
 		u.logController(c)
@@ -60,62 +57,91 @@ func (u *InputUnifi) Initialize(l poller.Logger) error {
 }
 
 func (u *InputUnifi) logController(c *Controller) {
-	u.Logf("   => URL: %s", c.URL)
+	u.Logf("   => URL: %s (verify SSL: %v)", c.URL, *c.VerifySSL)
 
 	if c.Unifi != nil {
-		u.Logf("   => Version: %s", c.Unifi.ServerVersion)
+		u.Logf("   => Version: %s (%s)", c.Unifi.ServerVersion, c.Unifi.UUID)
 	}
 
 	u.Logf("   => Username: %s (has password: %v)", c.User, c.Pass != "")
-	u.Logf("   => Hash PII: %v", *c.HashPII)
-	u.Logf("   => Verify SSL: %v", *c.VerifySSL)
-	u.Logf("   => Save DPI: %v", *c.SaveDPI)
-	u.Logf("   => Save IDS: %v", *c.SaveIDS)
-	u.Logf("   => Save Sites: %v", *c.SaveSites)
+	u.Logf("   => Hash PII / Poll Sites: %v / %s", *c.HashPII, strings.Join(c.Sites, ", "))
+	u.Logf("   => Save Sites / Save DPI: %v / %v (metrics)", *c.SaveSites, *c.SaveDPI)
+	u.Logf("   => Save Events / Save IDS: %v / %v (logs)", *c.SaveEvents, *c.SaveIDS)
+	u.Logf("   => Save Alarms / Anomalies: %v / %v (logs)", *c.SaveAlarms, *c.SaveAnomal)
+}
+
+// Events allows you to pull only events (and IDS) from the UniFi Controller.
+// This does not fully respect HashPII, but it may in the future!
+// Use Filter.Path to pick a specific controller, otherwise poll them all!
+func (u *InputUnifi) Events(filter *poller.Filter) (*poller.Events, error) {
+	if u.Disable {
+		return nil, nil
+	}
+
+	logs := []interface{}{}
+
+	if filter == nil {
+		filter = &poller.Filter{}
+	}
+
+	for _, c := range u.Controllers {
+		if filter.Path != "" && !strings.EqualFold(c.URL, filter.Path) {
+			continue
+		}
+
+		events, err := u.collectControllerEvents(c)
+		if err != nil {
+			return nil, err
+		}
+
+		logs = append(logs, events...)
+	}
+
+	return &poller.Events{Logs: logs}, nil
 }
 
 // Metrics grabs all the measurements from a UniFi controller and returns them.
-func (u *InputUnifi) Metrics() (*poller.Metrics, bool, error) {
-	return u.MetricsFrom(nil)
-}
-
-// MetricsFrom grabs all the measurements from a UniFi controller and returns them.
-func (u *InputUnifi) MetricsFrom(filter *poller.Filter) (*poller.Metrics, bool, error) {
+// Set Filter.Path to a controller URL for a specific controller (or get them all).
+func (u *InputUnifi) Metrics(filter *poller.Filter) (*poller.Metrics, error) {
 	if u.Disable {
-		return nil, false, nil
+		return nil, nil
 	}
 
 	metrics := &poller.Metrics{}
 
+	if filter == nil {
+		filter = &poller.Filter{}
+	}
+
 	// Check if the request is for an existing, configured controller (or all controllers)
 	for _, c := range u.Controllers {
-		if filter != nil && !strings.EqualFold(c.URL, filter.Path) {
+		if filter.Path != "" && !strings.EqualFold(c.URL, filter.Path) {
+			// continue only if we have a filter path and it doesn't match.
 			continue
 		}
 
 		m, err := u.collectController(c)
 		if err != nil {
-			return metrics, false, err
+			return metrics, err
 		}
 
 		metrics = poller.AppendMetrics(metrics, m)
 	}
 
-	if filter == nil || len(metrics.Clients) != 0 {
-		return metrics, true, nil
+	if filter.Path == "" || len(metrics.Clients) != 0 {
+		return metrics, nil
 	}
 
 	if !u.Dynamic {
-		return nil, false, errDynamicLookupsDisabled
+		return nil, errDynamicLookupsDisabled
 	}
 
 	// Attempt a dynamic metrics fetch from an unconfigured controller.
-	m, err := u.dynamicController(filter.Path)
-
-	return m, err == nil && m != nil, err
+	return u.dynamicController(filter)
 }
 
-// RawMetrics returns API output from the first configured unifi controller.
+// RawMetrics returns API output from the first configured UniFi controller.
+// Adjust filter.Unit to pull from a controller other than the first.
 func (u *InputUnifi) RawMetrics(filter *poller.Filter) ([]byte, error) {
 	if l := len(u.Controllers); filter.Unit >= l {
 		return nil, errors.Wrapf(errControllerNumNotFound, "%d controller(s) configured, '%d'", l, filter.Unit)
@@ -141,13 +167,30 @@ func (u *InputUnifi) RawMetrics(filter *poller.Filter) ([]byte, error) {
 
 	switch filter.Kind {
 	case "d", "device", "devices":
-		return u.dumpSitesJSON(c, unifi.APIDevicePath, "Devices", sites)
+		return u.getSitesJSON(c, unifi.APIDevicePath, sites)
 	case "client", "clients", "c":
-		return u.dumpSitesJSON(c, unifi.APIClientPath, "Clients", sites)
+		return u.getSitesJSON(c, unifi.APIClientPath, sites)
 	case "other", "o":
-		_, _ = fmt.Fprintf(os.Stderr, "[INFO] Dumping Path '%s':\n", filter.Path)
 		return c.Unifi.GetJSON(filter.Path)
 	default:
 		return []byte{}, errNoFilterKindProvided
 	}
+}
+
+func (u *InputUnifi) getSitesJSON(c *Controller, path string, sites []*unifi.Site) ([]byte, error) {
+	allJSON := []byte{}
+
+	for _, s := range sites {
+		apiPath := fmt.Sprintf(path, s.Name)
+		u.LogDebugf("Returning Path '%s' for site: %s (%s):\n", apiPath, s.Desc, s.Name)
+
+		body, err := c.Unifi.GetJSON(apiPath)
+		if err != nil {
+			return allJSON, err
+		}
+
+		allJSON = append(allJSON, body...)
+	}
+
+	return allJSON, nil
 }
