@@ -13,7 +13,7 @@ const (
 )
 
 // batchIDS generates intrusion detection datapoints for InfluxDB.
-func (u *InfluxUnifi) batchIDS(r report, i *unifi.IDS) { // nolint: godupl
+func (u *InfluxUnifi) batchIDS(r report, i *unifi.IDS) { // nolint:dupl
 	if time.Since(i.Datetime) > u.Interval.Duration+time.Second {
 		return // The event is older than our interval, ignore it.
 	}
@@ -157,7 +157,7 @@ func cleanTags(tags map[string]string) map[string]string {
 }
 
 // cleanFields removes any field with a default (or empty) value.
-func cleanFields(fields map[string]interface{}) map[string]interface{} {
+func cleanFields(fields map[string]interface{}) map[string]interface{} { //nolint:cyclop
 	for s := range fields {
 		switch v := fields[s].(type) {
 		case nil:

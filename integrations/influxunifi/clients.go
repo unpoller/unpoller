@@ -103,8 +103,8 @@ func (u *InfluxUnifi) batchClientDPI(r report, v interface{}, appTotal, catTotal
 				"rx_packets": dpi.RxPackets,
 				"tx_bytes":   dpi.TxBytes,
 				"rx_bytes":   dpi.RxBytes,
-			}},
-		)
+			},
+		})
 	}
 }
 

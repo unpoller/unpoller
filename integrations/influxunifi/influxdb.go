@@ -4,6 +4,7 @@ package influxunifi
 
 import (
 	"crypto/tls"
+	"fmt"
 	"io/ioutil"
 	"log"
 	"strconv"
@@ -19,7 +20,7 @@ import (
 )
 
 // PluginName is the name of this plugin.
-const PluginName = "InfluxDB"
+const PluginName = "influxdb"
 
 const (
 	defaultInterval   = 30 * time.Second
@@ -119,7 +120,7 @@ func (u *InfluxUnifi) Run(c poller.Collect) error {
 		TLSConfig: &tls.Config{InsecureSkipVerify: !u.VerifySSL}, // nolint: gosec
 	})
 	if err != nil {
-		return err
+		return fmt.Errorf("making client: %w", err)
 	}
 
 	fake := *u.Config
@@ -259,7 +260,7 @@ func (u *InfluxUnifi) loopPoints(r report) {
 	reportClientDPItotals(r, appTotal, catTotal)
 }
 
-func (u *InfluxUnifi) switchExport(r report, v interface{}) {
+func (u *InfluxUnifi) switchExport(r report, v interface{}) { //nolint:cyclop
 	switch v := v.(type) {
 	case *unifi.UAP:
 		u.batchUAP(r, v)

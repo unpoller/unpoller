@@ -78,7 +78,7 @@ func (u *InfluxUnifi) batchSiteDPI(r report, v interface{}) {
 				"rx_packets": dpi.RxPackets,
 				"tx_bytes":   dpi.TxBytes,
 				"rx_bytes":   dpi.RxBytes,
-			}},
-		)
+			},
+		})
 	}
 }

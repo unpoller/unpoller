@@ -12,7 +12,7 @@ const (
 )
 
 // batchAlarms generates alarm datapoints for InfluxDB.
-func (u *InfluxUnifi) batchAlarms(r report, event *unifi.Alarm) { // nolint: godupl
+func (u *InfluxUnifi) batchAlarms(r report, event *unifi.Alarm) { // nolint:dupl
 	if time.Since(event.Datetime) > u.Interval.Duration+time.Second {
 		return // The event is older than our interval, ignore it.
 	}
