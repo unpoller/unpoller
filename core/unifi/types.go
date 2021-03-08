@@ -108,6 +108,7 @@ type Unifi struct {
 
 type fingerprints []string
 
+// Contains returns true if the fingerprint is in the list.
 func (f fingerprints) Contains(s string) bool {
 	for i := range f {
 		if s == f[i] {
