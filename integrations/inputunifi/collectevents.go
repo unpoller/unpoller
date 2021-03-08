@@ -1,9 +1,9 @@
 package inputunifi
 
 import (
+	"fmt"
 	"time"
 
-	"github.com/pkg/errors"
 	"github.com/unifi-poller/unifi"
 	"github.com/unifi-poller/webserver"
 )
@@ -11,6 +11,14 @@ import (
 /* Event collection. Events are also sent to the webserver for display. */
 
 func (u *InputUnifi) collectControllerEvents(c *Controller) ([]interface{}, error) {
+	if u.isNill(c) {
+		u.Logf("Re-authenticating to UniFi Controller: %s", c.URL)
+
+		if err := u.getUnifi(c); err != nil {
+			return nil, fmt.Errorf("re-authenticating to %s: %w", c.URL, err)
+		}
+	}
+
 	var (
 		logs    = []interface{}{}
 		newLogs []interface{}
@@ -19,7 +27,7 @@ func (u *InputUnifi) collectControllerEvents(c *Controller) ([]interface{}, erro
 	// Get the sites we care about.
 	sites, err := u.getFilteredSites(c)
 	if err != nil {
-		return nil, errors.Wrap(err, "unifi.GetSites()")
+		return nil, fmt.Errorf("unifi.GetSites(): %w", err)
 	}
 
 	type caller func([]interface{}, []*unifi.Site, *Controller) ([]interface{}, error)
@@ -40,15 +48,17 @@ func (u *InputUnifi) collectAlarms(logs []interface{}, sites []*unifi.Site, c *C
 		for _, s := range sites {
 			events, err := c.Unifi.GetAlarmsSite(s)
 			if err != nil {
-				return logs, errors.Wrap(err, "unifi.GetAlarms()")
+				return logs, fmt.Errorf("unifi.GetAlarms(): %w", err)
 			}
 
 			for _, e := range events {
 				logs = append(logs, e)
 
-				webserver.NewInputEvent(PluginName, s.ID+"_alarms", &webserver.Event{Ts: e.Datetime, Msg: e.Msg,
-					Tags: map[string]string{"type": "alarm", "key": e.Key, "site_id": e.SiteID,
-						"site_name": e.SiteName, "source": e.SourceName},
+				webserver.NewInputEvent(PluginName, s.ID+"_alarms", &webserver.Event{
+					Ts: e.Datetime, Msg: e.Msg, Tags: map[string]string{
+						"type": "alarm", "key": e.Key, "site_id": e.SiteID,
+						"site_name": e.SiteName, "source": e.SourceName,
+					},
 				})
 			}
 		}
@@ -62,14 +72,16 @@ func (u *InputUnifi) collectAnomalies(logs []interface{}, sites []*unifi.Site, c
 		for _, s := range sites {
 			events, err := c.Unifi.GetAnomaliesSite(s)
 			if err != nil {
-				return logs, errors.Wrap(err, "unifi.GetAnomalies()")
+				return logs, fmt.Errorf("unifi.GetAnomalies(): %w", err)
 			}
 
 			for _, e := range events {
 				logs = append(logs, e)
 
-				webserver.NewInputEvent(PluginName, s.ID+"_anomalies", &webserver.Event{Ts: e.Datetime, Msg: e.Anomaly,
-					Tags: map[string]string{"type": "anomaly", "site_name": e.SiteName, "source": e.SourceName},
+				webserver.NewInputEvent(PluginName, s.ID+"_anomalies", &webserver.Event{
+					Ts: e.Datetime, Msg: e.Anomaly, Tags: map[string]string{
+						"type": "anomaly", "site_name": e.SiteName, "source": e.SourceName,
+					},
 				})
 			}
 		}
@@ -83,16 +95,18 @@ func (u *InputUnifi) collectEvents(logs []interface{}, sites []*unifi.Site, c *C
 		for _, s := range sites {
 			events, err := c.Unifi.GetSiteEvents(s, time.Hour)
 			if err != nil {
-				return logs, errors.Wrap(err, "unifi.GetEvents()")
+				return logs, fmt.Errorf("unifi.GetEvents(): %w", err)
 			}
 
 			for _, e := range events {
 				e := redactEvent(e, c.HashPII)
 				logs = append(logs, e)
 
-				webserver.NewInputEvent(PluginName, s.ID+"_events", &webserver.Event{Msg: e.Msg, Ts: e.Datetime,
-					Tags: map[string]string{"type": "event", "key": e.Key, "site_id": e.SiteID,
-						"site_name": e.SiteName, "source": e.SourceName},
+				webserver.NewInputEvent(PluginName, s.ID+"_events", &webserver.Event{
+					Msg: e.Msg, Ts: e.Datetime, Tags: map[string]string{
+						"type": "event", "key": e.Key, "site_id": e.SiteID,
+						"site_name": e.SiteName, "source": e.SourceName,
+					},
 				})
 			}
 		}
@@ -106,15 +120,17 @@ func (u *InputUnifi) collectIDS(logs []interface{}, sites []*unifi.Site, c *Cont
 		for _, s := range sites {
 			events, err := c.Unifi.GetIDSSite(s)
 			if err != nil {
-				return logs, errors.Wrap(err, "unifi.GetIDS()")
+				return logs, fmt.Errorf("unifi.GetIDS(): %w", err)
 			}
 
 			for _, e := range events {
 				logs = append(logs, e)
 
-				webserver.NewInputEvent(PluginName, s.ID+"_ids", &webserver.Event{Ts: e.Datetime, Msg: e.Msg,
-					Tags: map[string]string{"type": "ids", "key": e.Key, "site_id": e.SiteID,
-						"site_name": e.SiteName, "source": e.SourceName},
+				webserver.NewInputEvent(PluginName, s.ID+"_ids", &webserver.Event{
+					Ts: e.Datetime, Msg: e.Msg, Tags: map[string]string{
+						"type": "ids", "key": e.Key, "site_id": e.SiteID,
+						"site_name": e.SiteName, "source": e.SourceName,
+					},
 				})
 			}
 		}

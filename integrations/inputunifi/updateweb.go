@@ -107,6 +107,10 @@ func formatClients(c *Controller, clients []*unifi.Client) (d webserver.Clients)
 }
 
 func formatDevices(c *Controller, devices *unifi.Devices) (d webserver.Devices) { // nolint: funlen
+	if devices == nil {
+		return d
+	}
+
 	for _, device := range devices.UAPs {
 		d = append(d, &webserver.Device{
 			Name:       device.Name,
