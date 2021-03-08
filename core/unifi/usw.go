@@ -7,80 +7,68 @@ import (
 
 // USW represents all the data from the Ubiquiti Controller for a Unifi Switch.
 type USW struct {
-	SourceName    string   `json:"-"`
-	SiteName      string   `json:"-"`
-	ID            string   `json:"_id"`
-	Adopted       FlexBool `json:"adopted"`
-	BoardRev      FlexInt  `json:"board_rev"`
-	Cfgversion    string   `json:"cfgversion"`
-	ConfigNetwork struct {
-		Type string `json:"type"`
-		IP   string `json:"ip"`
-	} `json:"config_network"`
-	Dot1XPortctrlEnabled FlexBool `json:"dot1x_portctrl_enabled"`
-	EthernetTable        []struct {
-		Mac     string  `json:"mac"`
-		NumPort FlexInt `json:"num_port,omitempty"`
-		Name    string  `json:"name"`
-	} `json:"ethernet_table"`
-	FlowctrlEnabled     FlexBool `json:"flowctrl_enabled"`
-	FwCaps              FlexInt  `json:"fw_caps"`
-	HasFan              FlexBool `json:"has_fan"`
-	HasTemperature      FlexBool `json:"has_temperature"`
-	InformIP            string   `json:"inform_ip"`
-	InformURL           string   `json:"inform_url"`
-	IP                  string   `json:"ip"`
-	JumboframeEnabled   FlexBool `json:"jumboframe_enabled"`
-	LedOverride         string   `json:"led_override"`
-	LicenseState        string   `json:"license_state"`
-	Mac                 string   `json:"mac"`
-	Model               string   `json:"model"`
-	Name                string   `json:"name"`
-	OutdoorModeOverride string   `json:"outdoor_mode_override"`
-	PortOverrides       []struct {
+	SourceName           string           `json:"-"`
+	SiteName             string           `json:"-"`
+	ID                   string           `json:"_id"`
+	Adopted              FlexBool         `json:"adopted"`
+	BoardRev             FlexInt          `json:"board_rev"`
+	Cfgversion           string           `json:"cfgversion"`
+	ConfigNetwork        *ConfigNetwork   `json:"config_network"`
+	Dot1XPortctrlEnabled FlexBool         `json:"dot1x_portctrl_enabled"`
+	EthernetTable        []*EthernetTable `json:"ethernet_table"`
+	FlowctrlEnabled      FlexBool         `json:"flowctrl_enabled"`
+	FwCaps               FlexInt          `json:"fw_caps"`
+	HasFan               FlexBool         `json:"has_fan"`
+	HasTemperature       FlexBool         `json:"has_temperature"`
+	InformIP             string           `json:"inform_ip"`
+	InformURL            string           `json:"inform_url"`
+	IP                   string           `json:"ip"`
+	JumboframeEnabled    FlexBool         `json:"jumboframe_enabled"`
+	LedOverride          string           `json:"led_override"`
+	LicenseState         string           `json:"license_state"`
+	Mac                  string           `json:"mac"`
+	Model                string           `json:"model"`
+	Name                 string           `json:"name"`
+	OutdoorModeOverride  string           `json:"outdoor_mode_override"`
+	PortOverrides        []struct {
 		Name       string  `json:"name,omitempty"`
 		PoeMode    string  `json:"poe_mode,omitempty"`
 		PortIdx    FlexInt `json:"port_idx"`
 		PortconfID string  `json:"portconf_id"`
 	} `json:"port_overrides"`
-	PortTable             []Port      `json:"port_table"`
-	Serial                string      `json:"serial"`
-	SiteID                string      `json:"site_id"`
-	StpPriority           FlexInt     `json:"stp_priority"`
-	StpVersion            string      `json:"stp_version"`
-	Type                  string      `json:"type"`
-	Version               string      `json:"version"`
-	RequiredVersion       string      `json:"required_version"`
-	SwitchCaps            *SwitchCaps `json:"switch_caps"`
-	HwCaps                FlexInt     `json:"hw_caps"`
-	Unsupported           FlexBool    `json:"unsupported"`
-	UnsupportedReason     FlexInt     `json:"unsupported_reason"`
-	SysErrorCaps          FlexInt     `json:"sys_error_caps"`
-	DeviceID              string      `json:"device_id"`
-	State                 FlexInt     `json:"state"`
-	LastSeen              FlexInt     `json:"last_seen"`
-	Upgradable            FlexBool    `json:"upgradable,omitempty"`
-	AdoptableWhenUpgraded FlexBool    `json:"adoptable_when_upgraded,omitempty"`
-	Rollupgrade           FlexBool    `json:"rollupgrade,omitempty"`
-	KnownCfgversion       string      `json:"known_cfgversion"`
-	Uptime                FlexInt     `json:"uptime"`
-	Locating              FlexBool    `json:"locating"`
-	ConnectRequestIP      string      `json:"connect_request_ip"`
-	ConnectRequestPort    string      `json:"connect_request_port"`
-	SysStats              SysStats    `json:"sys_stats"`
-	SystemStats           SystemStats `json:"system-stats"`
-	FanLevel              FlexInt     `json:"fan_level"`
-	GeneralTemperature    FlexInt     `json:"general_temperature"`
-	Overheating           FlexBool    `json:"overheating"`
-	TotalMaxPower         FlexInt     `json:"total_max_power"`
-	DownlinkTable         []struct {
-		PortIdx    FlexInt  `json:"port_idx"`
-		Speed      FlexInt  `json:"speed"`
-		FullDuplex FlexBool `json:"full_duplex"`
-		Mac        string   `json:"mac"`
-	} `json:"downlink_table"`
-	Uplink     Uplink `json:"uplink"`
-	LastUplink struct {
+	PortTable             []Port           `json:"port_table"`
+	Serial                string           `json:"serial"`
+	SiteID                string           `json:"site_id"`
+	StpPriority           FlexInt          `json:"stp_priority"`
+	StpVersion            string           `json:"stp_version"`
+	Type                  string           `json:"type"`
+	Version               string           `json:"version"`
+	RequiredVersion       string           `json:"required_version"`
+	SwitchCaps            *SwitchCaps      `json:"switch_caps"`
+	HwCaps                FlexInt          `json:"hw_caps"`
+	Unsupported           FlexBool         `json:"unsupported"`
+	UnsupportedReason     FlexInt          `json:"unsupported_reason"`
+	SysErrorCaps          FlexInt          `json:"sys_error_caps"`
+	DeviceID              string           `json:"device_id"`
+	State                 FlexInt          `json:"state"`
+	LastSeen              FlexInt          `json:"last_seen"`
+	Upgradable            FlexBool         `json:"upgradable,omitempty"`
+	AdoptableWhenUpgraded FlexBool         `json:"adoptable_when_upgraded,omitempty"`
+	Rollupgrade           FlexBool         `json:"rollupgrade,omitempty"`
+	KnownCfgversion       string           `json:"known_cfgversion"`
+	Uptime                FlexInt          `json:"uptime"`
+	Locating              FlexBool         `json:"locating"`
+	ConnectRequestIP      string           `json:"connect_request_ip"`
+	ConnectRequestPort    string           `json:"connect_request_port"`
+	SysStats              SysStats         `json:"sys_stats"`
+	SystemStats           SystemStats      `json:"system-stats"`
+	FanLevel              FlexInt          `json:"fan_level"`
+	GeneralTemperature    FlexInt          `json:"general_temperature"`
+	Overheating           FlexBool         `json:"overheating"`
+	TotalMaxPower         FlexInt          `json:"total_max_power"`
+	DownlinkTable         []*DownlinkTable `json:"downlink_table"`
+	Uplink                Uplink           `json:"uplink"`
+	LastUplink            struct {
 		UplinkMac string `json:"uplink_mac"`
 	} `json:"last_uplink"`
 	UplinkDepth FlexInt `json:"uplink_depth"`
@@ -109,7 +97,8 @@ type MacTable struct {
 	Mac           string   `json:"mac"`
 }
 
-// Port is a physical connection on a USW or UDM.
+// Port is a physical connection on a USW or Gateway.
+// Not every port has the same capabilities.
 type Port struct {
 	AggregatedBy FlexBool   `json:"aggregated_by"`
 	Autoneg      FlexBool   `json:"autoneg,omitempty"`

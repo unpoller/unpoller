@@ -53,40 +53,19 @@ type USG struct {
 	SpeedtestStatusSaved  FlexBool             `json:"speedtest-status-saved"`
 	Wan1                  Wan                  `json:"wan1"`
 	Wan2                  Wan                  `json:"wan2"`
-	PortTable             []struct {
-		Name        string   `json:"name"`
-		Ifname      string   `json:"ifname"`
-		IP          string   `json:"ip"`
-		Netmask     string   `json:"netmask"`
-		Mac         string   `json:"mac"`
-		Up          FlexBool `json:"up"`
-		Speed       FlexInt  `json:"speed"`
-		FullDuplex  FlexBool `json:"full_duplex"`
-		RxBytes     FlexInt  `json:"rx_bytes"`
-		RxDropped   FlexInt  `json:"rx_dropped"`
-		RxErrors    FlexInt  `json:"rx_errors"`
-		RxPackets   FlexInt  `json:"rx_packets"`
-		TxBytes     FlexInt  `json:"tx_bytes"`
-		TxDropped   FlexInt  `json:"tx_dropped"`
-		TxErrors    FlexInt  `json:"tx_errors"`
-		TxPackets   FlexInt  `json:"tx_packets"`
-		RxMulticast FlexInt  `json:"rx_multicast"`
-		Enable      FlexBool `json:"enable"`
-		DNS         []string `json:"dns,omitempty"`
-		Gateway     string   `json:"gateway,omitempty"`
-	} `json:"port_table"`
-	NetworkTable NetworkTable `json:"network_table"`
-	Uplink       Uplink       `json:"uplink"`
-	Stat         USGStat      `json:"stat"`
-	TxBytes      FlexInt      `json:"tx_bytes"`
-	RxBytes      FlexInt      `json:"rx_bytes"`
-	Bytes        FlexInt      `json:"bytes"`
-	NumSta       FlexInt      `json:"num_sta"`
-	UserNumSta   FlexInt      `json:"user-num_sta"`
-	GuestNumSta  FlexInt      `json:"guest-num_sta"`
-	NumDesktop   FlexInt      `json:"num_desktop"`
-	NumMobile    FlexInt      `json:"num_mobile"`
-	NumHandheld  FlexInt      `json:"num_handheld"`
+	PortTable             []*Port              `json:"port_table"`
+	NetworkTable          NetworkTable         `json:"network_table"`
+	Uplink                Uplink               `json:"uplink"`
+	Stat                  USGStat              `json:"stat"`
+	TxBytes               FlexInt              `json:"tx_bytes"`
+	RxBytes               FlexInt              `json:"rx_bytes"`
+	Bytes                 FlexInt              `json:"bytes"`
+	NumSta                FlexInt              `json:"num_sta"`
+	UserNumSta            FlexInt              `json:"user-num_sta"`
+	GuestNumSta           FlexInt              `json:"guest-num_sta"`
+	NumDesktop            FlexInt              `json:"num_desktop"`
+	NumMobile             FlexInt              `json:"num_mobile"`
+	NumHandheld           FlexInt              `json:"num_handheld"`
 }
 
 // Uplink is the Internet connection (or uplink) on a UniFi device.
@@ -175,17 +154,18 @@ type Wan struct {
 
 // SpeedtestStatus is the speed test info on a USG or UDM.
 type SpeedtestStatus struct {
-	Latency        FlexInt          `json:"latency"`
-	Rundate        FlexInt          `json:"rundate"`
-	Runtime        FlexInt          `json:"runtime"`
-	ServerDesc     string           `json:"server_desc,omitempty"`
-	Server         *SpeedtestServer `json:"server"`
-	StatusDownload FlexInt          `json:"status_download"`
-	StatusPing     FlexInt          `json:"status_ping"`
-	StatusSummary  FlexInt          `json:"status_summary"`
-	StatusUpload   FlexInt          `json:"status_upload"`
-	XputDownload   FlexInt          `json:"xput_download"`
-	XputUpload     FlexInt          `json:"xput_upload"`
+	Latency         FlexInt          `json:"latency"`
+	Rundate         FlexInt          `json:"rundate"`
+	Runtime         FlexInt          `json:"runtime"`
+	ServerDesc      string           `json:"server_desc,omitempty"`
+	Server          *SpeedtestServer `json:"server"`
+	SourceInterface string           `json:"source_interface"`
+	StatusDownload  FlexInt          `json:"status_download"`
+	StatusPing      FlexInt          `json:"status_ping"`
+	StatusSummary   FlexInt          `json:"status_summary"`
+	StatusUpload    FlexInt          `json:"status_upload"`
+	XputDownload    FlexInt          `json:"xput_download"`
+	XputUpload      FlexInt          `json:"xput_upload"`
 }
 
 type SpeedtestServer struct {
