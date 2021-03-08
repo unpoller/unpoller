@@ -4,6 +4,9 @@ import (
 	"github.com/unifi-poller/unifi"
 )
 
+// uapT is used as a name for printed/logged counters.
+const uapT = item("UAP")
+
 // batchUAP generates Wireless-Access-Point datapoints for InfluxDB.
 // These points can be passed directly to influx.
 func (u *InfluxUnifi) batchUAP(r report, s *unifi.UAP) {
@@ -32,6 +35,7 @@ func (u *InfluxUnifi) batchUAP(r report, s *unifi.UAP) {
 	fields["guest-num_sta"] = int(s.GuestNumSta.Val)
 	fields["num_sta"] = s.NumSta.Val
 
+	r.addCount(uapT)
 	r.send(&metric{Table: "uap", Tags: tags, Fields: fields})
 	u.processRadTable(r, tags, s.RadioTable, s.RadioTableStats)
 	u.processVAPTable(r, tags, s.VapTable)

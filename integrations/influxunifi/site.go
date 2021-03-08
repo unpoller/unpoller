@@ -57,7 +57,13 @@ func (u *InfluxUnifi) batchSite(r report, s *unifi.Site) {
 	}
 }
 
-func (u *InfluxUnifi) batchSiteDPI(r report, s *unifi.DPITable) {
+func (u *InfluxUnifi) batchSiteDPI(r report, v interface{}) {
+	s, ok := v.(*unifi.DPITable)
+	if !ok {
+		u.LogErrorf("invalid type given to batchSiteDPI: %T", v)
+		return
+	}
+
 	for _, dpi := range s.ByApp {
 		r.send(&metric{
 			Table: "sitedpi",
@@ -72,7 +78,7 @@ func (u *InfluxUnifi) batchSiteDPI(r report, s *unifi.DPITable) {
 				"rx_packets": dpi.RxPackets,
 				"tx_bytes":   dpi.TxBytes,
 				"rx_bytes":   dpi.RxBytes,
-			}},
-		)
+			},
+		})
 	}
 }

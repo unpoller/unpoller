@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"log"
+	"strconv"
 	"strings"
 	"time"
 
@@ -14,8 +15,12 @@ import (
 	"github.com/pkg/errors"
 	"github.com/unifi-poller/poller"
 	"github.com/unifi-poller/unifi"
+	"github.com/unifi-poller/webserver"
 	"golift.io/cnfg"
 )
+
+// PluginName is the name of this plugin.
+const PluginName = "influxdb"
 
 const (
 	defaultInterval   = 30 * time.Second
@@ -53,13 +58,14 @@ type metric struct {
 	Table  string
 	Tags   map[string]string
 	Fields map[string]interface{}
+	TS     time.Time
 }
 
 func init() { // nolint: gochecknoinits
 	u := &InfluxUnifi{InfluxDB: &InfluxDB{}, LastCheck: time.Now()}
 
 	poller.NewOutput(&poller.Output{
-		Name:   "influxdb",
+		Name:   PluginName,
 		Config: u.InfluxDB,
 		Method: u.Run,
 	})
@@ -73,24 +79,26 @@ func (u *InfluxUnifi) PollController() {
 	log.Printf("[INFO] Everything checks out! Poller started, InfluxDB interval: %v", interval)
 
 	for u.LastCheck = range ticker.C {
-		metrics, ok, collectErr := u.Collector.Metrics()
-		if collectErr != nil {
-			u.Collector.LogErrorf("metric fetch for InfluxDB failed: %v", collectErr)
-
-			if !ok {
-				continue
-			}
-		}
-
-		report, err := u.ReportMetrics(metrics)
+		metrics, err := u.Collector.Metrics(&poller.Filter{Name: "unifi"})
 		if err != nil {
-			// XXX: reset and re-auth? not sure..
-			u.Collector.LogErrorf("%v", err)
+			u.LogErrorf("metric fetch for InfluxDB failed: %v", err)
 			continue
 		}
 
-		report.error(collectErr)
-		u.LogInfluxReport(report)
+		events, err := u.Collector.Events(&poller.Filter{Name: "unifi", Dur: interval})
+		if err != nil {
+			u.LogErrorf("event fetch for InfluxDB failed: %v", err)
+			continue
+		}
+
+		report, err := u.ReportMetrics(metrics, events)
+		if err != nil {
+			// XXX: reset and re-auth? not sure..
+			u.LogErrorf("%v", err)
+			continue
+		}
+
+		u.Logf("UniFi Metrics Recorded. %v", report)
 	}
 }
 
@@ -98,12 +106,11 @@ func (u *InfluxUnifi) PollController() {
 func (u *InfluxUnifi) Run(c poller.Collect) error {
 	var err error
 
-	if u.Config == nil || u.Disable {
-		c.Logf("InfluxDB config missing (or disabled), InfluxDB output disabled!")
+	if u.Collector = c; u.Config == nil || u.Disable {
+		u.Logf("InfluxDB config missing (or disabled), InfluxDB output disabled!")
 		return nil
 	}
 
-	u.Collector = c
 	u.setConfigDefaults()
 
 	u.influx, err = influx.NewHTTPClient(influx.HTTPConfig{
@@ -113,9 +120,13 @@ func (u *InfluxUnifi) Run(c poller.Collect) error {
 		TLSConfig: &tls.Config{InsecureSkipVerify: !u.VerifySSL}, // nolint: gosec
 	})
 	if err != nil {
-		return err
+		return fmt.Errorf("making client: %w", err)
 	}
 
+	fake := *u.Config
+	fake.Pass = strconv.FormatBool(fake.Pass != "")
+
+	webserver.UpdateOutput(&webserver.Output{Name: PluginName, Config: fake})
 	u.PollController()
 
 	return nil
@@ -154,7 +165,7 @@ func (u *InfluxUnifi) setConfigDefaults() {
 func (u *InfluxUnifi) getPassFromFile(filename string) string {
 	b, err := ioutil.ReadFile(filename)
 	if err != nil {
-		u.Collector.LogErrorf("Reading InfluxDB Password File: %v", err)
+		u.LogErrorf("Reading InfluxDB Password File: %v", err)
 	}
 
 	return strings.TrimSpace(string(b))
@@ -163,8 +174,14 @@ func (u *InfluxUnifi) getPassFromFile(filename string) string {
 // ReportMetrics batches all device and client data into influxdb data points.
 // Call this after you've collected all the data you care about.
 // Returns an error if influxdb calls fail, otherwise returns a report.
-func (u *InfluxUnifi) ReportMetrics(m *poller.Metrics) (*Report, error) {
-	r := &Report{Metrics: m, ch: make(chan *metric), Start: time.Now()}
+func (u *InfluxUnifi) ReportMetrics(m *poller.Metrics, e *poller.Events) (*Report, error) {
+	r := &Report{
+		Metrics: m,
+		Events:  e,
+		ch:      make(chan *metric),
+		Start:   time.Now(),
+		Counts:  &Counts{Val: make(map[item]int)},
+	}
 	defer close(r.ch)
 
 	var err error
@@ -194,7 +211,11 @@ func (u *InfluxUnifi) ReportMetrics(m *poller.Metrics) (*Report, error) {
 // collect runs in a go routine and batches all the points.
 func (u *InfluxUnifi) collect(r report, ch chan *metric) {
 	for m := range ch {
-		pt, err := influx.NewPoint(m.Table, m.Tags, m.Fields, r.metrics().TS)
+		if m.TS.IsZero() {
+			m.TS = r.metrics().TS
+		}
+
+		pt, err := influx.NewPoint(m.Table, m.Tags, m.Fields, m.TS)
 		if err == nil {
 			r.batch(m, pt)
 		}
@@ -209,12 +230,24 @@ func (u *InfluxUnifi) collect(r report, ch chan *metric) {
 func (u *InfluxUnifi) loopPoints(r report) {
 	m := r.metrics()
 
+	for _, s := range m.Sites {
+		u.switchExport(r, s)
+	}
+
 	for _, s := range m.SitesDPI {
 		u.batchSiteDPI(r, s)
 	}
 
-	for _, s := range m.Sites {
-		u.batchSite(r, s)
+	for _, s := range m.Clients {
+		u.switchExport(r, s)
+	}
+
+	for _, s := range m.Devices {
+		u.switchExport(r, s)
+	}
+
+	for _, s := range r.events().Logs {
+		u.switchExport(r, s)
 	}
 
 	appTotal := make(totalsDPImap)
@@ -225,50 +258,31 @@ func (u *InfluxUnifi) loopPoints(r report) {
 	}
 
 	reportClientDPItotals(r, appTotal, catTotal)
-
-	for _, s := range m.Clients {
-		u.batchClient(r, s)
-	}
-
-	for _, s := range m.IDSList {
-		u.batchIDS(r, s)
-	}
-
-	u.loopDevicePoints(r)
 }
 
-func (u *InfluxUnifi) loopDevicePoints(r report) {
-	m := r.metrics()
-	if m.Devices == nil {
-		m.Devices = &unifi.Devices{}
-		return
+func (u *InfluxUnifi) switchExport(r report, v interface{}) { //nolint:cyclop
+	switch v := v.(type) {
+	case *unifi.UAP:
+		u.batchUAP(r, v)
+	case *unifi.USW:
+		u.batchUSW(r, v)
+	case *unifi.USG:
+		u.batchUSG(r, v)
+	case *unifi.UDM:
+		u.batchUDM(r, v)
+	case *unifi.Site:
+		u.batchSite(r, v)
+	case *unifi.Client:
+		u.batchClient(r, v)
+	case *unifi.Event:
+		u.batchEvent(r, v)
+	case *unifi.IDS:
+		u.batchIDS(r, v)
+	case *unifi.Alarm:
+		u.batchAlarms(r, v)
+	case *unifi.Anomaly:
+		u.batchAnomaly(r, v)
+	default:
+		u.LogErrorf("invalid export type: %T", v)
 	}
-
-	for _, s := range m.UAPs {
-		u.batchUAP(r, s)
-	}
-
-	for _, s := range m.USGs {
-		u.batchUSG(r, s)
-	}
-
-	for _, s := range m.USWs {
-		u.batchUSW(r, s)
-	}
-
-	for _, s := range m.UDMs {
-		u.batchUDM(r, s)
-	}
-}
-
-// LogInfluxReport writes a log message after exporting to influxdb.
-func (u *InfluxUnifi) LogInfluxReport(r *Report) {
-	m := r.Metrics
-	idsMsg := fmt.Sprintf("IDS Events: %d, ", len(m.IDSList))
-
-	u.Collector.Logf("UniFi Metrics Recorded. Sites: %d, Clients: %d, "+
-		"UAP: %d, USG/UDM: %d, USW: %d, %sPoints: %d, Fields: %d, Errs: %d, Elapsed: %v",
-		len(m.Sites), len(m.Clients), len(m.UAPs),
-		len(m.UDMs)+len(m.USGs), len(m.USWs), idsMsg, r.Total,
-		r.Fields, len(r.Errors), r.Elapsed.Round(time.Millisecond))
 }

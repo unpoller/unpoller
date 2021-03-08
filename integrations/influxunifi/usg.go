@@ -4,6 +4,9 @@ import (
 	"github.com/unifi-poller/unifi"
 )
 
+// usgT is used as a name for printed/logged counters.
+const usgT = item("USG")
+
 // batchUSG generates Unifi Gateway datapoints for InfluxDB.
 // These points can be passed directly to influx.
 func (u *InfluxUnifi) batchUSG(r report, s *unifi.USG) {
@@ -43,6 +46,7 @@ func (u *InfluxUnifi) batchUSG(r report, s *unifi.USG) {
 		},
 	)
 
+	r.addCount(usgT)
 	r.send(&metric{Table: "usg", Tags: tags, Fields: fields})
 	u.batchNetTable(r, tags, s.NetworkTable)
 	u.batchUSGwans(r, tags, s.Wan1, s.Wan2)

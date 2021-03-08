@@ -76,7 +76,13 @@ func (u *InfluxUnifi) batchClient(r report, s *unifi.Client) { // nolint: funlen
 // totalsDPImap: controller, site, name (app/cat name), dpi.
 type totalsDPImap map[string]map[string]map[string]unifi.DPIData
 
-func (u *InfluxUnifi) batchClientDPI(r report, s *unifi.DPITable, appTotal, catTotal totalsDPImap) {
+func (u *InfluxUnifi) batchClientDPI(r report, v interface{}, appTotal, catTotal totalsDPImap) {
+	s, ok := v.(*unifi.DPITable)
+	if !ok {
+		u.LogErrorf("invalid type given to batchClientDPI: %T", v)
+		return
+	}
+
 	for _, dpi := range s.ByApp {
 		category := unifi.DPICats.Get(dpi.Cat)
 		application := unifi.DPIApps.GetApp(dpi.Cat, dpi.App)
@@ -98,8 +104,8 @@ func (u *InfluxUnifi) batchClientDPI(r report, s *unifi.DPITable, appTotal, catT
 				"rx_packets": dpi.RxPackets,
 				"tx_bytes":   dpi.TxBytes,
 				"rx_bytes":   dpi.RxBytes,
-			}},
-		)
+			},
+		})
 	}
 }
 
