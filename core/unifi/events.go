@@ -8,8 +8,8 @@ import (
 )
 
 var (
-	errNoSiteProvided   = fmt.Errorf("site must not be nil or empty")
-	errInvalidTimeRange = fmt.Errorf("only 0, 1 or 2 times may be provided to timeRange")
+	ErrNoSiteProvided   = fmt.Errorf("site must not be nil or empty")
+	ErrInvalidTimeRange = fmt.Errorf("only 0, 1 or 2 times may be provided to timeRange")
 )
 
 const (
@@ -35,7 +35,7 @@ func (u *Unifi) GetEvents(sites []*Site, hours time.Duration) ([]*Event, error) 
 // GetSiteEvents retrieves the last 1 hour's worth of events from a single site.
 func (u *Unifi) GetSiteEvents(site *Site, hours time.Duration) ([]*Event, error) {
 	if site == nil || site.Name == "" {
-		return nil, errNoSiteProvided
+		return nil, ErrNoSiteProvided
 	}
 
 	if hours < time.Hour {
@@ -196,5 +196,9 @@ func (v *IPGeo) UnmarshalJSON(data []byte) error {
 	v.CountryName = g.CountryName
 	v.Organization = g.Organization
 
-	return err
+	if err != nil {
+		return fmt.Errorf("json unmarshal: %w", err)
+	}
+
+	return nil
 }

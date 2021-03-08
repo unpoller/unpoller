@@ -15,12 +15,23 @@ type DPITable struct {
 
 // DPIData is the DPI data in the DPI table.
 type DPIData struct {
-	Cat       int   `json:"cat"`
-	App       int   `json:"app"`
-	RxBytes   int64 `json:"rx_bytes"`
-	TxBytes   int64 `json:"tx_bytes"`
-	RxPackets int64 `json:"rx_packets"`
-	TxPackets int64 `json:"tx_packets"`
+	Cat          int          `json:"cat"`
+	App          int          `json:"app"`
+	RxBytes      int64        `json:"rx_bytes"`
+	TxBytes      int64        `json:"tx_bytes"`
+	RxPackets    int64        `json:"rx_packets"`
+	TxPackets    int64        `json:"tx_packets"`
+	Clients      []*DPIClient `json:"clients,omitempty"`
+	KnownClients FlexInt      `json:"known_clients,omitempty"`
+}
+
+// DPIClient data is sometimes included in ByApp output.
+type DPIClient struct {
+	Mac       string  `json:"mac"`
+	RxBytes   FlexInt `json:"rx_bytes"`
+	TxBytes   FlexInt `json:"tx_bytes"`
+	RxPackets FlexInt `json:"rx_packets"`
+	TxPackets FlexInt `json:"tx_packets"`
 }
 
 // DPIMap allows binding methods to the DPICat and DPIApps variables.

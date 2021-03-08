@@ -5,9 +5,7 @@ import (
 	"strings"
 )
 
-var (
-	errDPIDataBug = fmt.Errorf("dpi data table contains more than 1 item; please open a bug report")
-)
+var ErrDPIDataBug = fmt.Errorf("dpi data table contains more than 1 item; please open a bug report")
 
 // GetSites returns a list of configured sites on the UniFi controller.
 func (u *Unifi) GetSites() ([]*Site, error) {
@@ -53,7 +51,7 @@ func (u *Unifi) GetSiteDPI(sites []*Site) ([]*DPITable, error) {
 		}
 
 		if l := len(response.Data); l > 1 {
-			return nil, errDPIDataBug
+			return nil, ErrDPIDataBug
 		} else if l == 0 {
 			u.DebugLog("Site DPI data missing! Is DPI enabled in UniFi controller? Site %s (%s) ", site.Name, site.Desc)
 			continue
