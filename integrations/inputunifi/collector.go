@@ -1,19 +1,17 @@
 package inputunifi
 
+// nolint: gosec
 import (
-	"crypto/md5" // nolint: gosec
+	"crypto/md5"
 	"fmt"
 	"strings"
 	"time"
 
-	"github.com/pkg/errors"
 	"github.com/unifi-poller/poller"
 	"github.com/unifi-poller/unifi"
 )
 
-var (
-	errScrapeFilterMatchFailed = fmt.Errorf("scrape filter match failed, and filter is not http URL")
-)
+var ErrScrapeFilterMatchFailed = fmt.Errorf("scrape filter match failed, and filter is not http URL")
 
 func (u *InputUnifi) isNill(c *Controller) bool {
 	u.RLock()
@@ -42,17 +40,17 @@ func (u *InputUnifi) newDynamicCntrlr(url string) (bool, *Controller) {
 
 func (u *InputUnifi) dynamicController(filter *poller.Filter) (*poller.Metrics, error) {
 	if !strings.HasPrefix(filter.Path, "http") {
-		return nil, errScrapeFilterMatchFailed
+		return nil, ErrScrapeFilterMatchFailed
 	}
 
-	new, c := u.newDynamicCntrlr(filter.Path)
+	newCntrlr, c := u.newDynamicCntrlr(filter.Path)
 
-	if new {
+	if newCntrlr {
 		u.Logf("Authenticating to Dynamic UniFi Controller: %s", filter.Path)
 
 		if err := u.getUnifi(c); err != nil {
 			u.logController(c)
-			return nil, errors.Wrapf(err, "authenticating to %s", filter.Path)
+			return nil, fmt.Errorf("authenticating to %s: %w", filter.Path, err)
 		}
 
 		u.logController(c)
@@ -66,7 +64,7 @@ func (u *InputUnifi) collectController(c *Controller) (*poller.Metrics, error) {
 		u.Logf("Re-authenticating to UniFi Controller: %s", c.URL)
 
 		if err := u.getUnifi(c); err != nil {
-			return nil, errors.Wrapf(err, "re-authenticating to %s", c.URL)
+			return nil, fmt.Errorf("re-authenticating to %s: %w", c.URL, err)
 		}
 	}
 
@@ -75,67 +73,11 @@ func (u *InputUnifi) collectController(c *Controller) (*poller.Metrics, error) {
 		u.Logf("Re-authenticating to UniFi Controller: %s", c.URL)
 
 		if err := u.getUnifi(c); err != nil {
-			return metrics, errors.Wrapf(err, "re-authenticating to %s", c.URL)
+			return metrics, fmt.Errorf("re-authenticating to %s: %w", c.URL, err)
 		}
 	}
 
 	return metrics, err
-}
-
-func (u *InputUnifi) collectControllerEvents(c *Controller) ([]interface{}, error) {
-	logs := []interface{}{}
-
-	// Get the sites we care about.
-	sites, err := u.getFilteredSites(c)
-	if err != nil {
-		return nil, errors.Wrap(err, "unifi.GetSites()")
-	}
-
-	if *c.SaveAnomal {
-		anom, err := c.Unifi.GetAnomalies(sites, time.Now().Add(-time.Hour))
-		if err != nil {
-			return nil, errors.Wrap(err, "unifi.GetAnomalies()")
-		}
-
-		for _, a := range anom {
-			logs = append(logs, a)
-		}
-	}
-
-	if *c.SaveAlarms {
-		alarms, err := c.Unifi.GetAlarms(sites)
-		if err != nil {
-			return nil, errors.Wrap(err, "unifi.GetAlarms()")
-		}
-
-		for _, a := range alarms {
-			logs = append(logs, a)
-		}
-	}
-
-	if *c.SaveEvents {
-		events, err := c.Unifi.GetEvents(sites, time.Hour)
-		if err != nil {
-			return nil, errors.Wrap(err, "unifi.GetEvents()")
-		}
-
-		for _, e := range events {
-			logs = append(logs, redactEvent(e, c.HashPII))
-		}
-	}
-
-	if *c.SaveIDS {
-		events, err := c.Unifi.GetIDS(sites, time.Now().Add(-time.Hour))
-		if err != nil {
-			return nil, errors.Wrap(err, "unifi.GetIDS()")
-		}
-
-		for _, e := range events {
-			logs = append(logs, e)
-		}
-	}
-
-	return logs, nil
 }
 
 func (u *InputUnifi) pollController(c *Controller) (*poller.Metrics, error) {
@@ -145,28 +87,29 @@ func (u *InputUnifi) pollController(c *Controller) (*poller.Metrics, error) {
 	// Get the sites we care about.
 	sites, err := u.getFilteredSites(c)
 	if err != nil {
-		return nil, errors.Wrap(err, "unifi.GetSites()")
+		return nil, fmt.Errorf("unifi.GetSites(): %w", err)
 	}
 
 	m := &Metrics{TS: time.Now(), Sites: sites}
+	defer updateWeb(c, m)
 
 	if c.SaveDPI != nil && *c.SaveDPI {
 		if m.SitesDPI, err = c.Unifi.GetSiteDPI(sites); err != nil {
-			return nil, errors.Wrapf(err, "unifi.GetSiteDPI(%s)", c.URL)
+			return nil, fmt.Errorf("unifi.GetSiteDPI(%s): %w", c.URL, err)
 		}
 
 		if m.ClientsDPI, err = c.Unifi.GetClientsDPI(sites); err != nil {
-			return nil, errors.Wrapf(err, "unifi.GetClientsDPI(%s)", c.URL)
+			return nil, fmt.Errorf("unifi.GetClientsDPI(%s): %w", c.URL, err)
 		}
 	}
 
 	// Get all the points.
 	if m.Clients, err = c.Unifi.GetClients(sites); err != nil {
-		return nil, errors.Wrapf(err, "unifi.GetClients(%s)", c.URL)
+		return nil, fmt.Errorf("unifi.GetClients(%s): %w", c.URL, err)
 	}
 
 	if m.Devices, err = c.Unifi.GetDevices(sites); err != nil {
-		return nil, errors.Wrapf(err, "unifi.GetDevices(%s)", c.URL)
+		return nil, fmt.Errorf("unifi.GetDevices(%s): %w", c.URL, err)
 	}
 
 	return u.augmentMetrics(c, m), nil
@@ -257,24 +200,6 @@ func extractDevices(metrics *Metrics) (*poller.Metrics, map[string]string, map[s
 	return m, devices, bssdIDs
 }
 
-// redactEvent attempts to mask personally identying information from log messages.
-// This currently misses the "msg" value entirely and leaks PII information.
-func redactEvent(e *unifi.Event, hash *bool) *unifi.Event {
-	if !*hash {
-		return e
-	}
-
-	// metrics.Events[i].Msg <-- not sure what to do here.
-	e.DestIPGeo = unifi.IPGeo{}
-	e.SourceIPGeo = unifi.IPGeo{}
-	e.Host = RedactNamePII(e.Host, hash)
-	e.Hostname = RedactNamePII(e.Hostname, hash)
-	e.DstMAC = RedactMacPII(e.DstMAC, hash)
-	e.SrcMAC = RedactMacPII(e.SrcMAC, hash)
-
-	return e
-}
-
 // RedactNamePII converts a name string to an md5 hash (first 24 chars only).
 // Useful for maskiing out personally identifying information.
 func RedactNamePII(pii string, hash *bool) string {
@@ -308,7 +233,7 @@ func (u *InputUnifi) getFilteredSites(c *Controller) ([]*unifi.Site, error) {
 
 	sites, err := c.Unifi.GetSites()
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("controller: %w", err)
 	} else if len(c.Sites) == 0 || StringInSlice("all", c.Sites) {
 		return sites, nil
 	}

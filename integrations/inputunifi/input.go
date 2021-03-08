@@ -3,19 +3,20 @@
 package inputunifi
 
 import (
+	"fmt"
 	"io/ioutil"
 	"strings"
+	"sync"
 	"time"
 
-	"sync"
-
-	"github.com/pkg/errors"
 	"github.com/unifi-poller/poller"
 	"github.com/unifi-poller/unifi"
 )
 
+// PluginName is the name of this input plugin.
+const PluginName = "unifi"
+
 const (
-	PluginName  = "unifi" // PluginName is the name of this input plugin.
 	defaultURL  = "https://127.0.0.1:8443"
 	defaultUser = "unifipoller"
 	defaultPass = "unifipoller"
@@ -27,7 +28,7 @@ type InputUnifi struct {
 	*Config    `json:"unifi" toml:"unifi" xml:"unifi" yaml:"unifi"`
 	dynamic    map[string]*Controller
 	sync.Mutex // to lock the map above.
-	poller.Logger
+	Logger     poller.Logger
 }
 
 // Controller represents the configuration for a UniFi Controller.
@@ -44,8 +45,9 @@ type Controller struct {
 	User       string       `json:"user" toml:"user" xml:"user" yaml:"user"`
 	Pass       string       `json:"pass" toml:"pass" xml:"pass" yaml:"pass"`
 	URL        string       `json:"url" toml:"url" xml:"url" yaml:"url"`
-	Sites      []string     `json:"sites,omitempty" toml:"sites,omitempty" xml:"site" yaml:"sites"`
+	Sites      []string     `json:"sites" toml:"sites" xml:"site" yaml:"sites"`
 	Unifi      *unifi.Unifi `json:"-" toml:"-" xml:"-" yaml:"-"`
+	ID         string       `json:"id,omitempty"` // this is an output, not an input.
 }
 
 // Config contains our configuration data.
@@ -57,6 +59,7 @@ type Config struct {
 	Controllers  []*Controller `json:"controllers" toml:"controller" xml:"controller" yaml:"controllers"`
 }
 
+// Metrics is simply a useful container for everything.
 type Metrics struct {
 	TS         time.Time
 	Sites      []*unifi.Site
@@ -100,7 +103,7 @@ func (u *InputUnifi) getUnifi(c *Controller) error {
 	})
 	if err != nil {
 		c.Unifi = nil
-		return errors.Wrap(err, "unifi controller")
+		return fmt.Errorf("unifi controller: %w", err)
 	}
 
 	u.LogDebugf("Authenticated with controller successfully, %s", c.URL)
@@ -122,7 +125,7 @@ func (u *InputUnifi) checkSites(c *Controller) error {
 
 	sites, err := c.Unifi.GetSites()
 	if err != nil {
-		return err
+		return fmt.Errorf("controller: %w", err)
 	}
 
 	msg := []string{}
@@ -167,7 +170,7 @@ func (u *InputUnifi) getPassFromFile(filename string) string {
 }
 
 // setDefaults sets the default defaults.
-func (u *InputUnifi) setDefaults(c *Controller) {
+func (u *InputUnifi) setDefaults(c *Controller) { //nolint:cyclop
 	t := true
 	f := false
 
@@ -227,7 +230,7 @@ func (u *InputUnifi) setDefaults(c *Controller) {
 
 // setControllerDefaults sets defaults for the for controllers.
 // Any missing values come from defaults (above).
-func (u *InputUnifi) setControllerDefaults(c *Controller) *Controller {
+func (u *InputUnifi) setControllerDefaults(c *Controller) *Controller { //nolint:cyclop
 	// Configured controller defaults.
 	if c.SaveSites == nil {
 		c.SaveSites = u.Default.SaveSites
