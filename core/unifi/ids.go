@@ -76,7 +76,7 @@ func (u *Unifi) GetIDS(sites []*Site, timeRange ...time.Time) ([]*IDS, error) {
 // Events between start and end are returned. End defaults to time.Now().
 func (u *Unifi) GetIDSSite(site *Site, timeRange ...time.Time) ([]*IDS, error) {
 	if site == nil || site.Name == "" {
-		return nil, errNoSiteProvided
+		return nil, ErrNoSiteProvided
 	}
 
 	u.DebugLog("Polling Controller for IDS Events, site %s (%s)", site.Name, site.Desc)
@@ -126,12 +126,15 @@ func makeEventParams(timeRange ...time.Time) (string, error) {
 		rp.Start = timeRange[0].Unix() * int64(time.Microsecond)
 		rp.End = timeRange[1].Unix() * int64(time.Microsecond)
 	default:
-		return "", errInvalidTimeRange
+		return "", ErrInvalidTimeRange
 	}
 
 	params, err := json.Marshal(&rp)
+	if err != nil {
+		return "", fmt.Errorf("json marshal: %w", err)
+	}
 
-	return string(params), err
+	return string(params), nil
 }
 
 type idsList []*IDS

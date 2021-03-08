@@ -44,7 +44,7 @@ func (u *Unifi) GetAnomalies(sites []*Site, timeRange ...time.Time) ([]*Anomaly,
 // GetAnomaliesSite retreives the Anomalies for a single Site.
 func (u *Unifi) GetAnomaliesSite(site *Site, timeRange ...time.Time) ([]*Anomaly, error) {
 	if site == nil || site.Name == "" {
-		return nil, errNoSiteProvided
+		return nil, ErrNoSiteProvided
 	}
 
 	u.DebugLog("Polling Controller for Anomalies, site %s (%s)", site.Name, site.Desc)
@@ -119,7 +119,7 @@ func makeAnomalyParams(scale string, timeRange ...time.Time) (string, error) {
 		end := timeRange[1].Unix() * int64(time.Microsecond)
 		out = append(out, "end="+strconv.FormatInt(end, 10), "start="+strconv.FormatInt(start, 10))
 	default:
-		return "", errInvalidTimeRange
+		return "", ErrInvalidTimeRange
 	}
 
 	if len(out) == 0 {

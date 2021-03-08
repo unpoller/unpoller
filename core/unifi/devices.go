@@ -72,6 +72,12 @@ func (u *Unifi) parseDevices(data []json.RawMessage, siteName string) *Devices {
 				dev.Name = strings.TrimSpace(pick(dev.Name, dev.Mac))
 				devices.UDMs = append(devices.UDMs, dev)
 			}
+		case "uxg":
+			dev := &UXG{SiteName: siteName, SourceName: u.URL}
+			if u.unmarshalDevice(assetType, r, dev) == nil {
+				dev.Name = strings.TrimSpace(pick(dev.Name, dev.Mac))
+				devices.UXGs = append(devices.UXGs, dev)
+			}
 		default:
 			u.ErrorLog("unknown asset type - %v - skipping", assetType)
 		}

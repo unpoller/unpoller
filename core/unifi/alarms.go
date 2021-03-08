@@ -73,7 +73,7 @@ func (u *Unifi) GetAlarms(sites []*Site) ([]*Alarm, error) {
 // GetAlarmsSite retreives the Alarms for a single Site.
 func (u *Unifi) GetAlarmsSite(site *Site) ([]*Alarm, error) {
 	if site == nil || site.Name == "" {
-		return nil, errNoSiteProvided
+		return nil, ErrNoSiteProvided
 	}
 
 	u.DebugLog("Polling Controller for Alarms, site %s (%s)", site.Name, site.Desc)

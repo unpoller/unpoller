@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/pkg/errors"
 )
@@ -79,6 +80,7 @@ type Devices struct {
 	USGs []*USG
 	USWs []*USW
 	UDMs []*UDM
+	UXGs []*UXG
 }
 
 // Config is the data passed into our library. This configures things and allows
@@ -91,6 +93,7 @@ type Config struct {
 	New       bool
 	ErrorLog  Logger
 	DebugLog  Logger
+	Timeout   time.Duration // how long to wait for replies, default: forever.
 }
 
 // Unifi is what you get in return for providing a password! Unifi represents

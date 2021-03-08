@@ -7,6 +7,7 @@ package unifi
 
 import (
 	"bytes"
+	"context"
 	"crypto/tls"
 	"encoding/json"
 	"fmt"
@@ -18,13 +19,13 @@ import (
 	"strings"
 	"time"
 
-	"github.com/pkg/errors"
 	"golang.org/x/net/publicsuffix"
 )
 
 var (
-	errAuthenticationFailed = fmt.Errorf("authentication failed")
-	errInvalidStatusCode    = fmt.Errorf("invalid status code from server")
+	ErrAuthenticationFailed = fmt.Errorf("authentication failed")
+	ErrInvalidStatusCode    = fmt.Errorf("invalid status code from server")
+	ErrNoParams             = fmt.Errorf("requedted PUT with no parameters")
 )
 
 // NewUnifi creates a http.Client with authenticated cookies.
@@ -46,9 +47,11 @@ func NewUnifi(config *Config) (*Unifi, error) {
 		config.DebugLog = discardLogs
 	}
 
-	u := &Unifi{Config: config,
+	u := &Unifi{
+		Config: config,
 		Client: &http.Client{
-			Jar: jar,
+			Timeout: config.Timeout,
+			Jar:     jar,
 			Transport: &http.Transport{
 				TLSClientConfig: &tls.Config{InsecureSkipVerify: !config.VerifySSL}, // nolint: gosec
 			},
@@ -64,7 +67,7 @@ func NewUnifi(config *Config) (*Unifi, error) {
 	}
 
 	if err := u.GetServerData(); err != nil {
-		return u, errors.Wrap(err, "unable to get server version")
+		return u, fmt.Errorf("unable to get server version: %w", err)
 	}
 
 	return u, nil
@@ -91,8 +94,8 @@ func (u *Unifi) Login() error {
 		req.URL, time.Since(start).Round(time.Millisecond), resp.ContentLength)
 
 	if resp.StatusCode != http.StatusOK {
-		return errors.Wrapf(errAuthenticationFailed, "(user: %s): %s (status: %s)",
-			u.User, req.URL, resp.Status)
+		return fmt.Errorf("(user: %s): %s (status: %s): %w",
+			u.User, req.URL, resp.Status, ErrAuthenticationFailed)
 	}
 
 	return nil
@@ -185,39 +188,44 @@ func (u *Unifi) PutData(apiPath string, v interface{}, params ...string) error {
 // Use this if you're unmarshalling UniFi data into custom types.
 // And if you're doing that... sumbut a pull request with your new struct. :)
 // This is a helper method that is exposed for convenience.
-func (u *Unifi) UniReq(apiPath string, params string) (req *http.Request, err error) {
+func (u *Unifi) UniReq(apiPath string, params string) (*http.Request, error) {
+	var (
+		req *http.Request
+		err error
+	)
+
 	switch apiPath = u.path(apiPath); params {
 	case "":
-		req, err = http.NewRequest("GET", u.URL+apiPath, nil)
+		req, err = http.NewRequest(http.MethodGet, u.URL+apiPath, nil)
 	default:
-		req, err = http.NewRequest("POST", u.URL+apiPath, bytes.NewBufferString(params))
+		req, err = http.NewRequest(http.MethodPost, u.URL+apiPath, bytes.NewBufferString(params))
 	}
 
 	if err != nil {
-		return
+		return nil, fmt.Errorf("creating request: %w", err)
 	}
 
 	u.setHeaders(req, params)
 
-	return
+	return req, nil
 }
 
 // UniReqPut is the Put call equivalent to UniReq
-func (u *Unifi) UniReqPut(apiPath string, params string) (req *http.Request, err error) {
-	switch apiPath = u.path(apiPath); params {
-	case "":
-		err = fmt.Errorf("Put with no parameters. Use UniReq()")
-	default:
-		req, err = http.NewRequest("PUT", u.URL+apiPath, bytes.NewBufferString(params))
+func (u *Unifi) UniReqPut(apiPath string, params string) (*http.Request, error) {
+	if params == "" {
+		return nil, ErrNoParams
 	}
 
+	apiPath = u.path(apiPath)
+
+	req, err := http.NewRequest(http.MethodPut, u.URL+apiPath, bytes.NewBufferString(params)) //nolint:noctx
 	if err != nil {
-		return
+		return nil, fmt.Errorf("creating request: %w", err)
 	}
 
 	u.setHeaders(req, params)
 
-	return
+	return req, nil
 }
 
 // GetJSON returns the raw JSON from a path. This is useful for debugging.
@@ -242,7 +250,17 @@ func (u *Unifi) PutJSON(apiPath string, params ...string) ([]byte, error) {
 }
 
 func (u *Unifi) do(req *http.Request) ([]byte, error) {
-	resp, err := u.Do(req)
+	var (
+		cancel func()
+		ctx    = context.Background()
+	)
+
+	if u.Config.Timeout != 0 {
+		ctx, cancel = context.WithTimeout(ctx, u.Config.Timeout)
+		defer cancel()
+	}
+
+	resp, err := u.Do(req.WithContext(ctx))
 	if err != nil {
 		return []byte{}, err
 	}
@@ -260,7 +278,7 @@ func (u *Unifi) do(req *http.Request) ([]byte, error) {
 	}
 
 	if resp.StatusCode != http.StatusOK {
-		err = errors.Wrapf(errInvalidStatusCode, "%s: %s", req.URL, resp.Status)
+		err = fmt.Errorf("%s: %s: %w", req.URL, resp.Status, ErrInvalidStatusCode)
 	}
 
 	return body, err

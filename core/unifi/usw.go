@@ -43,19 +43,15 @@ type USW struct {
 		PortIdx    FlexInt `json:"port_idx"`
 		PortconfID string  `json:"portconf_id"`
 	} `json:"port_overrides"`
-	PortTable       []Port  `json:"port_table"`
-	Serial          string  `json:"serial"`
-	SiteID          string  `json:"site_id"`
-	StpPriority     FlexInt `json:"stp_priority"`
-	StpVersion      string  `json:"stp_version"`
-	Type            string  `json:"type"`
-	Version         string  `json:"version"`
-	RequiredVersion string  `json:"required_version"`
-	SwitchCaps      struct {
-		FeatureCaps          FlexInt `json:"feature_caps"`
-		MaxMirrorSessions    FlexInt `json:"max_mirror_sessions"`
-		MaxAggregateSessions FlexInt `json:"max_aggregate_sessions"`
-	} `json:"switch_caps"`
+	PortTable             []Port      `json:"port_table"`
+	Serial                string      `json:"serial"`
+	SiteID                string      `json:"site_id"`
+	StpPriority           FlexInt     `json:"stp_priority"`
+	StpVersion            string      `json:"stp_version"`
+	Type                  string      `json:"type"`
+	Version               string      `json:"version"`
+	RequiredVersion       string      `json:"required_version"`
+	SwitchCaps            *SwitchCaps `json:"switch_caps"`
 	HwCaps                FlexInt     `json:"hw_caps"`
 	Unsupported           FlexBool    `json:"unsupported"`
 	UnsupportedReason     FlexInt     `json:"unsupported_reason"`
@@ -97,39 +93,58 @@ type USW struct {
 	GuestNumSta FlexInt `json:"guest-num_sta"`
 }
 
+type SwitchCaps struct {
+	FeatureCaps          FlexInt `json:"feature_caps"`
+	MaxMirrorSessions    FlexInt `json:"max_mirror_sessions"`
+	MaxAggregateSessions FlexInt `json:"max_aggregate_sessions"`
+}
+
+// MacTable is a newer feature on some switched ports.
+type MacTable struct {
+	Age           int64    `json:"age"`
+	Authorized    FlexBool `json:"authorized"`
+	Hostname      string   `json:"hostname"`
+	IP            string   `json:"ip"`
+	LastReachable int64    `json:"lastReachable"`
+	Mac           string   `json:"mac"`
+}
+
 // Port is a physical connection on a USW or UDM.
 type Port struct {
-	AggregatedBy FlexBool `json:"aggregated_by"`
-	Autoneg      FlexBool `json:"autoneg,omitempty"`
-	BytesR       FlexInt  `json:"bytes-r"`
-	DNS          []string `json:"dns,omitempty"`
-	Dot1XMode    string   `json:"dot1x_mode"`
-	Dot1XStatus  string   `json:"dot1x_status"`
-	Enable       FlexBool `json:"enable"`
-	FlowctrlRx   FlexBool `json:"flowctrl_rx"`
-	FlowctrlTx   FlexBool `json:"flowctrl_tx"`
-	FullDuplex   FlexBool `json:"full_duplex"`
-	IP           string   `json:"ip,omitempty"`
-	Ifname       string   `json:"ifname,omitempty"`
-	IsUplink     FlexBool `json:"is_uplink"`
-	Mac          string   `json:"mac,omitempty"`
-	Jumbo        FlexBool `json:"jumbo,omitempty"`
-	Masked       FlexBool `json:"masked"`
-	Media        string   `json:"media"`
-	Name         string   `json:"name"`
-	NetworkName  string   `json:"network_name,omitempty"`
-	NumPort      int      `json:"num_port,omitempty"`
-	OpMode       string   `json:"op_mode"`
-	PoeCaps      FlexInt  `json:"poe_caps"`
-	PoeClass     string   `json:"poe_class,omitempty"`
-	PoeCurrent   FlexInt  `json:"poe_current,omitempty"`
-	PoeEnable    FlexBool `json:"poe_enable,omitempty"`
-	PoeGood      FlexBool `json:"poe_good,omitempty"`
-	PoeMode      string   `json:"poe_mode,omitempty"`
-	PoePower     FlexInt  `json:"poe_power,omitempty"`
-	PoeVoltage   FlexInt  `json:"poe_voltage,omitempty"`
+	AggregatedBy FlexBool   `json:"aggregated_by"`
+	Autoneg      FlexBool   `json:"autoneg,omitempty"`
+	BytesR       FlexInt    `json:"bytes-r"`
+	DNS          []string   `json:"dns,omitempty"`
+	Dot1XMode    string     `json:"dot1x_mode"`
+	Dot1XStatus  string     `json:"dot1x_status"`
+	Enable       FlexBool   `json:"enable"`
+	FlowctrlRx   FlexBool   `json:"flowctrl_rx"`
+	FlowctrlTx   FlexBool   `json:"flowctrl_tx"`
+	FullDuplex   FlexBool   `json:"full_duplex"`
+	IP           string     `json:"ip,omitempty"`
+	Ifname       string     `json:"ifname,omitempty"`
+	IsUplink     FlexBool   `json:"is_uplink"`
+	Mac          string     `json:"mac,omitempty"`
+	MacTable     []MacTable `json:"mac_table,omitempty"`
+	Jumbo        FlexBool   `json:"jumbo,omitempty"`
+	Masked       FlexBool   `json:"masked"`
+	Media        string     `json:"media"`
+	Name         string     `json:"name"`
+	NetworkName  string     `json:"network_name,omitempty"`
+	Netmask      string     `json:"netmask,omitempty"`
+	NumPort      int        `json:"num_port,omitempty"`
+	OpMode       string     `json:"op_mode"`
+	PoeCaps      FlexInt    `json:"poe_caps"`
+	PoeClass     string     `json:"poe_class,omitempty"`
+	PoeCurrent   FlexInt    `json:"poe_current,omitempty"`
+	PoeEnable    FlexBool   `json:"poe_enable,omitempty"`
+	PoeGood      FlexBool   `json:"poe_good,omitempty"`
+	PoeMode      string     `json:"poe_mode,omitempty"`
+	PoePower     FlexInt    `json:"poe_power,omitempty"`
+	PoeVoltage   FlexInt    `json:"poe_voltage,omitempty"`
 	PortDelta    struct {
-		TimeDelta int64 `json:"time_delta"`
+		TimeDelta         int64 `json:"time_delta"`
+		TimeDeltaActivity int64 `json:"time_delta_activity"`
 	} `json:"port_delta,omitempty"`
 	PortIdx      FlexInt  `json:"port_idx"`
 	PortPoe      FlexBool `json:"port_poe"`
@@ -141,6 +156,7 @@ type Port struct {
 	RxErrors     FlexInt  `json:"rx_errors"`
 	RxMulticast  FlexInt  `json:"rx_multicast"`
 	RxPackets    FlexInt  `json:"rx_packets"`
+	RxRate       FlexInt  `json:"rx_rate,omitempty"`
 	Satisfaction FlexInt  `json:"satisfaction,omitempty"`
 	SfpFound     FlexBool `json:"sfp_found,omitempty"`
 	Speed        FlexInt  `json:"speed"`
@@ -154,6 +170,7 @@ type Port struct {
 	TxErrors     FlexInt  `json:"tx_errors"`
 	TxMulticast  FlexInt  `json:"tx_multicast"`
 	TxPackets    FlexInt  `json:"tx_packets"`
+	TxRate       FlexInt  `json:"tx_rate,omitempty"`
 	Type         string   `json:"type,omitempty"`
 	Up           FlexBool `json:"up"`
 }
