@@ -94,7 +94,7 @@ func (s *Server) handleOutput(w http.ResponseWriter, r *http.Request) {
 }
 
 // Returns an input plugin's data: /api/v1/input/{input}.
-func (s *Server) handleInput(w http.ResponseWriter, r *http.Request) {
+func (s *Server) handleInput(w http.ResponseWriter, r *http.Request) { //nolint:cyclop
 	vars := mux.Vars(r)
 
 	c := s.plugins.getInput(vars["input"])

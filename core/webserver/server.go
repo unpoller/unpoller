@@ -2,6 +2,8 @@
 package webserver
 
 import (
+	"errors"
+	"fmt"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -9,7 +11,6 @@ import (
 	"time"
 
 	"github.com/gorilla/mux"
-	"github.com/pkg/errors"
 	"github.com/unifi-poller/poller"
 	"golang.org/x/crypto/bcrypt"
 )
@@ -71,7 +72,7 @@ func (s *Server) Run(c poller.Collect) error {
 	}
 
 	if _, err := os.Stat(s.HTMLPath); err != nil {
-		return errors.Wrap(err, "problem with HTML path")
+		return fmt.Errorf("problem with HTML path: %w", err)
 	}
 
 	UpdateOutput(&Output{Name: PluginName, Config: s.Config})
@@ -98,7 +99,7 @@ func (s *Server) Start() (err error) {
 	}
 
 	if !errors.Is(err, http.ErrServerClosed) {
-		return err
+		return fmt.Errorf("web server: %w", err)
 	}
 
 	return nil
@@ -107,7 +108,7 @@ func (s *Server) Start() (err error) {
 func (s *Server) newRouter() *mux.Router {
 	router := mux.NewRouter()
 	// special routes
-	//router.Handle("/debug/vars", http.DefaultServeMux).Methods("GET")      // unauthenticated expvar
+	// router.Handle("/debug/vars", http.DefaultServeMux).Methods("GET")      // unauthenticated expvar
 	router.HandleFunc("/health", s.handleLog(s.handleHealth)).Methods("GET") // unauthenticated health
 	// main web app/files/js/css
 	router.HandleFunc("/", s.basicAuth(s.handleIndex)).Methods("GET", "POST")

@@ -2,6 +2,7 @@ package webserver
 
 import (
 	"encoding/json"
+	"fmt"
 	"net"
 	"net/http"
 	"time"
@@ -121,7 +122,7 @@ func (w *ResponseWriter) Write(b []byte) (int, error) {
 	size, err := w.Writer.Write(b)
 	w.Size += size
 
-	return size, err
+	return size, fmt.Errorf("writing response: %w", err)
 }
 
 // WriteHeader sends an http StatusCode to a client. Satisfies http.ResponseWriter interface.
