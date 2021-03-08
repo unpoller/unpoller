@@ -29,9 +29,7 @@ const (
 	gauge   = prometheus.GaugeValue
 )
 
-var (
-	errMetricFetchFailed = fmt.Errorf("metric fetch failed")
-)
+var ErrMetricFetchFailed = fmt.Errorf("metric fetch failed")
 
 type promUnifi struct {
 	*Config `json:"prometheus" toml:"prometheus" xml:"prometheus" yaml:"prometheus"`
@@ -52,6 +50,9 @@ type Config struct {
 	// provided string and an underscore ("_").
 	Namespace  string `json:"namespace" toml:"namespace" xml:"namespace" yaml:"namespace"`
 	HTTPListen string `json:"http_listen" toml:"http_listen" xml:"http_listen" yaml:"http_listen"`
+	// If these are provided, the app will attempt to listen with an SSL connection.
+	SSLCrtPath string `json:"ssl_cert_path" toml:"ssl_cert_path" xml:"ssl_cert_path" yaml:"ssl_cert_path"`
+	SSLKeyPath string `json:"ssl_key_path" toml:"ssl_key_path" xml:"ssl_key_path" yaml:"ssl_key_path"`
 	// If true, any error encountered during collection is reported as an
 	// invalid metric (see NewInvalidMetric). Otherwise, errors are ignored
 	// and the collected metrics will be incomplete. Possibly, no metrics
@@ -114,9 +115,9 @@ func (u *promUnifi) Run(c poller.Collect) error {
 		return nil
 	}
 
-	u.Namespace = strings.Trim(strings.Replace(u.Namespace, "-", "_", -1), "_")
+	u.Namespace = strings.Trim(strings.ReplaceAll(u.Namespace, "-", "_"), "_")
 	if u.Namespace == "" {
-		u.Namespace = strings.Replace(poller.AppName, "-", "", -1)
+		u.Namespace = strings.ReplaceAll(poller.AppName, "-", "")
 	}
 
 	if u.HTTPListen == "" {
@@ -138,14 +139,20 @@ func (u *promUnifi) Run(c poller.Collect) error {
 	webserver.UpdateOutput(&webserver.Output{Name: PluginName, Config: u.Config})
 	prometheus.MustRegister(version.NewCollector(u.Namespace))
 	prometheus.MustRegister(u)
-	u.Logf("Prometheus exported at https://%s/ - namespace: %s", u.HTTPListen, u.Namespace)
 	mux.Handle("/metrics", promhttp.HandlerFor(prometheus.DefaultGatherer,
 		promhttp.HandlerOpts{ErrorHandling: promhttp.ContinueOnError},
 	))
 	mux.HandleFunc("/scrape", u.ScrapeHandler)
 	mux.HandleFunc("/", u.DefaultHandler)
 
-	return http.ListenAndServe(u.HTTPListen, mux)
+	switch u.SSLKeyPath == "" && u.SSLCrtPath == "" {
+	case true:
+		u.Logf("Prometheus exported at http://%s/ - namespace: %s", u.HTTPListen, u.Namespace)
+		return http.ListenAndServe(u.HTTPListen, mux)
+	default:
+		u.Logf("Prometheus exported at https://%s/ - namespace: %s", u.HTTPListen, u.Namespace)
+		return http.ListenAndServeTLS(u.HTTPListen, u.SSLCrtPath, u.SSLKeyPath, mux)
+	}
 }
 
 // ScrapeHandler allows prometheus to scrape a single source, instead of all sources.
@@ -234,14 +241,15 @@ func (u *promUnifi) collect(ch chan<- prometheus.Metric, filter *poller.Filter) 
 	r := &Report{
 		Config: u.Config,
 		ch:     make(chan []*metric, u.Config.Buffer),
-		Start:  time.Now()}
+		Start:  time.Now(),
+	}
 	defer r.close()
 
 	r.Metrics, err = u.Collector.Metrics(filter)
 	r.Fetch = time.Since(r.Start)
 
 	if err != nil {
-		r.error(ch, prometheus.NewInvalidDesc(err), errMetricFetchFailed)
+		r.error(ch, prometheus.NewInvalidDesc(err), ErrMetricFetchFailed)
 		u.LogErrorf("metric fetch failed: %v", err)
 
 		return

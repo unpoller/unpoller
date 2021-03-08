@@ -39,8 +39,10 @@ type uclient struct {
 }
 
 func descClient(ns string) *uclient {
-	labels := []string{"name", "mac", "site_name", "gw_name", "sw_name", "vlan",
-		"ip", "oui", "network", "sw_port", "ap_name", "source", "wired"}
+	labels := []string{
+		"name", "mac", "site_name", "gw_name", "sw_name", "vlan",
+		"ip", "oui", "network", "sw_port", "ap_name", "source", "wired",
+	}
 	labelW := append([]string{"radio_name", "radio", "radio_proto", "channel", "essid", "bssid", "radio_desc"}, labels...)
 	labelDPI := []string{"name", "mac", "site_name", "source", "category", "application"}
 
@@ -80,8 +82,10 @@ func (u *promUnifi) exportClientDPI(r report, v interface{}, appTotal, catTotal 
 	}
 
 	for _, dpi := range s.ByApp {
-		labelDPI := []string{s.Name, s.MAC, s.SiteName, s.SourceName,
-			unifi.DPICats.Get(dpi.Cat), unifi.DPIApps.GetApp(dpi.Cat, dpi.App)}
+		labelDPI := []string{
+			s.Name, s.MAC, s.SiteName, s.SourceName,
+			unifi.DPICats.Get(dpi.Cat), unifi.DPIApps.GetApp(dpi.Cat, dpi.App),
+		}
 
 		fillDPIMapTotals(appTotal, labelDPI[5], s.SourceName, s.SiteName, dpi)
 		fillDPIMapTotals(catTotal, labelDPI[4], s.SourceName, s.SiteName, dpi)
@@ -96,10 +100,13 @@ func (u *promUnifi) exportClientDPI(r report, v interface{}, appTotal, catTotal 
 }
 
 func (u *promUnifi) exportClient(r report, c *unifi.Client) {
-	labels := []string{c.Name, c.Mac, c.SiteName, c.GwName, c.SwName, c.Vlan.Txt,
-		c.IP, c.Oui, c.Network, c.SwPort.Txt, c.ApName, c.SourceName, ""}
-	labelW := append([]string{c.RadioName, c.Radio, c.RadioProto, c.Channel.Txt,
-		c.Essid, c.Bssid, c.RadioDescription}, labels...)
+	labels := []string{
+		c.Name, c.Mac, c.SiteName, c.GwName, c.SwName, c.Vlan.Txt,
+		c.IP, c.Oui, c.Network, c.SwPort.Txt, c.ApName, c.SourceName, "",
+	}
+	labelW := append([]string{
+		c.RadioName, c.Radio, c.RadioProto, c.Channel.Txt, c.Essid, c.Bssid, c.RadioDescription,
+	}, labels...)
 
 	if c.IsWired.Val {
 		labels[len(labels)-1] = "true"
