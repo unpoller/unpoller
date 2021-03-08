@@ -14,6 +14,8 @@ var ErrCannotUnmarshalFlexInt = fmt.Errorf("cannot unmarshal to FlexInt")
 // This is a list of unifi API paths.
 // The %s in each string must be replaced with a Site.Name.
 const (
+	// APIRogueAP shows your neighbors' wifis.
+	APIRogueAP string = "/api/s/%s/stat/rogueap"
 	// APIStatusPath shows Controller version.
 	APIStatusPath string = "/status"
 	// APIEventPath contains UniFi Event data.
