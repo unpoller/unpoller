@@ -75,7 +75,13 @@ func descSite(ns string) *site {
 	}
 }
 
-func (u *promUnifi) exportSiteDPI(r report, s *unifi.DPITable) {
+func (u *promUnifi) exportSiteDPI(r report, v interface{}) {
+	s, ok := v.(*unifi.DPITable)
+	if !ok {
+		u.LogErrorf("invalid type given to SiteDPI: %T", v)
+		return
+	}
+
 	for _, dpi := range s.ByApp {
 		labelDPI := []string{unifi.DPICats.Get(dpi.Cat), unifi.DPIApps.GetApp(dpi.Cat, dpi.App), s.SiteName, s.SourceName}
 

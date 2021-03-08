@@ -14,7 +14,11 @@ import (
 	"github.com/prometheus/common/version"
 	"github.com/unifi-poller/poller"
 	"github.com/unifi-poller/unifi"
+	"github.com/unifi-poller/webserver"
 )
+
+// PluginName is the name of this plugin.
+const PluginName = "prometheus"
 
 const (
 	// channel buffer, fits at least one batch.
@@ -25,9 +29,7 @@ const (
 	gauge   = prometheus.GaugeValue
 )
 
-var (
-	errMetricFetchFailed = fmt.Errorf("metric fetch failed")
-)
+var ErrMetricFetchFailed = fmt.Errorf("metric fetch failed")
 
 type promUnifi struct {
 	*Config `json:"prometheus" toml:"prometheus" xml:"prometheus" yaml:"prometheus"`
@@ -48,6 +50,9 @@ type Config struct {
 	// provided string and an underscore ("_").
 	Namespace  string `json:"namespace" toml:"namespace" xml:"namespace" yaml:"namespace"`
 	HTTPListen string `json:"http_listen" toml:"http_listen" xml:"http_listen" yaml:"http_listen"`
+	// If these are provided, the app will attempt to listen with an SSL connection.
+	SSLCrtPath string `json:"ssl_cert_path" toml:"ssl_cert_path" xml:"ssl_cert_path" yaml:"ssl_cert_path"`
+	SSLKeyPath string `json:"ssl_key_path" toml:"ssl_key_path" xml:"ssl_key_path" yaml:"ssl_key_path"`
 	// If true, any error encountered during collection is reported as an
 	// invalid metric (see NewInvalidMetric). Otherwise, errors are ignored
 	// and the collected metrics will be incomplete. Possibly, no metrics
@@ -72,6 +77,10 @@ type Report struct {
 	Total   int             // Total count of metrics recorded.
 	Errors  int             // Total count of errors recording metrics.
 	Zeros   int             // Total count of metrics equal to zero.
+	USG     int             // Total count of USG devices.
+	USW     int             // Total count of USW devices.
+	UAP     int             // Total count of UAP devices.
+	UDM     int             // Total count of UDM devices.
 	Metrics *poller.Metrics // Metrics collected and recorded.
 	Elapsed time.Duration   // Duration elapsed collecting and exporting.
 	Fetch   time.Duration   // Duration elapsed making controller requests.
@@ -92,7 +101,7 @@ func init() { // nolint: gochecknoinits
 	u := &promUnifi{Config: &Config{}}
 
 	poller.NewOutput(&poller.Output{
-		Name:   "prometheus",
+		Name:   PluginName,
 		Config: u,
 		Method: u.Run,
 	})
@@ -101,14 +110,14 @@ func init() { // nolint: gochecknoinits
 // Run creates the collectors and starts the web server up.
 // Should be run in a Go routine. Returns nil if not configured.
 func (u *promUnifi) Run(c poller.Collect) error {
-	if u.Config == nil || u.Disable {
-		c.Logf("Prometheus config missing (or disabled), Prometheus HTTP listener disabled!")
+	if u.Collector = c; u.Config == nil || u.Disable {
+		u.Logf("Prometheus config missing (or disabled), Prometheus HTTP listener disabled!")
 		return nil
 	}
 
-	u.Namespace = strings.Trim(strings.Replace(u.Namespace, "-", "_", -1), "_")
+	u.Namespace = strings.Trim(strings.ReplaceAll(u.Namespace, "-", "_"), "_")
 	if u.Namespace == "" {
-		u.Namespace = strings.Replace(poller.AppName, "-", "", -1)
+		u.Namespace = strings.ReplaceAll(poller.AppName, "-", "")
 	}
 
 	if u.HTTPListen == "" {
@@ -119,8 +128,6 @@ func (u *promUnifi) Run(c poller.Collect) error {
 		u.Buffer = defaultBuffer
 	}
 
-	// Later can pass this in from poller by adding a method to the interface.
-	u.Collector = c
 	u.Client = descClient(u.Namespace + "_client_")
 	u.Device = descDevice(u.Namespace + "_device_") // stats for all device types.
 	u.UAP = descUAP(u.Namespace + "_device_")
@@ -129,16 +136,23 @@ func (u *promUnifi) Run(c poller.Collect) error {
 	u.Site = descSite(u.Namespace + "_site_")
 	mux := http.NewServeMux()
 
+	webserver.UpdateOutput(&webserver.Output{Name: PluginName, Config: u.Config})
 	prometheus.MustRegister(version.NewCollector(u.Namespace))
 	prometheus.MustRegister(u)
-	c.Logf("Prometheus exported at https://%s/ - namespace: %s", u.HTTPListen, u.Namespace)
 	mux.Handle("/metrics", promhttp.HandlerFor(prometheus.DefaultGatherer,
 		promhttp.HandlerOpts{ErrorHandling: promhttp.ContinueOnError},
 	))
 	mux.HandleFunc("/scrape", u.ScrapeHandler)
 	mux.HandleFunc("/", u.DefaultHandler)
 
-	return http.ListenAndServe(u.HTTPListen, mux)
+	switch u.SSLKeyPath == "" && u.SSLCrtPath == "" {
+	case true:
+		u.Logf("Prometheus exported at http://%s/ - namespace: %s", u.HTTPListen, u.Namespace)
+		return http.ListenAndServe(u.HTTPListen, mux)
+	default:
+		u.Logf("Prometheus exported at https://%s/ - namespace: %s", u.HTTPListen, u.Namespace)
+		return http.ListenAndServeTLS(u.HTTPListen, u.SSLCrtPath, u.SSLKeyPath, mux)
+	}
 }
 
 // ScrapeHandler allows prometheus to scrape a single source, instead of all sources.
@@ -153,7 +167,7 @@ func (u *promUnifi) ScrapeHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if pathOld := r.URL.Query().Get("path"); pathOld != "" {
-		u.Collector.LogErrorf("deprecated 'path' parameter used; update your config to use 'target'")
+		u.LogErrorf("deprecated 'path' parameter used; update your config to use 'target'")
 
 		if t.Path == "" {
 			t.Path = pathOld
@@ -161,7 +175,7 @@ func (u *promUnifi) ScrapeHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if roleOld := r.URL.Query().Get("role"); roleOld != "" {
-		u.Collector.LogErrorf("deprecated 'role' parameter used; update your config to use 'target'")
+		u.LogErrorf("deprecated 'role' parameter used; update your config to use 'target'")
 
 		if t.Path == "" {
 			t.Path = roleOld
@@ -169,7 +183,7 @@ func (u *promUnifi) ScrapeHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if t.Path == "" {
-		u.Collector.LogErrorf("'target' parameter missing on scrape from %v", r.RemoteAddr)
+		u.LogErrorf("'target' parameter missing on scrape from %v", r.RemoteAddr)
 		http.Error(w, "'target' parameter must be specified: configured OR unconfigured url", 400)
 
 		return
@@ -227,25 +241,18 @@ func (u *promUnifi) collect(ch chan<- prometheus.Metric, filter *poller.Filter) 
 	r := &Report{
 		Config: u.Config,
 		ch:     make(chan []*metric, u.Config.Buffer),
-		Start:  time.Now()}
+		Start:  time.Now(),
+	}
 	defer r.close()
 
-	ok := false
-
-	r.Metrics, ok, err = u.Collector.MetricsFrom(filter)
+	r.Metrics, err = u.Collector.Metrics(filter)
 	r.Fetch = time.Since(r.Start)
 
 	if err != nil {
-		r.error(ch, prometheus.NewInvalidDesc(err), errMetricFetchFailed)
-		u.Collector.LogErrorf("metric fetch failed: %v", err)
+		r.error(ch, prometheus.NewInvalidDesc(err), ErrMetricFetchFailed)
+		u.LogErrorf("metric fetch failed: %v", err)
 
-		if !ok {
-			return
-		}
-	}
-
-	if r.Metrics.Devices == nil {
-		r.Metrics.Devices = &unifi.Devices{}
+		return
 	}
 
 	// Pass Report interface into our collecting and reporting methods.
@@ -258,7 +265,7 @@ func (u *promUnifi) collect(ch chan<- prometheus.Metric, filter *poller.Filter) 
 // This is where our channels connects to the prometheus channel.
 func (u *promUnifi) exportMetrics(r report, ch chan<- prometheus.Metric, ourChan chan []*metric) {
 	descs := make(map[*prometheus.Desc]bool) // used as a counter
-	defer r.report(u.Collector, descs)
+	defer r.report(u, descs)
 
 	for newMetrics := range ourChan {
 		for _, m := range newMetrics {
@@ -286,7 +293,7 @@ func (u *promUnifi) loopExports(r report) {
 	m := r.metrics()
 
 	for _, s := range m.Sites {
-		u.exportSite(r, s)
+		u.switchExport(r, s)
 	}
 
 	for _, s := range m.SitesDPI {
@@ -294,7 +301,11 @@ func (u *promUnifi) loopExports(r report) {
 	}
 
 	for _, c := range m.Clients {
-		u.exportClient(r, c)
+		u.switchExport(r, c)
+	}
+
+	for _, d := range m.Devices {
+		u.switchExport(r, d)
 	}
 
 	appTotal := make(totalsDPImap)
@@ -305,20 +316,27 @@ func (u *promUnifi) loopExports(r report) {
 	}
 
 	u.exportClientDPItotals(r, appTotal, catTotal)
+}
 
-	for _, d := range m.UAPs {
-		u.exportUAP(r, d)
-	}
-
-	for _, d := range m.UDMs {
-		u.exportUDM(r, d)
-	}
-
-	for _, d := range m.USGs {
-		u.exportUSG(r, d)
-	}
-
-	for _, d := range m.USWs {
-		u.exportUSW(r, d)
+func (u *promUnifi) switchExport(r report, v interface{}) {
+	switch v := v.(type) {
+	case *unifi.UAP:
+		r.addUAP()
+		u.exportUAP(r, v)
+	case *unifi.USW:
+		r.addUSW()
+		u.exportUSW(r, v)
+	case *unifi.USG:
+		r.addUSG()
+		u.exportUSG(r, v)
+	case *unifi.UDM:
+		r.addUDM()
+		u.exportUDM(r, v)
+	case *unifi.Site:
+		u.exportSite(r, v)
+	case *unifi.Client:
+		u.exportClient(r, v)
+	default:
+		u.LogErrorf("invalid type: %T", v)
 	}
 }

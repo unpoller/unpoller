@@ -161,8 +161,10 @@ func (u *promUnifi) exportPRTtable(r report, labels []string, pt []unifi.Port) {
 		}
 
 		// Copy labels, and add four new ones.
-		labelP := []string{labels[2] + " Port " + p.PortIdx.Txt, p.PortIdx.Txt,
-			p.Name, p.Mac, p.IP, labels[1], labels[2], labels[3]}
+		labelP := []string{
+			labels[2] + " Port " + p.PortIdx.Txt, p.PortIdx.Txt,
+			p.Name, p.Mac, p.IP, labels[1], labels[2], labels[3],
+		}
 
 		if p.PoeEnable.Val && p.PortPoe.Val {
 			r.send([]*metric{
