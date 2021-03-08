@@ -25,9 +25,80 @@ func (u *Unifi) GetDevices(sites []*Site) (*Devices, error) {
 		devices.USGs = append(devices.USGs, loopDevices.USGs...)
 		devices.USWs = append(devices.USWs, loopDevices.USWs...)
 		devices.UDMs = append(devices.UDMs, loopDevices.UDMs...)
+		devices.UXGs = append(devices.UXGs, loopDevices.UXGs...)
 	}
 
 	return devices, nil
+}
+
+// GetUSWs returns all switches, an error, or nil if there are no switches.
+func (u *Unifi) GetUSWs(siteName string) ([]*USW, error) {
+	var response struct {
+		Data []json.RawMessage `json:"data"`
+	}
+
+	err := u.GetData(fmt.Sprintf(APIDevicePath, siteName), &response)
+	if err != nil {
+		return nil, err
+	}
+
+	return u.parseDevices(response.Data, siteName).USWs, nil
+}
+
+// GetUSWs returns all access points, an error, or nil if there are no APs.
+func (u *Unifi) GetUAPs(siteName string) ([]*UAP, error) {
+	var response struct {
+		Data []json.RawMessage `json:"data"`
+	}
+
+	err := u.GetData(fmt.Sprintf(APIDevicePath, siteName), &response)
+	if err != nil {
+		return nil, err
+	}
+
+	return u.parseDevices(response.Data, siteName).UAPs, nil
+}
+
+// GetUSWs returns all dream machines, an error, or nil if there are no UDMs.
+func (u *Unifi) GetUDMs(siteName string) ([]*UDM, error) {
+	var response struct {
+		Data []json.RawMessage `json:"data"`
+	}
+
+	err := u.GetData(fmt.Sprintf(APIDevicePath, siteName), &response)
+	if err != nil {
+		return nil, err
+	}
+
+	return u.parseDevices(response.Data, siteName).UDMs, nil
+}
+
+// GetUSWs returns all 10Gb gateways, an error, or nil if there are no UXGs.
+func (u *Unifi) GetUXGs(siteName string) ([]*UXG, error) {
+	var response struct {
+		Data []json.RawMessage `json:"data"`
+	}
+
+	err := u.GetData(fmt.Sprintf(APIDevicePath, siteName), &response)
+	if err != nil {
+		return nil, err
+	}
+
+	return u.parseDevices(response.Data, siteName).UXGs, nil
+}
+
+// GetUSWs returns all 1Gb gateways, an error, or nil if there are no USGs.
+func (u *Unifi) GetUSGs(siteName string) ([]*USG, error) {
+	var response struct {
+		Data []json.RawMessage `json:"data"`
+	}
+
+	err := u.GetData(fmt.Sprintf(APIDevicePath, siteName), &response)
+	if err != nil {
+		return nil, err
+	}
+
+	return u.parseDevices(response.Data, siteName).USGs, nil
 }
 
 // parseDevices parses the raw JSON from the Unifi Controller into device structures.
@@ -69,6 +140,7 @@ func (u *Unifi) unmarshallUAP(siteName string, payload json.RawMessage, devices 
 	dev := &UAP{SiteName: siteName, SourceName: u.URL}
 	if u.unmarshalDevice("uap", payload, dev) == nil {
 		dev.Name = strings.TrimSpace(pick(dev.Name, dev.Mac))
+		dev.controller = u
 		devices.UAPs = append(devices.UAPs, dev)
 	}
 }
@@ -77,6 +149,7 @@ func (u *Unifi) unmarshallUSG(siteName string, payload json.RawMessage, devices 
 	dev := &USG{SiteName: siteName, SourceName: u.URL}
 	if u.unmarshalDevice("ugw", payload, dev) == nil {
 		dev.Name = strings.TrimSpace(pick(dev.Name, dev.Mac))
+		dev.controller = u
 		devices.USGs = append(devices.USGs, dev)
 	}
 }
@@ -85,6 +158,7 @@ func (u *Unifi) unmarshallUSW(siteName string, payload json.RawMessage, devices 
 	dev := &USW{SiteName: siteName, SourceName: u.URL}
 	if u.unmarshalDevice("usw", payload, dev) == nil {
 		dev.Name = strings.TrimSpace(pick(dev.Name, dev.Mac))
+		dev.controller = u
 		devices.USWs = append(devices.USWs, dev)
 	}
 }
@@ -93,6 +167,7 @@ func (u *Unifi) unmarshallUXG(siteName string, payload json.RawMessage, devices 
 	dev := &UXG{SiteName: siteName, SourceName: u.URL}
 	if u.unmarshalDevice("uxg", payload, dev) == nil {
 		dev.Name = strings.TrimSpace(pick(dev.Name, dev.Mac))
+		dev.controller = u
 		devices.UXGs = append(devices.UXGs, dev)
 	}
 }
@@ -101,6 +176,7 @@ func (u *Unifi) unmarshallUDM(siteName string, payload json.RawMessage, devices 
 	dev := &UDM{SiteName: siteName, SourceName: u.URL}
 	if u.unmarshalDevice("udm", payload, dev) == nil {
 		dev.Name = strings.TrimSpace(pick(dev.Name, dev.Mac))
+		dev.controller = u
 		devices.UDMs = append(devices.UDMs, dev)
 	}
 }

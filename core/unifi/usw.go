@@ -7,6 +7,7 @@ import (
 
 // USW represents all the data from the Ubiquiti Controller for a Unifi Switch.
 type USW struct {
+	controller           *Unifi
 	SourceName           string           `json:"-"`
 	SiteName             string           `json:"-"`
 	ID                   string           `json:"_id"`
