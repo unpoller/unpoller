@@ -5,7 +5,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/unifi-poller/poller/pkg/poller"
+	"github.com/unifi-poller/poller"
 	"github.com/unifi-poller/unifi"
 )
 

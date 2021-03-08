@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/unifi-poller/poller/pkg/webserver"
+	"github.com/unifi-poller/webserver"
 )
 
 // Logf logs a message.

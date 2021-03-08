@@ -3,13 +3,12 @@ package lokiunifi
 import (
 	"fmt"
 	"io/ioutil"
-	"reflect"
 	"strconv"
 	"strings"
 	"time"
 
-	"github.com/unifi-poller/poller/pkg/poller"
-	"github.com/unifi-poller/poller/pkg/webserver"
+	"github.com/unifi-poller/poller"
+	"github.com/unifi-poller/webserver"
 	"golift.io/cnfg"
 )
 
@@ -57,7 +56,6 @@ func init() { // nolint: gochecknoinits
 
 	poller.NewOutput(&poller.Output{
 		Name:   PluginName,
-		Path:   reflect.TypeOf(Config{}).PkgPath(),
 		Config: l,
 		Method: l.Run,
 	})
