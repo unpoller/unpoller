@@ -12,7 +12,6 @@ import (
 	"time"
 
 	influx "github.com/influxdata/influxdb1-client/v2"
-	"github.com/pkg/errors"
 	"github.com/unifi-poller/poller"
 	"github.com/unifi-poller/unifi"
 	"github.com/unifi-poller/webserver"
@@ -190,7 +189,7 @@ func (u *InfluxUnifi) ReportMetrics(m *poller.Metrics, e *poller.Events) (*Repor
 	r.bp, err = influx.NewBatchPoints(influx.BatchPointsConfig{Database: u.DB})
 
 	if err != nil {
-		return nil, errors.Wrap(err, "influx.NewBatchPoint")
+		return nil, fmt.Errorf("influx.NewBatchPoint: %w", err)
 	}
 
 	go u.collect(r, r.ch)
@@ -200,7 +199,7 @@ func (u *InfluxUnifi) ReportMetrics(m *poller.Metrics, e *poller.Events) (*Repor
 
 	// Send all the points.
 	if err = u.influx.Write(r.bp); err != nil {
-		return nil, errors.Wrap(err, "influxdb.Write(points)")
+		return nil, fmt.Errorf("influxdb.Write(points): %w", err)
 	}
 
 	r.Elapsed = time.Since(r.Start)
