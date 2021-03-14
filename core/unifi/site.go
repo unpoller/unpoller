@@ -20,6 +20,8 @@ func (u *Unifi) GetSites() ([]*Site, error) {
 	sites := []string{} // used for debug log only
 
 	for i, d := range response.Data {
+		// Add the unifi struct to the site.
+		response.Data[i].controller = u
 		// Add special SourceName value.
 		response.Data[i].SourceName = u.URL
 		// If the human name is missing (description), set it to the cryptic name.
@@ -67,6 +69,7 @@ func (u *Unifi) GetSiteDPI(sites []*Site) ([]*DPITable, error) {
 
 // Site represents a site's data.
 type Site struct {
+	controller   *Unifi
 	SourceName   string   `json:"-"`
 	ID           string   `json:"_id"`
 	Name         string   `json:"name"`

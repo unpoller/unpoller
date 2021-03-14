@@ -3,6 +3,7 @@ package unifi
 // UXG represents all the data from the Ubiquiti Controller for a UniFi 10Gb Gateway.
 // The UDM shares several structs/type-data with USW and USG.
 type UXG struct {
+	site                       *Site
 	controller                 *Unifi
 	SourceName                 string                  `json:"-"`
 	SiteName                   string                  `json:"-"`

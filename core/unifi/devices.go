@@ -20,7 +20,7 @@ func (u *Unifi) GetDevices(sites []*Site) (*Devices, error) {
 			return nil, err
 		}
 
-		loopDevices := u.parseDevices(response.Data, site.SiteName)
+		loopDevices := u.parseDevices(response.Data, site)
 		devices.UAPs = append(devices.UAPs, loopDevices.UAPs...)
 		devices.USGs = append(devices.USGs, loopDevices.USGs...)
 		devices.USWs = append(devices.USWs, loopDevices.USWs...)
@@ -32,77 +32,77 @@ func (u *Unifi) GetDevices(sites []*Site) (*Devices, error) {
 }
 
 // GetUSWs returns all switches, an error, or nil if there are no switches.
-func (u *Unifi) GetUSWs(siteName string) ([]*USW, error) {
+func (u *Unifi) GetUSWs(site *Site) ([]*USW, error) {
 	var response struct {
 		Data []json.RawMessage `json:"data"`
 	}
 
-	err := u.GetData(fmt.Sprintf(APIDevicePath, siteName), &response)
+	err := u.GetData(fmt.Sprintf(APIDevicePath, site.Name), &response)
 	if err != nil {
 		return nil, err
 	}
 
-	return u.parseDevices(response.Data, siteName).USWs, nil
+	return u.parseDevices(response.Data, site).USWs, nil
 }
 
 // GetUSWs returns all access points, an error, or nil if there are no APs.
-func (u *Unifi) GetUAPs(siteName string) ([]*UAP, error) {
+func (u *Unifi) GetUAPs(site *Site) ([]*UAP, error) {
 	var response struct {
 		Data []json.RawMessage `json:"data"`
 	}
 
-	err := u.GetData(fmt.Sprintf(APIDevicePath, siteName), &response)
+	err := u.GetData(fmt.Sprintf(APIDevicePath, site.Name), &response)
 	if err != nil {
 		return nil, err
 	}
 
-	return u.parseDevices(response.Data, siteName).UAPs, nil
+	return u.parseDevices(response.Data, site).UAPs, nil
 }
 
 // GetUSWs returns all dream machines, an error, or nil if there are no UDMs.
-func (u *Unifi) GetUDMs(siteName string) ([]*UDM, error) {
+func (u *Unifi) GetUDMs(site *Site) ([]*UDM, error) {
 	var response struct {
 		Data []json.RawMessage `json:"data"`
 	}
 
-	err := u.GetData(fmt.Sprintf(APIDevicePath, siteName), &response)
+	err := u.GetData(fmt.Sprintf(APIDevicePath, site.Name), &response)
 	if err != nil {
 		return nil, err
 	}
 
-	return u.parseDevices(response.Data, siteName).UDMs, nil
+	return u.parseDevices(response.Data, site).UDMs, nil
 }
 
 // GetUSWs returns all 10Gb gateways, an error, or nil if there are no UXGs.
-func (u *Unifi) GetUXGs(siteName string) ([]*UXG, error) {
+func (u *Unifi) GetUXGs(site *Site) ([]*UXG, error) {
 	var response struct {
 		Data []json.RawMessage `json:"data"`
 	}
 
-	err := u.GetData(fmt.Sprintf(APIDevicePath, siteName), &response)
+	err := u.GetData(fmt.Sprintf(APIDevicePath, site.Name), &response)
 	if err != nil {
 		return nil, err
 	}
 
-	return u.parseDevices(response.Data, siteName).UXGs, nil
+	return u.parseDevices(response.Data, site).UXGs, nil
 }
 
 // GetUSWs returns all 1Gb gateways, an error, or nil if there are no USGs.
-func (u *Unifi) GetUSGs(siteName string) ([]*USG, error) {
+func (u *Unifi) GetUSGs(site *Site) ([]*USG, error) {
 	var response struct {
 		Data []json.RawMessage `json:"data"`
 	}
 
-	err := u.GetData(fmt.Sprintf(APIDevicePath, siteName), &response)
+	err := u.GetData(fmt.Sprintf(APIDevicePath, site.Name), &response)
 	if err != nil {
 		return nil, err
 	}
 
-	return u.parseDevices(response.Data, siteName).USGs, nil
+	return u.parseDevices(response.Data, site).USGs, nil
 }
 
 // parseDevices parses the raw JSON from the Unifi Controller into device structures.
-func (u *Unifi) parseDevices(data []json.RawMessage, siteName string) *Devices {
+func (u *Unifi) parseDevices(data []json.RawMessage, site *Site) *Devices {
 	devices := new(Devices)
 
 	for _, r := range data {
@@ -114,20 +114,20 @@ func (u *Unifi) parseDevices(data []json.RawMessage, siteName string) *Devices {
 		}
 
 		assetType, _ := o["type"].(string)
-		u.DebugLog("Unmarshalling Device Type: %v, site %s ", assetType, siteName)
+		u.DebugLog("Unmarshalling Device Type: %v, site %s ", assetType, site.Name)
 		// Choose which type to unmarshal into based on the "type" json key.
 
 		switch assetType { // Unmarshal again into the correct type..
 		case "uap":
-			u.unmarshallUAP(siteName, r, devices)
+			u.unmarshallUAP(site, r, devices)
 		case "ugw", "usg": // in case they ever fix the name in the api.
-			u.unmarshallUSG(siteName, r, devices)
+			u.unmarshallUSG(site, r, devices)
 		case "usw":
-			u.unmarshallUSW(siteName, r, devices)
+			u.unmarshallUSW(site, r, devices)
 		case "udm":
-			u.unmarshallUDM(siteName, r, devices)
+			u.unmarshallUDM(site, r, devices)
 		case "uxg":
-			u.unmarshallUXG(siteName, r, devices)
+			u.unmarshallUXG(site, r, devices)
 		default:
 			u.ErrorLog("unknown asset type - %v - skipping", assetType)
 		}
@@ -136,47 +136,52 @@ func (u *Unifi) parseDevices(data []json.RawMessage, siteName string) *Devices {
 	return devices
 }
 
-func (u *Unifi) unmarshallUAP(siteName string, payload json.RawMessage, devices *Devices) {
-	dev := &UAP{SiteName: siteName, SourceName: u.URL}
+func (u *Unifi) unmarshallUAP(site *Site, payload json.RawMessage, devices *Devices) {
+	dev := &UAP{SiteName: site.Name, SourceName: u.URL}
 	if u.unmarshalDevice("uap", payload, dev) == nil {
 		dev.Name = strings.TrimSpace(pick(dev.Name, dev.Mac))
 		dev.controller = u
+		dev.site = site
 		devices.UAPs = append(devices.UAPs, dev)
 	}
 }
 
-func (u *Unifi) unmarshallUSG(siteName string, payload json.RawMessage, devices *Devices) {
-	dev := &USG{SiteName: siteName, SourceName: u.URL}
+func (u *Unifi) unmarshallUSG(site *Site, payload json.RawMessage, devices *Devices) {
+	dev := &USG{SiteName: site.Name, SourceName: u.URL}
 	if u.unmarshalDevice("ugw", payload, dev) == nil {
 		dev.Name = strings.TrimSpace(pick(dev.Name, dev.Mac))
 		dev.controller = u
+		dev.site = site
 		devices.USGs = append(devices.USGs, dev)
 	}
 }
 
-func (u *Unifi) unmarshallUSW(siteName string, payload json.RawMessage, devices *Devices) {
-	dev := &USW{SiteName: siteName, SourceName: u.URL}
+func (u *Unifi) unmarshallUSW(site *Site, payload json.RawMessage, devices *Devices) {
+	dev := &USW{SiteName: site.Name, SourceName: u.URL}
 	if u.unmarshalDevice("usw", payload, dev) == nil {
 		dev.Name = strings.TrimSpace(pick(dev.Name, dev.Mac))
 		dev.controller = u
+		dev.site = site
 		devices.USWs = append(devices.USWs, dev)
 	}
 }
 
-func (u *Unifi) unmarshallUXG(siteName string, payload json.RawMessage, devices *Devices) {
-	dev := &UXG{SiteName: siteName, SourceName: u.URL}
+func (u *Unifi) unmarshallUXG(site *Site, payload json.RawMessage, devices *Devices) {
+	dev := &UXG{SiteName: site.Name, SourceName: u.URL}
 	if u.unmarshalDevice("uxg", payload, dev) == nil {
 		dev.Name = strings.TrimSpace(pick(dev.Name, dev.Mac))
 		dev.controller = u
+		dev.site = site
 		devices.UXGs = append(devices.UXGs, dev)
 	}
 }
 
-func (u *Unifi) unmarshallUDM(siteName string, payload json.RawMessage, devices *Devices) {
-	dev := &UDM{SiteName: siteName, SourceName: u.URL}
+func (u *Unifi) unmarshallUDM(site *Site, payload json.RawMessage, devices *Devices) {
+	dev := &UDM{SiteName: site.Name, SourceName: u.URL}
 	if u.unmarshalDevice("udm", payload, dev) == nil {
 		dev.Name = strings.TrimSpace(pick(dev.Name, dev.Mac))
 		dev.controller = u
+		dev.site = site
 		devices.UDMs = append(devices.UDMs, dev)
 	}
 }
