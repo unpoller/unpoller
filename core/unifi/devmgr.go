@@ -291,7 +291,7 @@ func (s *Site) SpeedTest() error {
 }
 
 // SpeedTestStatus returns the raw response for the status of a speed test.
-// TODO: marshal the response into a data structure. This method will change!
+// XXX: marshal the response into a data structure. This method will change!
 func (s *Site) SpeedTestStatus() ([]byte, error) {
 	body, err := s.devMgrCommandReply(&devMgrCmd{Cmd: DevMgrSpeedTestStatus})
 	// marshal into struct here.
