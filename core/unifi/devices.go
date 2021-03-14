@@ -140,7 +140,6 @@ func (u *Unifi) unmarshallUAP(site *Site, payload json.RawMessage, devices *Devi
 	dev := &UAP{SiteName: site.Name, SourceName: u.URL}
 	if u.unmarshalDevice("uap", payload, dev) == nil {
 		dev.Name = strings.TrimSpace(pick(dev.Name, dev.Mac))
-		dev.controller = u
 		dev.site = site
 		devices.UAPs = append(devices.UAPs, dev)
 	}
@@ -150,7 +149,6 @@ func (u *Unifi) unmarshallUSG(site *Site, payload json.RawMessage, devices *Devi
 	dev := &USG{SiteName: site.Name, SourceName: u.URL}
 	if u.unmarshalDevice("ugw", payload, dev) == nil {
 		dev.Name = strings.TrimSpace(pick(dev.Name, dev.Mac))
-		dev.controller = u
 		dev.site = site
 		devices.USGs = append(devices.USGs, dev)
 	}
@@ -160,7 +158,6 @@ func (u *Unifi) unmarshallUSW(site *Site, payload json.RawMessage, devices *Devi
 	dev := &USW{SiteName: site.Name, SourceName: u.URL}
 	if u.unmarshalDevice("usw", payload, dev) == nil {
 		dev.Name = strings.TrimSpace(pick(dev.Name, dev.Mac))
-		dev.controller = u
 		dev.site = site
 		devices.USWs = append(devices.USWs, dev)
 	}
@@ -170,7 +167,6 @@ func (u *Unifi) unmarshallUXG(site *Site, payload json.RawMessage, devices *Devi
 	dev := &UXG{SiteName: site.Name, SourceName: u.URL}
 	if u.unmarshalDevice("uxg", payload, dev) == nil {
 		dev.Name = strings.TrimSpace(pick(dev.Name, dev.Mac))
-		dev.controller = u
 		dev.site = site
 		devices.UXGs = append(devices.UXGs, dev)
 	}
@@ -180,7 +176,6 @@ func (u *Unifi) unmarshallUDM(site *Site, payload json.RawMessage, devices *Devi
 	dev := &UDM{SiteName: site.Name, SourceName: u.URL}
 	if u.unmarshalDevice("udm", payload, dev) == nil {
 		dev.Name = strings.TrimSpace(pick(dev.Name, dev.Mac))
-		dev.controller = u
 		dev.site = site
 		devices.UDMs = append(devices.UDMs, dev)
 	}

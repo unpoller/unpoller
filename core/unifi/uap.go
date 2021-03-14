@@ -9,7 +9,6 @@ import (
 // This was auto generated then edited by hand to get all the data types right.
 type UAP struct {
 	site         *Site
-	controller   *Unifi
 	SourceName   string   `json:"-"`
 	ID           string   `json:"_id"`
 	Adopted      FlexBool `json:"adopted"`

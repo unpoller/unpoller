@@ -4,7 +4,6 @@ package unifi
 // The UDM shares several structs/type-data with USW and USG.
 type UXG struct {
 	site                       *Site
-	controller                 *Unifi
 	SourceName                 string                  `json:"-"`
 	SiteName                   string                  `json:"-"`
 	ID                         string                  `json:"_id"`
