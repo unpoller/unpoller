@@ -5,7 +5,7 @@ import (
 	"fmt"
 )
 
-// Known commands that can be sent to device manager.
+// Known commands that can be sent to device manager. All of these are implemented.
 //nolint:lll // https://ubntwiki.com/products/software/unifi-controller/api#callable
 const (
 	DevMgrPowerCycle      = "power-cycle"      // mac = switch mac (required), port_idx = PoE port to cycle (required)
@@ -25,11 +25,11 @@ const (
 
 // devMgrCmd is the type marshalled and sent to APIDevMgrPath.
 type devMgrCmd struct {
-	Cmd    string `json:"cmd"`
-	Mac    string `json:"mac"`
-	URL    string `json:"url,omitempty"`
-	Inform string `json:"inform_url,omitempty"`
-	Port   int    `json:"port_idx,omitempty"`
+	Cmd    string `json:"cmd"`                  // Required.
+	Mac    string `json:"mac"`                  // Device MAC (required for most, but not all).
+	URL    string `json:"url,omitempty"`        // External Upgrade only.
+	Inform string `json:"inform_url,omitempty"` // Migration only.
+	Port   int    `json:"port_idx,omitempty"`   // Power Cycle only.
 }
 
 // devMgrCommandReply is for commands with a return value.
@@ -189,7 +189,7 @@ func (u *UXG) Provision() error {
 }
 
 // Upgrade starts a firmware upgrade on a device by MAC address on your site.
-// URL is optional. If provided an external upgrade is performed.
+// URL is optional. If URL is not "" an external upgrade is performed.
 func (s *Site) Upgrade(mac string, url string) error {
 	if url == "" {
 		return s.devMgrCommandSimple(&devMgrCmd{Cmd: DevMgrUpgrade, Mac: mac})
@@ -199,31 +199,31 @@ func (s *Site) Upgrade(mac string, url string) error {
 }
 
 // Upgrade firmware on an access point.
-// URL is optional. If provided an external upgrade is performed.
+// URL is optional. If URL is not "" an external upgrade is performed.
 func (u *UAP) Upgrade(url string) error {
 	return u.site.Upgrade(u.Mac, url)
 }
 
 // Upgrade firmware on a switch.
-// URL is optional. If provided an external upgrade is performed.
+// URL is optional. If URL is not "" an external upgrade is performed.
 func (u *USW) Upgrade(url string) error {
 	return u.site.Upgrade(u.Mac, url)
 }
 
 // Upgrade firmware on a security gateway.
-// URL is optional. If provided an external upgrade is performed.
+// URL is optional. If URL is not "" an external upgrade is performed.
 func (u *USG) Upgrade(url string) error {
 	return u.site.Upgrade(u.Mac, url)
 }
 
 // Upgrade firmware on a dream machine.
-// URL is optional. If provided an external upgrade is performed.
+// URL is optional. If URL is not "" an external upgrade is performed.
 func (u *UDM) Upgrade(url string) error {
 	return u.site.Upgrade(u.Mac, url)
 }
 
 // Upgrade formware on a 10Gb security gateway.
-// URL is optional. If provided an external upgrade is performed.
+// URL is optional. If URL is not "" an external upgrade is performed.
 func (u *UXG) Upgrade(url string) error {
 	return u.site.Upgrade(u.Mac, url)
 }
@@ -249,24 +249,34 @@ func (u *USG) Migrate(url string) error {
 	return u.site.Migrate(u.Mac, url)
 }
 
+// Migrate sends a 10Gb gateway to another controller's URL.
+func (u *UXG) Migrate(url string) error {
+	return u.site.Migrate(u.Mac, url)
+}
+
 // CancelMigrate stops a migration in progress.
 // Probably does not work on devices with built-in controllers like UDM & UXG.
 func (s *Site) CancelMigrate(mac string) error {
 	return s.devMgrCommandSimple(&devMgrCmd{Cmd: DevMgrCancelMigrate, Mac: mac})
 }
 
-// CancelMigrate stops a migration in progress.
+// CancelMigrate stops an access point migration in progress.
 func (u *UAP) CancelMigrate() error {
 	return u.site.CancelMigrate(u.Mac)
 }
 
-// CancelMigrate stops a migration in progress.
+// CancelMigrate stops a switch migration in progress.
 func (u *USW) CancelMigrate() error {
 	return u.site.CancelMigrate(u.Mac)
 }
 
-// CancelMigrate stops a migration in progress.
+// CancelMigrate stops a security gateway migration in progress.
 func (u *USG) CancelMigrate() error {
+	return u.site.CancelMigrate(u.Mac)
+}
+
+// CancelMigrate stops 10Gb gateway a migration in progress.
+func (u *UXG) CancelMigrate() error {
 	return u.site.CancelMigrate(u.Mac)
 }
 
