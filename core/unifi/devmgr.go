@@ -82,22 +82,27 @@ func (s *Site) Restart(mac string) error {
 	return nil
 }
 
+// Restart an access point.
 func (u *UAP) Restart() error {
 	return u.site.Restart(u.Mac)
 }
 
+// Restart a switch.
 func (u *USW) Restart() error {
 	return u.site.Restart(u.Mac)
 }
 
+// Restart a security gateway.
 func (u *USG) Restart() error {
 	return u.site.Restart(u.Mac)
 }
 
+// Restart a dream machine.
 func (u *UDM) Restart() error {
 	return u.site.Restart(u.Mac)
 }
 
+// Restart a 10Gb security gateway.
 func (u *UXG) Restart() error {
 	return u.site.Restart(u.Mac)
 }
@@ -133,6 +138,7 @@ func (s *Site) SpeedTest() error {
 }
 
 // SpeedTestStatus returns the raw response for the status of a speed test.
+// TODO: marshal the response into a data structure. This method will change!
 func (s *Site) SpeedTestStatus() ([]byte, error) {
 	data, err := json.Marshal(&devMgrCommand{Command: DevMgrSpeedTestStatus})
 	if err != nil {
