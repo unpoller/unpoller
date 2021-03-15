@@ -1,6 +1,9 @@
 package influxunifi
 
 import (
+	"strconv"
+	"strings"
+
 	"github.com/unifi-poller/unifi"
 )
 
@@ -22,7 +25,7 @@ func Combine(in ...map[string]interface{}) map[string]interface{} {
 
 // batchSysStats is used by all device types.
 func (u *InfluxUnifi) batchSysStats(s unifi.SysStats, ss unifi.SystemStats) map[string]interface{} {
-	return map[string]interface{}{
+	m := map[string]interface{}{
 		"loadavg_1":     s.Loadavg1.Val,
 		"loadavg_5":     s.Loadavg5.Val,
 		"loadavg_15":    s.Loadavg15.Val,
@@ -33,6 +36,17 @@ func (u *InfluxUnifi) batchSysStats(s unifi.SysStats, ss unifi.SystemStats) map[
 		"mem":           ss.Mem.Val,
 		"system_uptime": ss.Uptime.Val,
 	}
+
+	for k, v := range ss.Temps {
+		temp, _ := strconv.Atoi(strings.Split(v, " ")[0])
+		k = strings.ReplaceAll(strings.ReplaceAll(strings.ReplaceAll(k, " ", "_"), ")", ""), "(", "")
+
+		if temp != 0 && k != "" {
+			m["temp_"+strings.ToLower(k)] = temp
+		}
+	}
+
+	return m
 }
 
 func (u *InfluxUnifi) batchUDMtemps(temps []unifi.Temperature) map[string]interface{} {
