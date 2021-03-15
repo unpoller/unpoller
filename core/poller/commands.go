@@ -43,7 +43,7 @@ func (u *UnifiPoller) PrintPasswordHash() (err error) {
 
 		pwd, err = terminal.ReadPassword(int(os.Stdin.Fd()))
 		if err != nil {
-			return err
+			return fmt.Errorf("reading stdin: %w", err)
 		}
 
 		fmt.Println() // print a newline.
@@ -52,5 +52,5 @@ func (u *UnifiPoller) PrintPasswordHash() (err error) {
 	hash, err := bcrypt.GenerateFromPassword(pwd, bcrypt.MinCost)
 	fmt.Println(string(hash))
 
-	return err
+	return err //nolint:wrapcheck
 }

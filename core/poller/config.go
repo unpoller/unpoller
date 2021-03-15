@@ -1,6 +1,7 @@
 package poller
 
 import (
+	"fmt"
 	"os"
 	"path"
 	"plugin"
@@ -42,6 +43,7 @@ type Metrics struct {
 	SitesDPI   []interface{}
 	ClientsDPI []interface{}
 	Devices    []interface{}
+	RogueAPs   []interface{}
 }
 
 // Events defines the type for log entries.
@@ -78,7 +80,7 @@ func (u *UnifiPoller) LoadPlugins() error {
 		u.Logf("Loading Dynamic Plugin: %s", name)
 
 		if _, err := plugin.Open(name); err != nil {
-			return err
+			return fmt.Errorf("opening plugin: %w", err)
 		}
 	}
 
@@ -114,20 +116,22 @@ func getFirstFile(files []string) (string, error) {
 		}
 	}
 
-	return "", err
+	return "", fmt.Errorf("finding file: %w", err)
 }
 
 // parseInterface parses the config file and environment variables into the provided interface.
 func (u *UnifiPoller) parseInterface(i interface{}) error {
 	// Parse config file into provided interface.
 	if err := cnfgfile.Unmarshal(i, u.Flags.ConfigFile); err != nil {
-		return err
+		return fmt.Errorf("cnfg unmarshal: %w", err)
 	}
 
 	// Parse environment variables into provided interface.
-	_, err := cnfg.UnmarshalENV(i, ENVConfigPrefix)
+	if _, err := cnfg.UnmarshalENV(i, ENVConfigPrefix); err != nil {
+		return fmt.Errorf("env unmarshal: %w", err)
+	}
 
-	return err
+	return nil
 }
 
 // Parse input plugin configs.

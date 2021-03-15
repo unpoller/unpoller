@@ -136,6 +136,7 @@ func AppendMetrics(existing *Metrics, m *Metrics) *Metrics {
 	existing.SitesDPI = append(existing.SitesDPI, m.SitesDPI...)
 	existing.Sites = append(existing.Sites, m.Sites...)
 	existing.ClientsDPI = append(existing.ClientsDPI, m.ClientsDPI...)
+	existing.RogueAPs = append(existing.RogueAPs, m.RogueAPs...)
 	existing.Clients = append(existing.Clients, m.Clients...)
 	existing.Devices = append(existing.Devices, m.Devices...)
 
