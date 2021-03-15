@@ -1,11 +1,9 @@
 language: go
 go:
-- 1.13.x
+- 1.15.x
 before_install:
   # download super-linter: golangci-lint
 - curl -sL https://install.goreleaser.com/github.com/golangci/golangci-lint.sh | sh -s -- -b $(go env GOPATH)/bin latest
-install:
-- go mod download
 script:
-- golangci-lint run --enable-all -D gochecknoinits
+- golangci-lint run --enable-all -D gochecknoinits,exhaustivestruct,nlreturn,forbidigo,goerr113
 - go test ./...
