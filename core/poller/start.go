@@ -7,8 +7,8 @@ import (
 	"os"
 	"strings"
 
-	"github.com/prometheus/common/version"
 	"github.com/spf13/pflag"
+	"golift.io/version"
 )
 
 // New returns a new poller struct.
@@ -25,7 +25,7 @@ func (u *UnifiPoller) Start() error {
 	u.Flags.Parse(os.Args[1:])
 
 	if u.Flags.ShowVer {
-		fmt.Printf("%s v%s\n", AppName, version.Version)
+		fmt.Println(version.Print(AppName))
 		return nil // don't run anything else w/ version request.
 	}
 
