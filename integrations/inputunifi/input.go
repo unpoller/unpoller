@@ -40,8 +40,10 @@ type Controller struct {
 	SaveEvents *bool        `json:"save_events" toml:"save_events" xml:"save_events" yaml:"save_events"`
 	SaveIDS    *bool        `json:"save_ids" toml:"save_ids" xml:"save_ids" yaml:"save_ids"`
 	SaveDPI    *bool        `json:"save_dpi" toml:"save_dpi" xml:"save_dpi" yaml:"save_dpi"`
+	SaveRogue  *bool        `json:"save_rogue" toml:"save_rogue" xml:"save_rogue" yaml:"save_rogue"`
 	HashPII    *bool        `json:"hash_pii" toml:"hash_pii" xml:"hash_pii" yaml:"hash_pii"`
 	SaveSites  *bool        `json:"save_sites" toml:"save_sites" xml:"save_sites" yaml:"save_sites"`
+	CertPaths  []string     `json:"ssl_cert_paths" toml:"ssl_cert_paths" xml:"ssl_cert_paths" yaml:"ssl_cert_paths"`
 	User       string       `json:"user" toml:"user" xml:"user" yaml:"user"`
 	Pass       string       `json:"pass" toml:"pass" xml:"pass" yaml:"pass"`
 	URL        string       `json:"url" toml:"url" xml:"url" yaml:"url"`
@@ -66,6 +68,7 @@ type Metrics struct {
 	Clients    []*unifi.Client
 	SitesDPI   []*unifi.DPITable
 	ClientsDPI []*unifi.DPITable
+	RogueAPs   []*unifi.RogueAP
 	Devices    *unifi.Devices
 }
 
@@ -81,10 +84,29 @@ func init() { // nolint: gochecknoinits
 	})
 }
 
-// getUnifi (re-)authenticates to a unifi controller.
-func (u *InputUnifi) getUnifi(c *Controller) error {
-	var err error
+// getCerts reads in cert files from disk and stores them as a slice of of byte slices.
+func (c *Controller) getCerts() ([][]byte, error) {
+	if len(c.CertPaths) == 0 {
+		return nil, nil
+	}
 
+	b := make([][]byte, len(c.CertPaths))
+
+	for i, f := range c.CertPaths {
+		c, err := ioutil.ReadFile(f)
+		if err != nil {
+			return nil, fmt.Errorf("reading SSL cert file: %w", err)
+		}
+
+		b[i] = c
+	}
+
+	return b, nil
+}
+
+// getUnifi (re-)authenticates to a unifi controller.
+// If certificate files are provided, they are re-read.
+func (u *InputUnifi) getUnifi(c *Controller) error {
 	u.Lock()
 	defer u.Unlock()
 
@@ -92,11 +114,17 @@ func (u *InputUnifi) getUnifi(c *Controller) error {
 		c.Unifi.CloseIdleConnections()
 	}
 
+	certs, err := c.getCerts()
+	if err != nil {
+		return err
+	}
+
 	// Create an authenticated session to the Unifi Controller.
 	c.Unifi, err = unifi.NewUnifi(&unifi.Config{
 		User:      c.User,
 		Pass:      c.Pass,
 		URL:       c.URL,
+		SSLCert:   certs,
 		VerifySSL: *c.VerifySSL,
 		ErrorLog:  u.LogErrorf, // Log all errors.
 		DebugLog:  u.LogDebugf, // Log debug messages.
@@ -191,6 +219,10 @@ func (u *InputUnifi) setDefaults(c *Controller) { //nolint:cyclop
 		c.SaveDPI = &f
 	}
 
+	if c.SaveRogue == nil {
+		c.SaveRogue = &f
+	}
+
 	if c.SaveIDS == nil {
 		c.SaveIDS = &f
 	}
@@ -250,6 +282,10 @@ func (u *InputUnifi) setControllerDefaults(c *Controller) *Controller { //nolint
 
 	if c.SaveIDS == nil {
 		c.SaveIDS = u.Default.SaveIDS
+	}
+
+	if c.SaveRogue == nil {
+		c.SaveRogue = u.Default.SaveRogue
 	}
 
 	if c.SaveEvents == nil {

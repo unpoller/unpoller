@@ -80,6 +80,7 @@ func (u *InputUnifi) collectController(c *Controller) (*poller.Metrics, error) {
 	return metrics, err
 }
 
+//nolint:cyclop
 func (u *InputUnifi) pollController(c *Controller) (*poller.Metrics, error) {
 	u.RLock()
 	defer u.RUnlock()
@@ -92,6 +93,12 @@ func (u *InputUnifi) pollController(c *Controller) (*poller.Metrics, error) {
 
 	m := &Metrics{TS: time.Now(), Sites: sites}
 	defer updateWeb(c, m)
+
+	if c.SaveRogue != nil && *c.SaveRogue {
+		if m.RogueAPs, err = c.Unifi.GetRogueAPs(sites); err != nil {
+			return nil, fmt.Errorf("unifi.GetRogueAPs(%s): %w", c.URL, err)
+		}
+	}
 
 	if c.SaveDPI != nil && *c.SaveDPI {
 		if m.SitesDPI, err = c.Unifi.GetSiteDPI(sites); err != nil {
@@ -154,6 +161,11 @@ func (u *InputUnifi) augmentMetrics(c *Controller, metrics *Metrics) *poller.Met
 		m.ClientsDPI = append(m.ClientsDPI, client)
 	}
 
+	for _, ap := range metrics.RogueAPs {
+		// XXX: do we need augment this data?
+		m.RogueAPs = append(m.RogueAPs, ap)
+	}
+
 	if *c.SaveSites {
 		for _, site := range metrics.Sites {
 			m.Sites = append(m.Sites, site)
@@ -193,6 +205,11 @@ func extractDevices(metrics *Metrics) (*poller.Metrics, map[string]string, map[s
 	}
 
 	for _, r := range metrics.Devices.UDMs {
+		devices[r.Mac] = r.Name
+		m.Devices = append(m.Devices, r)
+	}
+
+	for _, r := range metrics.Devices.UXGs {
 		devices[r.Mac] = r.Name
 		m.Devices = append(m.Devices, r)
 	}

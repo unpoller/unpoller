@@ -42,6 +42,7 @@ func formatControllers(controllers []*Controller) []*Controller {
 			VerifySSL:  c.VerifySSL,
 			SaveAnomal: c.SaveAnomal,
 			SaveAlarms: c.SaveAlarms,
+			SaveRogue:  c.SaveRogue,
 			SaveEvents: c.SaveEvents,
 			SaveIDS:    c.SaveIDS,
 			SaveDPI:    c.SaveDPI,

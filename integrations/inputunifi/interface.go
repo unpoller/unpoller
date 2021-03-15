@@ -60,6 +60,10 @@ func (u *InputUnifi) Initialize(l poller.Logger) error {
 func (u *InputUnifi) logController(c *Controller) {
 	u.Logf("   => URL: %s (verify SSL: %v)", c.URL, *c.VerifySSL)
 
+	if len(c.CertPaths) > 0 {
+		u.Logf("   => Cert Files: %s", c.CertPaths)
+	}
+
 	if c.Unifi != nil {
 		u.Logf("   => Version: %s (%s)", c.Unifi.ServerVersion, c.Unifi.UUID)
 	}
@@ -69,6 +73,7 @@ func (u *InputUnifi) logController(c *Controller) {
 	u.Logf("   => Save Sites / Save DPI: %v / %v (metrics)", *c.SaveSites, *c.SaveDPI)
 	u.Logf("   => Save Events / Save IDS: %v / %v (logs)", *c.SaveEvents, *c.SaveIDS)
 	u.Logf("   => Save Alarms / Anomalies: %v / %v (logs)", *c.SaveAlarms, *c.SaveAnomal)
+	u.Logf("   => Save Rogue APs: %v", *c.SaveRogue)
 }
 
 // Events allows you to pull only events (and IDS) from the UniFi Controller.
