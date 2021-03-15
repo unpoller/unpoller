@@ -24,31 +24,41 @@ type usw struct {
 	SwTxBroadcast *prometheus.Desc
 	SwBytes       *prometheus.Desc
 	// Port data.
-	PoeCurrent   *prometheus.Desc
-	PoePower     *prometheus.Desc
-	PoeVoltage   *prometheus.Desc
-	RxBroadcast  *prometheus.Desc
-	RxBytes      *prometheus.Desc
-	RxBytesR     *prometheus.Desc
-	RxDropped    *prometheus.Desc
-	RxErrors     *prometheus.Desc
-	RxMulticast  *prometheus.Desc
-	RxPackets    *prometheus.Desc
-	Satisfaction *prometheus.Desc
-	Speed        *prometheus.Desc
-	TxBroadcast  *prometheus.Desc
-	TxBytes      *prometheus.Desc
-	TxBytesR     *prometheus.Desc
-	TxDropped    *prometheus.Desc
-	TxErrors     *prometheus.Desc
-	TxMulticast  *prometheus.Desc
-	TxPackets    *prometheus.Desc
+	PoeCurrent     *prometheus.Desc
+	PoePower       *prometheus.Desc
+	PoeVoltage     *prometheus.Desc
+	RxBroadcast    *prometheus.Desc
+	RxBytes        *prometheus.Desc
+	RxBytesR       *prometheus.Desc
+	RxDropped      *prometheus.Desc
+	RxErrors       *prometheus.Desc
+	RxMulticast    *prometheus.Desc
+	RxPackets      *prometheus.Desc
+	Satisfaction   *prometheus.Desc
+	Speed          *prometheus.Desc
+	TxBroadcast    *prometheus.Desc
+	TxBytes        *prometheus.Desc
+	TxBytesR       *prometheus.Desc
+	TxDropped      *prometheus.Desc
+	TxErrors       *prometheus.Desc
+	TxMulticast    *prometheus.Desc
+	TxPackets      *prometheus.Desc
+	SFPCurrent     *prometheus.Desc
+	SFPRxPower     *prometheus.Desc
+	SFPTemperature *prometheus.Desc
+	SFPTxPower     *prometheus.Desc
+	SFPVoltage     *prometheus.Desc
 }
 
 func descUSW(ns string) *usw {
 	pns := ns + "port_"
+	sfp := pns + "sfp_"
 	labelS := []string{"site_name", "name", "source"}
 	labelP := []string{"port_id", "port_num", "port_name", "port_mac", "port_ip", "site_name", "name", "source"}
+	labelF := []string{
+		"sfp_part", "sfp_vendor", "sfp_serial", "sfp_compliance",
+		"port_id", "port_num", "port_name", "port_mac", "port_ip", "site_name", "name", "source",
+	}
 	nd := prometheus.NewDesc
 
 	return &usw{
@@ -70,25 +80,30 @@ func descUSW(ns string) *usw {
 		SwTxBroadcast: nd(ns+"switch_transmit_broadcast_total", "Switch Broadcast Transmit Total", labelS, nil),
 		SwBytes:       nd(ns+"switch_bytes_total", "Switch Bytes Transferred Total", labelS, nil),
 		// per-port data
-		PoeCurrent:   nd(pns+"poe_amperes", "POE Current", labelP, nil),
-		PoePower:     nd(pns+"poe_watts", "POE Power", labelP, nil),
-		PoeVoltage:   nd(pns+"poe_volts", "POE Voltage", labelP, nil),
-		RxBroadcast:  nd(pns+"receive_broadcast_total", "Receive Broadcast", labelP, nil),
-		RxBytes:      nd(pns+"receive_bytes_total", "Total Receive Bytes", labelP, nil),
-		RxBytesR:     nd(pns+"receive_rate_bytes", "Receive Bytes Rate", labelP, nil),
-		RxDropped:    nd(pns+"receive_dropped_total", "Total Receive Dropped", labelP, nil),
-		RxErrors:     nd(pns+"receive_errors_total", "Total Receive Errors", labelP, nil),
-		RxMulticast:  nd(pns+"receive_multicast_total", "Total Receive Multicast", labelP, nil),
-		RxPackets:    nd(pns+"receive_packets_total", "Total Receive Packets", labelP, nil),
-		Satisfaction: nd(pns+"satisfaction_ratio", "Satisfaction", labelP, nil),
-		Speed:        nd(pns+"port_speed_bps", "Speed", labelP, nil),
-		TxBroadcast:  nd(pns+"transmit_broadcast_total", "Total Transmit Broadcast", labelP, nil),
-		TxBytes:      nd(pns+"transmit_bytes_total", "Total Transmit Bytes", labelP, nil),
-		TxBytesR:     nd(pns+"transmit_rate_bytes", "Transmit Bytes Rate", labelP, nil),
-		TxDropped:    nd(pns+"transmit_dropped_total", "Total Transmit Dropped", labelP, nil),
-		TxErrors:     nd(pns+"transmit_errors_total", "Total Transmit Errors", labelP, nil),
-		TxMulticast:  nd(pns+"transmit_multicast_total", "Total Tranmist Multicast", labelP, nil),
-		TxPackets:    nd(pns+"transmit_packets_total", "Total Transmit Packets", labelP, nil),
+		PoeCurrent:     nd(pns+"poe_amperes", "POE Current", labelP, nil),
+		PoePower:       nd(pns+"poe_watts", "POE Power", labelP, nil),
+		PoeVoltage:     nd(pns+"poe_volts", "POE Voltage", labelP, nil),
+		RxBroadcast:    nd(pns+"receive_broadcast_total", "Receive Broadcast", labelP, nil),
+		RxBytes:        nd(pns+"receive_bytes_total", "Total Receive Bytes", labelP, nil),
+		RxBytesR:       nd(pns+"receive_rate_bytes", "Receive Bytes Rate", labelP, nil),
+		RxDropped:      nd(pns+"receive_dropped_total", "Total Receive Dropped", labelP, nil),
+		RxErrors:       nd(pns+"receive_errors_total", "Total Receive Errors", labelP, nil),
+		RxMulticast:    nd(pns+"receive_multicast_total", "Total Receive Multicast", labelP, nil),
+		RxPackets:      nd(pns+"receive_packets_total", "Total Receive Packets", labelP, nil),
+		Satisfaction:   nd(pns+"satisfaction_ratio", "Satisfaction", labelP, nil),
+		Speed:          nd(pns+"port_speed_bps", "Speed", labelP, nil),
+		TxBroadcast:    nd(pns+"transmit_broadcast_total", "Total Transmit Broadcast", labelP, nil),
+		TxBytes:        nd(pns+"transmit_bytes_total", "Total Transmit Bytes", labelP, nil),
+		TxBytesR:       nd(pns+"transmit_rate_bytes", "Transmit Bytes Rate", labelP, nil),
+		TxDropped:      nd(pns+"transmit_dropped_total", "Total Transmit Dropped", labelP, nil),
+		TxErrors:       nd(pns+"transmit_errors_total", "Total Transmit Errors", labelP, nil),
+		TxMulticast:    nd(pns+"transmit_multicast_total", "Total Tranmist Multicast", labelP, nil),
+		TxPackets:      nd(pns+"transmit_packets_total", "Total Transmit Packets", labelP, nil),
+		SFPCurrent:     nd(sfp+"current", "SFP Current", labelF, nil),
+		SFPRxPower:     nd(sfp+"rx_power", "SFP Receive Power", labelF, nil),
+		SFPTemperature: nd(sfp+"temperature", "SFP Temperature", labelF, nil),
+		SFPTxPower:     nd(sfp+"tx_power", "SFP Transmit Power", labelF, nil),
+		SFPVoltage:     nd(sfp+"voltage", "SFP Voltage", labelF, nil),
 	}
 }
 
@@ -156,7 +171,7 @@ func (u *promUnifi) exportUSWstats(r report, labels []string, sw *unifi.Sw) {
 func (u *promUnifi) exportPRTtable(r report, labels []string, pt []unifi.Port) {
 	// Per-port data on a switch
 	for _, p := range pt {
-		if !p.Up.Val || !p.Enable.Val {
+		if !u.DeadPorts && (!p.Up.Val || !p.Enable.Val) {
 			continue
 		}
 
@@ -171,6 +186,21 @@ func (u *promUnifi) exportPRTtable(r report, labels []string, pt []unifi.Port) {
 				{u.USW.PoeCurrent, gauge, p.PoeCurrent, labelP},
 				{u.USW.PoePower, gauge, p.PoePower, labelP},
 				{u.USW.PoeVoltage, gauge, p.PoeVoltage, labelP},
+			})
+		}
+
+		if p.SFPFound.Val {
+			labelF := []string{
+				p.SFPPart, p.SFPVendor, p.SFPSerial, p.SFPCompliance,
+				labelP[0], labelP[1], labelP[2], labelP[3], labelP[4], labelP[5], labelP[6], labelP[7],
+			}
+
+			r.send([]*metric{
+				{u.USW.SFPCurrent, gauge, p.SFPCurrent.Val, labelF},
+				{u.USW.SFPVoltage, gauge, p.SFPVoltage.Val, labelF},
+				{u.USW.SFPTemperature, gauge, p.SFPTemperature.Val, labelF},
+				{u.USW.SFPRxPower, gauge, p.SFPRxpower.Val, labelF},
+				{u.USW.SFPTxPower, gauge, p.SFPTxpower.Val, labelF},
 			})
 		}
 

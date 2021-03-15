@@ -53,15 +53,17 @@ type Config struct {
 	// If these are provided, the app will attempt to listen with an SSL connection.
 	SSLCrtPath string `json:"ssl_cert_path" toml:"ssl_cert_path" xml:"ssl_cert_path" yaml:"ssl_cert_path"`
 	SSLKeyPath string `json:"ssl_key_path" toml:"ssl_key_path" xml:"ssl_key_path" yaml:"ssl_key_path"`
+	// Buffer is a channel buffer.
+	// Default is probably 50. Seems fast there; try 1 to see if CPU usage goes down?
+	Buffer int `json:"buffer" toml:"buffer" xml:"buffer" yaml:"buffer"`
 	// If true, any error encountered during collection is reported as an
 	// invalid metric (see NewInvalidMetric). Otherwise, errors are ignored
 	// and the collected metrics will be incomplete. Possibly, no metrics
 	// will be collected at all.
 	ReportErrors bool `json:"report_errors" toml:"report_errors" xml:"report_errors" yaml:"report_errors"`
 	Disable      bool `json:"disable" toml:"disable" xml:"disable" yaml:"disable"`
-	// Buffer is a channel buffer.
-	// Default is probably 50. Seems fast there; try 1 to see if CPU usage goes down?
-	Buffer int `json:"buffer" toml:"buffer" xml:"buffer" yaml:"buffer"`
+	// Save data for dead ports? ie. ports that are down or disabled.
+	DeadPorts bool `json:"dead_ports" toml:"dead_ports" xml:"dead_ports" yaml:"dead_ports"`
 }
 
 type metric struct {
