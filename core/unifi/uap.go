@@ -2,6 +2,7 @@ package unifi
 
 import (
 	"encoding/json"
+	"fmt"
 	"time"
 )
 
@@ -547,6 +548,82 @@ type VapTable []struct {
 	WifiTxAttempts      FlexInt     `json:"wifi_tx_attempts"`
 	WifiTxDropped       FlexInt     `json:"wifi_tx_dropped"`
 	WlanconfID          string      `json:"wlanconf_id"`
+}
+
+// RogueAP are your neighbors access points.
+type RogueAP struct {
+	SourceName string   `json:"-"`
+	SiteName   string   `json:"-"`
+	ID         string   `json:"_id"`
+	ApMac      string   `json:"ap_mac"`
+	Bssid      string   `json:"bssid"`
+	SiteID     string   `json:"site_id"`
+	Age        FlexInt  `json:"age"`
+	Band       string   `json:"band"`
+	Bw         FlexInt  `json:"bw"`
+	CenterFreq FlexInt  `json:"center_freq"`
+	Channel    int      `json:"channel"`
+	Essid      string   `json:"essid"`
+	Freq       FlexInt  `json:"freq"`
+	IsAdhoc    FlexBool `json:"is_adhoc"`
+	IsRogue    FlexBool `json:"is_rogue"`
+	IsUbnt     FlexBool `json:"is_ubnt"`
+	LastSeen   FlexInt  `json:"last_seen"`
+	Noise      FlexInt  `json:"noise"`
+	Radio      string   `json:"radio"`
+	RadioName  string   `json:"radio_name"`
+	ReportTime FlexInt  `json:"report_time"`
+	Rssi       FlexInt  `json:"rssi"`
+	RssiAge    FlexInt  `json:"rssi_age"`
+	Security   string   `json:"security"`
+	Signal     FlexInt  `json:"signal"`
+	Oui        string   `json:"oui"`
+}
+
+// GetRogueAPs returns RogueAPs for a list of Sites.
+// Use GetRogueAPsSite if you want more control.
+func (u *Unifi) GetRogueAPs(sites []*Site) ([]*RogueAP, error) {
+	data := []*RogueAP{}
+
+	for _, site := range sites {
+		response, err := u.GetRogueAPsSite(site)
+		if err != nil {
+			return data, err
+		}
+
+		data = append(data, response...)
+	}
+
+	return data, nil
+}
+
+// GetRogueAPsSite returns RogueAPs for a single Site.
+func (u *Unifi) GetRogueAPsSite(site *Site) ([]*RogueAP, error) {
+	if site == nil || site.Name == "" {
+		return nil, ErrNoSiteProvided
+	}
+
+	u.DebugLog("Polling Controller for RogueAPs, site %s (%s)", site.Name, site.Desc)
+
+	var (
+		path     = fmt.Sprintf(APIRogueAP, site.Name)
+		rogueaps struct {
+			Data []*RogueAP `json:"data"`
+		}
+	)
+
+	if err := u.GetData(path, &rogueaps, ""); err != nil {
+		return rogueaps.Data, err
+	}
+
+	for i := range rogueaps.Data {
+		// Add special SourceName value.
+		rogueaps.Data[i].SourceName = u.URL
+		// Add the special "Site Name" to each event. This becomes a Grafana filter somewhere.
+		rogueaps.Data[i].SiteName = site.Desc + " (" + site.Name + ")"
+	}
+
+	return rogueaps.Data, nil
 }
 
 // UnmarshalJSON unmarshalls 5.10 or 5.11 formatted Access Point Stat data.
