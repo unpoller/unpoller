@@ -269,6 +269,8 @@ func (u *InfluxUnifi) switchExport(r report, v interface{}) { //nolint:cyclop
 		u.batchUSW(r, v)
 	case *unifi.USG:
 		u.batchUSG(r, v)
+	case *unifi.UXG:
+		u.batchUXG(r, v)
 	case *unifi.UDM:
 		u.batchUDM(r, v)
 	case *unifi.Site:

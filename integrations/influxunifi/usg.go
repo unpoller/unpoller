@@ -25,6 +25,7 @@ func (u *InfluxUnifi) batchUSG(r report, s *unifi.USG) {
 		"type":      s.Type,
 	}
 	fields := Combine(
+		u.batchUDMtemps(s.Temperatures),
 		u.batchSysStats(s.SysStats, s.SystemStats),
 		u.batchUSGstats(s.SpeedtestStatus, s.Stat.Gw, s.Uplink),
 		map[string]interface{}{
