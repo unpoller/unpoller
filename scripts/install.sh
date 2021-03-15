@@ -4,8 +4,8 @@
 #
 # Use it like this, pick curl or wget:  (sudo is optional)
 # ----
-#   curl -sL https://raw.githubusercontent.com/unifi-poller/unifi-poller/main/scripts/install.sh | sudo bash
-#   wget -qO- https://raw.githubusercontent.com/unifi-poller/unifi-poller/main/scripts/install.sh | sudo bash
+#   curl -sL https://raw.githubusercontent.com/unifi-poller/unifi-poller/master/scripts/install.sh | sudo bash
+#   wget -qO- https://raw.githubusercontent.com/unifi-poller/unifi-poller/master/scripts/install.sh | sudo bash
 # ----
 #
 # - If you're on RedHat/CentOS/Fedora, installs the latest rpm package.

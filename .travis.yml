@@ -17,6 +17,7 @@ addons:
     - expect
     - upx
 go: 1.15.x
+os: linux
 dist: bionic
 services: docker
 install:
@@ -63,6 +64,7 @@ deploy:
       secure: GsvW0m+EnRELQMk8DjH63VXinqbwse4FJ4vNUslOE6CZ8PBXPrH0ZgaI7ic/uxRtm7CYj0sir4CZq62W5l6uhoXCCQfjOnmJspqnQcrFZ1xRdWktsNXaRwM6hlzaUThsJ/1PD9Psc66uKXBYTg0IlUz0yjZAZk7tCUE4libuj41z40ZKxUcbfcNvH4Njc9IpNB4QSA3ss+a9/6ZwBz4tHVamsGIrzaE0Zf99ItNBYvaOwhM2rC/NWIsFmwt8w4rIA2NIrkZgMDV+Z2Niqh4JRLAWCQNx/RjC5U52lG2yhqivUC3TromZ+q4O4alUltsyIzF2nVanLWgJmbeFo8uXT5A+gd3ovSkFLU9medXd9i4kap7kN/o5m9p5QZvrdEYHEmIU4ml5rjT2EQQVy5CtSmpiRAbhpEJIvA1wDtRq8rdz8IVfJXkHNjg2XdouNmMMWqa3OkEPw21+uxsqv4LscW/6ZjsavzL5SSdnBRU9n79EfGJE/tJLKiNumah/vLuJ5buNhgqmCdtX/Tg+DhQS1BOyYg4l4L8s9IIKZgFRwrOPsZnA/KsrWg4ZsjJ87cqKCaT/qs2EJx5odZcZWJYLBngeO8Tc6cQtLgJdieY2oEKo51Agq4rgikZDt21m6TY9/R5lPN0piwdpy3ZGKfv1ijXx74raMT03qskputzMCvc=
     overwrite: true
     skip_cleanup: true
+    cleanup: false
     file_glob: true
     file: release/*
     on:
@@ -74,6 +76,7 @@ deploy:
   - provider: script
     script: scripts/package-deploy.sh
     skip_cleanup: true
+    cleanup: false
     on:
       all_branches: true
       condition: $TRAVIS_BRANCH =~ ^(master|v[0-9.]+)$

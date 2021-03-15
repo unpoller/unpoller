@@ -11,4 +11,7 @@ fi
 if [ -x "/bin/systemctl" ]; then
   /bin/systemctl stop {{BINARY}}
   /bin/systemctl disable {{BINARY}}
+elif [ -x /usr/sbin/service ]; then
+  /usr/sbin/service {{BINARY}} stop
+  /usr/sbin/service {{BINARY}} disable
 fi
