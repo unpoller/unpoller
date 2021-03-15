@@ -16,10 +16,9 @@ addons:
     - gnupg
     - expect
     - upx
-go:
-- 1.15.x
-services:
-  - docker
+go: 1.15.x
+dist: bionic
+services: docker
 install:
   - rvm install 2.6.0
   - rvm 2.6.0 do gem install --no-document fpm
