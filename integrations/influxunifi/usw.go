@@ -67,26 +67,32 @@ func (u *InfluxUnifi) batchUSWstat(sw *unifi.Sw) map[string]interface{} {
 	}
 }
 
+//nolint:funlen
 func (u *InfluxUnifi) batchPortTable(r report, t map[string]string, pt []unifi.Port) {
 	for _, p := range pt {
-		if !p.Up.Val || !p.Enable.Val {
+		if !u.DeadPorts && (!p.Up.Val || !p.Enable.Val) {
 			continue // only record UP ports.
 		}
 
 		tags := map[string]string{
-			"site_name":   t["site_name"],
-			"device_name": t["name"],
-			"source":      t["source"],
-			"type":        t["type"],
-			"name":        p.Name,
-			"poe_mode":    p.PoeMode,
-			"port_poe":    p.PortPoe.Txt,
-			"port_idx":    p.PortIdx.Txt,
-			"port_id":     t["name"] + " Port " + p.PortIdx.Txt,
-			"poe_enable":  p.PoeEnable.Txt,
-			"flowctrl_rx": p.FlowctrlRx.Txt,
-			"flowctrl_tx": p.FlowctrlTx.Txt,
-			"media":       p.Media,
+			"site_name":      t["site_name"],
+			"device_name":    t["name"],
+			"source":         t["source"],
+			"type":           t["type"],
+			"name":           p.Name,
+			"poe_mode":       p.PoeMode,
+			"port_poe":       p.PortPoe.Txt,
+			"port_idx":       p.PortIdx.Txt,
+			"port_id":        t["name"] + " Port " + p.PortIdx.Txt,
+			"poe_enable":     p.PoeEnable.Txt,
+			"flowctrl_rx":    p.FlowctrlRx.Txt,
+			"flowctrl_tx":    p.FlowctrlTx.Txt,
+			"media":          p.Media,
+			"has_sfp":        p.SFPFound.Txt,
+			"sfp_compliance": p.SFPCompliance,
+			"sfp_serial":     p.SFPSerial,
+			"sfp_vendor":     p.SFPVendor,
+			"sfp_part":       p.SFPPart,
 		}
 		fields := map[string]interface{}{
 			"dbytes_r":     p.BytesR.Val,
@@ -112,6 +118,14 @@ func (u *InfluxUnifi) batchPortTable(r report, t map[string]string, pt []unifi.P
 			fields["poe_current"] = p.PoeCurrent.Val
 			fields["poe_power"] = p.PoePower.Val
 			fields["poe_voltage"] = p.PoeVoltage.Val
+		}
+
+		if p.SFPFound.Val {
+			fields["sfp_current"] = p.SFPCurrent.Val
+			fields["sfp_voltage"] = p.SFPVoltage.Val
+			fields["sfp_temperature"] = p.SFPTemperature.Val
+			fields["sfp_txpower"] = p.SFPTxpower.Val
+			fields["sfp_rxpower"] = p.SFPRxpower.Val
 		}
 
 		r.send(&metric{Table: "usw_ports", Tags: tags, Fields: fields})

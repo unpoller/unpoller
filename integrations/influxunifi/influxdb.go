@@ -32,12 +32,14 @@ const (
 // Config defines the data needed to store metrics in InfluxDB.
 type Config struct {
 	Interval  cnfg.Duration `json:"interval,omitempty" toml:"interval,omitempty" xml:"interval" yaml:"interval"`
-	Disable   bool          `json:"disable" toml:"disable" xml:"disable,attr" yaml:"disable"`
-	VerifySSL bool          `json:"verify_ssl" toml:"verify_ssl" xml:"verify_ssl" yaml:"verify_ssl"`
 	URL       string        `json:"url,omitempty" toml:"url,omitempty" xml:"url" yaml:"url"`
 	User      string        `json:"user,omitempty" toml:"user,omitempty" xml:"user" yaml:"user"`
 	Pass      string        `json:"pass,omitempty" toml:"pass,omitempty" xml:"pass" yaml:"pass"`
 	DB        string        `json:"db,omitempty" toml:"db,omitempty" xml:"db" yaml:"db"`
+	Disable   bool          `json:"disable" toml:"disable" xml:"disable,attr" yaml:"disable"`
+	VerifySSL bool          `json:"verify_ssl" toml:"verify_ssl" xml:"verify_ssl" yaml:"verify_ssl"`
+	// Save data for dead ports? ie. ports that are down or disabled.
+	DeadPorts bool `json:"dead_ports" toml:"dead_ports" xml:"dead_ports" yaml:"dead_ports"`
 }
 
 // InfluxDB allows the data to be nested in the config file.
