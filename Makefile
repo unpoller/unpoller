@@ -421,8 +421,13 @@ install: man readme $(BINARY) plugins_darwin
 	@[ "$(ETC)" != "" ] || (echo "Unable to continue, ETC not set. Use: make install PREFIX=/usr/local ETC=/usr/local/etc" && false)
 	# Copying the binary, config file, unit file, and man page into the env.
 	/usr/bin/install -m 0755 -d $(PREFIX)/bin $(PREFIX)/share/man/man1 $(ETC)/$(BINARY) $(PREFIX)/share/doc/$(BINARY) $(PREFIX)/lib/$(BINARY)
+	/usr/bin/install -m 0755 -d $(PREFIX)/lib/$(BINARY)/web/static/{css,js,images}
 	/usr/bin/install -m 0755 -cp $(BINARY) $(PREFIX)/bin/$(BINARY)
 	/usr/bin/install -m 0644 -cp $(BINARY).1.gz $(PREFIX)/share/man/man1
 	/usr/bin/install -m 0644 -cp examples/$(CONFIG_FILE).example $(ETC)/$(BINARY)/
+	/usr/bin/install -m 0644 -cp init/webserver/index.html $(PREFIX)/lib/$(BINARY)/web/index.html
+	/usr/bin/install -m 0644 -cp init/webserver/static/css/* $(PREFIX)/lib/$(BINARY)/web/static/css/
+	/usr/bin/install -m 0644 -cp init/webserver/static/js/* $(PREFIX)/lib/$(BINARY)/web/static/js/
+	/usr/bin/install -m 0644 -cp init/webserver/static/images/* $(PREFIX)/lib/$(BINARY)/web/static/images/
 	[ -f $(ETC)/$(BINARY)/$(CONFIG_FILE) ] || /usr/bin/install -m 0644 -cp  examples/$(CONFIG_FILE).example $(ETC)/$(BINARY)/$(CONFIG_FILE)
 	/usr/bin/install -m 0644 -cp LICENSE *.html examples/* $(PREFIX)/share/doc/$(BINARY)/
