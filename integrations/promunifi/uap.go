@@ -80,6 +80,34 @@ type uap struct {
 	RadioTxRetries          *prometheus.Desc
 }
 
+type rogueap struct {
+	Age        *prometheus.Desc
+	BW         *prometheus.Desc
+	CenterFreq *prometheus.Desc
+	Channel    *prometheus.Desc
+	Freq       *prometheus.Desc
+	Noise      *prometheus.Desc
+	RSSI       *prometheus.Desc
+	RSSIAge    *prometheus.Desc
+	Signal     *prometheus.Desc
+}
+
+func descRogueAP(ns string) *rogueap {
+	label := []string{"security", "oui", "band", "mac", "site_name", "essid", "source"}
+
+	return &rogueap{
+		Age:        prometheus.NewDesc(ns+"age", "RogueAP Age", label, nil),
+		BW:         prometheus.NewDesc(ns+"bw", "RogueAP BW", label, nil),
+		CenterFreq: prometheus.NewDesc(ns+"center_freq", "RogueAP Center Frequency", label, nil),
+		Channel:    prometheus.NewDesc(ns+"channel", "RogueAP Channel", label, nil),
+		Freq:       prometheus.NewDesc(ns+"frequency", "RogueAP Frequency", label, nil),
+		Noise:      prometheus.NewDesc(ns+"noise", "RogueAP Noise", label, nil),
+		RSSI:       prometheus.NewDesc(ns+"rssi", "RogueAP RSSI", label, nil),
+		RSSIAge:    prometheus.NewDesc(ns+"rssi_age", "RogueAP RSSI Age", label, nil),
+		Signal:     prometheus.NewDesc(ns+"signal", "RogueAP Signal", label, nil),
+	}
+}
+
 func descUAP(ns string) *uap { // nolint: funlen
 	labelA := []string{"stat", "site_name", "name", "source"} // stat + labels[1:]
 	labelV := []string{"vap_name", "bssid", "radio", "radio_name", "essid", "usage", "site_name", "name", "source"}
@@ -160,6 +188,22 @@ func descUAP(ns string) *uap { // nolint: funlen
 		RadioTxPackets:          nd(ns+"radio_transmit_packets", "Radio Transmitted Packets", labelR, nil),
 		RadioTxRetries:          nd(ns+"radio_transmit_retries", "Radio Transmit Retries", labelR, nil),
 	}
+}
+
+func (u *promUnifi) exportRogueAP(r report, d *unifi.RogueAP) {
+	labels := []string{d.Security, d.Oui, d.Band, d.ApMac, d.SiteName, d.Essid, d.SourceName}
+
+	r.send([]*metric{
+		{u.RogueAP.Age, gauge, d.Age.Val, labels},
+		{u.RogueAP.BW, gauge, d.Bw.Val, labels},
+		{u.RogueAP.CenterFreq, gauge, d.CenterFreq.Val, labels},
+		{u.RogueAP.Channel, gauge, d.Channel, labels},
+		{u.RogueAP.Freq, gauge, d.Freq.Val, labels},
+		{u.RogueAP.Noise, gauge, d.Noise.Val, labels},
+		{u.RogueAP.RSSI, gauge, d.Rssi.Val, labels},
+		{u.RogueAP.RSSIAge, gauge, d.RssiAge.Val, labels},
+		{u.RogueAP.Signal, gauge, d.Signal.Val, labels},
+	})
 }
 
 func (u *promUnifi) exportUAP(r report, d *unifi.UAP) {

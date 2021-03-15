@@ -39,6 +39,7 @@ type promUnifi struct {
 	USG     *usg
 	USW     *usw
 	Site    *site
+	RogueAP *rogueap
 	// This interface is passed to the Collect() method. The Collect method uses
 	// this interface to retrieve the latest UniFi measurements and export them.
 	Collector poller.Collect
@@ -137,6 +138,8 @@ func (u *promUnifi) Run(c poller.Collect) error {
 	u.USG = descUSG(u.Namespace + "_device_")
 	u.USW = descUSW(u.Namespace + "_device_")
 	u.Site = descSite(u.Namespace + "_site_")
+	u.RogueAP = descRogueAP(u.Namespace + "_rogueap_")
+
 	mux := http.NewServeMux()
 
 	webserver.UpdateOutput(&webserver.Output{Name: PluginName, Config: u.Config})
@@ -295,6 +298,10 @@ func (u *promUnifi) exportMetrics(r report, ch chan<- prometheus.Metric, ourChan
 func (u *promUnifi) loopExports(r report) {
 	m := r.metrics()
 
+	for _, s := range m.RogueAPs {
+		u.switchExport(r, s)
+	}
+
 	for _, s := range m.Sites {
 		u.switchExport(r, s)
 	}
@@ -323,6 +330,9 @@ func (u *promUnifi) loopExports(r report) {
 
 func (u *promUnifi) switchExport(r report, v interface{}) {
 	switch v := v.(type) {
+	case *unifi.RogueAP:
+		// r.addRogueAP()
+		u.exportRogueAP(r, v)
 	case *unifi.UAP:
 		r.addUAP()
 		u.exportUAP(r, v)
