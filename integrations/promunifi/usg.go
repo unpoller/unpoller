@@ -79,6 +79,10 @@ func (u *promUnifi) exportUSG(r report, d *unifi.USG) {
 	labels := []string{d.Type, d.SiteName, d.Name, d.SourceName}
 	infoLabels := []string{d.Version, d.Model, d.Serial, d.Mac, d.IP, d.ID}
 
+	for _, t := range d.Temperatures {
+		r.send([]*metric{{u.Device.Temperature, gauge, t.Value, append(labels, t.Name, t.Type)}})
+	}
+
 	// Gateway System Data.
 	u.exportWANPorts(r, labels, d.Wan1, d.Wan2)
 	u.exportBYTstats(r, labels, d.TxBytes, d.RxBytes)

@@ -83,6 +83,7 @@ type Report struct {
 	USW     int             // Total count of USW devices.
 	UAP     int             // Total count of UAP devices.
 	UDM     int             // Total count of UDM devices.
+	UXG     int             // Total count of UXG devices.
 	Metrics *poller.Metrics // Metrics collected and recorded.
 	Elapsed time.Duration   // Duration elapsed collecting and exporting.
 	Fetch   time.Duration   // Duration elapsed making controller requests.
@@ -331,6 +332,9 @@ func (u *promUnifi) switchExport(r report, v interface{}) {
 	case *unifi.USG:
 		r.addUSG()
 		u.exportUSG(r, v)
+	case *unifi.UXG:
+		r.addUXG()
+		u.exportUXG(r, v)
 	case *unifi.UDM:
 		r.addUDM()
 		u.exportUDM(r, v)

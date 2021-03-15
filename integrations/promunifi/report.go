@@ -20,6 +20,7 @@ type report interface {
 	export(m *metric, v float64) prometheus.Metric
 	error(ch chan<- prometheus.Metric, d *prometheus.Desc, v interface{})
 	addUDM()
+	addUXG()
 	addUSG()
 	addUAP()
 	addUSW()
@@ -47,7 +48,7 @@ func (r *Report) report(c poller.Logger, descs map[*prometheus.Desc]bool) {
 	c.Logf("UniFi Measurements Exported. Site: %d, Client: %d, "+
 		"UAP: %d, USG/UDM: %d, USW: %d, DPI Site/Client: %d/%d, Desc: %d, "+
 		"Metric: %d, Err: %d, 0s: %d, Req/Total: %v / %v",
-		len(m.Sites), len(m.Clients), r.UAP, r.UDM+r.USG, r.USW, len(m.SitesDPI),
+		len(m.Sites), len(m.Clients), r.UAP, r.UDM+r.USG+r.UXG, r.USW, len(m.SitesDPI),
 		len(m.ClientsDPI), len(descs), r.Total, r.Errors, r.Zeros,
 		r.Fetch.Round(time.Millisecond/oneDecimalPoint),
 		r.Elapsed.Round(time.Millisecond/oneDecimalPoint))
@@ -85,6 +86,10 @@ func (r *Report) addUSG() {
 
 func (r *Report) addUDM() {
 	r.UDM++
+}
+
+func (r *Report) addUXG() {
+	r.UXG++
 }
 
 // close is not part of the interface.

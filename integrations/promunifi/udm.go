@@ -9,7 +9,7 @@ import (
 type unifiDevice struct {
 	Info          *prometheus.Desc
 	Uptime        *prometheus.Desc
-	Temperature   *prometheus.Desc // sw,udmp only
+	Temperature   *prometheus.Desc
 	TotalMaxPower *prometheus.Desc // sw only
 	FanLevel      *prometheus.Desc // sw only
 	TotalTxBytes  *prometheus.Desc
