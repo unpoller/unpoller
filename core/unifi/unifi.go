@@ -8,8 +8,11 @@ package unifi
 import (
 	"bytes"
 	"context"
+	"crypto/sha256"
 	"crypto/tls"
+	"crypto/x509"
 	"encoding/json"
+	"encoding/pem"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -26,6 +29,7 @@ var (
 	ErrAuthenticationFailed = fmt.Errorf("authentication failed")
 	ErrInvalidStatusCode    = fmt.Errorf("invalid status code from server")
 	ErrNoParams             = fmt.Errorf("requedted PUT with no parameters")
+	ErrInvalidSignature     = fmt.Errorf("certificate signature does not match")
 )
 
 // NewUnifi creates a http.Client with authenticated cookies.
@@ -37,6 +41,29 @@ func NewUnifi(config *Config) (*Unifi, error) {
 		return nil, fmt.Errorf("creating cookiejar: %w", err)
 	}
 
+	u := newUnifi(config, jar)
+
+	for i, cert := range config.SSLCert {
+		p, _ := pem.Decode(cert)
+		u.fingerprints[i] = fmt.Sprintf("%x", sha256.Sum256(p.Bytes))
+	}
+
+	if err := u.checkNewStyleAPI(); err != nil {
+		return u, err
+	}
+
+	if err := u.Login(); err != nil {
+		return u, err
+	}
+
+	if err := u.GetServerData(); err != nil {
+		return u, fmt.Errorf("unable to get server version: %w", err)
+	}
+
+	return u, nil
+}
+
+func newUnifi(config *Config, jar http.CookieJar) *Unifi {
 	config.URL = strings.TrimRight(config.URL, "/")
 
 	if config.ErrorLog == nil {
@@ -53,24 +80,38 @@ func NewUnifi(config *Config) (*Unifi, error) {
 			Timeout: config.Timeout,
 			Jar:     jar,
 			Transport: &http.Transport{
-				TLSClientConfig: &tls.Config{InsecureSkipVerify: !config.VerifySSL}, // nolint: gosec
+				TLSClientConfig: &tls.Config{
+					InsecureSkipVerify: !config.VerifySSL, // nolint: gosec
+				},
 			},
 		},
 	}
 
-	if err := u.checkNewStyleAPI(); err != nil {
-		return u, err
+	if len(config.SSLCert) > 0 {
+		u.fingerprints = make(fingerprints, len(config.SSLCert))
+		u.Client.Transport = &http.Transport{
+			TLSClientConfig: &tls.Config{
+				InsecureSkipVerify:    true, // nolint: gosec
+				VerifyPeerCertificate: u.verifyPeerCertificate,
+			},
+		}
 	}
 
-	if err := u.Login(); err != nil {
-		return u, err
+	return u
+}
+
+func (u *Unifi) verifyPeerCertificate(certs [][]byte, chains [][]*x509.Certificate) error {
+	if len(u.fingerprints) == 0 {
+		return nil
 	}
 
-	if err := u.GetServerData(); err != nil {
-		return u, fmt.Errorf("unable to get server version: %w", err)
+	for _, cert := range certs {
+		if u.fingerprints.Contains(fmt.Sprintf("%x", sha256.Sum256(cert))) {
+			return nil
+		}
 	}
 
-	return u, nil
+	return ErrInvalidSignature
 }
 
 // Login is a helper method. It can be called to grab a new authentication cookie.
@@ -144,7 +185,7 @@ func (u *Unifi) checkNewStyleAPI() error {
 
 	if resp.StatusCode == http.StatusOK {
 		// The new version returns a "200" for a / request.
-		u.New = true
+		u.new = true
 		u.DebugLog("Using NEW UniFi controller API paths for %s", req.URL)
 	}
 
