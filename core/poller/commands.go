@@ -7,7 +7,7 @@ import (
 	"strings"
 
 	"golang.org/x/crypto/bcrypt"
-	"golang.org/x/crypto/ssh/terminal"
+	"golang.org/x/term"
 )
 
 // PrintRawMetrics prints raw json from the UniFi Controller. This is currently
@@ -41,7 +41,7 @@ func (u *UnifiPoller) PrintPasswordHash() (err error) {
 	if u.Flags.HashPW == "-" {
 		fmt.Print("Enter Password: ")
 
-		pwd, err = terminal.ReadPassword(int(os.Stdin.Fd()))
+		pwd, err = term.ReadPassword(int(os.Stdin.Fd()))
 		if err != nil {
 			return fmt.Errorf("reading stdin: %w", err)
 		}
