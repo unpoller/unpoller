@@ -1,15 +1,14 @@
 package main
 
+//nolint:gci
 import (
 	"log"
 	"os"
 	"time"
 
-	"github.com/unifi-poller/poller/pkg/poller"
-
+	"github.com/unifi-poller/poller"
 	// Load input plugins!
 	_ "github.com/unifi-poller/inputunifi"
-
 	// Load output plugins!
 	_ "github.com/unifi-poller/influxunifi"
 	_ "github.com/unifi-poller/lokiunifi"
