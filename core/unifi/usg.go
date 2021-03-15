@@ -190,6 +190,9 @@ type SystemStats struct {
 	CPU    FlexInt `json:"cpu"`
 	Mem    FlexInt `json:"mem"`
 	Uptime FlexInt `json:"uptime"`
+	// This exists on at least USG4, may others, maybe not.
+	// {"Board (CPU)":"51 C","Board (PHY)":"51 C","CPU":"72 C","PHY":"77 C"}
+	Temps map[string]string `json:"temps,omitempty"`
 }
 
 // SysStats is load info for a UDM, USG, USW.
