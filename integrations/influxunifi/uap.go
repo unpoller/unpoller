@@ -7,6 +7,33 @@ import (
 // uapT is used as a name for printed/logged counters.
 const uapT = item("UAP")
 
+// batchRogueAP generates metric points for neighboring access points.
+func (u *InfluxUnifi) batchRogueAP(r report, s *unifi.RogueAP) {
+	r.send(&metric{
+		Table: "rogue_ap",
+		Tags: map[string]string{
+			"mac":       s.ApMac,
+			"site_name": s.SiteName,
+			"source":    s.SourceName,
+			"name":      s.Essid,
+			"security":  s.Security,
+			"oui":       s.Oui,
+			"band":      s.Band,
+		},
+		Fields: map[string]interface{}{
+			"age":         s.Age,
+			"bw":          s.Bw.Val,
+			"center_freq": s.CenterFreq.Val,
+			"channel":     s.Channel,
+			"freq":        s.Freq.Val,
+			"noise":       s.Noise.Val,
+			"rssi":        s.Rssi.Val,
+			"rssi_age":    s.RssiAge.Val,
+			"signal":      s.Signal.Val,
+		},
+	})
+}
+
 // batchUAP generates Wireless-Access-Point datapoints for InfluxDB.
 // These points can be passed directly to influx.
 func (u *InfluxUnifi) batchUAP(r report, s *unifi.UAP) {

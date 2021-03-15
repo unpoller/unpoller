@@ -231,6 +231,10 @@ func (u *InfluxUnifi) collect(r report, ch chan *metric) {
 func (u *InfluxUnifi) loopPoints(r report) {
 	m := r.metrics()
 
+	for _, s := range m.RogueAPs {
+		u.switchExport(r, s)
+	}
+
 	for _, s := range m.Sites {
 		u.switchExport(r, s)
 	}
@@ -263,6 +267,8 @@ func (u *InfluxUnifi) loopPoints(r report) {
 
 func (u *InfluxUnifi) switchExport(r report, v interface{}) { //nolint:cyclop
 	switch v := v.(type) {
+	case *unifi.RogueAP:
+		u.batchRogueAP(r, v)
 	case *unifi.UAP:
 		u.batchUAP(r, v)
 	case *unifi.USW:
