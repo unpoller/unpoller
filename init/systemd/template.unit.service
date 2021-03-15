@@ -1,6 +1,7 @@
-# Linux Systemd service unit for {{BINARY}}.
+# Systemd service unit for {{BINARY}}.
 # This is part of Application Builder.
 # https://github.com/golift/application-builder
+# This file is installed when FORMULA is set to 'service'.
 
 [Unit]
 Description={{BINARY}} - {{DESC}}
@@ -17,7 +18,12 @@ StandardOutput=syslog
 StandardError=syslog
 SyslogIdentifier={{BINARY}}
 Type=simple
-User=nobody
+WorkingDirectory=/tmp
+
+# These should be set correctly for your environment.
+UMask=0002
+User={{BINARY}}
+Group={{BINARY}}
 
 [Install]
 WantedBy=multi-user.target

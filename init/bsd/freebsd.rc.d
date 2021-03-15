@@ -12,7 +12,7 @@ name="{{BINARYU}}"
 real_name="{{BINARY}}"
 rcvar="{{BINARYU}}_enable"
 {{BINARYU}}_command="/usr/local/bin/${real_name}"
-{{BINARYU}}_user="nobody"
+{{BINARYU}}_user="{{BINARY}}"
 {{BINARYU}}_config="/usr/local/etc/${real_name}/{{CONFIG_FILE}}"
 pidfile="/var/run/${real_name}/pid"
 

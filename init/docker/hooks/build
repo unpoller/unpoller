@@ -9,7 +9,7 @@ set -e -o pipefail
 # This always run local to the Dockerfile folder, so the path is ../..
 pushd ../..
 
-source .metadata.sh
+source settings.sh
 
 # Build each configured image from Docker Cloud.
 for build in $BUILDS; do
@@ -24,7 +24,6 @@ for build in $BUILDS; do
     --build-arg "VERSION=${VERSION}-${ITERATION}" \
     --build-arg "LICENSE=${LICENSE}" \
     --build-arg "DESC=${DESC}" \
-    --build-arg "URL=${URL}" \
     --build-arg "VENDOR=${VENDOR}" \
     --build-arg "AUTHOR=${MAINT}" \
     --build-arg "BINARY=${BINARY}" \

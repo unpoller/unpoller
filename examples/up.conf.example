@@ -117,7 +117,7 @@
   # Password for UniFi controller user (above).
   # If the password provided here begins with file:// then the password is read in from
   # the file path that follows the file:// prefix. ex: file:///etc/unifi/password.file
-  # ex: file:///etc/unifi/passwd.file
+  # ex: file:///etc/unifi/passwd.file, windows: file://C:\\UserData\\Unifi\\Passwd.txt
   pass = "unifipoller"
 
   # If the controller has more than one site, specify which sites to poll here.
@@ -127,7 +127,7 @@
 
   # Enable collection of site data. This data powers the Network Sites dashboard.
   # It's not valuable to everyone and setting this to false will save resources.
-  #save_sites = true
+  save_sites = true
 
   # Hash, with md5, client names and MAC addresses. This attempts to protect
   # personally identifiable information. Most users won't want to enable this.
