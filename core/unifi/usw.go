@@ -146,18 +146,18 @@ type Port struct {
 	Satisfaction       FlexInt    `json:"satisfaction,omitempty"`
 	SatisfactionReason FlexInt    `json:"satisfaction_reason"`
 	SFPCompliance      string     `json:"sfp_compliance"`
-	SFPCurrent         string     `json:"sfp_current"`
+	SFPCurrent         FlexInt    `json:"sfp_current"`
 	SFPFound           FlexBool   `json:"sfp_found"`
 	SFPPart            string     `json:"sfp_part"`
 	SFPRev             string     `json:"sfp_rev"`
 	SFPRxfault         FlexBool   `json:"sfp_rxfault"`
-	SFPRxpower         string     `json:"sfp_rxpower"`
+	SFPRxpower         FlexInt    `json:"sfp_rxpower"`
 	SFPSerial          string     `json:"sfp_serial"`
-	SFPTemperature     string     `json:"sfp_temperature"`
+	SFPTemperature     FlexInt    `json:"sfp_temperature"`
 	SFPTxfault         FlexBool   `json:"sfp_txfault"`
-	SFPTxpower         string     `json:"sfp_txpower"`
+	SFPTxpower         FlexInt    `json:"sfp_txpower"`
 	SFPVendor          string     `json:"sfp_vendor"`
-	SFPVoltage         string     `json:"sfp_voltage"`
+	SFPVoltage         FlexInt    `json:"sfp_voltage"`
 	Speed              FlexInt    `json:"speed"`
 	SpeedCaps          FlexInt    `json:"speed_caps"`
 	StpPathcost        FlexInt    `json:"stp_pathcost"`
