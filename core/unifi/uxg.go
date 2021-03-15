@@ -31,7 +31,7 @@ type UXG struct {
 	Internet                   FlexBool                `json:"internet"`
 	ModelIncompatible          FlexBool                `json:"model_incompatible"`
 	EthernetTable              []*EthernetTable        `json:"ethernet_table"`
-	PortTable                  []*Port                 `json:"port_table"`
+	PortTable                  []Port                  `json:"port_table"`
 	EthernetOverrides          []*EthernetOverrides    `json:"ethernet_overrides"`
 	UsgCaps                    FlexInt                 `json:"usg_caps"`
 	HasSpeaker                 FlexBool                `json:"has_speaker"`
@@ -42,7 +42,7 @@ type UXG struct {
 	SwitchCaps                 *SwitchCaps             `json:"switch_caps"`
 	HasFan                     FlexBool                `json:"has_fan"`
 	HasTemperature             FlexBool                `json:"has_temperature"`
-	Temperatures               []*Temperature          `json:"temperatures"`
+	Temperatures               []Temperature           `json:"temperatures"`
 	Storage                    []*Storage              `json:"storage"`
 	RulesetInterfaces          interface{}             `json:"ruleset_interfaces"`
 	ConnectedAt                FlexInt                 `json:"connected_at"`
@@ -68,21 +68,21 @@ type UXG struct {
 	Uptime                     FlexInt                 `json:"uptime"`
 	UnderscoreUptime           FlexInt                 `json:"_uptime"`
 	Locating                   FlexBool                `json:"locating"`
-	SysStats                   *SysStats               `json:"sys_stats"`
-	SystemStats                *SystemStats            `json:"system-stats"`
+	SysStats                   SysStats                `json:"sys_stats"`
+	SystemStats                SystemStats             `json:"system-stats"`
 	GuestKicks                 FlexInt                 `json:"guest_kicks"`
 	GuestToken                 string                  `json:"guest_token"`
 	UptimeStats                map[string]*UptimeStats `json:"uptime_stats"`
 	Overheating                FlexBool                `json:"overheating"`
 	GeoInfo                    map[string]*GeoInfo     `json:"geo_info"`
 	LedState                   *LedState               `json:"led_state"`
-	SpeedtestStatus            *SpeedtestStatus        `json:"speedtest-status"`
+	SpeedtestStatus            SpeedtestStatus         `json:"speedtest-status"`
 	SpeedtestStatusSaved       FlexBool                `json:"speedtest-status-saved"`
-	Wan1                       *Wan                    `json:"wan1"`
-	Wan2                       *Wan                    `json:"wan2"`
-	Uplink                     *Uplink                 `json:"uplink"`
+	Wan1                       Wan                     `json:"wan1"`
+	Wan2                       Wan                     `json:"wan2"`
+	Uplink                     Uplink                  `json:"uplink"`
 	DownlinkTable              []*DownlinkTable        `json:"downlink_table"`
-	NetworkTable               []*NetworkTable         `json:"network_table"`
+	NetworkTable               NetworkTable            `json:"network_table"`
 	KnownCfgversion            string                  `json:"known_cfgversion"`
 	ConnectRequestIP           string                  `json:"connect_request_ip"`
 	ConnectRequestPort         string                  `json:"connect_request_port"`
