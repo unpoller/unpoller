@@ -36,8 +36,7 @@ you may use to get additional help.
 device configuration. This controller can be installed on Windows, macOS, FreeBSD,
 Linux or Docker. Ubiquiti also provides a dedicated hardware device called a
 [CloudKey](https://www.ui.com/unifi/unifi-cloud-key/) that runs the controller software.
-More recently they've developed the Dream Machine; it's still in
-beta / early access, but UniFi Poller can collect its data!
+More recently they've developed the Dream Machine, and UniFi Poller can collect its data!
 
 UniFi Poller is a small Golang application that runs on Windows, macOS, FreeBSD,
 Linux or Docker. In Influx-mode it polls a UniFi controller every 30 seconds for
@@ -52,6 +51,10 @@ a UniFi controller, there's no excuse not to install
 [Grafana](https://github.com/unifi-poller/unifi-poller/wiki/Grafana) and this app.
 You'll have a plethora of data at your fingertips and the ability to craft custom
 graphs to slice the data any way you choose. Good luck!
+
+Supported as of Poller v2.0.2, are [Loki](https://grafana.com/oss/loki/)
+and the collection of UniFi events, alarms, anomalies and IDS data.
+This data can be exported to Loki or InfluxDB, or both!
 
 ## Backstory
 

@@ -214,10 +214,11 @@ $(BINARY)-$(VERSION)_$(ITERATION).armhf.txz: package_build_freebsd_arm check_fpm
 # Build an environment that can be packaged for linux.
 package_build_linux: readme man plugins_linux_amd64 linux
 	# Building package environment for linux.
-	mkdir -p $@/usr/bin $@/etc/$(BINARY) $@/usr/share/man/man1 $@/usr/share/doc/$(BINARY) $@/usr/lib/$(BINARY)
+	mkdir -p $@/usr/bin $@/etc/$(BINARY) $@/usr/share/man/man1 $@/usr/share/doc/$(BINARY) $@/usr/lib/$(BINARY)/web
 	# Copying the binary, config file, unit file, and man page into the env.
 	cp $(BINARY).amd64.linux $@/usr/bin/$(BINARY)
 	cp *.1.gz $@/usr/share/man/man1
+	cp -r init/webserver/* $@/usr/lib/$(BINARY)/web/
 	rm -f $@/usr/lib/$(BINARY)/*.so
 	[ ! -f *amd64.so ] || cp *amd64.so $@/usr/lib/$(BINARY)/
 	cp examples/$(CONFIG_FILE).example $@/etc/$(BINARY)/
@@ -248,9 +249,10 @@ package_build_linux_armhf: package_build_linux armhf
 
 # Build an environment that can be packaged for freebsd.
 package_build_freebsd: readme man freebsd
-	mkdir -p $@/usr/local/bin $@/usr/local/etc/$(BINARY) $@/usr/local/share/man/man1 $@/usr/local/share/doc/$(BINARY)
+	mkdir -p $@/usr/local/bin $@/usr/local/etc/$(BINARY) $@/usr/local/share/man/man1 $@/usr/local/share/doc/$(BINARY) $@/usr/local/lib/$(BINARY)/web
 	cp $(BINARY).amd64.freebsd $@/usr/local/bin/$(BINARY)
 	cp *.1.gz $@/usr/local/share/man/man1
+	cp -r init/webserver/* $@/usr/local/lib/$(BINARY)/web/
 	cp examples/$(CONFIG_FILE).example $@/usr/local/etc/$(BINARY)/
 	cp examples/$(CONFIG_FILE).example $@/usr/local/etc/$(BINARY)/$(CONFIG_FILE)
 	cp LICENSE *.html examples/*?.?* $@/usr/local/share/doc/$(BINARY)/
@@ -337,6 +339,8 @@ deps:
 	go get -u github.com/unifi-poller/unifi
 	go get -u github.com/unifi-poller/influxunifi
 	go get -u github.com/unifi-poller/promunifi
+	go get -u github.com/unifi-poller/lokiunifi
+	go get -u github.com/unifi-poller/webserver
 	go get -u github.com/unifi-poller/inputunifi
 	go get -u github.com/unifi-poller/poller
 
@@ -354,9 +358,10 @@ install: man readme $(BINARY) plugins_darwin
 	@[ "$(PREFIX)" != "" ] || (echo "Unable to continue, PREFIX not set. Use: make install PREFIX=/usr/local ETC=/usr/local/etc" && false)
 	@[ "$(ETC)" != "" ] || (echo "Unable to continue, ETC not set. Use: make install PREFIX=/usr/local ETC=/usr/local/etc" && false)
 	# Copying the binary, config file, unit file, and man page into the env.
-	/usr/bin/install -m 0755 -d $(PREFIX)/bin $(PREFIX)/share/man/man1 $(ETC)/$(BINARY) $(PREFIX)/share/doc/$(BINARY) $(PREFIX)/lib/$(BINARY)
+	/usr/bin/install -m 0755 -d $(PREFIX)/bin $(PREFIX)/share/man/man1 $(ETC)/$(BINARY) $(PREFIX)/share/doc/$(BINARY) $(PREFIX)/lib/$(BINARY)/web
 	/usr/bin/install -m 0755 -cp $(BINARY) $(PREFIX)/bin/$(BINARY)
-	/usr/bin/install -m 0644 -cp $(BINARY).1.gz $(PREFIX)/share/man/man1
+	/usr/bin/install -m 0644 -cp $(BINARY).1.gz $(PREFIX)/share/man/man1/
 	/usr/bin/install -m 0644 -cp examples/$(CONFIG_FILE).example $(ETC)/$(BINARY)/
+	/usr/bin/install -m 0644 -cp init/webserver/* $(PREFIX)/lib/$(BINARY)/web/
 	[ -f $(ETC)/$(BINARY)/$(CONFIG_FILE) ] || /usr/bin/install -m 0644 -cp  examples/$(CONFIG_FILE).example $(ETC)/$(BINARY)/$(CONFIG_FILE)
 	/usr/bin/install -m 0644 -cp LICENSE *.html examples/* $(PREFIX)/share/doc/$(BINARY)/

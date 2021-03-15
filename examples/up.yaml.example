@@ -11,8 +11,10 @@ poller:
   plugins: []
 
 prometheus:
-  disable: false
-  http_listen: "0.0.0.0:9130"
+  disable:       false
+  http_listen:   "0.0.0.0:9130"
+  ssl_cert_path: ""
+  ssl_key_path:  ""
   report_errors: false
 
 influxdb:
@@ -24,6 +26,16 @@ influxdb:
   db:   "unifi"
   verify_ssl: false
 
+webserver:
+  enable:        false
+  port:          37288
+  html_path:     "/usr/lib/unifi-poller/web"
+  ssl_cert_path: ""
+  ssl_key_path:  ""
+  max_events:    200
+  accounts:
+    captain: "$2a$04$mxw6i0LKH6u46oaLK2cq5eCTAAFkfNiRpzNbz.EyvJZZWNa2FzIlS"
+
 unifi:
   dynamic: false
   defaults:
@@ -32,11 +44,14 @@ unifi:
     pass: "unifipoller"
     sites:
       - all
-    save_ids:   false
-    save_dpi:   false
-    save_sites: true
-    hash_pii:   false
-    verify_ssl: false
+    save_ids:    false
+    save_events: false
+    save_alarms: false
+    save_anomalies: false
+    save_dpi:    false
+    save_sites:  true
+    hash_pii:    false
+    verify_ssl:  false
 
 
   controllers:
@@ -46,8 +61,11 @@ unifi:
       pass: "unifipoller"
       sites:
         - all
-      save_ids:   false
-      save_dpi:   false
-      hash_pii:   false
-      save_sites: true
-      verify_ssl: false
+      save_ids:    false
+      save_events: false
+      save_alarms: false
+      save_anomalies: false
+      save_dpi:    false
+      save_sites:  true
+      hash_pii:    false
+      verify_ssl:  false

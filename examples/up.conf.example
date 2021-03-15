@@ -23,6 +23,10 @@
   # This controls on which ip and port /metrics is exported when mode is "prometheus".
   # This has no effect in other modes. Must contain a colon and port.
   http_listen = "0.0.0.0:9130"
+  # Adding an SSL Cert and Cert Key will make Poller listen with SSL/https.
+  ssl_cert_path = ""
+  ssl_key_path  = ""
+  # Errors are rare. Setting this to true will report them to Prometheus.
   report_errors = false
 
 [influxdb]
@@ -30,8 +34,11 @@
   # InfluxDB does not require auth by default, so the user/password are probably unimportant.
   url  = "http://127.0.0.1:8086"
   user = "unifipoller"
+  # Password for InfluxDB user (above).
+  # If the password provided here begins with file:// then the password is read in from
+  # the file path that follows the file:// prefix. ex: file:///etc/influxdb/passwd.file
   pass = "unifipoller"
-  # Be sure to create this database.
+  # Be sure to create this database. See the InfluxDB Wiki page for more info.
   db = "unifi"
   # If your InfluxDB uses a valid SSL cert, set this to true.
   verify_ssl = false
@@ -40,6 +47,45 @@
   # If you're getting zeros now, set this to "1m"
   interval = "30s"
 
+# To enable output of UniFi Events to Loki, add a URL; it's disabled otherwise.
+# User, pass and tenant_id are optional and most folks wont set them.
+# Pick which logs you want per-controller in the [unifi.controller] section.
+# This is a new feature. Feedback welcome!
+[loki]
+  url = ""
+  # The rest of this is advanced & optional. See wiki.
+  user       = ""
+  pass       = ""
+  verify_ssl = false
+  tenant_id  = ""
+  interval   = "2m"
+  timeout    = "10s"
+
+# Poller has an optional web server. To turn it on, set enable to true. If you
+# wish to use SSL, provide SSL cert and key paths. This interface is currently
+# read-only; it just displays information, like logs, devices and clients.
+# Notice: Enabling the web server with many sites will increase memory usage.
+# This is a new feature. Feedback welcome!
+[webserver]
+  enable = false
+  port   = 37288
+  # The HTML path is different on Windows and BSD/macOS.
+  html_path     = "/usr/lib/unifi-poller/web"
+  ssl_cert_path = ""
+  ssl_key_path  = ""
+  # How many events per event group to hold. 200-2000. Use fewer with many sites.
+  # With 1 site, you'll have a max total of 9 event groups; 1 per plugin, 4 per site.
+  # Each site adds 1 event group for each of these inputs that is enabled:
+  #   save_ids, save_events, save_anomalies, save_alarms.
+  max_events = 200
+
+# By default the web interface does not require authentication. You can change
+# that by adding a username and password hash (or multiple) below.
+# To create a hash, run unifi-poller with the -e CLI argument. See Wiki for more!
+[webserver.accounts]
+# username = "password-hash"
+# captain = "$2a$04$mxw6i0LKH6u46oaLK2cq5eCTAAFkfNiRpzNbz.EyvJZZWNa2FzIlS"
+
 #### INPUTS
 
 [unifi]
@@ -47,7 +93,7 @@
   # configuring controllers in this config file. Instead you configure them in
   # your prometheus.yml config. Prometheus then sends the controller URL to
   # unifi-poller when it performs the scrape. This is useful if you have many,
-  # or changing controllers. Most people can leave this off. See wiki for more.
+  # or changing controllers. See wiki for more.
   dynamic = false
 
 # The following section contains the default credentials/configuration for any
@@ -55,46 +101,25 @@
 # provide one and dynamic is disabled. In other words, you can just add your
 # controller here and delete the following section. The internal defaults are
 # shown below. Any missing values will assume these displayed defaults.
+
 [unifi.defaults]
-  url        = "https://127.0.0.1:8443"
-  user       = "unifipoller"
-  pass       = "unifipoller"
-  sites      = ["all"]
-  save_ids   = false
-  save_dpi   = false
-  save_sites = true
-  hash_pii   = false
-  verify_ssl = false
-
-# The following is optional and used for configurations with multiple controllers.
-
-# You may repeat the following section to poll multiple controllers.
-# Any ommitted variables will have their values taken from the defaults, above.
-#[[unifi.controller]]
   # URL for the UniFi Controller. Do not add any paths after the host:port.
-  # Do not use port 8443 if you have a UDM.
-  #url = "https://127.0.0.1:8443"
+  # Do not use port 8443 if you have a UDM; just use "https://ip".
+  url = "https://127.0.0.1:8443"
 
   # Make a read-only user in the UniFi Admin Settings, allow it access to all sites.
-  #user = "unifipoller"
-  #pass = "unifipoller"
+  user = "unifipoller"
+
+  # Password for UniFi controller user (above).
+  # If the password provided here begins with file:// then the password is read in from
+  # the file path that follows the file:// prefix. ex: file:///etc/unifi/password.file
+  # ex: file:///etc/unifi/passwd.file
+  pass = "unifipoller"
 
   # If the controller has more than one site, specify which sites to poll here.
   # Set this to ["default"] to poll only the first site on the controller.
   # A setting of ["all"] will poll all sites; this works if you only have 1 site too.
-  #sites = ["all"]
-
-  # Enable collection of Intrusion Detection System Data (InfluxDB only).
-  # Only useful if IDS or IPS are enabled on one of the sites.
-  #save_ids = false
-
-  # Enable collection of Deep Packet Inspection data. This data breaks down traffic
-  # types for each client and site, it powers a dedicated DPI dashboard.
-  # Enabling this adds roughly 150 data points per client.  That's 6000 metrics for
-  # 40 clients.  This adds a little bit of poller run time per interval and causes
-  # more API requests to your controller(s). Don't let these "cons" sway you:
-  # it's cool data. Please provide feedback on your experience with this feature.
-  #save_dpi = false
+  sites = ["all"]
 
   # Enable collection of site data. This data powers the Network Sites dashboard.
   # It's not valuable to everyone and setting this to false will save resources.
@@ -102,9 +127,63 @@
 
   # Hash, with md5, client names and MAC addresses. This attempts to protect
   # personally identifiable information. Most users won't want to enable this.
-  #hash_pii = false
+  hash_pii = false
+
+  # Enable collection of Intrusion Detection System Data (InfluxDB/Loki only).
+  # Only useful if IDS or IPS are enabled on one of the sites. This may store
+  # a lot of information. Only recommended for testing and debugging. There
+  # may not be any dashboards to display this data. It can be used for annotations.
+  # Enable this only if using InfluxDB or Loki. This will leak PII data!
+  save_ids = false
+
+  # Enable collection of UniFi Events (InfluxDB/Loki only).
+  # This may store a lot of information. Only recommended for testing and debugging.
+  # There are no dashboards to display this data. It can be used for annotations.
+  # This is a new (June, 2020) feature. Please provide feedback if you try it out!
+  # Enable this only if using InfluxDB or Loki. This will leak PII data!
+  save_events = false
+
+  # Enable collection of UniFi Alarms (InfluxDB/Loki only).
+  # There are no dashboards to display this data. It can be used for annotations.
+  # This is a new (June, 2020) feature. Please provide feedback if you try it out!
+  # Enable this only if using InfluxDB or Loki. This will leak PII data!
+  save_alarms = false
+
+  # Enable collection of UniFi Anomalies (InfluxDB/Loki only).
+  # There are no dashboards to display this data. It can be used for annotations.
+  # This is a new (June, 2020) feature. Please provide feedback if you try it out!
+  # Enable this only if using InfluxDB or Loki.
+  save_anomalies = false
+
+  # Enable collection of Deep Packet Inspection data. This data breaks down traffic
+  # types for each client and site, it powers a dedicated DPI dashboard.
+  # Enabling this adds roughly 150 data points per client.  That's 6000 metrics for
+  # 40 clients.  This adds a little bit of poller run time per interval and causes
+  # more API requests to your controller(s). Don't let these "cons" sway you:
+  # it's cool data. Please provide feedback on your experience with this feature.
+  save_dpi = false
 
   # If your UniFi controller has a valid SSL certificate (like lets encrypt),
   # you can enable this option to validate it. Otherwise, any SSL certificate is
   # valid. If you don't know if you have a valid SSL cert, then you don't have one.
-  #verify_ssl = false
+  verify_ssl = false
+
+# The following is optional and used for configurations with multiple UniFi controllers.
+
+# You may repeat the following [[unifi.controller]] section as many times as needed to
+# poll multiple controllers. Uncomment the entire section including [[unifi.controller]].
+# Omitted variables will have their values taken from the defaults, above.
+#
+#[[unifi.controller]]
+#  url         = "https://127.0.0.1:8443"
+#  user        = "unifipoller"
+#  pass        = "unifipoller"
+#  sites       = ["all"]
+#  save_sites  = true
+#  hash_pii    = false
+#  save_ids    = false
+#  save_events = false
+#  save_alarms = false
+#  save_anomalies = false
+#  save_dpi    = false
+#  verify_ssl  = false
