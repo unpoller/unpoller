@@ -9,6 +9,10 @@ const uapT = item("UAP")
 
 // batchRogueAP generates metric points for neighboring access points.
 func (u *InfluxUnifi) batchRogueAP(r report, s *unifi.RogueAP) {
+	if s.Age.Val == 0 {
+		return // only keep metrics for things that are recent.
+	}
+
 	r.send(&metric{
 		Table: "rogue_ap",
 		Tags: map[string]string{
@@ -21,7 +25,7 @@ func (u *InfluxUnifi) batchRogueAP(r report, s *unifi.RogueAP) {
 			"band":      s.Band,
 		},
 		Fields: map[string]interface{}{
-			"age":         s.Age,
+			"age":         s.Age.Val,
 			"bw":          s.Bw.Val,
 			"center_freq": s.CenterFreq.Val,
 			"channel":     s.Channel,
