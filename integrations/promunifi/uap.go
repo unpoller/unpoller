@@ -93,7 +93,9 @@ type rogueap struct {
 }
 
 func descRogueAP(ns string) *rogueap {
-	label := []string{"security", "oui", "band", "mac", "site_name", "essid", "source"}
+	label := []string{
+		"security", "oui", "band", "mac", "ap_mac", "radio", "radio_name", "site_name", "name", "source",
+	}
 
 	return &rogueap{
 		Age:        prometheus.NewDesc(ns+"age", "RogueAP Age", label, nil),
@@ -195,7 +197,9 @@ func (u *promUnifi) exportRogueAP(r report, d *unifi.RogueAP) {
 		return // only keep things that are recent.
 	}
 
-	labels := []string{d.Security, d.Oui, d.Band, d.ApMac, d.SiteName, d.Essid, d.SourceName}
+	labels := []string{
+		d.Security, d.Oui, d.Band, d.Bssid, d.ApMac, d.Radio, d.RadioName, d.SiteName, d.Essid, d.SourceName,
+	}
 
 	r.send([]*metric{
 		{u.RogueAP.Age, gauge, d.Age.Val, labels},
