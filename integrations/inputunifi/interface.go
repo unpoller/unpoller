@@ -61,7 +61,7 @@ func (u *InputUnifi) logController(c *Controller) {
 	u.Logf("   => URL: %s (verify SSL: %v)", c.URL, *c.VerifySSL)
 
 	if len(c.CertPaths) > 0 {
-		u.Logf("   => Cert Files: %s", c.CertPaths)
+		u.Logf("   => Cert Files: %s", strings.Join(c.CertPaths, ", "))
 	}
 
 	if c.Unifi != nil {

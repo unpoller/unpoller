@@ -150,7 +150,6 @@ func (u *InputUnifi) checkSites(c *Controller) error {
 	}
 
 	u.LogDebugf("Checking Controller Sites List")
-	u.LogDebugf("Cert Paths: %v", c.CertPaths)
 
 	sites, err := c.Unifi.GetSites()
 	if err != nil {
