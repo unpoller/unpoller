@@ -9,6 +9,7 @@ import (
 // UAP represents all the data from the Ubiquiti Controller for a Unifi Access Point.
 // This was auto generated then edited by hand to get all the data types right.
 type UAP struct {
+	site         *Site
 	SourceName   string   `json:"-"`
 	ID           string   `json:"_id"`
 	Adopted      FlexBool `json:"adopted"`

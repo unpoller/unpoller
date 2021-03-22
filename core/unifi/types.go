@@ -44,6 +44,8 @@ const (
 	APIPrefixNew string = "/proxy/network"
 	// APIAnomaliesPath returns site anomalies.
 	APIAnomaliesPath string = "/api/s/%s/stat/anomalies"
+	APICommandPath   string = "/api/s/%s/cmd"
+	APIDevMgrPath    string = APICommandPath + "/devmgr"
 )
 
 // path returns the correct api path based on the new variable.

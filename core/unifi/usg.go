@@ -7,6 +7,7 @@ import (
 
 // USG represents all the data from the Ubiquiti Controller for a Unifi Security Gateway.
 type USG struct {
+	site                  *Site
 	SourceName            string               `json:"-"`
 	ID                    string               `json:"_id"`
 	Adopted               FlexBool             `json:"adopted"`

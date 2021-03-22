@@ -3,6 +3,7 @@ package unifi
 // UDM represents all the data from the Ubiquiti Controller for a Unifi Dream Machine.
 // The UDM shares several structs/type-data with USW and USG.
 type UDM struct {
+	site                   *Site
 	SourceName             string               `json:"-"`
 	SiteID                 string               `json:"site_id"`
 	SiteName               string               `json:"-"`
