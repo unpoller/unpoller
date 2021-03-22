@@ -1,27 +1,20 @@
 module github.com/unifi-poller/unifi-poller
 
-go 1.14
+go 1.16
 
 require (
-	github.com/github/hub v2.11.2+incompatible // indirect
-	github.com/golang/snappy v0.0.1 // indirect
-	github.com/influxdata/influxdb1-client v0.0.0-20200515024757-02f0bf5dbca3 // indirect
-	github.com/mattn/go-colorable v0.1.4 // indirect
-	github.com/mattn/go-isatty v0.0.11 // indirect
-	github.com/prometheus/client_golang v1.7.1 // indirect
-	github.com/prometheus/common v0.10.0 // indirect
-	github.com/prometheus/procfs v0.1.3 // indirect
-	github.com/russross/blackfriday v2.0.0+incompatible // indirect
-	github.com/shurcooL/sanitized_anchor_name v1.0.0 // indirect
-	github.com/spf13/pflag v1.0.5 // indirect
-	github.com/unifi-poller/influxunifi v0.0.10-0.20200720041222-5932808647e8
-	github.com/unifi-poller/inputunifi v0.0.8-0.20200719194021-3d07f5886bf0
-	github.com/unifi-poller/lokiunifi v0.0.0-20200720041215-6b4aaa3bd40f
-	github.com/unifi-poller/poller v0.0.8-0.20200720041241-4068a5bfcdfd
-	github.com/unifi-poller/promunifi v0.0.9-0.20200720041230-cd67f20aa182
-	github.com/unifi-poller/unifi v0.0.6-0.20200628213309-a22ea217874f
-	golang.org/x/net v0.0.0-20200625001655-4c5254603344 // indirect
-	golang.org/x/sys v0.0.0-20200625212154-ddb9806d33ae // indirect
-	golift.io/cnfg v0.0.5 // indirect
-	google.golang.org/protobuf v1.25.0 // indirect
+	github.com/golang/protobuf v1.5.1 // indirect
+	github.com/influxdata/influxdb1-client v0.0.0-20200827194710-b269163b24ab // indirect
+	github.com/prometheus/client_golang v1.10.0 // indirect
+	github.com/prometheus/common v0.19.0 // indirect
+	github.com/unifi-poller/influxunifi v0.0.0-20210322065128-7bc73454c06e
+	github.com/unifi-poller/inputunifi v0.0.0-20210322032017-2bf529b57d4d
+	github.com/unifi-poller/lokiunifi v0.0.0-20210315080246-0270b8174e62
+	github.com/unifi-poller/poller v0.0.0-20210315075554-47d92433b172
+	github.com/unifi-poller/promunifi v0.0.0-20210322055855-07f7eb3765d6
+	golang.org/x/crypto v0.0.0-20210317152858-513c2a44f670 // indirect
+	golang.org/x/net v0.0.0-20210316092652-d523dce5a7f4 // indirect
+	golang.org/x/sys v0.0.0-20210320140829-1e4c9ba3b0c4 // indirect
+	golang.org/x/term v0.0.0-20210317153231-de623e64d2a6 // indirect
+	gopkg.in/yaml.v3 v3.0.0-20210107192922-496545a6307b // indirect
 )

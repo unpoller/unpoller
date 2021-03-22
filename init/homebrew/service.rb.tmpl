@@ -1,6 +1,7 @@
-# macOS Homebrew Formula Template. Built by Makefile: `make fomula`
+# Homebrew Formula Template. Built by Makefile: `make fomula`
 # This is part of Application Builder.
 # https://github.com/golift/application-builder
+# This file is used when FORMULA is set to 'service'.
 class {{Class}} < Formula
   desc "{{Desc}}"
   homepage "{{URL}}"
@@ -9,6 +10,7 @@ class {{Class}} < Formula
   head "{{SOURCE_URL}}"
 
   depends_on "go" => :build
+  depends_on "upx" => :build
 
   def install
     bin_path = buildpath/"#{name}"

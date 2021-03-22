@@ -15,13 +15,14 @@ addons:
     - debsigs
     - gnupg
     - expect
-go:
-- 1.14.x
-services:
-  - docker
+    - upx
+go: 1.16.x
+os: linux
+dist: bionic
+services: docker
 install:
-  - rvm install 2.3.0
-  - rvm 2.3.0 do gem install --no-document fpm
+  - rvm install 2.6.0
+  - rvm 2.6.0 do gem install --no-document fpm
   # download super-linter: golangci-lint
   # - curl -sL https://install.goreleaser.com/github.com/golangci/golangci-lint.sh | sh -s -- -b $(go env GOPATH)/bin latest
 before_script:
@@ -29,17 +30,17 @@ before_script:
   # Create your own deploy key, tar it, and encrypt the file to make this work. Optionally add a bitly_token file to the archive.
   - openssl aes-256-cbc -K $encrypted_9f3147001275_key -iv $encrypted_9f3147001275_iv -in .secret-files.tar.enc -out .secret-files.tar -d
   - tar -xf .secret-files.tar
-  - gpg --import gpg.signing.key
+  - gpg --batch --yes --import gpg.signing.key
   - rm -f gpg.signing.key .secret-files.tar
-  - source .metadata.sh
+  - source settings.sh
 script:
   # Test Go and Docker.
   # - make test
   - make docker
   # Test built docker image.
-  - docker run $BINARY -v 2>&1 | grep -Eq "^$BINARY v$VERSION"
+  - docker run $BINARY -v 2>&1 | grep -Eq "^$BINARY, version $VERSION"
   # Build everything
-  - rvm 2.3.0 do make release
+  - rvm 2.6.0 do make release
 after_success:
   # Display Release Folder
   - ls -l release/
@@ -63,6 +64,7 @@ deploy:
       secure: GsvW0m+EnRELQMk8DjH63VXinqbwse4FJ4vNUslOE6CZ8PBXPrH0ZgaI7ic/uxRtm7CYj0sir4CZq62W5l6uhoXCCQfjOnmJspqnQcrFZ1xRdWktsNXaRwM6hlzaUThsJ/1PD9Psc66uKXBYTg0IlUz0yjZAZk7tCUE4libuj41z40ZKxUcbfcNvH4Njc9IpNB4QSA3ss+a9/6ZwBz4tHVamsGIrzaE0Zf99ItNBYvaOwhM2rC/NWIsFmwt8w4rIA2NIrkZgMDV+Z2Niqh4JRLAWCQNx/RjC5U52lG2yhqivUC3TromZ+q4O4alUltsyIzF2nVanLWgJmbeFo8uXT5A+gd3ovSkFLU9medXd9i4kap7kN/o5m9p5QZvrdEYHEmIU4ml5rjT2EQQVy5CtSmpiRAbhpEJIvA1wDtRq8rdz8IVfJXkHNjg2XdouNmMMWqa3OkEPw21+uxsqv4LscW/6ZjsavzL5SSdnBRU9n79EfGJE/tJLKiNumah/vLuJ5buNhgqmCdtX/Tg+DhQS1BOyYg4l4L8s9IIKZgFRwrOPsZnA/KsrWg4ZsjJ87cqKCaT/qs2EJx5odZcZWJYLBngeO8Tc6cQtLgJdieY2oEKo51Agq4rgikZDt21m6TY9/R5lPN0piwdpy3ZGKfv1ijXx74raMT03qskputzMCvc=
     overwrite: true
     skip_cleanup: true
+    cleanup: false
     file_glob: true
     file: release/*
     on:
@@ -74,6 +76,7 @@ deploy:
   - provider: script
     script: scripts/package-deploy.sh
     skip_cleanup: true
+    cleanup: false
     on:
       all_branches: true
       condition: $TRAVIS_BRANCH =~ ^(master|v[0-9.]+)$

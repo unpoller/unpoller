@@ -4,13 +4,11 @@
 # This is part of Application Builder.
 # https://github.com/golift/application-builder
 
-#set -e -o pipefail
-
 pushd ../..
-source .metadata.sh
+source settings.sh
 popd
 
-if [ "$TAGS" == "" ]; then
+if [ "$BUILDS" != "" ]; then
   TAGS=$DOCKER_TAG
 fi
 
@@ -26,14 +24,14 @@ for build in $BUILDS; do
 done
 echo "Annotating Images: ${IMAGES}"
 
-# Build all the Docker tags if the source branch is a release and not a branch.
+# Build all the Docker tags if the source branch is a release and not a branch or pre-release.
 if [ "v$VERSION" = "$SOURCE_BRANCH" ]; then
-  TAGS="$VERSION $(echo $VERSION | cut -d. -f1,2) $(echo $VERSION | cut -d. -f1)"
+  TAGS="$VERSION"
 
   echo $SOURCE_BRANCH | grep -q -- -
   if [ "$?" = "1" ]; then
     # tag does not contain a dash, so assume it's a prod tag.
-    TAGS="$TAGS latest stable"
+    TAGS="$TAGS latest stable $(echo $VERSION | cut -d. -f1,2) $(echo $VERSION | cut -d. -f1)"
   fi
 fi
 
@@ -43,7 +41,7 @@ echo "Version: $VERSION, Source: $SOURCE_BRANCH, Building tags: ${TAGS}"
 for tag in $TAGS; do
   docker manifest create --amend ${DOCKER_REPO}:${tag} $IMAGES
   for build in $BUILDS; do
-    # os:name:arch:variant, ie linux:amd64:amd64: (no variant is ok)
+    # os:name:arch, ie linux:amd64:amd64
     os=$(echo $build | cut -d: -f1)
     name=$(echo $build | cut -d: -f2)
     arch=$(echo $build | cut -d: -f3)

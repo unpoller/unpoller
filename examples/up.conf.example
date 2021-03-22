@@ -28,6 +28,8 @@
   ssl_key_path  = ""
   # Errors are rare. Setting this to true will report them to Prometheus.
   report_errors = false
+  ## Record data for disabled or down (unlinked) switch ports.
+  dead_ports = false
 
 [influxdb]
   disable = false
@@ -46,6 +48,8 @@
   # Setting this to something lower may lead to "zeros" in your data.
   # If you're getting zeros now, set this to "1m"
   interval = "30s"
+  ## Record data for disabled or down (unlinked) switch ports.
+  dead_ports = false
 
 # To enable output of UniFi Events to Loki, add a URL; it's disabled otherwise.
 # User, pass and tenant_id are optional and most folks wont set them.
@@ -65,7 +69,7 @@
 # wish to use SSL, provide SSL cert and key paths. This interface is currently
 # read-only; it just displays information, like logs, devices and clients.
 # Notice: Enabling the web server with many sites will increase memory usage.
-# This is a new feature. Feedback welcome!
+# This is a new feature and lacks a UI, enabling only recommended for testing.
 [webserver]
   enable = false
   port   = 37288
@@ -113,7 +117,7 @@
   # Password for UniFi controller user (above).
   # If the password provided here begins with file:// then the password is read in from
   # the file path that follows the file:// prefix. ex: file:///etc/unifi/password.file
-  # ex: file:///etc/unifi/passwd.file
+  # ex: file:///etc/unifi/passwd.file, windows: file://C:\\UserData\\Unifi\\Passwd.txt
   pass = "unifipoller"
 
   # If the controller has more than one site, specify which sites to poll here.
@@ -123,7 +127,7 @@
 
   # Enable collection of site data. This data powers the Network Sites dashboard.
   # It's not valuable to everyone and setting this to false will save resources.
-  #save_sites = true
+  save_sites = true
 
   # Hash, with md5, client names and MAC addresses. This attempts to protect
   # personally identifiable information. Most users won't want to enable this.
@@ -163,10 +167,21 @@
   # it's cool data. Please provide feedback on your experience with this feature.
   save_dpi = false
 
+  ## Enabling save_rogue stores even more data in your time series databases.
+  ## This saves neighboring access point metrics in a dedicated table or namespace.
+  save_rogue = false
+
   # If your UniFi controller has a valid SSL certificate (like lets encrypt),
   # you can enable this option to validate it. Otherwise, any SSL certificate is
   # valid. If you don't know if you have a valid SSL cert, then you don't have one.
   verify_ssl = false
+
+  ## You may provide a list of SSL cert files (PEM format) that you expect your
+  ## controller to use. As long as one of the certs you provide here shows up in
+  ## the cert trust chain the controller presents it will be accepted and allowed.
+  ## These files may be re-read while poller is running.
+  ## Example: ssl_cert_paths = ["/path/to/cert.pem", "/another/cert.pem"]
+  ssl_cert_paths = []
 
 # The following is optional and used for configurations with multiple UniFi controllers.
 
@@ -186,4 +201,6 @@
 #  save_alarms = false
 #  save_anomalies = false
 #  save_dpi    = false
+#  save_rogue  = false
 #  verify_ssl  = false
+#  ssl_cert_paths = []

@@ -1,11 +1,11 @@
-#!/bin/sh
-
-# This is a quick and dirty script to install the latest Linux package.
+#!/bin/bash
+#
+# This is a quick and dirty script to install the latest package.
 #
 # Use it like this, pick curl or wget:  (sudo is optional)
 # ----
-#   curl -s https://raw.githubusercontent.com/unifi-poller/unifi-poller/master/scripts/install.sh | sudo sh
-#   wget -qO- https://raw.githubusercontent.com/unifi-poller/unifi-poller/master/scripts/install.sh | sudo sh
+#   curl -sL https://raw.githubusercontent.com/unifi-poller/unifi-poller/master/scripts/install.sh | sudo bash
+#   wget -qO- https://raw.githubusercontent.com/unifi-poller/unifi-poller/master/scripts/install.sh | sudo bash
 # ----
 #
 # - If you're on RedHat/CentOS/Fedora, installs the latest rpm package.
@@ -15,15 +15,18 @@
 # This is part of application-builder.
 # https://github.com/golift/application-builder
 
+# Set the repo name correctly.
 REPO=unifi-poller/unifi-poller
 BREW=golift/mugs/unifi-poller
+
+# Nothing else needs to be changed. Unless you're fixing things!
+
 LATEST=https://api.github.com/repos/${REPO}/releases/latest
 ISSUES=https://github.com/${REPO}/issues/new
 ARCH=$(uname -m)
 OS=$(uname -s)
 P=" ==>"
 
-# Nothing else needs to be changed. Unless you're fixing things!
 echo "<-------------------------------------------------->"
 
 if [ "$OS" = "Darwin" ]; then
@@ -108,7 +111,7 @@ INSTALLER="rpm -Uvh"
 if [ "$FILE" = "deb" ]; then
   INSTALLER="dpkg --force-confdef --force-confold --install"
 elif [ "$FILE" = "txz" ]; then
-  INSTALLER="pkg install"
+  INSTALLER="pkg install --yes"
 fi
 
 FILE=$(basename ${URL})
