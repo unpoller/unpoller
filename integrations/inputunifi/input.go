@@ -43,7 +43,7 @@ type Controller struct {
 	SaveRogue  *bool        `json:"save_rogue" toml:"save_rogue" xml:"save_rogue" yaml:"save_rogue"`
 	HashPII    *bool        `json:"hash_pii" toml:"hash_pii" xml:"hash_pii" yaml:"hash_pii"`
 	SaveSites  *bool        `json:"save_sites" toml:"save_sites" xml:"save_sites" yaml:"save_sites"`
-	CertPaths  []string     `json:"ssl_cert_paths" toml:"ssl_cert_paths" xml:"ssl_cert_paths" yaml:"ssl_cert_paths"`
+	CertPaths  []string     `json:"ssl_cert_paths" toml:"ssl_cert_paths" xml:"ssl_cert_path" yaml:"ssl_cert_paths"`
 	User       string       `json:"user" toml:"user" xml:"user" yaml:"user"`
 	Pass       string       `json:"pass" toml:"pass" xml:"pass" yaml:"pass"`
 	URL        string       `json:"url" toml:"url" xml:"url" yaml:"url"`
@@ -93,12 +93,12 @@ func (c *Controller) getCerts() ([][]byte, error) {
 	b := make([][]byte, len(c.CertPaths))
 
 	for i, f := range c.CertPaths {
-		c, err := ioutil.ReadFile(f)
+		d, err := ioutil.ReadFile(f)
 		if err != nil {
 			return nil, fmt.Errorf("reading SSL cert file: %w", err)
 		}
 
-		b[i] = c
+		b[i] = d
 	}
 
 	return b, nil
@@ -150,6 +150,7 @@ func (u *InputUnifi) checkSites(c *Controller) error {
 	}
 
 	u.LogDebugf("Checking Controller Sites List")
+	u.LogDebugf("Cert Paths: %v", c.CertPaths)
 
 	sites, err := c.Unifi.GetSites()
 	if err != nil {
@@ -262,7 +263,7 @@ func (u *InputUnifi) setDefaults(c *Controller) { //nolint:cyclop
 
 // setControllerDefaults sets defaults for the for controllers.
 // Any missing values come from defaults (above).
-func (u *InputUnifi) setControllerDefaults(c *Controller) *Controller { //nolint:cyclop
+func (u *InputUnifi) setControllerDefaults(c *Controller) *Controller { //nolint:cyclop,funlen
 	// Configured controller defaults.
 	if c.SaveSites == nil {
 		c.SaveSites = u.Default.SaveSites
@@ -270,6 +271,10 @@ func (u *InputUnifi) setControllerDefaults(c *Controller) *Controller { //nolint
 
 	if c.VerifySSL == nil {
 		c.VerifySSL = u.Default.VerifySSL
+	}
+
+	if c.CertPaths == nil {
+		c.CertPaths = u.Default.CertPaths
 	}
 
 	if c.HashPII == nil {
