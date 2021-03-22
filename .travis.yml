@@ -16,7 +16,7 @@ addons:
     - gnupg
     - expect
     - upx
-go: 1.15.x
+go: 1.16.x
 os: linux
 dist: bionic
 services: docker

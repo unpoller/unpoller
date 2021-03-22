@@ -284,6 +284,8 @@ github.com/stretchr/testify v1.6.1/go.mod h1:6Fq8oRcR53rry900zMqJjRRixrwX3KX962/
 github.com/tmc/grpc-websocket-proxy v0.0.0-20170815181823-89b8d40f7ca8/go.mod h1:ncp9v5uamzpCO7NfCPTXjqaC+bZgJeR0sMTm6dMHP7U=
 github.com/unifi-poller/influxunifi v0.0.0-20210322050609-e6104eba8e39 h1:PGzHec8s8fDBnVNROdNQ5uNcra1yD7oJbRPsE0pwfQ0=
 github.com/unifi-poller/influxunifi v0.0.0-20210322050609-e6104eba8e39/go.mod h1:DlASrS7caI8gZvzJ/GFyLkEK4sVxOP9vt2Osd+rZFQ8=
+github.com/unifi-poller/influxunifi v0.0.0-20210322065128-7bc73454c06e h1:fjBa0JxHgXFdcPemQNHODb1CB/p6uo2Txgdpkwpgxps=
+github.com/unifi-poller/influxunifi v0.0.0-20210322065128-7bc73454c06e/go.mod h1:DlASrS7caI8gZvzJ/GFyLkEK4sVxOP9vt2Osd+rZFQ8=
 github.com/unifi-poller/inputunifi v0.0.0-20210322032017-2bf529b57d4d h1:nN5a6UNer948VLgWN/ZeiuLTwW26dCfc6dyATwRuAbM=
 github.com/unifi-poller/inputunifi v0.0.0-20210322032017-2bf529b57d4d/go.mod h1:hbqRvuLzCva6t5E2f0pAdk9aNvo8tp2OTAVDLfSvsC8=
 github.com/unifi-poller/lokiunifi v0.0.0-20210315080246-0270b8174e62 h1:wNMBZQWx96BhYUsIThOhzXapV37NLXo29m+qYZ6tiP0=
