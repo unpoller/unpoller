@@ -41,7 +41,7 @@ func descDevice(ns string) *unifiDevice {
 		Temperature: prometheus.NewDesc(ns+"temperature_celsius", "Temperature",
 			append(labels, "temp_area", "temp_type"), nil),
 		Storage: prometheus.NewDesc(ns+"storage", "Storage",
-			append(labels, "mountpoint", "name", "valtype"), nil),
+			append(labels, "mountpoint", "storage_name", "storage_reading"), nil),
 		TotalMaxPower: prometheus.NewDesc(ns+"max_power_total", "Total Max Power", labels, nil),
 		FanLevel:      prometheus.NewDesc(ns+"fan_level", "Fan Level", labels, nil),
 		TotalTxBytes:  prometheus.NewDesc(ns+"transmit_bytes_total", "Total Transmitted Bytes", labels, nil),
