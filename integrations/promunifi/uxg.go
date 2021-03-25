@@ -31,4 +31,12 @@ func (u *promUnifi) exportUXG(r report, d *unifi.UXG) {
 	for _, t := range d.Temperatures {
 		r.send([]*metric{{u.Device.Temperature, gauge, t.Value, append(labels, t.Name, t.Type)}})
 	}
+
+	// UDM pro and UXG have hard drives.
+	for _, t := range d.Storage {
+		r.send([]*metric{
+			{u.Device.Storage, gauge, t.Size.Val, append(labels, t.MountPoint, t.Name, "size")},
+			{u.Device.Storage, gauge, t.Used.Val, append(labels, t.MountPoint, t.Name, "used")},
+		})
+	}
 }
