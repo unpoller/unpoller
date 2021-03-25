@@ -13,6 +13,7 @@ require (
 	github.com/unifi-poller/poller v0.0.0-20210325084048-71b84a5c7ed4
 	github.com/unifi-poller/promunifi v0.0.0-20210325083805-78fe8615bfbe
 	github.com/unifi-poller/unifi v0.0.7 // indirect
+	github.com/unifi-poller/webserver v0.0.0-20210325090816-b4db5feaea83 // indirect
 	golang.org/x/crypto v0.0.0-20210322153248-0c34fe9e7dc2 // indirect
 	golang.org/x/net v0.0.0-20210324205630-d1beb07c2056 // indirect
 	golang.org/x/term v0.0.0-20210317153231-de623e64d2a6 // indirect

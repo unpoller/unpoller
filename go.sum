@@ -300,6 +300,8 @@ github.com/unifi-poller/unifi v0.0.7 h1:6xkXRwSKH+6cYbkwd7HNf+AoT10fZvVFicefyQYe
 github.com/unifi-poller/unifi v0.0.7/go.mod h1:t8xQeZGwqInlBkvC3IClOXL4TpqYF5eI++1D+dvjKeo=
 github.com/unifi-poller/webserver v0.0.0-20210315055414-fa42b37295b7 h1:WU/FaFcNl+f/yZ8AXuqhUXFlxpS/8T8lI1WYRZelf7c=
 github.com/unifi-poller/webserver v0.0.0-20210315055414-fa42b37295b7/go.mod h1:7iwUoYHCsJ93p2Qd7UGxLRuH+Ls5wbe3EVBUz+RyxUM=
+github.com/unifi-poller/webserver v0.0.0-20210325090816-b4db5feaea83 h1:hkjrygMwANXCUdRBCwQ0Z7Sew4G4d30tjYuAYVmhdKc=
+github.com/unifi-poller/webserver v0.0.0-20210325090816-b4db5feaea83/go.mod h1:elxTpcA1Zml/3BNjNAF2pmUM8QeE4Yn08uqraPnsTQw=
 github.com/urfave/cli v1.20.0/go.mod h1:70zkFmudgCuE/ngEzBv17Jvp/497gISqfk5gWijbERA=
 github.com/urfave/cli v1.22.1/go.mod h1:Gos4lmkARVdJ6EkW0WaNv/tZAAMe9V7XWyB60NtXRu0=
 github.com/xiang90/probing v0.0.0-20190116061207-43a291ad63a2/go.mod h1:UETIi67q53MR2AWcXfiuqkDkRtnGDLqkBTpCHuJHxtU=
