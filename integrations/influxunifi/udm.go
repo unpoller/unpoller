@@ -59,6 +59,23 @@ func (u *InfluxUnifi) batchUDMtemps(temps []unifi.Temperature) map[string]interf
 	return output
 }
 
+func (u *InfluxUnifi) batchUDMstorage(storage []*unifi.Storage) map[string]interface{} {
+	output := make(map[string]interface{})
+
+	for _, t := range storage {
+		output["storage_"+t.Name+"_size"] = t.Size.Val
+		output["storage_"+t.Name+"_used"] = t.Used.Val
+
+		if t.Size.Val != 0 && t.Used.Val != 0 && t.Used.Val < t.Size.Val {
+			output["storage_"+t.Name+"_pct"] = t.Used.Val / t.Size.Val * 100 //nolint:gomnd
+		} else {
+			output["storage_"+t.Name+"_pct"] = 0
+		}
+	}
+
+	return output
+}
+
 // batchUDM generates Unifi Gateway datapoints for InfluxDB.
 // These points can be passed directly to influx.
 func (u *InfluxUnifi) batchUDM(r report, s *unifi.UDM) { // nolint: funlen
@@ -77,6 +94,7 @@ func (u *InfluxUnifi) batchUDM(r report, s *unifi.UDM) { // nolint: funlen
 		"type":      s.Type,
 	}
 	fields := Combine(
+		u.batchUDMstorage(s.Storage),
 		u.batchUDMtemps(s.Temperatures),
 		u.batchUSGstats(s.SpeedtestStatus, s.Stat.Gw, s.Uplink),
 		u.batchSysStats(s.SysStats, s.SystemStats),

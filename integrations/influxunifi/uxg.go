@@ -25,6 +25,7 @@ func (u *InfluxUnifi) batchUXG(r report, s *unifi.UXG) { // nolint: funlen
 		"type":      s.Type,
 	}
 	fields := Combine(
+		u.batchUDMstorage(s.Storage),
 		u.batchUDMtemps(s.Temperatures),
 		u.batchUSGstats(s.SpeedtestStatus, s.Stat.Gw, s.Uplink),
 		u.batchSysStats(s.SysStats, s.SystemStats),
