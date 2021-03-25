@@ -16,16 +16,16 @@ func (u *InfluxUnifi) batchRogueAP(r report, s *unifi.RogueAP) {
 	r.send(&metric{
 		Table: "uap_rogue",
 		Tags: map[string]string{
-			"ap_mac":     s.ApMac,
-			"site_name":  s.SiteName,
-			"source":     s.SourceName,
-			"name":       s.Essid,
-			"mac":        s.Bssid,
 			"security":   s.Security,
-			"radio":      s.Radio,
-			"radio_name": s.RadioName,
 			"oui":        s.Oui,
 			"band":       s.Band,
+			"mac":        s.Bssid,
+			"ap_mac":     s.ApMac,
+			"radio":      s.Radio,
+			"radio_name": s.RadioName,
+			"site_name":  s.SiteName,
+			"name":       s.Essid,
+			"source":     s.SourceName,
 		},
 		Fields: map[string]interface{}{
 			"age":         s.Age.Val,

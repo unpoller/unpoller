@@ -103,10 +103,10 @@ func (r *Report) String() string {
 	m, c := r.Metrics, r.Counts.Val
 
 	return fmt.Sprintf("Site: %d, Client: %d, "+
-		"%s: %d, %s/%s/: %d, %s: %d, %s/%s/%s/%s: %d/%d/%d/%d, "+
+		"Gateways: %d, %s: %d, %s: %d, %s/%s/%s/%s: %d/%d/%d/%d, "+
 		"DPI Site/Client: %d/%d, %s: %d, %s: %d, Err: %d, Dur: %v",
 		len(m.Sites), len(m.Clients),
-		uapT, c[uapT], udmT, usgT, c[udmT]+c[usgT]+c[uxgT], uswT, c[uswT],
+		c[udmT]+c[usgT]+c[uxgT], uapT, c[uapT], uswT, c[uswT],
 		idsT, eventT, alarmT, anomalyT, c[idsT], c[eventT], c[alarmT], c[anomalyT],
 		len(m.SitesDPI), len(m.ClientsDPI), pointT, c[pointT], fieldT, c[fieldT],
 		len(r.Errors), r.Elapsed.Round(time.Millisecond))
