@@ -239,8 +239,6 @@ github.com/prometheus/common v0.9.1/go.mod h1:yhUN8i9wzaXS3w1O07YhxHEBxD+W35wd8b
 github.com/prometheus/common v0.10.0/go.mod h1:Tlit/dnDKsSWFlCLTWaA1cyBgKHSMdTB80sz/V91rCo=
 github.com/prometheus/common v0.15.0/go.mod h1:U+gB1OBLb1lF3O42bTCL+FK18tX9Oar16Clt/msog/s=
 github.com/prometheus/common v0.18.0/go.mod h1:U+gB1OBLb1lF3O42bTCL+FK18tX9Oar16Clt/msog/s=
-github.com/prometheus/common v0.19.0 h1:Itb4+NjG9wRdkAWgVucbM/adyIXxEhbw0866e0uZE6A=
-github.com/prometheus/common v0.19.0/go.mod h1:U+gB1OBLb1lF3O42bTCL+FK18tX9Oar16Clt/msog/s=
 github.com/prometheus/common v0.20.0 h1:pfeDeUdQcIxOMutNjCejsEFp7qeP+/iltHSSmLpE+hU=
 github.com/prometheus/common v0.20.0/go.mod h1:U+gB1OBLb1lF3O42bTCL+FK18tX9Oar16Clt/msog/s=
 github.com/prometheus/procfs v0.0.0-20181005140218-185b4288413d/go.mod h1:c3At6R/oaqEKCNdg8wHV1ftS6bRYblBhIjjI8uT2IGk=
@@ -284,10 +282,10 @@ github.com/stretchr/testify v1.4.0/go.mod h1:j7eGeouHqKxXV5pUuKE4zz7dFj8WfuZ+81P
 github.com/stretchr/testify v1.6.1 h1:hDPOHmpOpP40lSULcqw7IrRb/u7w6RpDC9399XyoNd0=
 github.com/stretchr/testify v1.6.1/go.mod h1:6Fq8oRcR53rry900zMqJjRRixrwX3KX962/h/Wwjteg=
 github.com/tmc/grpc-websocket-proxy v0.0.0-20170815181823-89b8d40f7ca8/go.mod h1:ncp9v5uamzpCO7NfCPTXjqaC+bZgJeR0sMTm6dMHP7U=
-github.com/unifi-poller/influxunifi v0.0.0-20210322050609-e6104eba8e39 h1:PGzHec8s8fDBnVNROdNQ5uNcra1yD7oJbRPsE0pwfQ0=
-github.com/unifi-poller/influxunifi v0.0.0-20210322050609-e6104eba8e39/go.mod h1:DlASrS7caI8gZvzJ/GFyLkEK4sVxOP9vt2Osd+rZFQ8=
 github.com/unifi-poller/influxunifi v0.0.0-20210322065128-7bc73454c06e h1:fjBa0JxHgXFdcPemQNHODb1CB/p6uo2Txgdpkwpgxps=
 github.com/unifi-poller/influxunifi v0.0.0-20210322065128-7bc73454c06e/go.mod h1:DlASrS7caI8gZvzJ/GFyLkEK4sVxOP9vt2Osd+rZFQ8=
+github.com/unifi-poller/influxunifi v0.0.0-20210325075328-669b3f5c00b6 h1:7WjWoTtfWHNlqcmdeC/SeBTSO/Z9oN1c+duefXECb04=
+github.com/unifi-poller/influxunifi v0.0.0-20210325075328-669b3f5c00b6/go.mod h1:DlASrS7caI8gZvzJ/GFyLkEK4sVxOP9vt2Osd+rZFQ8=
 github.com/unifi-poller/inputunifi v0.0.0-20210322032017-2bf529b57d4d h1:nN5a6UNer948VLgWN/ZeiuLTwW26dCfc6dyATwRuAbM=
 github.com/unifi-poller/inputunifi v0.0.0-20210322032017-2bf529b57d4d/go.mod h1:hbqRvuLzCva6t5E2f0pAdk9aNvo8tp2OTAVDLfSvsC8=
 github.com/unifi-poller/lokiunifi v0.0.0-20210315080246-0270b8174e62 h1:wNMBZQWx96BhYUsIThOhzXapV37NLXo29m+qYZ6tiP0=
@@ -297,7 +295,6 @@ github.com/unifi-poller/poller v0.0.0-20210315075554-47d92433b172 h1:90zdY4RZ5oc
 github.com/unifi-poller/poller v0.0.0-20210315075554-47d92433b172/go.mod h1:5DN7IF0zmDcN7LqyCMcFfn1dAWxPc1d0z5QDyWYOaqs=
 github.com/unifi-poller/promunifi v0.0.0-20210322055855-07f7eb3765d6 h1:27dVBbNpEkBCO7ssNhHCJeLXm45Id1vKETEiVHu9etw=
 github.com/unifi-poller/promunifi v0.0.0-20210322055855-07f7eb3765d6/go.mod h1:gga/6BhE8nyOFSGWxdX04oKfR6pDNkkeDDd+ol9W0C8=
-github.com/unifi-poller/unifi v0.0.7-0.20210315051727-4c317f9a2b95 h1:aEgu1a1N4/6BN9mcAtDNrGwFcHqlpjY9qsG42V9t2i4=
 github.com/unifi-poller/unifi v0.0.7-0.20210315051727-4c317f9a2b95/go.mod h1:t8xQeZGwqInlBkvC3IClOXL4TpqYF5eI++1D+dvjKeo=
 github.com/unifi-poller/unifi v0.0.7 h1:6xkXRwSKH+6cYbkwd7HNf+AoT10fZvVFicefyQYeFtM=
 github.com/unifi-poller/unifi v0.0.7/go.mod h1:t8xQeZGwqInlBkvC3IClOXL4TpqYF5eI++1D+dvjKeo=
@@ -327,8 +324,6 @@ golang.org/x/crypto v0.0.0-20191011191535-87dc89f01550/go.mod h1:yigFU9vqHzYiE8U
 golang.org/x/crypto v0.0.0-20200622213623-75b288015ac9/go.mod h1:LzIPMQfyMNhhGPhUkYOs5KpL4U8rLKemX1yGLhDgUto=
 golang.org/x/crypto v0.0.0-20210220033148-5ea612d1eb83/go.mod h1:jdWPYTVW3xRLrWPugEBEK3UY2ZEsg3UU495nc5E+M+I=
 golang.org/x/crypto v0.0.0-20210314154223-e6e6c4f2bb5b/go.mod h1:T9bdIzuCu7OtxOm1hfPfRQxPLYneinmdGuTeoZ9dtd4=
-golang.org/x/crypto v0.0.0-20210317152858-513c2a44f670 h1:gzMM0EjIYiRmJI3+jBdFuoynZlpxa2JQZsolKu09BXo=
-golang.org/x/crypto v0.0.0-20210317152858-513c2a44f670/go.mod h1:T9bdIzuCu7OtxOm1hfPfRQxPLYneinmdGuTeoZ9dtd4=
 golang.org/x/crypto v0.0.0-20210322153248-0c34fe9e7dc2 h1:It14KIkyBFYkHkwZ7k45minvA9aorojkyjGk9KJ5B/w=
 golang.org/x/crypto v0.0.0-20210322153248-0c34fe9e7dc2/go.mod h1:T9bdIzuCu7OtxOm1hfPfRQxPLYneinmdGuTeoZ9dtd4=
 golang.org/x/exp v0.0.0-20190121172915-509febef88a4/go.mod h1:CJ0aWSM057203Lf6IL+f9T1iT9GByDxfZKAQTCR3kQA=
@@ -358,8 +353,6 @@ golang.org/x/net v0.0.0-20190813141303-74dc4d7220e7/go.mod h1:z5CRVTTTmAJ677TzLL
 golang.org/x/net v0.0.0-20200602114024-627f9648deb9/go.mod h1:qpuaurCH72eLCgpAm/N6yyVIVM9cpaDIP3A8BGJEC5A=
 golang.org/x/net v0.0.0-20200625001655-4c5254603344/go.mod h1:/O7V0waA8r7cgGh81Ro3o1hOxt32SMVPicZroKQ2sZA=
 golang.org/x/net v0.0.0-20210226172049-e18ecbb05110/go.mod h1:m0MpNAwzfU5UDzcl9v0D8zg8gWTRqZa9RBIspLL5mdg=
-golang.org/x/net v0.0.0-20210316092652-d523dce5a7f4 h1:b0LrWgu8+q7z4J+0Y3Umo5q1dL7NXBkKBWkaVkAq17E=
-golang.org/x/net v0.0.0-20210316092652-d523dce5a7f4/go.mod h1:RBQZq4jEuRlivfhVLdyRGr576XBO4/greRjx4P4O3yc=
 golang.org/x/net v0.0.0-20210324205630-d1beb07c2056 h1:sANdAef76Ioam9aQUUdcAqricwY/WUaMc4+7LY4eGg8=
 golang.org/x/net v0.0.0-20210324205630-d1beb07c2056/go.mod h1:uSPa2vr4CLtc/ILN5odXGNXS6mhrKVzTaCXzk9m6W3k=
 golang.org/x/oauth2 v0.0.0-20180821212333-d2e6202438be/go.mod h1:N/0e6XlmueqKjAGxoOufVs8QHGRruUQn6yWY3a++T0U=
@@ -397,9 +390,6 @@ golang.org/x/sys v0.0.0-20201119102817-f84b799fce68/go.mod h1:h1NjWce9XRLGQEsW7w
 golang.org/x/sys v0.0.0-20201214210602-f9fddec55a1e/go.mod h1:h1NjWce9XRLGQEsW7wpKNCjG9DtNlClVuFLEZdDNbEs=
 golang.org/x/sys v0.0.0-20210124154548-22da62e12c0c/go.mod h1:h1NjWce9XRLGQEsW7wpKNCjG9DtNlClVuFLEZdDNbEs=
 golang.org/x/sys v0.0.0-20210309074719-68d13333faf2/go.mod h1:h1NjWce9XRLGQEsW7wpKNCjG9DtNlClVuFLEZdDNbEs=
-golang.org/x/sys v0.0.0-20210315160823-c6e025ad8005/go.mod h1:h1NjWce9XRLGQEsW7wpKNCjG9DtNlClVuFLEZdDNbEs=
-golang.org/x/sys v0.0.0-20210320140829-1e4c9ba3b0c4 h1:EZ2mChiOa8udjfp6rRmswTbtZN/QzUQp4ptM4rnjHvc=
-golang.org/x/sys v0.0.0-20210320140829-1e4c9ba3b0c4/go.mod h1:h1NjWce9XRLGQEsW7wpKNCjG9DtNlClVuFLEZdDNbEs=
 golang.org/x/sys v0.0.0-20210324051608-47abb6519492 h1:Paq34FxTluEPvVyayQqMPgHm+vTOrIifmcYxFBx9TLg=
 golang.org/x/sys v0.0.0-20210324051608-47abb6519492/go.mod h1:h1NjWce9XRLGQEsW7wpKNCjG9DtNlClVuFLEZdDNbEs=
 golang.org/x/term v0.0.0-20201117132131-f5c789dd3221/go.mod h1:Nr5EML6q2oocZ2LXRh80K7BxOlk5/8JxuGnuhpl+muw=

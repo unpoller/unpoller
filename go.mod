@@ -7,7 +7,7 @@ require (
 	github.com/influxdata/influxdb1-client v0.0.0-20200827194710-b269163b24ab // indirect
 	github.com/prometheus/client_golang v1.10.0 // indirect
 	github.com/prometheus/common v0.20.0 // indirect
-	github.com/unifi-poller/influxunifi v0.0.0-20210322065128-7bc73454c06e
+	github.com/unifi-poller/influxunifi v0.0.0-20210325075328-669b3f5c00b6
 	github.com/unifi-poller/inputunifi v0.0.0-20210322032017-2bf529b57d4d
 	github.com/unifi-poller/lokiunifi v0.0.0-20210315080246-0270b8174e62
 	github.com/unifi-poller/poller v0.0.0-20210315075554-47d92433b172
