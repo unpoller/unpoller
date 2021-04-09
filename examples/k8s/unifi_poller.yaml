@@ -1,0 +1,82 @@
+#Create Unifi Poller
+--- 
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: unifi-poller
+  namespace: monitoring
+  labels:
+    app: unifi-poller
+    type: poller
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: unifi-poller
+      type: poller
+  template:
+    metadata:
+      labels:
+        app: unifi-poller
+        type: poller
+      annotations:
+        prometheus.io/path: /metrics
+        prometheus.io/port: "9130"
+        prometheus.io/scrape: "true"
+    spec:
+      containers:
+      - name: unifi-poller
+        image: golift/unifi-poller:latest
+        ports:
+        - containerPort: 9130
+          name: tcp
+          protocol: TCP
+        - containerPort: 9130
+          name: udp
+          protocol: UDP
+        volumeMounts:
+        - name: config-volume
+          mountPath: /config/unifi-poller.conf
+          subPath: unifi-poller.conf
+      volumes:
+      - name: config-volume
+        configMap:
+          name: unifi-poller
+
+
+# Add Config Map for Unifi Poller
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: unifi-poller
+  namespace: monitoring
+  labels:
+    app: unifi-poller
+    type: poller
+data:
+  unifi-poller.conf: |
+      [poller]
+          debug = false
+          quiet = false
+          plugins = []
+      [prometheus]
+        disable = false
+        http_listen = "0.0.0.0:9130"
+        report_errors = false
+      [unifi]
+          dynamic = false
+      [loki]
+#Point to your own Loki service
+          url = "http://loki.monitoring.svc.cluster.local:3100"    
+      [[unifi.controller]]
+#Change to your own URL
+          url         = "https://xx.xx.xx.xx"
+          user        = "xxx"
+          pass        = "xxx"
+          sites       = ["all"]
+          save_ids    = true
+          save_dpi    = true
+          save_sites  = true
+          hash_pii    = false
+          verify_ssl  = false
