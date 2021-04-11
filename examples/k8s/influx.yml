@@ -1,0 +1,145 @@
+#Create InfluxDB
+--- 
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: influx
+  namespace: monitoring
+  labels:
+    app: unifi-poller
+    type: influx
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: unifi-poller
+      type: influx
+  template:
+    metadata:
+      labels:
+        app: unifi-poller
+        type: influx
+    spec:
+      containers:
+      - name: influxdb
+        image: influxdb:1.8
+        ports:
+        - containerPort: 8086
+        env:
+#Fill with own settings
+        - name: INFLUXDB_DB
+          value: maindb
+        - name: INFLUXDB_HTTP_AUTH_ENABLED
+          value: 'false'
+        - name: INFLUXDB_ADMIN_USER
+          value: XXXXXXX
+        - name: INFLUXDB_ADMIN_PASSWORD
+          value: XXXX
+        volumeMounts:
+          - name: influx-volume
+            mountPath: /var/lib/influxdb
+      volumes:      
+        - name: influx-volume
+          persistentVolumeClaim:
+            claimName: influx-volume-claim
+
+
+
+# Persisten Volume Example
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: influx-volume-claim
+  namespace: monitoring
+spec:  
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 10Gi
+---      
+apiVersion: v1
+kind: Service
+metadata:
+  name: influx
+  namespace: monitoring
+spec:
+  selector:
+    app: unifi-poller
+    type: influx
+  ports:
+    - protocol: TCP
+      port: 8086
+      targetPort: 8086
+
+---
+#Create Chronograf
+--- 
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: chronograf
+  namespace: monitoring
+  labels:
+    app: unifi-poller
+    type: chronograf
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: unifi-poller
+      type: chronograf
+  template:
+    metadata:
+      labels:
+        app: unifi-poller
+        type: chronograf
+    spec:
+      containers:
+      - name: chronograf
+        image: chronograf:latest
+        ports:
+        - containerPort: 8888
+        env:
+## Fill in with Own settings
+        - name: INFLUXDB_URL
+          value: http://influx.monitoring.svc.cluster.local:8086
+        - name: INFLUXDB_USERNAME
+          value: xxxxx
+        - name: INFLUXDB_PASSWORD
+          value: xxxxx
+#        volumeMounts:
+#          - name: chronograf-volume
+#            mountPath: /var/lib/chronograf
+#      volumes:      
+#        - name: chronograf-volume
+#          persistentVolumeClaim:
+#            claimName: chronograf-volume-claim
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: chronograf-volume-claim
+  namespace: monitoring
+spec:  
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+---      
+apiVersion: v1
+kind: Service
+metadata:
+  name: chronograf
+  namespace: monitoring
+spec:
+  selector:
+    app: unifi-poller
+    type: chronograf
+  ports:
+    - protocol: TCP
+      port: 8888
+      targetPort: 8888
+---
