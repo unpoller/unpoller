@@ -83,20 +83,6 @@ deploy:
     on:
      tags: true
   - provider: releases
-    token:
-      # to get a secure api key, run: travis setup releases
-      # make a copy of this file first because that command will change it.
-      # or: make a new key manually at https://github.com/settings/tokens/new
-      # then: echo <NEW_KEY_FROM_GH> | travis encrypt
-      secure: "CEeczHbmPCs54puNInkE7pCwPrR13Rl054PVtfElsXGD62DoJB6DAW2M9XEEVQPAaCZHj8K1mTRKA6h0W1xSyT0YYZkcVRzrpqkntGo1swfRtPj3nnUCJEqvABrMJWv7c/145LmcoXpalxMCHVOioQJO87hZf+iV+Keb2HwIUTChglVpjcDtTeSrQlKSn58jiYSaVQs4cgdrXhlBFxTwgeyVBTbbg7nU036GgCnQoU9gzWZysa6XGuO4MyoehRfNj5RHIbPITWqmUSbxUHV4G25+SrcP2MBEdZawvWKSrnSvKdYuczhmhv9rVIxNNOM+jRqIpLlaJjY+o1kWL9OBT/e9eqyfpvG7b1sYWyuzQPPNH02hV5NyXLobXtWDpuL8gCbtF/dLTjsom2PGC/g0/aeJ0GvwmSA/c2P8Oc2AajHX9kJ9JSq1R7Kg0JKHFZRwsdUb1sfoc2oyO9sh7YpMDx/6eVnkTekbhpXLdJyJd4pWj6FLllZP6GMVQehyOUANADKZQ1yWH+gPUbgvieEjd54ZqZO5/yPzOI0eIw9j48BCMRgjkY5wZkUJ+lLjN5qMS5Zrc4rSI4kU0UKrvvr9O32EczV6f54lRxp9TK89NuPkkcbCAWa9iVasdONOho5TRKRirp3W3jqWm2rSbKWjPg9axJ2ts53I8w8ybMdyFRE="
-    overwrite: true
-    skip_cleanup: true
-    cleanup: false
-    file_glob: true
-    file: release/*
-    on:
-      tags: true
-  - provider: releases
     api_key:
       secure: GsvW0m+EnRELQMk8DjH63VXinqbwse4FJ4vNUslOE6CZ8PBXPrH0ZgaI7ic/uxRtm7CYj0sir4CZq62W5l6uhoXCCQfjOnmJspqnQcrFZ1xRdWktsNXaRwM6hlzaUThsJ/1PD9Psc66uKXBYTg0IlUz0yjZAZk7tCUE4libuj41z40ZKxUcbfcNvH4Njc9IpNB4QSA3ss+a9/6ZwBz4tHVamsGIrzaE0Zf99ItNBYvaOwhM2rC/NWIsFmwt8w4rIA2NIrkZgMDV+Z2Niqh4JRLAWCQNx/RjC5U52lG2yhqivUC3TromZ+q4O4alUltsyIzF2nVanLWgJmbeFo8uXT5A+gd3ovSkFLU9medXd9i4kap7kN/o5m9p5QZvrdEYHEmIU4ml5rjT2EQQVy5CtSmpiRAbhpEJIvA1wDtRq8rdz8IVfJXkHNjg2XdouNmMMWqa3OkEPw21+uxsqv4LscW/6ZjsavzL5SSdnBRU9n79EfGJE/tJLKiNumah/vLuJ5buNhgqmCdtX/Tg+DhQS1BOyYg4l4L8s9IIKZgFRwrOPsZnA/KsrWg4ZsjJ87cqKCaT/qs2EJx5odZcZWJYLBngeO8Tc6cQtLgJdieY2oEKo51Agq4rgikZDt21m6TY9/R5lPN0piwdpy3ZGKfv1ijXx74raMT03qskputzMCvc=
     overwrite: true
