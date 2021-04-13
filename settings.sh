@@ -30,3 +30,9 @@ SOURCE_PATH=https://golift.io/${BINARY}/archive/v${VERSION}.tar.gz
 
 export BINARY HBREPO MAINT VENDOR DESC GOLANGCI_LINT_ARGS CONFIG_FILE
 export LICENSE FORMULA SOURCE_URL VERSION_PATH SOURCE_PATH
+
+### Optional ###
+
+# Import this signing key only if it's in the keyring.
+gpg --list-keys 2>/dev/null | grep -q B93DD66EF98E54E2EAE025BA0166AD34ABC5A57C
+[ "$?" != "0" ] || export SIGNING_KEY=B93DD66EF98E54E2EAE025BA0166AD34ABC5A57C

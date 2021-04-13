@@ -106,7 +106,7 @@ integrations are used for things like storage, building, compiling, distribution
 documentation support. This project succeeds because of them. Thank you!
 
 <p style="text-align: center;">
-<a title="Jfrog Bintray" alt="Jfrog Bintray" href="https://bintray.com"><img src="https://docs.golift.io/integrations/bintray.png"/></a>
+<a title="PackageCloud" alt="PackageCloud" href="https://packagecloud.io"><img src="https://docs.golift.io/integrations/packagecloud.png"/></a>
 <a title="GitHub" alt="GitHub" href="https://GitHub.com"><img src="https://docs.golift.io/integrations/octocat.png"/></a>
 <a title="Docker Cloud" alt="Docker" href="https://cloud.docker.com"><img src="https://docs.golift.io/integrations/docker.png"/></a>
 <a title="Travis-CI" alt="Travis-CI" href="https://Travis-CI.com"><img src="https://docs.golift.io/integrations/travis-ci.png"/></a>

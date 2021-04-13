@@ -35,3 +35,4 @@ github_deploy_key*
 .metadata.make
 /after-install-rendered.sh
 /before-remove-rendered.sh
+/gpg.signing.key

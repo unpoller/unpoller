@@ -9,6 +9,4 @@
 # set `DOCKER_CLI_EXPERIMENTAL=enabled` in your build environment.
 # See README.md (in this dir) and the screenshot for more info.
 
-apt-get -y update
-apt-get -y --only-upgrade install docker-ee
 docker run --rm --privileged multiarch/qemu-user-static:register --reset

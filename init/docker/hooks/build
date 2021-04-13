@@ -4,8 +4,6 @@
 # This is part of Application Builder.
 # https://github.com/golift/application-builder
 
-set -e -o pipefail
-
 # This always run local to the Dockerfile folder, so the path is ../..
 pushd ../..
 
