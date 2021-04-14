@@ -1,8 +1,23 @@
 # Powered by Application Builder: https://github.com/golift/application-builder
-language: go
+jobs:
+  include:
+  - os: osx
+    osx_image: xcode12
+    language: go
+    go: 1.16.x
+  - os: linux
+    dist: bionic
+    services: docker
+    language: go
+    go: 1.16.x
 git:
   depth: false
 addons:
+  homebrew:
+    packages:
+    #- rpm
+    #- gnu-tar
+    - upx
   apt:
     packages:
     - ruby-dev
@@ -16,15 +31,11 @@ addons:
     - gnupg
     - expect
     - upx
-go: 1.16.x
-os: linux
-dist: bionic
-services: docker
 install:
-  - rvm install 2.6.0
-  - rvm 2.6.0 do gem install --no-document fpm
-  # download super-linter: golangci-lint
-  # - curl -sL https://install.goreleaser.com/github.com/golangci/golangci-lint.sh | sh -s -- -b $(go env GOPATH)/bin latest
+  - mkdir -p $(go env GOPATH)/bin
+  - curl -sfL https://install.goreleaser.com/github.com/golangci/golangci-lint.sh | sh -s -- -b $(go env GOPATH)/bin latest
+  - if [ "$TRAVIS_OS_NAME" == "linux" ]; then rvm install 2.6.0; fi
+  - if [ "$TRAVIS_OS_NAME" == "linux" ]; then rvm 2.6.0 do gem install --no-document fpm; fi
 before_script:
   # Create your own deploy key, tar it, and encrypt the file to make this work. Optionally add a bitly_token file to the archive.
   - openssl aes-256-cbc -K $encrypted_772fc4772f04_key -iv $encrypted_772fc4772f04_iv -in .secret_files.tar.enc -out .secret_files.tar -d
@@ -34,12 +45,13 @@ before_script:
   - source settings.sh
 script:
   # Test Go and Docker.
-  # - make test
-  - make docker
+  - make test
+  - if [ "$TRAVIS_OS_NAME" == "linux" ]; then make docker; fi
   # Test built docker image.
-  - docker run $BINARY -v 2>&1 | grep -Eq "^$BINARY, version $VERSION"
+  - if [ "$TRAVIS_OS_NAME" == "linux" ]; then docker run $BINARY -v 2>&1 | grep -Eq "^$BINARY,? v.*$VERSION"; fi
   # Build everything
-  - rvm 2.6.0 do make release
+  - if [ "$TRAVIS_OS_NAME" == "linux" ]; then rvm 2.6.0 do make release; fi
+  - if [ "$TRAVIS_OS_NAME" == "osx" ];   then make dmg; fi
 after_success:
   # Display Release Folder
   - ls -l release/
