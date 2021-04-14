@@ -44,11 +44,14 @@ before_script:
   - rm -f gpg.signing.key .secret_files.tar
   - source settings.sh
 script:
-  # Test Go and Docker.
+  # Test Go.
   - make test
+  # Test Docker.
   - if [ "$TRAVIS_OS_NAME" == "linux" ]; then make docker; fi
   # Test built docker image.
   - if [ "$TRAVIS_OS_NAME" == "linux" ]; then docker run $BINARY -v 2>&1 | grep -Eq "^$BINARY,? v.*$VERSION"; fi
+  # Test Homebrew!
+  - if [ "$TRAVIS_OS_NAME" == "osx" ]; then make install VERSION=$VERSION ITERATION=$ITERATION PREFIX=/tmp/up-$VERSION ETC=/tmp/up-$VERSION/etc; fi
   # Build everything
   - if [ "$TRAVIS_OS_NAME" == "linux" ]; then rvm 2.6.0 do make release; fi
   - if [ "$TRAVIS_OS_NAME" == "osx" ];   then make dmg; fi
