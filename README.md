@@ -17,13 +17,12 @@ included; with screenshots. Six for InfluxDB and six for Prometheus.
 
 ## Installation
 
-[See the Wiki!](https://github.com/unifi-poller/unifi-poller/wiki/Installation)
-We have a special place for [Docker Users](https://github.com/unifi-poller/unifi-poller/wiki/Docker).
-I'm willing to help if you have troubles.
+[See the Documentation!](https://unifipoller.com)
+We're willing to help if you have troubles.
 Open an [Issue](https://github.com/unifi-poller/unifi-poller/issues) and
 we'll figure out how to get things working for you. You can also get help in
-the #unifi-poller channel on the [Ubiquiti Discord server](https://discord.gg/KnyKYt2). I've also
-[provided a forum post](https://community.ui.com/questions/Unifi-Poller-Store-Unifi-Controller-Metrics-in-InfluxDB-without-SNMP/58a0ea34-d2b3-41cd-93bb-d95d3896d1a1)
+the #unifi-poller channel on the [Ubiquiti Discord server](https://discord.gg/KnyKYt2). There'se also
+[a forum post](https://community.ui.com/questions/Unifi-Poller-Store-Unifi-Controller-Metrics-in-InfluxDB-without-SNMP/58a0ea34-d2b3-41cd-93bb-d95d3896d1a1)
 you may use to get additional help.
 
 ## Description
@@ -55,49 +54,17 @@ Supported as of Poller v2.0.2, are [Loki](https://grafana.com/oss/loki/)
 and the collection of UniFi events, alarms, anomalies and IDS data.
 This data can be exported to Loki or InfluxDB, or both!
 
-## Backstory
-
-I found a simple piece of code on GitHub that sorta did what I needed;
-we all know that story. I wanted more data, so I added more data collection.
-I probably wouldn't have made it this far if [Garrett](https://github.com/dewski/unifi)
-hadn't written the original code I started with. Many props my man.
-The original code pulled only the client data. This app now pulls data
-for clients, access points, security gateways, dream machines and switches.
-
-I've been trying to get my UAP data into Grafana. Sure, google search that.
-You'll find [this](https://community.ubnt.com/t5/UniFi-Wireless/Grafana-dashboard-for-UniFi-APs-now-available/td-p/1833532).
-What if you don't want to deal with SNMP?
-Well, here you go. I've replicated 400% of what you see on those SNMP-powered
-dashboards with this Go app running on the same mac as my UniFi controller.
-All without enabling SNMP nor trying to understand those OIDs. Mad props
-to [waterside](https://community.ubnt.com/t5/user/viewprofilepage/user-id/303058)
-for making this dashboard; it gave me a fantastic start to making my own dashboards.
-
 ## Operation
 
 You can control this app with puppet, chef, saltstack, homebrew or a simple bash
 script if you needed to. Packages are available for macOS, Linux, FreeBSD and Docker.
-It works just fine on [Windows](https://github.com/unifi-poller/unifi-poller/wiki/Windows) too.
-Most people prefer Docker, and this app is right at home in that environment.
+It works just fine on Windows too.
 
 ## What's it look like?
 
 There are 12 total dashboards available; the 6 InfluxDB dashboards are very similar
-to the 6 Prometheus dashboards. Below you'll find screenshots of the first four dashboards.
-
-##### Client Dashboard (InfluxDB)
-![UniFi Clients Dashboard Image](https://grafana.com/api/dashboards/10418/images/7540/image)
-
-##### USG Dashboard (InfluxDB)
-![USG Dashboard Image](https://grafana.com/api/dashboards/10416/images/7543/image)
-
-##### UAP Dashboard (InfluxDB)
-![UAP Dashboard Image](https://grafana.com/api/dashboards/10415/images/7542/image)
-
-##### USW / Switch Dashboard (InfluxDB)
-You can drill down into specific sites, switches, and ports. Compare ports in different
-sites side-by-side. So easy! This screenshot barely does it justice.
-![USW Dashboard Image](https://grafana.com/api/dashboards/10417/images/7544/image)
+to the 6 Prometheus dashboards. On the [documentaton website](https://unifipoller.com)
+you'll find screenshots of some of the dashboards.
 
 ## Integrations
 
