@@ -50,11 +50,12 @@ script:
   - if [ "$TRAVIS_OS_NAME" == "linux" ]; then make docker; fi
   # Test built docker image.
   - if [ "$TRAVIS_OS_NAME" == "linux" ]; then docker run $BINARY -v 2>&1 | grep -Eq "^$BINARY,? v.*$VERSION"; fi
-  # Test Homebrew!
-  - if [ "$TRAVIS_OS_NAME" == "osx" ]; then make install VERSION=$VERSION ITERATION=$ITERATION PREFIX=/tmp/up-$VERSION ETC=/tmp/up-$VERSION/etc; fi
   # Build everything
   - if [ "$TRAVIS_OS_NAME" == "linux" ]; then rvm 2.6.0 do make release; fi
-  - if [ "$TRAVIS_OS_NAME" == "osx" ];   then make dmg; fi
+  # Build mac binary or image, and test homebrew (with make install).
+  - if [ "$TRAVIS_OS_NAME" == "osx" ]; then make dmg \
+      make install VERSION=$VERSION ITERATION=$ITERATION PREFIX=/tmp/up-$VERSION ETC=/tmp/up-$VERSION/etc \
+    fi
 after_success:
   # Display Release Folder
   - ls -l release/
@@ -73,6 +74,32 @@ after_success:
         "  StrictHostKeyChecking no" \
         "  LogLevel ERROR" >> $HOME/.ssh/config)
 deploy:
+  # Unstable (master pushes).
+  - provider: packagecloud
+    repository: "unstable"
+    username: "golift"
+    token:
+      secure: "1vzsIxgcDkMkkmxpvaw3vEMt4cbDNpk3UMeiv5qnHJ9/k0D6+VhNVS0I3QLgP5+WQgH11Y0YX00NvcY13M+hSj6vLhPCBroFisXJyDpg/f/bxyHxILFeO6AY/CSFbdLzyLcjJo5SC7JedEhqd4xeqjEo14FxGrzKB7guOBCdOQPtaFxfimm02vNt34LoLGYOfZMek2vt50qAR8ChvX2fG/gGxfAlQ4AYvppJLwfPs4jwMN1rrndDI1EUgy3ZMafM40KguXD2wGkctLmyoelTEX2TEDa8TBZKot3lRmK1vyI3wCzNY/Jb5chGq9J5zWFpPlSvn+NPeqj+8UGCZ+bCb0unFH5OdOEKTmQ46cYgL6d3RRbpwoxbG/twg/bAfJ0iiSNTJfXjXDLKT9j+YyeCerbnh7rT/qCuwO+W/HIsnu0waCXvXGAKXGAAE+xvnBygp/YS6I4Y26V2CBIF8KJEWIF/CuooHzraa5c1hg50h5YZnZ9EwVXxFRdsFSNxle9uNe2iJ08FEV6VyHPybYsOnA37yM7E8wCLbcKRKavAyVT7OykLU2GAAOCdcN8tpSDA/kwKx3imZhyjGGUrYQxVN/bCb4hhBX+OymcVIw2gQFkJ/sc09ck+Vo77FVR6JVi0tCjan7x4oCTQfbEa5lkioMjKgY6JDfRVZdX6HUjlJTw="
+    dist: "ubuntu/focal"
+    local-dir: release
+    package_glob: "*.deb"
+    cleanup: false
+    on:
+      branch: master
+      condition: "$TRAVIS_OS_NAME = linux"
+  - provider: packagecloud
+    repository: "unstable"
+    username: "golift"
+    token:
+      secure: "1vzsIxgcDkMkkmxpvaw3vEMt4cbDNpk3UMeiv5qnHJ9/k0D6+VhNVS0I3QLgP5+WQgH11Y0YX00NvcY13M+hSj6vLhPCBroFisXJyDpg/f/bxyHxILFeO6AY/CSFbdLzyLcjJo5SC7JedEhqd4xeqjEo14FxGrzKB7guOBCdOQPtaFxfimm02vNt34LoLGYOfZMek2vt50qAR8ChvX2fG/gGxfAlQ4AYvppJLwfPs4jwMN1rrndDI1EUgy3ZMafM40KguXD2wGkctLmyoelTEX2TEDa8TBZKot3lRmK1vyI3wCzNY/Jb5chGq9J5zWFpPlSvn+NPeqj+8UGCZ+bCb0unFH5OdOEKTmQ46cYgL6d3RRbpwoxbG/twg/bAfJ0iiSNTJfXjXDLKT9j+YyeCerbnh7rT/qCuwO+W/HIsnu0waCXvXGAKXGAAE+xvnBygp/YS6I4Y26V2CBIF8KJEWIF/CuooHzraa5c1hg50h5YZnZ9EwVXxFRdsFSNxle9uNe2iJ08FEV6VyHPybYsOnA37yM7E8wCLbcKRKavAyVT7OykLU2GAAOCdcN8tpSDA/kwKx3imZhyjGGUrYQxVN/bCb4hhBX+OymcVIw2gQFkJ/sc09ck+Vo77FVR6JVi0tCjan7x4oCTQfbEa5lkioMjKgY6JDfRVZdX6HUjlJTw="
+    dist: "el/6"
+    local-dir: release
+    package_glob: "*.rpm"
+    cleanup: false
+    on:
+      branch: master
+      condition: "$TRAVIS_OS_NAME = linux"
+  # Stable packages (releases).
   - provider: packagecloud
     repository: "pkgs"
     username: "golift"
