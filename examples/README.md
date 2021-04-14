@@ -7,8 +7,14 @@ the format. A JSON file should end with `.json`, and
 YAML with `.yaml`. The default format is always TOML and
 may have any _other_ suffix.
 
-#### Dashboards
+# Kubernetes
 
--   This folder used to contain Grafana Dashboards.
--   **They are now located at [Grafana.com](https://grafana.com/dashboards?search=unifi-poller).**
--   [Grafana Dashboards Wiki](https://github.com/unifi-poller/unifi-poller/wiki/Grafana-Dashboards)
+There are two files for Kubernetes deployment examples.
+Feel free to use them as you see fit.
+Please make sure to the delete all comments before
+deploying and make sure to fill in with correct values.
+
+# Notes
+
+When adding new content to this folder, **DO NOT MAKE NEW FOLDERS**,
+it will break `make install` on macOS (used for homebrew).

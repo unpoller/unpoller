@@ -1,4 +1,4 @@
-#Create InfluxDB
+# Create InfluxDB
 --- 
 apiVersion: apps/v1
 kind: Deployment
@@ -38,7 +38,7 @@ spec:
         volumeMounts:
           - name: influx-volume
             mountPath: /var/lib/influxdb
-      volumes:      
+      volumes:
         - name: influx-volume
           persistentVolumeClaim:
             claimName: influx-volume-claim
@@ -52,13 +52,13 @@ kind: PersistentVolumeClaim
 metadata:
   name: influx-volume-claim
   namespace: monitoring
-spec:  
+spec:
   accessModes:
     - ReadWriteOnce
   resources:
     requests:
       storage: 10Gi
----      
+---
 apiVersion: v1
 kind: Service
 metadata:
@@ -75,7 +75,7 @@ spec:
 
 ---
 #Create Chronograf
---- 
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -112,7 +112,7 @@ spec:
 #        volumeMounts:
 #          - name: chronograf-volume
 #            mountPath: /var/lib/chronograf
-#      volumes:      
+#      volumes:
 #        - name: chronograf-volume
 #          persistentVolumeClaim:
 #            claimName: chronograf-volume-claim
@@ -122,13 +122,13 @@ kind: PersistentVolumeClaim
 metadata:
   name: chronograf-volume-claim
   namespace: monitoring
-spec:  
+spec:
   accessModes:
     - ReadWriteOnce
   resources:
     requests:
       storage: 1Gi
----      
+---
 apiVersion: v1
 kind: Service
 metadata:
