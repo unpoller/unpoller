@@ -52,7 +52,7 @@ script:
   # Build mac binary or image.
   - if [ "$TRAVIS_OS_NAME" == "osx" ]; then make dmg; fi
   # Test homebrew (with make install).
-  - if [ "$TRAVIS_OS_NAME" == "osx" ]; make install VERSION=$VERSION ITERATION=$ITERATION PREFIX=/tmp/ab-$VERSION ETC=/tmp/ab-$VERSION/etc; fi
+  - if [ "$TRAVIS_OS_NAME" == "osx" ]; then make install VERSION=$VERSION ITERATION=$ITERATION PREFIX=/tmp/ab-$VERSION ETC=/tmp/ab-$VERSION/etc; fi
 after_success:
   # Display Release Folder
   - ls -l release/
@@ -73,36 +73,36 @@ after_success:
 deploy:
   # Unstable (master pushes).
   - provider: packagecloud
-    repository: "unstable"
-    username: "golift"
+    repository: unstable
+    username: golift
     token:
-      secure: "1vzsIxgcDkMkkmxpvaw3vEMt4cbDNpk3UMeiv5qnHJ9/k0D6+VhNVS0I3QLgP5+WQgH11Y0YX00NvcY13M+hSj6vLhPCBroFisXJyDpg/f/bxyHxILFeO6AY/CSFbdLzyLcjJo5SC7JedEhqd4xeqjEo14FxGrzKB7guOBCdOQPtaFxfimm02vNt34LoLGYOfZMek2vt50qAR8ChvX2fG/gGxfAlQ4AYvppJLwfPs4jwMN1rrndDI1EUgy3ZMafM40KguXD2wGkctLmyoelTEX2TEDa8TBZKot3lRmK1vyI3wCzNY/Jb5chGq9J5zWFpPlSvn+NPeqj+8UGCZ+bCb0unFH5OdOEKTmQ46cYgL6d3RRbpwoxbG/twg/bAfJ0iiSNTJfXjXDLKT9j+YyeCerbnh7rT/qCuwO+W/HIsnu0waCXvXGAKXGAAE+xvnBygp/YS6I4Y26V2CBIF8KJEWIF/CuooHzraa5c1hg50h5YZnZ9EwVXxFRdsFSNxle9uNe2iJ08FEV6VyHPybYsOnA37yM7E8wCLbcKRKavAyVT7OykLU2GAAOCdcN8tpSDA/kwKx3imZhyjGGUrYQxVN/bCb4hhBX+OymcVIw2gQFkJ/sc09ck+Vo77FVR6JVi0tCjan7x4oCTQfbEa5lkioMjKgY6JDfRVZdX6HUjlJTw="
-    dist: "ubuntu/focal"
+      secure: 1vzsIxgcDkMkkmxpvaw3vEMt4cbDNpk3UMeiv5qnHJ9/k0D6+VhNVS0I3QLgP5+WQgH11Y0YX00NvcY13M+hSj6vLhPCBroFisXJyDpg/f/bxyHxILFeO6AY/CSFbdLzyLcjJo5SC7JedEhqd4xeqjEo14FxGrzKB7guOBCdOQPtaFxfimm02vNt34LoLGYOfZMek2vt50qAR8ChvX2fG/gGxfAlQ4AYvppJLwfPs4jwMN1rrndDI1EUgy3ZMafM40KguXD2wGkctLmyoelTEX2TEDa8TBZKot3lRmK1vyI3wCzNY/Jb5chGq9J5zWFpPlSvn+NPeqj+8UGCZ+bCb0unFH5OdOEKTmQ46cYgL6d3RRbpwoxbG/twg/bAfJ0iiSNTJfXjXDLKT9j+YyeCerbnh7rT/qCuwO+W/HIsnu0waCXvXGAKXGAAE+xvnBygp/YS6I4Y26V2CBIF8KJEWIF/CuooHzraa5c1hg50h5YZnZ9EwVXxFRdsFSNxle9uNe2iJ08FEV6VyHPybYsOnA37yM7E8wCLbcKRKavAyVT7OykLU2GAAOCdcN8tpSDA/kwKx3imZhyjGGUrYQxVN/bCb4hhBX+OymcVIw2gQFkJ/sc09ck+Vo77FVR6JVi0tCjan7x4oCTQfbEa5lkioMjKgY6JDfRVZdX6HUjlJTw=
+    dist: ubuntu/focal
     local-dir: release
     package_glob: "*.deb"
     cleanup: false
     on:
-      branch: master
+      branch: unstable
       condition: "$TRAVIS_OS_NAME = linux"
   - provider: packagecloud
-    repository: "unstable"
-    username: "golift"
+    repository: unstable
+    username: golift
     token:
-      secure: "1vzsIxgcDkMkkmxpvaw3vEMt4cbDNpk3UMeiv5qnHJ9/k0D6+VhNVS0I3QLgP5+WQgH11Y0YX00NvcY13M+hSj6vLhPCBroFisXJyDpg/f/bxyHxILFeO6AY/CSFbdLzyLcjJo5SC7JedEhqd4xeqjEo14FxGrzKB7guOBCdOQPtaFxfimm02vNt34LoLGYOfZMek2vt50qAR8ChvX2fG/gGxfAlQ4AYvppJLwfPs4jwMN1rrndDI1EUgy3ZMafM40KguXD2wGkctLmyoelTEX2TEDa8TBZKot3lRmK1vyI3wCzNY/Jb5chGq9J5zWFpPlSvn+NPeqj+8UGCZ+bCb0unFH5OdOEKTmQ46cYgL6d3RRbpwoxbG/twg/bAfJ0iiSNTJfXjXDLKT9j+YyeCerbnh7rT/qCuwO+W/HIsnu0waCXvXGAKXGAAE+xvnBygp/YS6I4Y26V2CBIF8KJEWIF/CuooHzraa5c1hg50h5YZnZ9EwVXxFRdsFSNxle9uNe2iJ08FEV6VyHPybYsOnA37yM7E8wCLbcKRKavAyVT7OykLU2GAAOCdcN8tpSDA/kwKx3imZhyjGGUrYQxVN/bCb4hhBX+OymcVIw2gQFkJ/sc09ck+Vo77FVR6JVi0tCjan7x4oCTQfbEa5lkioMjKgY6JDfRVZdX6HUjlJTw="
-    dist: "el/6"
+      secure: 1vzsIxgcDkMkkmxpvaw3vEMt4cbDNpk3UMeiv5qnHJ9/k0D6+VhNVS0I3QLgP5+WQgH11Y0YX00NvcY13M+hSj6vLhPCBroFisXJyDpg/f/bxyHxILFeO6AY/CSFbdLzyLcjJo5SC7JedEhqd4xeqjEo14FxGrzKB7guOBCdOQPtaFxfimm02vNt34LoLGYOfZMek2vt50qAR8ChvX2fG/gGxfAlQ4AYvppJLwfPs4jwMN1rrndDI1EUgy3ZMafM40KguXD2wGkctLmyoelTEX2TEDa8TBZKot3lRmK1vyI3wCzNY/Jb5chGq9J5zWFpPlSvn+NPeqj+8UGCZ+bCb0unFH5OdOEKTmQ46cYgL6d3RRbpwoxbG/twg/bAfJ0iiSNTJfXjXDLKT9j+YyeCerbnh7rT/qCuwO+W/HIsnu0waCXvXGAKXGAAE+xvnBygp/YS6I4Y26V2CBIF8KJEWIF/CuooHzraa5c1hg50h5YZnZ9EwVXxFRdsFSNxle9uNe2iJ08FEV6VyHPybYsOnA37yM7E8wCLbcKRKavAyVT7OykLU2GAAOCdcN8tpSDA/kwKx3imZhyjGGUrYQxVN/bCb4hhBX+OymcVIw2gQFkJ/sc09ck+Vo77FVR6JVi0tCjan7x4oCTQfbEa5lkioMjKgY6JDfRVZdX6HUjlJTw=
+    dist: el/6
     local-dir: release
     package_glob: "*.rpm"
     cleanup: false
     on:
-      branch: master
+      branch: unstable
       condition: "$TRAVIS_OS_NAME = linux"
   # Stable packages (releases).
   - provider: packagecloud
-    repository: "pkgs"
-    username: "golift"
+    repository: pkgs
+    username: golift
     token:
-      secure: "1vzsIxgcDkMkkmxpvaw3vEMt4cbDNpk3UMeiv5qnHJ9/k0D6+VhNVS0I3QLgP5+WQgH11Y0YX00NvcY13M+hSj6vLhPCBroFisXJyDpg/f/bxyHxILFeO6AY/CSFbdLzyLcjJo5SC7JedEhqd4xeqjEo14FxGrzKB7guOBCdOQPtaFxfimm02vNt34LoLGYOfZMek2vt50qAR8ChvX2fG/gGxfAlQ4AYvppJLwfPs4jwMN1rrndDI1EUgy3ZMafM40KguXD2wGkctLmyoelTEX2TEDa8TBZKot3lRmK1vyI3wCzNY/Jb5chGq9J5zWFpPlSvn+NPeqj+8UGCZ+bCb0unFH5OdOEKTmQ46cYgL6d3RRbpwoxbG/twg/bAfJ0iiSNTJfXjXDLKT9j+YyeCerbnh7rT/qCuwO+W/HIsnu0waCXvXGAKXGAAE+xvnBygp/YS6I4Y26V2CBIF8KJEWIF/CuooHzraa5c1hg50h5YZnZ9EwVXxFRdsFSNxle9uNe2iJ08FEV6VyHPybYsOnA37yM7E8wCLbcKRKavAyVT7OykLU2GAAOCdcN8tpSDA/kwKx3imZhyjGGUrYQxVN/bCb4hhBX+OymcVIw2gQFkJ/sc09ck+Vo77FVR6JVi0tCjan7x4oCTQfbEa5lkioMjKgY6JDfRVZdX6HUjlJTw="
-    dist: "ubuntu/focal"
+      secure: 1vzsIxgcDkMkkmxpvaw3vEMt4cbDNpk3UMeiv5qnHJ9/k0D6+VhNVS0I3QLgP5+WQgH11Y0YX00NvcY13M+hSj6vLhPCBroFisXJyDpg/f/bxyHxILFeO6AY/CSFbdLzyLcjJo5SC7JedEhqd4xeqjEo14FxGrzKB7guOBCdOQPtaFxfimm02vNt34LoLGYOfZMek2vt50qAR8ChvX2fG/gGxfAlQ4AYvppJLwfPs4jwMN1rrndDI1EUgy3ZMafM40KguXD2wGkctLmyoelTEX2TEDa8TBZKot3lRmK1vyI3wCzNY/Jb5chGq9J5zWFpPlSvn+NPeqj+8UGCZ+bCb0unFH5OdOEKTmQ46cYgL6d3RRbpwoxbG/twg/bAfJ0iiSNTJfXjXDLKT9j+YyeCerbnh7rT/qCuwO+W/HIsnu0waCXvXGAKXGAAE+xvnBygp/YS6I4Y26V2CBIF8KJEWIF/CuooHzraa5c1hg50h5YZnZ9EwVXxFRdsFSNxle9uNe2iJ08FEV6VyHPybYsOnA37yM7E8wCLbcKRKavAyVT7OykLU2GAAOCdcN8tpSDA/kwKx3imZhyjGGUrYQxVN/bCb4hhBX+OymcVIw2gQFkJ/sc09ck+Vo77FVR6JVi0tCjan7x4oCTQfbEa5lkioMjKgY6JDfRVZdX6HUjlJTw=
+    dist: ubuntu/focal
     local-dir: release
     package_glob: "*.deb"
     skip_cleanup: true
@@ -111,11 +111,11 @@ deploy:
       tags: true
       condition: "$TRAVIS_OS_NAME = linux"
   - provider: packagecloud
-    repository: "pkgs"
-    username: "golift"
+    repository: pkgs
+    username: golift
     token:
-      secure: "1vzsIxgcDkMkkmxpvaw3vEMt4cbDNpk3UMeiv5qnHJ9/k0D6+VhNVS0I3QLgP5+WQgH11Y0YX00NvcY13M+hSj6vLhPCBroFisXJyDpg/f/bxyHxILFeO6AY/CSFbdLzyLcjJo5SC7JedEhqd4xeqjEo14FxGrzKB7guOBCdOQPtaFxfimm02vNt34LoLGYOfZMek2vt50qAR8ChvX2fG/gGxfAlQ4AYvppJLwfPs4jwMN1rrndDI1EUgy3ZMafM40KguXD2wGkctLmyoelTEX2TEDa8TBZKot3lRmK1vyI3wCzNY/Jb5chGq9J5zWFpPlSvn+NPeqj+8UGCZ+bCb0unFH5OdOEKTmQ46cYgL6d3RRbpwoxbG/twg/bAfJ0iiSNTJfXjXDLKT9j+YyeCerbnh7rT/qCuwO+W/HIsnu0waCXvXGAKXGAAE+xvnBygp/YS6I4Y26V2CBIF8KJEWIF/CuooHzraa5c1hg50h5YZnZ9EwVXxFRdsFSNxle9uNe2iJ08FEV6VyHPybYsOnA37yM7E8wCLbcKRKavAyVT7OykLU2GAAOCdcN8tpSDA/kwKx3imZhyjGGUrYQxVN/bCb4hhBX+OymcVIw2gQFkJ/sc09ck+Vo77FVR6JVi0tCjan7x4oCTQfbEa5lkioMjKgY6JDfRVZdX6HUjlJTw="
-    dist: "el/6"
+      secure: 1vzsIxgcDkMkkmxpvaw3vEMt4cbDNpk3UMeiv5qnHJ9/k0D6+VhNVS0I3QLgP5+WQgH11Y0YX00NvcY13M+hSj6vLhPCBroFisXJyDpg/f/bxyHxILFeO6AY/CSFbdLzyLcjJo5SC7JedEhqd4xeqjEo14FxGrzKB7guOBCdOQPtaFxfimm02vNt34LoLGYOfZMek2vt50qAR8ChvX2fG/gGxfAlQ4AYvppJLwfPs4jwMN1rrndDI1EUgy3ZMafM40KguXD2wGkctLmyoelTEX2TEDa8TBZKot3lRmK1vyI3wCzNY/Jb5chGq9J5zWFpPlSvn+NPeqj+8UGCZ+bCb0unFH5OdOEKTmQ46cYgL6d3RRbpwoxbG/twg/bAfJ0iiSNTJfXjXDLKT9j+YyeCerbnh7rT/qCuwO+W/HIsnu0waCXvXGAKXGAAE+xvnBygp/YS6I4Y26V2CBIF8KJEWIF/CuooHzraa5c1hg50h5YZnZ9EwVXxFRdsFSNxle9uNe2iJ08FEV6VyHPybYsOnA37yM7E8wCLbcKRKavAyVT7OykLU2GAAOCdcN8tpSDA/kwKx3imZhyjGGUrYQxVN/bCb4hhBX+OymcVIw2gQFkJ/sc09ck+Vo77FVR6JVi0tCjan7x4oCTQfbEa5lkioMjKgY6JDfRVZdX6HUjlJTw=
+    dist: el/6
     local-dir: release
     package_glob: "*.rpm"
     skip_cleanup: true
