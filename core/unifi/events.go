@@ -42,7 +42,7 @@ func (u *Unifi) GetSiteEvents(site *Site, hours time.Duration) ([]*Event, error)
 		hours = time.Hour
 	}
 
-	u.DebugLog("Polling Controller, retreiving UniFi Events, site %s (%s)", site.Name, site.Desc)
+	u.DebugLog("Polling Controller, retreiving UniFi Events, site %s", site.SiteName)
 
 	var (
 		path   = fmt.Sprintf(APIEventPath, site.Name)
@@ -61,7 +61,7 @@ func (u *Unifi) GetSiteEvents(site *Site, hours time.Duration) ([]*Event, error)
 		// Add special SourceName value.
 		event.Data[i].SourceName = u.URL
 		// Add the special "Site Name" to each event. This becomes a Grafana filter somewhere.
-		event.Data[i].SiteName = site.Desc + " (" + site.Name + ")"
+		event.Data[i].SiteName = site.SiteName
 	}
 
 	sort.Sort(event.Data)

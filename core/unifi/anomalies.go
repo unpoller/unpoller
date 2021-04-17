@@ -47,7 +47,7 @@ func (u *Unifi) GetAnomaliesSite(site *Site, timeRange ...time.Time) ([]*Anomaly
 		return nil, ErrNoSiteProvided
 	}
 
-	u.DebugLog("Polling Controller for Anomalies, site %s (%s)", site.Name, site.Desc)
+	u.DebugLog("Polling Controller for Anomalies, site %s", site.SiteName)
 
 	var (
 		path      = fmt.Sprintf(APIAnomaliesPath, site.Name)
@@ -68,7 +68,7 @@ func (u *Unifi) GetAnomaliesSite(site *Site, timeRange ...time.Time) ([]*Anomaly
 			anomalies = append(anomalies, &Anomaly{
 				Datetime:   time.Unix(ts/int64(time.Microsecond), 0),
 				SourceName: u.URL,
-				SiteName:   site.Desc + " (" + site.Name + ")",
+				SiteName:   site.SiteName,
 				Anomaly:    d.Anomaly,
 				DeviceMAC:  d.MAC,
 				//				DeviceName: d.Anomaly,

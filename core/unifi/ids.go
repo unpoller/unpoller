@@ -79,7 +79,7 @@ func (u *Unifi) GetIDSSite(site *Site, timeRange ...time.Time) ([]*IDS, error) {
 		return nil, ErrNoSiteProvided
 	}
 
-	u.DebugLog("Polling Controller for IDS Events, site %s (%s)", site.Name, site.Desc)
+	u.DebugLog("Polling Controller for IDS Events, site %s", site.SiteName)
 
 	var (
 		path = fmt.Sprintf(APIEventPathIDS, site.Name)
@@ -98,7 +98,7 @@ func (u *Unifi) GetIDSSite(site *Site, timeRange ...time.Time) ([]*IDS, error) {
 		// Add special SourceName value.
 		ids.Data[i].SourceName = u.URL
 		// Add the special "Site Name" to each event. This becomes a Grafana filter somewhere.
-		ids.Data[i].SiteName = site.Desc + " (" + site.Name + ")"
+		ids.Data[i].SiteName = site.SiteName
 	}
 
 	sort.Sort(ids.Data)
