@@ -11,10 +11,11 @@ import (
 
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
-	"github.com/prometheus/common/version"
+	promver "github.com/prometheus/common/version"
 	"github.com/unifi-poller/poller"
 	"github.com/unifi-poller/unifi"
 	"github.com/unifi-poller/webserver"
+	"golift.io/version"
 )
 
 // PluginName is the name of this plugin.
@@ -141,9 +142,12 @@ func (u *promUnifi) Run(c poller.Collect) error {
 	u.RogueAP = descRogueAP(u.Namespace + "_rogueap_")
 
 	mux := http.NewServeMux()
+	promver.Version = version.Version
+	promver.Revision = version.Revision
+	promver.Branch = version.Branch
 
 	webserver.UpdateOutput(&webserver.Output{Name: PluginName, Config: u.Config})
-	prometheus.MustRegister(version.NewCollector(u.Namespace))
+	prometheus.MustRegister(promver.NewCollector(u.Namespace))
 	prometheus.MustRegister(u)
 	mux.Handle("/metrics", promhttp.HandlerFor(prometheus.DefaultGatherer,
 		promhttp.HandlerOpts{ErrorHandling: promhttp.ContinueOnError},
