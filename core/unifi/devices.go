@@ -45,7 +45,7 @@ func (u *Unifi) GetUSWs(site *Site) ([]*USW, error) {
 	return u.parseDevices(response.Data, site).USWs, nil
 }
 
-// GetUSWs returns all access points, an error, or nil if there are no APs.
+// GetUAPs returns all access points, an error, or nil if there are no APs.
 func (u *Unifi) GetUAPs(site *Site) ([]*UAP, error) {
 	var response struct {
 		Data []json.RawMessage `json:"data"`
@@ -59,7 +59,7 @@ func (u *Unifi) GetUAPs(site *Site) ([]*UAP, error) {
 	return u.parseDevices(response.Data, site).UAPs, nil
 }
 
-// GetUSWs returns all dream machines, an error, or nil if there are no UDMs.
+// GetUDMs returns all dream machines, an error, or nil if there are no UDMs.
 func (u *Unifi) GetUDMs(site *Site) ([]*UDM, error) {
 	var response struct {
 		Data []json.RawMessage `json:"data"`
@@ -73,7 +73,7 @@ func (u *Unifi) GetUDMs(site *Site) ([]*UDM, error) {
 	return u.parseDevices(response.Data, site).UDMs, nil
 }
 
-// GetUSWs returns all 10Gb gateways, an error, or nil if there are no UXGs.
+// GetUXGs returns all 10Gb gateways, an error, or nil if there are no UXGs.
 func (u *Unifi) GetUXGs(site *Site) ([]*UXG, error) {
 	var response struct {
 		Data []json.RawMessage `json:"data"`
@@ -87,7 +87,7 @@ func (u *Unifi) GetUXGs(site *Site) ([]*UXG, error) {
 	return u.parseDevices(response.Data, site).UXGs, nil
 }
 
-// GetUSWs returns all 1Gb gateways, an error, or nil if there are no USGs.
+// GetUSGs returns all 1Gb gateways, an error, or nil if there are no USGs.
 func (u *Unifi) GetUSGs(site *Site) ([]*USG, error) {
 	var response struct {
 		Data []json.RawMessage `json:"data"`
@@ -114,7 +114,7 @@ func (u *Unifi) parseDevices(data []json.RawMessage, site *Site) *Devices {
 		}
 
 		assetType, _ := o["type"].(string)
-		u.DebugLog("Unmarshalling Device Type: %v, site %s ", assetType, site.Name)
+		u.DebugLog("Unmarshalling Device Type: %v, site %s ", assetType, site.SiteName)
 		// Choose which type to unmarshal into based on the "type" json key.
 
 		switch assetType { // Unmarshal again into the correct type..
@@ -137,7 +137,7 @@ func (u *Unifi) parseDevices(data []json.RawMessage, site *Site) *Devices {
 }
 
 func (u *Unifi) unmarshallUAP(site *Site, payload json.RawMessage, devices *Devices) {
-	dev := &UAP{SiteName: site.Name, SourceName: u.URL}
+	dev := &UAP{SiteName: site.SiteName, SourceName: u.URL}
 	if u.unmarshalDevice("uap", payload, dev) == nil {
 		dev.Name = strings.TrimSpace(pick(dev.Name, dev.Mac))
 		dev.site = site
@@ -146,7 +146,7 @@ func (u *Unifi) unmarshallUAP(site *Site, payload json.RawMessage, devices *Devi
 }
 
 func (u *Unifi) unmarshallUSG(site *Site, payload json.RawMessage, devices *Devices) {
-	dev := &USG{SiteName: site.Name, SourceName: u.URL}
+	dev := &USG{SiteName: site.SiteName, SourceName: u.URL}
 	if u.unmarshalDevice("ugw", payload, dev) == nil {
 		dev.Name = strings.TrimSpace(pick(dev.Name, dev.Mac))
 		dev.site = site
@@ -155,7 +155,7 @@ func (u *Unifi) unmarshallUSG(site *Site, payload json.RawMessage, devices *Devi
 }
 
 func (u *Unifi) unmarshallUSW(site *Site, payload json.RawMessage, devices *Devices) {
-	dev := &USW{SiteName: site.Name, SourceName: u.URL}
+	dev := &USW{SiteName: site.SiteName, SourceName: u.URL}
 	if u.unmarshalDevice("usw", payload, dev) == nil {
 		dev.Name = strings.TrimSpace(pick(dev.Name, dev.Mac))
 		dev.site = site
@@ -164,7 +164,7 @@ func (u *Unifi) unmarshallUSW(site *Site, payload json.RawMessage, devices *Devi
 }
 
 func (u *Unifi) unmarshallUXG(site *Site, payload json.RawMessage, devices *Devices) {
-	dev := &UXG{SiteName: site.Name, SourceName: u.URL}
+	dev := &UXG{SiteName: site.SiteName, SourceName: u.URL}
 	if u.unmarshalDevice("uxg", payload, dev) == nil {
 		dev.Name = strings.TrimSpace(pick(dev.Name, dev.Mac))
 		dev.site = site
@@ -173,7 +173,7 @@ func (u *Unifi) unmarshallUXG(site *Site, payload json.RawMessage, devices *Devi
 }
 
 func (u *Unifi) unmarshallUDM(site *Site, payload json.RawMessage, devices *Devices) {
-	dev := &UDM{SiteName: site.Name, SourceName: u.URL}
+	dev := &UDM{SiteName: site.SiteName, SourceName: u.URL}
 	if u.unmarshalDevice("udm", payload, dev) == nil {
 		dev.Name = strings.TrimSpace(pick(dev.Name, dev.Mac))
 		dev.site = site

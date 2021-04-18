@@ -604,7 +604,7 @@ func (u *Unifi) GetRogueAPsSite(site *Site) ([]*RogueAP, error) {
 		return nil, ErrNoSiteProvided
 	}
 
-	u.DebugLog("Polling Controller for RogueAPs, site %s (%s)", site.Name, site.Desc)
+	u.DebugLog("Polling Controller for RogueAPs, site %s (%s)", site.SiteName, site.Desc)
 
 	var (
 		path     = fmt.Sprintf(APIRogueAP, site.Name)
@@ -621,7 +621,7 @@ func (u *Unifi) GetRogueAPsSite(site *Site) ([]*RogueAP, error) {
 		// Add special SourceName value.
 		rogueaps.Data[i].SourceName = u.URL
 		// Add the special "Site Name" to each event. This becomes a Grafana filter somewhere.
-		rogueaps.Data[i].SiteName = site.Desc + " (" + site.Name + ")"
+		rogueaps.Data[i].SiteName = site.SiteName
 	}
 
 	return rogueaps.Data, nil

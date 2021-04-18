@@ -41,7 +41,7 @@ func (u *Unifi) GetSiteDPI(sites []*Site) ([]*DPITable, error) {
 	data := []*DPITable{}
 
 	for _, site := range sites {
-		u.DebugLog("Polling Controller, retreiving Site DPI data, site %s (%s) ", site.Name, site.Desc)
+		u.DebugLog("Polling Controller, retreiving Site DPI data, site %s", site.SiteName)
 
 		var response struct {
 			Data []*DPITable `json:"data"`
@@ -55,7 +55,7 @@ func (u *Unifi) GetSiteDPI(sites []*Site) ([]*DPITable, error) {
 		if l := len(response.Data); l > 1 {
 			return nil, ErrDPIDataBug
 		} else if l == 0 {
-			u.DebugLog("Site DPI data missing! Is DPI enabled in UniFi controller? Site %s (%s) ", site.Name, site.Desc)
+			u.DebugLog("Site DPI data missing! Is DPI enabled in UniFi controller? Site %s", site.SiteName)
 			continue
 		}
 

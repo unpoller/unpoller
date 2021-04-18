@@ -14,7 +14,7 @@ func (u *Unifi) GetClients(sites []*Site) ([]*Client, error) {
 			Data []*Client `json:"data"`
 		}
 
-		u.DebugLog("Polling Controller, retreiving UniFi Clients, site %s (%s) ", site.Name, site.Desc)
+		u.DebugLog("Polling Controller, retreiving UniFi Clients, site %s ", site.SiteName)
 
 		clientPath := fmt.Sprintf(APIClientPath, site.Name)
 		if err := u.GetData(clientPath, &response); err != nil {
@@ -25,7 +25,7 @@ func (u *Unifi) GetClients(sites []*Site) ([]*Client, error) {
 			// Add special SourceName value.
 			response.Data[i].SourceName = u.URL
 			// Add the special "Site Name" to each client. This becomes a Grafana filter somewhere.
-			response.Data[i].SiteName = site.Desc + " (" + site.Name + ")"
+			response.Data[i].SiteName = site.SiteName
 			// Fix name and hostname fields. Sometimes one or the other is blank.
 			response.Data[i].Hostname = strings.TrimSpace(pick(d.Hostname, d.Name, d.Mac))
 			response.Data[i].Name = strings.TrimSpace(pick(d.Name, d.Hostname))
@@ -42,7 +42,7 @@ func (u *Unifi) GetClientsDPI(sites []*Site) ([]*DPITable, error) {
 	var data []*DPITable
 
 	for _, site := range sites {
-		u.DebugLog("Polling Controller, retreiving Client DPI data, site %s (%s) ", site.Name, site.Desc)
+		u.DebugLog("Polling Controller, retreiving Client DPI data, site %s", site.SiteName)
 
 		var response struct {
 			Data []*DPITable `json:"data"`

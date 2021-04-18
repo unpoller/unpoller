@@ -76,7 +76,7 @@ func (u *Unifi) GetAlarmsSite(site *Site) ([]*Alarm, error) {
 		return nil, ErrNoSiteProvided
 	}
 
-	u.DebugLog("Polling Controller for Alarms, site %s (%s)", site.Name, site.Desc)
+	u.DebugLog("Polling Controller for Alarms, site %s", site.SiteName)
 
 	var (
 		path   = fmt.Sprintf(APIEventPathAlarms, site.Name)
@@ -93,7 +93,7 @@ func (u *Unifi) GetAlarmsSite(site *Site) ([]*Alarm, error) {
 		// Add special SourceName value.
 		alarms.Data[i].SourceName = u.URL
 		// Add the special "Site Name" to each event. This becomes a Grafana filter somewhere.
-		alarms.Data[i].SiteName = site.Desc + " (" + site.Name + ")"
+		alarms.Data[i].SiteName = site.SiteName
 	}
 
 	sort.Sort(alarms.Data)
