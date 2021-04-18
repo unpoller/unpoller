@@ -80,6 +80,7 @@ deploy:
     dist: ubuntu/focal
     local-dir: release
     package_glob: "*.deb"
+    skip_cleanup: true
     cleanup: false
     on:
       branch: unstable
@@ -92,6 +93,7 @@ deploy:
     dist: el/6
     local-dir: release
     package_glob: "*.rpm"
+    skip_cleanup: true
     cleanup: false
     on:
       branch: unstable
