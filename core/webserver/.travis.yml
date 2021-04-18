@@ -3,7 +3,7 @@ go:
 - 1.16.x
 before_install:
   # download super-linter: golangci-lint
-- curl -sL https://install.goreleaser.com/github.com/golangci/golangci-lint.sh | sh -s -- -b $(go env GOPATH)/bin latest
+- curl -sL https://install.goreleaser.com/github.com/golangci/golangci-lint.sh | sh -s -- -b $(go env GOPATH)/bin v1.38.0
 script:
 - go test ./...
-- golangci-lint run --enable-all -D exhaustivestruct,nlreturn
+- golangci-lint run --enable-all -D exhaustivestruct,nlreturn,interfacer,maligned

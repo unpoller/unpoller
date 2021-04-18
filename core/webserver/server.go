@@ -108,7 +108,7 @@ func (s *Server) Start() (err error) {
 func (s *Server) newRouter() *mux.Router {
 	router := mux.NewRouter()
 	// special routes
-	// router.Handle("/debug/vars", http.DefaultServeMux).Methods("GET")      // unauthenticated expvar
+	router.Handle("/debug/vars", http.DefaultServeMux).Methods("GET")        // unauthenticated expvar
 	router.HandleFunc("/health", s.handleLog(s.handleHealth)).Methods("GET") // unauthenticated health
 	// main web app/files/js/css
 	router.HandleFunc("/", s.basicAuth(s.handleIndex)).Methods("GET", "POST")
