@@ -289,14 +289,13 @@ github.com/unifi-poller/poller v0.0.0-20210315011940-c43dc3c221b4/go.mod h1:fOba
 github.com/unifi-poller/poller v0.0.0-20210315075554-47d92433b172/go.mod h1:5DN7IF0zmDcN7LqyCMcFfn1dAWxPc1d0z5QDyWYOaqs=
 github.com/unifi-poller/poller v0.0.0-20210418074507-efda34dd8222 h1:hAJT3PdQnIHJdp+QXtMXGuOtNCMj/oxnHYtthuJ5shQ=
 github.com/unifi-poller/poller v0.0.0-20210418074507-efda34dd8222/go.mod h1:3SHhmBT2BLuzkfeZQ87xBvy5LInGIRDDtxB09Cw9sOU=
-github.com/unifi-poller/promunifi v0.0.0-20210418074332-f15144f260be h1:hg+SEmQbqNT7SnX/OZaJK/of6Fy0ormTgicxg0kK/Fo=
-github.com/unifi-poller/promunifi v0.0.0-20210418074332-f15144f260be/go.mod h1:YZqL5fGfERT9muwc+WZkjduWaluy/Sb/LXhpefeUnso=
 github.com/unifi-poller/promunifi v0.0.0-20210418114237-ad8c36790d09 h1:Jh/E/v7QIX069RFdX0H6obg0ynrXxTR9qehgQWXd3Pk=
 github.com/unifi-poller/promunifi v0.0.0-20210418114237-ad8c36790d09/go.mod h1:SUhFeUwbzz70j8huZ/EGpjHfJuUt1CNV+g/CrdA/EcM=
 github.com/unifi-poller/unifi v0.0.8 h1:FsIbkjESCeo30y8bxGxKgpyZ29HP77mSLpifK2vq/aI=
 github.com/unifi-poller/unifi v0.0.8/go.mod h1:yRbmgFFG/RIMWVMgvkrzHAopW2adI4XctanAjxFdgRU=
-github.com/unifi-poller/webserver v0.0.0-20210325090816-b4db5feaea83 h1:hkjrygMwANXCUdRBCwQ0Z7Sew4G4d30tjYuAYVmhdKc=
 github.com/unifi-poller/webserver v0.0.0-20210325090816-b4db5feaea83/go.mod h1:elxTpcA1Zml/3BNjNAF2pmUM8QeE4Yn08uqraPnsTQw=
+github.com/unifi-poller/webserver v0.0.0-20210418211813-0ba1b3d0ac0b h1:7gLI/qRX6Rur8O+diUPC5+GIQ1REYUxkgjmckwQbZno=
+github.com/unifi-poller/webserver v0.0.0-20210418211813-0ba1b3d0ac0b/go.mod h1:WNmi21K2elVGWNiSb+0yamSk/Lkfb4FRJOPlhENqqC4=
 github.com/urfave/cli v1.20.0/go.mod h1:70zkFmudgCuE/ngEzBv17Jvp/497gISqfk5gWijbERA=
 github.com/urfave/cli v1.22.1/go.mod h1:Gos4lmkARVdJ6EkW0WaNv/tZAAMe9V7XWyB60NtXRu0=
 github.com/xiang90/probing v0.0.0-20190116061207-43a291ad63a2/go.mod h1:UETIi67q53MR2AWcXfiuqkDkRtnGDLqkBTpCHuJHxtU=
