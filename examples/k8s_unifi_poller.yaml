@@ -40,21 +40,21 @@ spec:
           subPath: unifi-poller.conf
       volumes:
       - name: config-volume
-        configMap:
-          name: unifi-poller
+        secret:
+          secretName: unifi-poller
 
 
 # Add Config Map for Unifi Poller
 ---
 apiVersion: v1
-kind: ConfigMap
+kind: Secret
 metadata:
   name: unifi-poller
   namespace: monitoring
   labels:
     app: unifi-poller
     type: poller
-data:
+stringData:
   unifi-poller.conf: |
       [poller]
           debug = false
@@ -67,10 +67,10 @@ data:
       [unifi]
           dynamic = false
       [loki]
-#Point to your own Loki service
+      #Point to your own Loki service
           url = "http://loki.monitoring.svc.cluster.local:3100"
       [[unifi.controller]]
-#Change to your own URL
+      #Change to your own URL
           url         = "https://xx.xx.xx.xx"
           user        = "xxx"
           pass        = "xxx"
