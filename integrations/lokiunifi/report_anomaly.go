@@ -3,7 +3,7 @@ package lokiunifi
 import (
 	"strconv"
 
-	"github.com/unifi-poller/unifi"
+	"github.com/unpoller/unifi"
 )
 
 const typeAnomaly = "Anomaly"

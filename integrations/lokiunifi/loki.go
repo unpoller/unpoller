@@ -7,8 +7,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/unifi-poller/poller"
-	"github.com/unifi-poller/webserver"
+	"github.com/unpoller/poller"
+	"github.com/unpoller/webserver"
 	"golift.io/cnfg"
 )
 

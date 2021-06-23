@@ -1,6 +1,6 @@
 # lokiunifi
 
-Loki Output Plugin for UniFi Poller
+Loki Output Plugin for UnPoller
 
 This plugin writes UniFi Events and IDS data to Loki. Maybe Alarms too.
 
