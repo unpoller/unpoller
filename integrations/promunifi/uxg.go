@@ -1,7 +1,7 @@
 package promunifi
 
 import (
-	"github.com/unifi-poller/unifi"
+	"github.com/unpoller/unifi"
 )
 
 // exportUXG is a collection of stats from USG and USW. It has no unique stats.

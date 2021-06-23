@@ -2,7 +2,7 @@ package promunifi
 
 import (
 	"github.com/prometheus/client_golang/prometheus"
-	"github.com/unifi-poller/unifi"
+	"github.com/unpoller/unifi"
 )
 
 type usw struct {

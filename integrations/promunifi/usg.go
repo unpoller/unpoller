@@ -5,7 +5,7 @@ import (
 	"strings"
 
 	"github.com/prometheus/client_golang/prometheus"
-	"github.com/unifi-poller/unifi"
+	"github.com/unpoller/unifi"
 )
 
 type usg struct {

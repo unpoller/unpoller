@@ -1,4 +1,4 @@
-// Package promunifi provides the bridge between unifi-poller metrics and prometheus.
+// Package promunifi provides the bridge between unpoller metrics and prometheus.
 package promunifi
 
 import (
@@ -12,9 +12,9 @@ import (
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	promver "github.com/prometheus/common/version"
-	"github.com/unifi-poller/poller"
-	"github.com/unifi-poller/unifi"
-	"github.com/unifi-poller/webserver"
+	"github.com/unpoller/poller"
+	"github.com/unpoller/unifi"
+	"github.com/unpoller/webserver"
 	"golift.io/version"
 )
 

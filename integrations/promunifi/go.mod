@@ -1,16 +1,15 @@
-module github.com/unifi-poller/promunifi
+module github.com/unpoller/promunifi
 
 go 1.16
 
 require (
+	github.com/go-kit/kit v0.10.0 // indirect
 	github.com/golang/protobuf v1.5.2 // indirect
-	github.com/prometheus/client_golang v1.10.0
-	github.com/prometheus/common v0.20.0
-	github.com/unifi-poller/poller v0.0.0-20210315075554-47d92433b172
-	github.com/unifi-poller/unifi v0.0.8
-	github.com/unifi-poller/webserver v0.0.0-20210325090816-b4db5feaea83
-	golang.org/x/crypto v0.0.0-20210415154028-4f45737414dc // indirect
-	golang.org/x/sys v0.0.0-20210415045647-66c3f260301c // indirect
-	golang.org/x/term v0.0.0-20210406210042-72f3dc4e9b72 // indirect
+	github.com/prometheus/client_golang v1.11.0
+	github.com/prometheus/common v0.29.0
+	github.com/unpoller/poller v0.0.0-20210623101401-f12841d79a28
+	github.com/unpoller/unifi v0.0.9-0.20210623100314-3dccfdbc4c80
+	github.com/unpoller/webserver v0.0.0-20210623101543-90d89bb0acdf
+	golang.org/x/net v0.0.0-20210614182718-04defd469f4e // indirect
 	golift.io/version v0.0.2
 )
