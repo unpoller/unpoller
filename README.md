@@ -17,7 +17,7 @@ included; with screenshots. Six for InfluxDB and six for Prometheus.
 
 ## Installation
 
-[See the Documentation!](https://unifipoller.com)
+[See the Documentation!](https://unpoller.com)
 We're willing to help if you have troubles.
 Open an [Issue](https://github.com/unpoller/unpoller/issues) and
 we'll figure out how to get things working for you. You can also get help in
@@ -63,7 +63,7 @@ It works just fine on Windows too.
 ## What's it look like?
 
 There are 12 total dashboards available; the 6 InfluxDB dashboards are very similar
-to the 6 Prometheus dashboards. On the [documentaton website](https://unifipoller.com)
+to the 6 Prometheus dashboards. On the [documentaton website](https://unpoller.com)
 you'll find screenshots of some of the dashboards.
 
 ## Integrations
