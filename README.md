@@ -1,14 +1,14 @@
-<img width="320px" src="https://raw.githubusercontent.com/wiki/unifi-poller/unifi-poller/images/unifi-poller-logo.png">
+<img width="320px" src="https://unpoller.com/img/unpoller.png">
 
 [![discord](https://badgen.net/badge/icon/Discord?color=0011ff&label&icon=https://simpleicons.now.sh/discord/eee "Ubiquiti Discord")](https://discord.gg/KnyKYt2)
 [![grafana](https://badgen.net/https/golift.io/bd/grafana/dashboard-downloads/11310,10419,10414,10415,10416,10417,10418,11311,11312,11313,11314,11315?icon=https://simpleicons.now.sh/grafana/ED7F38&color=0011ff "Grafana Dashboard Downloads")](http://grafana.com/dashboards?search=unifi-poller)
 [![pulls](https://badgen.net/docker/pulls/golift/unifi-poller?icon=https://simpleicons.now.sh/docker/38B1ED&label=pulls&color=0011ff "Docker Pulls")](https://hub.docker.com/r/golift/unifi-poller)
-[![DLs](https://img.shields.io/github/downloads/unifi-poller/unifi-poller/total.svg?logo=github&color=0116ff "GitHub Downloads")](https://www.somsubhra.com/github-release-stats/?username=unifi-poller&repository=unifi-poller)
+[![DLs](https://img.shields.io/github/downloads/unifi-poller/unifi-poller/total.svg?logo=github&color=0116ff "GitHub Downloads")](https://www.somsubhra.com/github-release-stats/?username=unpoller&repository=unpoller)
 
 [![unifi](https://badgen.net/badge/UniFi/5.12.x,5.13.x,UAP,USG,USW,UDM?list=|&icon=https://docs.golift.io/svg/ubiquiti_color.svg&color=0099ee "UniFi Products Supported")](https://github.com/golift/unifi)
 [![builer](https://badgen.net/badge/go/Application%20Builder?label=&icon=https://docs.golift.io/svg/go.svg&color=0099ee "Go Application Builder")](https://github.com/golift/application-builder)
-[![stars](https://badgen.net/github/stars/unifi-poller/unifi-poller?icon=https://simpleicons.now.sh/macys/fab&label=&color=0099ee "GitHub Stars")](https://github.com/unifi-poller/unifi-poller)
-[![travis](https://badgen.net/travis/unifi-poller/unifi-poller?icon=travis&label=build "Travis Build")](https://travis-ci.org/unifi-poller/unifi-poller)
+[![stars](https://badgen.net/github/stars/unifi-poller/unifi-poller?icon=https://simpleicons.now.sh/macys/fab&label=&color=0099ee "GitHub Stars")](https://github.com/unpoller/unpoller)
+[![travis](https://badgen.net/travis/unifi-poller/unifi-poller?icon=travis&label=build "Travis Build")](https://travis-ci.com/unpoller/unpoller)
 
 Collect your UniFi controller data and report it to an InfluxDB instance,
 or export it for Prometheus collection.
@@ -19,7 +19,7 @@ included; with screenshots. Six for InfluxDB and six for Prometheus.
 
 [See the Documentation!](https://unifipoller.com)
 We're willing to help if you have troubles.
-Open an [Issue](https://github.com/unifi-poller/unifi-poller/issues) and
+Open an [Issue](https://github.com/unpoller/unpoller/issues) and
 we'll figure out how to get things working for you. You can also get help in
 the #unifi-poller channel on the [Ubiquiti Discord server](https://discord.gg/KnyKYt2). There'se also
 [a forum post](https://community.ui.com/questions/Unifi-Poller-Store-Unifi-Controller-Metrics-in-InfluxDB-without-SNMP/58a0ea34-d2b3-41cd-93bb-d95d3896d1a1)
@@ -34,9 +34,9 @@ you may use to get additional help.
 device configuration. This controller can be installed on Windows, macOS, FreeBSD,
 Linux or Docker. Ubiquiti also provides a dedicated hardware device called a
 [CloudKey](https://www.ui.com/unifi/unifi-cloud-key/) that runs the controller software.
-More recently they've developed the Dream Machine, and UniFi Poller can collect its data!
+More recently they've developed the Dream Machine, and UnPoller can collect its data!
 
-UniFi Poller is a small Golang application that runs on Windows, macOS, FreeBSD,
+UnPoller is a small Golang application that runs on Windows, macOS, FreeBSD,
 Linux or Docker. In Influx-mode it polls a UniFi controller every 30 seconds for
 measurements and exports the data to an Influx database. In Prometheus mode the
 poller opens a web port and accepts Prometheus polling. It converts the UniFi
@@ -44,9 +44,9 @@ Controller API data into Prometheus exports on the fly.
 
 This application requires your controller to be running all the time. If you run
 a UniFi controller, there's no excuse not to install
-[Influx](https://github.com/unifi-poller/unifi-poller/wiki/InfluxDB) or
+Influx or
 [Prometheus](https://prometheus.io),
-[Grafana](https://github.com/unifi-poller/unifi-poller/wiki/Grafana) and this app.
+Grafana and this app.
 You'll have a plethora of data at your fingertips and the ability to craft custom
 graphs to slice the data any way you choose. Good luck!
 
@@ -83,7 +83,7 @@ documentation support. This project succeeds because of them. Thank you!
 </p>
 
 ## Copyright & License
-<img style="float: right;" align="right" width="200px" src="https://raw.githubusercontent.com/wiki/unifi-poller/unifi-poller/images/unifi-poller-logo.png">
+<img style="float: right;" align="right" width="200px" src="https://unpoller.com/img/unpoller.png">
 
 -   Copyright © 2018-2020 David Newhall II.
 -   See [LICENSE](LICENSE) for license information.

@@ -1,11 +1,11 @@
-module github.com/unifi-poller/unifi-poller
+module github.com/unpoller/unpoller
 
 go 1.16
 
 require (
-	github.com/unifi-poller/influxunifi v0.0.0-20210418074400-d2de22bd896d
-	github.com/unifi-poller/inputunifi v0.0.0-20210418074124-7fd4a2cdb411
-	github.com/unifi-poller/lokiunifi v0.0.0-20210418074701-9e27b9fcffc5
-	github.com/unifi-poller/poller v0.0.0-20210418074507-efda34dd8222
-	github.com/unifi-poller/promunifi v0.0.0-20210418114237-ad8c36790d09
+	github.com/unpoller/influxunifi v0.0.0-20210623102357-4b2dc7fa818c
+	github.com/unpoller/inputunifi v0.0.0-20210623102218-06574d44cc6b
+	github.com/unpoller/lokiunifi v0.0.0-20210623102057-0902524b6a8a
+	github.com/unpoller/poller v0.0.0-20210623101401-f12841d79a28
+	github.com/unpoller/promunifi v0.0.0-20210623101918-b986e661ac99
 )

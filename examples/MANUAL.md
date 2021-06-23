@@ -1,9 +1,9 @@
-unifi-poller(1) -- Utility to poll UniFi Controller Metrics and store them in InfluxDB
+unpoller(1) -- Utility to poll UniFi Controller Metrics and store them in InfluxDB
 ===
 
 SYNOPSIS
 ---
-`unifi-poller -c /etc/unifi-poller/up.conf`
+`unpoller -c /etc/unpoller/up.conf`
 
 This daemon polls a UniFi controller at a short interval and stores the collected
 measurements in an Influx Database. The measurements and metrics collected belong
@@ -11,7 +11,7 @@ to every available site, device and client found on the controller. Including
 UniFi Security Gateways, Access Points, Switches and possibly more.
 
 Dashboards for Grafana are available.
-Find them at [Grafana.com](https://grafana.com/dashboards?search=unifi-poller).
+Find them at [Grafana.com](https://grafana.com/dashboards?search=unpoller).
 
 DESCRIPTION
 ---
@@ -24,7 +24,7 @@ examples and default configurations.
 
 OPTIONS
 ---
-`unifi-poller [-c <config-file>,[config-file]] [-j <filter>] [-e <pass>] [-h] [-v]`
+`unpoller [-c <config-file>,[config-file]] [-j <filter>] [-e <pass>] [-h] [-v]`
 
     -c, --config <config-file>,[config-file]
         Provide a configuration file (instead of the default). You may provide
@@ -50,7 +50,7 @@ OPTIONS
         printing the JSON payload; it does not daemonize or report to InfluxDB
         with this option. The `other` option is special. This allows you request
         any api path. It must be enclosed in quotes with the word other. Example:
-           unifi-poller -j "other /stat/admins"
+           unpoller -j "other /stat/admins"
 
     -h, --help
         Display usage and exit.
@@ -58,9 +58,9 @@ OPTIONS
 CONFIGURATION
 ---
 *   Config File Default Location:
-    *   Mac/BSD: `/usr/local/etc/unifi-poller/up.conf`
-    *   Windows: `C:\\ProgramData\\unifi-poller\\up.conf`
-    *   Others:  `/etc/unifi-poller/up.conf`
+    *   Mac/BSD: `/usr/local/etc/unpoller/up.conf`
+    *   Windows: `C:\\ProgramData\\unpoller\\up.conf`
+    *   Others:  `/etc/unpoller/up.conf`
 *   Config File Default Format: `TOML`
 *   Possible formats: `JSON`, `TOML`, `YAML`
 
@@ -75,14 +75,14 @@ used to work but no longer does.
 
 Configuration file (up.conf) parameters are documented in the wiki.
 
-*   [https://github.com/unifi-poller/unifi-poller/wiki/Configuration](https://github.com/unifi-poller/unifi-poller/wiki/Configuration)
+*   [https://github.com/unpoller/unpoller/wiki/Configuration](https://github.com/unpoller/unpoller/wiki/Configuration)
 
 `Shell Environment Parameters`
 
 This application can be fully configured using shell environment variables.
 Find documentation for this feature on the Docker Wiki page, and the above Configuration wiki.
 
-*   [https://github.com/unifi-poller/unifi-poller/wiki/Docker](https://github.com/unifi-poller/unifi-poller/wiki/Docker)
+*   [https://github.com/unpoller/unpoller/wiki/Docker](https://github.com/unpoller/unpoller/wiki/Docker)
 
 GO DURATION
 ---
@@ -104,6 +104,6 @@ AUTHOR
 
 LOCATION
 ---
-*   UniFi Poller: [https://golift.io/unifi-poller/](https://golift.io/unifi-poller/)
-*   UniFi Library: [https://github.com/unifi-poller/unifi](https://github.com/unifi-poller/unifi)
-*   Grafana Dashboards: [https://grafana.com/dashboards?search=unifi-poller](https://grafana.com/dashboards?search=unifi-poller)
+*   UniFi Poller: [https://golift.io/unpoller/](https://golift.io/unpoller/)
+*   UniFi Library: [https://github.com/unpoller/unifi](https://github.com/unpoller/unifi)
+*   Grafana Dashboards: [https://grafana.com/dashboards?search=unpoller](https://grafana.com/dashboards?search=unpoller)

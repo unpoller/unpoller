@@ -6,7 +6,7 @@
 source $(dirname "${BASH_SOURCE[0]}")/init/buildinfo.sh
 
 # Must match the repo name.
-BINARY="unifi-poller"
+BINARY="unpoller"
 # Github repo containing homebrew formula repo.
 HBREPO="golift/homebrew-mugs"
 MAINT="David Newhall II <david at sleepers dot pro>"
