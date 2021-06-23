@@ -345,6 +345,8 @@ github.com/unpoller/lokiunifi v0.0.0-20210623102057-0902524b6a8a h1:uYVTxnhNsspp
 github.com/unpoller/lokiunifi v0.0.0-20210623102057-0902524b6a8a/go.mod h1:TVrEHyRoUWJczzYFuP6tCS3mR1gAA7+LV/YILVGEoLs=
 github.com/unpoller/poller v0.0.0-20210623101401-f12841d79a28 h1:YAv5naMdpOFahnxteFFRidZlrSEwLv8V2nBKJKmLmHg=
 github.com/unpoller/poller v0.0.0-20210623101401-f12841d79a28/go.mod h1:AbDp60t5WlLSRELAliMJ0RFQpm/0yXpyolVSZqNtero=
+github.com/unpoller/poller v0.0.0-20210623104748-50161c195d5e h1:tNBIBCmtc7whuhkjKyEzpU3OHzYHyGCBy/LERhHxh3A=
+github.com/unpoller/poller v0.0.0-20210623104748-50161c195d5e/go.mod h1:AbDp60t5WlLSRELAliMJ0RFQpm/0yXpyolVSZqNtero=
 github.com/unpoller/promunifi v0.0.0-20210623101918-b986e661ac99 h1:6x0qUKxU/A5UOUSoUGLbDuaGrXlRkOvdiWDGLnNC8BA=
 github.com/unpoller/promunifi v0.0.0-20210623101918-b986e661ac99/go.mod h1:xZQ+DIFUlI6XJqLHLEXxujWQwSzbESNtHtC0+njvOGA=
 github.com/unpoller/unifi v0.0.9-0.20210623100314-3dccfdbc4c80 h1:XjHGfJhMwnB63DYHgtWGJgDxLhxVcAOtf+cfuvpGoyo=
