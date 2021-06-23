@@ -11,7 +11,7 @@ import (
 	"time"
 
 	"github.com/gorilla/mux"
-	"github.com/unifi-poller/poller"
+	"github.com/unpoller/poller"
 	"golang.org/x/crypto/bcrypt"
 )
 
