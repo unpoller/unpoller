@@ -15,7 +15,7 @@ import (
 
 const (
 	// AppName is the name of the application.
-	AppName = "unifi-poller"
+	AppName = "unpoller"
 	// ENVConfigPrefix is the prefix appended to an env variable tag name.
 	ENVConfigPrefix = "UP"
 )
