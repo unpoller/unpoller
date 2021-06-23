@@ -1,3 +1,3 @@
 # inputunifi
 
-## UniFi Poller Input Plugin
+## UnPoller Input Plugin

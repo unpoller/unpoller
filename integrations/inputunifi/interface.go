@@ -6,9 +6,9 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/unifi-poller/poller"
-	"github.com/unifi-poller/unifi"
-	"github.com/unifi-poller/webserver"
+	"github.com/unpoller/poller"
+	"github.com/unpoller/unifi"
+	"github.com/unpoller/webserver"
 )
 
 var (

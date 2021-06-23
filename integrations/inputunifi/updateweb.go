@@ -5,8 +5,8 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/unifi-poller/unifi"
-	"github.com/unifi-poller/webserver"
+	"github.com/unpoller/unifi"
+	"github.com/unpoller/webserver"
 )
 
 /* This code reformats our data to be displayed on the built-in web interface. */

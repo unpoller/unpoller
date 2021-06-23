@@ -9,8 +9,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/unifi-poller/poller"
-	"github.com/unifi-poller/unifi"
+	"github.com/unpoller/poller"
+	"github.com/unpoller/unifi"
 )
 
 // PluginName is the name of this input plugin.
