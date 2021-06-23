@@ -4,7 +4,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/unifi-poller/unifi"
+	"github.com/unpoller/unifi"
 )
 
 // udmT is used as a name for printed/logged counters.

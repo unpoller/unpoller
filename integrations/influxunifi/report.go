@@ -6,7 +6,7 @@ import (
 	"time"
 
 	influx "github.com/influxdata/influxdb1-client/v2"
-	"github.com/unifi-poller/poller"
+	"github.com/unpoller/poller"
 )
 
 // Report is returned to the calling procedure after everything is processed.
