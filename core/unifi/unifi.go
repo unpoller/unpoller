@@ -142,6 +142,13 @@ func (u *Unifi) Login() error {
 	return nil
 }
 
+// Logout closes the current session
+func (u *Unifi) Logout() error {
+	var response struct {
+	}
+	return u.GetData(APILogoutPath, &response)
+}
+
 // with the release of controller version 5.12.55 on UDM in Jan 2020 the api paths
 // changed and broke this library. This function runs when `NewUnifi()` is called to
 // check if this is a newer controller or not. If it is, we set new to true.

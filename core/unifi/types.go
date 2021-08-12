@@ -28,6 +28,8 @@ const (
 	APIClientDPI string = "/api/s/%s/stat/stadpi"
 	// APIClientPath is Unifi Clients API Path.
 	APIClientPath string = "/api/s/%s/stat/sta"
+	// APIAllUserPath is Unifi Insight all previous Clients API Path.
+	APIAllUserPath string = "/api/s/%s/stat/alluser"
 	// APINetworkPath is where we get data about Unifi networks.
 	APINetworkPath string = "/api/s/%s/rest/networkconf"
 	// APIDevicePath is where we get data about Unifi devices.
@@ -36,6 +38,8 @@ const (
 	APILoginPath string = "/api/login"
 	// APILoginPathNew is how we log into UDM 5.12.55+.
 	APILoginPathNew string = "/api/auth/login"
+	// APILogoutPath is the how we logout from UDM
+	APILogoutPath string = "/api/auth/logout"
 	// APIEventPathIDS returns Intrusion Detection/Prevention Systems Events.
 	APIEventPathIDS string = "/api/s/%s/stat/ips/event"
 	// APIEventPathAlarms contains the site alarms.
