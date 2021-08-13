@@ -142,7 +142,7 @@ func (u *Unifi) Login() error {
 	return nil
 }
 
-// Logout closes the current session
+// Logout closes the current session.
 func (u *Unifi) Logout() error {
 	// a post is needed for logout
 	_, err := u.PostJSON(APILogoutPath)
@@ -296,6 +296,7 @@ func (u *Unifi) UniReqPost(apiPath string, params string) (*http.Request, error)
 	}
 
 	u.setHeaders(req, params)
+
 	return req, nil
 }
 

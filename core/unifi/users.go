@@ -6,15 +6,17 @@ import (
 )
 
 // GetUsers returns a response full of clients that connected to the UDM within the provided amount of time
-// it uses the insight historical connections data set
+// using the insight historical connection data set.
 func (u *Unifi) GetUsers(sites []*Site, hours int) ([]*User, error) {
 	data := make([]*User, 0)
 
 	for _, site := range sites {
-		var response struct {
-			Data []*User `json:"data"`
-		}
-		params := fmt.Sprintf(`{ "type": "all:", "conn": "all", "within":%d }`, hours)
+		var (
+			response struct {
+				Data []*User `json:"data"`
+			}
+			params = fmt.Sprintf(`{ "type": "all:", "conn": "all", "within":%d }`, hours)
+		)
 
 		u.DebugLog("Polling Controller, retrieving UniFi Users, site %s ", site.SiteName)
 
@@ -39,7 +41,7 @@ func (u *Unifi) GetUsers(sites []*Site, hours int) ([]*User, error) {
 	return data, nil
 }
 
-// User defines the metadata available for previously connected clients
+// User defines the metadata available for previously connected clients.
 type User struct {
 	SourceName          string   `json:"-"`
 	SiteName            string   `json:"-"`
