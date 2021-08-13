@@ -38,8 +38,8 @@ const (
 	APILoginPath string = "/api/login"
 	// APILoginPathNew is how we log into UDM 5.12.55+.
 	APILoginPathNew string = "/api/auth/login"
-	// APILogoutPath is the how we logout from UDM
-	APILogoutPath string = "/api/auth/logout"
+	// APILogoutPath is how we logout from UDM
+	APILogoutPath string = "/api/logout"
 	// APIEventPathIDS returns Intrusion Detection/Prevention Systems Events.
 	APIEventPathIDS string = "/api/s/%s/stat/ips/event"
 	// APIEventPathAlarms contains the site alarms.
