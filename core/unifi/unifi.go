@@ -28,7 +28,7 @@ import (
 var (
 	ErrAuthenticationFailed = fmt.Errorf("authentication failed")
 	ErrInvalidStatusCode    = fmt.Errorf("invalid status code from server")
-	ErrNoParams             = fmt.Errorf("requedted PUT with no parameters")
+	ErrNoParams             = fmt.Errorf("requested PUT with no parameters")
 	ErrInvalidSignature     = fmt.Errorf("certificate signature does not match")
 )
 
@@ -140,6 +140,13 @@ func (u *Unifi) Login() error {
 	}
 
 	return nil
+}
+
+// Logout closes the current session.
+func (u *Unifi) Logout() error {
+	// a post is needed for logout
+	_, err := u.PostJSON(APILogoutPath)
+	return err
 }
 
 // with the release of controller version 5.12.55 on UDM in Jan 2020 the api paths
@@ -279,6 +286,20 @@ func (u *Unifi) UniReqPut(apiPath string, params string) (*http.Request, error) 
 	return req, nil
 }
 
+// UniReqPost is the Post call equivalent to UniReq.
+func (u *Unifi) UniReqPost(apiPath string, params string) (*http.Request, error) {
+	apiPath = u.path(apiPath)
+
+	req, err := http.NewRequest(http.MethodPost, u.URL+apiPath, bytes.NewBufferString("")) //nolint:noctx
+	if err != nil {
+		return nil, fmt.Errorf("creating request: %w", err)
+	}
+
+	u.setHeaders(req, params)
+
+	return req, nil
+}
+
 // GetJSON returns the raw JSON from a path. This is useful for debugging.
 func (u *Unifi) GetJSON(apiPath string, params ...string) ([]byte, error) {
 	req, err := u.UniReq(apiPath, strings.Join(params, " "))
@@ -293,6 +314,17 @@ func (u *Unifi) GetJSON(apiPath string, params ...string) ([]byte, error) {
 // Use this if you want to change data via the REST API.
 func (u *Unifi) PutJSON(apiPath string, params ...string) ([]byte, error) {
 	req, err := u.UniReqPut(apiPath, strings.Join(params, " "))
+	if err != nil {
+		return []byte{}, err
+	}
+
+	return u.do(req)
+}
+
+// PostJSON uses a POST call and returns the raw JSON in the same way as GetData
+// Use this if you want to change data via the REST API.
+func (u *Unifi) PostJSON(apiPath string, params ...string) ([]byte, error) {
+	req, err := u.UniReqPost(apiPath, strings.Join(params, " "))
 	if err != nil {
 		return []byte{}, err
 	}
