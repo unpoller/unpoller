@@ -290,7 +290,7 @@ func (u *Unifi) UniReqPut(apiPath string, params string) (*http.Request, error) 
 func (u *Unifi) UniReqPost(apiPath string, params string) (*http.Request, error) {
 	apiPath = u.path(apiPath)
 
-	req, err := http.NewRequest(http.MethodPost, u.URL+apiPath, bytes.NewBufferString("")) //nolint:noctx
+	req, err := http.NewRequest(http.MethodPost, u.URL+apiPath, bytes.NewBufferString(params)) //nolint:noctx
 	if err != nil {
 		return nil, fmt.Errorf("creating request: %w", err)
 	}

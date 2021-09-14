@@ -4,7 +4,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	"github.com/unifi-poller/unifi"
+	"github.com/unpoller/unifi"
 )
 
 func TestIPGeoUnmarshalJSON(t *testing.T) {
