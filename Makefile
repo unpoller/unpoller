@@ -12,11 +12,11 @@ MD2ROFF_BIN=github.com/davidnewhall/md2roff@v0.0.1
 RSRC_BIN=github.com/akavel/rsrc
 
 # If upx is available, use it to compress the binaries.
+UPXPATH=$(shell which upx)
+
 # Skip upx in Mac ARM environments: https://github.com/upx/upx/issues/446
 ifeq ($(shell uname -ps),Darwin arm)
 	UPXPATH=
-else
-	UPXPATH=$(shell which upx)
 endif
 
 # Travis CI passes the version in. Local builds get it from the current git tag.
