@@ -3,13 +3,12 @@
 package datadogunifi
 
 import (
-	"fmt"
-	"log"
 	"time"
 
 	"github.com/DataDog/datadog-go/statsd"
-	"github.com/unifi-poller/poller"
-	"github.com/unifi-poller/unifi"
+	"github.com/unpoller/poller"
+	"github.com/unpoller/unifi"
+	"go.uber.org/zap"
 	"golift.io/cnfg"
 )
 
@@ -24,6 +23,9 @@ type Config struct {
 
 	// Interval controls the collection and reporting interval
 	Interval cnfg.Duration `json:"interval,omitempty" toml:"interval,omitempty" xml:"interval,omitempty" yaml:"interval,omitempty"`
+
+	// Save data for dead ports? ie. ports that are down or disabled.
+	DeadPorts bool `json:"dead_ports,omitempty" toml:"dead_ports,omitempty" xml:"dead_ports,omitempty" yaml:"dead_ports,omitempty"`
 
 	// Disable when true disables this output plugin
 	Disable bool `json:"disable" toml:"disable" xml:"disable,attr" yaml:"disable"`
@@ -107,11 +109,13 @@ type DatadogUnifi struct {
 	Collector poller.Collect
 	datadog   statsd.ClientInterface
 	LastCheck time.Time
+	Logger    *zap.SugaredLogger
 	*Datadog
 }
 
 func init() { // nolint: gochecknoinits
-	u := &DatadogUnifi{Datadog: &Datadog{}, LastCheck: time.Now()}
+	l, _ := zap.NewProduction()
+	u := &DatadogUnifi{Datadog: &Datadog{}, LastCheck: time.Now(), Logger: l.Sugar()}
 
 	poller.NewOutput(&poller.Output{
 		Name:   "datadog",
@@ -188,8 +192,13 @@ func (u *DatadogUnifi) setConfigDefaults() {
 
 // Run runs a ticker to poll the unifi server and update Datadog.
 func (u *DatadogUnifi) Run(c poller.Collect) error {
-	if u.Config == nil || u.Disable {
-		c.Logf("DataDog config is missing (or disabled): Datadog output is disabled!")
+	defer u.Logger.Sync()
+	if u.Disable {
+		u.Logger.Debug("Datadog config is disabled, output is disabled.")
+		return nil
+	}
+	if u.Config == nil && !u.Disable {
+		u.Logger.Error("DataDog config is missing and is not disabled: Datadog output is disabled!")
 		return nil
 	}
 
@@ -212,26 +221,29 @@ func (u *DatadogUnifi) Run(c poller.Collect) error {
 func (u *DatadogUnifi) PollController() {
 	interval := u.Interval.Round(time.Second)
 	ticker := time.NewTicker(interval)
-	log.Printf("[INFO] Everything checks out! Poller started, Datadog interval: %v", interval)
+	u.Logger.Info("Everything checks out! Poller started", zap.Duration("interval", interval))
 
 	for u.LastCheck = range ticker.C {
-		metrics, ok, collectErr := u.Collector.Metrics()
-		if collectErr != nil {
-			u.Collector.LogErrorf("metric fetch for Datadog failed: %v", collectErr)
-
-			if !ok {
-				continue
-			}
-		}
-
-		report, err := u.ReportMetrics(metrics)
+		metrics, err := u.Collector.Metrics(&poller.Filter{Name: "unifi"})
 		if err != nil {
-			// Is the agent down?
-			u.Collector.LogErrorf("%v", err)
+			u.Logger.Error("metric fetch for Datadog failed", zap.Error(err))
 			continue
 		}
 
-		report.error(collectErr)
+		events, err := u.Collector.Events(&poller.Filter{Name: "unifi", Dur: interval})
+		if err != nil {
+			u.Logger.Error("event fetch for Datadog failed", zap.Error(err))
+			continue
+		}
+
+		report, err := u.ReportMetrics(metrics, events)
+		if err != nil {
+			// Is the agent down?
+			u.Logger.Error("unable to report metrics and events", zap.Error(err))
+			report.reportCount("unifi.collect.errors", 1, []string{})
+			continue
+		}
+		report.reportCount("unifi.collect.success", 1, []string{})
 		u.LogDatadogReport(report)
 	}
 }
@@ -239,12 +251,19 @@ func (u *DatadogUnifi) PollController() {
 // ReportMetrics batches all device and client data into datadog data points.
 // Call this after you've collected all the data you care about.
 // Returns an error if datadog statsd calls fail, otherwise returns a report.
-func (u *DatadogUnifi) ReportMetrics(m *poller.Metrics) (*Report, error) {
-	r := &Report{Metrics: m, Start: time.Now()}
+func (u *DatadogUnifi) ReportMetrics(m *poller.Metrics, e *poller.Events) (*Report, error) {
+	r := &Report{
+		Metrics: m,
+		Events:  e,
+		Start:   time.Now(),
+		Counts:  &Counts{Val: make(map[item]int)},
+		Logger:  u.Logger,
+	}
 	// batch all the points.
 	u.loopPoints(r)
 	r.End = time.Now()
 	r.Elapsed = r.End.Sub(r.Start)
+	r.reportTiming("unifi.collector_timing", r.Elapsed, []string{})
 	return r, nil
 }
 
@@ -252,65 +271,82 @@ func (u *DatadogUnifi) ReportMetrics(m *poller.Metrics) (*Report, error) {
 func (u *DatadogUnifi) loopPoints(r report) {
 	m := r.metrics()
 
-	for _, s := range m.SitesDPI {
-		u.reportSiteDPI(r, s)
+	for _, s := range m.RogueAPs {
+		u.switchExport(r, s)
 	}
 
 	for _, s := range m.Sites {
-		u.reportSite(r, s)
+		u.switchExport(r, s)
+	}
+
+	for _, s := range m.SitesDPI {
+		u.reportSiteDPI(r, s.(*unifi.DPITable))
+	}
+
+	for _, s := range m.Clients {
+		u.switchExport(r, s)
+	}
+
+	for _, s := range m.Devices {
+		u.switchExport(r, s)
+	}
+
+	for _, s := range r.events().Logs {
+		u.switchExport(r, s)
 	}
 
 	appTotal := make(totalsDPImap)
 	catTotal := make(totalsDPImap)
 
 	for _, s := range m.ClientsDPI {
-		u.reportClientDPI(r, s, appTotal, catTotal)
+		u.batchClientDPI(r, s, appTotal, catTotal)
 	}
 
 	reportClientDPItotals(r, appTotal, catTotal)
-
-	for _, s := range m.Clients {
-		u.reportClient(r, s)
-	}
-
-	for _, s := range m.IDSList {
-		u.reportIDS(r, s)
-	}
-
-	u.loopDevicePoints(r)
 }
 
-func (u *DatadogUnifi) loopDevicePoints(r report) {
-	m := r.metrics()
-	if m.Devices == nil {
-		m.Devices = &unifi.Devices{}
-		return
-	}
-
-	for _, s := range m.UAPs {
-		u.reportUAP(r, s)
-	}
-
-	for _, s := range m.USGs {
-		u.reportUSG(r, s)
-	}
-
-	for _, s := range m.USWs {
-		u.reportUSW(r, s)
-	}
-
-	for _, s := range m.UDMs {
-		u.reportUDM(r, s)
+func (u *DatadogUnifi) switchExport(r report, v interface{}) { //nolint:cyclop
+	switch v := v.(type) {
+	case *unifi.RogueAP:
+		u.batchRogueAP(r, v)
+	case *unifi.UAP:
+		u.batchUAP(r, v)
+	case *unifi.USW:
+		u.batchUSW(r, v)
+	case *unifi.USG:
+		u.batchUSG(r, v)
+	case *unifi.UXG:
+		u.batchUXG(r, v)
+	case *unifi.UDM:
+		u.batchUDM(r, v)
+	case *unifi.Site:
+		u.reportSite(r, v)
+	case *unifi.Client:
+		u.batchClient(r, v)
+	case *unifi.Event:
+		u.batchEvent(r, v)
+	case *unifi.IDS:
+		u.batchIDS(r, v)
+	case *unifi.Alarm:
+		u.batchAlarms(r, v)
+	case *unifi.Anomaly:
+		u.batchAnomaly(r, v)
+	default:
+		u.Logger.Error("invalid export", zap.Reflect("type", v))
 	}
 }
 
-// LogInfluxReport writes a log message after exporting to influxdb.
+// LogDatadogReport writes a log message after exporting to Datadog.
 func (u *DatadogUnifi) LogDatadogReport(r *Report) {
 	m := r.Metrics
-	idsMsg := fmt.Sprintf("IDS Events: %d, ", len(m.IDSList))
-	u.Collector.Logf("UniFi Metrics Recorded. Sites: %d, Clients: %d, "+
-		"UAP: %d, USG/UDM: %d, USW: %d, %sPoints: %d, Fields: %d, Errs: %d, Elapsed: %v",
-		len(m.Sites), len(m.Clients), len(m.UAPs),
-		len(m.UDMs)+len(m.USGs), len(m.USWs), idsMsg, r.Total,
-		r.Fields, len(r.Errors), r.Elapsed.Round(time.Millisecond))
+	u.Logger.Info("UniFi Metrics Recorded",
+		zap.Int("num_sites", len(m.Sites)),
+		zap.Int("num_sites_dpi", len(m.SitesDPI)),
+		zap.Int("num_clients", len(m.Clients)),
+		zap.Int("num_clients_dpi", len(m.ClientsDPI)),
+		zap.Int("num_rogue_ap", len(m.RogueAPs)),
+		zap.Int("num_devices", len(m.Devices)),
+		zap.Errors("errors", r.Errors),
+		zap.Duration("elapsed", r.Elapsed),
+	)
 }

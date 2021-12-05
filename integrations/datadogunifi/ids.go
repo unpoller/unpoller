@@ -1,7 +1,7 @@
 package datadogunifi
 
 import (
-	"github.com/unifi-poller/unifi"
+	"github.com/unpoller/unifi"
 )
 
 // reportIDS generates intrusion detection datapoints for Datadog.

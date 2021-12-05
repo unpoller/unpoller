@@ -1,57 +1,93 @@
 package datadogunifi
 
 import (
-	"github.com/unifi-poller/unifi"
+	"github.com/unpoller/unifi"
 )
 
-// reportUAP generates Wireless-Access-Point datapoints for InfluxDB.
-// These points can be passed directly to influx.
-func (u *DatadogUnifi) reportUAP(r report, s *unifi.UAP) {
+// uapT is used as a name for printed/logged counters.
+const uapT = item("UAP")
+
+// batchRogueAP generates metric points for neighboring access points.
+func (u *DatadogUnifi) batchRogueAP(r report, s *unifi.RogueAP) {
+	if s.Age.Val == 0 {
+		return // only keep metrics for things that are recent.
+	}
+
+	tags := cleanTags(map[string]string{
+		"security":   s.Security,
+		"oui":        s.Oui,
+		"band":       s.Band,
+		"mac":        s.Bssid,
+		"ap_mac":     s.ApMac,
+		"radio":      s.Radio,
+		"radio_name": s.RadioName,
+		"site_name":  s.SiteName,
+		"name":       s.Essid,
+		"source":     s.SourceName,
+	})
+
+	data := map[string]float64{
+		"age":         s.Age.Val,
+		"bw":          s.Bw.Val,
+		"center_freq": s.CenterFreq.Val,
+		"channel":     float64(s.Channel),
+		"freq":        s.Freq.Val,
+		"noise":       s.Noise.Val,
+		"rssi":        s.Rssi.Val,
+		"rssi_age":    s.RssiAge.Val,
+		"signal":      s.Signal.Val,
+	}
+
+	metricName := metricNamespace("uap_rogue")
+
+	reportGaugeForFloat64Map(r, metricName, data, tags)
+}
+
+// batchUAP generates Wireless-Access-Point datapoints for Datadog.
+// These points can be passed directly to datadog.
+func (u *DatadogUnifi) batchUAP(r report, s *unifi.UAP) {
 	if !s.Adopted.Val || s.Locating.Val {
 		return
 	}
 
-	tags := []string{
-		tag("ip", s.IP),
-		tag("mac", s.Mac),
-		tag("site_name", s.SiteName),
-		tag("source", s.SourceName),
-		tag("name", s.Name),
-		tag("version", s.Version),
-		tag("model", s.Model),
-		tag("serial", s.Serial),
-		tag("type", s.Type),
-	}
+	tags := cleanTags(map[string]string{
+		"mac":       s.Mac,
+		"site_name": s.SiteName,
+		"source":    s.SourceName,
+		"name":      s.Name,
+		"version":   s.Version,
+		"model":     s.Model,
+		"serial":    s.Serial,
+		"type":      s.Type,
+		"ip":        s.IP,
+	})
+	data := CombineFloat64(u.processUAPstats(s.Stat.Ap), u.batchSysStats(s.SysStats, s.SystemStats))
+	data["bytes"] = s.Bytes.Val
+	data["last_seen"] = s.LastSeen.Val
+	data["rx_bytes"] = s.RxBytes.Val
+	data["tx_bytes"] = s.TxBytes.Val
+	data["uptime"] = s.Uptime.Val
+	data["user_num_sta"] = s.UserNumSta.Val
+	data["guest_num_sta"] = s.GuestNumSta.Val
+	data["num_sta"] = s.NumSta.Val
+
+	r.addCount(uapT)
 
 	metricName := metricNamespace("uap")
 
-	u.reportUAPstats(s.Stat.Ap, r, metricName, tags)
-	u.reportSysStats(r, metricName, s.SysStats, s.SystemStats, tags)
+	reportGaugeForFloat64Map(r, metricName, data, tags)
 
-	data := map[string]float64{
-		"bytes":         s.Bytes.Val,
-		"last_seen":     s.LastSeen.Val,
-		"rx_bytes":      s.RxBytes.Val,
-		"tx_bytes":      s.TxBytes.Val,
-		"uptime":        s.Uptime.Val,
-		"user-num_sta":  s.UserNumSta.Val,
-		"guest-num_sta": s.GuestNumSta.Val,
-		"num_sta":       s.NumSta.Val,
-	}
-	reportGaugeForMap(r, metricName, data, tags)
-
-	u.reportRadTable(r, s.Name, s.SiteName, s.SourceName, s.RadioTable, s.RadioTableStats)
-	u.reportVAPTable(r, s.Name, s.SiteName, s.SourceName, s.VapTable)
-	u.reportPortTable(r, s.Name, s.SiteName, s.SourceName, s.Type, s.PortTable)
+	u.processVAPTable(r, tags, s.VapTable)
+	u.batchPortTable(r, tags, s.PortTable)
 }
 
-func (u *DatadogUnifi) reportUAPstats(ap *unifi.Ap, r report, metricName func(string) string, tags []string) {
+func (u *DatadogUnifi) processUAPstats(ap *unifi.Ap) map[string]float64 {
 	if ap == nil {
-		return
+		return map[string]float64{}
 	}
 
 	// Accumulative Statistics.
-	data := map[string]float64{
+	return map[string]float64{
 		"stat_user-rx_packets":  ap.UserRxPackets.Val,
 		"stat_guest-rx_packets": ap.GuestRxPackets.Val,
 		"stat_rx_packets":       ap.RxPackets.Val,
@@ -85,27 +121,26 @@ func (u *DatadogUnifi) reportUAPstats(ap *unifi.Ap, r report, metricName func(st
 		"stat_user-tx_retries":  ap.UserTxRetries.Val,
 		"stat_guest-tx_retries": ap.GuestTxRetries.Val,
 	}
-	reportGaugeForMap(r, metricName, data, tags)
 }
 
-// reportVAPTable creates points for Wifi Radios. This works with several types of UAP-capable devices.
-func (u *DatadogUnifi) reportVAPTable(r report, deviceName string, siteName string, source string, vt unifi.VapTable) { // nolint: funlen
+// processVAPTable creates points for Wifi Radios. This works with several types of UAP-capable devices.
+func (u *DatadogUnifi) processVAPTable(r report, t map[string]string, vt unifi.VapTable) { // nolint: funlen
 	for _, s := range vt {
-		tags := []string{
-			tag("device_name", deviceName),
-			tag("site_name", siteName),
-			tag("source", source),
-			tag("ap_mac", s.ApMac),
-			tag("bssid", s.Bssid),
-			tag("id", s.ID),
-			tag("name", s.Name),
-			tag("radio_name", s.RadioName),
-			tag("radio", s.Radio),
-			tag("essid", s.Essid),
-			tag("site_id", s.SiteID),
-			tag("usage", s.Usage),
-			tag("state", s.State),
-			tag("is_guest", s.IsGuest.Txt),
+		tags := map[string]string{
+			"device_name": t["name"],
+			"site_name":   t["site_name"],
+			"source":      t["source"],
+			"ap_mac":      s.ApMac,
+			"bssid":       s.Bssid,
+			"id":          s.ID,
+			"name":        s.Name,
+			"radio_name":  s.RadioName,
+			"radio":       s.Radio,
+			"essid":       s.Essid,
+			"site_id":     s.SiteID,
+			"usage":       s.Usage,
+			"state":       s.State,
+			"is_guest":    s.IsGuest.Txt,
 		}
 		data := map[string]float64{
 			"ccq":                       float64(s.Ccq),
@@ -150,22 +185,23 @@ func (u *DatadogUnifi) reportVAPTable(r report, deviceName string, siteName stri
 		}
 
 		metricName := metricNamespace("uap_vaps")
-		reportGaugeForMap(r, metricName, data, tags)
+
+		reportGaugeForFloat64Map(r, metricName, data, tags)
 	}
 }
 
-func (u *DatadogUnifi) reportRadTable(r report, deviceName string, siteName string, source string, rt unifi.RadioTable, rts unifi.RadioTableStats) {
+func (u *DatadogUnifi) processRadTable(r report, t map[string]string, rt unifi.RadioTable, rts unifi.RadioTableStats) {
 	for _, p := range rt {
-		tags := []string{
-			tag("device_name", deviceName),
-			tag("site_name", siteName),
-			tag("source", source),
-			tag("channel", p.Channel.Txt),
-			tag("radio", p.Radio),
+		tags := map[string]string{
+			"device_name": t["name"],
+			"site_name":   t["site_name"],
+			"source":      t["source"],
+			"channel":     p.Channel.Txt,
+			"radio":       p.Radio,
+			"ht":          p.Ht.Txt,
 		}
 		data := map[string]float64{
 			"current_antenna_gain": p.CurrentAntennaGain.Val,
-			"ht":                   p.Ht.Val,
 			"max_txpower":          p.MaxTxpower.Val,
 			"min_txpower":          p.MinTxpower.Val,
 			"nss":                  p.Nss.Val,
@@ -181,12 +217,12 @@ func (u *DatadogUnifi) reportRadTable(r report, deviceName string, siteName stri
 				data["cu_total"] = t.CuTotal.Val
 				data["extchannel"] = t.Extchannel.Val
 				data["gain"] = t.Gain.Val
-				data["guest-num_sta"] = t.GuestNumSta.Val
+				data["guest_num_sta"] = t.GuestNumSta.Val
 				data["num_sta"] = t.NumSta.Val
 				data["tx_packets"] = t.TxPackets.Val
 				data["tx_power"] = t.TxPower.Val
 				data["tx_retries"] = t.TxRetries.Val
-				data["user-num_sta"] = t.UserNumSta.Val
+				data["user_num_sta"] = t.UserNumSta.Val
 
 				break
 			}
@@ -194,6 +230,6 @@ func (u *DatadogUnifi) reportRadTable(r report, deviceName string, siteName stri
 
 		metricName := metricNamespace("uap_radios")
 
-		reportGaugeForMap(r, metricName, data, tags)
+		reportGaugeForFloat64Map(r, metricName, data, tags)
 	}
 }

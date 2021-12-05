@@ -1,37 +1,88 @@
 package datadogunifi
 
 import (
+	"sync"
 	"time"
 
 	"github.com/DataDog/datadog-go/statsd"
-	"github.com/unifi-poller/poller"
+	"github.com/unpoller/poller"
+	"go.uber.org/zap"
 )
 
 type Report struct {
 	Metrics *poller.Metrics
+	Events  *poller.Events
 	Errors  []error
-	Total   int
-	Fields  int
+	Counts  *Counts
 	Start   time.Time
 	End     time.Time
 	Elapsed time.Duration
 
+	Logger *zap.SugaredLogger
+
+	Total  int
+	Fields int
+
+	wg sync.WaitGroup
+
 	client statsd.ClientInterface
 }
 
+// Counts holds counters and has a lock to deal with routines.
+type Counts struct {
+	Val map[item]int
+	sync.RWMutex
+}
+
 type report interface {
+	add()
+	done()
 	error(err error)
 	metrics() *poller.Metrics
+	events() *poller.Events
+	addCount(item, ...int)
+
 	reportGauge(name string, value float64, tags []string) error
 	reportCount(name string, value int64, tags []string) error
 	reportDistribution(name string, value float64, tags []string) error
 	reportTiming(name string, value time.Duration, tags []string) error
-	reportEvent(title string, message string, tags []string) error
+	reportEvent(title string, date time.Time, message string, tags []string) error
+	reportInfoLog(message string, f ...interface{})
+	reportWarnLog(message string, f ...interface{})
 	reportServiceCheck(name string, status statsd.ServiceCheckStatus, message string, tags []string) error
+}
+
+func (r *Report) add() {
+	r.wg.Add(1)
+}
+
+func (r *Report) done() {
+	r.wg.Done()
 }
 
 func (r *Report) metrics() *poller.Metrics {
 	return r.Metrics
+}
+
+func (r *Report) events() *poller.Events {
+	return r.Events
+}
+
+/* The following methods are not thread safe. */
+
+type item string
+
+func (r *Report) addCount(name item, counts ...int) {
+	r.Counts.Lock()
+	defer r.Counts.Unlock()
+
+	if len(counts) == 0 {
+		r.Counts.Val[name]++
+	}
+
+	for _, c := range counts {
+		r.Counts.Val[name] += c
+	}
 }
 
 func (r *Report) error(err error) {
@@ -56,13 +107,24 @@ func (r *Report) reportTiming(name string, value time.Duration, tags []string) e
 	return r.client.Timing(name, value, tags, 1.0)
 }
 
-func (r *Report) reportEvent(title string, message string, tags []string) error {
+func (r *Report) reportEvent(title string, date time.Time, message string, tags []string) error {
+	if date.IsZero() {
+		date = time.Now()
+	}
 	return r.client.Event(&statsd.Event{
 		Title:     title,
 		Text:      message,
-		Timestamp: time.Now(),
+		Timestamp: date,
 		Tags:      tags,
 	})
+}
+
+func (r *Report) reportInfoLog(message string, f ...interface{}) {
+	r.Logger.Info(message, f)
+}
+
+func (r *Report) reportWarnLog(message string, f ...interface{}) {
+	r.Logger.Warn(message, f)
 }
 
 func (r *Report) reportServiceCheck(name string, status statsd.ServiceCheckStatus, message string, tags []string) error {

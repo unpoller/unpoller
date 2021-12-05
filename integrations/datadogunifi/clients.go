@@ -1,108 +1,122 @@
 package datadogunifi
 
 import (
-	"github.com/unifi-poller/unifi"
+	"github.com/unpoller/unifi"
 )
 
-// reportClient generates Unifi Client datapoints for InfluxDB.
-// These points can be passed directly to influx.
-func (u *DatadogUnifi) reportClient(r report, s *unifi.Client) { // nolint: funlen
-	tags := []string{
-		tag("mac", s.Mac),
-		tag("site_name", s.SiteName),
-		tag("source", s.SourceName),
-		tag("ap_name", s.ApName),
-		tag("gw_name", s.GwName),
-		tag("sw_name", s.SwName),
-		tag("oui", s.Oui),
-		tag("radio_name", s.RadioName),
-		tag("radio", s.Radio),
-		tag("radio_proto", s.RadioProto),
-		tag("name", s.Name),
-		tag("fixed_ip", s.FixedIP),
-		tag("sw_port", s.SwPort.Txt),
-		tag("os_class", s.OsClass.Txt),
-		tag("os_name", s.OsName.Txt),
-		tag("dev_cat", s.DevCat.Txt),
-		tag("dev_id", s.DevID.Txt),
-		tag("dev_vendor", s.DevVendor.Txt),
-		tag("dev_family", s.DevFamily.Txt),
-		tag("is_wired", s.IsWired.Txt),
-		tag("is_guest", s.IsGuest.Txt),
-		tag("use_fixedip", s.UseFixedIP.Txt),
-		tag("channel", s.Channel.Txt),
-		tag("vlan", s.Vlan.Txt),
-		tag("hostname", s.Name),
-		tag("radio_desc", s.RadioDescription),
-		tag("ip", s.IP),
-		tag("essid", s.Essid),
-		tag("bssid", s.Bssid),
+// batchClient generates Unifi Client datapoints for Datadog.
+// These points can be passed directly to Datadog.
+func (u *DatadogUnifi) batchClient(r report, s *unifi.Client) { // nolint: funlen
+	tags := map[string]string{
+		"mac":         s.Mac,
+		"site_name":   s.SiteName,
+		"source":      s.SourceName,
+		"ap_name":     s.ApName,
+		"gw_name":     s.GwName,
+		"sw_name":     s.SwName,
+		"oui":         s.Oui,
+		"radio_name":  s.RadioName,
+		"radio":       s.Radio,
+		"radio_proto": s.RadioProto,
+		"name":        s.Name,
+		"fixed_ip":    s.FixedIP,
+		"sw_port":     s.SwPort.Txt,
+		"os_class":    s.OsClass.Txt,
+		"os_name":     s.OsName.Txt,
+		"dev_cat":     s.DevCat.Txt,
+		"dev_id":      s.DevID.Txt,
+		"dev_vendor":  s.DevVendor.Txt,
+		"dev_family":  s.DevFamily.Txt,
+		"is_wired":    s.IsWired.Txt,
+		"is_guest":    s.IsGuest.Txt,
+		"use_fixedip": s.UseFixedIP.Txt,
+		"channel":     s.Channel.Txt,
+		"vlan":        s.Vlan.Txt,
+		"hostname":    s.Name,
+		"essid":       s.Essid,
+		"bssid":       s.Bssid,
+		"ip":          s.IP,
+	}
+	powerSaveEnabled := 0.0
+	if s.PowersaveEnabled.Val {
+		powerSaveEnabled = 1.0
+	}
+	data := map[string]float64{
+		"anomalies":         float64(s.Anomalies),
+		"channel":           s.Channel.Val,
+		"satisfaction":      s.Satisfaction.Val,
+		"bytes_r":           float64(s.BytesR),
+		"ccq":               float64(s.Ccq),
+		"noise":             float64(s.Noise),
+		"powersave_enabled": powerSaveEnabled,
+		"roam_count":        float64(s.RoamCount),
+		"rssi":              float64(s.Rssi),
+		"rx_bytes":          float64(s.RxBytes),
+		"rx_bytes_r":        float64(s.RxBytesR),
+		"rx_packets":        float64(s.RxPackets),
+		"rx_rate":           float64(s.RxRate),
+		"signal":            float64(s.Signal),
+		"tx_bytes":          float64(s.TxBytes),
+		"tx_bytes_r":        float64(s.TxBytesR),
+		"tx_packets":        float64(s.TxPackets),
+		"tx_retries":        float64(s.TxRetries),
+		"tx_power":          float64(s.TxPower),
+		"tx_rate":           float64(s.TxRate),
+		"uptime":            float64(s.Uptime),
+		"wifi_tx_attempts":  float64(s.WifiTxAttempts),
+		"wired-rx_bytes":    float64(s.WiredRxBytes),
+		"wired-rx_bytes-r":  float64(s.WiredRxBytesR),
+		"wired-rx_packets":  float64(s.WiredRxPackets),
+		"wired-tx_bytes":    float64(s.WiredTxBytes),
+		"wired-tx_bytes-r":  float64(s.WiredTxBytesR),
+		"wired-tx_packets":  float64(s.WiredTxPackets),
 	}
 
-	data := map[string]float64{
-		"anomalies":        float64(s.Anomalies),
-		"channel":          s.Channel.Val,
-		"satisfaction":     s.Satisfaction.Val,
-		"bytes_r":          float64(s.BytesR),
-		"ccq":              float64(s.Ccq),
-		"noise":            float64(s.Noise),
-		"roam_count":       float64(s.RoamCount),
-		"rssi":             float64(s.Rssi),
-		"rx_bytes":         float64(s.RxBytes),
-		"rx_bytes_r":       float64(s.RxBytesR),
-		"rx_packets":       float64(s.RxPackets),
-		"rx_rate":          float64(s.RxRate),
-		"signal":           float64(s.Signal),
-		"tx_bytes":         float64(s.TxBytes),
-		"tx_bytes_r":       float64(s.TxBytesR),
-		"tx_packets":       float64(s.TxPackets),
-		"tx_retries":       float64(s.TxRetries),
-		"tx_power":         float64(s.TxPower),
-		"tx_rate":          float64(s.TxRate),
-		"uptime":           float64(s.Uptime),
-		"wifi_tx_attempts": float64(s.WifiTxAttempts),
-		"wired-rx_bytes":   float64(s.WiredRxBytes),
-		"wired-rx_bytes-r": float64(s.WiredRxBytesR),
-		"wired-rx_packets": float64(s.WiredRxPackets),
-		"wired-tx_bytes":   float64(s.WiredTxBytes),
-		"wired-tx_bytes-r": float64(s.WiredTxBytesR),
-		"wired-tx_packets": float64(s.WiredTxPackets),
-	}
 	metricName := metricNamespace("clients")
-	reportGaugeForMap(r, metricName, data, tags)
+
+	reportGaugeForFloat64Map(r, metricName, data, tags)
 }
 
 // totalsDPImap: controller, site, name (app/cat name), dpi.
 type totalsDPImap map[string]map[string]map[string]unifi.DPIData
 
-func (u *DatadogUnifi) reportClientDPI(r report, s *unifi.DPITable, appTotal, catTotal totalsDPImap) {
+func (u *DatadogUnifi) batchClientDPI(r report, v interface{}, appTotal, catTotal totalsDPImap) {
+	s, ok := v.(*unifi.DPITable)
+	if !ok {
+		u.LogErrorf("invalid type given to batchClientDPI: %T", v)
+		return
+	}
+
 	for _, dpi := range s.ByApp {
 		category := unifi.DPICats.Get(dpi.Cat)
 		application := unifi.DPIApps.GetApp(dpi.Cat, dpi.App)
 		fillDPIMapTotals(appTotal, application, s.SourceName, s.SiteName, dpi)
 		fillDPIMapTotals(catTotal, category, s.SourceName, s.SiteName, dpi)
 
-		tags := []string{
-			tag("category", category),
-			tag("application", application),
-			tag("name", s.Name),
-			tag("mac", s.MAC),
-			tag("site_name", s.SiteName),
-			tag("source", s.SourceName),
+		tags := map[string]string{
+			"category":    category,
+			"application": application,
+			"name":        s.Name,
+			"mac":         s.MAC,
+			"site_name":   s.SiteName,
+			"source":      s.SourceName,
 		}
+
 		data := map[string]float64{
 			"tx_packets": float64(dpi.TxPackets),
 			"rx_packets": float64(dpi.RxPackets),
 			"tx_bytes":   float64(dpi.TxBytes),
 			"rx_bytes":   float64(dpi.RxBytes),
 		}
-		metricName := metricNamespace("clientdpi")
-		reportGaugeForMap(r, metricName, data, tags)
+
+		metricName := metricNamespace("client_dpi")
+
+		reportGaugeForFloat64Map(r, metricName, data, tags)
 	}
 }
 
 // fillDPIMapTotals fills in totals for categories and applications. maybe clients too.
-// This allows less processing in InfluxDB to produce total transfer data per cat or app.
+// This allows less processing in Datadog to produce total transfer data per cat or app.
 func fillDPIMapTotals(m totalsDPImap, name, controller, site string, dpi unifi.DPIData) {
 	if m[controller] == nil {
 		m[controller] = make(map[string]map[string]unifi.DPIData)
@@ -148,19 +162,26 @@ func reportClientDPItotals(r report, appTotal, catTotal totalsDPImap) {
 		for controller, s := range k.val {
 			for site, c := range s {
 				for name, m := range c {
-					tags := []string{
-						tag("site_name", site),
-						tag("source", controller),
-						tag("name", name),
+					tags := map[string]string{
+						"category":    "TOTAL",
+						"application": "TOTAL",
+						"name":        "TOTAL",
+						"mac":         "TOTAL",
+						"site_name":   site,
+						"source":      controller,
 					}
+					tags[k.kind] = name
+
 					data := map[string]float64{
 						"tx_packets": float64(m.TxPackets),
 						"rx_packets": float64(m.RxPackets),
 						"tx_bytes":   float64(m.TxBytes),
 						"rx_bytes":   float64(m.RxBytes),
 					}
-					metricName := metricNamespace("clientdpi.totals")
-					reportGaugeForMap(r, metricName, data, tags)
+
+					metricName := metricNamespace("client_dpi")
+
+					reportGaugeForFloat64Map(r, metricName, data, tags)
 				}
 			}
 		}

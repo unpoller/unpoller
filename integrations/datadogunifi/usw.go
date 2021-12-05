@@ -1,55 +1,60 @@
 package datadogunifi
 
 import (
-	"fmt"
-
-	"github.com/unifi-poller/unifi"
+	"github.com/unpoller/unifi"
 )
 
-// reportUSW generates Unifi Switch datapoints for Datadog.
+// uswT is used as a name for printed/logged counters.
+const uswT = item("USW")
+
+// batchUSW generates Unifi Switch datapoints for Datadog.
 // These points can be passed directly to datadog.
-func (u *DatadogUnifi) reportUSW(r report, s *unifi.USW) {
+func (u *DatadogUnifi) batchUSW(r report, s *unifi.USW) {
 	if !s.Adopted.Val || s.Locating.Val {
 		return
 	}
 
-	tags := []string{
-		tag("mac", s.Mac),
-		tag("site_name", s.SiteName),
-		tag("source", s.SourceName),
-		tag("name", s.Name),
-		tag("version", s.Version),
-		tag("model", s.Model),
-		tag("serial", s.Serial),
-		tag("type", s.Type),
-		tag("ip", s.IP),
-	}
-	metricName := metricNamespace("usw")
-	u.reportUSWstat(r, metricName, tags, s.Stat.Sw)
-	u.reportSysStats(r, metricName, s.SysStats, s.SystemStats, tags)
+	tags := cleanTags(map[string]string{
+		"mac":       s.Mac,
+		"site_name": s.SiteName,
+		"source":    s.SourceName,
+		"name":      s.Name,
+		"version":   s.Version,
+		"model":     s.Model,
+		"serial":    s.Serial,
+		"type":      s.Type,
+		"ip":        s.IP,
+	})
+	data := CombineFloat64(
+		u.batchUSWstat(s.Stat.Sw),
+		u.batchSysStats(s.SysStats, s.SystemStats),
+		map[string]float64{
+			"guest-num_sta": s.GuestNumSta.Val,
 
-	data := map[string]float64{
-		"guest-num_sta":       s.GuestNumSta.Val,
-		"bytes":               s.Bytes.Val,
-		"fan_level":           s.FanLevel.Val,
-		"general_temperature": s.GeneralTemperature.Val,
-		"last_seen":           s.LastSeen.Val,
-		"rx_bytes":            s.RxBytes.Val,
-		"tx_bytes":            s.TxBytes.Val,
-		"uptime":              s.Uptime.Val,
-		"state":               s.State.Val,
-		"user-num_sta":        s.UserNumSta.Val,
-	}
-	reportGaugeForMap(r, metricName, data, tags)
-	u.reportPortTable(r, s.Name, s.SiteName, s.SourceName, s.Type, s.PortTable)
+			"bytes":               s.Bytes.Val,
+			"fan_level":           s.FanLevel.Val,
+			"general_temperature": s.GeneralTemperature.Val,
+			"last_seen":           s.LastSeen.Val,
+			"rx_bytes":            s.RxBytes.Val,
+			"tx_bytes":            s.TxBytes.Val,
+			"uptime":              s.Uptime.Val,
+			"state":               s.State.Val,
+			"user-num_sta":        s.UserNumSta.Val,
+		})
+
+	r.addCount(uswT)
+	metricName := metricNamespace("usw")
+	reportGaugeForFloat64Map(r, metricName, data, tags)
+
+	u.batchPortTable(r, tags, s.PortTable)
 }
 
-func (u *DatadogUnifi) reportUSWstat(r report, metricName func(string) string, tags []string, sw *unifi.Sw) {
+func (u *DatadogUnifi) batchUSWstat(sw *unifi.Sw) map[string]float64 {
 	if sw == nil {
-		return
+		return map[string]float64{}
 	}
 
-	data := map[string]float64{
+	return map[string]float64{
 		"stat_bytes":      sw.Bytes.Val,
 		"stat_rx_bytes":   sw.RxBytes.Val,
 		"stat_rx_crypts":  sw.RxCrypts.Val,
@@ -63,30 +68,35 @@ func (u *DatadogUnifi) reportUSWstat(r report, metricName func(string) string, t
 		"stat_tx_packets": sw.TxPackets.Val,
 		"stat_tx_retries": sw.TxRetries.Val,
 	}
-	reportGaugeForMap(r, metricName, data, tags)
 }
 
-func (u *DatadogUnifi) reportPortTable(r report, deviceName string, siteName string, source string, typeTag string, pt []unifi.Port) {
+//nolint:funlen
+func (u *DatadogUnifi) batchPortTable(r report, t map[string]string, pt []unifi.Port) {
 	for _, p := range pt {
-		if !p.Up.Val || !p.Enable.Val {
+		if !u.DeadPorts && (!p.Up.Val || !p.Enable.Val) {
 			continue // only record UP ports.
 		}
 
-		tags := []string{
-			tag("site_name", siteName),
-			tag("device_name", deviceName),
-			tag("source", source),
-			tag("type", typeTag),
-			tag("name", p.Name),
-			tag("poe_mode", p.PoeMode),
-			tag("port_poe", p.PortPoe.Txt),
-			tag("port_idx", p.PortIdx.Txt),
-			tag("port_id", fmt.Sprintf("%s_port_%s", deviceName, p.PortIdx.Txt)),
-			tag("poe_enable", p.PoeEnable.Txt),
-			tag("flowctrl_rx", p.FlowctrlRx.Txt),
-			tag("flowctrl_tx", p.FlowctrlTx.Txt),
-			tag("media", p.Media),
-		}
+		tags := cleanTags(map[string]string{
+			"site_name":      t["site_name"],
+			"device_name":    t["name"],
+			"source":         t["source"],
+			"type":           t["type"],
+			"name":           p.Name,
+			"poe_mode":       p.PoeMode,
+			"port_poe":       p.PortPoe.Txt,
+			"port_idx":       p.PortIdx.Txt,
+			"port_id":        t["name"] + " Port " + p.PortIdx.Txt,
+			"poe_enable":     p.PoeEnable.Txt,
+			"flowctrl_rx":    p.FlowctrlRx.Txt,
+			"flowctrl_tx":    p.FlowctrlTx.Txt,
+			"media":          p.Media,
+			"has_sfp":        p.SFPFound.Txt,
+			"sfp_compliance": p.SFPCompliance,
+			"sfp_serial":     p.SFPSerial,
+			"sfp_vendor":     p.SFPVendor,
+			"sfp_part":       p.SFPPart,
+		})
 		data := map[string]float64{
 			"dbytes_r":     p.BytesR.Val,
 			"rx_broadcast": p.RxBroadcast.Val,
@@ -113,7 +123,15 @@ func (u *DatadogUnifi) reportPortTable(r report, deviceName string, siteName str
 			data["poe_voltage"] = p.PoeVoltage.Val
 		}
 
-		metricName := metricNamespace("usw_ports")
-		reportGaugeForMap(r, metricName, data, tags)
+		if p.SFPFound.Val {
+			data["sfp_current"] = p.SFPCurrent.Val
+			data["sfp_voltage"] = p.SFPVoltage.Val
+			data["sfp_temperature"] = p.SFPTemperature.Val
+			data["sfp_txpower"] = p.SFPTxpower.Val
+			data["sfp_rxpower"] = p.SFPRxpower.Val
+		}
+
+		metricName := metricNamespace("usw.ports")
+		reportGaugeForFloat64Map(r, metricName, data, tags)
 	}
 }
