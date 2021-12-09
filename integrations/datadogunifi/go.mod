@@ -1,6 +1,6 @@
 module github.com/platinummonkey/datadogunifi
 
-go 1.15
+go 1.16
 
 require (
 	github.com/DataDog/datadog-go v4.0.0+incompatible
