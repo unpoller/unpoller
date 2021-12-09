@@ -9,7 +9,7 @@ import (
 
 // Logf logs a message.
 func (u *DatadogUnifi) Logf(msg string, v ...interface{}) {
-	webserver.NewOutputEvent(PluginName, PluginName, &webserver.Event{
+	webserver.NewOutputEvent(webserver.PluginName, webserver.PluginName, &webserver.Event{
 		Ts:   time.Now(),
 		Msg:  fmt.Sprintf(msg, v...),
 		Tags: map[string]string{"type": "info"},
@@ -19,7 +19,7 @@ func (u *DatadogUnifi) Logf(msg string, v ...interface{}) {
 
 // LogErrorf logs an error message.
 func (u *DatadogUnifi) LogErrorf(msg string, v ...interface{}) {
-	webserver.NewOutputEvent(PluginName, PluginName, &webserver.Event{
+	webserver.NewOutputEvent(webserver.PluginName, webserver.PluginName, &webserver.Event{
 		Ts:   time.Now(),
 		Msg:  fmt.Sprintf(msg, v...),
 		Tags: map[string]string{"type": "error"},
@@ -29,7 +29,7 @@ func (u *DatadogUnifi) LogErrorf(msg string, v ...interface{}) {
 
 // LogDebugf logs a debug message.
 func (u *DatadogUnifi) LogDebugf(msg string, v ...interface{}) {
-	webserver.NewOutputEvent(PluginName, PluginName, &webserver.Event{
+	webserver.NewOutputEvent(webserver.PluginName, webserver.PluginName, &webserver.Event{
 		Ts:   time.Now(),
 		Msg:  fmt.Sprintf(msg, v...),
 		Tags: map[string]string{"type": "debug"},

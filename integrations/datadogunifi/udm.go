@@ -116,12 +116,12 @@ func (u *DatadogUnifi) batchUDM(r report, s *unifi.UDM) { // nolint: funlen
 		map[string]float64{
 			"bytes":         s.Bytes.Val,
 			"last_seen":     s.LastSeen.Val,
-			"guest-num_sta": s.GuestNumSta.Val,
+			"guest_num_sta": s.GuestNumSta.Val,
 			"rx_bytes":      s.RxBytes.Val,
 			"tx_bytes":      s.TxBytes.Val,
 			"uptime":        s.Uptime.Val,
 			"state":         s.State.Val,
-			"user-num_sta":  s.UserNumSta.Val,
+			"user_num_sta":  s.UserNumSta.Val,
 			"num_desktop":   s.NumDesktop.Val,
 			"num_handheld":  s.NumHandheld.Val,
 			"num_mobile":    s.NumMobile.Val,
@@ -149,7 +149,7 @@ func (u *DatadogUnifi) batchUDM(r report, s *unifi.UDM) { // nolint: funlen
 	data = CombineFloat64(
 		u.batchUSWstat(s.Stat.Sw),
 		map[string]float64{
-			"guest-num_sta": s.GuestNumSta.Val,
+			"guest_num_sta": s.GuestNumSta.Val,
 			"bytes":         s.Bytes.Val,
 			"last_seen":     s.LastSeen.Val,
 			"rx_bytes":      s.RxBytes.Val,
@@ -184,8 +184,8 @@ func (u *DatadogUnifi) batchUDM(r report, s *unifi.UDM) { // nolint: funlen
 	data["tx_bytes"] = s.TxBytes.Val
 	data["uptime"] = s.Uptime.Val
 	data["state"] = s.State.Val
-	data["user-num_sta"] = s.UserNumSta.Val
-	data["guest-num_sta"] = s.GuestNumSta.Val
+	data["user_num_sta"] = s.UserNumSta.Val
+	data["guest_num_sta"] = s.GuestNumSta.Val
 	data["num_sta"] = s.NumSta.Val
 
 	metricName = metricNamespace("uap")

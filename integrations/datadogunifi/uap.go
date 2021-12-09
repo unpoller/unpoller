@@ -215,7 +215,7 @@ func (u *DatadogUnifi) processRadTable(r report, t map[string]string, rt unifi.R
 				data["cu_self_rx"] = t.CuSelfRx.Val
 				data["cu_self_tx"] = t.CuSelfTx.Val
 				data["cu_total"] = t.CuTotal.Val
-				data["extchannel"] = t.Extchannel.Val
+				data["ext_channel"] = t.Extchannel.Val
 				data["gain"] = t.Gain.Val
 				data["guest_num_sta"] = t.GuestNumSta.Val
 				data["num_sta"] = t.NumSta.Val

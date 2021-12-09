@@ -29,8 +29,7 @@ func (u *DatadogUnifi) batchUSW(r report, s *unifi.USW) {
 		u.batchUSWstat(s.Stat.Sw),
 		u.batchSysStats(s.SysStats, s.SystemStats),
 		map[string]float64{
-			"guest-num_sta": s.GuestNumSta.Val,
-
+			"guest_num_sta":       s.GuestNumSta.Val,
 			"bytes":               s.Bytes.Val,
 			"fan_level":           s.FanLevel.Val,
 			"general_temperature": s.GeneralTemperature.Val,
@@ -39,7 +38,7 @@ func (u *DatadogUnifi) batchUSW(r report, s *unifi.USW) {
 			"tx_bytes":            s.TxBytes.Val,
 			"uptime":              s.Uptime.Val,
 			"state":               s.State.Val,
-			"user-num_sta":        s.UserNumSta.Val,
+			"user_num_sta":        s.UserNumSta.Val,
 		})
 
 	r.addCount(uswT)
@@ -88,8 +87,8 @@ func (u *DatadogUnifi) batchPortTable(r report, t map[string]string, pt []unifi.
 			"port_idx":       p.PortIdx.Txt,
 			"port_id":        t["name"] + " Port " + p.PortIdx.Txt,
 			"poe_enable":     p.PoeEnable.Txt,
-			"flowctrl_rx":    p.FlowctrlRx.Txt,
-			"flowctrl_tx":    p.FlowctrlTx.Txt,
+			"flow_ctrl_rx":   p.FlowctrlRx.Txt,
+			"flow_ctrl_tx":   p.FlowctrlTx.Txt,
 			"media":          p.Media,
 			"has_sfp":        p.SFPFound.Txt,
 			"sfp_compliance": p.SFPCompliance,
@@ -98,23 +97,23 @@ func (u *DatadogUnifi) batchPortTable(r report, t map[string]string, pt []unifi.
 			"sfp_part":       p.SFPPart,
 		})
 		data := map[string]float64{
-			"dbytes_r":     p.BytesR.Val,
-			"rx_broadcast": p.RxBroadcast.Val,
-			"rx_bytes":     p.RxBytes.Val,
-			"rx_bytes-r":   p.RxBytesR.Val,
-			"rx_dropped":   p.RxDropped.Val,
-			"rx_errors":    p.RxErrors.Val,
-			"rx_multicast": p.RxMulticast.Val,
-			"rx_packets":   p.RxPackets.Val,
-			"speed":        p.Speed.Val,
-			"stp_pathcost": p.StpPathcost.Val,
-			"tx_broadcast": p.TxBroadcast.Val,
-			"tx_bytes":     p.TxBytes.Val,
-			"tx_bytes-r":   p.TxBytesR.Val,
-			"tx_dropped":   p.TxDropped.Val,
-			"tx_errors":    p.TxErrors.Val,
-			"tx_multicast": p.TxMulticast.Val,
-			"tx_packets":   p.TxPackets.Val,
+			"bytes_r":       p.BytesR.Val,
+			"rx_broadcast":  p.RxBroadcast.Val,
+			"rx_bytes":      p.RxBytes.Val,
+			"rx_bytes_r":    p.RxBytesR.Val,
+			"rx_dropped":    p.RxDropped.Val,
+			"rx_errors":     p.RxErrors.Val,
+			"rx_multicast":  p.RxMulticast.Val,
+			"rx_packets":    p.RxPackets.Val,
+			"speed":         p.Speed.Val,
+			"stp_path_cost": p.StpPathcost.Val,
+			"tx_broadcast":  p.TxBroadcast.Val,
+			"tx_bytes":      p.TxBytes.Val,
+			"tx_bytes_r":    p.TxBytesR.Val,
+			"tx_dropped":    p.TxDropped.Val,
+			"tx_errors":     p.TxErrors.Val,
+			"tx_multicast":  p.TxMulticast.Val,
+			"tx_packets":    p.TxPackets.Val,
 		}
 
 		if p.PoeEnable.Val && p.PortPoe.Val {
@@ -127,8 +126,8 @@ func (u *DatadogUnifi) batchPortTable(r report, t map[string]string, pt []unifi.
 			data["sfp_current"] = p.SFPCurrent.Val
 			data["sfp_voltage"] = p.SFPVoltage.Val
 			data["sfp_temperature"] = p.SFPTemperature.Val
-			data["sfp_txpower"] = p.SFPTxpower.Val
-			data["sfp_rxpower"] = p.SFPRxpower.Val
+			data["sfp_tx_power"] = p.SFPTxpower.Val
+			data["sfp_rx_power"] = p.SFPRxpower.Val
 		}
 
 		metricName := metricNamespace("usw.ports")
