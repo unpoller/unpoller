@@ -28,8 +28,9 @@ github.com/stretchr/testify v1.4.0/go.mod h1:j7eGeouHqKxXV5pUuKE4zz7dFj8WfuZ+81P
 github.com/stretchr/testify v1.6.1/go.mod h1:6Fq8oRcR53rry900zMqJjRRixrwX3KX962/h/Wwjteg=
 github.com/stretchr/testify v1.7.0 h1:nwc3DEeHmmLAfoZucVR881uASk0Mfjw8xYJ99tb5CcY=
 github.com/stretchr/testify v1.7.0/go.mod h1:6Fq8oRcR53rry900zMqJjRRixrwX3KX962/h/Wwjteg=
-github.com/unpoller/poller v0.0.0-20210623101401-f12841d79a28 h1:YAv5naMdpOFahnxteFFRidZlrSEwLv8V2nBKJKmLmHg=
 github.com/unpoller/poller v0.0.0-20210623101401-f12841d79a28/go.mod h1:AbDp60t5WlLSRELAliMJ0RFQpm/0yXpyolVSZqNtero=
+github.com/unpoller/poller v0.0.0-20210623104748-50161c195d5e h1:tNBIBCmtc7whuhkjKyEzpU3OHzYHyGCBy/LERhHxh3A=
+github.com/unpoller/poller v0.0.0-20210623104748-50161c195d5e/go.mod h1:AbDp60t5WlLSRELAliMJ0RFQpm/0yXpyolVSZqNtero=
 github.com/unpoller/unifi v0.0.0-20210914213836-fd3c38c905a3 h1:OYfAGqNNevU4ARJL1yE1v7VUvce1gJEsgzAxCH23cYQ=
 github.com/unpoller/unifi v0.0.0-20210914213836-fd3c38c905a3/go.mod h1:K9QFFGfZws4gzB+Popix19S/rBKqrtqI+tyPORyg3F0=
 github.com/unpoller/webserver v0.0.0-20210623101543-90d89bb0acdf h1:HhXi3qca3kyFEFPh0mqdr0bpQs94hJvMbUJztwPtf2A=
