@@ -260,6 +260,7 @@ func (u *DatadogUnifi) ReportMetrics(m *poller.Metrics, e *poller.Events) (*Repo
 		Start:   time.Now(),
 		Counts:  &Counts{Val: make(map[item]int)},
 		Logger:  u.Logger,
+		client:  u.datadog,
 	}
 	// batch all the points.
 	u.loopPoints(r)
