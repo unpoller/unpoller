@@ -1,4 +1,4 @@
-# UniFi Poller v2 primary configuration file. TOML FORMAT #
+# Unpoller v2 primary configuration file. TOML FORMAT #
 ###########################################################
 
 [poller]
@@ -65,7 +65,7 @@
   interval   = "2m"
   timeout    = "10s"
 
-# Poller has an optional web server. To turn it on, set enable to true. If you
+# Unpoller has an optional web server. To turn it on, set enable to true. If you
 # wish to use SSL, provide SSL cert and key paths. This interface is currently
 # read-only; it just displays information, like logs, devices and clients.
 # Notice: Enabling the web server with many sites will increase memory usage.
@@ -96,7 +96,7 @@
   # Setting this to true and providing default credentials allows you to skip
   # configuring controllers in this config file. Instead you configure them in
   # your prometheus.yml config. Prometheus then sends the controller URL to
-  # unifi-poller when it performs the scrape. This is useful if you have many,
+  # Unpoller when it performs the scrape. This is useful if you have many,
   # or changing controllers. See wiki for more.
   dynamic = false
 
