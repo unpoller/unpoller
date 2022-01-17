@@ -3,12 +3,12 @@
 package datadogunifi
 
 import (
+	"reflect"
 	"time"
 
 	"github.com/DataDog/datadog-go/statsd"
 	"github.com/unpoller/poller"
 	"github.com/unpoller/unifi"
-	"go.uber.org/zap"
 	"golift.io/cnfg"
 )
 
@@ -109,13 +109,11 @@ type DatadogUnifi struct {
 	Collector poller.Collect
 	datadog   statsd.ClientInterface
 	LastCheck time.Time
-	Logger    *zap.SugaredLogger
 	*Datadog
 }
 
 func init() { // nolint: gochecknoinits
-	l, _ := zap.NewProduction()
-	u := &DatadogUnifi{Datadog: &Datadog{}, LastCheck: time.Now(), Logger: l.Sugar()}
+	u := &DatadogUnifi{Datadog: &Datadog{}, LastCheck: time.Now()}
 
 	poller.NewOutput(&poller.Output{
 		Name:   "datadog",
@@ -192,16 +190,15 @@ func (u *DatadogUnifi) setConfigDefaults() {
 
 // Run runs a ticker to poll the unifi server and update Datadog.
 func (u *DatadogUnifi) Run(c poller.Collect) error {
-	defer u.Logger.Sync()
 	if u.Disable {
-		u.Logger.Debug("Datadog config is disabled, output is disabled.")
+		u.LogDebugf("Datadog config is disabled, output is disabled.")
 		return nil
 	}
 	if u.Config == nil && !u.Disable {
-		u.Logger.Error("DataDog config is missing and is not disabled: Datadog output is disabled!")
+		u.LogErrorf("DataDog config is missing and is not disabled: Datadog output is disabled!")
 		return nil
 	}
-	u.Logger.Info("Datadog is configured.")
+	u.Logf("Datadog is configured.")
 
 	u.Collector = c
 	u.setConfigDefaults()
@@ -209,7 +206,7 @@ func (u *DatadogUnifi) Run(c poller.Collect) error {
 	var err error
 	u.datadog, err = statsd.New(u.Address, u.options...)
 	if err != nil {
-		u.Logger.Error("Error configuration Datadog agent reporting", zap.Error(err))
+		u.LogErrorf("Error configuration Datadog agent reporting: %+v", err)
 		return err
 	}
 
@@ -223,25 +220,25 @@ func (u *DatadogUnifi) Run(c poller.Collect) error {
 func (u *DatadogUnifi) PollController() {
 	interval := u.Interval.Round(time.Second)
 	ticker := time.NewTicker(interval)
-	u.Logger.Info("Everything checks out! Poller started", zap.Duration("interval", interval))
+	u.Logf("Everything checks out! Poller started, interval=%+v", interval)
 
 	for u.LastCheck = range ticker.C {
 		metrics, err := u.Collector.Metrics(&poller.Filter{Name: "unifi"})
 		if err != nil {
-			u.Logger.Error("metric fetch for Datadog failed", zap.Error(err))
+			u.LogErrorf("metric fetch for Datadog failed: %v", err)
 			continue
 		}
 
 		events, err := u.Collector.Events(&poller.Filter{Name: "unifi", Dur: interval})
 		if err != nil {
-			u.Logger.Error("event fetch for Datadog failed", zap.Error(err))
+			u.LogErrorf("event fetch for Datadog failed", err)
 			continue
 		}
 
 		report, err := u.ReportMetrics(metrics, events)
 		if err != nil {
 			// Is the agent down?
-			u.Logger.Error("unable to report metrics and events", zap.Error(err))
+			u.LogErrorf("unable to report metrics and events", err)
 			report.reportCount("unifi.collect.errors", 1, []string{})
 			continue
 		}
@@ -255,12 +252,12 @@ func (u *DatadogUnifi) PollController() {
 // Returns an error if datadog statsd calls fail, otherwise returns a report.
 func (u *DatadogUnifi) ReportMetrics(m *poller.Metrics, e *poller.Events) (*Report, error) {
 	r := &Report{
-		Metrics: m,
-		Events:  e,
-		Start:   time.Now(),
-		Counts:  &Counts{Val: make(map[item]int)},
-		Logger:  u.Logger,
-		client:  u.datadog,
+		Metrics:   m,
+		Events:    e,
+		Start:     time.Now(),
+		Counts:    &Counts{Val: make(map[item]int)},
+		Collector: u.Collector,
+		client:    u.datadog,
 	}
 	// batch all the points.
 	u.loopPoints(r)
@@ -335,21 +332,30 @@ func (u *DatadogUnifi) switchExport(r report, v interface{}) { //nolint:cyclop
 	case *unifi.Anomaly:
 		u.batchAnomaly(r, v)
 	default:
-		u.Logger.Error("invalid export", zap.Reflect("type", v))
+		u.LogErrorf("invalid export, type=%+v", reflect.TypeOf(v))
 	}
 }
 
 // LogDatadogReport writes a log message after exporting to Datadog.
 func (u *DatadogUnifi) LogDatadogReport(r *Report) {
 	m := r.Metrics
-	u.Logger.Info("UniFi Metrics Recorded",
-		zap.Int("num_sites", len(m.Sites)),
-		zap.Int("num_sites_dpi", len(m.SitesDPI)),
-		zap.Int("num_clients", len(m.Clients)),
-		zap.Int("num_clients_dpi", len(m.ClientsDPI)),
-		zap.Int("num_rogue_ap", len(m.RogueAPs)),
-		zap.Int("num_devices", len(m.Devices)),
-		zap.Errors("errors", r.Errors),
-		zap.Duration("elapsed", r.Elapsed),
+	u.Logf("UniFi Metrics Recorded num_sites=%d num_sites_dpi=%d num_clients=%d num_clients_dpi=%d num_rogue_ap=%d num_devices=%d errors=%v elapsec=%v",
+		len(m.Sites),
+		len(m.SitesDPI),
+		len(m.Clients),
+		len(m.ClientsDPI),
+		len(m.RogueAPs),
+		len(m.Devices),
+		r.Errors,
+		r.Elapsed,
 	)
+	metricName := metricNamespace("collector")
+	r.reportCount(metricName("num_sites"), int64(len(m.Sites)), u.Tags)
+	r.reportCount(metricName("num_sites_dpi"), int64(len(m.SitesDPI)), u.Tags)
+	r.reportCount(metricName("num_clients"), int64(len(m.Clients)), u.Tags)
+	r.reportCount(metricName("num_clients_dpi"), int64(len(m.ClientsDPI)), u.Tags)
+	r.reportCount(metricName("num_rogue_ap"), int64(len(m.RogueAPs)), u.Tags)
+	r.reportCount(metricName("num_devices"), int64(len(m.Devices)), u.Tags)
+	r.reportCount(metricName("num_errors"), int64(len(r.Errors)), u.Tags)
+	r.reportTiming(metricName("elapsed_time"), r.Elapsed, u.Tags)
 }

@@ -2,9 +2,9 @@ package datadogunifi
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/unpoller/unifi"
-	"go.uber.org/zap"
 )
 
 func tag(name string, value interface{}) string {
@@ -19,12 +19,12 @@ func tagMapToTags(tagMap map[string]string) []string {
 	return tags
 }
 
-func tagMapToZapFields(tagMap map[string]string) []zap.Field {
-	fields := make([]zap.Field, 0)
+func tagMapToSimpleStrings(tagMap map[string]string) string {
+	result := ""
 	for k, v := range tagMap {
-		fields = append(fields, zap.String(k, v))
+		result = fmt.Sprintf("%s%s=\"%v\", ", result, k, v)
 	}
-	return fields
+	return strings.TrimRight(result, ", ")
 }
 
 func metricNamespace(namespace string) func(string) string {

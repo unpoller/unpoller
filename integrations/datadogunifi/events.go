@@ -65,7 +65,7 @@ func (u *DatadogUnifi) batchIDS(r report, i *unifi.IDS) { // nolint:dupl
 	tags := tagMapToTags(tagMap)
 	title := fmt.Sprintf("Intrusion Detection at %s from %s", i.SiteName, i.SourceName)
 	r.reportEvent(title, i.Datetime, i.Msg, tags)
-	r.reportWarnLog(fmt.Sprintf("[%d] %s: %s", i.Datetime.Unix(), title, i.Msg), tagMapToZapFields(tagMap))
+	r.reportWarnLog(fmt.Sprintf("[%d] %s: %s - %s", i.Datetime.Unix(), title, i.Msg, tagMapToSimpleStrings(tagMap)))
 }
 
 // batchEvents generates events from UniFi for Datadog.
@@ -139,5 +139,5 @@ func (u *DatadogUnifi) batchEvent(r report, i *unifi.Event) { // nolint: funlen
 	tags := tagMapToTags(tagMap)
 	title := fmt.Sprintf("Unifi Event at %s from %s", i.SiteName, i.SourceName)
 	r.reportEvent(title, i.Datetime, i.Msg, tags)
-	r.reportInfoLog(fmt.Sprintf("[%d] %s: %s", i.Datetime.Unix(), title, i.Msg), tagMapToZapFields(tagMap))
+	r.reportInfoLog(fmt.Sprintf("[%d] %s: %s - %s", i.Datetime.Unix(), title, i.Msg, tagMapToSimpleStrings(tagMap)))
 }

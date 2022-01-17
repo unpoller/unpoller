@@ -6,9 +6,9 @@ import (
 
 	"github.com/DataDog/datadog-go/statsd"
 	"github.com/unpoller/poller"
-	"go.uber.org/zap"
 )
 
+// Report is a will report the current collection run data.
 type Report struct {
 	Metrics *poller.Metrics
 	Events  *poller.Events
@@ -18,7 +18,7 @@ type Report struct {
 	End     time.Time
 	Elapsed time.Duration
 
-	Logger *zap.SugaredLogger
+	Collector poller.Collect
 
 	Total  int
 	Fields int
@@ -120,11 +120,11 @@ func (r *Report) reportEvent(title string, date time.Time, message string, tags 
 }
 
 func (r *Report) reportInfoLog(message string, f ...interface{}) {
-	r.Logger.Info(message, f)
+	r.Collector.Logf(message, f)
 }
 
 func (r *Report) reportWarnLog(message string, f ...interface{}) {
-	r.Logger.Warn(message, f)
+	r.Collector.Logf(message, f)
 }
 
 func (r *Report) reportServiceCheck(name string, status statsd.ServiceCheckStatus, message string, tags []string) error {
