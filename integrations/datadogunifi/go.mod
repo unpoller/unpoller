@@ -1,4 +1,4 @@
-module github.com/platinummonkey/datadogunifi
+module github.com/unpoller/datadogunifi
 
 go 1.16
 
