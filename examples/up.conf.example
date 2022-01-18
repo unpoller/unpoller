@@ -89,7 +89,8 @@
   # max_bytes_per_payload = 0
 
   # max_messages_per_payload is the maximum number of metrics, events and/or service checks a single payload will contain.
-  # This option can be set to `1` to create an unbuffered client.
+  # This option can be set to `1` to create an unbuffered client. Default is 0 to use the default datadog statsd
+  # client max messages.
   # max_messages_per_payload = 0
 
   # BufferPoolSize is the size of the pool of buffers in number of buffers.
@@ -98,19 +99,23 @@
   # buffer_pool_size = 0
 
   # buffer_flush_interval is the interval after which the current buffer will get flushed.
+  # Default is 0 to use the default datadog statsd setting.
   # buffer_flush_interval = 0
 
   # buffer_shard_count is the number of buffer "shards" that will be used.
   # Those shards allows the use of multiple buffers at the same time to reduce
   # lock contention.
+  # Default is 0 to use the default datadog statsd setting.
   # buffer_shard_count = 0
 
   # sender_queue_size is the size of the sender queue in number of buffers.
   # The magic value 0 will set the option to the optimal size for the transport
   # protocol used when creating the client: 2048 for UDP and 512 for UDS.
+  # Default is 0 to use the default datadog statsd setting.
   # sender_queue_size = 0
 
-  # write_timeout_uds is the timeout after which a UDS packet is dropped.
+  # write_timeout_uds is the timeout after which a UDS packet is dropped. This is only useful when in UDS mode.
+  # Default is 5000 to use the default datadog statsd setting.
   # write_timeout_uds = 5000
 
   # receive_mode determines the behavior of the client when receiving to many
@@ -132,12 +137,15 @@
   # using many goroutines, sending the same metrics at a very high
   # volume. The goal is to not slow down the application at the cost of
   # dropping metrics and having a lower max throughput.
+  # Default 0 is mutex mode, 1 is channel mode.
   # receive_mode = 0
 
   # channel_mode_buffer_size is the size of the channel holding incoming metrics
+  # Default is 0 to use the default datadog statsd setting.
   # channel_mode_buffer_size = 0
 
   # aggregation_flush_interval is the interval for the aggregator to flush metrics
+  # Default is 0 to use the default datadog statsd setting.
   # aggregation_flush_interval = 0
 
 # Unpoller has an optional web server. To turn it on, set enable to true. If you
