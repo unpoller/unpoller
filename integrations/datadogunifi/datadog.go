@@ -101,7 +101,7 @@ type Config struct {
 // Datadog allows the data to be context aware with configuration
 type Datadog struct {
 	*Config `json:"datadog" toml:"datadog" xml:"datadog" yaml:"datadog"`
-	options []statsd.Option
+	options []statsd.Option // nolint
 }
 
 // DatadogUnifi is returned by New() after you provide a Config.

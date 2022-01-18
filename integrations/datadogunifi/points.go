@@ -3,8 +3,6 @@ package datadogunifi
 import (
 	"fmt"
 	"strings"
-
-	"github.com/unpoller/unifi"
 )
 
 func tag(name string, value interface{}) string {
@@ -48,32 +46,4 @@ func cleanTags(tags map[string]string) map[string]string {
 	}
 
 	return tags
-}
-
-// cleanFields removes any field with a default (or empty) value.
-func cleanFields(fields map[string]interface{}) map[string]interface{} { //nolint:cyclop
-	for s := range fields {
-		switch v := fields[s].(type) {
-		case nil:
-			delete(fields, s)
-		case int, int64, float64:
-			if v == 0 {
-				delete(fields, s)
-			}
-		case unifi.FlexBool:
-			if v.Txt == "" {
-				delete(fields, s)
-			}
-		case unifi.FlexInt:
-			if v.Txt == "" {
-				delete(fields, s)
-			}
-		case string:
-			if v == "" {
-				delete(fields, s)
-			}
-		}
-	}
-
-	return fields
 }
