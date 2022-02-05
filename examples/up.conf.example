@@ -65,6 +65,28 @@
   interval   = "2m"
   timeout    = "10s"
 
+[datadog]
+  # How often to poll UniFi and report to Datadog.
+  interval = "2m"
+
+  # To disable this output plugin
+  disable = true
+
+  # Datadog Custom Options
+
+  # address to talk to the datadog agent, by default this uses the local statsd UDP interface
+  # address = "localhost:8125"
+
+  # namespace to prepend to all data, default is no additional prefix.
+  # namespace = ""
+
+  # tags to append to all data
+  # tags = [ "customer:abc_corp" ]
+
+  # For more advanced options for very large amount of data collected see the upstream
+  # github.com/unpoller/datadogunifi repository README.
+
+
 # Unpoller has an optional web server. To turn it on, set enable to true. If you
 # wish to use SSL, provide SSL cert and key paths. This interface is currently
 # read-only; it just displays information, like logs, devices and clients.
