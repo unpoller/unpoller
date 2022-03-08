@@ -21,7 +21,7 @@ included; with screenshots. Six for InfluxDB and six for Prometheus.
 We're willing to help if you have troubles.
 Open an [Issue](https://github.com/unpoller/unpoller/issues) and
 we'll figure out how to get things working for you. You can also get help in
-the #unifi-poller channel on the [Ubiquiti Discord server](https://discord.gg/KnyKYt2). There'se also
+the #unifi-poller channel on the [Ubiquiti Discord server](https://discord.gg/KnyKYt2). There is also
 [a forum post](https://community.ui.com/questions/Unifi-Poller-Store-Unifi-Controller-Metrics-in-InfluxDB-without-SNMP/58a0ea34-d2b3-41cd-93bb-d95d3896d1a1)
 you may use to get additional help.
 
@@ -60,10 +60,10 @@ You can control this app with puppet, chef, saltstack, homebrew or a simple bash
 script if you needed to. Packages are available for macOS, Linux, FreeBSD and Docker.
 It works just fine on Windows too.
 
-## What's it look like?
+## What does it look like?
 
 There are 12 total dashboards available; the 6 InfluxDB dashboards are very similar
-to the 6 Prometheus dashboards. On the [documentaton website](https://unpoller.com)
+to the 6 Prometheus dashboards. On the [documentation website](https://unpoller.com)
 you'll find screenshots of some of the dashboards.
 
 ## Integrations
