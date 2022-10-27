@@ -198,9 +198,8 @@ func (u *DatadogUnifi) Run(c poller.Collect) error {
 		u.LogErrorf("DataDog config is missing and is not disabled: Datadog output is disabled!")
 		return nil
 	}
-	u.Logf("Datadog is configured.")
-
 	u.Collector = c
+	u.Logf("Datadog is configured.")
 	u.setConfigDefaults()
 
 	var err error
