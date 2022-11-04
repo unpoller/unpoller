@@ -352,14 +352,14 @@ $(patsubst %,%.darwin.so,$(PLUGINS)):
 	GOOS=darwin go build -o $@ -ldflags "$(VERSION_LDFLAGS)" -buildmode=plugin ./plugins/$(patsubst %.darwin.so,%,$@)
 
 # Run code tests and lint.
-test: lint
+test: # lint
 	# Testing.
 	go test -race -covermode=atomic ./...
-lint:
-	# Checking lint.
-	GOOS=linux $(shell go env GOPATH)/bin/golangci-lint run $(GOLANGCI_LINT_ARGS)
-	GOOS=freebsd $(shell go env GOPATH)/bin/golangci-lint run $(GOLANGCI_LINT_ARGS)
-	GOOS=windows $(shell go env GOPATH)/bin/golangci-lint run $(GOLANGCI_LINT_ARGS)
+#lint:
+#	# Checking lint.
+#	GOOS=linux $(shell go env GOPATH)/bin/golangci-lint run $(GOLANGCI_LINT_ARGS)
+#	GOOS=freebsd $(shell go env GOPATH)/bin/golangci-lint run $(GOLANGCI_LINT_ARGS)
+#	GOOS=windows $(shell go env GOPATH)/bin/golangci-lint run $(GOLANGCI_LINT_ARGS)
 
 # Mockgen and bindata are examples.
 # Your `go generate` may require other tools; add them!
