@@ -1,0 +1,148 @@
+# .goreleaser.yaml
+builds:
+  - env:
+    - CGO_ENABLED=0
+    binary: unpoller
+    goos:
+      - linux
+    goarch:
+      - amd64
+      - arm64
+      - arm
+dockers:
+  - # amd64
+    image_templates:
+    - "unpoller/unpoller:latest-amd64"
+    - "unpoller/unpoller:{{ .Tag }}-amd64"
+    - "unpoller/unpoller:{{ .Tag }}-{{ .Env.GO_VERSION }}-amd64"
+    - "unpoller/unpoller:v{{ .Major }}-amd64"
+    use: buildx
+    build_flag_templates:
+    - "--pull"
+    - "--label=org.opencontainers.image.created={{.Date}}"
+    - "--label=org.opencontainers.image.title={{.ProjectName}}"
+    - "--label=org.opencontainers.image.revision={{.FullCommit}}"
+    - "--label=org.opencontainers.image.version={{.Version}}"
+    - "--label=org.opencontainers.image.documentation='https://unpoller.com/docs/install/docker'"
+    - "--label=org.opencontainers.image.description='Telemetry and Observability for your UniFi Network'"
+    - "--label=org.opencontainers.image.url='https://unpoller.com'"
+    - "--label=org.opencontainers.image.source='https://github.com/unpoller/unpoller'"
+    - "--label=org.opencontainers.image.vendor=unpoller"
+    - "--label=org.opencontainers.image.licenses=MIT"
+    - "--platform=linux/amd64"
+    push_flags:
+    - --tls-verify=false
+  - # arm64
+    image_templates:
+    - "unpoller/unpoller:latest-arm64v8"
+    - "unpoller/unpoller:{{ .Tag }}-arm64v8"
+    - "unpoller/unpoller:{{ .Tag }}-{{ .Env.GO_VERSION }}-arm64v8"
+    - "unpoller/unpoller:v{{ .Major }}-arm64v8"
+    use: buildx
+    build_flag_templates:
+    - "--pull"
+    - "--label=org.opencontainers.image.created={{.Date}}"
+    - "--label=org.opencontainers.image.title={{.ProjectName}}"
+    - "--label=org.opencontainers.image.revision={{.FullCommit}}"
+    - "--label=org.opencontainers.image.version={{.Version}}"
+    - "--label=org.opencontainers.image.documentation='https://unpoller.com/docs/install/docker'"
+    - "--label=org.opencontainers.image.description='Telemetry and Observability for your UniFi Network'"
+    - "--label=org.opencontainers.image.url='https://unpoller.com'"
+    - "--label=org.opencontainers.image.source='https://github.com/unpoller/unpoller'"
+    - "--label=org.opencontainers.image.vendor=unpoller"
+    - "--label=org.opencontainers.image.licenses=MIT"
+    - "--platform=linux/arm64"
+    push_flags:
+    - --tls-verify=false
+  - # armv7
+    image_templates:
+    - "unpoller/unpoller:latest-armv7"
+    - "unpoller/unpoller:{{ .Tag }}-armv7"
+    - "unpoller/unpoller:{{ .Tag }}-{{ .Env.GO_VERSION }}-armv7"
+    - "unpoller/unpoller:v{{ .Major }}-armv7"
+    use: buildx
+    build_flag_templates:
+    - "--pull"
+    - "--label=org.opencontainers.image.created={{.Date}}"
+    - "--label=org.opencontainers.image.title={{.ProjectName}}"
+    - "--label=org.opencontainers.image.revision={{.FullCommit}}"
+    - "--label=org.opencontainers.image.version={{.Version}}"
+    - "--label=org.opencontainers.image.documentation='https://unpoller.com/docs/install/docker'"
+    - "--label=org.opencontainers.image.description='Telemetry and Observability for your UniFi Network'"
+    - "--label=org.opencontainers.image.url='https://unpoller.com'"
+    - "--label=org.opencontainers.image.source='https://github.com/unpoller/unpoller'"
+    - "--label=org.opencontainers.image.vendor=unpoller"
+    - "--label=org.opencontainers.image.licenses=MIT"
+    - "--platform=linux/arm/v7"
+    push_flags:
+    - --tls-verify=false
+docker_manifests:
+  - name_template: unpoller/unpoller:{{ .Version }}
+    image_templates:
+    - unpoller/unpoller:{{ .Version }}-amd64
+    - unpoller/unpoller:{{ .Version }}-arm64v8
+    - unpoller/unpoller:{{ .Version }}-armv7
+
+nfpms:
+  -
+    # ID of the nfpm config, must be unique.
+    # Defaults to "default".
+    id: foo
+
+    # Build IDs for the builds you want to create NFPM packages for.
+    # Defaults empty, which means no filtering.
+    builds:
+      - foo
+      - bar
+
+    # Replacements for GOOS and GOARCH in the package name.
+    # Keys should be valid GOOSs or GOARCHs.
+    # Values are the respective replacements.
+    # Default is empty.
+    replacements:
+      amd64: 64-bit
+      386: 32-bit
+      darwin: macOS
+      linux: Tux
+
+    vendor: unpoller
+    homepage: https://unpoller.com/
+    maintainer: unpoller.com
+    description: Telemetry and Observability for your UniFi Network
+    license: MIT
+    formats:
+      - apk
+      - deb
+      - rpm
+      - termux.deb # Since GoReleaser v1.11.
+      - archlinux
+
+    provides:
+      - unpoller
+    bindir: /usr/bin
+    version_metadata: git
+    section: default
+    priority: extra
+
+    # Contents to add to the package.
+    # GoReleaser will automatically add the binaries.
+    contents:
+      # Basic file that applies to all packagers
+      - src: unpoller
+        dst: /usr/local/bin/unpoller
+      
+      - dst: /etc/unpoller
+        type: dir
+        file_info:
+          mode: 0700
+
+      # Example config files
+      - src: examples/up.conf.example
+        dst: /etc/unpoller/up.conf.example
+        type: config
+      - src: examples/up.json.example
+        dst: /etc/unpoller/up.json.example
+        type: config
+      - src: examples/up.yaml.example
+        dst: /etc/unpoller/up.yaml.example
+        type: config
