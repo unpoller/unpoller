@@ -28,11 +28,11 @@ jobs:
       - uses: goreleaser/goreleaser-action@v2
         with:
           # either 'goreleaser' (default) or 'goreleaser-pro':
-          distribution: goreleaser
+          distribution: goreleaser-pro
           version: latest
           args: release --rm-dist
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           # Your GoReleaser Pro key, if you are using the 'goreleaser-pro'
           # distribution:
-          # GORELEASER_KEY: ${{ secrets.GORELEASER_KEY }}
+          GORELEASER_KEY: ${{ secrets.GORELEASER_KEY }}
