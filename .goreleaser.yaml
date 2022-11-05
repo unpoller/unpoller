@@ -99,10 +99,6 @@ docker_manifests:
 
 nfpms:
   -
-    # Replacements for GOOS and GOARCH in the package name.
-    # Keys should be valid GOOSs or GOARCHs.
-    # Values are the respective replacements.
-    # Default is empty.
     replacements:
       amd64: 64-bit
       386: 32-bit
@@ -120,9 +116,6 @@ nfpms:
       - rpm
       - termux.deb # Since GoReleaser v1.11.
       - archlinux
-
-    provides:
-      - unpoller
     bindir: /usr/bin
     version_metadata: git
     section: default
@@ -131,10 +124,6 @@ nfpms:
     # Contents to add to the package.
     # GoReleaser will automatically add the binaries.
     contents:
-      # Basic file that applies to all packagers
-      - src: dist/unpoller
-        dst: /usr/local/bin/unpoller
-      
       - dst: /etc/unpoller
         type: dir
         file_info:
