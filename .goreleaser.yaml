@@ -3,6 +3,9 @@ builds:
   - env:
     - CGO_ENABLED=0
     binary: unpoller
+    goarm:
+      - 6
+      - 7
     goos:
       - linux
     goarch:
@@ -146,3 +149,5 @@ nfpms:
       - src: examples/up.yaml.example
         dst: /etc/unpoller/up.yaml.example
         type: config
+universal_binaries:
+  - replace: true
