@@ -28,7 +28,6 @@ dockers:
     image_templates:
     - "unpoller/unpoller:latest-amd64"
     - "unpoller/unpoller:{{ .Tag }}-amd64"
-    - "unpoller/unpoller:{{ .Tag }}-{{ .Env.GO_VERSION }}-amd64"
     - "unpoller/unpoller:v{{ .Major }}-amd64"
     use: buildx
     build_flag_templates:
@@ -50,7 +49,6 @@ dockers:
     image_templates:
     - "unpoller/unpoller:latest-arm64v8"
     - "unpoller/unpoller:{{ .Tag }}-arm64v8"
-    - "unpoller/unpoller:{{ .Tag }}-{{ .Env.GO_VERSION }}-arm64v8"
     - "unpoller/unpoller:v{{ .Major }}-arm64v8"
     use: buildx
     build_flag_templates:
@@ -72,7 +70,6 @@ dockers:
     image_templates:
     - "unpoller/unpoller:latest-armv7"
     - "unpoller/unpoller:{{ .Tag }}-armv7"
-    - "unpoller/unpoller:{{ .Tag }}-{{ .Env.GO_VERSION }}-armv7"
     - "unpoller/unpoller:v{{ .Major }}-armv7"
     use: buildx
     build_flag_templates:
