@@ -8,10 +8,21 @@ builds:
       - 7
     goos:
       - linux
+      - darwin
+      - windows
+      - freebsd
     goarch:
       - amd64
       - arm64
       - arm
+    ignore:
+      - goos: darwin
+        goarch: 386
+      - goarm: mips64
+      - gomips: hardfloat
+      - goamd64: v4
+      - goos: freebsd
+        goarch: 386
 dockers:
   - # amd64
     image_templates:
@@ -88,16 +99,6 @@ docker_manifests:
 
 nfpms:
   -
-    # ID of the nfpm config, must be unique.
-    # Defaults to "default".
-    id: foo
-
-    # Build IDs for the builds you want to create NFPM packages for.
-    # Defaults empty, which means no filtering.
-    builds:
-      - foo
-      - bar
-
     # Replacements for GOOS and GOARCH in the package name.
     # Keys should be valid GOOSs or GOARCHs.
     # Values are the respective replacements.
