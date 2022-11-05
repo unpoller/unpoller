@@ -131,7 +131,7 @@ nfpms:
     # GoReleaser will automatically add the binaries.
     contents:
       # Basic file that applies to all packagers
-      - src: unpoller
+      - src: dist/unpoller
         dst: /usr/local/bin/unpoller
       
       - dst: /etc/unpoller
