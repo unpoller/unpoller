@@ -1,0 +1,173 @@
+# .goreleaser.yaml
+builds:
+  - env:
+    - CGO_ENABLED=0
+    binary: unpoller
+    goarm:
+      - 6
+      - 7
+    goos:
+      - linux
+      - darwin
+      - windows
+      - freebsd
+    goarch:
+      - amd64
+      - arm64
+      - arm
+    ignore:
+      - goos: darwin
+        goarch: 386
+      - goarm: mips64
+      - gomips: hardfloat
+      - goamd64: v4
+      - goos: freebsd
+        goarch: 386
+dockers:
+  - # amd64
+    image_templates:
+      - "{{ .Env.DOCKER_REGISTRY }}/{{ .Env.DOCKER_IMAGE_NAME }}:latest-amd64"
+      - "{{ .Env.DOCKER_REGISTRY }}/{{ .Env.DOCKER_IMAGE_NAME }}:{{ .Tag }}-amd64"
+      - "{{ .Env.DOCKER_REGISTRY }}/{{ .Env.DOCKER_IMAGE_NAME }}:v{{ .Major }}-amd64"
+    use: buildx
+    build_flag_templates:
+      - "--pull"
+      - "--label=org.opencontainers.image.created={{.Date}}"
+      - "--label=org.opencontainers.image.title={{.ProjectName}}"
+      - "--label=org.opencontainers.image.revision={{.FullCommit}}"
+      - "--label=org.opencontainers.image.version={{.Version}}"
+      - "--label=org.opencontainers.image.documentation='https://unpoller.com/docs/install/docker'"
+      - "--label=org.opencontainers.image.description='Telemetry and Observability for your UniFi Network'"
+      - "--label=org.opencontainers.image.url='https://unpoller.com'"
+      - "--label=org.opencontainers.image.source={{ .GitURL }}"
+      - "--label=org.opencontainers.image.vendor=unpoller"
+      - "--label=org.opencontainers.image.licenses=MIT"
+      - "--platform=linux/amd64"
+    push_flags:
+      - --tls-verify=false
+    extra_files:
+      - "examples/up.conf.example"
+      - "examples/up.json.example"
+      - "examples/up.yaml.example"
+  - # arm64
+    image_templates:
+      - "{{ .Env.DOCKER_REGISTRY }}/{{ .Env.DOCKER_IMAGE_NAME }}:latest-arm64v8"
+      - "{{ .Env.DOCKER_REGISTRY }}/{{ .Env.DOCKER_IMAGE_NAME }}:{{ .Tag }}-arm64v8"
+      - "{{ .Env.DOCKER_REGISTRY }}/{{ .Env.DOCKER_IMAGE_NAME }}:v{{ .Major }}-arm64v8"
+    use: buildx
+    build_flag_templates:
+      - "--pull"
+      - "--label=org.opencontainers.image.created={{.Date}}"
+      - "--label=org.opencontainers.image.title={{.ProjectName}}"
+      - "--label=org.opencontainers.image.revision={{.FullCommit}}"
+      - "--label=org.opencontainers.image.version={{.Version}}"
+      - "--label=org.opencontainers.image.documentation='https://unpoller.com/docs/install/docker'"
+      - "--label=org.opencontainers.image.description='Telemetry and Observability for your UniFi Network'"
+      - "--label=org.opencontainers.image.url='https://unpoller.com'"
+      - "--label=org.opencontainers.image.source={{ .GitURL }}"
+      - "--label=org.opencontainers.image.vendor=unpoller"
+      - "--label=org.opencontainers.image.licenses=MIT"
+      - "--platform=linux/arm64"
+    push_flags:
+      - --tls-verify=false
+    extra_files:
+      - "examples/up.conf.example"
+      - "examples/up.json.example"
+      - "examples/up.yaml.example"
+  - # armv7
+    image_templates:
+      - "{{ .Env.DOCKER_REGISTRY }}/{{ .Env.DOCKER_IMAGE_NAME }}:latest-armv7"
+      - "{{ .Env.DOCKER_REGISTRY }}/{{ .Env.DOCKER_IMAGE_NAME }}:{{ .Tag }}-armv7"
+      - "{{ .Env.DOCKER_REGISTRY }}/{{ .Env.DOCKER_IMAGE_NAME }}:v{{ .Major }}-armv7"
+    use: buildx
+    build_flag_templates:
+      - "--pull"
+      - "--label=org.opencontainers.image.created={{.Date}}"
+      - "--label=org.opencontainers.image.title={{.ProjectName}}"
+      - "--label=org.opencontainers.image.revision={{.FullCommit}}"
+      - "--label=org.opencontainers.image.version={{.Version}}"
+      - "--label=org.opencontainers.image.documentation='https://unpoller.com/docs/install/docker'"
+      - "--label=org.opencontainers.image.description='Telemetry and Observability for your UniFi Network'"
+      - "--label=org.opencontainers.image.url='https://unpoller.com'"
+      - "--label=org.opencontainers.image.source={{ .GitURL }}"
+      - "--label=org.opencontainers.image.vendor=unpoller"
+      - "--label=org.opencontainers.image.licenses=MIT"
+      - "--platform=linux/arm/v7"
+    push_flags:
+      - --tls-verify=false
+    extra_files:
+      - "examples/up.conf.example"
+      - "examples/up.json.example"
+      - "examples/up.yaml.example"
+docker_manifests:
+  - name_template: '{{ .Env.DOCKER_REGISTRY }}/{{ .Env.DOCKER_IMAGE_NAME }}:latest'
+    create_flags:
+      - --insecure
+    push_flags:
+      - --insecure
+    image_templates:
+      - "{{ .Env.DOCKER_REGISTRY }}/{{ .Env.DOCKER_IMAGE_NAME }}:latest-amd64"
+      - "{{ .Env.DOCKER_REGISTRY }}/{{ .Env.DOCKER_IMAGE_NAME }}:latest-arm64v8"
+      - "{{ .Env.DOCKER_REGISTRY }}/{{ .Env.DOCKER_IMAGE_NAME }}:latest-armv7"
+  - name_template: '{{ .Env.DOCKER_REGISTRY }}/{{ .Env.DOCKER_IMAGE_NAME }}:{{ .Tag }}'
+    create_flags:
+      - --insecure
+    push_flags:
+      - --insecure
+    image_templates:
+      - "{{ .Env.DOCKER_REGISTRY }}/{{ .Env.DOCKER_IMAGE_NAME }}:{{ .Tag }}-amd64"
+      - "{{ .Env.DOCKER_REGISTRY }}/{{ .Env.DOCKER_IMAGE_NAME }}:{{ .Tag }}-arm64v8"
+      - "{{ .Env.DOCKER_REGISTRY }}/{{ .Env.DOCKER_IMAGE_NAME }}:{{ .Tag }}-armv7"
+  - name_template: '{{ .Env.DOCKER_REGISTRY }}/{{ .Env.DOCKER_IMAGE_NAME }}:v{{ .Major }}'
+    create_flags:
+      - --insecure
+    push_flags:
+      - --insecure
+    image_templates:
+      - "{{ .Env.DOCKER_REGISTRY }}/{{ .Env.DOCKER_IMAGE_NAME }}:v{{ .Major }}-amd64"
+      - "{{ .Env.DOCKER_REGISTRY }}/{{ .Env.DOCKER_IMAGE_NAME }}:v{{ .Major }}-arm64v8"
+      - "{{ .Env.DOCKER_REGISTRY }}/{{ .Env.DOCKER_IMAGE_NAME }}:v{{ .Major }}-armv7"
+
+nfpms:
+  -
+    replacements:
+      amd64: 64-bit
+      386: 32-bit
+      darwin: macOS
+      linux: Tux
+
+    vendor: unpoller
+    homepage: https://unpoller.com/
+    maintainer: unpoller.com
+    description: Telemetry and Observability for your UniFi Network
+    license: MIT
+    formats:
+      - apk
+      - deb
+      - rpm
+      - termux.deb # Since GoReleaser v1.11.
+    bindir: /usr/bin
+    version_metadata: git
+    section: default
+    priority: extra
+
+    # Contents to add to the package.
+    # GoReleaser will automatically add the binaries.
+    contents:
+      - dst: /etc/unpoller
+        type: dir
+        file_info:
+          mode: 0700
+
+      # Example config files
+      - src: examples/up.conf.example
+        dst: /etc/unpoller/up.conf.example
+        type: config
+      - src: examples/up.json.example
+        dst: /etc/unpoller/up.json.example
+        type: config
+      - src: examples/up.yaml.example
+        dst: /etc/unpoller/up.yaml.example
+        type: config
+universal_binaries:
+  - replace: true
