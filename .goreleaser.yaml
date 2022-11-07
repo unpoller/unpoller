@@ -1,20 +1,20 @@
 # .goreleaser.yaml
+before:
+  hooks:
+    - make man
+    - make readme
+    - make rsrc
+
 builds:
-  - env:
-    - CGO_ENABLED=0
+  - id: unpoller
+    env:
+      - CGO_ENABLED=0
     binary: unpoller
-    goarm:
-      - 6
-      - 7
     goos:
       - linux
-      - darwin
-      - windows
       - freebsd
     goarch:
       - amd64
-      - arm64
-      - arm
     ignore:
       - goos: darwin
         goarch: 386
@@ -23,8 +23,82 @@ builds:
       - goamd64: v4
       - goos: freebsd
         goarch: 386
+  - id: unpoller-mac
+    env:
+      - CGO_ENABLED=0
+    binary: unpoller
+    goos:
+      - darwin
+    goarch:
+      - amd64
+      - arm64
+    ignore:
+      - goos: darwin
+        goarch: 386
+  - id: unpoller-linux-arm
+    env:
+      - CGO_ENABLED=0
+    binary: unpoller
+    goarm:
+      - 6
+      - 7
+    goos:
+      - linux
+    goarch:
+      - arm64
+      - arm
+  - id: unpoller-windows
+    env:
+      - CGO_ENABLED=0
+    binary: unpoller
+    goos:
+      - windows
+    goarch:
+      - amd64
+
+archives:
+  - id: unpoller
+    builds:
+      - unpoller
+    files:
+      - LICENSE
+      - README.md
+      - examples/up.*.example
+  - id: unpoller-linux-arm
+    builds:
+      - unpoller-linux-arm
+    files:
+      - LICENSE
+      - README.html
+      - unpoller_manual.html
+      - examples/up.*.example
+  - id: unpoller-mac
+    builds:
+      - unpoller-mac
+    files:
+      - LICENSE
+      - README.html
+      - unpoller_manual.html
+      - examples/up.*.example
+  - id: unpoller-windows
+    format_overrides:
+      - goos: windows
+        format: zip
+    builds:
+      - unpoller-windows
+    files:
+      - LICENSE
+      - README.html
+      - unpoller_manual.html
+      - rsrc_windows_*.syso
+      - examples/up.*.example
+
 dockers:
-  - # amd64
+  - id: docker-linux-amd64
+    ids:
+      - unpoller
+    goos: linux
+    goarch: amd64
     image_templates:
       - "{{ .Env.DOCKER_REGISTRY }}/{{ .Env.DOCKER_IMAGE_NAME }}:latest-amd64"
       - "{{ .Env.DOCKER_REGISTRY }}/{{ .Env.DOCKER_IMAGE_NAME }}:{{ .Tag }}-amd64"
@@ -49,7 +123,13 @@ dockers:
       - "examples/up.conf.example"
       - "examples/up.json.example"
       - "examples/up.yaml.example"
-  - # arm64
+      - "README.html"
+      - "unpoller_manual.html"
+  - id: docker-linux-arm64
+    ids:
+      - unpoller-linux-arm
+    goos: linux
+    goarch: arm64
     image_templates:
       - "{{ .Env.DOCKER_REGISTRY }}/{{ .Env.DOCKER_IMAGE_NAME }}:latest-arm64v8"
       - "{{ .Env.DOCKER_REGISTRY }}/{{ .Env.DOCKER_IMAGE_NAME }}:{{ .Tag }}-arm64v8"
@@ -74,7 +154,14 @@ dockers:
       - "examples/up.conf.example"
       - "examples/up.json.example"
       - "examples/up.yaml.example"
-  - # armv7
+      - "README.html"
+      - "unpoller_manual.html"
+  - id: docker-linux-armv7
+    ids:
+      - unpoller-linux-arm
+    goos: linux
+    goarch: arm
+    goarm: "7"
     image_templates:
       - "{{ .Env.DOCKER_REGISTRY }}/{{ .Env.DOCKER_IMAGE_NAME }}:latest-armv7"
       - "{{ .Env.DOCKER_REGISTRY }}/{{ .Env.DOCKER_IMAGE_NAME }}:{{ .Tag }}-armv7"
@@ -99,6 +186,9 @@ dockers:
       - "examples/up.conf.example"
       - "examples/up.json.example"
       - "examples/up.yaml.example"
+      - "README.html"
+      - "unpoller_manual.html"
+
 docker_manifests:
   - name_template: '{{ .Env.DOCKER_REGISTRY }}/{{ .Env.DOCKER_IMAGE_NAME }}:latest'
     create_flags:
@@ -129,7 +219,9 @@ docker_manifests:
       - "{{ .Env.DOCKER_REGISTRY }}/{{ .Env.DOCKER_IMAGE_NAME }}:v{{ .Major }}-armv7"
 
 nfpms:
-  -
+  - id: unpoller-packages
+    builds:
+      - unpoller
     replacements:
       amd64: 64-bit
       386: 32-bit
@@ -142,7 +234,6 @@ nfpms:
     description: Telemetry and Observability for your UniFi Network
     license: MIT
     formats:
-      - apk
       - deb
       - rpm
       - termux.deb # Since GoReleaser v1.11.
@@ -150,6 +241,8 @@ nfpms:
     version_metadata: git
     section: default
     priority: extra
+    provides:
+      - unifi-poller
 
     # Contents to add to the package.
     # GoReleaser will automatically add the binaries.
@@ -169,5 +262,34 @@ nfpms:
       - src: examples/up.yaml.example
         dst: /etc/unpoller/up.yaml.example
         type: config
+      - src: "README.html"
+        dst: /etc/unpoller/readme.html
+        type: config
+      - src: "unpoller_manual.html"
+        dst: /etc/unpoller/manual.html
+        type: config
+    # signing
+    scripts:
+      postinstall: "scripts/after-install.sh"
+      preremove: "scripts/before-remove.sh"
+
+signs:
+  - id: default
+    artifacts: all
+    ids:
+      - unpoller
+      - unpoller-linux-arm
+      - unpoller-windows
+      - unpoller-mac
+
 universal_binaries:
   - replace: true
+    ids:
+      - unpoller-mac
+
+publishers:
+  - name: "packagecloud-publisher"
+    ids:
+      - unpoller-packages
+    cmd: "scripts/packagecloud_push.sh '{{ .Tag }}' '{{ .Env.PACKAGECLOUD_TOKEN }}' 'unpoller' '{{ .ArtifactPath }}' '{{ .Os }}'"
+
