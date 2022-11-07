@@ -26,73 +26,73 @@ builds:
 dockers:
   - # amd64
     image_templates:
-    - "unpoller/unpoller:latest-amd64"
-    - "unpoller/unpoller:{{ .Tag }}-amd64"
-    - "unpoller/unpoller:v{{ .Major }}-amd64"
+      - "ghcr.io/unpoller/unpoller:latest-amd64"
+      - "ghcr.io/unpoller/unpoller:{{ .Tag }}-amd64"
+      - "ghcr.io/unpoller/unpoller:v{{ .Major }}-amd64"
     use: buildx
     build_flag_templates:
-    - "--pull"
-    - "--label=org.opencontainers.image.created={{.Date}}"
-    - "--label=org.opencontainers.image.title={{.ProjectName}}"
-    - "--label=org.opencontainers.image.revision={{.FullCommit}}"
-    - "--label=org.opencontainers.image.version={{.Version}}"
-    - "--label=org.opencontainers.image.documentation='https://unpoller.com/docs/install/docker'"
-    - "--label=org.opencontainers.image.description='Telemetry and Observability for your UniFi Network'"
-    - "--label=org.opencontainers.image.url='https://unpoller.com'"
-    - "--label=org.opencontainers.image.source='https://github.com/unpoller/unpoller'"
-    - "--label=org.opencontainers.image.vendor=unpoller"
-    - "--label=org.opencontainers.image.licenses=MIT"
-    - "--platform=linux/amd64"
+      - "--pull"
+      - "--label=org.opencontainers.image.created={{.Date}}"
+      - "--label=org.opencontainers.image.title={{.ProjectName}}"
+      - "--label=org.opencontainers.image.revision={{.FullCommit}}"
+      - "--label=org.opencontainers.image.version={{.Version}}"
+      - "--label=org.opencontainers.image.documentation='https://unpoller.com/docs/install/docker'"
+      - "--label=org.opencontainers.image.description='Telemetry and Observability for your UniFi Network'"
+      - "--label=org.opencontainers.image.url='https://unpoller.com'"
+      - "--label=org.opencontainers.image.source='https://github.com/unpoller/unpoller'"
+      - "--label=org.opencontainers.image.vendor=unpoller"
+      - "--label=org.opencontainers.image.licenses=MIT"
+      - "--platform=linux/amd64"
     push_flags:
-    - --tls-verify=false
+      - --tls-verify=false
   - # arm64
     image_templates:
-    - "unpoller/unpoller:latest-arm64v8"
-    - "unpoller/unpoller:{{ .Tag }}-arm64v8"
-    - "unpoller/unpoller:v{{ .Major }}-arm64v8"
+      - "ghcr.io/unpoller/unpoller:latest-arm64v8"
+      - "ghcr.io/unpoller/unpoller:{{ .Tag }}-arm64v8"
+      - "ghcr.io/unpoller/unpoller:v{{ .Major }}-arm64v8"
     use: buildx
     build_flag_templates:
-    - "--pull"
-    - "--label=org.opencontainers.image.created={{.Date}}"
-    - "--label=org.opencontainers.image.title={{.ProjectName}}"
-    - "--label=org.opencontainers.image.revision={{.FullCommit}}"
-    - "--label=org.opencontainers.image.version={{.Version}}"
-    - "--label=org.opencontainers.image.documentation='https://unpoller.com/docs/install/docker'"
-    - "--label=org.opencontainers.image.description='Telemetry and Observability for your UniFi Network'"
-    - "--label=org.opencontainers.image.url='https://unpoller.com'"
-    - "--label=org.opencontainers.image.source='https://github.com/unpoller/unpoller'"
-    - "--label=org.opencontainers.image.vendor=unpoller"
-    - "--label=org.opencontainers.image.licenses=MIT"
-    - "--platform=linux/arm64"
+      - "--pull"
+      - "--label=org.opencontainers.image.created={{.Date}}"
+      - "--label=org.opencontainers.image.title={{.ProjectName}}"
+      - "--label=org.opencontainers.image.revision={{.FullCommit}}"
+      - "--label=org.opencontainers.image.version={{.Version}}"
+      - "--label=org.opencontainers.image.documentation='https://unpoller.com/docs/install/docker'"
+      - "--label=org.opencontainers.image.description='Telemetry and Observability for your UniFi Network'"
+      - "--label=org.opencontainers.image.url='https://unpoller.com'"
+      - "--label=org.opencontainers.image.source='https://github.com/unpoller/unpoller'"
+      - "--label=org.opencontainers.image.vendor=unpoller"
+      - "--label=org.opencontainers.image.licenses=MIT"
+      - "--platform=linux/arm64"
     push_flags:
-    - --tls-verify=false
+      - --tls-verify=false
   - # armv7
     image_templates:
-    - "unpoller/unpoller:latest-armv7"
-    - "unpoller/unpoller:{{ .Tag }}-armv7"
-    - "unpoller/unpoller:v{{ .Major }}-armv7"
+      - "ghcr.io/unpoller/unpoller:latest-armv7"
+      - "ghcr.io/unpoller/unpoller:{{ .Tag }}-armv7"
+      - "ghcr.io/unpoller/unpoller:v{{ .Major }}-armv7"
     use: buildx
     build_flag_templates:
-    - "--pull"
-    - "--label=org.opencontainers.image.created={{.Date}}"
-    - "--label=org.opencontainers.image.title={{.ProjectName}}"
-    - "--label=org.opencontainers.image.revision={{.FullCommit}}"
-    - "--label=org.opencontainers.image.version={{.Version}}"
-    - "--label=org.opencontainers.image.documentation='https://unpoller.com/docs/install/docker'"
-    - "--label=org.opencontainers.image.description='Telemetry and Observability for your UniFi Network'"
-    - "--label=org.opencontainers.image.url='https://unpoller.com'"
-    - "--label=org.opencontainers.image.source='https://github.com/unpoller/unpoller'"
-    - "--label=org.opencontainers.image.vendor=unpoller"
-    - "--label=org.opencontainers.image.licenses=MIT"
-    - "--platform=linux/arm/v7"
+      - "--pull"
+      - "--label=org.opencontainers.image.created={{.Date}}"
+      - "--label=org.opencontainers.image.title={{.ProjectName}}"
+      - "--label=org.opencontainers.image.revision={{.FullCommit}}"
+      - "--label=org.opencontainers.image.version={{.Version}}"
+      - "--label=org.opencontainers.image.documentation='https://unpoller.com/docs/install/docker'"
+      - "--label=org.opencontainers.image.description='Telemetry and Observability for your UniFi Network'"
+      - "--label=org.opencontainers.image.url='https://unpoller.com'"
+      - "--label=org.opencontainers.image.source='https://github.com/unpoller/unpoller'"
+      - "--label=org.opencontainers.image.vendor=unpoller"
+      - "--label=org.opencontainers.image.licenses=MIT"
+      - "--platform=linux/arm/v7"
     push_flags:
-    - --tls-verify=false
+      - --tls-verify=false
 docker_manifests:
   - name_template: unpoller/unpoller:{{ .Version }}
     image_templates:
-    - unpoller/unpoller:{{ .Version }}-amd64
-    - unpoller/unpoller:{{ .Version }}-arm64v8
-    - unpoller/unpoller:{{ .Version }}-armv7
+      - ghcr.io/unpoller/unpoller:{{ .Version }}-amd64
+      - ghcr.io/unpoller/unpoller:{{ .Version }}-arm64v8
+      - ghcr.io/unpoller/unpoller:{{ .Version }}-armv7
 
 nfpms:
   -
