@@ -88,7 +88,7 @@ dockers:
     push_flags:
       - --tls-verify=false
 docker_manifests:
-  - name_template: unpoller/unpoller:{{ .Version }}
+  - name_template: ghcr.io/unpoller/unpoller:{{ .Version }}
     image_templates:
       - ghcr.io/unpoller/unpoller:{{ .Version }}-amd64
       - ghcr.io/unpoller/unpoller:{{ .Version }}-arm64v8
