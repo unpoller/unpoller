@@ -37,3 +37,5 @@ github_deploy_key*
 /after-install-rendered.sh
 /before-remove-rendered.sh
 /gpg.signing.key
+dist/
+.vscode/
