@@ -126,7 +126,7 @@ rsrc: rsrc.syso
 rsrc.syso: init/windows/application.ico init/windows/manifest.xml $(shell go env GOPATH)/bin/rsrc
 	$(shell go env GOPATH)/bin/rsrc -ico init/windows/application.ico -manifest init/windows/manifest.xml
 $(shell go env GOPATH)/bin/rsrc:
-	cd /tmp ; go get $(RSRC_BIN) ; go install $(RSRC_BIN)
+	cd /tmp ; go get $(RSRC_BIN) ; go install $(RSRC_BIN)@latest
 
 ####################
 ##### Binaries #####

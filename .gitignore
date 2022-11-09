@@ -1,5 +1,6 @@
 # Change this line.
 /unifi-poller
+/unpoller
 /init/macos/*.app/Contents/MacOS/*
 # The rest is probably fine.
 /rsrc*.syso
