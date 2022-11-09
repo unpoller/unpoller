@@ -354,6 +354,7 @@ github.com/unpoller/datadogunifi v0.0.0-20220117210709-255cee8eaa3b h1:3CmL9glNl
 github.com/unpoller/datadogunifi v0.0.0-20220117210709-255cee8eaa3b/go.mod h1:FvOpw3mdjBpgbmjFl4D3lD0wkV21tv5AWogE+5uuoh0=
 github.com/unpoller/datadogunifi v0.0.0-20221027212755-dbf387d41bcb h1:j7C5WUFxeVpWCoK64bKCPjb5UNxE8BDz9fjeo4X0e4Q=
 github.com/unpoller/datadogunifi v0.0.0-20221027212755-dbf387d41bcb/go.mod h1:FvOpw3mdjBpgbmjFl4D3lD0wkV21tv5AWogE+5uuoh0=
+github.com/unpoller/datadogunifi v0.0.0-20221109161507-2c4fbce23b95 h1:1s6gdBdbxMBoFu0doJOKCT+OgeEU2dQlWi7McStWlPM=
 github.com/unpoller/datadogunifi v0.0.0-20221109161507-2c4fbce23b95/go.mod h1:FvOpw3mdjBpgbmjFl4D3lD0wkV21tv5AWogE+5uuoh0=
 github.com/unpoller/influxunifi v0.0.0-20210623102357-4b2dc7fa818c h1:T+T+jWgL3+4Bgy3VuTLNJLoShvmrfPuH7DxaYeB0gho=
 github.com/unpoller/influxunifi v0.0.0-20210623102357-4b2dc7fa818c/go.mod h1:GHqTS6Ry8fcVDPoPuIhI6e7HPVH6tSOZIJsQ5h2zmJo=
