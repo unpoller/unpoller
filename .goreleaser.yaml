@@ -238,7 +238,6 @@ nfpms:
     formats:
       - deb
       - rpm
-      - termux.deb # Since GoReleaser v1.11.
     bindir: /usr/bin
     version_metadata: git
     section: default
