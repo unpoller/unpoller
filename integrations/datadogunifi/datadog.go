@@ -190,6 +190,7 @@ func (u *DatadogUnifi) setConfigDefaults() {
 
 // Run runs a ticker to poll the unifi server and update Datadog.
 func (u *DatadogUnifi) Run(c poller.Collect) error {
+	u.Collector = c
 	if u.Disable {
 		u.LogDebugf("Datadog config is disabled, output is disabled.")
 		return nil
@@ -198,7 +199,6 @@ func (u *DatadogUnifi) Run(c poller.Collect) error {
 		u.LogErrorf("DataDog config is missing and is not disabled: Datadog output is disabled!")
 		return nil
 	}
-	u.Collector = c
 	u.Logf("Datadog is configured.")
 	u.setConfigDefaults()
 
