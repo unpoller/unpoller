@@ -243,6 +243,7 @@ nfpms:
     priority: extra
     provides:
       - unifi-poller
+      - unpoller
 
     # Contents to add to the package.
     # GoReleaser will automatically add the binaries.
