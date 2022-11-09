@@ -15,14 +15,15 @@ builds:
       - freebsd
     goarch:
       - amd64
+      - "386"
     ignore:
       - goos: darwin
-        goarch: 386
+        goarch: "386"
       - goarm: mips64
       - gomips: hardfloat
       - goamd64: v4
       - goos: freebsd
-        goarch: 386
+        goarch: "386"
   - id: unpoller-mac
     env:
       - CGO_ENABLED=0
@@ -34,14 +35,14 @@ builds:
       - arm64
     ignore:
       - goos: darwin
-        goarch: 386
+        goarch: "386"
   - id: unpoller-linux-arm
     env:
       - CGO_ENABLED=0
     binary: unpoller
     goarm:
-      - 6
-      - 7
+      - "6"
+      - "7"
     goos:
       - linux
     goarch:
@@ -222,6 +223,7 @@ nfpms:
   - id: unpoller-packages
     builds:
       - unpoller
+      - unpoller-linux-arm
     replacements:
       amd64: 64-bit
       386: 32-bit
@@ -236,7 +238,6 @@ nfpms:
     formats:
       - deb
       - rpm
-      - termux.deb # Since GoReleaser v1.11.
     bindir: /usr/bin
     version_metadata: git
     section: default
