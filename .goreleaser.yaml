@@ -93,6 +93,7 @@ archives:
       - unpoller_manual.html
       - rsrc_windows_*.syso
       - examples/up.*.example
+      - init/windows/application.ico
 
 dockers:
   - id: docker-linux-amd64
@@ -242,9 +243,10 @@ nfpms:
     version_metadata: git
     section: default
     priority: extra
+    # provides defines the packages. The first one defines the package name.
     provides:
-      - unifi-poller
       - unpoller
+      - unifi-poller
 
     # Contents to add to the package.
     # GoReleaser will automatically add the binaries.
@@ -252,7 +254,11 @@ nfpms:
       - dst: /etc/unpoller
         type: dir
         file_info:
-          mode: 0700
+          mode: 0740
+      - dst: /usr/share/doc/unpoller
+        type: dir
+        file_info:
+          mode: 0755
 
       # Example config files
       - src: examples/up.conf.example
@@ -270,6 +276,59 @@ nfpms:
       - src: "unpoller_manual.html"
         dst: /etc/unpoller/manual.html
         type: config
+      
+      # man pages
+      - src: unpoller.1.gz
+        dst: /usr/share/man/man1/unpoller.1.gz
+        type: man
+      - src: LICENSE
+        dst: /usr/share/doc/unpoller/LICENSE
+        type: man
+      - src: unpoller_manual.html
+        dst: /usr/share/doc/unpoller/unpoller_manual.html
+        type: man
+      
+      # systemd service
+      - src: init/systemd/unpoller.service
+        dst: /lib/systemd/service/unpoller.service
+        type: config
+      
+      # freebsd rc service
+      - src: init/bsd/freebsd.rc.d
+        dst: /usr/local/etc/rc.d/unpoller
+        type: config
+      
+      # web server statics
+      - dst: /usr/local/lib/unpoller/web/static/
+        type: dir
+        file_info:
+          mode: 0755
+      - dst: /usr/local/lib/unpoller/web/static/css
+        type: dir
+        file_info:
+          mode: 0755
+      - dst: /usr/local/lib/unpoller/web/static/images
+        type: dir
+        file_info:
+          mode: 0755
+      - dst: /usr/local/lib/unpoller/web/static/js
+        type: dir
+        file_info:
+          mode: 0755
+      - src: init/webserver/index.html
+        dst: /usr/local/lib/unpoller/web/static/index.html
+        type: config
+      - src: init/webserver/static/css/*
+        dst: /usr/local/lib/unpoller/web/static//css
+        type: config
+      - src: init/webserver/static/images/*
+        dst: /usr/local/lib/unpoller/web/static/images
+        type: config
+      - src: init/webserver/static/js/*
+        dst: /usr/local/lib/unpoller/web/static/js
+        type: config
+      
+      
     # signing
     scripts:
       postinstall: "scripts/after-install.sh"

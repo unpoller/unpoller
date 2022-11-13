@@ -1,29 +1,29 @@
-# Systemd service unit for {{BINARY}}.
+# Systemd service unit for unpoller.
 # This is part of Application Builder.
 # https://github.com/golift/application-builder
 # This file is installed when FORMULA is set to 'service'.
 
 [Unit]
-Description={{BINARY}} - {{DESC}}
+Description=unpoller - Telemetry and Observability for your UniFi Network
 After=network.target
 Requires=network.target
 
 [Service]
-ExecStart=/usr/bin/{{BINARY}} $DAEMON_OPTS
-EnvironmentFile=-/etc/default/{{BINARY}}
-EnvironmentFile=-/etc/sysconfig/{{BINARY}}
+ExecStart=/usr/bin/unpoller $DAEMON_OPTS
+EnvironmentFile=-/etc/default/unpoller
+EnvironmentFile=-/etc/sysconfig/unpoller
 Restart=always
 RestartSec=10
 StandardOutput=syslog
 StandardError=syslog
-SyslogIdentifier={{BINARY}}
+SyslogIdentifier=unpoller
 Type=simple
 WorkingDirectory=/tmp
 
 # These should be set correctly for your environment.
 UMask=0002
-User={{BINARY}}
-Group={{BINARY}}
+User=unpoller
+Group=unpoller
 
 [Install]
 WantedBy=multi-user.target
