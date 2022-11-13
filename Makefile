@@ -206,5 +206,8 @@ install: man readme $(BINARY) plugins_darwin
 	[ -f $(ETC)/$(BINARY)/$(CONFIG_FILE) ] || /usr/bin/install -m 0644 -cp  examples/$(CONFIG_FILE).example $(ETC)/$(BINARY)/$(CONFIG_FILE)
 	/usr/bin/install -m 0644 -cp LICENSE *.html examples/* $(PREFIX)/share/doc/$(BINARY)/
 
+goreleaser:
+	goreleaser release --rm-dist
+
 goreleaser-test:
 	goreleaser release --rm-dist --skip-validate --skip-publish --skip-sign --debug
