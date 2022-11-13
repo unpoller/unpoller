@@ -17,10 +17,6 @@ builds:
       - amd64
       - "386"
     ignore:
-      - goos: darwin
-        goarch: "386"
-      - goarm: mips64
-      - gomips: hardfloat
       - goamd64: v4
       - goos: freebsd
         goarch: "386"

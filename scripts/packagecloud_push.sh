@@ -56,13 +56,13 @@ fi
 for ubuntu_version in ${SUPPORTED_UBUNTU_VERSIONS}
 do
   if [[ $ARTIFACT_PATH == *.deb ]]; then
-    package_cloud push ${PACKAGE_CLOUD_REPO}/ubuntu/${ubuntu_version} $ARTIFACT_PATH
+    package_cloud push ${PACKAGE_CLOUD_REPO}/ubuntu/${ubuntu_version} $ARTIFACT_PATH --skip-errors
   fi
 done
 
 for redhat_version in ${SUPPORTED_REDHAT_VERSIONS}
 do
   if [[ $ARTIFACT_PATH == *.rpm ]]; then
-    package_cloud push ${PACKAGE_CLOUD_REPO}/el/${redhat_version} $ARTIFACT_PATH
+    package_cloud push ${PACKAGE_CLOUD_REPO}/el/${redhat_version} $ARTIFACT_PATH --skip-errors
   fi
 done
