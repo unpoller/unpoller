@@ -9,9 +9,9 @@ if [ "$1" = "upgrade" ] || [ "$1" = "1" ] ; then
 fi
 
 if [ -x "/bin/systemctl" ]; then
-  /bin/systemctl stop {{BINARY}}
-  /bin/systemctl disable {{BINARY}}
+  /bin/systemctl stop unpoller
+  /bin/systemctl disable unpoller
 elif [ -x /usr/sbin/service ]; then
-  /usr/sbin/service {{BINARY}} stop
-  /usr/sbin/service {{BINARY}} disable
+  /usr/sbin/service unpoller stop
+  /usr/sbin/service unpoller disable
 fi

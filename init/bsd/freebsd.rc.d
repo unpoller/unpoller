@@ -1,31 +1,31 @@
 #!/bin/sh
 #
-# FreeBSD rc.d startup script for {{BINARY}}.
+# FreeBSD rc.d startup script for unpoller.
 #
-# PROVIDE: {{BINARY}}
+# PROVIDE: unpoller
 # REQUIRE: networking syslog
 # KEYWORD:
 
 . /etc/rc.subr
 
-name="{{BINARYU}}"
-real_name="{{BINARY}}"
-rcvar="{{BINARYU}}_enable"
-{{BINARYU}}_command="/usr/local/bin/${real_name}"
-{{BINARYU}}_user="{{BINARY}}"
-{{BINARYU}}_config="/usr/local/etc/${real_name}/{{CONFIG_FILE}}"
+name="unpoller"
+real_name="unpoller"
+rcvar="unpoller_enable"
+unpoller_command="/usr/local/bin/${real_name}"
+unpoller_user="unpoller"
+unpoller_config="/usr/local/etc/${real_name}/{{CONFIG_FILE}}"
 pidfile="/var/run/${real_name}/pid"
 
-# This runs `daemon` as the `{{BINARYU}}_user` user.
+# This runs `daemon` as the `unpoller_user` user.
 command="/usr/sbin/daemon"
-command_args="-P ${pidfile} -r -t ${real_name} -T ${real_name} -l daemon ${{{BINARYU}}_command} -c ${{{BINARYU}}_config}"
+command_args="-P ${pidfile} -r -t ${real_name} -T ${real_name} -l daemon ${unpoller_command} -c ${unpoller_config}"
 
 load_rc_config ${name}
-: ${{{BINARYU}}_enable:=no}
+: ${unpoller_enable:=no}
 
 # Make a place for the pid file.
 mkdir -p $(dirname ${pidfile})
-chown -R ${{BINARYU}}_user $(dirname ${pidfile})
+chown -R $unpoller_user $(dirname ${pidfile})
 
 # Suck in optional exported override variables.
 # ie. add something like the following to this file: export UP_POLLER_DEBUG=true
