@@ -4,7 +4,7 @@ package inputunifi
 
 import (
 	"fmt"
-	"io/ioutil"
+	"os"
 	"strings"
 	"sync"
 	"time"
@@ -93,7 +93,7 @@ func (c *Controller) getCerts() ([][]byte, error) {
 	b := make([][]byte, len(c.CertPaths))
 
 	for i, f := range c.CertPaths {
-		d, err := ioutil.ReadFile(f)
+		d, err := os.ReadFile(f)
 		if err != nil {
 			return nil, fmt.Errorf("reading SSL cert file: %w", err)
 		}
@@ -189,7 +189,7 @@ FIRST:
 }
 
 func (u *InputUnifi) getPassFromFile(filename string) string {
-	b, err := ioutil.ReadFile(filename)
+	b, err := os.ReadFile(filename)
 	if err != nil {
 		u.LogErrorf("Reading UniFi Password File: %v", err)
 	}

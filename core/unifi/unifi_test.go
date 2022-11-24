@@ -1,7 +1,7 @@
 package unifi // nolint: testpackage
 
 import (
-	"io/ioutil"
+	"io"
 	"net/http"
 	"runtime"
 	"testing"
@@ -60,7 +60,7 @@ func TestUniReq(t *testing.T) {
 	a.EqualValues("application/json", r.Header.Get("Accept"), "Accept header must be set to application/json")
 
 	// Check the parameters.
-	d, err := ioutil.ReadAll(r.Body)
+	d, err := io.ReadAll(r.Body)
 	a.Nil(err, "problem reading request body, POST parameters may be malformed")
 	a.EqualValues(k, string(d), "POST parameters improperly encoded")
 }
@@ -89,7 +89,7 @@ func TestUniReqPut(t *testing.T) {
 	a.EqualValues("application/json", r.Header.Get("Accept"), "Accept header must be set to application/json")
 
 	// Check the parameters.
-	d, err := ioutil.ReadAll(r.Body)
+	d, err := io.ReadAll(r.Body)
 	a.Nil(err, "problem reading request body, PUT parameters may be malformed")
 	a.EqualValues(k, string(d), "PUT parameters improperly encoded")
 }

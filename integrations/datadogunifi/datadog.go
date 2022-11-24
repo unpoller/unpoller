@@ -191,7 +191,7 @@ func (u *DatadogUnifi) setConfigDefaults() {
 // Run runs a ticker to poll the unifi server and update Datadog.
 func (u *DatadogUnifi) Run(c poller.Collect) error {
 	u.Collector = c
-	disabled := u.Disable == nil || *u.Disable == true
+	disabled := u.Disable == nil || *u.Disable
 	if disabled {
 		u.LogDebugf("Datadog config is disabled, output is disabled.")
 		return nil
@@ -239,10 +239,10 @@ func (u *DatadogUnifi) PollController() {
 		if err != nil {
 			// Is the agent down?
 			u.LogErrorf("unable to report metrics and events", err)
-			report.reportCount("unifi.collect.errors", 1, []string{})
+			_ = report.reportCount("unifi.collect.errors", 1, []string{})
 			continue
 		}
-		report.reportCount("unifi.collect.success", 1, []string{})
+		_ = report.reportCount("unifi.collect.success", 1, []string{})
 		u.LogDatadogReport(report)
 	}
 }
@@ -263,7 +263,7 @@ func (u *DatadogUnifi) ReportMetrics(m *poller.Metrics, e *poller.Events) (*Repo
 	u.loopPoints(r)
 	r.End = time.Now()
 	r.Elapsed = r.End.Sub(r.Start)
-	r.reportTiming("unifi.collector_timing", r.Elapsed, []string{})
+	_ = r.reportTiming("unifi.collector_timing", r.Elapsed, []string{})
 	return r, nil
 }
 
@@ -350,12 +350,12 @@ func (u *DatadogUnifi) LogDatadogReport(r *Report) {
 		r.Elapsed,
 	)
 	metricName := metricNamespace("collector")
-	r.reportCount(metricName("num_sites"), int64(len(m.Sites)), u.Tags)
-	r.reportCount(metricName("num_sites_dpi"), int64(len(m.SitesDPI)), u.Tags)
-	r.reportCount(metricName("num_clients"), int64(len(m.Clients)), u.Tags)
-	r.reportCount(metricName("num_clients_dpi"), int64(len(m.ClientsDPI)), u.Tags)
-	r.reportCount(metricName("num_rogue_ap"), int64(len(m.RogueAPs)), u.Tags)
-	r.reportCount(metricName("num_devices"), int64(len(m.Devices)), u.Tags)
-	r.reportCount(metricName("num_errors"), int64(len(r.Errors)), u.Tags)
-	r.reportTiming(metricName("elapsed_time"), r.Elapsed, u.Tags)
+	_ = r.reportCount(metricName("num_sites"), int64(len(m.Sites)), u.Tags)
+	_ = r.reportCount(metricName("num_sites_dpi"), int64(len(m.SitesDPI)), u.Tags)
+	_ = r.reportCount(metricName("num_clients"), int64(len(m.Clients)), u.Tags)
+	_ = r.reportCount(metricName("num_clients_dpi"), int64(len(m.ClientsDPI)), u.Tags)
+	_ = r.reportCount(metricName("num_rogue_ap"), int64(len(m.RogueAPs)), u.Tags)
+	_ = r.reportCount(metricName("num_devices"), int64(len(m.Devices)), u.Tags)
+	_ = r.reportCount(metricName("num_errors"), int64(len(r.Errors)), u.Tags)
+	_ = r.reportTiming(metricName("elapsed_time"), r.Elapsed, u.Tags)
 }

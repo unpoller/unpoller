@@ -15,7 +15,6 @@ import (
 	"encoding/pem"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"net/http"
 	"net/http/cookiejar"
 	"net/url"
@@ -130,7 +129,7 @@ func (u *Unifi) Login() error {
 	}
 
 	defer resp.Body.Close()                   // we need no data here.
-	_, _ = io.Copy(ioutil.Discard, resp.Body) // avoid leaking.
+	_, _ = io.Copy(io.Discard, resp.Body) // avoid leaking.
 	u.DebugLog("Requested %s: elapsed %v, returned %d bytes",
 		req.URL, time.Since(start).Round(time.Millisecond), resp.ContentLength)
 
@@ -188,7 +187,7 @@ func (u *Unifi) checkNewStyleAPI() error {
 	}
 
 	defer resp.Body.Close()                   // we need no data here.
-	_, _ = io.Copy(ioutil.Discard, resp.Body) // avoid leaking.
+	_, _ = io.Copy(io.Discard, resp.Body) // avoid leaking.
 
 	if resp.StatusCode == http.StatusOK {
 		// The new version returns a "200" for a / request.
@@ -350,7 +349,7 @@ func (u *Unifi) do(req *http.Request) ([]byte, error) {
 
 	defer resp.Body.Close()
 
-	body, err := ioutil.ReadAll(resp.Body)
+	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return body, fmt.Errorf("reading response: %w", err)
 	}

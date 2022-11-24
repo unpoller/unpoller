@@ -5,8 +5,8 @@ package influxunifi
 import (
 	"crypto/tls"
 	"fmt"
-	"io/ioutil"
 	"log"
+	"os"
 	"strconv"
 	"strings"
 	"time"
@@ -165,7 +165,7 @@ func (u *InfluxUnifi) setConfigDefaults() {
 }
 
 func (u *InfluxUnifi) getPassFromFile(filename string) string {
-	b, err := ioutil.ReadFile(filename)
+	b, err := os.ReadFile(filename)
 	if err != nil {
 		u.LogErrorf("Reading InfluxDB Password File: %v", err)
 	}

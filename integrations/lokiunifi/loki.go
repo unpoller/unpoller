@@ -2,7 +2,7 @@ package lokiunifi
 
 import (
 	"fmt"
-	"io/ioutil"
+	"os"
 	"strconv"
 	"strings"
 	"time"
@@ -90,7 +90,7 @@ func (l *Loki) ValidateConfig() {
 	}
 
 	if strings.HasPrefix(l.Password, "file://") {
-		pass, err := ioutil.ReadFile(strings.TrimPrefix(l.Password, "file://"))
+		pass, err := os.ReadFile(strings.TrimPrefix(l.Password, "file://"))
 		if err != nil {
 			l.LogErrorf("Reading Loki Password File: %v", err)
 		}

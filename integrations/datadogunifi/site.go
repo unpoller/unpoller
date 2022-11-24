@@ -56,7 +56,7 @@ func (u *DatadogUnifi) reportSite(r report, s *unifi.Site) {
 		}
 
 		for name, value := range data {
-			r.reportGauge(metricName(name), value, tags)
+			_ = r.reportGauge(metricName(name), value, tags)
 		}
 	}
 }
@@ -72,9 +72,9 @@ func (u *DatadogUnifi) reportSiteDPI(r report, s *unifi.DPITable) {
 			tag("source", s.SourceName),
 		}
 
-		r.reportCount(metricName("tx_packets"), dpi.TxPackets, tags)
-		r.reportCount(metricName("rx_packets"), dpi.RxPackets, tags)
-		r.reportCount(metricName("tx_bytes"), dpi.TxBytes, tags)
-		r.reportCount(metricName("rx_bytes"), dpi.RxBytes, tags)
+		_ = r.reportCount(metricName("tx_packets"), dpi.TxPackets, tags)
+		_ = r.reportCount(metricName("rx_packets"), dpi.RxPackets, tags)
+		_ = r.reportCount(metricName("tx_bytes"), dpi.TxBytes, tags)
+		_ = r.reportCount(metricName("rx_bytes"), dpi.RxBytes, tags)
 	}
 }

@@ -62,7 +62,7 @@ func (u *DatadogUnifi) batchAlarms(r report, event *unifi.Alarm) { // nolint:dup
 	tagMap = cleanTags(tagMap)
 	tags := tagMapToTags(tagMap)
 	title := fmt.Sprintf("[%s][%s] Alarm at %s from %s", event.EventType, event.Catname, event.SiteName, event.SourceName)
-	r.reportEvent(title, event.Datetime, event.Msg, tags)
+	_ = r.reportEvent(title, event.Datetime, event.Msg, tags)
 	r.reportWarnLog(fmt.Sprintf("[%d] %s: %s - %s", event.Datetime.Unix(), title, event.Msg, tagMapToSimpleStrings(tagMap)))
 }
 
@@ -83,6 +83,6 @@ func (u *DatadogUnifi) batchAnomaly(r report, event *unifi.Anomaly) {
 	tags := tagMapToTags(tagMap)
 
 	title := fmt.Sprintf("Anomaly detected at %s from %s", event.SiteName, event.SourceName)
-	r.reportEvent(title, event.Datetime, event.Anomaly, tags)
+	_ = r.reportEvent(title, event.Datetime, event.Anomaly, tags)
 	r.reportWarnLog(fmt.Sprintf("[%d] %s: %s - %s", event.Datetime.Unix(), title, event.Anomaly, tagMapToSimpleStrings(tagMap)))
 }

@@ -33,7 +33,7 @@ func metricNamespace(namespace string) func(string) string {
 
 func reportGaugeForFloat64Map(r report, metricName func(string) string, data map[string]float64, tags map[string]string) {
 	for name, value := range data {
-		r.reportGauge(metricName(name), value, tagMapToTags(tags))
+		_ = r.reportGauge(metricName(name), value, tagMapToTags(tags))
 	}
 }
 
