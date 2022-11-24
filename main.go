@@ -12,7 +12,7 @@ import (
 	// Load output plugins!
 	_ "github.com/unpoller/integrations/datadogunifi"
 	_ "github.com/unpoller/integrations/influxunifi"
-	_ "github.com/unpoller/lokiunifi"
+	_ "github.com/unpoller/integrations/lokiunifi"
 	_ "github.com/unpoller/promunifi"
 )
 
