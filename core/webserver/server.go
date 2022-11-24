@@ -52,7 +52,7 @@ type Server struct {
 func init() { // nolint: gochecknoinits
 	s := &Server{plugins: plugins, start: time.Now(), Config: &Config{
 		Port:      DefaultPort,
-		HTMLPath:  filepath.Join(poller.DefaultObjPath, "web"),
+		HTMLPath:  filepath.Join(poller.DefaultObjPath(), "web"),
 		MaxEvents: DefaultEvents,
 	}}
 	plugins.Config = s.Config
