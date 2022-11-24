@@ -13,7 +13,8 @@ notification if it changes. The possibilities are endless.
 
 You must compile your plugin using the unifi-poller source for the version you're
 using. In other words, to build a plugin for version 2.0.1, do this:
-```
+
+```bash
 mkdir -p $GOPATH/src/github.com/unifi-poller
 cd $GOPATH/src/github.com/unifi-poller
 
@@ -25,4 +26,5 @@ git checkout v2.0.1
 cp -r <your plugin> plugins/
 GOOS=linux make plugins
 ```
+
 The plugin you copy in *must* have a `main.go` file for `make plugins` to build it.
