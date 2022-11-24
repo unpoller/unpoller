@@ -1,7 +1,7 @@
 package datadogunifi
 
 import (
-	"github.com/unpoller/unifi"
+	"github.com/unpoller/unpoller/core/unifi"
 )
 
 // uapT is used as a name for printed/logged counters.

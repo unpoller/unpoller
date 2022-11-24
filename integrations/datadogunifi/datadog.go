@@ -7,8 +7,8 @@ import (
 	"time"
 
 	"github.com/DataDog/datadog-go/statsd"
-	"github.com/unpoller/poller"
-	"github.com/unpoller/unifi"
+	"github.com/unpoller/unpoller/core/poller"
+	"github.com/unpoller/unpoller/core/unifi"
 	"golift.io/cnfg"
 )
 

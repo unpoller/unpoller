@@ -10,11 +10,11 @@ require (
 	github.com/unpoller/lokiunifi v0.0.0-20210623102057-0902524b6a8a
 	github.com/unpoller/poller v0.0.0-20210623104748-50161c195d5e
 	github.com/unpoller/promunifi v0.0.0-20210623101918-b986e661ac99
+	golift.io/cnfg v0.2.1
 	golift.io/version v0.0.2
 )
 
 require (
 	golang.org/x/net v0.2.0 // indirect
 	golang.org/x/sys v0.2.0 // indirect
-	golift.io/cnfg v0.2.1 // indirect
 )

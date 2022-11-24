@@ -1,7 +1,7 @@
 package datadogunifi
 
 import (
-	"github.com/unpoller/unifi"
+	"github.com/unpoller/unpoller/core/unifi"
 )
 
 // reportSite generates Unifi Sites' datapoints for Datadog.

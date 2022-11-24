@@ -1,7 +1,7 @@
 package datadogunifi
 
 import (
-	"github.com/unpoller/unifi"
+	"github.com/unpoller/unpoller/core/unifi"
 )
 
 // batchClient generates Unifi Client datapoints for Datadog.
