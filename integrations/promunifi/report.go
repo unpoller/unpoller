@@ -5,7 +5,7 @@ import (
 	"time"
 
 	"github.com/prometheus/client_golang/prometheus"
-	"github.com/unpoller/poller"
+	"github.com/unpoller/unpoller/core/poller"
 )
 
 // This file contains the report interface.

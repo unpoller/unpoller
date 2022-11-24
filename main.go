@@ -13,7 +13,7 @@ import (
 	_ "github.com/unpoller/integrations/datadogunifi"
 	_ "github.com/unpoller/integrations/influxunifi"
 	_ "github.com/unpoller/integrations/lokiunifi"
-	_ "github.com/unpoller/promunifi"
+	_ "github.com/unpoller/integrations/promunifi"
 )
 
 // Keep it simple.
