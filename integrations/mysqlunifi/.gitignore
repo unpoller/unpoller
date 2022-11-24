@@ -1,3 +1,1 @@
-/mysqlunifi
-/*.so
-/go.sum
+*.so
