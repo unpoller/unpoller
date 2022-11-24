@@ -350,6 +350,7 @@ github.com/stretchr/testify v1.6.1/go.mod h1:6Fq8oRcR53rry900zMqJjRRixrwX3KX962/
 github.com/stretchr/testify v1.7.0 h1:nwc3DEeHmmLAfoZucVR881uASk0Mfjw8xYJ99tb5CcY=
 github.com/stretchr/testify v1.7.0/go.mod h1:6Fq8oRcR53rry900zMqJjRRixrwX3KX962/h/Wwjteg=
 github.com/tmc/grpc-websocket-proxy v0.0.0-20170815181823-89b8d40f7ca8/go.mod h1:ncp9v5uamzpCO7NfCPTXjqaC+bZgJeR0sMTm6dMHP7U=
+github.com/unpoller/datadogunifi v0.0.0-20221124011555-8037ce373224 h1:avnWIPsXSuOIT1x2oImsbOUpLvC0ACQxsPmhYm5P8/E=
 github.com/unpoller/datadogunifi v0.0.0-20221124011555-8037ce373224/go.mod h1:/E0LxkzsPngrP+hevAaXOjVCOr8JWRosGbrvlV6reIk=
 github.com/unpoller/influxunifi v0.0.0-20210623102357-4b2dc7fa818c h1:T+T+jWgL3+4Bgy3VuTLNJLoShvmrfPuH7DxaYeB0gho=
 github.com/unpoller/influxunifi v0.0.0-20210623102357-4b2dc7fa818c/go.mod h1:GHqTS6Ry8fcVDPoPuIhI6e7HPVH6tSOZIJsQ5h2zmJo=
