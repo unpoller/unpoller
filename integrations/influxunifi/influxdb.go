@@ -12,8 +12,8 @@ import (
 	"time"
 
 	influx "github.com/influxdata/influxdb1-client/v2"
-	"github.com/unpoller/poller"
-	"github.com/unpoller/unifi"
+	"github.com/unpoller/unpoller/core/poller"
+	"github.com/unpoller/unpoller/core/unifi"
 	"github.com/unpoller/webserver"
 	"golift.io/cnfg"
 )

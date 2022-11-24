@@ -3,7 +3,7 @@ package influxunifi
 import (
 	"time"
 
-	"github.com/unpoller/unifi"
+	"github.com/unpoller/unpoller/core/unifi"
 )
 
 const (
