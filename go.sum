@@ -350,12 +350,7 @@ github.com/stretchr/testify v1.6.1/go.mod h1:6Fq8oRcR53rry900zMqJjRRixrwX3KX962/
 github.com/stretchr/testify v1.7.0 h1:nwc3DEeHmmLAfoZucVR881uASk0Mfjw8xYJ99tb5CcY=
 github.com/stretchr/testify v1.7.0/go.mod h1:6Fq8oRcR53rry900zMqJjRRixrwX3KX962/h/Wwjteg=
 github.com/tmc/grpc-websocket-proxy v0.0.0-20170815181823-89b8d40f7ca8/go.mod h1:ncp9v5uamzpCO7NfCPTXjqaC+bZgJeR0sMTm6dMHP7U=
-github.com/unpoller/datadogunifi v0.0.0-20220117210709-255cee8eaa3b h1:3CmL9glNl4xIXXiscUeV9Hf6mHqwPmyHZ7TK8GuAvno=
-github.com/unpoller/datadogunifi v0.0.0-20220117210709-255cee8eaa3b/go.mod h1:FvOpw3mdjBpgbmjFl4D3lD0wkV21tv5AWogE+5uuoh0=
-github.com/unpoller/datadogunifi v0.0.0-20221027212755-dbf387d41bcb h1:j7C5WUFxeVpWCoK64bKCPjb5UNxE8BDz9fjeo4X0e4Q=
-github.com/unpoller/datadogunifi v0.0.0-20221027212755-dbf387d41bcb/go.mod h1:FvOpw3mdjBpgbmjFl4D3lD0wkV21tv5AWogE+5uuoh0=
-github.com/unpoller/datadogunifi v0.0.0-20221109161507-2c4fbce23b95 h1:1s6gdBdbxMBoFu0doJOKCT+OgeEU2dQlWi7McStWlPM=
-github.com/unpoller/datadogunifi v0.0.0-20221109161507-2c4fbce23b95/go.mod h1:FvOpw3mdjBpgbmjFl4D3lD0wkV21tv5AWogE+5uuoh0=
+github.com/unpoller/datadogunifi v0.0.0-20221124011555-8037ce373224/go.mod h1:/E0LxkzsPngrP+hevAaXOjVCOr8JWRosGbrvlV6reIk=
 github.com/unpoller/influxunifi v0.0.0-20210623102357-4b2dc7fa818c h1:T+T+jWgL3+4Bgy3VuTLNJLoShvmrfPuH7DxaYeB0gho=
 github.com/unpoller/influxunifi v0.0.0-20210623102357-4b2dc7fa818c/go.mod h1:GHqTS6Ry8fcVDPoPuIhI6e7HPVH6tSOZIJsQ5h2zmJo=
 github.com/unpoller/inputunifi v0.0.0-20210623102218-06574d44cc6b h1:dHFTRAxwm064wPA4SOijcMfOqayrywn5foKqz7iU2BQ=
@@ -369,6 +364,7 @@ github.com/unpoller/poller v0.0.0-20210623104748-50161c195d5e/go.mod h1:AbDp60t5
 github.com/unpoller/promunifi v0.0.0-20210623101918-b986e661ac99 h1:6x0qUKxU/A5UOUSoUGLbDuaGrXlRkOvdiWDGLnNC8BA=
 github.com/unpoller/promunifi v0.0.0-20210623101918-b986e661ac99/go.mod h1:xZQ+DIFUlI6XJqLHLEXxujWQwSzbESNtHtC0+njvOGA=
 github.com/unpoller/unifi v0.0.0-20210914213836-fd3c38c905a3/go.mod h1:K9QFFGfZws4gzB+Popix19S/rBKqrtqI+tyPORyg3F0=
+github.com/unpoller/unifi v0.0.0-20221124010147-8d83427af67b/go.mod h1:pJGPtjikPcYO+rZMpgYOj6Zs044Dl4R+u3MsV3TMenk=
 github.com/unpoller/unifi v0.0.9-0.20210623100314-3dccfdbc4c80 h1:XjHGfJhMwnB63DYHgtWGJgDxLhxVcAOtf+cfuvpGoyo=
 github.com/unpoller/unifi v0.0.9-0.20210623100314-3dccfdbc4c80/go.mod h1:K9QFFGfZws4gzB+Popix19S/rBKqrtqI+tyPORyg3F0=
 github.com/unpoller/webserver v0.0.0-20210623101543-90d89bb0acdf h1:HhXi3qca3kyFEFPh0mqdr0bpQs94hJvMbUJztwPtf2A=

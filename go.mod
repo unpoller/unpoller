@@ -3,7 +3,7 @@ module github.com/unpoller/unpoller
 go 1.16
 
 require (
-	github.com/unpoller/datadogunifi v0.0.0-20221109161507-2c4fbce23b95
+	github.com/unpoller/datadogunifi v0.0.0-20221124011555-8037ce373224
 	github.com/unpoller/influxunifi v0.0.0-20210623102357-4b2dc7fa818c
 	github.com/unpoller/inputunifi v0.0.0-20210623102218-06574d44cc6b
 	github.com/unpoller/lokiunifi v0.0.0-20210623102057-0902524b6a8a
