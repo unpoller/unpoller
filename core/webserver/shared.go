@@ -7,7 +7,7 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/unpoller/poller"
+	"github.com/unpoller/unpoller/core/poller"
 )
 
 /* This file has the methods that help the content-methods. Shared helpers. */
