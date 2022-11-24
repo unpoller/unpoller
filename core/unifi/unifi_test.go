@@ -3,6 +3,7 @@ package unifi // nolint: testpackage
 import (
 	"io/ioutil"
 	"net/http"
+	"runtime"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -22,7 +23,11 @@ func TestNewUnifi(t *testing.T) {
 	authReq, err := NewUnifi(c)
 	a.NotNil(err)
 	a.EqualValues(u, authReq.URL)
-	a.Contains(err.Error(), "connection refused", "an invalid destination should produce a connection error.")
+	if runtime.GOOS == "windows" {
+		a.Contains(err.Error(), "connectex: No connection", "an invalid destination should produce a connection error.")
+	} else {
+		a.Contains(err.Error(), "connection refused", "an invalid destination should produce a connection error.")
+	}
 }
 
 func TestUniReq(t *testing.T) {
