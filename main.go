@@ -6,7 +6,7 @@ import (
 	"os"
 	"time"
 
-	"github.com/unpoller/poller"
+	"github.com/unpoller/unpoller/core/poller"
 	// Load input plugins!
 	_ "github.com/unpoller/inputunifi"
 	// Load output plugins!

@@ -5,6 +5,7 @@ import (
 	"os"
 	"path"
 	"plugin"
+	"runtime"
 	"strings"
 	"time"
 
@@ -19,6 +20,45 @@ const (
 	// ENVConfigPrefix is the prefix appended to an env variable tag name.
 	ENVConfigPrefix = "UP"
 )
+
+// DefaultConfFile is where to find config if --config is not provided.
+func DefaultConfFile() string {
+	switch runtime.GOOS {
+	case "windows":
+		return `C:\ProgramData\unifi-poller\up.conf`
+	case "darwin":
+		fallthrough
+	case "freebsd":
+		fallthrough
+	case "netbsd":
+		fallthrough
+	case "openbsd":
+		return "/etc/unifi-poller/up.conf,/usr/local/etc/unifi-poller/up.conf"
+	default:
+		// linux and everything else
+		return "/config/unifi-poller.conf,/etc/unifi-poller/up.conf"
+	}
+}
+
+// DefaultObjPath is the path to look for shared object libraries (plugins).
+func DefaultObjPath() string {
+	switch runtime.GOOS {
+	case "windows":
+		// DefaultObjPath is useless in this context. Bummer.
+		return "PLUGINS_DO_NOT_WORK_ON_WINDOWS_SOWWWWWY"
+	case "darwin":
+		fallthrough
+	case "freebsd":
+		fallthrough
+	case "netbsd":
+		fallthrough
+	case "openbsd":
+		return "/usr/local/lib/unifi-poller"
+	default:
+		// linux and everything else
+		return "/usr/lib/unifi-poller"
+	}
+}
 
 // UnifiPoller contains the application startup data, and auth info for UniFi & Influx.
 type UnifiPoller struct {
@@ -74,7 +114,7 @@ func (u *UnifiPoller) LoadPlugins() error {
 		}
 
 		if _, err := os.Stat(name); os.IsNotExist(err) {
-			name = path.Join(DefaultObjPath, name)
+			name = path.Join(DefaultObjPath(), name)
 		}
 
 		u.Logf("Loading Dynamic Plugin: %s", name)

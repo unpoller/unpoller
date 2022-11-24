@@ -63,7 +63,7 @@ func (f *Flags) Parse(args []string) {
 		"This option bcrypts a provided string. Useful for the webserver password. Use - to be prompted.")
 	f.StringVarP(&f.DumpJSON, "dumpjson", "j", "",
 		"This debug option prints a json payload and exits. See man page for more info.")
-	f.StringVarP(&f.ConfigFile, "config", "c", DefaultConfFile,
+	f.StringVarP(&f.ConfigFile, "config", "c", DefaultConfFile(),
 		"Poller config file path. Separating multiple paths with a comma will load the first config file found.")
 	f.BoolVarP(&f.ShowVer, "version", "v", false, "Print the version and exit.")
 	_ = f.FlagSet.Parse(args) // pflag.ExitOnError means this will never return error.
