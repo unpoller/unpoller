@@ -8,12 +8,12 @@ import (
 
 	"github.com/unpoller/unpoller/core/poller"
 	// Load input plugins!
-	_ "github.com/unpoller/integrations/inputunifi"
+	_ "github.com/unpoller/unpoller/integrations/inputunifi"
 	// Load output plugins!
-	_ "github.com/unpoller/integrations/datadogunifi"
-	_ "github.com/unpoller/integrations/influxunifi"
-	_ "github.com/unpoller/integrations/lokiunifi"
-	_ "github.com/unpoller/integrations/promunifi"
+	_ "github.com/unpoller/unpoller/integrations/datadogunifi"
+	_ "github.com/unpoller/unpoller/integrations/influxunifi"
+	_ "github.com/unpoller/unpoller/integrations/lokiunifi"
+	_ "github.com/unpoller/unpoller/integrations/promunifi"
 )
 
 // Keep it simple.

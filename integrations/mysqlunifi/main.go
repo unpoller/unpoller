@@ -3,7 +3,7 @@ package main
 import (
 	"fmt"
 
-	"github.com/unifi-poller/unpoller/core/poller"
+	"github.com/unpoller/unpoller/core/poller"
 	"golift.io/cnfg"
 )
 

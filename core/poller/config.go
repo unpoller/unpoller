@@ -11,7 +11,7 @@ import (
 
 	"github.com/spf13/pflag"
 	"golift.io/cnfg"
-	"golift.io/cnfg/cnfgfile"
+	"golift.io/cnfgfile"
 )
 
 const (
