@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/unpoller/unifi"
-	"github.com/unpoller/webserver"
+	"github.com/unpoller/unpoller/core/unifi"
+	"github.com/unpoller/unpoller/core/webserver"
 )
 
 /* Event collection. Events are also sent to the webserver for display. */

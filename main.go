@@ -8,7 +8,7 @@ import (
 
 	"github.com/unpoller/unpoller/core/poller"
 	// Load input plugins!
-	_ "github.com/unpoller/inputunifi"
+	_ "github.com/unpoller/integrations/inputunifi"
 	// Load output plugins!
 	_ "github.com/unpoller/integrations/datadogunifi"
 	_ "github.com/unpoller/integrations/influxunifi"
