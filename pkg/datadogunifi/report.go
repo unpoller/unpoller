@@ -5,7 +5,7 @@ import (
 	"time"
 
 	"github.com/DataDog/datadog-go/statsd"
-	"github.com/unpoller/unpoller/core/poller"
+	"github.com/unpoller/unpoller/pkg/poller"
 )
 
 // Report is a will report the current collection run data.

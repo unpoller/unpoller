@@ -5,7 +5,7 @@ import (
 	"time"
 
 	"github.com/unpoller/unifi"
-	"github.com/unpoller/unpoller/core/webserver"
+	"github.com/unpoller/unpoller/pkg/webserver"
 )
 
 /* Event collection. Events are also sent to the webserver for display. */

@@ -8,7 +8,7 @@ import (
 	"time"
 
 	"github.com/unpoller/unifi"
-	"github.com/unpoller/unpoller/core/poller"
+	"github.com/unpoller/unpoller/pkg/poller"
 )
 
 var ErrScrapeFilterMatchFailed = fmt.Errorf("scrape filter match failed, and filter is not http URL")

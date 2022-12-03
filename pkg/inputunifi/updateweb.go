@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"github.com/unpoller/unifi"
-	"github.com/unpoller/unpoller/core/webserver"
+	"github.com/unpoller/unpoller/pkg/webserver"
 )
 
 /* This code reformats our data to be displayed on the built-in web interface. */
