@@ -6,14 +6,14 @@ import (
 	"os"
 	"time"
 
-	"github.com/unpoller/poller"
+	"github.com/unpoller/unpoller/pkg/poller"
 	// Load input plugins!
-	_ "github.com/unpoller/inputunifi"
+	_ "github.com/unpoller/unpoller/pkg/inputunifi"
 	// Load output plugins!
-	_ "github.com/unpoller/datadogunifi"
-	_ "github.com/unpoller/influxunifi"
-	_ "github.com/unpoller/lokiunifi"
-	_ "github.com/unpoller/promunifi"
+	_ "github.com/unpoller/unpoller/pkg/datadogunifi"
+	_ "github.com/unpoller/unpoller/pkg/influxunifi"
+	_ "github.com/unpoller/unpoller/pkg/lokiunifi"
+	_ "github.com/unpoller/unpoller/pkg/promunifi"
 )
 
 // Keep it simple.

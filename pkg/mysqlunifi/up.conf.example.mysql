@@ -1,0 +1,34 @@
+[poller]
+  debug   = true
+  plugins = ["/path/to/mysql.so"]
+
+[mysql]
+  interval = "30s"
+  host     = "127.0.0.1:3306"
+  user     = "unifipoller"
+  pass     = "unifipoller"
+  db       = "unifipoller"
+
+[mysql.clients]
+  table = "client_records"
+  [mysql.clients.fields]
+    tx_bytes = "tx-bytes"
+    rx_bytes = "rx-bytes"
+
+[[mysql.devices]]
+  type  = "uap"
+  table = "uap_records"
+  [mysql.devices.fields]
+    tx_bytes = "tx-bytes"
+    rx_bytes = "rx-bytes"
+
+[[mysql.devices]]
+  type  = "ugw"
+  table = "usg_records"
+  [mysql.devices.fields]
+    wan_bytes = "wan_bytes"
+
+[unifi.defaults]
+  url        = "https://127.0.0.1:8443"
+  user       = "unifipoller"
+  pass       = "4BB9345C-2341-48D7-99F5-E01B583FF77F"
