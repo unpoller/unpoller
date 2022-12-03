@@ -10,7 +10,7 @@ import (
 
 /* Event collection. Events are also sent to the webserver for display. */
 
-func (u *InputUnifi) collectControllerEvents(c *Controller) ([]interface{}, error) {
+func (u *InputUnifi) collectControllerEvents(c *Controller) ([]any, error) {
 	if u.isNill(c) {
 		u.Logf("Re-authenticating to UniFi Controller: %s", c.URL)
 
@@ -20,8 +20,8 @@ func (u *InputUnifi) collectControllerEvents(c *Controller) ([]interface{}, erro
 	}
 
 	var (
-		logs    = []interface{}{}
-		newLogs []interface{}
+		logs    = []any{}
+		newLogs []any
 	)
 
 	// Get the sites we care about.
@@ -30,7 +30,7 @@ func (u *InputUnifi) collectControllerEvents(c *Controller) ([]interface{}, erro
 		return nil, fmt.Errorf("unifi.GetSites(): %w", err)
 	}
 
-	type caller func([]interface{}, []*unifi.Site, *Controller) ([]interface{}, error)
+	type caller func([]any, []*unifi.Site, *Controller) ([]any, error)
 
 	for _, call := range []caller{u.collectIDS, u.collectAnomalies, u.collectAlarms, u.collectEvents} {
 		if newLogs, err = call(logs, sites, c); err != nil {
@@ -43,7 +43,7 @@ func (u *InputUnifi) collectControllerEvents(c *Controller) ([]interface{}, erro
 	return logs, nil
 }
 
-func (u *InputUnifi) collectAlarms(logs []interface{}, sites []*unifi.Site, c *Controller) ([]interface{}, error) {
+func (u *InputUnifi) collectAlarms(logs []any, sites []*unifi.Site, c *Controller) ([]any, error) {
 	if *c.SaveAlarms {
 		for _, s := range sites {
 			events, err := c.Unifi.GetAlarmsSite(s)
@@ -67,7 +67,7 @@ func (u *InputUnifi) collectAlarms(logs []interface{}, sites []*unifi.Site, c *C
 	return logs, nil
 }
 
-func (u *InputUnifi) collectAnomalies(logs []interface{}, sites []*unifi.Site, c *Controller) ([]interface{}, error) {
+func (u *InputUnifi) collectAnomalies(logs []any, sites []*unifi.Site, c *Controller) ([]any, error) {
 	if *c.SaveAnomal {
 		for _, s := range sites {
 			events, err := c.Unifi.GetAnomaliesSite(s)
@@ -90,7 +90,7 @@ func (u *InputUnifi) collectAnomalies(logs []interface{}, sites []*unifi.Site, c
 	return logs, nil
 }
 
-func (u *InputUnifi) collectEvents(logs []interface{}, sites []*unifi.Site, c *Controller) ([]interface{}, error) {
+func (u *InputUnifi) collectEvents(logs []any, sites []*unifi.Site, c *Controller) ([]any, error) {
 	if *c.SaveEvents {
 		for _, s := range sites {
 			events, err := c.Unifi.GetSiteEvents(s, time.Hour)
@@ -115,7 +115,7 @@ func (u *InputUnifi) collectEvents(logs []interface{}, sites []*unifi.Site, c *C
 	return logs, nil
 }
 
-func (u *InputUnifi) collectIDS(logs []interface{}, sites []*unifi.Site, c *Controller) ([]interface{}, error) {
+func (u *InputUnifi) collectIDS(logs []any, sites []*unifi.Site, c *Controller) ([]any, error) {
 	if *c.SaveIDS {
 		for _, s := range sites {
 			events, err := c.Unifi.GetIDSSite(s)

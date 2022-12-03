@@ -75,7 +75,7 @@ func descSite(ns string) *site {
 	}
 }
 
-func (u *promUnifi) exportSiteDPI(r report, v interface{}) {
+func (u *promUnifi) exportSiteDPI(r report, v any) {
 	s, ok := v.(*unifi.DPITable)
 	if !ok {
 		u.LogErrorf("invalid type given to SiteDPI: %T", v)

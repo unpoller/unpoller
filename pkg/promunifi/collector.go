@@ -71,7 +71,7 @@ type Config struct {
 type metric struct {
 	Desc      *prometheus.Desc
 	ValueType prometheus.ValueType
-	Value     interface{}
+	Value     any
 	Labels    []string
 }
 
@@ -221,7 +221,7 @@ func (t *target) Describe(ch chan<- *prometheus.Desc) {
 // Describe satisfies the prometheus Collector. This returns all of the
 // metric descriptions that this packages produces.
 func (u *promUnifi) Describe(ch chan<- *prometheus.Desc) {
-	for _, f := range []interface{}{u.Client, u.Device, u.UAP, u.USG, u.USW, u.Site} {
+	for _, f := range []any{u.Client, u.Device, u.UAP, u.USG, u.USW, u.Site} {
 		v := reflect.Indirect(reflect.ValueOf(f))
 
 		// Loop each struct member and send it to the provided channel.
@@ -332,7 +332,7 @@ func (u *promUnifi) loopExports(r report) {
 	u.exportClientDPItotals(r, appTotal, catTotal)
 }
 
-func (u *promUnifi) switchExport(r report, v interface{}) {
+func (u *promUnifi) switchExport(r report, v any) {
 	switch v := v.(type) {
 	case *unifi.RogueAP:
 		// r.addRogueAP()

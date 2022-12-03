@@ -27,7 +27,7 @@ func (u *InfluxUnifi) batchUSW(r report, s *unifi.USW) {
 	fields := Combine(
 		u.batchUSWstat(s.Stat.Sw),
 		u.batchSysStats(s.SysStats, s.SystemStats),
-		map[string]interface{}{
+		map[string]any{
 			"guest-num_sta":       s.GuestNumSta.Val,
 			"ip":                  s.IP,
 			"bytes":               s.Bytes.Val,
@@ -46,12 +46,12 @@ func (u *InfluxUnifi) batchUSW(r report, s *unifi.USW) {
 	u.batchPortTable(r, tags, s.PortTable)
 }
 
-func (u *InfluxUnifi) batchUSWstat(sw *unifi.Sw) map[string]interface{} {
+func (u *InfluxUnifi) batchUSWstat(sw *unifi.Sw) map[string]any {
 	if sw == nil {
-		return map[string]interface{}{}
+		return map[string]any{}
 	}
 
-	return map[string]interface{}{
+	return map[string]any{
 		"stat_bytes":      sw.Bytes.Val,
 		"stat_rx_bytes":   sw.RxBytes.Val,
 		"stat_rx_crypts":  sw.RxCrypts.Val,
@@ -94,7 +94,7 @@ func (u *InfluxUnifi) batchPortTable(r report, t map[string]string, pt []unifi.P
 			"sfp_vendor":     p.SFPVendor,
 			"sfp_part":       p.SFPPart,
 		}
-		fields := map[string]interface{}{
+		fields := map[string]any{
 			"dbytes_r":     p.BytesR.Val,
 			"rx_broadcast": p.RxBroadcast.Val,
 			"rx_bytes":     p.RxBytes.Val,

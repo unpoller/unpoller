@@ -6,7 +6,7 @@ import (
 )
 
 // Logf logs a message.
-func (s *Server) Logf(msg string, v ...interface{}) {
+func (s *Server) Logf(msg string, v ...any) {
 	NewOutputEvent(PluginName, PluginName, &Event{
 		Ts:   time.Now(),
 		Msg:  fmt.Sprintf(msg, v...),
@@ -16,7 +16,7 @@ func (s *Server) Logf(msg string, v ...interface{}) {
 }
 
 // LogErrorf logs an error message.
-func (s *Server) LogErrorf(msg string, v ...interface{}) {
+func (s *Server) LogErrorf(msg string, v ...any) {
 	NewOutputEvent(PluginName, PluginName, &Event{
 		Ts:   time.Now(),
 		Msg:  fmt.Sprintf(msg, v...),
@@ -26,7 +26,7 @@ func (s *Server) LogErrorf(msg string, v ...interface{}) {
 }
 
 // LogDebugf logs a debug message.
-func (s *Server) LogDebugf(msg string, v ...interface{}) {
+func (s *Server) LogDebugf(msg string, v ...any) {
 	NewOutputEvent(PluginName, PluginName, &Event{
 		Ts:   time.Now(),
 		Msg:  fmt.Sprintf(msg, v...),

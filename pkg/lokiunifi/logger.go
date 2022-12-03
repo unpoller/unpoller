@@ -8,7 +8,7 @@ import (
 )
 
 // Logf logs a message.
-func (l *Loki) Logf(msg string, v ...interface{}) {
+func (l *Loki) Logf(msg string, v ...any) {
 	webserver.NewOutputEvent(PluginName, PluginName, &webserver.Event{
 		Ts:   time.Now(),
 		Msg:  fmt.Sprintf(msg, v...),
@@ -18,7 +18,7 @@ func (l *Loki) Logf(msg string, v ...interface{}) {
 }
 
 // LogErrorf logs an error message.
-func (l *Loki) LogErrorf(msg string, v ...interface{}) {
+func (l *Loki) LogErrorf(msg string, v ...any) {
 	webserver.NewOutputEvent(PluginName, PluginName, &webserver.Event{
 		Ts:   time.Now(),
 		Msg:  fmt.Sprintf(msg, v...),
@@ -28,7 +28,7 @@ func (l *Loki) LogErrorf(msg string, v ...interface{}) {
 }
 
 // LogDebugf logs a debug message.
-func (l *Loki) LogDebugf(msg string, v ...interface{}) {
+func (l *Loki) LogDebugf(msg string, v ...any) {
 	webserver.NewOutputEvent(PluginName, PluginName, &webserver.Event{
 		Ts:   time.Now(),
 		Msg:  fmt.Sprintf(msg, v...),

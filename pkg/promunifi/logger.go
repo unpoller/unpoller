@@ -8,7 +8,7 @@ import (
 )
 
 // Logf logs a message.
-func (u *promUnifi) Logf(msg string, v ...interface{}) {
+func (u *promUnifi) Logf(msg string, v ...any) {
 	webserver.NewOutputEvent(PluginName, PluginName, &webserver.Event{
 		Ts:   time.Now(),
 		Msg:  fmt.Sprintf(msg, v...),
@@ -18,7 +18,7 @@ func (u *promUnifi) Logf(msg string, v ...interface{}) {
 }
 
 // LogErrorf logs an error message.
-func (u *promUnifi) LogErrorf(msg string, v ...interface{}) {
+func (u *promUnifi) LogErrorf(msg string, v ...any) {
 	webserver.NewOutputEvent(PluginName, PluginName, &webserver.Event{
 		Ts:   time.Now(),
 		Msg:  fmt.Sprintf(msg, v...),
@@ -28,7 +28,7 @@ func (u *promUnifi) LogErrorf(msg string, v ...interface{}) {
 }
 
 // LogDebugf logs a debug message.
-func (u *promUnifi) LogDebugf(msg string, v ...interface{}) {
+func (u *promUnifi) LogDebugf(msg string, v ...any) {
 	webserver.NewOutputEvent(PluginName, PluginName, &webserver.Event{
 		Ts:   time.Now(),
 		Msg:  fmt.Sprintf(msg, v...),

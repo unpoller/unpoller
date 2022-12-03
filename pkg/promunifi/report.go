@@ -18,7 +18,7 @@ type report interface {
 	metrics() *poller.Metrics
 	report(c poller.Logger, descs map[*prometheus.Desc]bool)
 	export(m *metric, v float64) prometheus.Metric
-	error(ch chan<- prometheus.Metric, d *prometheus.Desc, v interface{})
+	error(ch chan<- prometheus.Metric, d *prometheus.Desc, v any)
 	addUDM()
 	addUXG()
 	addUSG()
@@ -64,7 +64,7 @@ func (r *Report) export(m *metric, v float64) prometheus.Metric {
 	return prometheus.MustNewConstMetric(m.Desc, m.ValueType, v, m.Labels...)
 }
 
-func (r *Report) error(ch chan<- prometheus.Metric, d *prometheus.Desc, v interface{}) {
+func (r *Report) error(ch chan<- prometheus.Metric, d *prometheus.Desc, v any) {
 	r.Errors++
 
 	if r.ReportErrors {

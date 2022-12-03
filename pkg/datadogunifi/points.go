@@ -5,7 +5,7 @@ import (
 	"strings"
 )
 
-func tag(name string, value interface{}) string {
+func tag(name string, value any) string {
 	return fmt.Sprintf("%s:%v", name, value)
 }
 

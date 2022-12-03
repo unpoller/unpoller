@@ -23,7 +23,7 @@ type Input interface {
 // InputPlugin describes an input plugin's consumable interface.
 type InputPlugin struct {
 	Name   string
-	Config interface{} // Each config is passed into an unmarshaller later.
+	Config any // Each config is passed into an unmarshaller later.
 	Input
 }
 

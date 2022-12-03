@@ -39,7 +39,7 @@ func (s *Server) handleConfig(w http.ResponseWriter, r *http.Request) {
 
 	switch vars["sub"] {
 	case "":
-		data := map[string]interface{}{
+		data := map[string]any{
 			"inputs":  s.Collect.Inputs(),
 			"outputs": s.Collect.Outputs(),
 			"poller":  s.Collect.Poller(),

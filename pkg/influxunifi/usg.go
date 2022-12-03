@@ -28,7 +28,7 @@ func (u *InfluxUnifi) batchUSG(r report, s *unifi.USG) {
 		u.batchUDMtemps(s.Temperatures),
 		u.batchSysStats(s.SysStats, s.SystemStats),
 		u.batchUSGstats(s.SpeedtestStatus, s.Stat.Gw, s.Uplink),
-		map[string]interface{}{
+		map[string]any{
 			"ip":            s.IP,
 			"bytes":         s.Bytes.Val,
 			"last_seen":     s.LastSeen.Val,
@@ -53,12 +53,12 @@ func (u *InfluxUnifi) batchUSG(r report, s *unifi.USG) {
 	u.batchUSGwans(r, tags, s.Wan1, s.Wan2)
 }
 
-func (u *InfluxUnifi) batchUSGstats(ss unifi.SpeedtestStatus, gw *unifi.Gw, ul unifi.Uplink) map[string]interface{} {
+func (u *InfluxUnifi) batchUSGstats(ss unifi.SpeedtestStatus, gw *unifi.Gw, ul unifi.Uplink) map[string]any {
 	if gw == nil {
-		return map[string]interface{}{}
+		return map[string]any{}
 	}
 
-	return map[string]interface{}{
+	return map[string]any{
 		"uplink_name":                    ul.Name,
 		"uplink_latency":                 ul.Latency.Val,
 		"uplink_speed":                   ul.Speed.Val,
@@ -95,7 +95,7 @@ func (u *InfluxUnifi) batchUSGwans(r report, tags map[string]string, wans ...uni
 			"up":          wan.Up.Txt,
 			"enabled":     wan.Enable.Txt,
 		}
-		fields := map[string]interface{}{
+		fields := map[string]any{
 			"bytes-r":      wan.BytesR.Val,
 			"full_duplex":  wan.FullDuplex.Val,
 			"gateway":      wan.Gateway,
@@ -137,7 +137,7 @@ func (u *InfluxUnifi) batchNetTable(r report, tags map[string]string, nt unifi.N
 			"purpose":     p.Purpose,
 			"is_guest":    p.IsGuest.Txt,
 		}
-		fields := map[string]interface{}{
+		fields := map[string]any{
 			"num_sta":    p.NumSta.Val,
 			"rx_bytes":   p.RxBytes.Val,
 			"rx_packets": p.RxPackets.Val,

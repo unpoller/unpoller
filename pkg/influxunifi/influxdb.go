@@ -58,7 +58,7 @@ type InfluxUnifi struct {
 type metric struct {
 	Table  string
 	Tags   map[string]string
-	Fields map[string]interface{}
+	Fields map[string]any
 	TS     time.Time
 }
 
@@ -266,7 +266,7 @@ func (u *InfluxUnifi) loopPoints(r report) {
 	reportClientDPItotals(r, appTotal, catTotal)
 }
 
-func (u *InfluxUnifi) switchExport(r report, v interface{}) { //nolint:cyclop
+func (u *InfluxUnifi) switchExport(r report, v any) { //nolint:cyclop
 	switch v := v.(type) {
 	case *unifi.RogueAP:
 		u.batchRogueAP(r, v)

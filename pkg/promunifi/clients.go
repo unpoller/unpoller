@@ -74,7 +74,7 @@ func descClient(ns string) *uclient {
 	}
 }
 
-func (u *promUnifi) exportClientDPI(r report, v interface{}, appTotal, catTotal totalsDPImap) {
+func (u *promUnifi) exportClientDPI(r report, v any, appTotal, catTotal totalsDPImap) {
 	s, ok := v.(*unifi.DPITable)
 	if !ok {
 		u.LogErrorf("invalid type given to ClientsDPI: %T", v)

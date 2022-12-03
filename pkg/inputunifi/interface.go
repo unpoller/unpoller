@@ -84,7 +84,7 @@ func (u *InputUnifi) Events(filter *poller.Filter) (*poller.Events, error) {
 		return nil, nil
 	}
 
-	logs := []interface{}{}
+	logs := []any{}
 
 	if filter == nil {
 		filter = &poller.Filter{}

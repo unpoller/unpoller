@@ -78,17 +78,17 @@ type Flags struct {
 // Metrics is a type shared by the exporting and reporting packages.
 type Metrics struct {
 	TS         time.Time
-	Sites      []interface{}
-	Clients    []interface{}
-	SitesDPI   []interface{}
-	ClientsDPI []interface{}
-	Devices    []interface{}
-	RogueAPs   []interface{}
+	Sites      []any
+	Clients    []any
+	SitesDPI   []any
+	ClientsDPI []any
+	Devices    []any
+	RogueAPs   []any
 }
 
 // Events defines the type for log entries.
 type Events struct {
-	Logs []interface{}
+	Logs []any
 }
 
 // Config represents the core library input data.
@@ -160,7 +160,7 @@ func getFirstFile(files []string) (string, error) {
 }
 
 // parseInterface parses the config file and environment variables into the provided interface.
-func (u *UnifiPoller) parseInterface(i interface{}) error {
+func (u *UnifiPoller) parseInterface(i any) error {
 	// Parse config file into provided interface.
 	if err := cnfgfile.Unmarshal(i, u.Flags.ConfigFile); err != nil {
 		return fmt.Errorf("cnfg unmarshal: %w", err)

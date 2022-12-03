@@ -27,7 +27,7 @@ func (u *InfluxUnifi) batchRogueAP(r report, s *unifi.RogueAP) {
 			"name":       s.Essid,
 			"source":     s.SourceName,
 		},
-		Fields: map[string]interface{}{
+		Fields: map[string]any{
 			"age":         s.Age.Val,
 			"bw":          s.Bw.Val,
 			"center_freq": s.CenterFreq.Val,
@@ -76,13 +76,13 @@ func (u *InfluxUnifi) batchUAP(r report, s *unifi.UAP) {
 	u.batchPortTable(r, tags, s.PortTable)
 }
 
-func (u *InfluxUnifi) processUAPstats(ap *unifi.Ap) map[string]interface{} {
+func (u *InfluxUnifi) processUAPstats(ap *unifi.Ap) map[string]any {
 	if ap == nil {
-		return map[string]interface{}{}
+		return map[string]any{}
 	}
 
 	// Accumulative Statistics.
-	return map[string]interface{}{
+	return map[string]any{
 		"stat_user-rx_packets":  ap.UserRxPackets.Val,
 		"stat_guest-rx_packets": ap.GuestRxPackets.Val,
 		"stat_rx_packets":       ap.RxPackets.Val,
@@ -137,7 +137,7 @@ func (u *InfluxUnifi) processVAPTable(r report, t map[string]string, vt unifi.Va
 			"state":       s.State,
 			"is_guest":    s.IsGuest.Txt,
 		}
-		fields := map[string]interface{}{
+		fields := map[string]any{
 			"ccq":                       s.Ccq,
 			"mac_filter_rejections":     s.MacFilterRejections,
 			"num_satisfaction_sta":      s.NumSatisfactionSta.Val,
@@ -192,7 +192,7 @@ func (u *InfluxUnifi) processRadTable(r report, t map[string]string, rt unifi.Ra
 			"channel":     p.Channel.Txt,
 			"radio":       p.Radio,
 		}
-		fields := map[string]interface{}{
+		fields := map[string]any{
 			"current_antenna_gain": p.CurrentAntennaGain.Val,
 			"ht":                   p.Ht.Txt,
 			"max_txpower":          p.MaxTxpower.Val,
