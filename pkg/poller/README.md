@@ -10,7 +10,7 @@ Aggregates metrics on request. Provides CLI app and args parsing.
 
 This library has no notion of "UniFi" or controllers, or Influx, or Prometheus.
 This library simply provides an input interface and an output interface.
-Each interface uses an `[]interface{}` type, so any type of data can be used.
+Each interface uses an `[]any` type, so any type of data can be used.
 That is to say, you could write input and output plugins that work with, say,
 Cisco gear, or any other network (or even non-network) data. The existing plugins
 should provide ample example of how to use this library, but at some point the

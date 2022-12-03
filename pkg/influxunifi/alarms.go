@@ -17,7 +17,7 @@ func (u *InfluxUnifi) batchAlarms(r report, event *unifi.Alarm) { // nolint:dupl
 		return // The event is older than our interval, ignore it.
 	}
 
-	fields := map[string]interface{}{
+	fields := map[string]any{
 		"dest_port":            event.DestPort,
 		"src_port":             event.SrcPort,
 		"dest_ip":              event.DestIP,
@@ -76,7 +76,7 @@ func (u *InfluxUnifi) batchAnomaly(r report, event *unifi.Anomaly) {
 	r.send(&metric{
 		TS:     event.Datetime,
 		Table:  "unifi_anomaly",
-		Fields: map[string]interface{}{"msg": event.Anomaly},
+		Fields: map[string]any{"msg": event.Anomaly},
 		Tags: cleanTags(map[string]string{
 			"application": "unifi_anomaly",
 			"source":      event.SourceName,

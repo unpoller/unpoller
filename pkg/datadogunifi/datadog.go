@@ -301,7 +301,7 @@ func (u *DatadogUnifi) loopPoints(r report) {
 	reportClientDPItotals(r, appTotal, catTotal)
 }
 
-func (u *DatadogUnifi) switchExport(r report, v interface{}) { //nolint:cyclop
+func (u *DatadogUnifi) switchExport(r report, v any) { //nolint:cyclop
 	switch v := v.(type) {
 	case *unifi.RogueAP:
 		u.batchRogueAP(r, v)

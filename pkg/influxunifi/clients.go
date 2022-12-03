@@ -33,7 +33,7 @@ func (u *InfluxUnifi) batchClient(r report, s *unifi.Client) { // nolint: funlen
 		"channel":     s.Channel.Txt,
 		"vlan":        s.Vlan.Txt,
 	}
-	fields := map[string]interface{}{
+	fields := map[string]any{
 		"anomalies":         s.Anomalies,
 		"ip":                s.IP,
 		"essid":             s.Essid,
@@ -76,7 +76,7 @@ func (u *InfluxUnifi) batchClient(r report, s *unifi.Client) { // nolint: funlen
 // totalsDPImap: controller, site, name (app/cat name), dpi.
 type totalsDPImap map[string]map[string]map[string]unifi.DPIData
 
-func (u *InfluxUnifi) batchClientDPI(r report, v interface{}, appTotal, catTotal totalsDPImap) {
+func (u *InfluxUnifi) batchClientDPI(r report, v any, appTotal, catTotal totalsDPImap) {
 	s, ok := v.(*unifi.DPITable)
 	if !ok {
 		u.LogErrorf("invalid type given to batchClientDPI: %T", v)
@@ -99,7 +99,7 @@ func (u *InfluxUnifi) batchClientDPI(r report, v interface{}, appTotal, catTotal
 				"site_name":   s.SiteName,
 				"source":      s.SourceName,
 			},
-			Fields: map[string]interface{}{
+			Fields: map[string]any{
 				"tx_packets": dpi.TxPackets,
 				"rx_packets": dpi.RxPackets,
 				"tx_bytes":   dpi.TxBytes,
@@ -166,7 +166,7 @@ func reportClientDPItotals(r report, appTotal, catTotal totalsDPImap) {
 							"site_name":   site,
 							"source":      controller,
 						},
-						Fields: map[string]interface{}{
+						Fields: map[string]any{
 							"tx_packets": m.TxPackets,
 							"rx_packets": m.RxPackets,
 							"tx_bytes":   m.TxBytes,

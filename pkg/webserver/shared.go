@@ -89,7 +89,7 @@ func (s *Server) handleDone(w http.ResponseWriter, b []byte, cType string) {
 }
 
 // handleJSON sends a json-formatted data reply.
-func (s *Server) handleJSON(w http.ResponseWriter, data interface{}) {
+func (s *Server) handleJSON(w http.ResponseWriter, data any) {
 	b, err := json.Marshal(data)
 	if err != nil {
 		s.handleError(w, err)

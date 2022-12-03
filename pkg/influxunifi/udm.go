@@ -11,8 +11,8 @@ import (
 const udmT = item("UDM")
 
 // Combine concatenates N maps. This will delete things if not used with caution.
-func Combine(in ...map[string]interface{}) map[string]interface{} {
-	out := make(map[string]interface{})
+func Combine(in ...map[string]any) map[string]any {
+	out := make(map[string]any)
 
 	for i := range in {
 		for k := range in[i] {
@@ -24,8 +24,8 @@ func Combine(in ...map[string]interface{}) map[string]interface{} {
 }
 
 // batchSysStats is used by all device types.
-func (u *InfluxUnifi) batchSysStats(s unifi.SysStats, ss unifi.SystemStats) map[string]interface{} {
-	m := map[string]interface{}{
+func (u *InfluxUnifi) batchSysStats(s unifi.SysStats, ss unifi.SystemStats) map[string]any {
+	m := map[string]any{
 		"loadavg_1":     s.Loadavg1.Val,
 		"loadavg_5":     s.Loadavg5.Val,
 		"loadavg_15":    s.Loadavg15.Val,
@@ -49,8 +49,8 @@ func (u *InfluxUnifi) batchSysStats(s unifi.SysStats, ss unifi.SystemStats) map[
 	return m
 }
 
-func (u *InfluxUnifi) batchUDMtemps(temps []unifi.Temperature) map[string]interface{} {
-	output := make(map[string]interface{})
+func (u *InfluxUnifi) batchUDMtemps(temps []unifi.Temperature) map[string]any {
+	output := make(map[string]any)
 
 	for _, t := range temps {
 		output["temp_"+t.Name] = t.Value
@@ -59,8 +59,8 @@ func (u *InfluxUnifi) batchUDMtemps(temps []unifi.Temperature) map[string]interf
 	return output
 }
 
-func (u *InfluxUnifi) batchUDMstorage(storage []*unifi.Storage) map[string]interface{} {
-	output := make(map[string]interface{})
+func (u *InfluxUnifi) batchUDMstorage(storage []*unifi.Storage) map[string]any {
+	output := make(map[string]any)
 
 	for _, t := range storage {
 		output["storage_"+t.Name+"_size"] = t.Size.Val
@@ -98,7 +98,7 @@ func (u *InfluxUnifi) batchUDM(r report, s *unifi.UDM) { // nolint: funlen
 		u.batchUDMtemps(s.Temperatures),
 		u.batchUSGstats(s.SpeedtestStatus, s.Stat.Gw, s.Uplink),
 		u.batchSysStats(s.SysStats, s.SystemStats),
-		map[string]interface{}{
+		map[string]any{
 			"source":        s.SourceName,
 			"ip":            s.IP,
 			"bytes":         s.Bytes.Val,
@@ -134,7 +134,7 @@ func (u *InfluxUnifi) batchUDM(r report, s *unifi.UDM) { // nolint: funlen
 	}
 	fields = Combine(
 		u.batchUSWstat(s.Stat.Sw),
-		map[string]interface{}{
+		map[string]any{
 			"guest-num_sta": s.GuestNumSta.Val,
 			"ip":            s.IP,
 			"bytes":         s.Bytes.Val,

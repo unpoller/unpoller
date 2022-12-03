@@ -19,7 +19,7 @@ func (u *InfluxUnifi) batchSite(r report, s *unifi.Site) {
 			"gw_name":   h.GwName,
 			"lan_ip":    h.LanIP,
 		}
-		fields := map[string]interface{}{
+		fields := map[string]any{
 			"num_user":                 h.NumUser.Val,
 			"num_guest":                h.NumGuest.Val,
 			"num_iot":                  h.NumIot.Val,
@@ -57,7 +57,7 @@ func (u *InfluxUnifi) batchSite(r report, s *unifi.Site) {
 	}
 }
 
-func (u *InfluxUnifi) batchSiteDPI(r report, v interface{}) {
+func (u *InfluxUnifi) batchSiteDPI(r report, v any) {
 	s, ok := v.(*unifi.DPITable)
 	if !ok {
 		u.LogErrorf("invalid type given to batchSiteDPI: %T", v)
@@ -73,7 +73,7 @@ func (u *InfluxUnifi) batchSiteDPI(r report, v interface{}) {
 				"site_name":   s.SiteName,
 				"source":      s.SourceName,
 			},
-			Fields: map[string]interface{}{
+			Fields: map[string]any{
 				"tx_packets": dpi.TxPackets,
 				"rx_packets": dpi.RxPackets,
 				"tx_bytes":   dpi.TxBytes,

@@ -28,7 +28,7 @@ type Collect interface {
 // Output packages should call NewOutput with this struct in init().
 type Output struct {
 	Name   string
-	Config interface{}         // Each config is passed into an unmarshaller later.
+	Config any                 // Each config is passed into an unmarshaller later.
 	Method func(Collect) error // Called on startup for each configured output.
 }
 

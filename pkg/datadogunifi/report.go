@@ -47,8 +47,8 @@ type report interface {
 	reportDistribution(name string, value float64, tags []string) error
 	reportTiming(name string, value time.Duration, tags []string) error
 	reportEvent(title string, date time.Time, message string, tags []string) error
-	reportInfoLog(message string, f ...interface{})
-	reportWarnLog(message string, f ...interface{})
+	reportInfoLog(message string, f ...any)
+	reportWarnLog(message string, f ...any)
 	reportServiceCheck(name string, status statsd.ServiceCheckStatus, message string, tags []string) error
 }
 
@@ -119,11 +119,11 @@ func (r *Report) reportEvent(title string, date time.Time, message string, tags 
 	})
 }
 
-func (r *Report) reportInfoLog(message string, f ...interface{}) {
+func (r *Report) reportInfoLog(message string, f ...any) {
 	r.Collector.Logf(message, f)
 }
 
-func (r *Report) reportWarnLog(message string, f ...interface{}) {
+func (r *Report) reportWarnLog(message string, f ...any) {
 	r.Collector.Logf(message, f)
 }
 

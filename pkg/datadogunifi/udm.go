@@ -11,8 +11,8 @@ import (
 const udmT = item("UDM")
 
 // Combine concatenates N maps. This will delete things if not used with caution.
-func Combine(in ...map[string]interface{}) map[string]interface{} {
-	out := make(map[string]interface{})
+func Combine(in ...map[string]any) map[string]any {
+	out := make(map[string]any)
 
 	for i := range in {
 		for k := range in[i] {

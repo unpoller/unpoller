@@ -184,7 +184,7 @@ func formatDevices(c *Controller, devices *unifi.Devices) (d webserver.Devices) 
 }
 
 // Logf logs a message.
-func (u *InputUnifi) Logf(msg string, v ...interface{}) {
+func (u *InputUnifi) Logf(msg string, v ...any) {
 	webserver.NewInputEvent(PluginName, PluginName, &webserver.Event{
 		Ts:   time.Now(),
 		Msg:  fmt.Sprintf(msg, v...),
@@ -194,7 +194,7 @@ func (u *InputUnifi) Logf(msg string, v ...interface{}) {
 }
 
 // LogErrorf logs an error message.
-func (u *InputUnifi) LogErrorf(msg string, v ...interface{}) {
+func (u *InputUnifi) LogErrorf(msg string, v ...any) {
 	webserver.NewInputEvent(PluginName, PluginName, &webserver.Event{
 		Ts:   time.Now(),
 		Msg:  fmt.Sprintf(msg, v...),
@@ -204,7 +204,7 @@ func (u *InputUnifi) LogErrorf(msg string, v ...interface{}) {
 }
 
 // LogDebugf logs a debug message.
-func (u *InputUnifi) LogDebugf(msg string, v ...interface{}) {
+func (u *InputUnifi) LogDebugf(msg string, v ...any) {
 	webserver.NewInputEvent(PluginName, PluginName, &webserver.Event{
 		Ts:   time.Now(),
 		Msg:  fmt.Sprintf(msg, v...),

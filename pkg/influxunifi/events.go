@@ -18,7 +18,7 @@ func (u *InfluxUnifi) batchIDS(r report, i *unifi.IDS) { // nolint:dupl
 		return // The event is older than our interval, ignore it.
 	}
 
-	fields := map[string]interface{}{
+	fields := map[string]any{
 		"dest_port":            i.DestPort,
 		"src_port":             i.SrcPort,
 		"dest_ip":              i.DestIP,
@@ -73,7 +73,7 @@ func (u *InfluxUnifi) batchEvent(r report, i *unifi.Event) { // nolint: funlen
 		return // The event is older than our interval, ignore it.
 	}
 
-	fields := map[string]interface{}{
+	fields := map[string]any{
 		"msg":                  i.Msg,          // contains user[] or guest[] or admin[]
 		"duration":             i.Duration.Val, // probably microseconds?
 		"guest":                i.Guest,        // mac address
@@ -157,7 +157,7 @@ func cleanTags(tags map[string]string) map[string]string {
 }
 
 // cleanFields removes any field with a default (or empty) value.
-func cleanFields(fields map[string]interface{}) map[string]interface{} { //nolint:cyclop
+func cleanFields(fields map[string]any) map[string]any { //nolint:cyclop
 	for s := range fields {
 		switch v := fields[s].(type) {
 		case nil:

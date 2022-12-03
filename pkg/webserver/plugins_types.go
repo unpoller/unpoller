@@ -15,7 +15,7 @@ type Input struct {
 	Events       Events
 	Devices      Devices
 	Clients      Clients
-	Config       interface{}
+	Config       any
 	Counter      map[string]int64
 	sync.RWMutex // Locks this data structure.
 }
@@ -27,7 +27,7 @@ type Input struct {
 type Output struct {
 	Name         string
 	Events       Events
-	Config       interface{}
+	Config       any
 	Counter      map[string]int64
 	sync.RWMutex // Locks this data structure.
 }
@@ -94,18 +94,18 @@ type Devices []*Device
 
 // Device holds the data for a network device.
 type Device struct {
-	Clients    int         `json:"clients"`
-	Uptime     int         `json:"uptime"`
-	Name       string      `json:"name"`
-	SiteID     string      `json:"site_id"`
-	Source     string      `json:"source"`
-	Controller string      `json:"controller"`
-	MAC        string      `json:"mac"`
-	IP         string      `json:"ip"`
-	Type       string      `json:"type"`
-	Model      string      `json:"model"`
-	Version    string      `json:"version"`
-	Config     interface{} `json:"config,omitempty"`
+	Clients    int    `json:"clients"`
+	Uptime     int    `json:"uptime"`
+	Name       string `json:"name"`
+	SiteID     string `json:"site_id"`
+	Source     string `json:"source"`
+	Controller string `json:"controller"`
+	MAC        string `json:"mac"`
+	IP         string `json:"ip"`
+	Type       string `json:"type"`
+	Model      string `json:"model"`
+	Version    string `json:"version"`
+	Config     any    `json:"config,omitempty"`
 }
 
 func (c Devices) Filter(siteid string) (devices []*Device) {
