@@ -35,7 +35,7 @@ services:
 
   unifi-poller:
     restart: always
-    image: golift/unifi-poller:latest
+    image: ghcr.io/unpoller/unpoller:${POLLER_TAG}
     environment:
       - UP_INFLUXDB_USER=${INFLUXDB_ADMIN_USER}
       - UP_INFLUXDB_PASS=${INFLUXDB_ADMIN_PASSWORD}
