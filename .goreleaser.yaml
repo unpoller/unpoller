@@ -286,7 +286,7 @@ nfpms:
       
       # systemd service
       - src: init/systemd/unpoller.service
-        dst: /lib/systemd/service/unpoller.service
+        dst: /etc/systemd/service/unpoller.service
         type: config
       
       # freebsd rc service
