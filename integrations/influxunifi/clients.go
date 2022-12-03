@@ -1,7 +1,7 @@
 package influxunifi
 
 import (
-	"github.com/unpoller/unpoller/core/unifi"
+	"github.com/unpoller/unifi"
 )
 
 // batchClient generates Unifi Client datapoints for InfluxDB.

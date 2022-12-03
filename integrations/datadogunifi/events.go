@@ -5,7 +5,7 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/unpoller/unpoller/core/unifi"
+	"github.com/unpoller/unifi"
 )
 
 // These constants are used as names for printed/logged counters.

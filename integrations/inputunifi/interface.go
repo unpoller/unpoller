@@ -6,8 +6,8 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/unpoller/unifi"
 	"github.com/unpoller/unpoller/core/poller"
-	"github.com/unpoller/unpoller/core/unifi"
 	"github.com/unpoller/unpoller/core/webserver"
 )
 

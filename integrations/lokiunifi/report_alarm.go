@@ -3,7 +3,7 @@ package lokiunifi
 import (
 	"strconv"
 
-	"github.com/unpoller/unpoller/core/unifi"
+	"github.com/unpoller/unifi"
 )
 
 const typeAlarm = "Alarm"

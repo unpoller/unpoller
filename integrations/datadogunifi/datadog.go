@@ -7,8 +7,8 @@ import (
 	"time"
 
 	"github.com/DataDog/datadog-go/statsd"
+	"github.com/unpoller/unifi"
 	"github.com/unpoller/unpoller/core/poller"
-	"github.com/unpoller/unpoller/core/unifi"
 	"golift.io/cnfg"
 )
 
@@ -27,8 +27,8 @@ type Config struct {
 	// Save data for dead ports? ie. ports that are down or disabled.
 	DeadPorts bool `json:"dead_ports,omitempty" toml:"dead_ports,omitempty" xml:"dead_ports,omitempty" yaml:"dead_ports,omitempty"`
 
-	// Disable when true disables this output plugin
-	Disable *bool `json:"disable" toml:"disable" xml:"disable,attr" yaml:"disable"`
+	// Enable when true, enables this output plugin
+	Enable *bool `json:"enable" toml:"enable" xml:"enable,attr" yaml:"enable"`
 	// Address determines how to talk to the Datadog agent
 	Address string `json:"address" toml:"address" xml:"address,attr" yaml:"address"`
 
@@ -190,16 +190,12 @@ func (u *DatadogUnifi) setConfigDefaults() {
 
 // Run runs a ticker to poll the unifi server and update Datadog.
 func (u *DatadogUnifi) Run(c poller.Collect) error {
-	u.Collector = c
-	disabled := u.Disable == nil || *u.Disable
+	disabled := u == nil || u.Enable == nil || !(*u.Enable) || u.Config == nil
 	if disabled {
 		u.LogDebugf("Datadog config is disabled, output is disabled.")
 		return nil
 	}
-	if u.Config == nil && !disabled {
-		u.LogErrorf("DataDog config is missing and is not disabled: Datadog output is disabled!")
-		return nil
-	}
+	u.Collector = c
 	u.Logf("Datadog is configured.")
 	u.setConfigDefaults()
 

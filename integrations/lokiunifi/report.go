@@ -5,8 +5,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/unpoller/unifi"
 	"github.com/unpoller/unpoller/core/poller"
-	"github.com/unpoller/unpoller/core/unifi"
 )
 
 // LogStream contains a stream of logs (like a log file).

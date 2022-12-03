@@ -1,7 +1,7 @@
 package influxunifi
 
 import (
-	"github.com/unpoller/unpoller/core/unifi"
+	"github.com/unpoller/unifi"
 )
 
 // batchSite generates Unifi Sites' datapoints for InfluxDB.
