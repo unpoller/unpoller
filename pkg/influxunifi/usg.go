@@ -59,8 +59,10 @@ func (u *InfluxUnifi) batchUSGstats(ss unifi.SpeedtestStatus, gw *unifi.Gw, ul u
 	}
 
 	return map[string]interface{}{
+		"uplink_name":                    ul.Name,
 		"uplink_latency":                 ul.Latency.Val,
 		"uplink_speed":                   ul.Speed.Val,
+		"uplink_type":                    ul.Type,
 		"speedtest-status_latency":       ss.Latency.Val,
 		"speedtest-status_runtime":       ss.Runtime.Val,
 		"speedtest-status_rundate":       ss.Rundate.Val,
@@ -97,6 +99,7 @@ func (u *InfluxUnifi) batchUSGwans(r report, tags map[string]string, wans ...uni
 			"bytes-r":      wan.BytesR.Val,
 			"full_duplex":  wan.FullDuplex.Val,
 			"gateway":      wan.Gateway,
+			"is_uplink":    wan.IsUplink.Val,
 			"max_speed":    wan.MaxSpeed.Val,
 			"rx_bytes":     wan.RxBytes.Val,
 			"rx_bytes-r":   wan.RxBytesR.Val,
