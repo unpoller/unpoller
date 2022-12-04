@@ -12,6 +12,7 @@ import (
 	// Load output plugins!
 	_ "github.com/unpoller/unpoller/pkg/datadogunifi"
 	_ "github.com/unpoller/unpoller/pkg/influx_v1_unifi"
+	_ "github.com/unpoller/unpoller/pkg/influx_v2_unifi"
 	_ "github.com/unpoller/unpoller/pkg/lokiunifi"
 	_ "github.com/unpoller/unpoller/pkg/promunifi"
 )
