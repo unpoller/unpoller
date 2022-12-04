@@ -6,7 +6,7 @@ systemd_version=0
 if ! command -V systemctl >/dev/null 2>&1; then
   use_systemctl="False"
 else
-    systemd_version=$(systemctl --version | head -1 | sed 's/systemd //g')
+    systemd_version=$(systemctl --version | head -1 | sed 's/systemd //g' | sed 's/ .*//')
 fi
 
 cleanup() {
@@ -49,7 +49,7 @@ cleanInstall() {
     else
         # rhel/centos7 cannot use ExecStartPre=+ to specify the pre start should be run as root
         # even if you want your service to run as non root.
-        if [ "${systemd_version}" -lt 231 ]; then
+        if [] "${systemd_version}" -lt 231 ]; then
             printf "\033[31m systemd version %s is less then 231, fixing the service file \033[0m\n" "${systemd_version}"
             sed -i "s/=+/=/g" /etc/systemd/service/unpoller.service
         fi
