@@ -12,7 +12,7 @@ fi
 cleanup() {
     # This is where you remove files that were not needed on this platform / system
     if [ "${use_systemctl}" = "False" ]; then
-        rm -f /etc/systemd/service/unpoller.service
+        rm -f /etc/systemd/system/unpoller.service
     else
         rm -f /etc/chkconfig/unpoller
         rm -f /etc/init.d/unpoller
@@ -51,7 +51,7 @@ cleanInstall() {
         # even if you want your service to run as non root.
         if [] "${systemd_version}" -lt 231 ]; then
             printf "\033[31m systemd version %s is less then 231, fixing the service file \033[0m\n" "${systemd_version}"
-            sed -i "s/=+/=/g" /etc/systemd/service/unpoller.service
+            sed -i "s/=+/=/g" /etc/systemd/system/unpoller.service
         fi
         printf "\033[32m Reload the service unit from disk\033[0m\n"
         systemctl daemon-reload ||:
