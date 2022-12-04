@@ -327,8 +327,9 @@ nfpms:
       
     # signing
     scripts:
-      postinstall: "scripts/after-install.sh"
-      preremove: "scripts/before-remove.sh"
+      postinstall: "scripts/post-install.sh"
+      preremove: "scripts/pre-remove.sh"
+      postremove: "scripts/post-remove.sh"
 
 signs:
   - id: default
