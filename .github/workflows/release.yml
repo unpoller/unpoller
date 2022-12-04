@@ -56,7 +56,7 @@ jobs:
       # on your needs.
       - name: "make key file"
         run: "echo '${{ secrets.PACKAGECLOUD_SIGNING_GPG }}' > /tmp/key.gpg"
-      - uses: goreleaser/goreleaser-action@v2
+      - uses: goreleaser/goreleaser-action@v3
         with:
           # either 'goreleaser' (default) or 'goreleaser-pro':
           distribution: goreleaser-pro
