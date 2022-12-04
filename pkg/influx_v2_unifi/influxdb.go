@@ -4,7 +4,6 @@ package influx_v2_unifi
 
 import (
 	"crypto/tls"
-	"fmt"
 	"log"
 	"os"
 	"strings"
@@ -21,10 +20,11 @@ import (
 const PluginName = "influxdb2"
 
 const (
-	defaultInterval  = 30 * time.Second
-	minimumInterval  = 10 * time.Second
-	defaultInfluxDB  = "unifi"
-	defaultInfluxURL = "http://127.0.0.1:8086"
+	defaultInterval     = 30 * time.Second
+	minimumInterval     = 10 * time.Second
+	defaultInfluxOrg    = "unifi"
+	defaultInfluxBucket = "unifi"
+	defaultInfluxURL    = "http://127.0.0.1:8086"
 )
 
 // Config defines the data needed to store metrics in InfluxDB.
@@ -32,7 +32,8 @@ type Config struct {
 	Interval  cnfg.Duration `json:"interval,omitempty" toml:"interval,omitempty" xml:"interval" yaml:"interval"`
 	URL       string        `json:"url,omitempty" toml:"url,omitempty" xml:"url" yaml:"url"`
 	AuthToken string        `json:"auth_token,omitempty" toml:"auth_token,omitempty" xml:"auth_token" yaml:"auth_token"`
-	DB        string        `json:"db,omitempty" toml:"db,omitempty" xml:"db" yaml:"db"`
+	Org       string        `json:"org,omitempty" toml:"org,omitempty" xml:"org" yaml:"org"`
+	Bucket    string        `json:"bucket,omitempty" toml:"bucket,omitempty" xml:"bucket" yaml:"bucket"`
 	BatchSize uint          `json:"batch_size,omitempty" toml:"batch_size,omitempty" xml:"batch_size" yaml:"batch_size"`
 	Enable    bool          `json:"enable" toml:"enable" xml:"enable,attr" yaml:"enable"`
 	VerifySSL bool          `json:"verify_ssl" toml:"verify_ssl" xml:"verify_ssl" yaml:"verify_ssl"`
@@ -75,8 +76,8 @@ func init() { // nolint: gochecknoinits
 func (u *InfluxUnifi) PollController() {
 	interval := u.Interval.Round(time.Second)
 	ticker := time.NewTicker(interval)
-	log.Printf("[INFO] Poller->InfluxDB2 started, interval: %v, dp: %v, db: %s, url: %s",
-		interval, u.DeadPorts, u.DB, u.URL)
+	log.Printf("[INFO] Poller->InfluxDB2 started, interval: %v, dp: %v, org: %s, bucket: %s, url: %s",
+		interval, u.DeadPorts, u.Org, u.Bucket, u.URL)
 
 	for u.LastCheck = range ticker.C {
 		metrics, err := u.Collector.Metrics(&poller.Filter{Name: "unifi"})
@@ -136,8 +137,12 @@ func (u *InfluxUnifi) setConfigDefaults() {
 		u.AuthToken = "anonymous"
 	}
 
-	if u.DB == "" {
-		u.DB = defaultInfluxDB
+	if u.Org == "" {
+		u.Org = defaultInfluxOrg
+	}
+
+	if u.Bucket == "" {
+		u.Bucket = defaultInfluxBucket
 	}
 
 	if u.BatchSize == 0 {
@@ -174,26 +179,16 @@ func (u *InfluxUnifi) ReportMetrics(m *poller.Metrics, e *poller.Events) (*Repor
 		Counts:  &Counts{Val: make(map[item]int)},
 	}
 	defer close(r.ch)
-
-	var err error
-
 	// Make a new Influx Points Batcher.
-	r.bp, err = influx.NewBatchPoints(influx.BatchPointsConfig{Database: u.DB})
-
-	if err != nil {
-		return nil, fmt.Errorf("influxdb2.NewBatchPoint: %w", err)
-	}
+	r.writer = u.influx.WriteAPI(u.Org, u.Bucket)
 
 	go u.collect(r, r.ch)
 	// Batch all the points.
 	u.loopPoints(r)
 	r.wg.Wait() // wait for all points to finish batching!
 
-	// Send all the points.
-	if err = u.influx.Write(r.bp); err != nil {
-		return nil, fmt.Errorf("influxdb2.Write(points): %w", err)
-	}
-
+	// Flush all the points.
+	r.writer.Flush()
 	r.Elapsed = time.Since(r.Start)
 
 	return r, nil

@@ -5,7 +5,7 @@ import (
 	"sync"
 	"time"
 
-	influx "github.com/influxdata/influxdb-client-go/v2"
+	"github.com/influxdata/influxdb-client-go/v2/api"
 	"github.com/influxdata/influxdb-client-go/v2/api/write"
 	"github.com/unpoller/unpoller/pkg/poller"
 )
@@ -20,7 +20,7 @@ type Report struct {
 	Elapsed time.Duration
 	ch      chan *metric
 	wg      sync.WaitGroup
-	bp      influx.BatchPoints
+	writer  api.WriteAPI
 }
 
 // Counts holds counters and has a lock to deal with routines.
@@ -94,7 +94,7 @@ const (
 func (r *Report) batch(m *metric, p *write.Point) {
 	r.addCount(pointT)
 	r.addCount(fieldT, len(m.Fields))
-	r.bp.AddPoint(p)
+	r.writer.WritePoint(p)
 }
 
 func (r *Report) String() string {
