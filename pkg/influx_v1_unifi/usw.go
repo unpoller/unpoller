@@ -1,4 +1,4 @@
-package influxunifi
+package influx_v1_unifi
 
 import (
 	"github.com/unpoller/unifi"
@@ -9,7 +9,7 @@ const uswT = item("USW")
 
 // batchUSW generates Unifi Switch datapoints for InfluxDB.
 // These points can be passed directly to influx.
-func (u *InfluxUnifi) batchUSW(r report, s *unifi.USW) {
+func (u *InfluxV1Unifi) batchUSW(r report, s *unifi.USW) {
 	if !s.Adopted.Val || s.Locating.Val {
 		return
 	}
@@ -46,7 +46,7 @@ func (u *InfluxUnifi) batchUSW(r report, s *unifi.USW) {
 	u.batchPortTable(r, tags, s.PortTable)
 }
 
-func (u *InfluxUnifi) batchUSWstat(sw *unifi.Sw) map[string]any {
+func (u *InfluxV1Unifi) batchUSWstat(sw *unifi.Sw) map[string]any {
 	if sw == nil {
 		return map[string]any{}
 	}
@@ -68,7 +68,7 @@ func (u *InfluxUnifi) batchUSWstat(sw *unifi.Sw) map[string]any {
 }
 
 //nolint:funlen
-func (u *InfluxUnifi) batchPortTable(r report, t map[string]string, pt []unifi.Port) {
+func (u *InfluxV1Unifi) batchPortTable(r report, t map[string]string, pt []unifi.Port) {
 	for _, p := range pt {
 		if !u.DeadPorts && (!p.Up.Val || !p.Enable.Val) {
 			continue // only record UP ports.

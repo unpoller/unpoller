@@ -1,4 +1,4 @@
-package influxunifi
+package influx_v1_unifi
 
 import (
 	"time"
@@ -13,7 +13,7 @@ const (
 )
 
 // batchIDS generates intrusion detection datapoints for InfluxDB.
-func (u *InfluxUnifi) batchIDS(r report, i *unifi.IDS) { // nolint:dupl
+func (u *InfluxV1Unifi) batchIDS(r report, i *unifi.IDS) { // nolint:dupl
 	if time.Since(i.Datetime) > u.Interval.Duration+time.Second {
 		return // The event is older than our interval, ignore it.
 	}
@@ -68,7 +68,7 @@ func (u *InfluxUnifi) batchIDS(r report, i *unifi.IDS) { // nolint:dupl
 }
 
 // batchEvents generates events from UniFi for InfluxDB.
-func (u *InfluxUnifi) batchEvent(r report, i *unifi.Event) { // nolint: funlen
+func (u *InfluxV1Unifi) batchEvent(r report, i *unifi.Event) { // nolint: funlen
 	if time.Since(i.Datetime) > u.Interval.Duration+time.Second {
 		return // The event is older than our interval, ignore it.
 	}

@@ -1,4 +1,4 @@
-package influxunifi
+package influx_v1_unifi
 
 import (
 	"fmt"

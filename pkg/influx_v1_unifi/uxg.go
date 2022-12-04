@@ -1,4 +1,4 @@
-package influxunifi
+package influx_v1_unifi
 
 import (
 	"github.com/unpoller/unifi"
@@ -9,7 +9,7 @@ const uxgT = item("UXG")
 
 // batchUXG generates 10Gb Unifi Gateway datapoints for InfluxDB.
 // These points can be passed directly to influx.
-func (u *InfluxUnifi) batchUXG(r report, s *unifi.UXG) { // nolint: funlen
+func (u *InfluxV1Unifi) batchUXG(r report, s *unifi.UXG) { // nolint: funlen
 	if !s.Adopted.Val || s.Locating.Val {
 		return
 	}

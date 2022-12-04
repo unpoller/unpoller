@@ -1,4 +1,4 @@
-package influxunifi
+package influx_v2_unifi
 
 import (
 	"github.com/unpoller/unifi"
