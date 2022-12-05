@@ -381,8 +381,8 @@ golang.org/x/xerrors v0.0.0-20191011141410-1b5146add898/go.mod h1:I/5z698sn9Ka8T
 golang.org/x/xerrors v0.0.0-20191204190536-9bdfabe68543/go.mod h1:I/5z698sn9Ka8TeJc9MKroUUfqBBauWjQqLJ2OPfmY0=
 golang.org/x/xerrors v0.0.0-20200804184101-5ec99f83aff1 h1:go1bK/D/BFZV2I8cIQd1NKEZ+0owSTG1fDTci4IqFcE=
 golang.org/x/xerrors v0.0.0-20200804184101-5ec99f83aff1/go.mod h1:I/5z698sn9Ka8TeJc9MKroUUfqBBauWjQqLJ2OPfmY0=
-golift.io/cnfg v0.1.1 h1:8T20+WhEgfThCu5D/Tf5CCFGORSCrTB8cgR29sXTpUE=
-golift.io/cnfg v0.1.1/go.mod h1:cjgsYXSEgyWJEbSk+QehZuGN26jw+1CzwceGCbJ0Lck=
+golift.io/cnfg v0.2.1 h1:E4q4I8hxxaC4Ywt4Tlpw2z6H3cJUU42fLrjfF4e7BjY=
+golift.io/cnfg v0.2.1/go.mod h1:333ixAK2eoXCr+OYXo2/TXE5pChTtRccE3JbiIKweek=
 golift.io/cnfgfile v0.0.0-20220509075834-08755d9ef3f5 h1:W9EKFeDCvnMCXrXZ/z33fmDZZmUQYJPkUqlQ95Sbg+o=
 golift.io/cnfgfile v0.0.0-20220509075834-08755d9ef3f5/go.mod h1:oXt/WBhSizIK6GmS2ka85IQ4TLmL2BFh4jHKR0bbThI=
 golift.io/version v0.0.2 h1:i0gXRuSDHKs4O0sVDUg4+vNIuOxYoXhaxspftu2FRTE=
