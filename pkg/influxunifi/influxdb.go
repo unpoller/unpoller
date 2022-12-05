@@ -65,7 +65,7 @@ type InfluxDB struct {
 type InfluxUnifi struct {
 	Collector poller.Collect
 	influxV1  influxV1.Client
-	influxV2  influx.ClientInterface
+	influxV2  influx.Client
 	LastCheck time.Time
 	*InfluxDB
 }
@@ -231,7 +231,7 @@ func (u *InfluxUnifi) ReportMetrics(m *poller.Metrics, e *poller.Events) (*Repor
 
 	if u.Config.Version2 {
 		// Make a new Influx Points Batcher.
-		r.writer = &u.influxV2.WriteAPI(u.Org, u.Bucket)
+		r.writer = u.influxV2.WriteAPI(u.Org, u.Bucket)
 
 		go u.collect(r, r.ch)
 		// Batch all the points.
