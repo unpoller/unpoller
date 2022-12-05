@@ -3,7 +3,7 @@ module github.com/unpoller/unpoller
 go 1.19
 
 require (
-	github.com/DataDog/datadog-go v4.0.0+incompatible
+	github.com/DataDog/datadog-go v4.8.3+incompatible
 	github.com/gorilla/mux v1.8.0
 	github.com/influxdata/influxdb1-client v0.0.0-20200827194710-b269163b24ab
 	github.com/prometheus/client_golang v1.14.0
@@ -16,7 +16,12 @@ require (
 	golift.io/version v0.0.2
 )
 
-require golang.org/x/net v0.2.0 // indirect
+require (
+	github.com/Microsoft/go-winio v0.6.0 // indirect
+	golang.org/x/mod v0.6.0-dev.0.20220419223038-86c51ed26bb4 // indirect
+	golang.org/x/net v0.2.0 // indirect
+	golang.org/x/tools v0.1.12 // indirect
+)
 
 require (
 	github.com/BurntSushi/toml v1.0.0 // indirect
