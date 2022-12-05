@@ -8,6 +8,8 @@ This is meant for InfluxDB users 1.8+ and 2.x series.
 
 ### InfluxDB 1.8+, 2.x
 
+Note the use of `auth_token` to enable this mode.
+
 ```yaml
 influxdb:
   disable: false
@@ -15,7 +17,7 @@ influxdb:
   interval: "2m"
   # the influxdb url to post data
   url: http://somehost:1234
-  # the secret auth token
+  # the secret auth token, this enables InfluxDB 1.8, 2.x compatibility.
   auth_token: somesecret
   # the influxdb org
   org: my-org
@@ -26,6 +28,8 @@ influxdb:
 ```
 
 ### InfluxDB pre 1.8
+
+Note the lack of `auth_token` to enable this mode.
 
 ```yaml
 influxdb:

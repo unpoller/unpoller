@@ -35,24 +35,30 @@ const (
 // Config defines the data needed to store metrics in InfluxDB.
 type Config struct {
 	Interval cnfg.Duration `json:"interval,omitempty" toml:"interval,omitempty" xml:"interval" yaml:"interval"`
-	Version2 bool          `json:"version2,omitempty" toml:"version2,omitempty" xml:"version2" yaml:"version2"`
 
-	// V1
-	User string `json:"user,omitempty" toml:"user,omitempty" xml:"user" yaml:"user"`
+	// Pass controls the influxdb v1 password to write metrics with
 	Pass string `json:"pass,omitempty" toml:"pass,omitempty" xml:"pass" yaml:"pass"`
-	DB   string `json:"db,omitempty" toml:"db,omitempty" xml:"db" yaml:"db"`
+	// User controls the influxdb v1 user to write metrics with
+	User string `json:"user,omitempty" toml:"user,omitempty" xml:"user" yaml:"user"`
+	// DB controls the influxdb v1 database to write metrics to
+	DB string `json:"db,omitempty" toml:"db,omitempty" xml:"db" yaml:"db"`
 
-	// V2 features
+	// AuthToken is the secret for v2 influxdb
 	AuthToken string `json:"auth_token,omitempty" toml:"auth_token,omitempty" xml:"auth_token" yaml:"auth_token"`
-	Org       string `json:"org,omitempty" toml:"org,omitempty" xml:"org" yaml:"org"`
-	Bucket    string `json:"bucket,omitempty" toml:"bucket,omitempty" xml:"bucket" yaml:"bucket"`
-	BatchSize uint   `json:"batch_size,omitempty" toml:"batch_size,omitempty" xml:"batch_size" yaml:"batch_size"`
+	// Org is the influx org to put metrics under for v2 influxdb
+	Org string `json:"org,omitempty" toml:"org,omitempty" xml:"org" yaml:"org"`
+	// Bucket is the influx bucket to put metrics under for v2 influxdb
+	Bucket string `json:"bucket,omitempty" toml:"bucket,omitempty" xml:"bucket" yaml:"bucket"`
+	// BatchSize controls the async batch size for v2 influxdb client mode
+	BatchSize uint `json:"batch_size,omitempty" toml:"batch_size,omitempty" xml:"batch_size" yaml:"batch_size"`
 
-	// Common
+	// URL details which influxdb url to use to report metrics to.
 	URL       string `json:"url,omitempty" toml:"url,omitempty" xml:"url" yaml:"url"`
+	// Disable when true will disable the influxdb output.
 	Disable   bool   `json:"disable" toml:"disable" xml:"disable,attr" yaml:"disable"`
+	// VerifySSL when true will require ssl verification.
 	VerifySSL bool   `json:"verify_ssl" toml:"verify_ssl" xml:"verify_ssl" yaml:"verify_ssl"`
-	// Save data for dead ports? ie. ports that are down or disabled.
+	// DeadPorts when true will save data for dead ports, for example ports that are down or disabled.
 	DeadPorts bool `json:"dead_ports" toml:"dead_ports" xml:"dead_ports" yaml:"dead_ports"`
 }
 
@@ -63,10 +69,11 @@ type InfluxDB struct {
 
 // InfluxUnifi is returned by New() after you provide a Config.
 type InfluxUnifi struct {
-	Collector poller.Collect
-	influxV1  influxV1.Client
-	influxV2  influx.Client
-	LastCheck time.Time
+	Collector  poller.Collect
+	influxV1   influxV1.Client
+	influxV2   influx.Client
+	LastCheck  time.Time
+	IsVersion2 bool
 	*InfluxDB
 }
 
@@ -130,7 +137,7 @@ func (u *InfluxUnifi) Run(c poller.Collect) error {
 
 	u.setConfigDefaults()
 
-	if u.Config.Version2 {
+	if u.IsVersion2 {
 		// we're a version 2
 		tlsConfig := &tls.Config{InsecureSkipVerify: !u.VerifySSL} // nolint: gosec
 		serverOptions := influx.DefaultOptions().SetTLSConfig(tlsConfig).SetBatchSize(u.BatchSize)
@@ -165,36 +172,37 @@ func (u *InfluxUnifi) setConfigDefaults() {
 		u.AuthToken = u.getPassFromFile(strings.TrimPrefix(u.AuthToken, "file://"))
 	}
 
-	if u.AuthToken == "" {
-		u.AuthToken = "anonymous"
-	}
+	if u.AuthToken != "" {
+		// Version >= 1.8 influx
+		u.IsVersion2 = true
+		if u.Org == "" {
+			u.Org = defaultInfluxOrg
+		}
 
-	if u.Org == "" {
-		u.Org = defaultInfluxOrg
-	}
+		if u.Bucket == "" {
+			u.Bucket = defaultInfluxBucket
+		}
 
-	if u.Bucket == "" {
-		u.Bucket = defaultInfluxBucket
-	}
+		if u.BatchSize == 0 {
+			u.BatchSize = 20
+		}
+	} else {
+		// Version < 1.8 influx
+		if u.User == "" {
+			u.User = defaultInfluxUser
+		}
 
-	if u.BatchSize == 0 {
-		u.BatchSize = 20
-	}
+		if strings.HasPrefix(u.Pass, "file://") {
+			u.Pass = u.getPassFromFile(strings.TrimPrefix(u.Pass, "file://"))
+		}
 
-	if u.User == "" {
-		u.User = defaultInfluxUser
-	}
+		if u.Pass == "" {
+			u.Pass = defaultInfluxUser
+		}
 
-	if strings.HasPrefix(u.Pass, "file://") {
-		u.Pass = u.getPassFromFile(strings.TrimPrefix(u.Pass, "file://"))
-	}
-
-	if u.Pass == "" {
-		u.Pass = defaultInfluxUser
-	}
-
-	if u.DB == "" {
-		u.DB = defaultInfluxDB
+		if u.DB == "" {
+			u.DB = defaultInfluxDB
+		}
 	}
 
 	if u.Interval.Duration == 0 {
@@ -220,7 +228,7 @@ func (u *InfluxUnifi) getPassFromFile(filename string) string {
 // Returns an error if influxdb calls fail, otherwise returns a report.
 func (u *InfluxUnifi) ReportMetrics(m *poller.Metrics, e *poller.Events) (*Report, error) {
 	r := &Report{
-		UseV2:   u.Config.Version2,
+		UseV2:   u.IsVersion2,
 		Metrics: m,
 		Events:  e,
 		ch:      make(chan *metric),
@@ -229,7 +237,7 @@ func (u *InfluxUnifi) ReportMetrics(m *poller.Metrics, e *poller.Events) (*Repor
 	}
 	defer close(r.ch)
 
-	if u.Config.Version2 {
+	if u.IsVersion2 {
 		// Make a new Influx Points Batcher.
 		r.writer = u.influxV2.WriteAPI(u.Org, u.Bucket)
 
@@ -273,7 +281,7 @@ func (u *InfluxUnifi) collect(r report, ch chan *metric) {
 			m.TS = r.metrics().TS
 		}
 
-		if u.Config.Version2 {
+		if u.IsVersion2 {
 			pt := influx.NewPoint(m.Table, m.Tags, m.Fields, m.TS)
 			r.batchV2(m, pt)
 		} else {
