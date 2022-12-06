@@ -112,13 +112,15 @@ type DatadogUnifi struct {
 	*Datadog
 }
 
+var _ poller.OutputPlugin = &DatadogUnifi{}
+
 func init() { // nolint: gochecknoinits
 	u := &DatadogUnifi{Datadog: &Datadog{}, LastCheck: time.Now()}
 
 	poller.NewOutput(&poller.Output{
-		Name:   "datadog",
-		Config: u.Datadog,
-		Method: u.Run,
+		Name:         "datadog",
+		Config:       u.Datadog,
+		OutputPlugin: u,
 	})
 }
 
@@ -188,14 +190,26 @@ func (u *DatadogUnifi) setConfigDefaults() {
 
 }
 
+func (u *DatadogUnifi) Enabled() bool {
+	if u == nil {
+		return false
+	}
+	if u.Enable == nil || u.Config == nil {
+		return false
+	}
+	if u.Collector == nil {
+		return false
+	}
+	return *u.Enable
+}
+
 // Run runs a ticker to poll the unifi server and update Datadog.
 func (u *DatadogUnifi) Run(c poller.Collect) error {
-	disabled := u == nil || u.Enable == nil || !(*u.Enable) || u.Config == nil
-	if disabled {
-		u.LogDebugf("Datadog config is disabled, output is disabled.")
+	u.Collector = c
+	if !u.Enabled() {
+		u.Logf("DataDog config missing (or disabled), DataDog output disabled!")
 		return nil
 	}
-	u.Collector = c
 	u.Logf("Datadog is configured.")
 	u.setConfigDefaults()
 

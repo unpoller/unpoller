@@ -55,6 +55,8 @@ type InfluxUnifi struct {
 	*InfluxDB
 }
 
+var _ poller.OutputPlugin = &InfluxUnifi{}
+
 type metric struct {
 	Table  string
 	Tags   map[string]string
@@ -66,9 +68,9 @@ func init() { // nolint: gochecknoinits
 	u := &InfluxUnifi{InfluxDB: &InfluxDB{}, LastCheck: time.Now()}
 
 	poller.NewOutput(&poller.Output{
-		Name:   PluginName,
-		Config: u.InfluxDB,
-		Method: u.Run,
+		Name:         PluginName,
+		Config:       u.InfluxDB,
+		OutputPlugin: u,
 	})
 }
 
@@ -104,14 +106,30 @@ func (u *InfluxUnifi) PollController() {
 	}
 }
 
+func (u *InfluxUnifi) Enabled() bool {
+	if u == nil {
+		return false
+	}
+	if u.Config == nil {
+		return false
+	}
+	if u.Collector == nil {
+		return false
+	}
+	return !u.Disable
+}
+
 // Run runs a ticker to poll the unifi server and update influxdb.
 func (u *InfluxUnifi) Run(c poller.Collect) error {
-	var err error
-
-	if u.Collector = c; u.Config == nil || u.Disable {
+	u.Collector = c
+	if !u.Enabled() {
 		u.Logf("InfluxDB config missing (or disabled), InfluxDB output disabled!")
 		return nil
 	}
+
+	var err error
+
+	u.Collector = c
 
 	u.setConfigDefaults()
 

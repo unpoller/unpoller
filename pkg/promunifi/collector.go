@@ -46,6 +46,8 @@ type promUnifi struct {
 	Collector poller.Collect
 }
 
+var _ poller.OutputPlugin = &promUnifi{}
+
 // Config is the input (config file) data used to initialize this output plugin.
 type Config struct {
 	// If non-empty, each of the collected metrics is prefixed by the
@@ -106,16 +108,30 @@ func init() { // nolint: gochecknoinits
 	u := &promUnifi{Config: &Config{}}
 
 	poller.NewOutput(&poller.Output{
-		Name:   PluginName,
-		Config: u,
-		Method: u.Run,
+		Name:         PluginName,
+		Config:       u,
+		OutputPlugin: u,
 	})
+}
+
+func (u *promUnifi) Enabled() bool {
+	if u == nil {
+		return false
+	}
+	if u.Config == nil {
+		return false
+	}
+	if u.Collector == nil {
+		return false
+	}
+	return !u.Disable
 }
 
 // Run creates the collectors and starts the web server up.
 // Should be run in a Go routine. Returns nil if not configured.
 func (u *promUnifi) Run(c poller.Collect) error {
-	if u.Collector = c; u.Config == nil || u.Disable {
+	u.Collector = c
+	if u.Config == nil || !u.Enabled() {
 		u.Logf("Prometheus config missing (or disabled), Prometheus HTTP listener disabled!")
 		return nil
 	}

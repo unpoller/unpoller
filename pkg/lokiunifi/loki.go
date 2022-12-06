@@ -46,6 +46,8 @@ type Loki struct {
 	last    time.Time
 }
 
+var _ poller.OutputPlugin = &Loki{}
+
 // init is how this modular code is initialized by the main app.
 // This module adds itself as an output module to the poller core.
 func init() { // nolint: gochecknoinits
@@ -55,15 +57,26 @@ func init() { // nolint: gochecknoinits
 	}}
 
 	poller.NewOutput(&poller.Output{
-		Name:   PluginName,
-		Config: l,
-		Method: l.Run,
+		Name:         PluginName,
+		Config:       l,
+		OutputPlugin: l,
 	})
+}
+
+func (l *Loki) Enabled() bool {
+	if l == nil {
+		return false
+	}
+	if l.Config == nil {
+		return false
+	}
+	return !l.Disable
 }
 
 // Run is fired from the poller library after the Config is unmarshalled.
 func (l *Loki) Run(collect poller.Collect) error {
-	if l.Collect = collect; l.Config == nil || l.URL == "" || l.Disable {
+	l.Collect = collect
+	if l.Config == nil || l.URL == "" || !l.Enabled() {
 		l.Logf("Loki config missing (or disabled), Loki output disabled!")
 		return nil
 	}
