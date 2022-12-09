@@ -36,6 +36,13 @@ webserver:
   accounts:
     captain: "$2a$04$mxw6i0LKH6u46oaLK2cq5eCTAAFkfNiRpzNbz.EyvJZZWNa2FzIlS"
 
+datadog:
+  enable: false
+  address: localhost:8125
+  namespace: ""
+  tags:
+  - customer:abcdef
+
 unifi:
   dynamic: false
   defaults:

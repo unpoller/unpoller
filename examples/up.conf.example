@@ -69,8 +69,8 @@
   # How often to poll UniFi and report to Datadog.
   interval = "2m"
 
-  # To disable this output plugin
-  disable = true
+  # To enable this output plugin
+  enable = false
 
   # Datadog Custom Options
 
@@ -84,7 +84,7 @@
   # tags = [ "customer:abc_corp" ]
 
   # For more advanced options for very large amount of data collected see the upstream
-  # github.com/unpoller/datadogunifi repository README.
+  # github.com/unpoller/unpoller/pkg/datadogunifi repository README.
 
 
 # Unpoller has an optional web server. To turn it on, set enable to true. If you

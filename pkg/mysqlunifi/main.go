@@ -13,6 +13,8 @@ type plugin struct {
 	poller.Collect
 }
 
+var _ poller.OutputPlugin = &plugin{}
+
 // Config represents the data that is unmarshalled from the up.conf config file for this plugins.
 // See up.conf.example.mysql for sample input data.
 type Config struct {
@@ -48,16 +50,30 @@ func init() {
 	u := &plugin{Config: &Config{}}
 
 	poller.NewOutput(&poller.Output{
-		Name:   "mysql",
-		Config: u, // pass in the struct *above* your config (so it can see the struct tags).
-		Method: u.Run,
+		Name:         "mysql",
+		Config:       u, // pass in the struct *above* your config (so it can see the struct tags).
+		OutputPlugin: u,
 	})
+}
+
+func (p *plugin) Enabled() bool {
+	if p == nil {
+		return false
+	}
+	if p.Config == nil {
+		return false
+	}
+	if p.Collect == nil {
+		return false
+	}
+	return !p.Disable
 }
 
 // Run gets called by poller core code. Return when the plugin stops working or has an error.
 // In other words, don't run your code in a go routine, it already is.
 func (p *plugin) Run(c poller.Collect) error {
-	if p.Collect = c; c == nil || p.Config == nil || p.Disable {
+	p.Collect = c
+	if p.Config == nil || !p.Enabled() {
 		return nil // no config or disabled, bail out.
 	}
 

@@ -24,12 +24,17 @@ type Collect interface {
 	Outputs() []string
 }
 
+type OutputPlugin interface {
+	Run(Collect) error
+	Enabled() bool
+}
+
 // Output defines the output data for a metric exporter like influx or prometheus.
 // Output packages should call NewOutput with this struct in init().
 type Output struct {
 	Name   string
-	Config any                 // Each config is passed into an unmarshaller later.
-	Method func(Collect) error // Called on startup for each configured output.
+	Config any // Each config is passed into an unmarshaller later.
+	OutputPlugin
 }
 
 // NewOutput should be called by each output package's init function.
@@ -37,8 +42,8 @@ func NewOutput(o *Output) {
 	outputSync.Lock()
 	defer outputSync.Unlock()
 
-	if o == nil || o.Method == nil {
-		panic("nil output or method passed to poller.NewOutput")
+	if o == nil {
+		panic("nil output passed to poller.NewOutput")
 	}
 
 	outputs = append(outputs, o)
@@ -81,9 +86,11 @@ func (u *UnifiPoller) runOutputMethods() (int, chan error) {
 	defer outputSync.RUnlock()
 
 	for _, o := range outputs {
-		go func(o *Output) {
-			err <- o.Method(u) // Run each output plugin
-		}(o)
+		if o != nil && o.Enabled() {
+			go func(o *Output) {
+				err <- o.Run(u) // Run each output plugin
+			}(o)
+		}
 	}
 
 	return len(outputs), err

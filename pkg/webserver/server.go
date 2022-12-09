@@ -47,6 +47,8 @@ type Server struct {
 	start   time.Time
 }
 
+var _ poller.OutputPlugin = &Server{}
+
 // init is how this modular code is initialized by the main app.
 // This module adds itself as an output module to the poller core.
 func init() { // nolint: gochecknoinits
@@ -58,15 +60,29 @@ func init() { // nolint: gochecknoinits
 	plugins.Config = s.Config
 
 	poller.NewOutput(&poller.Output{
-		Name:   PluginName,
-		Config: s,
-		Method: s.Run,
+		Name:         PluginName,
+		Config:       s,
+		OutputPlugin: s,
 	})
+}
+
+func (s *Server) Enabled() bool {
+	if s == nil {
+		return false
+	}
+	if s.Config == nil {
+		return false
+	}
+	if s.Collect == nil {
+		return false
+	}
+	return s.Enable
 }
 
 // Run starts the server and gets things going.
 func (s *Server) Run(c poller.Collect) error {
-	if s.Collect = c; s.Config == nil || s.Port == 0 || s.HTMLPath == "" || !s.Enable {
+	s.Collect = c
+	if s.Config == nil || s.Port == 0 || s.HTMLPath == "" || !s.Enabled() {
 		s.Logf("Internal web server disabled!")
 		return nil
 	}

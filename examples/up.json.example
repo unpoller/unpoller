@@ -35,6 +35,15 @@
      }
   },
 
+  "datadog": {
+    "enable": false,
+    "address": "localhost:8125",
+    "namespace": "",
+    "tags": [
+      "customer:abcde"
+    ]
+  }
+
   "unifi": {
     "dynamic": false,
     "defaults": {
