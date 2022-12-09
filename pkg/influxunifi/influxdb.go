@@ -129,8 +129,6 @@ func (u *InfluxUnifi) Run(c poller.Collect) error {
 
 	var err error
 
-	u.Collector = c
-
 	u.setConfigDefaults()
 
 	u.influx, err = influx.NewHTTPClient(influx.HTTPConfig{
