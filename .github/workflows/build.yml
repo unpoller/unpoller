@@ -31,7 +31,7 @@ jobs:
     strategy:
       matrix:
         go: [1.19]
-        os: [ubuntu-latest, macos-latest, windows-latest]
+        os: [ubuntu-latest]
     name: lint
     runs-on: ${{ matrix.os }}
     steps:
@@ -51,8 +51,6 @@ jobs:
           # Optional: golangci-lint command line arguments.
           # args: --issues-exit-code=0
           args: --timeout=3m
-          # we have installed go already
-          skip-go-installation: true
 
           # Optional: show only new issues if it's a pull request. The default value is `false`.
           # only-new-issues: true
