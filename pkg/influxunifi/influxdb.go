@@ -99,8 +99,12 @@ func init() { // nolint: gochecknoinits
 func (u *InfluxUnifi) PollController() {
 	interval := u.Interval.Round(time.Second)
 	ticker := time.NewTicker(interval)
-	log.Printf("[INFO] Poller->InfluxDB started, interval: %v, dp: %v, db: %s, url: %s",
-		interval, u.DeadPorts, u.DB, u.URL)
+	version := "1"
+	if u.IsVersion2 {
+		version = "2"
+	}
+	log.Printf("[INFO] Poller->InfluxDB started, version: %s, interval: %v, dp: %v, db: %s, url: %s",
+		version, interval, u.DeadPorts, u.DB, u.URL)
 
 	for u.LastCheck = range ticker.C {
 		metrics, err := u.Collector.Metrics(&poller.Filter{Name: "unifi"})
