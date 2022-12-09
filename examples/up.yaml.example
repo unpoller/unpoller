@@ -51,6 +51,7 @@ unifi:
     pass: "unifipoller"
     sites:
       - all
+    timeout: 60s
     save_ids:    false
     save_events: false
     save_alarms: false

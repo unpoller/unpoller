@@ -51,6 +51,7 @@
       "pass":   "unifipoller",
       "url":    "https://127.0.0.1:8443",
       "sites": ["all"],
+      "timeout": "60s",
       "save_ids":    false,
       "save_events": false,
       "save_alarms": false,
