@@ -87,9 +87,12 @@ func (u *UnifiPoller) runOutputMethods() (int, chan error) {
 
 	for _, o := range outputs {
 		if o != nil && o.Enabled() {
+			u.LogDebugf("output plugin enabled, starting run loop for %s", o.Name)
 			go func(o *Output) {
 				err <- o.Run(u) // Run each output plugin
 			}(o)
+		} else {
+			u.LogDebugf("output plugin disabled for %s", o.Name)
 		}
 	}
 

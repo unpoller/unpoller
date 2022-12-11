@@ -197,9 +197,6 @@ func (u *DatadogUnifi) Enabled() bool {
 	if u.Enable == nil || u.Config == nil {
 		return false
 	}
-	if u.Collector == nil {
-		return false
-	}
 	return *u.Enable
 }
 
@@ -207,10 +204,10 @@ func (u *DatadogUnifi) Enabled() bool {
 func (u *DatadogUnifi) Run(c poller.Collect) error {
 	u.Collector = c
 	if !u.Enabled() {
-		u.Logf("DataDog config missing (or disabled), DataDog output disabled!")
+		u.LogDebugf("DataDog config missing (or disabled), DataDog output disabled!")
 		return nil
 	}
-	u.Logf("Datadog is configured.")
+	u.Logf("Datadog is enabled")
 	u.setConfigDefaults()
 
 	var err error

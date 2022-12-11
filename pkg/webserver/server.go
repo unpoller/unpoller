@@ -73,9 +73,6 @@ func (s *Server) Enabled() bool {
 	if s.Config == nil {
 		return false
 	}
-	if s.Collect == nil {
-		return false
-	}
 	return s.Enable
 }
 
@@ -83,9 +80,10 @@ func (s *Server) Enabled() bool {
 func (s *Server) Run(c poller.Collect) error {
 	s.Collect = c
 	if s.Config == nil || s.Port == 0 || s.HTMLPath == "" || !s.Enabled() {
-		s.Logf("Internal web server disabled!")
+		s.LogDebugf("Internal web server disabled!")
 		return nil
 	}
+	s.Logf("Internal web server enabled")
 
 	if _, err := os.Stat(s.HTMLPath); err != nil {
 		return fmt.Errorf("problem with HTML path: %w", err)

@@ -121,9 +121,6 @@ func (u *promUnifi) Enabled() bool {
 	if u.Config == nil {
 		return false
 	}
-	if u.Collector == nil {
-		return false
-	}
 	return !u.Disable
 }
 
@@ -132,9 +129,10 @@ func (u *promUnifi) Enabled() bool {
 func (u *promUnifi) Run(c poller.Collect) error {
 	u.Collector = c
 	if u.Config == nil || !u.Enabled() {
-		u.Logf("Prometheus config missing (or disabled), Prometheus HTTP listener disabled!")
+		u.LogDebugf("Prometheus config missing (or disabled), Prometheus HTTP listener disabled!")
 		return nil
 	}
+	u.Logf("Prometheus is enabled")
 
 	u.Namespace = strings.Trim(strings.ReplaceAll(u.Namespace, "-", "_"), "_")
 	if u.Namespace == "" {

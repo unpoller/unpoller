@@ -266,6 +266,12 @@ nfpms:
       - src: examples/up.yaml.example
         dst: /etc/unpoller/up.yaml.example
         type: config
+      # copy example by default to real locations, people can override, cnfg uses this.
+      - src: examples/up.conf.example
+        dst: /etc/unpoller/up.conf
+        type: config|noreplace
+      
+      # common useful info
       - src: "README.html"
         dst: /etc/unpoller/readme.html
         type: config
@@ -315,7 +321,7 @@ nfpms:
         dst: /usr/local/lib/unpoller/web/static/index.html
         type: config
       - src: init/webserver/static/css/*
-        dst: /usr/local/lib/unpoller/web/static//css
+        dst: /usr/local/lib/unpoller/web/static/css
         type: config
       - src: init/webserver/static/images/*
         dst: /usr/local/lib/unpoller/web/static/images

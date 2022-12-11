@@ -5,7 +5,6 @@ package influxunifi
 import (
 	"crypto/tls"
 	"fmt"
-	"log"
 	"os"
 	"strconv"
 	"strings"
@@ -53,11 +52,11 @@ type Config struct {
 	BatchSize uint `json:"batch_size,omitempty" toml:"batch_size,omitempty" xml:"batch_size" yaml:"batch_size"`
 
 	// URL details which influxdb url to use to report metrics to.
-	URL       string `json:"url,omitempty" toml:"url,omitempty" xml:"url" yaml:"url"`
+	URL string `json:"url,omitempty" toml:"url,omitempty" xml:"url" yaml:"url"`
 	// Disable when true will disable the influxdb output.
-	Disable   bool   `json:"disable" toml:"disable" xml:"disable,attr" yaml:"disable"`
+	Disable bool `json:"disable" toml:"disable" xml:"disable,attr" yaml:"disable"`
 	// VerifySSL when true will require ssl verification.
-	VerifySSL bool   `json:"verify_ssl" toml:"verify_ssl" xml:"verify_ssl" yaml:"verify_ssl"`
+	VerifySSL bool `json:"verify_ssl" toml:"verify_ssl" xml:"verify_ssl" yaml:"verify_ssl"`
 	// DeadPorts when true will save data for dead ports, for example ports that are down or disabled.
 	DeadPorts bool `json:"dead_ports" toml:"dead_ports" xml:"dead_ports" yaml:"dead_ports"`
 }
@@ -105,8 +104,8 @@ func (u *InfluxUnifi) PollController() {
 	if u.IsVersion2 {
 		version = "2"
 	}
-	log.Printf("[INFO] Poller->InfluxDB started, version: %s, interval: %v, dp: %v, db: %s, url: %s",
-		version, interval, u.DeadPorts, u.DB, u.URL)
+	u.Logf("Poller->InfluxDB started, version: %s, interval: %v, dp: %v, db: %s, url: %s, bucket: %s, org: %s",
+		version, interval, u.DeadPorts, u.DB, u.URL, u.Bucket, u.Org)
 
 	for u.LastCheck = range ticker.C {
 		metrics, err := u.Collector.Metrics(&poller.Filter{Name: "unifi"})
@@ -139,9 +138,6 @@ func (u *InfluxUnifi) Enabled() bool {
 	if u.Config == nil {
 		return false
 	}
-	if u.Collector == nil {
-		return false
-	}
 	return !u.Disable
 }
 
@@ -149,9 +145,11 @@ func (u *InfluxUnifi) Enabled() bool {
 func (u *InfluxUnifi) Run(c poller.Collect) error {
 	u.Collector = c
 	if !u.Enabled() {
-		u.Logf("InfluxDB config missing (or disabled), InfluxDB output disabled!")
+		u.LogDebugf("InfluxDB config missing (or disabled), InfluxDB output disabled!")
 		return nil
 	}
+
+	u.Logf("InfluxDB enabled")
 
 	var err error
 

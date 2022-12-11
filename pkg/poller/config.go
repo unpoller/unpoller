@@ -33,10 +33,10 @@ func DefaultConfFile() string {
 	case "netbsd":
 		fallthrough
 	case "openbsd":
-		return "/etc/unifi-poller/up.conf,/usr/local/etc/unifi-poller/up.conf"
+		return "/etc/unpoller/up.conf,/etc/unifi-poller/up.conf,/usr/local/etc/unifi-poller/up.conf"
 	default:
 		// linux and everything else
-		return "/config/unifi-poller.conf,/etc/unifi-poller/up.conf"
+		return "/etc/unpoller/up.conf,/config/unifi-poller.conf,/etc/unifi-poller/up.conf"
 	}
 }
 

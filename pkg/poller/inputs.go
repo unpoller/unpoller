@@ -63,9 +63,12 @@ func (u *UnifiPoller) InitializeInputs() error {
 
 	for _, input := range inputs {
 		// This must return, or the app locks up here.
+		u.LogDebugf("inititalizing input... %s", input.Name)
 		if err := input.Initialize(u); err != nil {
+			u.LogDebugf("error initializing input ... %s", input.Name)
 			return err
 		}
+		u.LogDebugf("input successfully initialized ... %s", input.Name)
 	}
 
 	return nil
