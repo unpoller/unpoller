@@ -260,12 +260,14 @@ func (u *InfluxUnifi) ReportMetrics(m *poller.Metrics, e *poller.Events) (*Repor
 		r.writer = u.influxV2.WriteAPI(u.Org, u.Bucket)
 
 		go u.collect(r, r.ch)
+		go u.drainErrors(r)
 		// Batch all the points.
 		u.loopPoints(r)
 		r.wg.Wait() // wait for all points to finish batching!
 
 		// Flush all the points.
 		r.writer.Flush()
+		go u.drainErrors(r)
 	} else {
 		var err error
 
@@ -290,6 +292,12 @@ func (u *InfluxUnifi) ReportMetrics(m *poller.Metrics, e *poller.Events) (*Repor
 	r.Elapsed = time.Since(r.Start)
 
 	return r, nil
+}
+
+func (u *InfluxUnifi) drainErrors(r *Report) {
+	for e := range r.writer.Errors() {
+		u.LogErrorf("error encountered by influx flush: %v", e)
+	}
 }
 
 // collect runs in a go routine and batches all the points.
