@@ -70,16 +70,20 @@ func (l *Loki) Enabled() bool {
 	if l.Config == nil {
 		return false
 	}
+	if l.URL == "" {
+		return false
+	}
 	return !l.Disable
 }
 
 // Run is fired from the poller library after the Config is unmarshalled.
 func (l *Loki) Run(collect poller.Collect) error {
 	l.Collect = collect
-	if l.Config == nil || l.URL == "" || !l.Enabled() {
-		l.Logf("Loki config missing (or disabled), Loki output disabled!")
+	if !l.Enabled() {
+		l.LogDebugf("Loki config missing (or disabled), Loki output disabled!")
 		return nil
 	}
+	l.Logf("Loki enabled")
 
 	l.ValidateConfig()
 

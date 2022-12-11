@@ -94,5 +94,7 @@ func (u *UnifiPoller) Run() error {
 		return err
 	}
 
+	u.LogDebugf("staring outputs")
+
 	return u.InitializeOutputs()
 }
