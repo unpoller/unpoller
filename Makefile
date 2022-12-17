@@ -58,8 +58,12 @@ $(shell go env GOPATH)/bin/rsrc:
 	cd /tmp ; go get $(RSRC_BIN) ; go install $(RSRC_BIN)@latest
 
 
-bulid-and-release:
+bulid-and-release: clean
 	goreleaser release --rm-dist
 
-build:
+build: clean
 	goreleaser release --rm-dist --skip-validate --skip-publish --skip-sign --debug
+
+clean:
+	git clean -xdf
+	docker images -f "dangling=true" -q | xargs docker rmi
