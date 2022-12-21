@@ -28,6 +28,10 @@ func (u *InfluxUnifi) batchUXG(r report, s *unifi.UXG) { // nolint: funlen
 	if s.Stat != nil {
 		gw = s.Stat.Gw
 	}
+	var sw *unifi.Sw = nil
+	if s.Stat != nil {
+		sw = s.Stat.Sw
+	}
 	fields := Combine(
 		u.batchUDMstorage(s.Storage),
 		u.batchUDMtemps(s.Temperatures),
@@ -68,7 +72,7 @@ func (u *InfluxUnifi) batchUXG(r report, s *unifi.UXG) { // nolint: funlen
 		"type":      s.Type,
 	}
 	fields = Combine(
-		u.batchUSWstat(s.Stat.Sw),
+		u.batchUSWstat(sw),
 		map[string]any{
 			"guest-num_sta": s.GuestNumSta.Val,
 			"ip":            s.IP,
