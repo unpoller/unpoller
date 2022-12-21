@@ -30,6 +30,10 @@ func (u *DatadogUnifi) batchUXG(r report, s *unifi.UXG) { // nolint: funlen
 	if s.Stat != nil {
 		gw = s.Stat.Gw
 	}
+	var sw *unifi.Sw = nil
+	if s.Stat != nil {
+		sw = s.Stat.Sw
+	}
 	data := CombineFloat64(
 		u.batchUDMstorage(s.Storage),
 		u.batchUDMtemps(s.Temperatures),
@@ -70,7 +74,7 @@ func (u *DatadogUnifi) batchUXG(r report, s *unifi.UXG) { // nolint: funlen
 		"ip":        s.IP,
 	})
 	data = CombineFloat64(
-		u.batchUSWstat(s.Stat.Sw),
+		u.batchUSWstat(sw),
 		map[string]float64{
 			"guest_num_sta": s.GuestNumSta.Val,
 			"bytes":         s.Bytes.Val,
