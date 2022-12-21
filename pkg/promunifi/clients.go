@@ -1,6 +1,8 @@
 package promunifi
 
 import (
+	"fmt"
+
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/unpoller/unifi"
 )
@@ -84,7 +86,7 @@ func (u *promUnifi) exportClientDPI(r report, v any, appTotal, catTotal totalsDP
 	for _, dpi := range s.ByApp {
 		labelDPI := []string{
 			s.Name, s.MAC, s.SiteName, s.SourceName,
-			unifi.DPICats.Get(dpi.Cat), unifi.DPIApps.GetApp(dpi.Cat, dpi.App),
+			unifi.DPICats.Get(int(dpi.Cat.Val)), unifi.DPIApps.GetApp(int(dpi.Cat.Val), int(dpi.App.Val)),
 		}
 
 		fillDPIMapTotals(appTotal, labelDPI[5], s.SourceName, s.SiteName, dpi)
@@ -170,10 +172,14 @@ func fillDPIMapTotals(m totalsDPImap, name, controller, site string, dpi unifi.D
 	}
 
 	oldDPI := m[controller][site][name]
-	oldDPI.TxPackets += dpi.TxPackets
-	oldDPI.RxPackets += dpi.RxPackets
-	oldDPI.TxBytes += dpi.TxBytes
-	oldDPI.RxBytes += dpi.RxBytes
+	oldDPI.TxPackets.Val += dpi.TxPackets.Val
+	oldDPI.TxPackets.Txt = fmt.Sprintf("%f", oldDPI.TxPackets.Val)
+	oldDPI.RxPackets.Val += dpi.RxPackets.Val
+	oldDPI.RxPackets.Txt = fmt.Sprintf("%f", oldDPI.RxPackets.Val)
+	oldDPI.TxBytes.Val += dpi.TxBytes.Val
+	oldDPI.TxBytes.Txt = fmt.Sprintf("%f", oldDPI.TxBytes.Val)
+	oldDPI.RxBytes.Val += dpi.RxBytes.Val
+	oldDPI.RxBytes.Txt = fmt.Sprintf("%f", oldDPI.RxBytes.Val)
 	m[controller][site][name] = oldDPI
 }
 

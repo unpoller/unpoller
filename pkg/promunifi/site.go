@@ -83,7 +83,7 @@ func (u *promUnifi) exportSiteDPI(r report, v any) {
 	}
 
 	for _, dpi := range s.ByApp {
-		labelDPI := []string{unifi.DPICats.Get(dpi.Cat), unifi.DPIApps.GetApp(dpi.Cat, dpi.App), s.SiteName, s.SourceName}
+		labelDPI := []string{unifi.DPICats.Get(int(dpi.Cat.Val)), unifi.DPIApps.GetApp(int(dpi.Cat.Val), int(dpi.App.Val)), s.SiteName, s.SourceName}
 
 		//	log.Println(labelsDPI, dpi.Cat, dpi.App, dpi.TxBytes, dpi.RxBytes, dpi.TxPackets, dpi.RxPackets)
 		r.send([]*metric{

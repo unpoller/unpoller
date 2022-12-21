@@ -66,15 +66,15 @@ func (u *DatadogUnifi) reportSiteDPI(r report, s *unifi.DPITable) {
 		metricName := metricNamespace("sitedpi")
 
 		tags := []string{
-			tag("category", unifi.DPICats.Get(dpi.Cat)),
-			tag("application", unifi.DPIApps.GetApp(dpi.Cat, dpi.App)),
+			tag("category", unifi.DPICats.Get(int(dpi.Cat.Val))),
+			tag("application", unifi.DPIApps.GetApp(int(dpi.Cat.Val), int(dpi.App.Val))),
 			tag("site_name", s.SiteName),
 			tag("source", s.SourceName),
 		}
 
-		_ = r.reportCount(metricName("tx_packets"), dpi.TxPackets, tags)
-		_ = r.reportCount(metricName("rx_packets"), dpi.RxPackets, tags)
-		_ = r.reportCount(metricName("tx_bytes"), dpi.TxBytes, tags)
-		_ = r.reportCount(metricName("rx_bytes"), dpi.RxBytes, tags)
+		_ = r.reportCount(metricName("tx_packets"), int64(dpi.TxPackets.Val), tags)
+		_ = r.reportCount(metricName("rx_packets"), int64(dpi.RxPackets.Val), tags)
+		_ = r.reportCount(metricName("tx_bytes"), int64(dpi.TxBytes.Val), tags)
+		_ = r.reportCount(metricName("rx_bytes"), int64(dpi.RxBytes.Val), tags)
 	}
 }

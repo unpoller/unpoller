@@ -1,6 +1,8 @@
 package influxunifi
 
 import (
+	"fmt"
+
 	"github.com/unpoller/unifi"
 )
 
@@ -84,8 +86,8 @@ func (u *InfluxUnifi) batchClientDPI(r report, v any, appTotal, catTotal totalsD
 	}
 
 	for _, dpi := range s.ByApp {
-		category := unifi.DPICats.Get(dpi.Cat)
-		application := unifi.DPIApps.GetApp(dpi.Cat, dpi.App)
+		category := unifi.DPICats.Get(int(dpi.Cat.Val))
+		application := unifi.DPIApps.GetApp(int(dpi.Cat.Val), int(dpi.App.Val))
 		fillDPIMapTotals(appTotal, application, s.SourceName, s.SiteName, dpi)
 		fillDPIMapTotals(catTotal, category, s.SourceName, s.SiteName, dpi)
 
@@ -121,10 +123,14 @@ func fillDPIMapTotals(m totalsDPImap, name, controller, site string, dpi unifi.D
 	}
 
 	existing := m[controller][site][name]
-	existing.TxPackets += dpi.TxPackets
-	existing.RxPackets += dpi.RxPackets
-	existing.TxBytes += dpi.TxBytes
-	existing.RxBytes += dpi.RxBytes
+	existing.TxPackets.Val += dpi.TxPackets.Val
+	existing.TxPackets.Txt = fmt.Sprintf("%f", existing.TxPackets.Val)
+	existing.RxPackets.Val += dpi.RxPackets.Val
+	existing.RxPackets.Txt = fmt.Sprintf("%f", existing.RxPackets.Val)
+	existing.TxBytes.Val += dpi.TxBytes.Val
+	existing.TxBytes.Txt = fmt.Sprintf("%f", existing.TxBytes.Val)
+	existing.RxBytes.Val += dpi.RxBytes.Val
+	existing.RxBytes.Txt = fmt.Sprintf("%f", existing.RxBytes.Val)
 	m[controller][site][name] = existing
 }
 
