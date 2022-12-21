@@ -16,6 +16,8 @@ builds:
     goarch:
       - amd64
       - "386"
+    ldflags:
+      - -s -w -X main.version={{.Version}} -X main.commit={{.Commit}} -X main.date={{.Date}} -X main.builtBy=goreleaser -X "golift.io/version.Version={{.Version}}" -X "golift.io/version.Branch={{.Branch}} ({{.Commit}})" -X "golift.io/version.BuildDate={{.Date}}" -X "golift.io/version.BuildUser=goreleaser" -X "golift.io/version.Revision=1"
     ignore:
       - goamd64: v4
       - goos: freebsd
@@ -29,6 +31,8 @@ builds:
     goarch:
       - amd64
       - arm64
+    ldflags:
+      - -s -w -X main.version={{.Version}} -X main.commit={{.Commit}} -X main.date={{.Date}} -X main.builtBy=goreleaser -X "golift.io/version.Version={{.Version}}" -X "golift.io/version.Branch={{.Branch}} ({{.Commit}})" -X "golift.io/version.BuildDate={{.Date}}" -X "golift.io/version.BuildUser=goreleaser" -X "golift.io/version.Revision=1"
     ignore:
       - goos: darwin
         goarch: "386"
@@ -44,6 +48,8 @@ builds:
     goarch:
       - arm64
       - arm
+    ldflags:
+      - -s -w -X main.version={{.Version}} -X main.commit={{.Commit}} -X main.date={{.Date}} -X main.builtBy=goreleaser -X "golift.io/version.Version={{.Version}}" -X "golift.io/version.Branch={{.Branch}} ({{.Commit}})" -X "golift.io/version.BuildDate={{.Date}}" -X "golift.io/version.BuildUser=goreleaser" -X "golift.io/version.Revision=1"
   - id: unpoller-windows
     env:
       - CGO_ENABLED=0
@@ -52,6 +58,8 @@ builds:
       - windows
     goarch:
       - amd64
+    ldflags:
+      - -s -w -X main.version={{.Version}} -X main.commit={{.Commit}} -X main.date={{.Date}} -X main.builtBy=goreleaser -X "golift.io/version.Version={{.Version}}" -X "golift.io/version.Branch={{.Branch}} ({{.Commit}})" -X "golift.io/version.BuildDate={{.Date}}" -X "golift.io/version.BuildUser=goreleaser" -X "golift.io/version.Revision=1"
 
 archives:
   - id: unpoller
