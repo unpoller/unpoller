@@ -194,7 +194,10 @@ func (u *DatadogUnifi) Enabled() bool {
 	if u == nil {
 		return false
 	}
-	if u.Enable == nil || u.Config == nil {
+	if u.Config == nil {
+		return false
+	}
+	if u.Enable == nil {
 		return false
 	}
 	return *u.Enable
