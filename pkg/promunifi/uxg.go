@@ -9,6 +9,14 @@ func (u *promUnifi) exportUXG(r report, d *unifi.UXG) {
 	if !d.Adopted.Val || d.Locating.Val {
 		return
 	}
+	var gw *unifi.Gw = nil
+	if d.Stat != nil {
+		gw = d.Stat.Gw
+	}
+	var sw *unifi.Sw = nil
+	if d.Stat != nil {
+		sw = d.Stat.Sw
+	}
 
 	labels := []string{d.Type, d.SiteName, d.Name, d.SourceName}
 	infoLabels := []string{d.Version, d.Model, d.Serial, d.Mac, d.IP, d.ID}
@@ -17,11 +25,11 @@ func (u *promUnifi) exportUXG(r report, d *unifi.UXG) {
 	u.exportSYSstats(r, labels, d.SysStats, d.SystemStats)
 	u.exportSTAcount(r, labels, d.UserNumSta, d.GuestNumSta, d.NumDesktop, d.NumMobile, d.NumHandheld)
 	// Switch Data
-	u.exportUSWstats(r, labels, d.Stat.Sw)
+	u.exportUSWstats(r, labels, sw)
 	u.exportPRTtable(r, labels, d.PortTable)
 	// Gateway Data
 	u.exportWANPorts(r, labels, d.Wan1, d.Wan2)
-	u.exportUSGstats(r, labels, d.Stat.Gw, d.SpeedtestStatus, d.Uplink)
+	u.exportUSGstats(r, labels, gw, d.SpeedtestStatus, d.Uplink)
 	// Dream Machine System Data.
 	r.send([]*metric{
 		{u.Device.Info, gauge, 1.0, append(labels, infoLabels...)},
