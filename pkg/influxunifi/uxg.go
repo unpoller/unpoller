@@ -24,10 +24,14 @@ func (u *InfluxUnifi) batchUXG(r report, s *unifi.UXG) { // nolint: funlen
 		"serial":    s.Serial,
 		"type":      s.Type,
 	}
+	var gw *unifi.Gw = nil
+	if s.Stat != nil {
+		gw = s.Stat.Gw
+	}
 	fields := Combine(
 		u.batchUDMstorage(s.Storage),
 		u.batchUDMtemps(s.Temperatures),
-		u.batchUSGstats(s.SpeedtestStatus, s.Stat.Gw, s.Uplink),
+		u.batchUSGstats(s.SpeedtestStatus, gw, s.Uplink),
 		u.batchSysStats(s.SysStats, s.SystemStats),
 		map[string]any{
 			"source":        s.SourceName,
