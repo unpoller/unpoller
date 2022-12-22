@@ -5,6 +5,7 @@ package influxunifi
 import (
 	"crypto/tls"
 	"fmt"
+	"net/url"
 	"os"
 	"strconv"
 	"strings"
@@ -154,6 +155,12 @@ func (u *InfluxUnifi) Run(c poller.Collect) error {
 	var err error
 
 	u.setConfigDefaults()
+	
+	_, err = url.Parse(u.Config.URL)
+	if err != nil {
+		u.LogErrorf("invalid influx URL: %v", err)
+		return err
+	}
 
 	if u.IsVersion2 {
 		// we're a version 2
