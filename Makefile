@@ -65,5 +65,5 @@ build: clean
 	goreleaser release --rm-dist --skip-validate --skip-publish --skip-sign --debug
 
 clean:
-	git clean -xdf
-	docker images -f "dangling=true" -q | xargs docker rmi
+	git clean -xdf || true
+	(docker images -f "dangling=true" -q | xargs docker rmi) || true
