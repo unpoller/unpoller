@@ -22,7 +22,7 @@ builds:
   - id: unpoller-freebsd
     env:
       - CGO_ENABLED=0
-    binary: usr/local/bin/unpoller
+    binary: /usr/local/bin/unpoller
     goos:
       - freebsd
     goarch:
@@ -119,29 +119,29 @@ archives:
     files:
       # config files
       - src: "examples/up.conf.example"
-        dst: "usr/local/etc/unpoller"
+        dst: "/usr/local/etc/unpoller"
         strip_parent: true
       - src: "examples/up.json.example"
-        dst: "usr/local/etc/unpoller"
+        dst: "/usr/local/etc/unpoller"
         strip_parent: true
       - src: "examples/up.yaml.example"
-        dst: "usr/local/etc/unpoller"
+        dst: "/usr/local/etc/unpoller"
         strip_parent: true
       # docs
       - src: "README.html"
-        dst: "usr/local/share/doc/unpoller/"
+        dst: "/usr/local/share/doc/unpoller/"
         strip_parent: true
       - src: "unpoller_manual.html"
-        dst: "usr/local/share/doc/unpoller/"
+        dst: "/usr/local/share/doc/unpoller/"
         strip_parent: true
       - src: LICENSE
-        dst: "usr/local/share/doc/unpoller/"
+        dst: "/usr/local/share/doc/unpoller/"
         strip_parent: true
       - src: "unpoller.1.gz"
-        dst: usr/local/share/man/man1
+        dst: /usr/local/share/man/man1
         strip_parent: true
       - src: "init/bsd/freebsd.rc.d"
-        dst: usr/local/etc/rc.d
+        dst: /usr/local/etc/rc.d
         strip_parent: true
         info:
           mode: 755
