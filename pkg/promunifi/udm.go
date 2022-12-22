@@ -29,6 +29,7 @@ type unifiDevice struct {
 	MemUsed       *prometheus.Desc
 	CPU           *prometheus.Desc
 	Mem           *prometheus.Desc
+	Upgradeable   *prometheus.Desc
 }
 
 func descDevice(ns string) *unifiDevice {
@@ -60,6 +61,7 @@ func descDevice(ns string) *unifiDevice {
 		MemBuffer:     prometheus.NewDesc(ns+"memory_buffer_bytes", "System Memory Buffer", labels, nil),
 		CPU:           prometheus.NewDesc(ns+"cpu_utilization_ratio", "System CPU % Utilized", labels, nil),
 		Mem:           prometheus.NewDesc(ns+"memory_utilization_ratio", "System Memory % Utilized", labels, nil),
+		Upgradeable:   prometheus.NewDesc(ns+"upgradable", "Upgrade-able", labels, nil),
 	}
 }
 
@@ -85,6 +87,7 @@ func (u *promUnifi) exportUDM(r report, d *unifi.UDM) {
 	r.send([]*metric{
 		{u.Device.Info, gauge, 1.0, append(labels, infoLabels...)},
 		{u.Device.Uptime, gauge, d.Uptime, labels},
+		{u.Device.Upgradeable, gauge, d.Upgradeable.Val, labels},
 	})
 
 	// UDM pro has special temp sensors. UDM non-pro may not have temp; not sure.

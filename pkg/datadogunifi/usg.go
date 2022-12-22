@@ -42,6 +42,7 @@ func (u *DatadogUnifi) batchUSG(r report, s *unifi.USG) {
 			"num_desktop":   s.NumDesktop.Val,
 			"num_handheld":  s.NumHandheld.Val,
 			"num_mobile":    s.NumMobile.Val,
+			"upgradeable":   boolToFloat64(s.Upgradable.Val),
 		},
 	)
 

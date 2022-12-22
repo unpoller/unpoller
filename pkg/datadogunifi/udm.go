@@ -125,6 +125,7 @@ func (u *DatadogUnifi) batchUDM(r report, s *unifi.UDM) { // nolint: funlen
 			"num_desktop":   s.NumDesktop.Val,
 			"num_handheld":  s.NumHandheld.Val,
 			"num_mobile":    s.NumMobile.Val,
+			"upgradeable":   boolToFloat64(s.Upgradeable.Val),
 		},
 	)
 
@@ -155,6 +156,7 @@ func (u *DatadogUnifi) batchUDM(r report, s *unifi.UDM) { // nolint: funlen
 			"rx_bytes":      s.RxBytes.Val,
 			"tx_bytes":      s.TxBytes.Val,
 			"uptime":        s.Uptime.Val,
+			"upgradeable":   boolToFloat64(s.Upgradeable.Val),
 		})
 
 	metricName = metricNamespace("usw")
