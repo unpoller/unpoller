@@ -139,9 +139,9 @@ func (u *InputUnifi) augmentMetrics(c *Controller, metrics *Metrics) *poller.Met
 			devices[client.Mac] = client.Hostname
 		}
 
-		client.Mac = RedactMacPII(client.Mac, c.HashPII)
-		client.Name = RedactNamePII(client.Name, c.HashPII)
-		client.Hostname = RedactNamePII(client.Hostname, c.HashPII)
+		client.Mac = RedactMacPII(client.Mac, c.HashPII, c.DropPII)
+		client.Name = RedactNamePII(client.Name, c.HashPII, c.DropPII)
+		client.Hostname = RedactNamePII(client.Hostname, c.HashPII, c.DropPII)
 		client.SwName = devices[client.SwMac]
 		client.ApName = devices[client.ApMac]
 		client.GwName = devices[client.GwMac]
@@ -156,8 +156,8 @@ func (u *InputUnifi) augmentMetrics(c *Controller, metrics *Metrics) *poller.Met
 			client.Name = client.MAC
 		}
 
-		client.Name = RedactNamePII(client.Name, c.HashPII)
-		client.MAC = RedactMacPII(client.MAC, c.HashPII)
+		client.Name = RedactNamePII(client.Name, c.HashPII, c.DropPII)
+		client.MAC = RedactMacPII(client.MAC, c.HashPII, c.DropPII)
 		m.ClientsDPI = append(m.ClientsDPI, client)
 	}
 
@@ -219,7 +219,11 @@ func extractDevices(metrics *Metrics) (*poller.Metrics, map[string]string, map[s
 
 // RedactNamePII converts a name string to an md5 hash (first 24 chars only).
 // Useful for maskiing out personally identifying information.
-func RedactNamePII(pii string, hash *bool) string {
+func RedactNamePII(pii string, hash *bool, dropPII *bool) string {
+	if dropPII != nil && *dropPII {
+		return ""
+	}
+
 	if hash == nil || !*hash || pii == "" {
 		return pii
 	}
@@ -231,7 +235,11 @@ func RedactNamePII(pii string, hash *bool) string {
 
 // RedactMacPII converts a MAC address to an md5 hashed version (first 14 chars only).
 // Useful for maskiing out personally identifying information.
-func RedactMacPII(pii string, hash *bool) (output string) {
+func RedactMacPII(pii string, hash *bool, dropPII *bool) (output string) {
+	if dropPII != nil && *dropPII {
+		return ""
+	}
+
 	if hash == nil || !*hash || pii == "" {
 		return pii
 	}

@@ -99,7 +99,7 @@ func (u *InputUnifi) collectEvents(logs []any, sites []*unifi.Site, c *Controlle
 			}
 
 			for _, e := range events {
-				e := redactEvent(e, c.HashPII)
+				e := redactEvent(e, c.HashPII, c.DropPII)
 				logs = append(logs, e)
 
 				webserver.NewInputEvent(PluginName, s.ID+"_events", &webserver.Event{
@@ -141,18 +141,26 @@ func (u *InputUnifi) collectIDS(logs []any, sites []*unifi.Site, c *Controller) 
 
 // redactEvent attempts to mask personally identying information from log messages.
 // This currently misses the "msg" value entirely and leaks PII information.
-func redactEvent(e *unifi.Event, hash *bool) *unifi.Event {
-	if !*hash {
+func redactEvent(e *unifi.Event, hash *bool, dropPII *bool) *unifi.Event {
+	if !*hash && !*dropPII {
 		return e
 	}
 
 	// metrics.Events[i].Msg <-- not sure what to do here.
 	e.DestIPGeo = unifi.IPGeo{}
 	e.SourceIPGeo = unifi.IPGeo{}
-	e.Host = RedactNamePII(e.Host, hash)
-	e.Hostname = RedactNamePII(e.Hostname, hash)
-	e.DstMAC = RedactMacPII(e.DstMAC, hash)
-	e.SrcMAC = RedactMacPII(e.SrcMAC, hash)
+	if *dropPII {
+		e.Host = ""
+		e.Hostname = ""
+		e.DstMAC = ""
+		e.SrcMAC = ""
+	} else {
+		// hash it
+		e.Host = RedactNamePII(e.Host, hash)
+		e.Hostname = RedactNamePII(e.Hostname, hash)
+		e.DstMAC = RedactMacPII(e.DstMAC, hash)
+		e.SrcMAC = RedactMacPII(e.SrcMAC, hash)
+	}
 
 	return e
 }

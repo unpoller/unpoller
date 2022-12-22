@@ -42,6 +42,7 @@ type Controller struct {
 	SaveDPI    *bool        `json:"save_dpi" toml:"save_dpi" xml:"save_dpi" yaml:"save_dpi"`
 	SaveRogue  *bool        `json:"save_rogue" toml:"save_rogue" xml:"save_rogue" yaml:"save_rogue"`
 	HashPII    *bool        `json:"hash_pii" toml:"hash_pii" xml:"hash_pii" yaml:"hash_pii"`
+	DropPII    *bool        `json:"drop_pii" toml:"drop_pii" xml:"drop_pii" yaml:"drop_pii"`
 	SaveSites  *bool        `json:"save_sites" toml:"save_sites" xml:"save_sites" yaml:"save_sites"`
 	CertPaths  []string     `json:"ssl_cert_paths" toml:"ssl_cert_paths" xml:"ssl_cert_path" yaml:"ssl_cert_paths"`
 	User       string       `json:"user" toml:"user" xml:"user" yaml:"user"`
@@ -215,6 +216,10 @@ func (u *InputUnifi) setDefaults(c *Controller) { //nolint:cyclop
 		c.HashPII = &f
 	}
 
+	if c.DropPII == nil {
+		c.DropPII = &f
+	}
+
 	if c.SaveDPI == nil {
 		c.SaveDPI = &f
 	}
@@ -278,6 +283,10 @@ func (u *InputUnifi) setControllerDefaults(c *Controller) *Controller { //nolint
 
 	if c.HashPII == nil {
 		c.HashPII = u.Default.HashPII
+	}
+
+	if c.DropPII == nil {
+		c.DropPII = u.Default.DropPII
 	}
 
 	if c.SaveDPI == nil {
