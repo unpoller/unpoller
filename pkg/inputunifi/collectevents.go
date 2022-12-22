@@ -156,10 +156,10 @@ func redactEvent(e *unifi.Event, hash *bool, dropPII *bool) *unifi.Event {
 		e.SrcMAC = ""
 	} else {
 		// hash it
-		e.Host = RedactNamePII(e.Host, hash)
-		e.Hostname = RedactNamePII(e.Hostname, hash)
-		e.DstMAC = RedactMacPII(e.DstMAC, hash)
-		e.SrcMAC = RedactMacPII(e.SrcMAC, hash)
+		e.Host = RedactNamePII(e.Host, hash, dropPII)
+		e.Hostname = RedactNamePII(e.Hostname, hash, dropPII)
+		e.DstMAC = RedactMacPII(e.DstMAC, hash, dropPII)
+		e.SrcMAC = RedactMacPII(e.SrcMAC, hash, dropPII)
 	}
 
 	return e
