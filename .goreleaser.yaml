@@ -98,6 +98,15 @@ archives:
       - rsrc_windows_*.syso
       - examples/up.*.example
       - init/windows/application.ico
+  - id: unpoller-txz
+    builds:
+      - unpoller
+    format: tar.xz
+    name_template:  
+    files:
+      - LICENSE
+      - README.md
+      - examples/up.*.example
 
 dockers:
   - id: docker-linux-amd64
