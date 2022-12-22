@@ -47,3 +47,10 @@ func cleanTags(tags map[string]string) map[string]string {
 
 	return tags
 }
+
+func boolToFloat64(v bool) float64 {
+	if v {
+		return 1.0
+	}
+	return 0.0
+}

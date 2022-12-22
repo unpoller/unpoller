@@ -68,6 +68,7 @@ func (u *InfluxUnifi) batchUAP(r report, s *unifi.UAP) {
 	fields["user-num_sta"] = int(s.UserNumSta.Val)
 	fields["guest-num_sta"] = int(s.GuestNumSta.Val)
 	fields["num_sta"] = s.NumSta.Val
+	fields["upgradeable"] = s.Upgradable.Val
 
 	r.addCount(uapT)
 	r.send(&metric{Table: "uap", Tags: tags, Fields: fields})

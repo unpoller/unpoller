@@ -39,6 +39,7 @@ func (u *DatadogUnifi) batchUSW(r report, s *unifi.USW) {
 			"uptime":              s.Uptime.Val,
 			"state":               s.State.Val,
 			"user_num_sta":        s.UserNumSta.Val,
+			"upgradeable":         boolToFloat64(s.Upgradeable.Val),
 		})
 
 	r.addCount(uswT)

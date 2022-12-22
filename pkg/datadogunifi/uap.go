@@ -70,6 +70,7 @@ func (u *DatadogUnifi) batchUAP(r report, s *unifi.UAP) {
 	data["user_num_sta"] = s.UserNumSta.Val
 	data["guest_num_sta"] = s.GuestNumSta.Val
 	data["num_sta"] = s.NumSta.Val
+	data["upgradeable"] = boolToFloat64(s.Upgradable.Val)
 
 	r.addCount(uapT)
 

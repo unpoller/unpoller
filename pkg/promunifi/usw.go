@@ -48,6 +48,8 @@ type usw struct {
 	SFPTemperature *prometheus.Desc
 	SFPTxPower     *prometheus.Desc
 	SFPVoltage     *prometheus.Desc
+	// other
+	Upgradeable *prometheus.Desc
 }
 
 func descUSW(ns string) *usw {
@@ -104,6 +106,8 @@ func descUSW(ns string) *usw {
 		SFPTemperature: nd(sfp+"temperature", "SFP Temperature", labelF, nil),
 		SFPTxPower:     nd(sfp+"tx_power", "SFP Transmit Power", labelF, nil),
 		SFPVoltage:     nd(sfp+"voltage", "SFP Voltage", labelF, nil),
+		// other data
+		Upgradeable: nd(ns+"upgradeable", "Upgrade-able", labelS, nil),
 	}
 }
 
@@ -123,6 +127,7 @@ func (u *promUnifi) exportUSW(r report, d *unifi.USW) {
 	r.send([]*metric{
 		{u.Device.Info, gauge, 1.0, append(labels, infoLabels...)},
 		{u.Device.Uptime, gauge, d.Uptime, labels},
+		{u.Device.Upgradeable, gauge, d.Upgradable.Val, labels},
 	})
 
 	// Switch System Data.
