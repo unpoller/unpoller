@@ -47,6 +47,7 @@ func formatControllers(controllers []*Controller) []*Controller {
 			SaveIDS:    c.SaveIDS,
 			SaveDPI:    c.SaveDPI,
 			HashPII:    c.HashPII,
+			DropPII:    c.DropPII,
 			SaveSites:  c.SaveSites,
 			User:       c.User,
 			Pass:       strconv.FormatBool(c.Pass != ""),

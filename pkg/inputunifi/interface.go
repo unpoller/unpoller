@@ -69,10 +69,10 @@ func (u *InputUnifi) logController(c *Controller) {
 	}
 
 	u.Logf("   => Username: %s (has password: %v)", c.User, c.Pass != "")
-	u.Logf("   => Hash PII / Poll Sites: %v / %s", *c.HashPII, strings.Join(c.Sites, ", "))
-	u.Logf("   => Save Sites / Save DPI: %v / %v (metrics)", *c.SaveSites, *c.SaveDPI)
-	u.Logf("   => Save Events / Save IDS: %v / %v (logs)", *c.SaveEvents, *c.SaveIDS)
-	u.Logf("   => Save Alarms / Anomalies: %v / %v (logs)", *c.SaveAlarms, *c.SaveAnomal)
+	u.Logf("   => Hash PII %v / Drop PII %v / Poll Sites: %s", *c.HashPII, *c.DropPII, strings.Join(c.Sites, ", "))
+	u.Logf("   => Save Sites %v / Save DPI %v (metrics)", *c.SaveSites, *c.SaveDPI)
+	u.Logf("   => Save Events %v / Save IDS %v (logs)", *c.SaveEvents, *c.SaveIDS)
+	u.Logf("   => Save Alarms %v / Anomalies %v (logs)", *c.SaveAlarms, *c.SaveAnomal)
 	u.Logf("   => Save Rogue APs: %v", *c.SaveRogue)
 }
 
