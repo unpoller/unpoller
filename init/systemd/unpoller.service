@@ -9,7 +9,7 @@ After=network.target
 Requires=network.target
 
 [Service]
-ExecStart=/usr/bin/unpoller $DAEMON_OPTS
+ExecStart=/usr/bin/unpoller -c /etc/unpoller/up.conf $DAEMON_OPTS
 EnvironmentFile=-/etc/default/unpoller
 EnvironmentFile=-/etc/sysconfig/unpoller
 Restart=always
