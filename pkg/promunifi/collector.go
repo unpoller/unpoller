@@ -39,6 +39,7 @@ type promUnifi struct {
 	UAP     *uap
 	USG     *usg
 	USW     *usw
+	PDU     *pdu
 	Site    *site
 	RogueAP *rogueap
 	// This interface is passed to the Collect() method. The Collect method uses
@@ -85,6 +86,7 @@ type Report struct {
 	Zeros   int             // Total count of metrics equal to zero.
 	USG     int             // Total count of USG devices.
 	USW     int             // Total count of USW devices.
+	PDU     int             // Total count of PDU devices.
 	UAP     int             // Total count of UAP devices.
 	UDM     int             // Total count of UDM devices.
 	UXG     int             // Total count of UXG devices.
@@ -152,6 +154,7 @@ func (u *promUnifi) Run(c poller.Collect) error {
 	u.UAP = descUAP(u.Namespace + "_device_")
 	u.USG = descUSG(u.Namespace + "_device_")
 	u.USW = descUSW(u.Namespace + "_device_")
+	u.PDU = descPDU(u.Namespace + "_device_")
 	u.Site = descSite(u.Namespace + "_site_")
 	u.RogueAP = descRogueAP(u.Namespace + "_rogueap_")
 
@@ -235,7 +238,7 @@ func (t *target) Describe(ch chan<- *prometheus.Desc) {
 // Describe satisfies the prometheus Collector. This returns all of the
 // metric descriptions that this packages produces.
 func (u *promUnifi) Describe(ch chan<- *prometheus.Desc) {
-	for _, f := range []any{u.Client, u.Device, u.UAP, u.USG, u.USW, u.Site} {
+	for _, f := range []any{u.Client, u.Device, u.UAP, u.USG, u.USW, u.PDU, u.Site} {
 		v := reflect.Indirect(reflect.ValueOf(f))
 
 		// Loop each struct member and send it to the provided channel.
@@ -357,6 +360,9 @@ func (u *promUnifi) switchExport(r report, v any) {
 	case *unifi.USW:
 		r.addUSW()
 		u.exportUSW(r, v)
+	case *unifi.PDU:
+		r.addPDU()
+		u.exportPDU(r, v)
 	case *unifi.USG:
 		r.addUSG()
 		u.exportUSG(r, v)

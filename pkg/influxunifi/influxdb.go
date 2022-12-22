@@ -155,7 +155,7 @@ func (u *InfluxUnifi) Run(c poller.Collect) error {
 	var err error
 
 	u.setConfigDefaults()
-	
+
 	_, err = url.Parse(u.Config.URL)
 	if err != nil {
 		u.LogErrorf("invalid influx URL: %v", err)
@@ -368,6 +368,8 @@ func (u *InfluxUnifi) switchExport(r report, v any) { //nolint:cyclop
 		u.batchUAP(r, v)
 	case *unifi.USW:
 		u.batchUSW(r, v)
+	case *unifi.PDU:
+		u.batchPDU(r, v)
 	case *unifi.USG:
 		u.batchUSG(r, v)
 	case *unifi.UXG:

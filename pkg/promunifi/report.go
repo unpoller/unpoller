@@ -24,6 +24,7 @@ type report interface {
 	addUSG()
 	addUAP()
 	addUSW()
+	addPDU()
 }
 
 // Satisfy gomnd.
@@ -74,6 +75,10 @@ func (r *Report) error(ch chan<- prometheus.Metric, d *prometheus.Desc, v any) {
 
 func (r *Report) addUSW() {
 	r.USW++
+}
+
+func (r *Report) addPDU() {
+	r.PDU++
 }
 
 func (r *Report) addUAP() {
