@@ -7,29 +7,31 @@ import (
 
 // These are shared by all four device types: UDM, UAP, USG, USW.
 type unifiDevice struct {
-	Info          *prometheus.Desc
-	Uptime        *prometheus.Desc
-	Temperature   *prometheus.Desc
-	Storage       *prometheus.Desc
-	TotalMaxPower *prometheus.Desc // sw only
-	FanLevel      *prometheus.Desc // sw only
-	TotalTxBytes  *prometheus.Desc
-	TotalRxBytes  *prometheus.Desc
-	TotalBytes    *prometheus.Desc
-	BytesR        *prometheus.Desc // ap only
-	BytesD        *prometheus.Desc // ap only
-	TxBytesD      *prometheus.Desc // ap only
-	RxBytesD      *prometheus.Desc // ap only
-	Counter       *prometheus.Desc
-	Loadavg1      *prometheus.Desc
-	Loadavg5      *prometheus.Desc
-	Loadavg15     *prometheus.Desc
-	MemBuffer     *prometheus.Desc
-	MemTotal      *prometheus.Desc
-	MemUsed       *prometheus.Desc
-	CPU           *prometheus.Desc
-	Mem           *prometheus.Desc
-	Upgradeable   *prometheus.Desc
+	Info                     *prometheus.Desc
+	Uptime                   *prometheus.Desc
+	Temperature              *prometheus.Desc
+	Storage                  *prometheus.Desc
+	TotalMaxPower            *prometheus.Desc // sw only
+	OutletACPowerConsumption *prometheus.Desc // pdu only
+	PowerSource              *prometheus.Desc // pdu only
+	FanLevel                 *prometheus.Desc // sw only
+	TotalTxBytes             *prometheus.Desc
+	TotalRxBytes             *prometheus.Desc
+	TotalBytes               *prometheus.Desc
+	BytesR                   *prometheus.Desc // ap only
+	BytesD                   *prometheus.Desc // ap only
+	TxBytesD                 *prometheus.Desc // ap only
+	RxBytesD                 *prometheus.Desc // ap only
+	Counter                  *prometheus.Desc
+	Loadavg1                 *prometheus.Desc
+	Loadavg5                 *prometheus.Desc
+	Loadavg15                *prometheus.Desc
+	MemBuffer                *prometheus.Desc
+	MemTotal                 *prometheus.Desc
+	MemUsed                  *prometheus.Desc
+	CPU                      *prometheus.Desc
+	Mem                      *prometheus.Desc
+	Upgradeable              *prometheus.Desc
 }
 
 func descDevice(ns string) *unifiDevice {
@@ -43,25 +45,27 @@ func descDevice(ns string) *unifiDevice {
 			append(labels, "temp_area", "temp_type"), nil),
 		Storage: prometheus.NewDesc(ns+"storage", "Storage",
 			append(labels, "mountpoint", "storage_name", "storage_reading"), nil),
-		TotalMaxPower: prometheus.NewDesc(ns+"max_power_total", "Total Max Power", labels, nil),
-		FanLevel:      prometheus.NewDesc(ns+"fan_level", "Fan Level", labels, nil),
-		TotalTxBytes:  prometheus.NewDesc(ns+"transmit_bytes_total", "Total Transmitted Bytes", labels, nil),
-		TotalRxBytes:  prometheus.NewDesc(ns+"receive_bytes_total", "Total Received Bytes", labels, nil),
-		TotalBytes:    prometheus.NewDesc(ns+"bytes_total", "Total Bytes Transferred", labels, nil),
-		BytesR:        prometheus.NewDesc(ns+"rate_bytes", "Transfer Rate", labels, nil),
-		BytesD:        prometheus.NewDesc(ns+"d_bytes", "Total Bytes D???", labels, nil),
-		TxBytesD:      prometheus.NewDesc(ns+"d_tranmsit_bytes", "Transmit Bytes D???", labels, nil),
-		RxBytesD:      prometheus.NewDesc(ns+"d_receive_bytes", "Receive Bytes D???", labels, nil),
-		Counter:       prometheus.NewDesc(ns+"stations", "Number of Stations", append(labels, "station_type"), nil),
-		Loadavg1:      prometheus.NewDesc(ns+"load_average_1", "System Load Average 1 Minute", labels, nil),
-		Loadavg5:      prometheus.NewDesc(ns+"load_average_5", "System Load Average 5 Minutes", labels, nil),
-		Loadavg15:     prometheus.NewDesc(ns+"load_average_15", "System Load Average 15 Minutes", labels, nil),
-		MemUsed:       prometheus.NewDesc(ns+"memory_used_bytes", "System Memory Used", labels, nil),
-		MemTotal:      prometheus.NewDesc(ns+"memory_installed_bytes", "System Installed Memory", labels, nil),
-		MemBuffer:     prometheus.NewDesc(ns+"memory_buffer_bytes", "System Memory Buffer", labels, nil),
-		CPU:           prometheus.NewDesc(ns+"cpu_utilization_ratio", "System CPU % Utilized", labels, nil),
-		Mem:           prometheus.NewDesc(ns+"memory_utilization_ratio", "System Memory % Utilized", labels, nil),
-		Upgradeable:   prometheus.NewDesc(ns+"upgradable", "Upgrade-able", labels, nil),
+		TotalMaxPower:            prometheus.NewDesc(ns+"max_power_total", "Total Max Power", labels, nil),
+		OutletACPowerConsumption: prometheus.NewDesc(ns+"outlet_ac_power_consumption", "Outlet AC Power Consumption", labels, nil),
+		PowerSource:              prometheus.NewDesc(ns+"power_source", "Power Source", labels, nil),
+		FanLevel:                 prometheus.NewDesc(ns+"fan_level", "Fan Level", labels, nil),
+		TotalTxBytes:             prometheus.NewDesc(ns+"transmit_bytes_total", "Total Transmitted Bytes", labels, nil),
+		TotalRxBytes:             prometheus.NewDesc(ns+"receive_bytes_total", "Total Received Bytes", labels, nil),
+		TotalBytes:               prometheus.NewDesc(ns+"bytes_total", "Total Bytes Transferred", labels, nil),
+		BytesR:                   prometheus.NewDesc(ns+"rate_bytes", "Transfer Rate", labels, nil),
+		BytesD:                   prometheus.NewDesc(ns+"d_bytes", "Total Bytes D???", labels, nil),
+		TxBytesD:                 prometheus.NewDesc(ns+"d_tranmsit_bytes", "Transmit Bytes D???", labels, nil),
+		RxBytesD:                 prometheus.NewDesc(ns+"d_receive_bytes", "Receive Bytes D???", labels, nil),
+		Counter:                  prometheus.NewDesc(ns+"stations", "Number of Stations", append(labels, "station_type"), nil),
+		Loadavg1:                 prometheus.NewDesc(ns+"load_average_1", "System Load Average 1 Minute", labels, nil),
+		Loadavg5:                 prometheus.NewDesc(ns+"load_average_5", "System Load Average 5 Minutes", labels, nil),
+		Loadavg15:                prometheus.NewDesc(ns+"load_average_15", "System Load Average 15 Minutes", labels, nil),
+		MemUsed:                  prometheus.NewDesc(ns+"memory_used_bytes", "System Memory Used", labels, nil),
+		MemTotal:                 prometheus.NewDesc(ns+"memory_installed_bytes", "System Installed Memory", labels, nil),
+		MemBuffer:                prometheus.NewDesc(ns+"memory_buffer_bytes", "System Memory Buffer", labels, nil),
+		CPU:                      prometheus.NewDesc(ns+"cpu_utilization_ratio", "System CPU % Utilized", labels, nil),
+		Mem:                      prometheus.NewDesc(ns+"memory_utilization_ratio", "System Memory % Utilized", labels, nil),
+		Upgradeable:              prometheus.NewDesc(ns+"upgradable", "Upgrade-able", labels, nil),
 	}
 }
 
