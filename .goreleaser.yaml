@@ -12,7 +12,6 @@ builds:
     binary: unpoller
     goos:
       - linux
-      - freebsd
     goarch:
       - amd64
       - "386"
@@ -20,8 +19,22 @@ builds:
       - -s -w -X main.version={{.Version}} -X main.commit={{.Commit}} -X main.date={{.Date}} -X main.builtBy=goreleaser -X "golift.io/version.Version={{.Version}}" -X "golift.io/version.Branch={{.Branch}} ({{.Commit}})" -X "golift.io/version.BuildDate={{.Date}}" -X "golift.io/version.BuildUser=goreleaser" -X "golift.io/version.Revision=1"
     ignore:
       - goamd64: v4
-      - goos: freebsd
-        goarch: "386"
+  - id: unpoller-freebsd
+    env:
+      - CGO_ENABLED=0
+    binary: usr/local/bin/unpoller
+    goos:
+      - freebsd
+    goarch:
+      - amd64
+      - arm64
+      - arm
+    goarm:
+      - "7"
+    ldflags:
+      - -s -w -X main.version={{.Version}} -X main.commit={{.Commit}} -X main.date={{.Date}} -X main.builtBy=goreleaser -X "golift.io/version.Version={{.Version}}" -X "golift.io/version.Branch={{.Branch}} ({{.Commit}})" -X "golift.io/version.BuildDate={{.Date}}" -X "golift.io/version.BuildUser=goreleaser" -X "golift.io/version.Revision=1"
+    ignore:
+      - goamd64: v4
   - id: unpoller-mac
     env:
       - CGO_ENABLED=0
@@ -98,6 +111,41 @@ archives:
       - rsrc_windows_*.syso
       - examples/up.*.example
       - init/windows/application.ico
+  - id: unpoller-freebsd-pkg
+    builds:
+      - unpoller-freebsd
+    format: tar.xz
+    wrap_in_directory: false
+    files:
+      # config files
+      - src: "examples/up.conf.example"
+        dst: "usr/local/etc/unpoller"
+        strip_parent: true
+      - src: "examples/up.json.example"
+        dst: "usr/local/etc/unpoller"
+        strip_parent: true
+      - src: "examples/up.yaml.example"
+        dst: "usr/local/etc/unpoller"
+        strip_parent: true
+      # docs
+      - src: "README.html"
+        dst: "usr/local/share/doc/unpoller/"
+        strip_parent: true
+      - src: "unpoller_manual.html"
+        dst: "usr/local/share/doc/unpoller/"
+        strip_parent: true
+      - src: LICENSE
+        dst: "usr/local/share/doc/unpoller/"
+        strip_parent: true
+      - src: "unpoller.1.gz"
+        dst: usr/local/share/man/man1
+        strip_parent: true
+      - src: "init/bsd/freebsd.rc.d"
+        dst: usr/local/etc/rc.d
+        strip_parent: true
+        info:
+          mode: 755
+    
 
 dockers:
   - id: docker-linux-amd64
