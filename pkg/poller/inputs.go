@@ -21,7 +21,7 @@ type Input interface {
 	Metrics(*Filter) (*Metrics, error) // Called every time new metrics are requested.
 	Events(*Filter) (*Events, error)   // This is new.
 	RawMetrics(*Filter) ([]byte, error)
-	DebugInputs(Logger) (bool, error)
+	DebugInput() (bool, error)
 }
 
 // InputPlugin describes an input plugin's consumable interface.

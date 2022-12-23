@@ -69,7 +69,7 @@ func (p *plugin) Enabled() bool {
 	return !p.Disable
 }
 
-func (p *plugin) DebugOutput(l poller.Logger) (bool, error) {
+func (p *plugin) DebugOutput() (bool, error) {
 	if p == nil {
 		return true, nil
 	}

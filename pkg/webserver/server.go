@@ -95,7 +95,7 @@ func (s *Server) Run(c poller.Collect) error {
 	return s.Start()
 }
 
-func (s *Server) DebugOutput(l poller.Logger) (bool, error) {
+func (s *Server) DebugOutput() (bool, error) {
 	if s == nil {
 		return true, nil
 	}

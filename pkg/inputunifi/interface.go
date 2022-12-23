@@ -57,7 +57,7 @@ func (u *InputUnifi) Initialize(l poller.Logger) error {
 	return nil
 }
 
-func (u *InputUnifi) DebugInputs(l poller.Logger) (bool, error) {
+func (u *InputUnifi) DebugInput() (bool, error) {
 	if u == nil || u.Config == nil {
 		return true, nil
 	}
@@ -70,23 +70,27 @@ func (u *InputUnifi) DebugInputs(l poller.Logger) (bool, error) {
 		u.logController(&u.Default)
 	}
 
-	ok := true
+	allOK := true
 	var allErrors error
 	for i, c := range u.Controllers {
 		if err := u.getUnifi(u.setControllerDefaults(c)); err != nil {
 			u.LogErrorf("Controller %d of %d Auth or Connection Error, retrying: %v", i+1, len(u.Controllers), err)
-			ok = false
+			allOK = false
 			if allErrors != nil {
-				err = fmt.Errorf("%v: %w", err, allErrors)
+				allErrors = fmt.Errorf("%v: %w", err, allErrors)
+			} else {
+				allErrors = err
 			}
 			continue
 		}
 
 		if err := u.checkSites(c); err != nil {
 			u.LogErrorf("checking sites on %s: %v", c.URL, err)
-			ok = false
+			allOK = false
 			if allErrors != nil {
-				err = fmt.Errorf("%v: %w", err, allErrors)
+				allErrors = fmt.Errorf("%v: %w", err, allErrors)
+			} else {
+				allErrors = err
 			}
 			continue
 		}
@@ -95,7 +99,7 @@ func (u *InputUnifi) DebugInputs(l poller.Logger) (bool, error) {
 		u.logController(c)
 	}
 
-	return ok, allErrors
+	return allOK, allErrors
 }
 
 func (u *InputUnifi) logController(c *Controller) {

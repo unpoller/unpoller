@@ -14,7 +14,9 @@ func (u *promUnifi) Logf(msg string, v ...any) {
 		Msg:  fmt.Sprintf(msg, v...),
 		Tags: map[string]string{"type": "info"},
 	})
-	u.Collector.Logf(msg, v...)
+	if u.Collector != nil {
+		u.Collector.Logf(msg, v...)
+	}
 }
 
 // LogErrorf logs an error message.
@@ -24,7 +26,9 @@ func (u *promUnifi) LogErrorf(msg string, v ...any) {
 		Msg:  fmt.Sprintf(msg, v...),
 		Tags: map[string]string{"type": "error"},
 	})
-	u.Collector.LogErrorf(msg, v...)
+	if u.Collector != nil {
+		u.Collector.LogErrorf(msg, v...)
+	}
 }
 
 // LogDebugf logs a debug message.
@@ -34,5 +38,7 @@ func (u *promUnifi) LogDebugf(msg string, v ...any) {
 		Msg:  fmt.Sprintf(msg, v...),
 		Tags: map[string]string{"type": "debug"},
 	})
-	u.Collector.LogDebugf(msg, v...)
+	if u.Collector != nil {
+		u.Collector.LogDebugf(msg, v...)
+	}
 }

@@ -204,7 +204,7 @@ func (u *DatadogUnifi) Enabled() bool {
 	return *u.Enable
 }
 
-func (u *DatadogUnifi) DebugOutput(l poller.Logger) (bool, error) {
+func (u *DatadogUnifi) DebugOutput() (bool, error) {
 	if u == nil {
 		return true, nil
 	}

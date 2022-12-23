@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"net"
 	"net/http"
-	"net/url"
 	"reflect"
 	"strings"
 	"sync"
@@ -118,7 +117,7 @@ func init() { // nolint: gochecknoinits
 	})
 }
 
-func (u *promUnifi) DebugOutput(l poller.Logger) (bool, error) {
+func (u *promUnifi) DebugOutput() (bool, error) {
 	if u == nil {
 		return true, nil
 	}
@@ -129,16 +128,17 @@ func (u *promUnifi) DebugOutput(l poller.Logger) (bool, error) {
 		return false, fmt.Errorf("invalid listen string")
 	}
 	// check the port
-	httpListenURL, err := url.Parse(u.HTTPListen)
-	if err != nil {
-		return false, err
+	parts := strings.Split(u.HTTPListen, ":")
+	if len(parts) != 2 {
+		return false, fmt.Errorf("invalid listen address: %s (must be of the form \"IP:Port\"", u.HTTPListen)
 	}
-	ln, err := net.Listen("tcp", fmt.Sprintf("%s:%s", httpListenURL.Host, httpListenURL.Port()))
+
+	ln, err := net.Listen("tcp", u.HTTPListen)
 	if err != nil {
 		return false, err
 	}
 	_ = ln.Close()
-	return false, nil
+	return true, nil
 }
 
 func (u *promUnifi) Enabled() bool {

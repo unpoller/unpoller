@@ -54,3 +54,57 @@ func (u *UnifiPoller) PrintPasswordHash() (err error) {
 
 	return err //nolint:wrapcheck
 }
+
+func (u *UnifiPoller) DebugIO() error {
+	inputSync.RLock()
+	defer inputSync.RUnlock()
+	outputSync.RLock()
+	defer outputSync.RUnlock()
+
+	allOK := true
+	var allErr error
+
+	u.Logf("Checking inputs...")
+	totalInputs := len(inputs)
+	for i, input := range inputs {
+		u.Logf("\t(%d/%d) Checking input %s...", i+1, totalInputs, input.Name)
+		ok, err := input.DebugInput()
+		if !ok {
+			u.LogErrorf("\t\t %s Failed: %v", input.Name, err)
+			allOK = false
+		} else {
+			u.Logf("\t\t %s is OK", input.Name)
+		}
+		if err != nil {
+			if allErr == nil {
+				allErr = err
+			} else {
+				allErr = fmt.Errorf("%v: %w", err, allErr)
+			}
+		}
+	}
+
+	u.Logf("Checking outputs...")
+	totalOutputs := len(outputs)
+	for i, output := range outputs {
+		u.Logf("\t(%d/%d) Checking output %s...", i+1, totalOutputs, output.Name)
+		ok, err := output.DebugOutput()
+		if !ok {
+			u.LogErrorf("\t\t %s Failed: %v", output.Name, err)
+			allOK = false
+		} else {
+			u.Logf("\t\t %s is OK", output.Name)
+		}
+		if err != nil {
+			if allErr == nil {
+				allErr = err
+			} else {
+				allErr = fmt.Errorf("%v: %w", err, allErr)
+			}
+		}
+	}
+	if !allOK {
+		u.LogErrorf("No all checks passed, please fix the logged issues.")
+	}
+	return allErr
+}

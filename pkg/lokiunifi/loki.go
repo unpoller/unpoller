@@ -76,7 +76,7 @@ func (l *Loki) Enabled() bool {
 	return !l.Disable
 }
 
-func (l *Loki) DebugOutput(logger poller.Logger) (bool, error) {
+func (l *Loki) DebugOutput() (bool, error) {
 	if l == nil {
 		return true, nil
 	}

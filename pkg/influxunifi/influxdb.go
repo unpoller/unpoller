@@ -143,7 +143,7 @@ func (u *InfluxUnifi) Enabled() bool {
 	return !u.Disable
 }
 
-func (u *InfluxUnifi) DebugOutput(l poller.Logger) (bool, error) {
+func (u *InfluxUnifi) DebugOutput() (bool, error) {
 	if u == nil {
 		return true, nil
 	}
