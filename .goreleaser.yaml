@@ -407,6 +407,58 @@ universal_binaries:
     ids:
       - unpoller-mac
 
+brews:
+  - name: unpoller
+    ids:
+      - unpoller
+      - unpoller-linux-arm
+      - unpoller-mac
+    tap:
+      owner: golift
+      name: homebrew-mugs
+      branch: master
+      token: "{{ .Env.HOMEBREW_TAP_GITHUB_TOKEN }}"
+    commit_author:
+      name: goreleaserbot
+      email: bot@goreleaser.com
+    commit_msg_template: "Brew formula update for {{ .ProjectName }} version {{ .Tag }}"
+    folder: Formula
+    # enable the line below only for testing locally
+    # skip_upload: true
+    homepage: https://unpoller.com/
+    description: "Polls a UniFi controller, exports metrics to InfluxDB, Prometheus and Datadog"
+    caveats: "Edit the config file at #{etc}/unpoller/up.conf then start unpoller with brew services start unpoller ~ log file: #{var}/log/unpoller.log The manual explains the config file options: man unpoller"
+    conflicts:
+      - unifi-poller
+    license: MIT
+    plist: |
+      <?xml version="1.0" encoding="UTF-8"?>
+      <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+      <plist version="1.0">
+        <dict>
+            <key>Label</key>
+            <string>#{plist_name}</string>
+            <key>ProgramArguments</key>
+            <array>
+                <string>#{bin}/unpoller</string>
+                <string>--config</string>
+                <string>#{etc}/unpoller/up.conf</string>
+            </array>
+            <key>RunAtLoad</key>
+            <true/>
+            <key>KeepAlive</key>
+            <true/>
+            <key>StandardErrorPath</key>
+            <string>#{var}/log/unpoller.log</string>
+            <key>StandardOutPath</key>
+            <string>#{var}/log/unpoller.log</string>
+        </dict>
+      </plist>
+    url_template: "https://github.com/unpoller/unpoller/releases/download/{{ .Tag }}/{{ .ArtifactName }}"
+    test: |
+      assert_match "unpoller v#{version}", shell_output("#{bin}/unpoller -v 2>&1", 2)
+    
+
 publishers:
   - name: "packagecloud-publisher"
     ids:
