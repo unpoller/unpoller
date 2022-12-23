@@ -3,6 +3,7 @@ package promunifi
 
 import (
 	"fmt"
+	"net"
 	"net/http"
 	"reflect"
 	"strings"
@@ -114,6 +115,30 @@ func init() { // nolint: gochecknoinits
 		Config:       u,
 		OutputPlugin: u,
 	})
+}
+
+func (u *promUnifi) DebugOutput() (bool, error) {
+	if u == nil {
+		return true, nil
+	}
+	if !u.Enabled() {
+		return true, nil
+	}
+	if u.HTTPListen == "" {
+		return false, fmt.Errorf("invalid listen string")
+	}
+	// check the port
+	parts := strings.Split(u.HTTPListen, ":")
+	if len(parts) != 2 {
+		return false, fmt.Errorf("invalid listen address: %s (must be of the form \"IP:Port\"", u.HTTPListen)
+	}
+
+	ln, err := net.Listen("tcp", u.HTTPListen)
+	if err != nil {
+		return false, err
+	}
+	_ = ln.Close()
+	return true, nil
 }
 
 func (u *promUnifi) Enabled() bool {

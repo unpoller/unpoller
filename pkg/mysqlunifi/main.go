@@ -69,6 +69,19 @@ func (p *plugin) Enabled() bool {
 	return !p.Disable
 }
 
+func (p *plugin) DebugOutput() (bool, error) {
+	if p == nil {
+		return true, nil
+	}
+	if !p.Enabled() {
+		return true, nil
+	}
+	if err := p.validateConfig(); err != nil {
+		return false, err
+	}
+	return true, nil
+}
+
 // Run gets called by poller core code. Return when the plugin stops working or has an error.
 // In other words, don't run your code in a go routine, it already is.
 func (p *plugin) Run(c poller.Collect) error {

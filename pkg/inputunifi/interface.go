@@ -57,6 +57,51 @@ func (u *InputUnifi) Initialize(l poller.Logger) error {
 	return nil
 }
 
+func (u *InputUnifi) DebugInput() (bool, error) {
+	if u == nil || u.Config == nil {
+		return true, nil
+	}
+	if u.setDefaults(&u.Default); len(u.Controllers) == 0 && !u.Dynamic {
+		u.Controllers = []*Controller{&u.Default}
+	}
+
+	if len(u.Controllers) == 0 {
+		u.Logf("No controllers configured. Polling dynamic controllers only! Defaults:")
+		u.logController(&u.Default)
+	}
+
+	allOK := true
+	var allErrors error
+	for i, c := range u.Controllers {
+		if err := u.getUnifi(u.setControllerDefaults(c)); err != nil {
+			u.LogErrorf("Controller %d of %d Auth or Connection Error, retrying: %v", i+1, len(u.Controllers), err)
+			allOK = false
+			if allErrors != nil {
+				allErrors = fmt.Errorf("%v: %w", err, allErrors)
+			} else {
+				allErrors = err
+			}
+			continue
+		}
+
+		if err := u.checkSites(c); err != nil {
+			u.LogErrorf("checking sites on %s: %v", c.URL, err)
+			allOK = false
+			if allErrors != nil {
+				allErrors = fmt.Errorf("%v: %w", err, allErrors)
+			} else {
+				allErrors = err
+			}
+			continue
+		}
+
+		u.Logf("Valid UniFi Controller %d of %d:", i+1, len(u.Controllers))
+		u.logController(c)
+	}
+
+	return allOK, allErrors
+}
+
 func (u *InputUnifi) logController(c *Controller) {
 	u.Logf("   => URL: %s (verify SSL: %v)", c.URL, *c.VerifySSL)
 

@@ -15,7 +15,7 @@ func (r *Report) IDS(event *unifi.IDS, logs *Logs) {
 	}
 
 	r.Counts[typeIDS]++ // increase counter and append new log line.
-	
+
 	logs.Streams = append(logs.Streams, LogStream{
 		Entries: [][]string{{strconv.FormatInt(event.Datetime.UnixNano(), 10), event.Msg}},
 		Labels: CleanLabels(map[string]string{

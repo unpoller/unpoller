@@ -48,6 +48,15 @@ func (u *UnifiPoller) Start() error {
 		return err
 	}
 
+	if u.Flags.DebugIO {
+		err = u.DebugIO()
+		if err != nil {
+			os.Exit(1)
+		}
+		log.Fatal("Failed debug checks")
+		return err
+	}
+
 	return u.Run()
 }
 
@@ -63,6 +72,7 @@ func (f *Flags) Parse(args []string) {
 		"This option bcrypts a provided string. Useful for the webserver password. Use - to be prompted.")
 	f.StringVarP(&f.DumpJSON, "dumpjson", "j", "",
 		"This debug option prints a json payload and exits. See man page for more info.")
+	f.BoolVarP(&f.DebugIO, "debugio", "d", false, "Debug the Inputs and Outputs configured and exit.")
 	f.StringVarP(&f.ConfigFile, "config", "c", DefaultConfFile(),
 		"Poller config file path. Separating multiple paths with a comma will load the first config file found.")
 	f.BoolVarP(&f.ShowVer, "version", "v", false, "Print the version and exit.")

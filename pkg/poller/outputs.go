@@ -27,6 +27,7 @@ type Collect interface {
 type OutputPlugin interface {
 	Run(Collect) error
 	Enabled() bool
+	DebugOutput() (bool, error)
 }
 
 // Output defines the output data for a metric exporter like influx or prometheus.

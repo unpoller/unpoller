@@ -4,6 +4,7 @@ package webserver
 import (
 	"errors"
 	"fmt"
+	"net"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -92,6 +93,32 @@ func (s *Server) Run(c poller.Collect) error {
 	UpdateOutput(&Output{Name: PluginName, Config: s.Config})
 
 	return s.Start()
+}
+
+func (s *Server) DebugOutput() (bool, error) {
+	if s == nil {
+		return true, nil
+	}
+	if !s.Enabled() {
+		return true, nil
+	}
+	if s.HTMLPath == "" {
+		return true, nil
+	}
+
+	// check the html path
+	if _, err := os.Stat(s.HTMLPath); err != nil {
+		return false, fmt.Errorf("problem with HTML path: %w", err)
+	}
+
+	// check the port
+	ln, err := net.Listen("tcp", fmt.Sprintf(":%d", s.Port))
+	if err != nil {
+		return false, err
+	}
+	_ = ln.Close()
+
+	return true, nil
 }
 
 // Start gets the web server going.

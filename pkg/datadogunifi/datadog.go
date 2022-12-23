@@ -3,6 +3,7 @@
 package datadogunifi
 
 import (
+	"fmt"
 	"reflect"
 	"time"
 
@@ -201,6 +202,22 @@ func (u *DatadogUnifi) Enabled() bool {
 		return false
 	}
 	return *u.Enable
+}
+
+func (u *DatadogUnifi) DebugOutput() (bool, error) {
+	if u == nil {
+		return true, nil
+	}
+	if !u.Enabled() {
+		return true, nil
+	}
+	u.setConfigDefaults()
+	var err error
+	u.datadog, err = statsd.New(u.Address, u.options...)
+	if err != nil {
+		return false, fmt.Errorf("Error configuration Datadog agent reporting: %+v", err)
+	}
+	return true, nil
 }
 
 // Run runs a ticker to poll the unifi server and update Datadog.

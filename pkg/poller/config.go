@@ -72,6 +72,7 @@ type Flags struct {
 	DumpJSON   string
 	HashPW     string
 	ShowVer    bool
+	DebugIO    bool
 	*pflag.FlagSet
 }
 

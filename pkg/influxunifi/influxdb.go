@@ -16,6 +16,7 @@ import (
 	"github.com/unpoller/unifi"
 	"github.com/unpoller/unpoller/pkg/poller"
 	"github.com/unpoller/unpoller/pkg/webserver"
+	"golang.org/x/net/context"
 	"golift.io/cnfg"
 )
 
@@ -140,6 +141,51 @@ func (u *InfluxUnifi) Enabled() bool {
 		return false
 	}
 	return !u.Disable
+}
+
+func (u *InfluxUnifi) DebugOutput() (bool, error) {
+	if u == nil {
+		return true, nil
+	}
+	if !u.Enabled() {
+		return true, nil
+	}
+	u.setConfigDefaults()
+	_, err := url.Parse(u.Config.URL)
+	if err != nil {
+		return false, fmt.Errorf("invalid influx URL: %v", err)
+	}
+
+	if u.IsVersion2 {
+		// we're a version 2
+		tlsConfig := &tls.Config{InsecureSkipVerify: !u.VerifySSL} // nolint: gosec
+		serverOptions := influx.DefaultOptions().SetTLSConfig(tlsConfig).SetBatchSize(u.BatchSize)
+		u.influxV2 = influx.NewClientWithOptions(u.URL, u.AuthToken, serverOptions)
+		ctx, cancel := context.WithTimeout(context.Background(), time.Second*2)
+		defer cancel()
+		ok, err := u.influxV2.Ping(ctx)
+		if err != nil {
+			return false, err
+		}
+		if !ok {
+			return false, fmt.Errorf("unsuccessful ping to influxdb2")
+		}
+	} else {
+		u.influxV1, err = influxV1.NewHTTPClient(influxV1.HTTPConfig{
+			Addr:      u.URL,
+			Username:  u.User,
+			Password:  u.Pass,
+			TLSConfig: &tls.Config{InsecureSkipVerify: !u.VerifySSL}, // nolint: gosec
+		})
+		if err != nil {
+			return false, fmt.Errorf("making client: %w", err)
+		}
+		_, _, err = u.influxV1.Ping(time.Second * 2)
+		if err != nil {
+			return false, fmt.Errorf("unsuccessful ping to influxdb1")
+		}
+	}
+	return true, nil
 }
 
 // Run runs a ticker to poll the unifi server and update influxdb.

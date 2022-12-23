@@ -76,6 +76,19 @@ func (l *Loki) Enabled() bool {
 	return !l.Disable
 }
 
+func (l *Loki) DebugOutput() (bool, error) {
+	if l == nil {
+		return true, nil
+	}
+	if !l.Enabled() {
+		return true, nil
+	}
+	if err := l.ValidateConfig(); err != nil {
+		return false, err
+	}
+	return true, nil
+}
+
 // Run is fired from the poller library after the Config is unmarshalled.
 func (l *Loki) Run(collect poller.Collect) error {
 	l.Collect = collect
@@ -85,7 +98,10 @@ func (l *Loki) Run(collect poller.Collect) error {
 	}
 	l.Logf("Loki enabled")
 
-	l.ValidateConfig()
+	if err := l.ValidateConfig(); err != nil {
+		l.LogErrorf("invalid loki config")
+		return err
+	}
 
 	fake := *l.Config
 	fake.Password = strconv.FormatBool(fake.Password != "")
@@ -99,7 +115,7 @@ func (l *Loki) Run(collect poller.Collect) error {
 
 // ValidateConfig sets initial "last" update time. Also creates an http client,
 // makes sure URL is sane, and sets interval within min/max limits.
-func (l *Loki) ValidateConfig() {
+func (l *Loki) ValidateConfig() error {
 	if l.Interval.Duration > maxInterval {
 		l.Interval.Duration = maxInterval
 	} else if l.Interval.Duration < minInterval {
@@ -110,6 +126,7 @@ func (l *Loki) ValidateConfig() {
 		pass, err := os.ReadFile(strings.TrimPrefix(l.Password, "file://"))
 		if err != nil {
 			l.LogErrorf("Reading Loki Password File: %v", err)
+			return fmt.Errorf("error reading password file")
 		}
 
 		l.Password = strings.TrimSpace(string(pass))
@@ -118,6 +135,7 @@ func (l *Loki) ValidateConfig() {
 	l.last = time.Now().Add(-l.Interval.Duration)
 	l.client = l.httpClient()
 	l.URL = strings.TrimRight(l.URL, "/") // gets a path appended to it later.
+	return nil
 }
 
 // PollController runs forever, polling UniFi for events and pushing them to Loki.
