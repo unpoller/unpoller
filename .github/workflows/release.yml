@@ -69,6 +69,7 @@ jobs:
           GORELEASER_KEY: ${{ secrets.GORELEASER_KEY }}
           DOCKER_REGISTRY: ${{ env.DOCKER_REGISTRY }}
           DOCKER_IMAGE_NAME: ${{ env.DOCKER_IMAGE_NAME }}
+          HOMEBREW_TAP_GITHUB_TOKEN: ${{ secrets.HOMEBREW_TAP_GITHUB_TOKEN }}
           PACKAGECLOUD_TOKEN: ${{ secrets.PACKAGECLOUD_TOKEN }}
           PACKAGECLOUD_SIGNING_GPG: /tmp/key.gpg
           PACKAGECLOUD_SIGNING_KEY_ID: ${{ steps.import_gpg.outputs.keyid }}
