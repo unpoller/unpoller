@@ -69,6 +69,7 @@ jobs:
           GORELEASER_KEY: ${{ secrets.GORELEASER_KEY }}
           DOCKER_REGISTRY: ${{ env.DOCKER_REGISTRY }}
           DOCKER_IMAGE_NAME: ${{ env.DOCKER_IMAGE_NAME }}
+          # This needs to be reset every year (next one at 2023-12-22) - use a fine grained PAT with Contents: R/W on golift/homebrew-mugs.
           HOMEBREW_TAP_GITHUB_TOKEN: ${{ secrets.HOMEBREW_TAP_GITHUB_TOKEN }}
           PACKAGECLOUD_TOKEN: ${{ secrets.PACKAGECLOUD_TOKEN }}
           PACKAGECLOUD_SIGNING_GPG: /tmp/key.gpg
