@@ -316,79 +316,145 @@ nfpms:
       - src: examples/up.conf.example
         dst: /etc/unpoller/up.conf.example
         type: config
+        file_info:
+          mode: 0640
+          owner: unpoller
+          group: unpoller
       - src: examples/up.json.example
         dst: /etc/unpoller/up.json.example
         type: config
+        file_info:
+          mode: 0640
+          owner: unpoller
+          group: unpoller
       - src: examples/up.yaml.example
         dst: /etc/unpoller/up.yaml.example
         type: config
+        file_info:
+          mode: 0640
+          owner: unpoller
+          group: unpoller
       # copy example by default to real locations, people can override, cnfg uses this.
       - src: examples/up.conf.example
         dst: /etc/unpoller/up.conf
         type: config|noreplace
+        file_info:
+          mode: 0640
+          owner: unpoller
+          group: unpoller
       
       # common useful info
       - src: "README.html"
         dst: /etc/unpoller/readme.html
         type: config
+        file_info:
+          mode: 0644
+          owner: unpoller
+          group: unpoller
       - src: "unpoller_manual.html"
         dst: /etc/unpoller/manual.html
         type: config
+        file_info:
+          mode: 0644
+          owner: unpoller
+          group: unpoller
       
       # man pages
       - src: unpoller.1.gz
         dst: /usr/share/man/man1/unpoller.1.gz
-        type: man
+        file_info:
+          mode: 0644
+          owner: unpoller
+          group: unpoller
       - src: LICENSE
         dst: /usr/share/doc/unpoller/LICENSE
-        type: man
+        file_info:
+          mode: 0644
+          owner: unpoller
+          group: unpoller
       - src: unpoller_manual.html
         dst: /usr/share/doc/unpoller/unpoller_manual.html
-        type: man
+        file_info:
+          mode: 0644
+          owner: unpoller
+          group: unpoller
       
       # systemd service
       - src: init/systemd/unpoller.service
         dst: /etc/systemd/system/unpoller.service
         type: config
+        file_info:
+          mode: 0644
+          owner: unpoller
+          group: unpoller
       
       # freebsd rc service
       - src: init/bsd/freebsd.rc.d
         dst: /usr/local/etc/rc.d/unpoller
         type: config
+        file_info:
+          mode: 0644
+          owner: unpoller
+          group: unpoller
       
       # web server statics
       - dst: /usr/local/lib/unpoller/web/static/
         type: dir
         file_info:
           mode: 0755
+          owner: unpoller
+          group: unpoller
       - dst: /usr/local/lib/unpoller/web/static/css
         type: dir
         file_info:
           mode: 0755
+          owner: unpoller
+          group: unpoller
       - dst: /usr/local/lib/unpoller/web/static/images
         type: dir
         file_info:
           mode: 0755
+          owner: unpoller
+          group: unpoller
       - dst: /usr/local/lib/unpoller/web/static/js
         type: dir
         file_info:
           mode: 0755
+          owner: unpoller
+          group: unpoller
       - src: init/webserver/index.html
         dst: /usr/local/lib/unpoller/web/static/index.html
         type: config
+        file_info:
+          mode: 0644
+          owner: unpoller
+          group: unpoller
       - src: init/webserver/static/css/*
         dst: /usr/local/lib/unpoller/web/static/css
         type: config
+        file_info:
+          mode: 0644
+          owner: unpoller
+          group: unpoller
       - src: init/webserver/static/images/*
         dst: /usr/local/lib/unpoller/web/static/images
         type: config
+        file_info:
+          mode: 0644
+          owner: unpoller
+          group: unpoller
       - src: init/webserver/static/js/*
         dst: /usr/local/lib/unpoller/web/static/js
         type: config
+        file_info:
+          mode: 0644
+          owner: unpoller
+          group: unpoller
       
       
     # signing
     scripts:
+      preinstall: "scripts/pre-install.sh"
       postinstall: "scripts/post-install.sh"
       preremove: "scripts/pre-remove.sh"
       postremove: "scripts/post-remove.sh"
