@@ -154,9 +154,12 @@ dockers:
     goos: linux
     goarch: amd64
     image_templates:
-      - "{{ .Env.DOCKER_REGISTRY }}/{{ .Env.DOCKER_IMAGE_NAME }}:latest-amd64"
-      - "{{ .Env.DOCKER_REGISTRY }}/{{ .Env.DOCKER_IMAGE_NAME }}:{{ .Tag }}-amd64"
-      - "{{ .Env.DOCKER_REGISTRY }}/{{ .Env.DOCKER_IMAGE_NAME }}:v{{ .Major }}-amd64"
+      - "ghcr.io/unpoller/unpoller:latest-amd64"
+      - "ghcr.io/unpoller/unpoller:{{ .Tag }}-amd64"
+      - "ghcr.io/unpoller/unpoller:v{{ .Major }}-amd64"
+      - "golift/unifi-poller:latest-amd64"
+      - "golift/unifi-poller:{{ .Tag }}-amd64"
+      - "golift/unifi-poller:v{{ .Major }}-amd64"
     use: buildx
     build_flag_templates:
       - "--pull"
@@ -185,9 +188,12 @@ dockers:
     goos: linux
     goarch: arm64
     image_templates:
-      - "{{ .Env.DOCKER_REGISTRY }}/{{ .Env.DOCKER_IMAGE_NAME }}:latest-arm64v8"
-      - "{{ .Env.DOCKER_REGISTRY }}/{{ .Env.DOCKER_IMAGE_NAME }}:{{ .Tag }}-arm64v8"
-      - "{{ .Env.DOCKER_REGISTRY }}/{{ .Env.DOCKER_IMAGE_NAME }}:v{{ .Major }}-arm64v8"
+      - "ghcr.io/unpoller/unpoller:latest-arm64v8"
+      - "ghcr.io/unpoller/unpoller:{{ .Tag }}-arm64v8"
+      - "ghcr.io/unpoller/unpoller:v{{ .Major }}-arm64v8"
+      - "golift/unifi-poller:latest-arm64v8"
+      - "golift/unifi-poller:{{ .Tag }}-arm64v8"
+      - "golift/unifi-poller:v{{ .Major }}-arm64v8"
     use: buildx
     build_flag_templates:
       - "--pull"
@@ -217,9 +223,12 @@ dockers:
     goarch: arm
     goarm: "7"
     image_templates:
-      - "{{ .Env.DOCKER_REGISTRY }}/{{ .Env.DOCKER_IMAGE_NAME }}:latest-armv7"
-      - "{{ .Env.DOCKER_REGISTRY }}/{{ .Env.DOCKER_IMAGE_NAME }}:{{ .Tag }}-armv7"
-      - "{{ .Env.DOCKER_REGISTRY }}/{{ .Env.DOCKER_IMAGE_NAME }}:v{{ .Major }}-armv7"
+      - "ghcr.io/unpoller/unpoller:latest-armv7"
+      - "ghcr.io/unpoller/unpoller:{{ .Tag }}-armv7"
+      - "ghcr.io/unpoller/unpoller:v{{ .Major }}-armv7"
+      - "golift/unifi-poller:latest-armv7"
+      - "golift/unifi-poller:{{ .Tag }}-armv7"
+      - "golift/unifi-poller:v{{ .Major }}-armv7"
     use: buildx
     build_flag_templates:
       - "--pull"
@@ -244,33 +253,60 @@ dockers:
       - "unpoller_manual.html"
 
 docker_manifests:
-  - name_template: '{{ .Env.DOCKER_REGISTRY }}/{{ .Env.DOCKER_IMAGE_NAME }}:latest'
+  - name_template: 'ghcr.io/unpoller/unpoller:latest'
     create_flags:
       - --insecure
     push_flags:
       - --insecure
     image_templates:
-      - "{{ .Env.DOCKER_REGISTRY }}/{{ .Env.DOCKER_IMAGE_NAME }}:latest-amd64"
-      - "{{ .Env.DOCKER_REGISTRY }}/{{ .Env.DOCKER_IMAGE_NAME }}:latest-arm64v8"
-      - "{{ .Env.DOCKER_REGISTRY }}/{{ .Env.DOCKER_IMAGE_NAME }}:latest-armv7"
-  - name_template: '{{ .Env.DOCKER_REGISTRY }}/{{ .Env.DOCKER_IMAGE_NAME }}:{{ .Tag }}'
+      - "ghcr.io/unpoller/unpoller:latest-amd64"
+      - "ghcr.io/unpoller/unpoller:latest-arm64v8"
+      - "ghcr.io/unpoller/unpoller:latest-armv7"
+  - name_template: 'ghcr.io/unpoller/unpoller:{{ .Tag }}'
     create_flags:
       - --insecure
     push_flags:
       - --insecure
     image_templates:
-      - "{{ .Env.DOCKER_REGISTRY }}/{{ .Env.DOCKER_IMAGE_NAME }}:{{ .Tag }}-amd64"
-      - "{{ .Env.DOCKER_REGISTRY }}/{{ .Env.DOCKER_IMAGE_NAME }}:{{ .Tag }}-arm64v8"
-      - "{{ .Env.DOCKER_REGISTRY }}/{{ .Env.DOCKER_IMAGE_NAME }}:{{ .Tag }}-armv7"
-  - name_template: '{{ .Env.DOCKER_REGISTRY }}/{{ .Env.DOCKER_IMAGE_NAME }}:v{{ .Major }}'
+      - "ghcr.io/unpoller/unpoller:{{ .Tag }}-amd64"
+      - "ghcr.io/unpoller/unpoller:{{ .Tag }}-arm64v8"
+      - "ghcr.io/unpoller/unpoller:{{ .Tag }}-armv7"
+  - name_template: 'ghcr.io/unpoller/unpoller:v{{ .Major }}'
     create_flags:
       - --insecure
     push_flags:
       - --insecure
     image_templates:
-      - "{{ .Env.DOCKER_REGISTRY }}/{{ .Env.DOCKER_IMAGE_NAME }}:v{{ .Major }}-amd64"
-      - "{{ .Env.DOCKER_REGISTRY }}/{{ .Env.DOCKER_IMAGE_NAME }}:v{{ .Major }}-arm64v8"
-      - "{{ .Env.DOCKER_REGISTRY }}/{{ .Env.DOCKER_IMAGE_NAME }}:v{{ .Major }}-armv7"
+      - "ghcr.io/unpoller/unpoller:v{{ .Major }}-amd64"
+      - "ghcr.io/unpoller/unpoller:v{{ .Major }}-arm64v8"
+      - "ghcr.io/unpoller/unpoller:v{{ .Major }}-armv7"
+  - name_template: 'golift/unifi-poller:latest'
+    create_flags:
+      - --insecure
+    push_flags:
+      - --insecure
+    image_templates:
+      - "golift/unifi-poller:latest-amd64"
+      - "golift/unifi-poller:latest-arm64v8"
+      - "golift/unifi-poller:latest-armv7"
+  - name_template: 'golift/unifi-poller:{{ .Tag }}'
+    create_flags:
+      - --insecure
+    push_flags:
+      - --insecure
+    image_templates:
+      - "golift/unifi-poller:{{ .Tag }}-amd64"
+      - "golift/unifi-poller:{{ .Tag }}-arm64v8"
+      - "golift/unifi-poller:{{ .Tag }}-armv7"
+  - name_template: 'golift/unifi-poller:v{{ .Major }}'
+    create_flags:
+      - --insecure
+    push_flags:
+      - --insecure
+    image_templates:
+      - "golift/unifi-poller:v{{ .Major }}-amd64"
+      - "golift/unifi-poller:v{{ .Major }}-arm64v8"
+      - "golift/unifi-poller:v{{ .Major }}-armv7"
 
 nfpms:
   - id: unpoller-packages
