@@ -59,14 +59,14 @@ $(shell go env GOPATH)/bin/rsrc:
 
 build-and-release: export DOCKER_REGISTRY = ghcr.io
 build-and-release: export DOCKER_IMAGE_NAME = unpoller/unpoller
-build-and-release: export PACKAGECLOUD_SIGNING_GPG = 
+build-and-release: export GPG_SIGNING_KEY = 
 
 bulid-and-release: clean
 	goreleaser release --rm-dist
 
 build: export DOCKER_REGISTRY = ghcr.io
 build: export DOCKER_IMAGE_NAME = unpoller/unpoller
-build: export PACKAGECLOUD_SIGNING_GPG = 
+build: export GPG_SIGNING_KEY = 
 
 build: clean
 	goreleaser release --rm-dist --skip-validate --skip-publish --skip-sign --debug

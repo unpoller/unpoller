@@ -454,10 +454,10 @@ nfpms:
     # signing
     rpm:
       signature:
-        key_file: "{{ .Env.PACKAGECLOUD_SIGNING_GPG }}"
+        key_file: "{{ .Env.GPG_SIGNING_KEY }}"
     deb:
       signature:
-        key_file: "{{ .Env.PACKAGECLOUD_SIGNING_GPG }}"
+        key_file: "{{ .Env.GPG_SIGNING_KEY }}"
         type: origin
 
     scripts:
