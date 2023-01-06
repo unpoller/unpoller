@@ -82,7 +82,7 @@ documentation support. This project succeeds because of them. Thank you!
 
 ## Copyright & License
 
-<img style="float: right;" align="right" width="200px" src="https://unpoller.com/img/unpoller.png">
+<img style="float: right;" align="right" width="200px" src="https://unpoller.com/img/logo.png">
 
 - Copyright © 2018-2020 David Newhall II.
 - See [LICENSE](LICENSE) for license information.
