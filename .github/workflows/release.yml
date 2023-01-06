@@ -40,7 +40,7 @@ jobs:
         id: import_gpg
         uses: crazy-max/ghaction-import-gpg@v5
         with:
-          gpg_private_key: ${{ secrets.PACKAGECLOUD_SIGNING_GPG }}
+          gpg_private_key: ${{ secrets.GPG_SIGNING_KEY }}
       - name: "Setup Ruby for packagecloud uploads"
         uses: ruby/setup-ruby@v1
         with:
@@ -55,7 +55,7 @@ jobs:
       # More assembly might be required: Docker logins, GPG, etc. It all depends
       # on your needs.
       - name: "make key file"
-        run: "echo '${{ secrets.PACKAGECLOUD_SIGNING_GPG }}' > /tmp/key.gpg"
+        run: "echo '${{ secrets.GPG_SIGNING_KEY }}' > /tmp/key.gpg"
       - uses: goreleaser/goreleaser-action@v3
         with:
           # either 'goreleaser' (default) or 'goreleaser-pro':
@@ -72,5 +72,5 @@ jobs:
           # This needs to be reset every year (next one at 2023-12-22) - use a fine grained PAT with Contents: R/W on golift/homebrew-mugs.
           HOMEBREW_TAP_GITHUB_TOKEN: ${{ secrets.HOMEBREW_TAP_GITHUB_TOKEN }}
           PACKAGECLOUD_TOKEN: ${{ secrets.PACKAGECLOUD_TOKEN }}
-          PACKAGECLOUD_SIGNING_GPG: /tmp/key.gpg
-          PACKAGECLOUD_SIGNING_KEY_ID: ${{ steps.import_gpg.outputs.keyid }}
+          GPG_SIGNING_KEY: /tmp/key.gpg
+          GPG_SIGNING_KEY_ID: ${{ steps.import_gpg.outputs.keyid }}
