@@ -1,4 +1,4 @@
-<img width="320px" src="https://unpoller.com/img/unpoller.png">
+<img width="320px" src="https://unpoller.com/img/logo.png">
 
 [![discord](https://badgen.net/badge/icon/Discord?color=0011ff&label&icon=https://simpleicons.now.sh/discord/eee "GoLift Discord")](https://discord.gg/HV3yrkMevK)
 [![grafana](https://badgen.net/https/golift.io/bd/grafana/dashboard-downloads/11310,10419,10414,10415,10416,10417,10418,11311,11312,11313,11314,11315?icon=https://simpleicons.now.sh/grafana/ED7F38&color=0011ff "Grafana Dashboard Downloads")](http://grafana.com/dashboards?search=unifi-poller)
