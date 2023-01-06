@@ -57,9 +57,16 @@ rsrc.syso: init/windows/application.ico init/windows/manifest.xml $(shell go env
 $(shell go env GOPATH)/bin/rsrc:
 	cd /tmp ; go get $(RSRC_BIN) ; go install $(RSRC_BIN)@latest
 
+build-and-release: export DOCKER_REGISTRY = ghcr.io
+build-and-release: export DOCKER_IMAGE_NAME = unpoller/unpoller
+build-and-release: export PACKAGECLOUD_SIGNING_GPG = 
 
 bulid-and-release: clean
 	goreleaser release --rm-dist
+
+build: export DOCKER_REGISTRY = ghcr.io
+build: export DOCKER_IMAGE_NAME = unpoller/unpoller
+build: export PACKAGECLOUD_SIGNING_GPG = 
 
 build: clean
 	goreleaser release --rm-dist --skip-validate --skip-publish --skip-sign --debug

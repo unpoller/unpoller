@@ -46,7 +46,7 @@ if [[ ${PACKAGE_VERSION} =~ .+-rc ]]; then
 fi
 
 export SUPPORTED_UBUNTU_VERSIONS="focal"
-export SUPPORTED_REDHAT_VERSIONS="7"
+export SUPPORTED_REDHAT_VERSIONS="6"
 
 if [[ $ARTIFACT_PATH == *termux* ]]; then
   # skip termux builds

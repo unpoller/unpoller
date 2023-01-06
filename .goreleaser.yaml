@@ -450,9 +450,16 @@ nfpms:
           mode: 0644
           owner: unpoller
           group: unpoller
-      
-      
+
     # signing
+    rpm:
+      signature:
+        key_file: "{{ .Env.PACKAGECLOUD_SIGNING_GPG }}"
+    deb:
+      signature:
+        key_file: "{{ .Env.PACKAGECLOUD_SIGNING_GPG }}"
+        type: origin
+
     scripts:
       preinstall: "scripts/pre-install.sh"
       postinstall: "scripts/post-install.sh"
