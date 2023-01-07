@@ -68,8 +68,8 @@ func (u *InfluxUnifi) batchSiteDPI(r report, v any) {
 		r.send(&metric{
 			Table: "sitedpi",
 			Tags: map[string]string{
-				"category":    unifi.DPICats.Get(int(dpi.Cat.Val)),
-				"application": unifi.DPIApps.GetApp(int(dpi.Cat.Val), int(dpi.App.Val)),
+				"category":    unifi.DPICats.Get(dpi.Cat.Int()),
+				"application": unifi.DPIApps.GetApp(dpi.Cat.Int(), dpi.App.Int()),
 				"site_name":   s.SiteName,
 				"source":      s.SourceName,
 			},
