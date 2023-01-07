@@ -306,7 +306,7 @@ nfpms:
       - dst: /etc/unpoller
         type: dir
         file_info:
-          mode: 0740
+          mode: 0755
       - dst: /usr/share/doc/unpoller
         type: dir
         file_info:
