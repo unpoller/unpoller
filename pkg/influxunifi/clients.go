@@ -100,10 +100,10 @@ func (u *InfluxUnifi) batchClientDPI(r report, v any, appTotal, catTotal totalsD
 				"source":      s.SourceName,
 			},
 			Fields: map[string]any{
-				"tx_packets": dpi.TxPackets,
-				"rx_packets": dpi.RxPackets,
-				"tx_bytes":   dpi.TxBytes,
-				"rx_bytes":   dpi.RxBytes,
+				"tx_packets": dpi.TxPackets.Val,
+				"rx_packets": dpi.RxPackets.Val,
+				"tx_bytes":   dpi.TxBytes.Val,
+				"rx_bytes":   dpi.RxBytes.Val,
 			},
 		})
 	}
@@ -167,10 +167,10 @@ func reportClientDPItotals(r report, appTotal, catTotal totalsDPImap) {
 							"source":      controller,
 						},
 						Fields: map[string]any{
-							"tx_packets": m.TxPackets,
-							"rx_packets": m.RxPackets,
-							"tx_bytes":   m.TxBytes,
-							"rx_bytes":   m.RxBytes,
+							"tx_packets": m.TxPackets.Val,
+							"rx_packets": m.RxPackets.Val,
+							"tx_bytes":   m.TxBytes.Val,
+							"rx_bytes":   m.RxBytes.Val,
 						},
 					}
 					newMetric.Tags[k.kind] = name
