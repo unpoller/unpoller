@@ -1,13 +1,11 @@
 <img width="320px" src="https://unpoller.com/img/logo.png">
 
-[![discord](https://badgen.net/badge/icon/Discord?color=0011ff&label&icon=https://simpleicons.now.sh/discord/eee "GoLift Discord")](https://discord.gg/HV3yrkMevK)
+[![discord](https://badgen.net/badge/icon/Discord?color=0011ff&label&icon=https://simpleicons.now.sh/discord/eee "GoLift Discord")](https://golift.io/discord)
 [![grafana](https://badgen.net/https/golift.io/bd/grafana/dashboard-downloads/11310,10419,10414,10415,10416,10417,10418,11311,11312,11313,11314,11315?icon=https://simpleicons.now.sh/grafana/ED7F38&color=0011ff "Grafana Dashboard Downloads")](http://grafana.com/dashboards?search=unifi-poller)
 [![pulls](https://badgen.net/docker/pulls/golift/unifi-poller?icon=https://simpleicons.now.sh/docker/38B1ED&label=pulls&color=0011ff "Docker Pulls")](https://hub.docker.com/r/golift/unifi-poller)
-[![DLs](https://img.shields.io/github/downloads/unifi-poller/unifi-poller/total.svg?logo=github&color=0116ff "GitHub Downloads")](https://www.somsubhra.com/github-release-stats/?username=unpoller&repository=unpoller)
+[![stars](https://badgen.net/github/stars/unifi-poller/unifi-poller?icon=https://simpleicons.now.sh/macys/fab&label=&color=0099ee "GitHub Stars")](https://github.com/unpoller/unpoller)
 
 [![unifi](https://badgen.net/badge/UniFi/5.12.x,5.13.x,UAP,USG,USW,UDM?list=|&icon=https://docs.golift.io/svg/ubiquiti_color.svg&color=0099ee "UniFi Products Supported")](https://github.com/golift/unifi)
-[![builer](https://badgen.net/badge/go/Application%20Builder?label=&icon=https://docs.golift.io/svg/go.svg&color=0099ee "Go Application Builder")](https://github.com/golift/application-builder)
-[![stars](https://badgen.net/github/stars/unifi-poller/unifi-poller?icon=https://simpleicons.now.sh/macys/fab&label=&color=0099ee "GitHub Stars")](https://github.com/unpoller/unpoller)
 
 Collect your UniFi controller data and report it to an InfluxDB instance,
 or export it for Prometheus collection.
@@ -20,7 +18,7 @@ included; with screenshots. Six for InfluxDB and six for Prometheus.
 We're willing to help if you have troubles.
 Open an [Issue](https://github.com/unpoller/unpoller/issues) and
 we'll figure out how to get things working for you. You can also get help in
-the #unpoller channel on the [GoLift Discord server](https://discord.gg/HV3yrkMevK). There is also
+the #unpoller channel on the [GoLift Discord server](https://golift.io/discord). There is also
 [a forum post](https://community.ui.com/questions/Unifi-Poller-Store-Unifi-Controller-Metrics-in-InfluxDB-without-SNMP/58a0ea34-d2b3-41cd-93bb-d95d3896d1a1)
 you may use to get additional help.
 
