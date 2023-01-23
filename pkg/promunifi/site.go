@@ -87,10 +87,10 @@ func (u *promUnifi) exportSiteDPI(r report, v any) {
 
 		//	log.Println(labelsDPI, dpi.Cat, dpi.App, dpi.TxBytes, dpi.RxBytes, dpi.TxPackets, dpi.RxPackets)
 		r.send([]*metric{
-			{u.Site.DPITxPackets, gauge, dpi.TxPackets, labelDPI},
-			{u.Site.DPIRxPackets, gauge, dpi.RxPackets, labelDPI},
-			{u.Site.DPITxBytes, gauge, dpi.TxBytes, labelDPI},
-			{u.Site.DPIRxBytes, gauge, dpi.RxBytes, labelDPI},
+			{u.Site.DPITxPackets, gauge, dpi.TxPackets.Val, labelDPI},
+			{u.Site.DPIRxPackets, gauge, dpi.RxPackets.Val, labelDPI},
+			{u.Site.DPITxBytes, gauge, dpi.TxBytes.Val, labelDPI},
+			{u.Site.DPIRxBytes, gauge, dpi.RxBytes.Val, labelDPI},
 		})
 	}
 }

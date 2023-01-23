@@ -74,10 +74,10 @@ func (u *InfluxUnifi) batchSiteDPI(r report, v any) {
 				"source":      s.SourceName,
 			},
 			Fields: map[string]any{
-				"tx_packets": dpi.TxPackets,
-				"rx_packets": dpi.RxPackets,
-				"tx_bytes":   dpi.TxBytes,
-				"rx_bytes":   dpi.RxBytes,
+				"tx_packets": dpi.TxPackets.Val,
+				"rx_packets": dpi.RxPackets.Val,
+				"tx_bytes":   dpi.TxBytes.Val,
+				"rx_bytes":   dpi.RxBytes.Val,
 			},
 		})
 	}
