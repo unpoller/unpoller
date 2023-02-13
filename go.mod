@@ -10,7 +10,7 @@ require (
 	github.com/prometheus/client_golang v1.14.0
 	github.com/prometheus/common v0.39.0
 	github.com/spf13/pflag v1.0.6-0.20201009195203-85dd5c8bc61c
-	golang.org/x/crypto v0.5.0
+	golang.org/x/crypto v0.6.0
 	golang.org/x/net v0.6.0
 	golang.org/x/term v0.5.0
 	golift.io/cnfg v0.2.1
