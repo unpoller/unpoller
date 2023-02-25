@@ -231,6 +231,7 @@ func (u *promUnifi) exportUAP(r report, d *unifi.UAP) {
 	r.send([]*metric{
 		{u.Device.Info, gauge, 1.0, append(labels, infoLabels...)},
 		{u.Device.Uptime, gauge, d.Uptime, labels},
+		{u.Device.Upgradeable, gauge, d.Upgradable.Val, labels},
 	})
 }
 
