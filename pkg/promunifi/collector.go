@@ -332,6 +332,12 @@ func (u *promUnifi) exportMetrics(r report, ch chan<- prometheus.Metric, ourChan
 				ch <- r.export(m, float64(v))
 			case int:
 				ch <- r.export(m, float64(v))
+			case bool:
+				if v {
+					ch <- r.export(m, 1)
+				} else {
+					ch <- r.export(m, 0)
+				}
 			default:
 				r.error(ch, m.Desc, fmt.Sprintf("not a number: %v", m.Value))
 			}
