@@ -62,14 +62,14 @@ build-and-release: export DOCKER_IMAGE_NAME = unpoller/unpoller
 build-and-release: export GPG_SIGNING_KEY = 
 
 bulid-and-release: clean
-	goreleaser release --rm-dist
+	goreleaser release --clean
 
 build: export DOCKER_REGISTRY = ghcr.io
 build: export DOCKER_IMAGE_NAME = unpoller/unpoller
 build: export GPG_SIGNING_KEY = 
 
 build: clean
-	goreleaser release --rm-dist --skip-validate --skip-publish --skip-sign --debug
+	goreleaser release --clean --skip-validate --skip-publish --skip-sign --debug
 
 clean:
 	git clean -xdf || true
