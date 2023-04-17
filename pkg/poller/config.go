@@ -53,10 +53,10 @@ func DefaultObjPath() string {
 	case "netbsd":
 		fallthrough
 	case "openbsd":
-		return "/usr/local/lib/unifi-poller"
+		return "/usr/local/lib/unpoller"
 	default:
 		// linux and everything else
-		return "/usr/lib/unifi-poller"
+		return "/usr/local/lib/unpoller"
 	}
 }
 

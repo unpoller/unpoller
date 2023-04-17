@@ -29,7 +29,7 @@ influxdb:
 webserver:
   enable:        false
   port:          37288
-  html_path:     "/usr/lib/unifi-poller/web"
+  html_path:     "/usr/local/lib/unpoller/web"
   ssl_cert_path: ""
   ssl_key_path:  ""
   max_events:    200
