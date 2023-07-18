@@ -34,7 +34,7 @@ func (u *InfluxUnifi) batchClient(r report, s *unifi.Client) { // nolint: funlen
 		"vlan":        s.Vlan.Txt,
 	}
 	fields := map[string]any{
-		"anomalies":         s.Anomalies,
+		"anomalies":         s.Anomalies.Int64(),
 		"ip":                s.IP,
 		"essid":             s.Essid,
 		"bssid":             s.Bssid,
