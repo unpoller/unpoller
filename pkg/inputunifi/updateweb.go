@@ -100,8 +100,8 @@ func formatClients(c *Controller, clients []*unifi.Client) (d webserver.Clients)
 			DeviceMAC:  deviceMAC,
 			Rx:         client.RxBytes.Int64(),
 			Tx:         client.TxBytes.Int64(),
-			Since:      time.Unix(client.FirstSeen, 0),
-			Last:       time.Unix(client.LastSeen, 0),
+			Since:      time.Unix(client.FirstSeen.Int64(), 0),
+			Last:       time.Unix(client.LastSeen.Int64(), 0),
 		})
 	}
 
