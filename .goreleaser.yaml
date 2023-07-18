@@ -277,11 +277,7 @@ nfpms:
     builds:
       - unpoller
       - unpoller-linux-arm
-    replacements:
-      amd64: 64-bit
-      386: 32-bit
-      darwin: macOS
-      linux: Tux
+    file_name_template: '{{ .ConventionalFileName }}'
 
     vendor: unpoller
     homepage: https://unpoller.com/
