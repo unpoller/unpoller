@@ -126,7 +126,7 @@ func (u *promUnifi) exportClient(r report, c *unifi.Client) {
 
 		r.send([]*metric{
 			{u.Client.Anomalies, counter, c.Anomalies, labelW},
-			{u.Client.CCQ, gauge, float64(c.Ccq) / 1000.0, labelW},
+			{u.Client.CCQ, gauge, c.Ccq.Val / 1000.0, labelW},
 			{u.Client.Satisfaction, gauge, c.Satisfaction.Val / 100.0, labelW},
 			{u.Client.Noise, gauge, c.Noise, labelW},
 			{u.Client.RoamCount, counter, c.RoamCount, labelW},
@@ -135,7 +135,7 @@ func (u *promUnifi) exportClient(r report, c *unifi.Client) {
 			{u.Client.TxPower, gauge, c.TxPower, labelW},
 			{u.Client.TxRate, gauge, c.TxRate.Val * 1000, labelW},
 			{u.Client.WifiTxAttempts, counter, c.WifiTxAttempts, labelW},
-			{u.Client.RxRate, gauge, c.RxRate * 1000, labelW},
+			{u.Client.RxRate, gauge, c.RxRate.Val * 1000, labelW},
 			{u.Client.TxRetries, counter, c.TxRetries, labels},
 			{u.Client.TxBytes, counter, c.TxBytes, labels},
 			{u.Client.TxBytesR, gauge, c.TxBytesR, labels},
