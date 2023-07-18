@@ -277,7 +277,7 @@ nfpms:
     builds:
       - unpoller
       - unpoller-linux-arm
-    file_name_template: '{{ .ConventionalFileName }}'
+    file_name_template: '{{ .ProjectName }}_{{ if eq .Os "darwin" }}macOS{{ else if eq .Os "linux" }}Tux{{ else }}{{ .Os }}{{ end }}_{{ if eq .Arch "386" }}32-bit{{ else if eq .Arch "amd64" }}64-bit{{ else }}{{ .Arch }}{{ end }}{{ if .Arm }}v{{ .Arm }}{{ end }}'
 
     vendor: unpoller
     homepage: https://unpoller.com/
