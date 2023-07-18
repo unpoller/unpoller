@@ -133,7 +133,7 @@ func (u *promUnifi) exportClient(r report, c *unifi.Client) {
 			{u.Client.RSSI, gauge, c.Rssi, labelW},
 			{u.Client.Signal, gauge, c.Signal, labelW},
 			{u.Client.TxPower, gauge, c.TxPower, labelW},
-			{u.Client.TxRate, gauge, c.TxRate * 1000, labelW},
+			{u.Client.TxRate, gauge, c.TxRate.Val * 1000, labelW},
 			{u.Client.WifiTxAttempts, counter, c.WifiTxAttempts, labelW},
 			{u.Client.RxRate, gauge, c.RxRate * 1000, labelW},
 			{u.Client.TxRetries, counter, c.TxRetries, labels},
