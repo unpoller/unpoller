@@ -107,6 +107,7 @@ func (w *webPlugins) updateInput(config *Input) {
 	input := w.getInput(config.Name)
 	if input == nil {
 		w.newInput(config)
+
 		return
 	}
 
@@ -142,6 +143,7 @@ func (w *webPlugins) updateOutput(config *Output) {
 	output := w.getOutput(config.Name)
 	if output == nil {
 		w.newOutput(config)
+
 		return
 	}
 

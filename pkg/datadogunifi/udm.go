@@ -1,7 +1,7 @@
 package datadogunifi
 
 import (
-	"strconv"
+	"regexp"
 	"strings"
 
 	"github.com/unpoller/unifi"
@@ -36,6 +36,12 @@ func CombineFloat64(in ...map[string]float64) map[string]float64 {
 	return out
 }
 
+var statNameRe = regexp.MustCompile("[^a-zA-Z0-9_]")
+
+func safeStatsName(s string) string {
+	return statNameRe.ReplaceAllString(strings.ToLower(s), "_")
+}
+
 // batchSysStats is used by all device types.
 func (u *DatadogUnifi) batchSysStats(s unifi.SysStats, ss unifi.SystemStats) map[string]float64 {
 	m := map[string]float64{
@@ -51,11 +57,11 @@ func (u *DatadogUnifi) batchSysStats(s unifi.SysStats, ss unifi.SystemStats) map
 	}
 
 	for k, v := range ss.Temps {
-		temp, _ := strconv.Atoi(strings.Split(v, " ")[0])
-		k = strings.ReplaceAll(strings.ReplaceAll(strings.ReplaceAll(k, " ", "_"), ")", ""), "(", "")
+		temp := v.Celsius()
+		k = safeStatsName(k)
 
 		if temp != 0 && k != "" {
-			m["temp_"+strings.ToLower(k)] = float64(temp)
+			m[k] = float64(temp)
 		}
 	}
 
@@ -66,7 +72,11 @@ func (u *DatadogUnifi) batchUDMtemps(temps []unifi.Temperature) map[string]float
 	output := make(map[string]float64)
 
 	for _, t := range temps {
-		output["temp_"+t.Name] = t.Value
+		if t.Name == "" {
+			continue
+		}
+
+		output[safeStatsName("temp_"+t.Name)] = t.Value
 	}
 
 	return output
@@ -76,13 +86,17 @@ func (u *DatadogUnifi) batchUDMstorage(storage []*unifi.Storage) map[string]floa
 	output := make(map[string]float64)
 
 	for _, t := range storage {
-		output["storage_"+t.Name+"_size"] = t.Size.Val
-		output["storage_"+t.Name+"_used"] = t.Used.Val
+		if t.Name == "" {
+			continue
+		}
+
+		output[safeStatsName("storage_"+t.Name+"_size")] = t.Size.Val
+		output[safeStatsName("storage_"+t.Name+"_used")] = t.Used.Val
 
 		if t.Size.Val != 0 && t.Used.Val != 0 && t.Used.Val < t.Size.Val {
-			output["storage_"+t.Name+"_pct"] = t.Used.Val / t.Size.Val * 100 //nolint:gomnd
+			output[safeStatsName("storage_"+t.Name+"_pct")] = t.Used.Val / t.Size.Val * 100 //nolint:gomnd
 		} else {
-			output["storage_"+t.Name+"_pct"] = 0
+			output[safeStatsName("storage_"+t.Name+"_pct")] = 0
 		}
 	}
 
@@ -130,7 +144,9 @@ func (u *DatadogUnifi) batchUDM(r report, s *unifi.UDM) { // nolint: funlen
 	)
 
 	r.addCount(udmT)
+
 	metricName := metricNamespace("usg")
+
 	reportGaugeForFloat64Map(r, metricName, data, tags)
 
 	u.batchNetTable(r, tags, s.NetworkTable)

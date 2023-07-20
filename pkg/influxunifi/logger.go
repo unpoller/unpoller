@@ -14,6 +14,7 @@ func (u *InfluxUnifi) Logf(msg string, v ...any) {
 		Msg:  fmt.Sprintf(msg, v...),
 		Tags: map[string]string{"type": "info"},
 	})
+
 	if u.Collector != nil {
 		u.Collector.Logf(msg, v...)
 	}
@@ -26,6 +27,7 @@ func (u *InfluxUnifi) LogErrorf(msg string, v ...any) {
 		Msg:  fmt.Sprintf(msg, v...),
 		Tags: map[string]string{"type": "error"},
 	})
+
 	if u.Collector != nil {
 		u.Collector.LogErrorf(msg, v...)
 	}
@@ -38,6 +40,7 @@ func (u *InfluxUnifi) LogDebugf(msg string, v ...any) {
 		Msg:  fmt.Sprintf(msg, v...),
 		Tags: map[string]string{"type": "debug"},
 	})
+
 	if u.Collector != nil {
 		u.Collector.LogDebugf(msg, v...)
 	}

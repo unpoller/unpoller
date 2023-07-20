@@ -74,3 +74,12 @@ build: clean
 clean:
 	git clean -xdf || true
 	(docker images -f "dangling=true" -q | xargs docker rmi) || true
+
+lint:
+	golangci-lint run --fix
+
+test:
+	go test -timeout=30s ./...
+
+integration-test:
+	go test -timeout=30m -args=integration ./...

@@ -70,27 +70,35 @@ func (u *UnifiPoller) InitializeInputs() error {
 
 	// parallelize startup
 	u.LogDebugf("initializing %d inputs", len(inputs))
+
 	for _, input := range inputs {
 		wg.Add(1)
+
 		go func(input *InputPlugin) {
 			defer wg.Done()
 			// This must return, or the app locks up here.
 			u.LogDebugf("inititalizing input... %s", input.Name)
+
 			if err := input.Initialize(u); err != nil {
 				u.LogDebugf("error initializing input ... %s", input.Name)
 				errChan <- err
+
 				return
 			}
+
 			u.LogDebugf("input successfully initialized ... %s", input.Name)
 			errChan <- nil
 		}(input)
 	}
+
 	wg.Wait()
 	close(errChan)
+
 	u.LogDebugf("collecting input errors...")
 
 	// collect errors if any.
 	errs := make([]error, 0)
+
 	for err := range errChan {
 		if err != nil {
 			errs = append(errs, err)
@@ -104,6 +112,7 @@ func (u *UnifiPoller) InitializeInputs() error {
 			err = errors.Wrap(err, e.Error())
 		}
 	}
+
 	u.LogDebugf("returning error: %w", err)
 
 	return err
@@ -114,39 +123,43 @@ type eventInputResult struct {
 	err  error
 }
 
-// Events aggregates log messages (events) from one or more sources.
-func (u *UnifiPoller) Events(filter *Filter) (*Events, error) {
-	inputSync.RLock()
-	defer inputSync.RUnlock()
-
+func collectEvents(filter *Filter, inputs []*InputPlugin) (*Events, error) {
 	resultChan := make(chan eventInputResult, len(inputs))
 	wg := &sync.WaitGroup{}
 
 	for _, input := range inputs {
 		wg.Add(1)
+
 		go func(input *InputPlugin) {
 			defer wg.Done()
+
 			if filter != nil &&
 				filter.Name != "" &&
 				!strings.EqualFold(input.Name, filter.Name) {
 				resultChan <- eventInputResult{}
+
 				return
 			}
 
 			e, err := input.Events(filter)
+
 			if err != nil {
 				resultChan <- eventInputResult{err: err}
+
 				return
 			}
-			resultChan <- eventInputResult{logs: e.Logs}
 
+			resultChan <- eventInputResult{logs: e.Logs}
 		}(input)
 	}
+
 	wg.Wait()
+
 	close(resultChan)
 
 	events := Events{}
 	errs := make([]error, 0)
+
 	for result := range resultChan {
 		if result.err != nil {
 			errs = append(errs, result.err)
@@ -155,6 +168,7 @@ func (u *UnifiPoller) Events(filter *Filter) (*Events, error) {
 			events.Logs = append(events.Logs, result.logs...)
 		}
 	}
+
 	var err error
 	if len(errs) > 0 {
 		err = fmt.Errorf("error initializing inputs")
@@ -166,28 +180,34 @@ func (u *UnifiPoller) Events(filter *Filter) (*Events, error) {
 	return &events, err
 }
 
+// Events aggregates log messages (events) from one or more sources.
+func (u *UnifiPoller) Events(filter *Filter) (*Events, error) {
+	inputSync.RLock()
+	defer inputSync.RUnlock()
+
+	return collectEvents(filter, inputs)
+}
+
 type metricInputResult struct {
 	metric *Metrics
 	err    error
 }
 
-// Metrics aggregates all the measurements from filtered inputs and returns them.
-// Passing a null filter returns everything!
-func (u *UnifiPoller) Metrics(filter *Filter) (*Metrics, error) {
-	inputSync.RLock()
-	defer inputSync.RUnlock()
-
+func collectMetrics(filter *Filter, inputs []*InputPlugin) (*Metrics, error) {
 	resultChan := make(chan metricInputResult, len(inputs))
 	wg := &sync.WaitGroup{}
 
 	for _, input := range inputs {
 		wg.Add(1)
+
 		go func(input *InputPlugin) {
 			defer wg.Done()
+
 			if filter != nil &&
 				filter.Name != "" &&
 				!strings.EqualFold(input.Name, filter.Name) {
 				resultChan <- metricInputResult{}
+
 				return
 			}
 
@@ -195,11 +215,14 @@ func (u *UnifiPoller) Metrics(filter *Filter) (*Metrics, error) {
 			resultChan <- metricInputResult{metric: m, err: err}
 		}(input)
 	}
+
 	wg.Wait()
+
 	close(resultChan)
 
 	errs := make([]error, 0)
 	metrics := &Metrics{}
+
 	for result := range resultChan {
 		if result.err != nil {
 			errs = append(errs, result.err)
@@ -217,6 +240,15 @@ func (u *UnifiPoller) Metrics(filter *Filter) (*Metrics, error) {
 	}
 
 	return metrics, err
+}
+
+// Metrics aggregates all the measurements from filtered inputs and returns them.
+// Passing a null filter returns everything!
+func (u *UnifiPoller) Metrics(filter *Filter) (*Metrics, error) {
+	inputSync.RLock()
+	defer inputSync.RUnlock()
+
+	return collectMetrics(filter, inputs)
 }
 
 // AppendMetrics combines the metrics from two sources.

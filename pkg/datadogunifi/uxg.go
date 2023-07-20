@@ -26,14 +26,17 @@ func (u *DatadogUnifi) batchUXG(r report, s *unifi.UXG) { // nolint: funlen
 		"ip":            s.IP,
 		"license_state": s.LicenseState,
 	})
-	var gw *unifi.Gw = nil
+	
+	var gw *unifi.Gw
 	if s.Stat != nil {
 		gw = s.Stat.Gw
 	}
-	var sw *unifi.Sw = nil
+	
+	var sw *unifi.Sw
 	if s.Stat != nil {
 		sw = s.Stat.Sw
 	}
+	
 	data := CombineFloat64(
 		u.batchUDMstorage(s.Storage),
 		u.batchUDMtemps(s.Temperatures),

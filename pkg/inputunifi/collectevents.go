@@ -11,6 +11,8 @@ import (
 /* Event collection. Events are also sent to the webserver for display. */
 
 func (u *InputUnifi) collectControllerEvents(c *Controller) ([]any, error) {
+	u.LogDebugf("Collecting controller events: %s (%s)", c.URL, c.ID)
+	
 	if u.isNill(c) {
 		u.Logf("Re-authenticating to UniFi Controller: %s", c.URL)
 
@@ -45,6 +47,8 @@ func (u *InputUnifi) collectControllerEvents(c *Controller) ([]any, error) {
 
 func (u *InputUnifi) collectAlarms(logs []any, sites []*unifi.Site, c *Controller) ([]any, error) {
 	if *c.SaveAlarms {
+		u.LogDebugf("Collecting controller alarms: %s (%s)", c.URL, c.ID)
+
 		for _, s := range sites {
 			events, err := c.Unifi.GetAlarmsSite(s)
 			if err != nil {
@@ -69,6 +73,8 @@ func (u *InputUnifi) collectAlarms(logs []any, sites []*unifi.Site, c *Controlle
 
 func (u *InputUnifi) collectAnomalies(logs []any, sites []*unifi.Site, c *Controller) ([]any, error) {
 	if *c.SaveAnomal {
+		u.LogDebugf("Collecting controller anomalies: %s (%s)", c.URL, c.ID)
+
 		for _, s := range sites {
 			events, err := c.Unifi.GetAnomaliesSite(s)
 			if err != nil {
@@ -92,6 +98,8 @@ func (u *InputUnifi) collectAnomalies(logs []any, sites []*unifi.Site, c *Contro
 
 func (u *InputUnifi) collectEvents(logs []any, sites []*unifi.Site, c *Controller) ([]any, error) {
 	if *c.SaveEvents {
+		u.LogDebugf("Collecting controller site events: %s (%s)", c.URL, c.ID)
+
 		for _, s := range sites {
 			events, err := c.Unifi.GetSiteEvents(s, time.Hour)
 			if err != nil {
@@ -117,6 +125,8 @@ func (u *InputUnifi) collectEvents(logs []any, sites []*unifi.Site, c *Controlle
 
 func (u *InputUnifi) collectIDS(logs []any, sites []*unifi.Site, c *Controller) ([]any, error) {
 	if *c.SaveIDS {
+		u.LogDebugf("Collecting controller IDS data: %s (%s)", c.URL, c.ID)
+
 		for _, s := range sites {
 			events, err := c.Unifi.GetIDSSite(s)
 			if err != nil {
@@ -149,6 +159,7 @@ func redactEvent(e *unifi.Event, hash *bool, dropPII *bool) *unifi.Event {
 	// metrics.Events[i].Msg <-- not sure what to do here.
 	e.DestIPGeo = unifi.IPGeo{}
 	e.SourceIPGeo = unifi.IPGeo{}
+	
 	if *dropPII {
 		e.Host = ""
 		e.Hostname = ""

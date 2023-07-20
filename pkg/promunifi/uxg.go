@@ -9,11 +9,13 @@ func (u *promUnifi) exportUXG(r report, d *unifi.UXG) {
 	if !d.Adopted.Val || d.Locating.Val {
 		return
 	}
-	var gw *unifi.Gw = nil
+
+	var gw *unifi.Gw
 	if d.Stat != nil {
 		gw = d.Stat.Gw
 	}
-	var sw *unifi.Sw = nil
+
+	var sw *unifi.Sw
 	if d.Stat != nil {
 		sw = d.Stat.Sw
 	}

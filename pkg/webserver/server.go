@@ -27,13 +27,13 @@ const (
 
 // Config is the webserver library input config.
 type Config struct {
-	Enable     bool     `json:"enable" toml:"enable" xml:"enable,attr" yaml:"enable"`
+	Enable     bool     `json:"enable"        toml:"enable"        xml:"enable,attr"   yaml:"enable"`
 	SSLCrtPath string   `json:"ssl_cert_path" toml:"ssl_cert_path" xml:"ssl_cert_path" yaml:"ssl_cert_path"`
-	SSLKeyPath string   `json:"ssl_key_path" toml:"ssl_key_path" xml:"ssl_key_path" yaml:"ssl_key_path"`
-	Port       uint     `json:"port" toml:"port" xml:"port" yaml:"port"`
-	Accounts   accounts `json:"accounts" toml:"accounts" xml:"accounts" yaml:"accounts"`
-	HTMLPath   string   `json:"html_path" toml:"html_path" xml:"html_path" yaml:"html_path"`
-	MaxEvents  uint     `json:"max_events" toml:"max_events" xml:"max_events" yaml:"max_events"`
+	SSLKeyPath string   `json:"ssl_key_path"  toml:"ssl_key_path"  xml:"ssl_key_path"  yaml:"ssl_key_path"`
+	Port       uint     `json:"port"          toml:"port"          xml:"port"          yaml:"port"`
+	Accounts   accounts `json:"accounts"      toml:"accounts"      xml:"accounts"      yaml:"accounts"`
+	HTMLPath   string   `json:"html_path"     toml:"html_path"     xml:"html_path"     yaml:"html_path"`
+	MaxEvents  uint     `json:"max_events"    toml:"max_events"    xml:"max_events"    yaml:"max_events"`
 }
 
 // accounts stores a map of usernames and password hashes.
@@ -71,9 +71,11 @@ func (s *Server) Enabled() bool {
 	if s == nil {
 		return false
 	}
+	
 	if s.Config == nil {
 		return false
 	}
+
 	return s.Enable
 }
 
@@ -82,8 +84,10 @@ func (s *Server) Run(c poller.Collect) error {
 	s.Collect = c
 	if s.Config == nil || s.Port == 0 || s.HTMLPath == "" || !s.Enabled() {
 		s.LogDebugf("Internal web server disabled!")
+		
 		return nil
 	}
+
 	s.Logf("Internal web server enabled")
 
 	if _, err := os.Stat(s.HTMLPath); err != nil {
@@ -99,9 +103,11 @@ func (s *Server) DebugOutput() (bool, error) {
 	if s == nil {
 		return true, nil
 	}
+	
 	if !s.Enabled() {
 		return true, nil
 	}
+	
 	if s.HTMLPath == "" {
 		return true, nil
 	}
@@ -116,6 +122,7 @@ func (s *Server) DebugOutput() (bool, error) {
 	if err != nil {
 		return false, err
 	}
+
 	_ = ln.Close()
 
 	return true, nil

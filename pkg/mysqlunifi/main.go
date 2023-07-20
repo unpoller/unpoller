@@ -18,14 +18,14 @@ var _ poller.OutputPlugin = &plugin{}
 // Config represents the data that is unmarshalled from the up.conf config file for this plugins.
 // See up.conf.example.mysql for sample input data.
 type Config struct {
-	Disable  bool          `json:"disable" toml:"disable" xml:"disable" yaml:"disable"`
+	Disable  bool          `json:"disable"  toml:"disable"  xml:"disable"  yaml:"disable"`
 	Interval cnfg.Duration `json:"interval" toml:"interval" xml:"interval" yaml:"interval"`
-	Host     string        `json:"host" toml:"host" xml:"host" yaml:"host"`
-	User     string        `json:"user" toml:"user" xml:"user" yaml:"user"`
-	Pass     string        `json:"pass" toml:"pass" xml:"pass" yaml:"pass"`
-	DB       string        `json:"db" toml:"db" xml:"db" yaml:"db"`
-	Devices  []Device      `json:"devices" toml:"devices" xml:"device" yaml:"devices"`
-	Clients  *Clients      `json:"clients" toml:"clients" xml:"clients" yaml:"clients"`
+	Host     string        `json:"host"     toml:"host"     xml:"host"     yaml:"host"`
+	User     string        `json:"user"     toml:"user"     xml:"user"     yaml:"user"`
+	Pass     string        `json:"pass"     toml:"pass"     xml:"pass"     yaml:"pass"`
+	DB       string        `json:"db"       toml:"db"       xml:"db"       yaml:"db"`
+	Devices  []Device      `json:"devices"  toml:"devices"  xml:"device"   yaml:"devices"`
+	Clients  *Clients      `json:"clients"  toml:"clients"  xml:"clients"  yaml:"clients"`
 }
 
 // Device represents the configuration to save a devices' data.
@@ -33,8 +33,8 @@ type Config struct {
 // Table represents the mysql table name we save these fields to.
 // Fields is a map of api response data key -> mysql column.
 type Device struct {
-	Type   string            `json:"type" toml:"type" xml:"type" yaml:"type"`
-	Table  string            `json:"table" toml:"table" xml:"table" yaml:"table"`
+	Type   string            `json:"type"   toml:"type"   xml:"type"  yaml:"type"`
+	Table  string            `json:"table"  toml:"table"  xml:"table" yaml:"table"`
 	Fields map[string]string `json:"fields" toml:"fields" xml:"field" yaml:"fields"`
 }
 
@@ -42,7 +42,7 @@ type Device struct {
 // Table represents the mysql table name we save these fields to.
 // Fields is a map of api response data key -> mysql column.
 type Clients struct {
-	Table  string            `json:"table" toml:"table" xml:"table" yaml:"table"`
+	Table  string            `json:"table"  toml:"table"  xml:"table" yaml:"table"`
 	Fields map[string]string `json:"fields" toml:"fields" xml:"field" yaml:"fields"`
 }
 
@@ -60,12 +60,15 @@ func (p *plugin) Enabled() bool {
 	if p == nil {
 		return false
 	}
+	
 	if p.Config == nil {
 		return false
 	}
+	
 	if p.Collect == nil {
 		return false
 	}
+
 	return !p.Disable
 }
 
@@ -73,12 +76,15 @@ func (p *plugin) DebugOutput() (bool, error) {
 	if p == nil {
 		return true, nil
 	}
+	
 	if !p.Enabled() {
 		return true, nil
 	}
+	
 	if err := p.validateConfig(); err != nil {
 		return false, err
 	}
+	
 	return true, nil
 }
 

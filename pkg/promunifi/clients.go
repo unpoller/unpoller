@@ -78,6 +78,7 @@ func (u *promUnifi) exportClientDPI(r report, v any, appTotal, catTotal totalsDP
 	s, ok := v.(*unifi.DPITable)
 	if !ok {
 		u.LogErrorf("invalid type given to ClientsDPI: %T", v)
+
 		return
 	}
 
@@ -166,6 +167,7 @@ func fillDPIMapTotals(m totalsDPImap, name, controller, site string, dpi unifi.D
 
 	if _, ok := m[controller][site][name]; !ok {
 		m[controller][site][name] = dpi
+
 		return
 	}
 

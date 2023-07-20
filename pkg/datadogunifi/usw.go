@@ -43,7 +43,9 @@ func (u *DatadogUnifi) batchUSW(r report, s *unifi.USW) {
 		})
 
 	r.addCount(uswT)
+	
 	metricName := metricNamespace("usw")
+	
 	reportGaugeForFloat64Map(r, metricName, data, tags)
 
 	u.batchPortTable(r, tags, s.PortTable)

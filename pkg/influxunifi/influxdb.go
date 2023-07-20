@@ -70,11 +70,11 @@ type InfluxDB struct {
 
 // InfluxUnifi is returned by New() after you provide a Config.
 type InfluxUnifi struct {
-	Collector  poller.Collect
-	influxV1   influxV1.Client
-	influxV2   influx.Client
-	LastCheck  time.Time
-	IsVersion2 bool
+	Collector      poller.Collect
+	InfluxV1Client influxV1.Client
+	InfluxV2Client influx.Client
+	LastCheck      time.Time
+	IsVersion2     bool
 	*InfluxDB
 }
 
@@ -103,43 +103,54 @@ func (u *InfluxUnifi) PollController() {
 	interval := u.Interval.Round(time.Second)
 	ticker := time.NewTicker(interval)
 	version := "1"
+	
 	if u.IsVersion2 {
 		version = "2"
 	}
+	
 	u.Logf("Poller->InfluxDB started, version: %s, interval: %v, dp: %v, db: %s, url: %s, bucket: %s, org: %s",
 		version, interval, u.DeadPorts, u.DB, u.URL, u.Bucket, u.Org)
 
 	for u.LastCheck = range ticker.C {
-		metrics, err := u.Collector.Metrics(&poller.Filter{Name: "unifi"})
-		if err != nil {
-			u.LogErrorf("metric fetch for InfluxDB failed: %v", err)
-			continue
-		}
-
-		events, err := u.Collector.Events(&poller.Filter{Name: "unifi", Dur: interval})
-		if err != nil {
-			u.LogErrorf("event fetch for InfluxDB failed: %v", err)
-			continue
-		}
-
-		report, err := u.ReportMetrics(metrics, events)
-		if err != nil {
-			// XXX: reset and re-auth? not sure..
-			u.LogErrorf("%v", err)
-			continue
-		}
-
-		u.Logf("UniFi Metrics Recorded. %v", report)
+		u.Poll(interval)
 	}
+}
+
+func (u *InfluxUnifi) Poll(interval time.Duration) {
+	metrics, err := u.Collector.Metrics(&poller.Filter{Name: "unifi"})
+	if err != nil {
+		u.LogErrorf("metric fetch for InfluxDB failed: %v", err)
+		
+		return
+	}
+
+	events, err := u.Collector.Events(&poller.Filter{Name: "unifi", Dur: interval})
+	if err != nil {
+		u.LogErrorf("event fetch for InfluxDB failed: %v", err)
+
+		return
+	}
+
+	report, err := u.ReportMetrics(metrics, events)
+	if err != nil {
+		// XXX: reset and re-auth? not sure..
+		u.LogErrorf("%v", err)
+
+		return
+	}
+
+	u.Logf("UniFi Metrics Recorded. %v", report)
 }
 
 func (u *InfluxUnifi) Enabled() bool {
 	if u == nil {
 		return false
 	}
+	
 	if u.Config == nil {
 		return false
 	}
+	
 	return !u.Disable
 }
 
@@ -147,10 +158,13 @@ func (u *InfluxUnifi) DebugOutput() (bool, error) {
 	if u == nil {
 		return true, nil
 	}
+	
 	if !u.Enabled() {
 		return true, nil
 	}
+	
 	u.setConfigDefaults()
+	
 	_, err := url.Parse(u.Config.URL)
 	if err != nil {
 		return false, fmt.Errorf("invalid influx URL: %v", err)
@@ -160,18 +174,21 @@ func (u *InfluxUnifi) DebugOutput() (bool, error) {
 		// we're a version 2
 		tlsConfig := &tls.Config{InsecureSkipVerify: !u.VerifySSL} // nolint: gosec
 		serverOptions := influx.DefaultOptions().SetTLSConfig(tlsConfig).SetBatchSize(u.BatchSize)
-		u.influxV2 = influx.NewClientWithOptions(u.URL, u.AuthToken, serverOptions)
+		u.InfluxV2Client = influx.NewClientWithOptions(u.URL, u.AuthToken, serverOptions)
+		
 		ctx, cancel := context.WithTimeout(context.Background(), time.Second*2)
 		defer cancel()
-		ok, err := u.influxV2.Ping(ctx)
+
+		ok, err := u.InfluxV2Client.Ping(ctx)
 		if err != nil {
 			return false, err
 		}
+
 		if !ok {
 			return false, fmt.Errorf("unsuccessful ping to influxdb2")
 		}
 	} else {
-		u.influxV1, err = influxV1.NewHTTPClient(influxV1.HTTPConfig{
+		u.InfluxV1Client, err = influxV1.NewHTTPClient(influxV1.HTTPConfig{
 			Addr:      u.URL,
 			Username:  u.User,
 			Password:  u.Pass,
@@ -180,19 +197,23 @@ func (u *InfluxUnifi) DebugOutput() (bool, error) {
 		if err != nil {
 			return false, fmt.Errorf("making client: %w", err)
 		}
-		_, _, err = u.influxV1.Ping(time.Second * 2)
+
+		_, _, err = u.InfluxV1Client.Ping(time.Second * 2)
 		if err != nil {
 			return false, fmt.Errorf("unsuccessful ping to influxdb1")
 		}
 	}
+
 	return true, nil
 }
 
 // Run runs a ticker to poll the unifi server and update influxdb.
 func (u *InfluxUnifi) Run(c poller.Collect) error {
 	u.Collector = c
+	
 	if !u.Enabled() {
 		u.LogDebugf("InfluxDB config missing (or disabled), InfluxDB output disabled!")
+
 		return nil
 	}
 
@@ -205,6 +226,7 @@ func (u *InfluxUnifi) Run(c poller.Collect) error {
 	_, err = url.Parse(u.Config.URL)
 	if err != nil {
 		u.LogErrorf("invalid influx URL: %v", err)
+
 		return err
 	}
 
@@ -212,9 +234,9 @@ func (u *InfluxUnifi) Run(c poller.Collect) error {
 		// we're a version 2
 		tlsConfig := &tls.Config{InsecureSkipVerify: !u.VerifySSL} // nolint: gosec
 		serverOptions := influx.DefaultOptions().SetTLSConfig(tlsConfig).SetBatchSize(u.BatchSize)
-		u.influxV2 = influx.NewClientWithOptions(u.URL, u.AuthToken, serverOptions)
+		u.InfluxV2Client = influx.NewClientWithOptions(u.URL, u.AuthToken, serverOptions)
 	} else {
-		u.influxV1, err = influxV1.NewHTTPClient(influxV1.HTTPConfig{
+		u.InfluxV1Client, err = influxV1.NewHTTPClient(influxV1.HTTPConfig{
 			Addr:      u.URL,
 			Username:  u.User,
 			Password:  u.Pass,
@@ -310,7 +332,7 @@ func (u *InfluxUnifi) ReportMetrics(m *poller.Metrics, e *poller.Events) (*Repor
 
 	if u.IsVersion2 {
 		// Make a new Influx Points Batcher.
-		r.writer = u.influxV2.WriteAPI(u.Org, u.Bucket)
+		r.writer = u.InfluxV2Client.WriteAPI(u.Org, u.Bucket)
 
 		go u.collect(r, r.ch)
 		// Batch all the points.
@@ -335,7 +357,7 @@ func (u *InfluxUnifi) ReportMetrics(m *poller.Metrics, e *poller.Events) (*Repor
 		r.wg.Wait() // wait for all points to finish batching!
 
 		// Send all the points.
-		if err = u.influxV1.Write(r.bp); err != nil {
+		if err = u.InfluxV1Client.Write(r.bp); err != nil {
 			return nil, fmt.Errorf("influxdb.Write(points): %w", err)
 		}
 	}
@@ -363,6 +385,7 @@ func (u *InfluxUnifi) collect(r report, ch chan *metric) {
 
 			r.error(err)
 		}
+
 		r.done()
 	}
 }

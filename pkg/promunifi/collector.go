@@ -54,11 +54,11 @@ var _ poller.OutputPlugin = &promUnifi{}
 type Config struct {
 	// If non-empty, each of the collected metrics is prefixed by the
 	// provided string and an underscore ("_").
-	Namespace  string `json:"namespace" toml:"namespace" xml:"namespace" yaml:"namespace"`
+	Namespace  string `json:"namespace"   toml:"namespace"   xml:"namespace"   yaml:"namespace"`
 	HTTPListen string `json:"http_listen" toml:"http_listen" xml:"http_listen" yaml:"http_listen"`
 	// If these are provided, the app will attempt to listen with an SSL connection.
 	SSLCrtPath string `json:"ssl_cert_path" toml:"ssl_cert_path" xml:"ssl_cert_path" yaml:"ssl_cert_path"`
-	SSLKeyPath string `json:"ssl_key_path" toml:"ssl_key_path" xml:"ssl_key_path" yaml:"ssl_key_path"`
+	SSLKeyPath string `json:"ssl_key_path"  toml:"ssl_key_path"  xml:"ssl_key_path"  yaml:"ssl_key_path"`
 	// Buffer is a channel buffer.
 	// Default is probably 50. Seems fast there; try 1 to see if CPU usage goes down?
 	Buffer int `json:"buffer" toml:"buffer" xml:"buffer" yaml:"buffer"`
@@ -67,7 +67,7 @@ type Config struct {
 	// and the collected metrics will be incomplete. Possibly, no metrics
 	// will be collected at all.
 	ReportErrors bool `json:"report_errors" toml:"report_errors" xml:"report_errors" yaml:"report_errors"`
-	Disable      bool `json:"disable" toml:"disable" xml:"disable" yaml:"disable"`
+	Disable      bool `json:"disable"       toml:"disable"       xml:"disable"       yaml:"disable"`
 	// Save data for dead ports? ie. ports that are down or disabled.
 	DeadPorts bool `json:"dead_ports" toml:"dead_ports" xml:"dead_ports" yaml:"dead_ports"`
 }
@@ -121,12 +121,15 @@ func (u *promUnifi) DebugOutput() (bool, error) {
 	if u == nil {
 		return true, nil
 	}
+	
 	if !u.Enabled() {
 		return true, nil
 	}
+	
 	if u.HTTPListen == "" {
 		return false, fmt.Errorf("invalid listen string")
 	}
+	
 	// check the port
 	parts := strings.Split(u.HTTPListen, ":")
 	if len(parts) != 2 {
@@ -137,7 +140,9 @@ func (u *promUnifi) DebugOutput() (bool, error) {
 	if err != nil {
 		return false, err
 	}
+	
 	_ = ln.Close()
+	
 	return true, nil
 }
 
@@ -145,9 +150,11 @@ func (u *promUnifi) Enabled() bool {
 	if u == nil {
 		return false
 	}
+	
 	if u.Config == nil {
 		return false
 	}
+	
 	return !u.Disable
 }
 
@@ -157,8 +164,10 @@ func (u *promUnifi) Run(c poller.Collect) error {
 	u.Collector = c
 	if u.Config == nil || !u.Enabled() {
 		u.LogDebugf("Prometheus config missing (or disabled), Prometheus HTTP listener disabled!")
+
 		return nil
 	}
+	
 	u.Logf("Prometheus is enabled")
 
 	u.Namespace = strings.Trim(strings.ReplaceAll(u.Namespace, "-", "_"), "_")
@@ -200,9 +209,11 @@ func (u *promUnifi) Run(c poller.Collect) error {
 	switch u.SSLKeyPath == "" && u.SSLCrtPath == "" {
 	case true:
 		u.Logf("Prometheus exported at http://%s/ - namespace: %s", u.HTTPListen, u.Namespace)
+		
 		return http.ListenAndServe(u.HTTPListen, mux)
 	default:
 		u.Logf("Prometheus exported at https://%s/ - namespace: %s", u.HTTPListen, u.Namespace)
+		
 		return http.ListenAndServeTLS(u.HTTPListen, u.SSLCrtPath, u.SSLKeyPath, mux)
 	}
 }
@@ -249,7 +260,7 @@ func (u *promUnifi) ScrapeHandler(w http.ResponseWriter, r *http.Request) {
 	).ServeHTTP(w, r)
 }
 
-func (u *promUnifi) DefaultHandler(w http.ResponseWriter, r *http.Request) {
+func (u *promUnifi) DefaultHandler(w http.ResponseWriter, _ *http.Request) {
 	w.WriteHeader(http.StatusOK)
 	_, _ = w.Write([]byte(poller.AppName + "\n"))
 }

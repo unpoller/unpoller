@@ -191,6 +191,7 @@ func (u *InputUnifi) Logf(msg string, v ...any) {
 		Msg:  fmt.Sprintf(msg, v...),
 		Tags: map[string]string{"type": "info"},
 	})
+	
 	if u.Logger != nil {
 		u.Logger.Logf(msg, v...)
 	}
@@ -203,6 +204,7 @@ func (u *InputUnifi) LogErrorf(msg string, v ...any) {
 		Msg:  fmt.Sprintf(msg, v...),
 		Tags: map[string]string{"type": "error"},
 	})
+	
 	if u.Logger != nil {
 		u.Logger.LogErrorf(msg, v...)
 	}
@@ -215,6 +217,7 @@ func (u *InputUnifi) LogDebugf(msg string, v ...any) {
 		Msg:  fmt.Sprintf(msg, v...),
 		Tags: map[string]string{"type": "debug"},
 	})
+	
 	if u.Logger != nil {
 		u.Logger.LogDebugf(msg, v...)
 	}

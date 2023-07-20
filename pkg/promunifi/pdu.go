@@ -143,9 +143,11 @@ func (u *promUnifi) exportPDU(r report, d *unifi.PDU) {
 	if d.OutletACPowerConsumption.Txt != "" {
 		r.send([]*metric{{u.Device.OutletACPowerConsumption, gauge, d.OutletACPowerConsumption, labels}})
 	}
+
 	if d.PowerSource.Txt != "" {
 		r.send([]*metric{{u.Device.PowerSource, gauge, d.PowerSource, labels}})
 	}
+
 	if d.TotalMaxPower.Txt != "" {
 		r.send([]*metric{{u.Device.TotalMaxPower, gauge, d.TotalMaxPower, labels}})
 	}
@@ -241,7 +243,6 @@ func (u *promUnifi) exportPDUPrtTable(r report, labels []string, pt []unifi.Port
 func (u *promUnifi) exportPDUOutletTable(r report, labels []string, ot []unifi.OutletTable, oto []unifi.OutletOverride) {
 	// Per-outlet data on a switch
 	for _, o := range ot {
-
 		// Copy labels, and add four new ones.
 		labelOutlet := []string{
 			labels[2] + " Outlet " + o.Index.Txt, o.Index.Txt,
@@ -261,7 +262,6 @@ func (u *promUnifi) exportPDUOutletTable(r report, labels []string, ot []unifi.O
 
 	// Per-outlet data on a switch
 	for _, o := range oto {
-
 		// Copy labels, and add four new ones.
 		labelOutlet := []string{
 			labels[2] + " Outlet Override " + o.Index.Txt, o.Index.Txt,

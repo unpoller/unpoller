@@ -28,14 +28,14 @@ const (
 
 // Config is the plugin's input data.
 type Config struct {
-	Disable   bool          `json:"disable" toml:"disable" xml:"disable" yaml:"disable"`
+	Disable   bool          `json:"disable"    toml:"disable"    xml:"disable"    yaml:"disable"`
 	VerifySSL bool          `json:"verify_ssl" toml:"verify_ssl" xml:"verify_ssl" yaml:"verify_ssl"`
-	URL       string        `json:"url" toml:"url" xml:"url" yaml:"url"`
-	Username  string        `json:"user" toml:"user" xml:"user" yaml:"user"`
-	Password  string        `json:"pass" toml:"pass" xml:"pass" yaml:"pass"`
-	TenantID  string        `json:"tenant_id" toml:"tenant_id" xml:"tenant_id" yaml:"tenant_id"`
-	Interval  cnfg.Duration `json:"interval" toml:"interval" xml:"interval" yaml:"interval"`
-	Timeout   cnfg.Duration `json:"timeout" toml:"timeout" xml:"timeout" yaml:"timeout"`
+	URL       string        `json:"url"        toml:"url"        xml:"url"        yaml:"url"`
+	Username  string        `json:"user"       toml:"user"       xml:"user"       yaml:"user"`
+	Password  string        `json:"pass"       toml:"pass"       xml:"pass"       yaml:"pass"`
+	TenantID  string        `json:"tenant_id"  toml:"tenant_id"  xml:"tenant_id"  yaml:"tenant_id"`
+	Interval  cnfg.Duration `json:"interval"   toml:"interval"   xml:"interval"   yaml:"interval"`
+	Timeout   cnfg.Duration `json:"timeout"    toml:"timeout"    xml:"timeout"    yaml:"timeout"`
 }
 
 // Loki is the main library struct. This satisfies the poller.Output interface.
@@ -67,12 +67,15 @@ func (l *Loki) Enabled() bool {
 	if l == nil {
 		return false
 	}
+
 	if l.Config == nil {
 		return false
 	}
+
 	if l.URL == "" {
 		return false
 	}
+
 	return !l.Disable
 }
 
@@ -80,12 +83,15 @@ func (l *Loki) DebugOutput() (bool, error) {
 	if l == nil {
 		return true, nil
 	}
+
 	if !l.Enabled() {
 		return true, nil
 	}
+
 	if err := l.ValidateConfig(); err != nil {
 		return false, err
 	}
+
 	return true, nil
 }
 
@@ -94,12 +100,15 @@ func (l *Loki) Run(collect poller.Collect) error {
 	l.Collect = collect
 	if !l.Enabled() {
 		l.LogDebugf("Loki config missing (or disabled), Loki output disabled!")
+
 		return nil
 	}
+
 	l.Logf("Loki enabled")
 
 	if err := l.ValidateConfig(); err != nil {
 		l.LogErrorf("invalid loki config")
+
 		return err
 	}
 
@@ -126,6 +135,7 @@ func (l *Loki) ValidateConfig() error {
 		pass, err := os.ReadFile(strings.TrimPrefix(l.Password, "file://"))
 		if err != nil {
 			l.LogErrorf("Reading Loki Password File: %v", err)
+			
 			return fmt.Errorf("error reading password file")
 		}
 
@@ -135,6 +145,7 @@ func (l *Loki) ValidateConfig() error {
 	l.last = time.Now().Add(-l.Interval.Duration)
 	l.client = l.httpClient()
 	l.URL = strings.TrimRight(l.URL, "/") // gets a path appended to it later.
+
 	return nil
 }
 
@@ -142,6 +153,7 @@ func (l *Loki) ValidateConfig() error {
 // This is started by Run().
 func (l *Loki) PollController() {
 	interval := l.Interval.Round(time.Second)
+
 	l.Logf("Loki Event collection started, interval: %v, URL: %s", interval, l.URL)
 
 	ticker := time.NewTicker(interval)
@@ -149,6 +161,7 @@ func (l *Loki) PollController() {
 		events, err := l.Collect.Events(&poller.Filter{Name: InputName})
 		if err != nil {
 			l.LogErrorf("event fetch for Loki failed: %v", err)
+
 			continue
 		}
 
@@ -172,6 +185,7 @@ func (l *Loki) ProcessEvents(report *Report, events *poller.Events) error {
 	}
 
 	l.last = report.Start
+
 	l.Logf("Events sent to Loki. %v", report)
 
 	return nil

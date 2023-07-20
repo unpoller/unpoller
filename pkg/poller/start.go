@@ -26,6 +26,7 @@ func (u *UnifiPoller) Start() error {
 
 	if u.Flags.ShowVer {
 		fmt.Println(version.Print(AppName))
+
 		return nil // don't run anything else w/ version request.
 	}
 
@@ -53,7 +54,9 @@ func (u *UnifiPoller) Start() error {
 		if err != nil {
 			os.Exit(1)
 		}
+
 		log.Fatal("Failed debug checks")
+		
 		return err
 	}
 

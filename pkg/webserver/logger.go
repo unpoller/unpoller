@@ -12,6 +12,7 @@ func (s *Server) Logf(msg string, v ...any) {
 		Msg:  fmt.Sprintf(msg, v...),
 		Tags: map[string]string{"type": "info"},
 	})
+
 	if s.Collect != nil {
 		s.Collect.Logf(msg, v...)
 	}
@@ -24,6 +25,7 @@ func (s *Server) LogErrorf(msg string, v ...any) {
 		Msg:  fmt.Sprintf(msg, v...),
 		Tags: map[string]string{"type": "error"},
 	})
+
 	if s.Collect != nil {
 		s.Collect.LogErrorf(msg, v...)
 	}
@@ -36,6 +38,7 @@ func (s *Server) LogDebugf(msg string, v ...any) {
 		Msg:  fmt.Sprintf(msg, v...),
 		Tags: map[string]string{"type": "debug"},
 	})
+
 	if s.Collect != nil {
 		s.Collect.LogDebugf(msg, v...)
 	}

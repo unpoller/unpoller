@@ -17,7 +17,7 @@ func (s *Server) handleIndex(w http.ResponseWriter, r *http.Request) {
 }
 
 // Arbitrary /health handler.
-func (s *Server) handleHealth(w http.ResponseWriter, r *http.Request) {
+func (s *Server) handleHealth(w http.ResponseWriter, _ *http.Request) {
 	s.handleDone(w, []byte("OK"), mimeHTML)
 }
 
@@ -64,6 +64,7 @@ func (s *Server) handleOutput(w http.ResponseWriter, r *http.Request) {
 	c := s.plugins.getOutput(vars["output"])
 	if c == nil {
 		s.handleMissing(w, r)
+
 		return
 	}
 
@@ -100,6 +101,7 @@ func (s *Server) handleInput(w http.ResponseWriter, r *http.Request) { //nolint:
 	c := s.plugins.getInput(vars["input"])
 	if c == nil {
 		s.handleMissing(w, r)
+
 		return
 	}
 

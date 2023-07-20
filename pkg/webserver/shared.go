@@ -24,6 +24,7 @@ func (s *Server) basicAuth(handler http.HandlerFunc) http.HandlerFunc {
 	return s.handleLog(func(w http.ResponseWriter, r *http.Request) {
 		if s.Accounts.PasswordIsCorrect(r.BasicAuth()) {
 			handler(w, r)
+
 			return
 		}
 
@@ -41,6 +42,7 @@ func (s *Server) handleLog(handler http.HandlerFunc) http.HandlerFunc {
 
 		// Use custom ResponseWriter to catch and log response data.
 		response := &ResponseWriter{Writer: w, Start: time.Now()}
+
 		handler(response, r) // Run provided handler with custom ResponseWriter.
 
 		user, _, _ := r.BasicAuth()
@@ -67,7 +69,7 @@ func (s *Server) handleLog(handler http.HandlerFunc) http.HandlerFunc {
 }
 
 // handleMissing returns a blank 404.
-func (s *Server) handleMissing(w http.ResponseWriter, r *http.Request) {
+func (s *Server) handleMissing(w http.ResponseWriter, _ *http.Request) {
 	w.Header().Set("Content-Type", mimeHTML)
 	w.WriteHeader(http.StatusNotFound)
 	_, _ = w.Write([]byte("404 page not found\n"))
@@ -93,6 +95,7 @@ func (s *Server) handleJSON(w http.ResponseWriter, data any) {
 	b, err := json.Marshal(data)
 	if err != nil {
 		s.handleError(w, err)
+
 		return
 	}
 
