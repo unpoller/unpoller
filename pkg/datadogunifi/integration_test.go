@@ -24,7 +24,6 @@ type mockValue struct {
 // metrics as expected with the correct types
 type mockStatsd struct {
 	sync.RWMutex
-
 	gauges        map[string]mockValue
 	counts        map[string]mockValue
 	histograms    map[string]mockValue
