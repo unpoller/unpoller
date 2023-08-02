@@ -501,7 +501,7 @@ brews:
       - unifi-poller
     license: MIT
     service: |
-      run [opt_bin/"unpoller" --config etc/"unpoller/up.conf"]
+      run [opt_bin/"unpoller", "--config", etc/"unpoller/up.conf"]
       keep_alive true
       log_path var/"log/unpoller.log"
       error_log_path var/"log/unpoller.log"
