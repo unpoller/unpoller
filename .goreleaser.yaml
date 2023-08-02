@@ -500,29 +500,11 @@ brews:
     conflicts:
       - unifi-poller
     license: MIT
-    plist: |
-      <?xml version="1.0" encoding="UTF-8"?>
-      <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-      <plist version="1.0">
-        <dict>
-            <key>Label</key>
-            <string>#{plist_name}</string>
-            <key>ProgramArguments</key>
-            <array>
-                <string>#{bin}/unpoller</string>
-                <string>--config</string>
-                <string>#{etc}/unpoller/up.conf</string>
-            </array>
-            <key>RunAtLoad</key>
-            <true/>
-            <key>KeepAlive</key>
-            <true/>
-            <key>StandardErrorPath</key>
-            <string>#{var}/log/unpoller.log</string>
-            <key>StandardOutPath</key>
-            <string>#{var}/log/unpoller.log</string>
-        </dict>
-      </plist>
+    service: |
+      run [opt_bin/"unpoller" --config etc/"unpoller/up.conf"]
+      keep_alive true
+      log_path var/"log/unpoller.log"
+      error_log_path var/"log/unpoller.log"
     url_template: "https://github.com/unpoller/unpoller/releases/download/{{ .Tag }}/{{ .ArtifactName }}"
     test: |
       assert_match "unpoller v#{version}", shell_output("#{bin}/unpoller -v 2>&1", 2)
