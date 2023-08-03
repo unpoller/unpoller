@@ -10,7 +10,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/unpoller/unpoller/pkg/datadogunifi"
-	"github.com/unpoller/unpoller/pkg/testutil"
+	"github.com/unpoller/unpoller/pkg/unittest"
 	"golift.io/cnfg"
 	"gopkg.in/yaml.v3"
 )
@@ -199,7 +199,7 @@ func TestDataDogUnifiIntegration(t *testing.T) {
 	err = yaml.Unmarshal(yamlFile, &testExpectationsData)
 	require.NoError(t, err)
 
-	testRig := testutil.NewTestSetup(t)
+	testRig := unittest.NewTestSetup(t)
 	defer testRig.Close()
 
 	mockCapture := &mockStatsd{
@@ -216,7 +216,7 @@ func TestDataDogUnifiIntegration(t *testing.T) {
 	u := datadogunifi.DatadogUnifi{
 		Datadog: &datadogunifi.Datadog{
 			Config: &datadogunifi.Config{
-				Enable:   testutil.PBool(true),
+				Enable:   unittest.PBool(true),
 				Interval: cnfg.Duration{Duration: time.Hour},
 			},
 		},
@@ -233,8 +233,8 @@ func TestDataDogUnifiIntegration(t *testing.T) {
 	// gauges
 	assert.Equal(t, len(testExpectationsData.Gauges), len(mockCapture.gauges))
 
-	expectedKeys := testutil.NewSetFromSlice[string](testExpectationsData.Gauges)
-	foundKeys := testutil.NewSetFromMap[string](mockCapture.gauges)
+	expectedKeys := unittest.NewSetFromSlice[string](testExpectationsData.Gauges)
+	foundKeys := unittest.NewSetFromMap[string](mockCapture.gauges)
 	additions, deletions := expectedKeys.Difference(foundKeys)
 	assert.Len(t, additions, 0)
 	assert.Len(t, deletions, 0)
@@ -242,8 +242,8 @@ func TestDataDogUnifiIntegration(t *testing.T) {
 	// counts
 	assert.Len(t, mockCapture.counts, 12)
 
-	expectedKeys = testutil.NewSetFromSlice[string](testExpectationsData.Counts)
-	foundKeys = testutil.NewSetFromMap[string](mockCapture.counts)
+	expectedKeys = unittest.NewSetFromSlice[string](testExpectationsData.Counts)
+	foundKeys = unittest.NewSetFromMap[string](mockCapture.counts)
 	additions, deletions = expectedKeys.Difference(foundKeys)
 	assert.Len(t, additions, 0)
 	assert.Len(t, deletions, 0)
@@ -251,8 +251,8 @@ func TestDataDogUnifiIntegration(t *testing.T) {
 	// timings
 	assert.Len(t, mockCapture.timings, 2)
 
-	expectedKeys = testutil.NewSetFromSlice[string](testExpectationsData.Timings)
-	foundKeys = testutil.NewSetFromMap[string](mockCapture.timings)
+	expectedKeys = unittest.NewSetFromSlice[string](testExpectationsData.Timings)
+	foundKeys = unittest.NewSetFromMap[string](mockCapture.timings)
 	additions, deletions = expectedKeys.Difference(foundKeys)
 	assert.Len(t, additions, 0)
 	assert.Len(t, deletions, 0)
@@ -260,8 +260,8 @@ func TestDataDogUnifiIntegration(t *testing.T) {
 	// histograms
 	assert.Len(t, mockCapture.histograms, 0)
 
-	expectedKeys = testutil.NewSetFromSlice[string](testExpectationsData.Histograms)
-	foundKeys = testutil.NewSetFromMap[string](mockCapture.histograms)
+	expectedKeys = unittest.NewSetFromSlice[string](testExpectationsData.Histograms)
+	foundKeys = unittest.NewSetFromMap[string](mockCapture.histograms)
 	additions, deletions = expectedKeys.Difference(foundKeys)
 	assert.Len(t, additions, 0)
 	assert.Len(t, deletions, 0)
@@ -269,8 +269,8 @@ func TestDataDogUnifiIntegration(t *testing.T) {
 	// distributions
 	assert.Len(t, mockCapture.distributions, 0)
 
-	expectedKeys = testutil.NewSetFromSlice[string](testExpectationsData.Distributions)
-	foundKeys = testutil.NewSetFromMap[string](mockCapture.distributions)
+	expectedKeys = unittest.NewSetFromSlice[string](testExpectationsData.Distributions)
+	foundKeys = unittest.NewSetFromMap[string](mockCapture.distributions)
 	additions, deletions = expectedKeys.Difference(foundKeys)
 	assert.Len(t, additions, 0)
 	assert.Len(t, deletions, 0)
@@ -278,8 +278,8 @@ func TestDataDogUnifiIntegration(t *testing.T) {
 	// sets
 	assert.Len(t, mockCapture.sets, 0)
 
-	expectedKeys = testutil.NewSetFromSlice[string](testExpectationsData.Sets)
-	foundKeys = testutil.NewSetFromMap[string](mockCapture.sets)
+	expectedKeys = unittest.NewSetFromSlice[string](testExpectationsData.Sets)
+	foundKeys = unittest.NewSetFromMap[string](mockCapture.sets)
 	additions, deletions = expectedKeys.Difference(foundKeys)
 	assert.Len(t, additions, 0)
 	assert.Len(t, deletions, 0)
@@ -291,8 +291,8 @@ func TestDataDogUnifiIntegration(t *testing.T) {
 	// service checks
 	assert.Len(t, mockCapture.checks, 0)
 
-	expectedKeys = testutil.NewSetFromSlice[string](testExpectationsData.ServiceChecks)
-	foundKeys = testutil.NewSetFromSlice[string](mockCapture.checks)
+	expectedKeys = unittest.NewSetFromSlice[string](testExpectationsData.ServiceChecks)
+	foundKeys = unittest.NewSetFromSlice[string](mockCapture.checks)
 	additions, deletions = expectedKeys.Difference(foundKeys)
 	assert.Len(t, additions, 0)
 	assert.Len(t, deletions, 0)

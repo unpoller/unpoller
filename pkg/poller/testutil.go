@@ -11,8 +11,6 @@ type TestCollector struct {
 	poller *Poller
 }
 
-var _ Collect = &TestCollector{}
-
 func NewTestCollector(l testLogger) *TestCollector {
 	return &TestCollector{
 		Logger: NewTestLogger(l),

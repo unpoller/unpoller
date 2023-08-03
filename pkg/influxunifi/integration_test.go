@@ -13,7 +13,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/unpoller/unpoller/pkg/influxunifi"
-	"github.com/unpoller/unpoller/pkg/testutil"
+	"github.com/unpoller/unpoller/pkg/unittest"
 	"golift.io/cnfg"
 	"gopkg.in/yaml.v3"
 )
@@ -164,7 +164,7 @@ func TestInfluxV1Integration(t *testing.T) {
 	err = yaml.Unmarshal(yamlFile, &testExpectationsData)
 	require.NoError(t, err)
 
-	testRig := testutil.NewTestSetup(t)
+	testRig := unittest.NewTestSetup(t)
 	defer testRig.Close()
 
 	mockCapture := newMockInfluxV1Client()
@@ -189,37 +189,37 @@ func TestInfluxV1Integration(t *testing.T) {
 	// databases
 	assert.Len(t, mockCapture.databases, 1)
 
-	expectedKeys := testutil.NewSetFromSlice[string](testExpectationsData.Databases)
-	foundKeys := testutil.NewSetFromMap[string](mockCapture.databases)
+	expectedKeys := unittest.NewSetFromSlice[string](testExpectationsData.Databases)
+	foundKeys := unittest.NewSetFromMap[string](mockCapture.databases)
 	additions, deletions := expectedKeys.Difference(foundKeys)
 	assert.Len(t, additions, 0)
 	assert.Len(t, deletions, 0)
 
 	// point names
-	assert.Len(t, testutil.NewSetFromMap[string](mockCapture.points).Slice(), len(testExpectationsData.Points))
-	expectedKeys = testutil.NewSetFromMap[string](testExpectationsData.Points)
-	foundKeys = testutil.NewSetFromMap[string](mockCapture.points)
+	assert.Len(t, unittest.NewSetFromMap[string](mockCapture.points).Slice(), len(testExpectationsData.Points))
+	expectedKeys = unittest.NewSetFromMap[string](testExpectationsData.Points)
+	foundKeys = unittest.NewSetFromMap[string](mockCapture.points)
 	additions, deletions = expectedKeys.Difference(foundKeys)
 	assert.Len(t, additions, 0)
 	assert.Len(t, deletions, 0)
 
 	// validate tags and fields per point
-	pointNames := testutil.NewSetFromMap[string](testExpectationsData.Points).Slice()
+	pointNames := unittest.NewSetFromMap[string](testExpectationsData.Points).Slice()
 	sort.Strings(pointNames)
 
 	for _, pointName := range pointNames {
 		expectedContent := testExpectationsData.Points[pointName]
 		foundContent := mockCapture.points[pointName]
 		// check tags left intact
-		expectedKeys = testutil.NewSetFromSlice[string](expectedContent.Tags)
-		foundKeys = testutil.NewSetFromMap[string](foundContent.Tags)
+		expectedKeys = unittest.NewSetFromSlice[string](expectedContent.Tags)
+		foundKeys = unittest.NewSetFromMap[string](foundContent.Tags)
 		additions, deletions = expectedKeys.Difference(foundKeys)
 		assert.Len(t, additions, 0, "point \"%s\" found the following tag keys have a difference!: additions=%+v", pointName, additions)
 		assert.Len(t, deletions, 0, "point \"%s\" found the following tag keys have a difference!: deletions=%+v", pointName, deletions)
 
 		// check field keys intact
-		expectedKeys = testutil.NewSetFromMap[string](expectedContent.Fields)
-		foundKeys = testutil.NewSetFromMap[string](foundContent.Fields)
+		expectedKeys = unittest.NewSetFromMap[string](expectedContent.Fields)
+		foundKeys = unittest.NewSetFromMap[string](foundContent.Fields)
 		additions, deletions = expectedKeys.Difference(foundKeys)
 		assert.Len(
 			t,
@@ -241,7 +241,7 @@ func TestInfluxV1Integration(t *testing.T) {
 		)
 
 		// check field types
-		fieldNames := testutil.NewSetFromMap[string](expectedContent.Fields).Slice()
+		fieldNames := unittest.NewSetFromMap[string](expectedContent.Fields).Slice()
 		sort.Strings(fieldNames)
 
 		for _, fieldName := range fieldNames {

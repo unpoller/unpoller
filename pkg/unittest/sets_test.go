@@ -1,21 +1,21 @@
-package testutil_test
+package unittest_test
 
 import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	"github.com/unpoller/unpoller/pkg/testutil"
+	"github.com/unpoller/unpoller/pkg/unittest"
 )
 
 func TestSets(t *testing.T) {
-	s1 := testutil.NewSetFromSlice[string]([]string{"a", "b", "c", "c"})
+	s1 := unittest.NewSetFromSlice[string]([]string{"a", "b", "c", "c"})
 
 	assert.Len(t, s1.Slice(), 3)
 	assert.Contains(t, s1.Slice(), "a")
 	assert.Contains(t, s1.Slice(), "b")
 	assert.Contains(t, s1.Slice(), "c")
 
-	s2 := testutil.NewSetFromMap[string](map[string]bool{
+	s2 := unittest.NewSetFromMap[string](map[string]bool{
 		"c": true,
 		"d": false,
 		"e": true,
