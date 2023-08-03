@@ -482,7 +482,7 @@ brews:
       - unpoller
       - unpoller-linux-arm
       - unpoller-mac
-    tap:
+    repository:
       owner: golift
       name: homebrew-mugs
       branch: master
@@ -508,7 +508,12 @@ brews:
     url_template: "https://github.com/unpoller/unpoller/releases/download/{{ .Tag }}/{{ .ArtifactName }}"
     test: |
       assert_match "unpoller v#{version}", shell_output("#{bin}/unpoller -v 2>&1", 2)
-    
+    install: |
+      bin.install "unpoller"
+      etc.mkdir "unpoller"
+      etc.install "examples/up.conf" => "unpoller/up.conf.example"
+    post_install: |
+      etc.install "examples/up.conf" => "unpoller/up.conf"
 
 publishers:
   - name: "packagecloud-publisher"
