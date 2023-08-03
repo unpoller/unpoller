@@ -14,6 +14,7 @@ func (l *Loki) Logf(msg string, v ...any) {
 		Msg:  fmt.Sprintf(msg, v...),
 		Tags: map[string]string{"type": "info"},
 	})
+	
 	if l.Collect != nil {
 		l.Collect.Logf(msg, v...)
 	}
@@ -26,6 +27,7 @@ func (l *Loki) LogErrorf(msg string, v ...any) {
 		Msg:  fmt.Sprintf(msg, v...),
 		Tags: map[string]string{"type": "error"},
 	})
+	
 	if l.Collect != nil {
 		l.Collect.LogErrorf(msg, v...)
 	}
@@ -38,6 +40,7 @@ func (l *Loki) LogDebugf(msg string, v ...any) {
 		Msg:  fmt.Sprintf(msg, v...),
 		Tags: map[string]string{"type": "debug"},
 	})
+	
 	if l.Collect != nil {
 		l.Collect.LogDebugf(msg, v...)
 	}

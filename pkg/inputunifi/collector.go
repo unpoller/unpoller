@@ -50,6 +50,7 @@ func (u *InputUnifi) dynamicController(filter *poller.Filter) (*poller.Metrics, 
 
 		if err := u.getUnifi(c); err != nil {
 			u.logController(c)
+
 			return nil, fmt.Errorf("authenticating to %s: %w", filter.Path, err)
 		}
 
@@ -60,6 +61,8 @@ func (u *InputUnifi) dynamicController(filter *poller.Filter) (*poller.Metrics, 
 }
 
 func (u *InputUnifi) collectController(c *Controller) (*poller.Metrics, error) {
+	u.LogDebugf("Collecting controller data: %s (%s)", c.URL, c.ID)
+
 	if u.isNill(c) {
 		u.Logf("Re-authenticating to UniFi Controller: %s", c.URL)
 
@@ -84,6 +87,7 @@ func (u *InputUnifi) collectController(c *Controller) (*poller.Metrics, error) {
 func (u *InputUnifi) pollController(c *Controller) (*poller.Metrics, error) {
 	u.RLock()
 	defer u.RUnlock()
+	u.LogDebugf("Polling controller: %s (%s)", c.URL, c.ID)
 
 	// Get the sites we care about.
 	sites, err := u.getFilteredSites(c)

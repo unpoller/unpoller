@@ -37,10 +37,12 @@ func (u *DatadogUnifi) batchClient(r report, s *unifi.Client) { // nolint: funle
 		"bssid":        s.Bssid,
 		"ip":           s.IP,
 	}
+	
 	powerSaveEnabled := 0.0
 	if s.PowersaveEnabled.Val {
 		powerSaveEnabled = 1.0
 	}
+	
 	data := map[string]float64{
 		"anomalies":         s.Anomalies.Val,
 		"channel":           s.Channel.Val,
@@ -84,6 +86,7 @@ func (u *DatadogUnifi) batchClientDPI(r report, v any, appTotal, catTotal totals
 	s, ok := v.(*unifi.DPITable)
 	if !ok {
 		u.LogErrorf("invalid type given to batchClientDPI: %T", v)
+
 		return
 	}
 

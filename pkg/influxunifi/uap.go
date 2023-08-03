@@ -1,6 +1,8 @@
 package influxunifi
 
 import (
+	"strings"
+
 	"github.com/unpoller/unifi"
 )
 
@@ -203,7 +205,7 @@ func (u *InfluxUnifi) processRadTable(r report, t map[string]string, rt unifi.Ra
 		}
 
 		for _, t := range rts {
-			if t.Name == p.Name {
+			if strings.EqualFold(t.Name, p.Name) {
 				fields["ast_be_xmit"] = t.AstBeXmit.Val
 				fields["channel"] = t.Channel.Val
 				fields["cu_self_rx"] = t.CuSelfRx.Val

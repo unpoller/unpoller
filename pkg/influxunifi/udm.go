@@ -1,7 +1,6 @@
 package influxunifi
 
 import (
-	"strconv"
 	"strings"
 
 	"github.com/unpoller/unifi"
@@ -23,6 +22,10 @@ func Combine(in ...map[string]any) map[string]any {
 	return out
 }
 
+func sanitizeName(v string) string {
+	return strings.ToLower(strings.ReplaceAll(strings.ReplaceAll(strings.ReplaceAll(v, " ", "_"), ")", ""), "(", ""))
+}
+
 // batchSysStats is used by all device types.
 func (u *InfluxUnifi) batchSysStats(s unifi.SysStats, ss unifi.SystemStats) map[string]any {
 	m := map[string]any{
@@ -38,11 +41,10 @@ func (u *InfluxUnifi) batchSysStats(s unifi.SysStats, ss unifi.SystemStats) map[
 	}
 
 	for k, v := range ss.Temps {
-		temp, _ := strconv.Atoi(strings.Split(v, " ")[0])
-		k = strings.ReplaceAll(strings.ReplaceAll(strings.ReplaceAll(k, " ", "_"), ")", ""), "(", "")
+		temp := v.CelsiusInt64()
 
 		if temp != 0 && k != "" {
-			m["temp_"+strings.ToLower(k)] = temp
+			m["temp_"+sanitizeName(k)] = temp
 		}
 	}
 
@@ -53,7 +55,7 @@ func (u *InfluxUnifi) batchUDMtemps(temps []unifi.Temperature) map[string]any {
 	output := make(map[string]any)
 
 	for _, t := range temps {
-		output["temp_"+t.Name] = t.Value
+		output["temp_"+sanitizeName(t.Name)] = t.Value
 	}
 
 	return output
@@ -63,13 +65,13 @@ func (u *InfluxUnifi) batchUDMstorage(storage []*unifi.Storage) map[string]any {
 	output := make(map[string]any)
 
 	for _, t := range storage {
-		output["storage_"+t.Name+"_size"] = t.Size.Val
-		output["storage_"+t.Name+"_used"] = t.Used.Val
+		output["storage_"+sanitizeName(t.Name)+"_size"] = t.Size.Val
+		output["storage_"+sanitizeName(t.Name)+"_used"] = t.Used.Val
 
 		if t.Size.Val != 0 && t.Used.Val != 0 && t.Used.Val < t.Size.Val {
-			output["storage_"+t.Name+"_pct"] = t.Used.Val / t.Size.Val * 100 //nolint:gomnd
+			output["storage_"+sanitizeName(t.Name)+"_pct"] = t.Used.Val / t.Size.Val * 100 //nolint:gomnd
 		} else {
-			output["storage_"+t.Name+"_pct"] = 0
+			output["storage_"+sanitizeName(t.Name)+"_pct"] = 0
 		}
 	}
 

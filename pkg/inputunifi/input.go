@@ -34,32 +34,32 @@ type InputUnifi struct {
 // Controller represents the configuration for a UniFi Controller.
 // Each polled controller may have its own configuration.
 type Controller struct {
-	VerifySSL  *bool        `json:"verify_ssl" toml:"verify_ssl" xml:"verify_ssl" yaml:"verify_ssl"`
+	VerifySSL  *bool        `json:"verify_ssl"     toml:"verify_ssl"     xml:"verify_ssl"     yaml:"verify_ssl"`
 	SaveAnomal *bool        `json:"save_anomalies" toml:"save_anomalies" xml:"save_anomalies" yaml:"save_anomalies"`
-	SaveAlarms *bool        `json:"save_alarms" toml:"save_alarms" xml:"save_alarms" yaml:"save_alarms"`
-	SaveEvents *bool        `json:"save_events" toml:"save_events" xml:"save_events" yaml:"save_events"`
-	SaveIDS    *bool        `json:"save_ids" toml:"save_ids" xml:"save_ids" yaml:"save_ids"`
-	SaveDPI    *bool        `json:"save_dpi" toml:"save_dpi" xml:"save_dpi" yaml:"save_dpi"`
-	SaveRogue  *bool        `json:"save_rogue" toml:"save_rogue" xml:"save_rogue" yaml:"save_rogue"`
-	HashPII    *bool        `json:"hash_pii" toml:"hash_pii" xml:"hash_pii" yaml:"hash_pii"`
-	DropPII    *bool        `json:"drop_pii" toml:"drop_pii" xml:"drop_pii" yaml:"drop_pii"`
-	SaveSites  *bool        `json:"save_sites" toml:"save_sites" xml:"save_sites" yaml:"save_sites"`
-	CertPaths  []string     `json:"ssl_cert_paths" toml:"ssl_cert_paths" xml:"ssl_cert_path" yaml:"ssl_cert_paths"`
-	User       string       `json:"user" toml:"user" xml:"user" yaml:"user"`
-	Pass       string       `json:"pass" toml:"pass" xml:"pass" yaml:"pass"`
-	URL        string       `json:"url" toml:"url" xml:"url" yaml:"url"`
-	Sites      []string     `json:"sites" toml:"sites" xml:"site" yaml:"sites"`
-	Unifi      *unifi.Unifi `json:"-" toml:"-" xml:"-" yaml:"-"`
+	SaveAlarms *bool        `json:"save_alarms"    toml:"save_alarms"    xml:"save_alarms"    yaml:"save_alarms"`
+	SaveEvents *bool        `json:"save_events"    toml:"save_events"    xml:"save_events"    yaml:"save_events"`
+	SaveIDS    *bool        `json:"save_ids"       toml:"save_ids"       xml:"save_ids"       yaml:"save_ids"`
+	SaveDPI    *bool        `json:"save_dpi"       toml:"save_dpi"       xml:"save_dpi"       yaml:"save_dpi"`
+	SaveRogue  *bool        `json:"save_rogue"     toml:"save_rogue"     xml:"save_rogue"     yaml:"save_rogue"`
+	HashPII    *bool        `json:"hash_pii"       toml:"hash_pii"       xml:"hash_pii"       yaml:"hash_pii"`
+	DropPII    *bool        `json:"drop_pii"       toml:"drop_pii"       xml:"drop_pii"       yaml:"drop_pii"`
+	SaveSites  *bool        `json:"save_sites"     toml:"save_sites"     xml:"save_sites"     yaml:"save_sites"`
+	CertPaths  []string     `json:"ssl_cert_paths" toml:"ssl_cert_paths" xml:"ssl_cert_path"  yaml:"ssl_cert_paths"`
+	User       string       `json:"user"           toml:"user"           xml:"user"           yaml:"user"`
+	Pass       string       `json:"pass"           toml:"pass"           xml:"pass"           yaml:"pass"`
+	URL        string       `json:"url"            toml:"url"            xml:"url"            yaml:"url"`
+	Sites      []string     `json:"sites"          toml:"sites"          xml:"site"           yaml:"sites"`
+	Unifi      *unifi.Unifi `json:"-"              toml:"-"              xml:"-"              yaml:"-"`
 	ID         string       `json:"id,omitempty"` // this is an output, not an input.
 }
 
 // Config contains our configuration data.
 type Config struct {
 	sync.RWMutex               // locks the Unifi struct member when re-authing to unifi.
-	Default      Controller    `json:"defaults" toml:"defaults" xml:"default" yaml:"defaults"`
-	Disable      bool          `json:"disable" toml:"disable" xml:"disable,attr" yaml:"disable"`
-	Dynamic      bool          `json:"dynamic" toml:"dynamic" xml:"dynamic,attr" yaml:"dynamic"`
-	Controllers  []*Controller `json:"controllers" toml:"controller" xml:"controller" yaml:"controllers"`
+	Default      Controller    `json:"defaults"    toml:"defaults"   xml:"default"      yaml:"defaults"`
+	Disable      bool          `json:"disable"     toml:"disable"    xml:"disable,attr" yaml:"disable"`
+	Dynamic      bool          `json:"dynamic"     toml:"dynamic"    xml:"dynamic,attr" yaml:"dynamic"`
+	Controllers  []*Controller `json:"controllers" toml:"controller" xml:"controller"   yaml:"controllers"`
 }
 
 // Metrics is simply a useful container for everything.
@@ -132,6 +132,7 @@ func (u *InputUnifi) getUnifi(c *Controller) error {
 	})
 	if err != nil {
 		c.Unifi = nil
+		
 		return fmt.Errorf("unifi controller: %w", err)
 	}
 
@@ -166,6 +167,7 @@ func (u *InputUnifi) checkSites(c *Controller) error {
 
 	if StringInSlice("all", c.Sites) {
 		c.Sites = []string{"all"}
+
 		return nil
 	}
 
@@ -176,6 +178,7 @@ FIRST:
 		for _, site := range sites {
 			if s == site.Name {
 				keep = append(keep, s)
+
 				continue FIRST
 			}
 		}

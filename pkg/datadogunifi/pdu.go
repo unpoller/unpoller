@@ -45,7 +45,9 @@ func (u *DatadogUnifi) batchPDU(r report, s *unifi.PDU) {
 			"user_num_sta":                s.UserNumSta.Val,
 			"upgradeable":                 boolToFloat64(s.Upgradeable.Val),
 		})
+	
 	r.addCount(pduT)
+	
 	metricName := metricNamespace("pdu")
 	reportGaugeForFloat64Map(r, metricName, data, tags)
 

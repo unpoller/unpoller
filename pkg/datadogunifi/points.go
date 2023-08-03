@@ -14,6 +14,7 @@ func tagMapToTags(tagMap map[string]string) []string {
 	for k, v := range tagMap {
 		tags = append(tags, tag(k, v))
 	}
+
 	return tags
 }
 
@@ -22,6 +23,7 @@ func tagMapToSimpleStrings(tagMap map[string]string) string {
 	for k, v := range tagMap {
 		result = fmt.Sprintf("%s%s=\"%v\", ", result, k, v)
 	}
+
 	return strings.TrimRight(result, ", ")
 }
 
@@ -52,5 +54,6 @@ func boolToFloat64(v bool) float64 {
 	if v {
 		return 1.0
 	}
+
 	return 0.0
 }

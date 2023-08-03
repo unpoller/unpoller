@@ -26,6 +26,7 @@ func (u *InputUnifi) Initialize(l poller.Logger) error {
 
 	if u.Logger = l; u.Disable {
 		u.Logf("UniFi input plugin disabled or missing configuration!")
+		
 		return nil
 	}
 
@@ -41,6 +42,7 @@ func (u *InputUnifi) Initialize(l poller.Logger) error {
 	for i, c := range u.Controllers {
 		if err := u.getUnifi(u.setControllerDefaults(c)); err != nil {
 			u.LogErrorf("Controller %d of %d Auth or Connection Error, retrying: %v", i+1, len(u.Controllers), err)
+
 			continue
 		}
 
@@ -61,6 +63,7 @@ func (u *InputUnifi) DebugInput() (bool, error) {
 	if u == nil || u.Config == nil {
 		return true, nil
 	}
+	
 	if u.setDefaults(&u.Default); len(u.Controllers) == 0 && !u.Dynamic {
 		u.Controllers = []*Controller{&u.Default}
 	}
@@ -71,27 +74,35 @@ func (u *InputUnifi) DebugInput() (bool, error) {
 	}
 
 	allOK := true
+
 	var allErrors error
+
 	for i, c := range u.Controllers {
 		if err := u.getUnifi(u.setControllerDefaults(c)); err != nil {
 			u.LogErrorf("Controller %d of %d Auth or Connection Error, retrying: %v", i+1, len(u.Controllers), err)
+			
 			allOK = false
+
 			if allErrors != nil {
 				allErrors = fmt.Errorf("%v: %w", err, allErrors)
 			} else {
 				allErrors = err
 			}
+
 			continue
 		}
 
 		if err := u.checkSites(c); err != nil {
 			u.LogErrorf("checking sites on %s: %v", c.URL, err)
+			
 			allOK = false
+
 			if allErrors != nil {
 				allErrors = fmt.Errorf("%v: %w", err, allErrors)
 			} else {
 				allErrors = err
 			}
+
 			continue
 		}
 

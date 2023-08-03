@@ -1,7 +1,6 @@
 package promunifi
 
 import (
-	"strconv"
 	"strings"
 
 	"github.com/prometheus/client_golang/prometheus"
@@ -87,7 +86,7 @@ func (u *promUnifi) exportUSG(r report, d *unifi.USG) {
 	}
 
 	for k, v := range d.SystemStats.Temps {
-		temp, _ := strconv.ParseInt(strings.Split(v, " ")[0], 10, 64)
+		temp := v.CelsiusInt64()
 		k = strings.ReplaceAll(strings.ReplaceAll(strings.ReplaceAll(k, " ", "_"), ")", ""), "(", "")
 
 		if k = strings.ToLower(k); temp != 0 && k != "" {

@@ -1,6 +1,8 @@
 package datadogunifi
 
 import (
+	"strings"
+
 	"github.com/unpoller/unifi"
 )
 
@@ -46,10 +48,6 @@ func (u *DatadogUnifi) batchRogueAP(r report, s *unifi.RogueAP) {
 // batchUAP generates Wireless-Access-Point datapoints for Datadog.
 // These points can be passed directly to datadog.
 func (u *DatadogUnifi) batchUAP(r report, s *unifi.UAP) {
-	if !s.Adopted.Val || s.Locating.Val {
-		return
-	}
-
 	tags := cleanTags(map[string]string{
 		"mac":       s.Mac,
 		"site_name": s.SiteName,
@@ -61,7 +59,10 @@ func (u *DatadogUnifi) batchUAP(r report, s *unifi.UAP) {
 		"type":      s.Type,
 		"ip":        s.IP,
 	})
-	data := CombineFloat64(u.processUAPstats(s.Stat.Ap), u.batchSysStats(s.SysStats, s.SystemStats))
+	data := CombineFloat64(
+		u.processUAPstats(s.Stat.Ap),
+		u.batchSysStats(s.SysStats, s.SystemStats),
+	)
 	data["bytes"] = s.Bytes.Val
 	data["last_seen"] = s.LastSeen.Val
 	data["rx_bytes"] = s.RxBytes.Val
@@ -70,7 +71,9 @@ func (u *DatadogUnifi) batchUAP(r report, s *unifi.UAP) {
 	data["user_num_sta"] = s.UserNumSta.Val
 	data["guest_num_sta"] = s.GuestNumSta.Val
 	data["num_sta"] = s.NumSta.Val
-	data["upgradeable"] = boolToFloat64(s.Upgradable.Val)
+	data["upgradeable"] = s.Upgradable.Float64()
+	data["adopted"] = s.Adopted.Float64()
+	data["locating"] = s.Locating.Float64()
 
 	r.addCount(uapT)
 
@@ -210,7 +213,7 @@ func (u *DatadogUnifi) processRadTable(r report, t map[string]string, rt unifi.R
 		}
 
 		for _, t := range rts {
-			if t.Name == p.Name {
+			if strings.EqualFold(t.Name, p.Name) {
 				data["ast_be_xmit"] = t.AstBeXmit.Val
 				data["channel"] = t.Channel.Val
 				data["cu_self_rx"] = t.CuSelfRx.Val

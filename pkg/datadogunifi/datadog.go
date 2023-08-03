@@ -108,7 +108,7 @@ type Datadog struct {
 // DatadogUnifi is returned by New() after you provide a Config.
 type DatadogUnifi struct {
 	Collector poller.Collect
-	datadog   statsd.ClientInterface
+	Statsd    statsd.ClientInterface
 	LastCheck time.Time
 	*Datadog
 }
@@ -188,19 +188,21 @@ func (u *DatadogUnifi) setConfigDefaults() {
 	if u.AggregationFlushInterval != nil {
 		u.options = append(u.options, statsd.WithAggregationInterval(*u.AggregationFlushInterval))
 	}
-
 }
 
 func (u *DatadogUnifi) Enabled() bool {
 	if u == nil {
 		return false
 	}
+
 	if u.Config == nil {
 		return false
 	}
+
 	if u.Enable == nil {
 		return false
 	}
+
 	return *u.Enable
 }
 
@@ -208,15 +210,20 @@ func (u *DatadogUnifi) DebugOutput() (bool, error) {
 	if u == nil {
 		return true, nil
 	}
+
 	if !u.Enabled() {
 		return true, nil
 	}
+
 	u.setConfigDefaults()
+
 	var err error
-	u.datadog, err = statsd.New(u.Address, u.options...)
+
+	u.Statsd, err = statsd.New(u.Address, u.options...)
 	if err != nil {
 		return false, fmt.Errorf("Error configuration Datadog agent reporting: %+v", err)
 	}
+
 	return true, nil
 }
 
@@ -225,15 +232,19 @@ func (u *DatadogUnifi) Run(c poller.Collect) error {
 	u.Collector = c
 	if !u.Enabled() {
 		u.LogDebugf("DataDog config missing (or disabled), DataDog output disabled!")
+
 		return nil
 	}
+
 	u.Logf("Datadog is enabled")
 	u.setConfigDefaults()
 
 	var err error
-	u.datadog, err = statsd.New(u.Address, u.options...)
+
+	u.Statsd, err = statsd.New(u.Address, u.options...)
 	if err != nil {
 		u.LogErrorf("Error configuration Datadog agent reporting: %+v", err)
+
 		return err
 	}
 
@@ -250,28 +261,37 @@ func (u *DatadogUnifi) PollController() {
 	u.Logf("Everything checks out! Poller started, interval=%+v", interval)
 
 	for u.LastCheck = range ticker.C {
-		metrics, err := u.Collector.Metrics(&poller.Filter{Name: "unifi"})
-		if err != nil {
-			u.LogErrorf("metric fetch for Datadog failed: %v", err)
-			continue
-		}
-
-		events, err := u.Collector.Events(&poller.Filter{Name: "unifi", Dur: interval})
-		if err != nil {
-			u.LogErrorf("event fetch for Datadog failed", err)
-			continue
-		}
-
-		report, err := u.ReportMetrics(metrics, events)
-		if err != nil {
-			// Is the agent down?
-			u.LogErrorf("unable to report metrics and events", err)
-			_ = report.reportCount("unifi.collect.errors", 1, []string{})
-			continue
-		}
-		_ = report.reportCount("unifi.collect.success", 1, []string{})
-		u.LogDatadogReport(report)
+		u.Collect(interval)
 	}
+}
+
+func (u *DatadogUnifi) Collect(interval time.Duration) {
+	metrics, err := u.Collector.Metrics(&poller.Filter{Name: "unifi"})
+	if err != nil {
+		u.LogErrorf("metric fetch for Datadog failed: %v", err)
+
+		return
+	}
+
+	events, err := u.Collector.Events(&poller.Filter{Name: "unifi", Dur: interval})
+	if err != nil {
+		u.LogErrorf("event fetch for Datadog failed", err)
+
+		return
+	}
+
+	report, err := u.ReportMetrics(metrics, events)
+	if err != nil {
+		// Is the agent down?
+		u.LogErrorf("unable to report metrics and events", err)
+
+		_ = report.reportCount("unifi.collect.errors", 1, []string{})
+
+		return
+	}
+
+	_ = report.reportCount("unifi.collect.success", 1, []string{})
+	u.LogDatadogReport(report)
 }
 
 // ReportMetrics batches all device and client data into datadog data points.
@@ -284,13 +304,16 @@ func (u *DatadogUnifi) ReportMetrics(m *poller.Metrics, e *poller.Events) (*Repo
 		Start:     time.Now(),
 		Counts:    &Counts{Val: make(map[item]int)},
 		Collector: u.Collector,
-		client:    u.datadog,
+		client:    u.Statsd,
 	}
+
 	// batch all the points.
 	u.loopPoints(r)
+
 	r.End = time.Now()
 	r.Elapsed = r.End.Sub(r.Start)
 	_ = r.reportTiming("unifi.collector_timing", r.Elapsed, []string{})
+
 	return r, nil
 }
 
@@ -368,6 +391,7 @@ func (u *DatadogUnifi) switchExport(r report, v any) { //nolint:cyclop
 // LogDatadogReport writes a log message after exporting to Datadog.
 func (u *DatadogUnifi) LogDatadogReport(r *Report) {
 	m := r.Metrics
+
 	u.Logf("UniFi Metrics Recorded num_sites=%d num_sites_dpi=%d num_clients=%d num_clients_dpi=%d num_rogue_ap=%d num_devices=%d errors=%v elapsec=%v",
 		len(m.Sites),
 		len(m.SitesDPI),
@@ -378,7 +402,9 @@ func (u *DatadogUnifi) LogDatadogReport(r *Report) {
 		r.Errors,
 		r.Elapsed,
 	)
+
 	metricName := metricNamespace("collector")
+
 	_ = r.reportCount(metricName("num_sites"), int64(len(m.Sites)), u.Tags)
 	_ = r.reportCount(metricName("num_sites_dpi"), int64(len(m.SitesDPI)), u.Tags)
 	_ = r.reportCount(metricName("num_clients"), int64(len(m.Clients)), u.Tags)

@@ -80,20 +80,25 @@ func (u *UnifiPoller) InitializeOutputs() error {
 }
 
 func (u *UnifiPoller) runOutputMethods() (int, chan error) {
-	// Output plugin errors go into this channel.
-	err := make(chan error)
-
 	outputSync.RLock()
 	defer outputSync.RUnlock()
 
+	return runOutputMethods(outputs, u, u)
+}
+
+func runOutputMethods(outputs []*Output, l Logger, c Collect) (int, chan error) {
+	// Output plugin errors go into this channel.
+	err := make(chan error)
+
 	for _, o := range outputs {
 		if o != nil && o.Enabled() {
-			u.LogDebugf("output plugin enabled, starting run loop for %s", o.Name)
+			l.LogDebugf("output plugin enabled, starting run loop for %s", o.Name)
+			
 			go func(o *Output) {
-				err <- o.Run(u) // Run each output plugin
+				err <- o.Run(c) // Run each output plugin
 			}(o)
 		} else {
-			u.LogDebugf("output plugin disabled for %s", o.Name)
+			l.LogDebugf("output plugin disabled for %s", o.Name)
 		}
 	}
 

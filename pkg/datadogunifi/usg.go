@@ -49,6 +49,7 @@ func (u *DatadogUnifi) batchUSG(r report, s *unifi.USG) {
 	r.addCount(usgT)
 
 	metricName := metricNamespace("usg")
+
 	reportGaugeForFloat64Map(r, metricName, data, tags)
 
 	u.batchNetTable(r, tags, s.NetworkTable)
@@ -101,6 +102,7 @@ func (u *DatadogUnifi) batchUSGwans(r report, tags map[string]string, wans ...un
 		if wan.FullDuplex.Val {
 			fullDuplex = 1.0
 		}
+
 		data := map[string]float64{
 			"bytes_r":      wan.BytesR.Val,
 			"full_duplex":  fullDuplex,

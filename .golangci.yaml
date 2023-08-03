@@ -1,0 +1,27 @@
+run:
+  timeout: 3m
+
+linters:
+  enable:
+    - wsl
+    - nlreturn
+    - tagalign
+    - revive
+    - testpackage
+    - errcheck
+    - gosimple
+    - govet
+    - ineffassign
+    - staticcheck
+    - unused
+
+output:
+  sort-results: true
+
+issues:
+  # disable the default limit so we see everything
+  max-same-issues: 0
+  max-issues-per-linter: 0
+  
+  # default enable fix where the linter supports
+  fix: true
