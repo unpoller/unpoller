@@ -7,8 +7,8 @@ import (
 	"strings"
 
 	"github.com/unpoller/unifi"
-	"github.com/unpoller/unpoller/pkg/poller"
-	"github.com/unpoller/unpoller/pkg/webserver"
+	"github.com/kepath/unpoller/pkg/poller"
+	"github.com/kepath/unpoller/pkg/webserver"
 )
 
 var (

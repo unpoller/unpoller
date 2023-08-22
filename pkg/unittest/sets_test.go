@@ -4,7 +4,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	"github.com/unpoller/unpoller/pkg/unittest"
+	"github.com/kepath/unpoller/pkg/unittest"
 )
 
 func TestSets(t *testing.T) {

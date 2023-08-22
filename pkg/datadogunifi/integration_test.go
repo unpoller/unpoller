@@ -9,8 +9,8 @@ import (
 	"github.com/DataDog/datadog-go/statsd"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"github.com/unpoller/unpoller/pkg/datadogunifi"
-	"github.com/unpoller/unpoller/pkg/unittest"
+	"github.com/kepath/unpoller/pkg/datadogunifi"
+	"github.com/kepath/unpoller/pkg/unittest"
 	"golift.io/cnfg"
 	"gopkg.in/yaml.v3"
 )

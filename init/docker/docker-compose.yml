@@ -45,7 +45,7 @@ services:
       - GF_INSTALL_PLUGINS=grafana-clock-panel,natel-discrete-panel,grafana-piechart-panel
   unifi-poller:
     restart: always
-    image: ghcr.io/unpoller/unpoller:${POLLER_TAG}
+    image: ghcr.io/kepath/unpoller:${POLLER_TAG}
     depends_on:
       - grafana
       - influxdb

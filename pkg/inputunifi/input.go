@@ -10,7 +10,7 @@ import (
 	"time"
 
 	"github.com/unpoller/unifi"
-	"github.com/unpoller/unpoller/pkg/poller"
+	"github.com/kepath/unpoller/pkg/poller"
 )
 
 // PluginName is the name of this input plugin.

@@ -4,8 +4,8 @@ import (
 	"testing"
 
 	"github.com/unpoller/unifi/mocks"
-	"github.com/unpoller/unpoller/pkg/inputunifi"
-	"github.com/unpoller/unpoller/pkg/poller"
+	"github.com/kepath/unpoller/pkg/inputunifi"
+	"github.com/kepath/unpoller/pkg/poller"
 )
 
 type TestRig struct {

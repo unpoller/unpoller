@@ -14,8 +14,8 @@ import (
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	promver "github.com/prometheus/common/version"
 	"github.com/unpoller/unifi"
-	"github.com/unpoller/unpoller/pkg/poller"
-	"github.com/unpoller/unpoller/pkg/webserver"
+	"github.com/kepath/unpoller/poller"
+	"github.com/kepath/unpoller/pkg/webserver"
 	"golift.io/version"
 )
 

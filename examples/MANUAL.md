@@ -75,14 +75,14 @@ used to work but no longer does.
 
 Configuration file (up.conf) parameters are documented in the wiki.
 
-*   [https://github.com/unpoller/unpoller/wiki/Configuration](https://github.com/unpoller/unpoller/wiki/Configuration)
+*   [https://github.com/kepath/unpoller/wiki/Configuration](https://github.com/kepath/unpoller/wiki/Configuration)
 
 `Shell Environment Parameters`
 
 This application can be fully configured using shell environment variables.
 Find documentation for this feature on the Docker Wiki page, and the above Configuration wiki.
 
-*   [https://github.com/unpoller/unpoller/wiki/Docker](https://github.com/unpoller/unpoller/wiki/Docker)
+*   [https://github.com/kepath/unpoller/wiki/Docker](https://github.com/kepath/unpoller/wiki/Docker)
 
 GO DURATION
 ---

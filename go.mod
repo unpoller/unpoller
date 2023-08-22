@@ -1,4 +1,4 @@
-module github.com/unpoller/unpoller
+module github.com/kepath/unpoller
 
 go 1.20
 

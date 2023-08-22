@@ -12,8 +12,8 @@ import (
 	influxV1 "github.com/influxdata/influxdb1-client/v2"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"github.com/unpoller/unpoller/pkg/influxunifi"
-	"github.com/unpoller/unpoller/pkg/unittest"
+	"github.com/kepath/unpoller/pkg/influxunifi"
+	"github.com/kepath/unpoller/pkg/unittest"
 	"golift.io/cnfg"
 	"gopkg.in/yaml.v3"
 )

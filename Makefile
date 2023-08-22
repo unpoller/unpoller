@@ -58,14 +58,14 @@ $(shell go env GOPATH)/bin/rsrc:
 	cd /tmp ; go get $(RSRC_BIN) ; go install $(RSRC_BIN)@latest
 
 build-and-release: export DOCKER_REGISTRY = ghcr.io
-build-and-release: export DOCKER_IMAGE_NAME = unpoller/unpoller
+build-and-release: export DOCKER_IMAGE_NAME = kepath/unpoller
 build-and-release: export GPG_SIGNING_KEY = 
 
 bulid-and-release: clean
 	goreleaser release --clean
 
 build: export DOCKER_REGISTRY = ghcr.io
-build: export DOCKER_IMAGE_NAME = unpoller/unpoller
+build: export DOCKER_IMAGE_NAME = kepath/unpoller
 build: export GPG_SIGNING_KEY = 
 
 build: clean

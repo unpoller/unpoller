@@ -369,7 +369,7 @@ nfpms:
           owner: unpoller
           group: unpoller
       - src: unpoller_manual.html
-        dst: /usr/share/doc/unpoller/unpoller_manual.html
+        dst: /usr/share/doc/kepath/unpoller_manual.html
         file_info:
           mode: 0644
           owner: unpoller
@@ -505,7 +505,7 @@ brews:
       keep_alive true
       log_path var/"log/unpoller.log"
       error_log_path var/"log/unpoller.log"
-    url_template: "https://github.com/unpoller/unpoller/releases/download/{{ .Tag }}/{{ .ArtifactName }}"
+    url_template: "https://github.com/kepath/unpoller/releases/download/{{ .Tag }}/{{ .ArtifactName }}"
     test: |
       assert_match "unpoller v#{version}", shell_output("#{bin}/unpoller -v 2>&1", 2)
     install: |

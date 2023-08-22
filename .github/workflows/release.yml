@@ -17,7 +17,7 @@ jobs:
     env:
       DOCKER_CLI_EXPERIMENTAL: "enabled"
       DOCKER_REGISTRY: "ghcr.io"
-      DOCKER_IMAGE_NAME: "unpoller/unpoller"
+      DOCKER_IMAGE_NAME: "kepath/unpoller"
     steps:
       - uses: actions/checkout@v3
         with:

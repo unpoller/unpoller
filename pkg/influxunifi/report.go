@@ -8,7 +8,7 @@ import (
 	influxV2API "github.com/influxdata/influxdb-client-go/v2/api"
 	influxV2Write "github.com/influxdata/influxdb-client-go/v2/api/write"
 	influxV1 "github.com/influxdata/influxdb1-client/v2"
-	"github.com/unpoller/unpoller/pkg/poller"
+	"github.com/kepath/unpoller/pkg/poller"
 )
 
 // Report is returned to the calling procedure after everything is processed.

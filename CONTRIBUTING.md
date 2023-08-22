@@ -8,7 +8,7 @@ making changes to it.
 
 ## Github Actions
 
-This repo is tested, built and deployed by [Github Actions](https://github.com/unpoller/unpoller/actions).
+This repo is tested, built and deployed by [Github Actions](https://github.com/kepath/unpoller/actions).
 
 The [.github/](.github/) directory in this repo coordinates the entire process.
 As long as this document is kept up to date, this is what github does:
@@ -24,7 +24,7 @@ As long as this document is kept up to date, this is what github does:
 -      Builds numerous platform docker images and uploads them
 
 After the release is built and Docker image tested:
--   Deploys the release assets to the tagged release on [GitHub releases](https://github.com/unpoller/unpoller/releases)
+-   Deploys the release assets to the tagged release on [GitHub releases](https://github.com/kepath/unpoller/releases)
 
 ### Homebrew
 

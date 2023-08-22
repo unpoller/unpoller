@@ -85,7 +85,7 @@
   # tags = [ "customer:abc_corp" ]
 
   # For more advanced options for very large amount of data collected see the upstream
-  # github.com/unpoller/unpoller/pkg/datadogunifi repository README.
+  # github.com/kepath/unpoller/pkg/datadogunifi repository README.
 
 
 # Unpoller has an optional web server. To turn it on, set enable to true. If you
