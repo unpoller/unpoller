@@ -13,7 +13,7 @@ require (
 	github.com/stretchr/testify v1.8.4
 	golang.org/x/crypto v0.12.0
 	golang.org/x/net v0.14.0
-	golang.org/x/term v0.11.0
+	golang.org/x/term v0.12.0
 	golift.io/cnfg v0.2.2
 	golift.io/cnfgfile v0.0.0-20220509075834-08755d9ef3f5
 	golift.io/version v0.0.2
@@ -40,7 +40,7 @@ require (
 	github.com/prometheus/client_model v0.4.0 // indirect
 	github.com/prometheus/procfs v0.10.1 // indirect
 	github.com/unpoller/unifi v0.3.15
-	golang.org/x/sys v0.11.0 // indirect
+	golang.org/x/sys v0.12.0 // indirect
 	google.golang.org/protobuf v1.30.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1
 )
