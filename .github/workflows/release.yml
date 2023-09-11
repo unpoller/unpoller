@@ -77,3 +77,9 @@ jobs:
           PACKAGECLOUD_TOKEN: ${{ secrets.PACKAGECLOUD_TOKEN }}
           GPG_SIGNING_KEY: /tmp/key.gpg
           GPG_SIGNING_KEY_ID: ${{ steps.import_gpg.outputs.keyid }}
+      - name: Update Docker Hub Description
+        uses: peter-evans/dockerhub-description@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_PASSWORD }}
+          repository: golift/unifi-poller
