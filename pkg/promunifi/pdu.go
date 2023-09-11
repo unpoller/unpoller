@@ -61,6 +61,7 @@ type pdu struct {
 }
 
 func descPDU(ns string) *pdu {
+	outlet := ns + "outlet_"
 	pns := ns + "port_"
 	sfp := pns + "sfp_"
 	labelS := []string{"site_name", "name", "source"}
@@ -68,6 +69,9 @@ func descPDU(ns string) *pdu {
 	labelF := []string{
 		"sfp_part", "sfp_vendor", "sfp_serial", "sfp_compliance",
 		"port_id", "port_num", "port_name", "port_mac", "port_ip", "site_name", "name", "source",
+	}
+	labelO := []string{
+		"outlet_description", "outlet_index", "outlet_name", "site_name", "name", "source",
 	}
 	nd := prometheus.NewDesc
 
@@ -116,6 +120,14 @@ func descPDU(ns string) *pdu {
 		SFPVoltage:     nd(sfp+"voltage", "SFP Voltage", labelF, nil),
 		// other data
 		Upgradeable: nd(ns+"upgradeable", "Upgrade-able", labelS, nil),
+		// power
+		CycleEnabled:      nd(outlet+"cycle_enabled", "Cycle Enabled", labelO, nil),
+		RelayState:        nd(outlet+"relay_state", "Relay State", labelO, nil),
+		OutletCaps:        nd(outlet+"outlet_caps", "Outlet Caps", labelO, nil),
+		OutletCurrent:     nd(outlet+"outlet_current", "Outlet Current", labelO, nil),
+		OutletPower:       nd(outlet+"outlet_power", "Outlet Power", labelO, nil),
+		OutletPowerFactor: nd(outlet+"outlet_power_factor", "Outlet Power Factor", labelO, nil),
+		OutletVoltage:     nd(outlet+"outlet_voltage", "Outlet Voltage", labelO, nil),
 	}
 }
 
