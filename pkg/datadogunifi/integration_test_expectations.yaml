@@ -31,6 +31,55 @@ gauges:
   - unifi.clients.wired_tx_bytes
   - unifi.clients.wired_tx_bytes-r
   - unifi.clients.wired_tx_packets
+  - unifi.pdu.bytes 
+  - unifi.pdu.cpu
+  - unifi.pdu.guest_num_sta 
+  - unifi.pdu.last_seen 
+  - unifi.pdu.loadavg_1 
+  - unifi.pdu.loadavg_15 
+  - unifi.pdu.loadavg_5 
+  - unifi.pdu.mem 
+  - unifi.pdu.mem_buffer 
+  - unifi.pdu.mem_total 
+  - unifi.pdu.mem_used 
+  - unifi.pdu.memory 
+  - unifi.pdu.network 
+  - unifi.pdu.outlet_ac_power_budget 
+  - unifi.pdu.outlet_ac_power_consumption 
+  - unifi.pdu.outlet_enabled 
+  - unifi.pdu.outlet_overrides.cycle_enabled 
+  - unifi.pdu.outlet_overrides.relay_state 
+  - unifi.pdu.outlet_table.cycle_enabled 
+  - unifi.pdu.outlet_table.outlet_caps 
+  - unifi.pdu.outlet_table.outlet_current 
+  - unifi.pdu.outlet_table.outlet_power 
+  - unifi.pdu.outlet_table.outlet_power_factor 
+  - unifi.pdu.outlet_table.outlet_voltage 
+  - unifi.pdu.outlet_table.relay_state 
+  - unifi.pdu.overheating 
+  - unifi.pdu.power_source 
+  - unifi.pdu.probe 
+  - unifi.pdu.rx_bytes 
+  - unifi.pdu.stat_bytes 
+  - unifi.pdu.stat_rx_bytes 
+  - unifi.pdu.stat_rx_crypts 
+  - unifi.pdu.stat_rx_dropped 
+  - unifi.pdu.stat_rx_errors 
+  - unifi.pdu.stat_rx_frags 
+  - unifi.pdu.stat_rx_packets 
+  - unifi.pdu.stat_tx_bytes 
+  - unifi.pdu.stat_tx_dropped 
+  - unifi.pdu.stat_tx_errors 
+  - unifi.pdu.stat_tx_packets 
+  - unifi.pdu.stat_tx_retries 
+  - unifi.pdu.state 
+  - unifi.pdu.sys 
+  - unifi.pdu.system_uptime 
+  - unifi.pdu.total_max_power 
+  - unifi.pdu.tx_bytes 
+  - unifi.pdu.upgradeable 
+  - unifi.pdu.uptime 
+  - unifi.pdu.user_num_sta 
   - unifi.subsystems.drops
   - unifi.subsystems.gw_cpu
   - unifi.subsystems.gw_mem
