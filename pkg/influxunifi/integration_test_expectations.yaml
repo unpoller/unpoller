@@ -72,6 +72,96 @@ points:
       wired-tx_bytes: int
       wired-tx_bytes-r: int
       wired-tx_packets: int
+  pdu:
+    tags:
+      - mac
+      - model
+      - name
+      - serial
+      - site_name
+      - source
+      - type
+      - version
+    fields:
+      bytes: float
+      cpu: float
+      guest-num_sta: float
+      ip: string
+      last_seen: float
+      loadavg_1: float
+      loadavg_5: float
+      loadavg_15: float
+      mem: float
+      mem_buffer: float
+      mem_total: float
+      mem_used: float
+      outlet_ac_power_budget: float
+      outlet_ac_power_consumption: float
+      outlet_enabled: bool
+      overheating: bool
+      power_source: float
+      rx_bytes: float
+      stat_bytes: float
+      stat_rx_bytes: float
+      stat_rx_crypts: float
+      stat_rx_dropped: float
+      stat_rx_errors: float
+      stat_rx_frags: float
+      stat_rx_packets: float
+      stat_tx_bytes: float
+      stat_tx_dropped: float
+      stat_tx_errors: float
+      stat_tx_packets: float
+      stat_tx_retries: float
+      state: float
+      system_uptime: float
+      temp_cpu: int
+      temp_memory: int
+      temp_network: int
+      temp_probe: int
+      temp_sys: int
+      total_max_power: float
+      tx_bytes: float
+      upgradeable: bool
+      uptime: float
+      user-num_sta: float
+  pdu.outlet_overrides:
+    tags:
+      - ip
+      - mac
+      - model
+      - name
+      - outlet_index
+      - outlet_name
+      - serial
+      - site_name
+      - source
+      - type
+      - version
+    fields:
+      cycle_enabled: bool
+      relay_state: bool
+  pdu.outlet_table:
+    tags:
+      - ip
+      - mac
+      - model
+      - name
+      - outlet_index
+      - outlet_name
+      - serial
+      - site_name
+      - source
+      - type
+      - version
+    fields:
+      cycle_enabled: bool
+      outlet_caps: float
+      outlet_current: float
+      outlet_power: float
+      outlet_power_factor: float
+      outlet_voltage: float
+      relay_state: bool
   sitedpi:
     tags:
       - application
@@ -142,9 +232,9 @@ points:
       guest-num_sta: int
       ip: string
       last_seen: float
-      loadavg_15: float
       loadavg_1: float
       loadavg_5: float
+      loadavg_15: float
       mem: float
       mem_buffer: float
       mem_total: float
@@ -494,11 +584,11 @@ points:
       temp_probe: int
       temp_sys: int
       tx_bytes: float
+      upgradeable: bool
       uplink_latency: float
       uplink_name: string
       uplink_speed: float
       uplink_type: string
-      upgradeable: bool
       uptime: float
       user-num_sta: float
       version: string

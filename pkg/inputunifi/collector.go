@@ -218,6 +218,11 @@ func extractDevices(metrics *Metrics) (*poller.Metrics, map[string]string, map[s
 		m.Devices = append(m.Devices, r)
 	}
 
+	for _, r := range metrics.Devices.PDUs {
+		devices[r.Mac] = r.Name
+		m.Devices = append(m.Devices, r)
+	}
+
 	return m, devices, bssdIDs
 }
 
