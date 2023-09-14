@@ -17,19 +17,6 @@ services:
       - DOCKER_INFLUXDB_INIT_ORG=${INFLUXDB_ORG}
       - DOCKER_INFLUXDB_INIT_BUCKET=${INFLUXDB_BUCKET}
       - DOCKER_INFLUXDB_INIT_ADMIN_TOKEN=${INFLUXDB_ADMIN_TOKEN}
-  chronograf:
-    image: chronograf:latest
-    restart: always
-    ports:
-      - '8888:8888'
-    volumes:
-      - chronograf-storage:/var/lib/chronograf
-    depends_on:
-      - influxdb
-    environment:
-      - INFLUXDB_URL=http://influxdb:8086
-      - INFLUXDB_USERNAME=${INFLUXDB_ADMIN_USER}
-      - INFLUXDB_PASSWORD=${INFLUXDB_ADMIN_PASSWORD}
   grafana:
     image: grafana/grafana:latest
     restart: always
