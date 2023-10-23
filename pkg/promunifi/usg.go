@@ -114,7 +114,13 @@ func (u *promUnifi) exportUSGstats(r report, labels []string, gw *unifi.Gw, st u
 	}
 
 	labelLan := []string{"lan", labels[1], labels[2], labels[3]}
-	labelWan := []string{"all", labels[1], labels[2], labels[3]}
+	var sourceInterface string
+	if st.SourceInterface != "" {
+		sourceInterface = st.SourceInterface
+	} else {
+		sourceInterface = "all"
+	}
+	labelWan := []string{sourceInterface, labels[1], labels[2], labels[3]}
 
 	r.send([]*metric{
 		{u.USG.LanRxPackets, counter, gw.LanRxPackets, labelLan},
