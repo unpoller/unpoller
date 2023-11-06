@@ -140,11 +140,11 @@ archives:
       - src: "unpoller.1.gz"
         dst: /usr/local/share/man/man1
         strip_parent: true
-      - src: "init/bsd/freebsd.rc.d"
+      - src: "init/bsd/unpoller"
         dst: /usr/local/etc/rc.d
         strip_parent: true
         info:
-          mode: 755
+          mode: 0755
     
 
 dockers:

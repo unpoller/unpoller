@@ -4,7 +4,7 @@ go 1.20
 
 require (
 	github.com/DataDog/datadog-go v4.8.3+incompatible
-	github.com/gorilla/mux v1.8.0
+	github.com/gorilla/mux v1.8.1
 	github.com/influxdata/influxdb1-client v0.0.0-20200827194710-b269163b24ab
 	github.com/pkg/errors v0.9.1
 	github.com/prometheus/client_golang v1.17.0
