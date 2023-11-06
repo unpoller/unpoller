@@ -421,7 +421,7 @@ nfpms:
           group: unpoller
       
       # freebsd rc service
-      - src: init/bsd/freebsd.rc.d
+      - src: init/bsd/unpoller
         dst: /usr/local/etc/rc.d/unpoller
         type: config
         file_info:
