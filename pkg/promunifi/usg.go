@@ -109,12 +109,20 @@ func (u *promUnifi) exportUSG(r report, d *unifi.USG) {
 
 // Gateway Stats.
 func (u *promUnifi) exportUSGstats(r report, labels []string, gw *unifi.Gw, st unifi.SpeedtestStatus, ul unifi.Uplink) {
+	var sourceInterface string
+
+	if st.SourceInterface != "" {
+		sourceInterface = st.SourceInterface
+	} else {
+		sourceInterface = "all"
+	}
+
 	if gw == nil {
 		return
 	}
 
 	labelLan := []string{"lan", labels[1], labels[2], labels[3]}
-	labelWan := []string{"all", labels[1], labels[2], labels[3]}
+	labelWan := []string{sourceInterface, labels[1], labels[2], labels[3]}
 
 	r.send([]*metric{
 		{u.USG.LanRxPackets, counter, gw.LanRxPackets, labelLan},
