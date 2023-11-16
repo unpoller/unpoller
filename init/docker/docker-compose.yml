@@ -50,6 +50,7 @@ services:
       - UP_UNIFI_DEFAULT_URL=${UNIFI_URL}
       - UP_POLLER_DEBUG=${POLLER_DEBUG}
       - UP_UNIFI_DEFAULT_SAVE_DPI=${POLLER_SAVE_DPI}
+      - UP_PROMETHEUS_NAMESPACE=unpoller
 volumes:
   influxdb-storage:
   chronograf-storage:
