@@ -53,7 +53,7 @@ jobs:
           bundler-cache: true # runs 'bundle install' and caches installed gems automatically
       - name: "Install packagecloud gem"
         run: gem install package_cloud
-      - uses: actions/setup-go@v4
+      - uses: actions/setup-go@v5
         with:
           go-version: '>=1.20.5'
           cache: true
