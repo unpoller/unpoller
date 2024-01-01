@@ -36,7 +36,6 @@ services:
     depends_on:
       - grafana
       - influxdb
-      - chronograf
     environment:
       - UP_INFLUXDB_DB=${INFLUXDB_DB}
       - UP_INFLUXDB_USER=${INFLUXDB_ADMIN_USER}
@@ -53,5 +52,4 @@ services:
       - UP_PROMETHEUS_NAMESPACE=unpoller
 volumes:
   influxdb-storage:
-  chronograf-storage:
   grafana-storage:
