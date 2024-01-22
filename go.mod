@@ -14,7 +14,7 @@ require (
 	golang.org/x/crypto v0.18.0
 	golang.org/x/net v0.20.0
 	golang.org/x/term v0.16.0
-	golift.io/cnfg v0.2.2
+	golift.io/cnfg v0.2.3
 	golift.io/cnfgfile v0.0.0-20220509075834-08755d9ef3f5
 	golift.io/version v0.0.2
 )
