@@ -21,6 +21,8 @@ func (r *Report) Event(event *unifi.Event, logs *Logs) {
 		Labels: CleanLabels(map[string]string{
 			"application":  "unifi_event",
 			"admin":        event.Admin, // username
+			"host":         event.Host,
+			"hostname":     event.Hostname,
 			"site_name":    event.SiteName,
 			"source":       event.SourceName,
 			"subsystem":    event.Subsystem,
