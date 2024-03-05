@@ -20,6 +20,7 @@ func (r *Report) Alarm(event *unifi.Alarm, logs *Logs) {
 		Entries: [][]string{{strconv.FormatInt(event.Datetime.UnixNano(), 10), event.Msg}},
 		Labels: CleanLabels(map[string]string{
 			"application":  "unifi_alarm",
+			"host":         event.Host,
 			"source":       event.SourceName,
 			"site_name":    event.SiteName,
 			"subsystem":    event.Subsystem,

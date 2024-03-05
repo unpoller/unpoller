@@ -21,6 +21,7 @@ func (r *Report) IDS(event *unifi.IDS, logs *Logs) {
 		Labels: CleanLabels(map[string]string{
 			"application":      "unifi_ids",
 			"source":           event.SourceName,
+			"host":             event.Host,
 			"site_name":        event.SiteName,
 			"subsystem":        event.Subsystem,
 			"category":         event.Catname,
