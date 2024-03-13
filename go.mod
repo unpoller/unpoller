@@ -42,7 +42,7 @@ require (
 	github.com/prometheus/procfs v0.12.0 // indirect
 	github.com/unpoller/unifi v0.3.15
 	golang.org/x/sys v0.18.0 // indirect
-	google.golang.org/protobuf v1.32.0 // indirect
+	google.golang.org/protobuf v1.33.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1
 )
 
