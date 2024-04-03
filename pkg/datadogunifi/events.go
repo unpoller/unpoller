@@ -54,7 +54,7 @@ func (u *DatadogUnifi) batchIDS(r report, i *unifi.IDS) { // nolint:dupl
 		"usg_ip":                i.USGIP,
 		"proto":                 i.Proto,
 		"key":                   i.Key,
-		"catname":               i.Catname,
+		"catname":               i.Catname.String(),
 		"app_proto":             i.AppProto,
 		"action":                i.InnerAlertAction,
 	}
