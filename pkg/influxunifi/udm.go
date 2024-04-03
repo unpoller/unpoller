@@ -71,7 +71,7 @@ func (u *InfluxUnifi) batchUDMstorage(storage []*unifi.Storage) map[string]any {
 		if t.Size.Val != 0 && t.Used.Val != 0 && t.Used.Val < t.Size.Val {
 			output["storage_"+sanitizeName(t.Name)+"_pct"] = t.Used.Val / t.Size.Val * 100 //nolint:gomnd
 		} else {
-			output["storage_"+sanitizeName(t.Name)+"_pct"] = 0
+			output["storage_"+sanitizeName(t.Name)+"_pct"] = float64(0)
 		}
 	}
 
