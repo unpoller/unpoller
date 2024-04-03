@@ -60,7 +60,7 @@ func (u *InfluxUnifi) batchIDS(r report, i *unifi.IDS) { // nolint:dupl
 			"usgip":      i.USGIP,
 			"proto":      i.Proto,
 			"key":        i.Key,
-			"catname":    i.Catname,
+			"catname":    i.Catname.String(),
 			"app_proto":  i.AppProto,
 			"action":     i.InnerAlertAction,
 		}),
