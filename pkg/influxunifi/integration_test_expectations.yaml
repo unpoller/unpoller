@@ -571,10 +571,10 @@ points:
       speedtest-status_xput_download: float
       speedtest-status_xput_upload: float
       state: float
-      storage_bar_pct: int
+      storage_bar_pct: float
       storage_bar_size: float
       storage_bar_used: float
-      storage_foo_pct: int
+      storage_foo_pct: float
       storage_foo_size: float
       storage_foo_used: float
       system_uptime: float
