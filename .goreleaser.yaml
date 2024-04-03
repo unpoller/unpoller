@@ -527,7 +527,7 @@ brews:
       name: goreleaserbot
       email: bot@goreleaser.com
     commit_msg_template: "Brew formula update for {{ .ProjectName }} version {{ .Tag }}"
-    folder: Formula
+    directory: Formula
     # enable the line below only for testing locally
     # skip_upload: true
     homepage: https://unpoller.com/
