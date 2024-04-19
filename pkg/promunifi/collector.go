@@ -3,6 +3,7 @@ package promunifi
 
 import (
 	"fmt"
+	"github.com/prometheus/client_golang/prometheus/collectors"
 	"net"
 	"net/http"
 	"reflect"
@@ -121,15 +122,15 @@ func (u *promUnifi) DebugOutput() (bool, error) {
 	if u == nil {
 		return true, nil
 	}
-	
+
 	if !u.Enabled() {
 		return true, nil
 	}
-	
+
 	if u.HTTPListen == "" {
 		return false, fmt.Errorf("invalid listen string")
 	}
-	
+
 	// check the port
 	parts := strings.Split(u.HTTPListen, ":")
 	if len(parts) != 2 {
@@ -140,9 +141,9 @@ func (u *promUnifi) DebugOutput() (bool, error) {
 	if err != nil {
 		return false, err
 	}
-	
+
 	_ = ln.Close()
-	
+
 	return true, nil
 }
 
@@ -150,11 +151,11 @@ func (u *promUnifi) Enabled() bool {
 	if u == nil {
 		return false
 	}
-	
+
 	if u.Config == nil {
 		return false
 	}
-	
+
 	return !u.Disable
 }
 
@@ -167,7 +168,7 @@ func (u *promUnifi) Run(c poller.Collect) error {
 
 		return nil
 	}
-	
+
 	u.Logf("Prometheus is enabled")
 
 	u.Namespace = strings.Trim(strings.ReplaceAll(u.Namespace, "-", "_"), "_")
@@ -198,7 +199,7 @@ func (u *promUnifi) Run(c poller.Collect) error {
 	promver.Branch = version.Branch
 
 	webserver.UpdateOutput(&webserver.Output{Name: PluginName, Config: u.Config})
-	prometheus.MustRegister(promver.NewCollector(u.Namespace))
+	prometheus.MustRegister(collectors.NewBuildInfoCollector())
 	prometheus.MustRegister(u)
 	mux.Handle("/metrics", promhttp.HandlerFor(prometheus.DefaultGatherer,
 		promhttp.HandlerOpts{ErrorHandling: promhttp.ContinueOnError},
@@ -209,11 +210,11 @@ func (u *promUnifi) Run(c poller.Collect) error {
 	switch u.SSLKeyPath == "" && u.SSLCrtPath == "" {
 	case true:
 		u.Logf("Prometheus exported at http://%s/ - namespace: %s", u.HTTPListen, u.Namespace)
-		
+
 		return http.ListenAndServe(u.HTTPListen, mux)
 	default:
 		u.Logf("Prometheus exported at https://%s/ - namespace: %s", u.HTTPListen, u.Namespace)
-		
+
 		return http.ListenAndServeTLS(u.HTTPListen, u.SSLCrtPath, u.SSLKeyPath, mux)
 	}
 }
