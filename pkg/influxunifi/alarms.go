@@ -59,7 +59,7 @@ func (u *InfluxUnifi) batchAlarms(r report, event *unifi.Alarm) { // nolint:dupl
 			"usgip":      event.USGIP,
 			"proto":      event.Proto,
 			"key":        event.Key,
-			"catname":    event.Catname,
+			"catname":    event.Catname.String(),
 			"app_proto":  event.AppProto,
 			"action":     event.InnerAlertAction,
 		}),

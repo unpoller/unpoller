@@ -60,8 +60,8 @@ github.com/stretchr/objx v0.5.2/go.mod h1:FRsXN1f5AsAjCGJKqEizvkpNtU+EGNCLh3NxZ/
 github.com/stretchr/testify v1.3.0/go.mod h1:M5WIy9Dh21IEIfnGCwXGc5bZfKNJtfHm1UVUgZn+9EI=
 github.com/stretchr/testify v1.9.0 h1:HtqpIVDClZ4nwg75+f6Lvsy/wHu+3BoSGCbBAcpTsTg=
 github.com/stretchr/testify v1.9.0/go.mod h1:r2ic/lqez/lEtzL7wO/rwa5dbSLXVDPFyf8C91i36aY=
-github.com/unpoller/unifi v0.4.2 h1:vEsejhyjx72eKOUnPhkN/1U58gXlYuJhRqQseC00hB4=
-github.com/unpoller/unifi v0.4.2/go.mod h1:xcaIIZjSMiu/ZZxaK62f85FWMccvYY/J0HwUXw21IUY=
+github.com/unpoller/unifi v0.4.3 h1:MyX27nf/Nq9a+p/o5qIjNJDJSS+jvxGC7BbxDk09BRg=
+github.com/unpoller/unifi v0.4.3/go.mod h1:TWzPB/1SVbvoweS3RcknQj3Ds+MclHzGGE2weqI+vO0=
 golang.org/x/crypto v0.22.0 h1:g1v0xeRhjcugydODzvb3mEM9SQ0HGp9s/nh3COQ/C30=
 golang.org/x/crypto v0.22.0/go.mod h1:vr6Su+7cTlO45qkww3VDJlzDn0ctJvRgYbC2NvXHt+M=
 golang.org/x/mod v0.7.0 h1:LapD9S96VoQRhi/GrNTqeBJFrUjs5UHCAtTlgwA5oZA=

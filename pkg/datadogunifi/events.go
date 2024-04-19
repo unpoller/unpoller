@@ -113,7 +113,7 @@ func (u *DatadogUnifi) batchEvent(r report, i *unifi.Event) { // nolint: funlen
 		"gw_name":               i.GwName,
 		"sw":                    i.Sw,
 		"sw_name":               i.SwName,
-		"catname":               i.Catname,
+		"catname":               i.Catname.String(),
 		"radio":                 i.Radio,
 		"radio_from":            i.RadioFrom,
 		"radio_to":              i.RadioTo,
