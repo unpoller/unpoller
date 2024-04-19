@@ -34,7 +34,7 @@ func (r *Report) Event(event *unifi.Event, logs *Logs) {
 			"gw_name":      event.GwName,
 			"sw":           event.Sw,
 			"sw_name":      event.SwName,
-			"category":     event.Catname,
+			"category":     event.Catname.String(),
 			"radio":        event.Radio,
 			"radio_from":   event.RadioFrom,
 			"radio_to":     event.RadioTo,

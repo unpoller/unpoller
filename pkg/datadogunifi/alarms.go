@@ -53,11 +53,11 @@ func (u *DatadogUnifi) batchAlarms(r report, event *unifi.Alarm) { // nolint:dup
 		"usg_ip":                event.USGIP,
 		"proto":                 event.Proto,
 		"key":                   event.Key,
-		"catname":               event.Catname,
+		"catname":               event.Catname.String(),
 		"app_proto":             event.AppProto,
 		"action":                event.InnerAlertAction,
 	}
-	
+
 	r.addCount(alarmT)
 
 	tagMap = cleanTags(tagMap)

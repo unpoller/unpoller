@@ -24,7 +24,7 @@ func (r *Report) Alarm(event *unifi.Alarm, logs *Logs) {
 			"source":       event.SourceName,
 			"site_name":    event.SiteName,
 			"subsystem":    event.Subsystem,
-			"category":     event.Catname,
+			"category":     event.Catname.String(),
 			"event_type":   event.EventType,
 			"key":          event.Key,
 			"app_protocol": event.AppProto,
