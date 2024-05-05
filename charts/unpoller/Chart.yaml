@@ -6,9 +6,8 @@ version: "2.11.2"
 appVersion: "v2.11.2"
 keywords:
   - unifi
-  - home-assistant
+  - unpoller
 home: https://unpoller.com/
-icon: XXX?
 sources:
   - https://github.com/unpoller/unpoller
 
