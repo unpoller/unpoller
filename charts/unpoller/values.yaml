@@ -84,7 +84,7 @@ dashboards:
       # it must contain two keys: GF_SECURITY_ADMIN_PASSWORD and GF_SECURITY_ADMIN_USER.
       existingSecretName: ""
       # When existingSecretName is not provided, username and password must be provided. A new secret will be
-      # created with the provided username and password. GF_SECURITY_ADMIN_USER
+      # created with the provided username and password. GF_SECURITY_ADMIN_USER.
       username: "prom"
       # Password for username, will create field GF_SECURITY_ADMIN_PASSWORD
       password: "prom-operator"

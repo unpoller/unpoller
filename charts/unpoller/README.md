@@ -4,13 +4,7 @@
 
 A Helm chart for unpoller, a unifi prometheus exporter
 
-**Homepage:** <https://github.com/unpoller/unpoller>
-
-## Maintainers
-
-| Name | Email | Url |
-| ---- | ------ | --- |
-| XXXX? | <XXXX?> |  |
+**Homepage:** <https://unpoller.com/>
 
 ## Source Code
 

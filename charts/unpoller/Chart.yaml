@@ -5,13 +5,10 @@ type: application
 version: "2.11.2"
 appVersion: "v2.11.2"
 keywords:
-  - esp32
+  - unifi
   - home-assistant
-home: https://github.com/unpoller/unpoller
+home: https://unpoller.com/
 icon: XXX?
 sources:
   - https://github.com/unpoller/unpoller
-maintainers:
-  - name: XXXX?
-    email: XXXX?
 
