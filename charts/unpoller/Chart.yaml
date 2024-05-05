@@ -1,0 +1,17 @@
+apiVersion: v2
+name: unpoller
+description: A Helm chart for unpoller, a unifi prometheus exporter
+type: application
+version: "2.11.2"
+appVersion: "v2.11.2"
+keywords:
+  - esp32
+  - home-assistant
+home: https://github.com/unpoller/unpoller
+icon: XXX?
+sources:
+  - https://github.com/unpoller/unpoller
+maintainers:
+  - name: XXXX?
+    email: XXXX?
+
