@@ -83,6 +83,7 @@ jobs:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
           repository: golift/unifi-poller
+
       - name: Trigger unpoller version update in helm-chart-update
         run: |
           curl -L \
