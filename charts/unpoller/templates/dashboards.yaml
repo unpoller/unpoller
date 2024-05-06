@@ -1,0 +1,78 @@
+{{- if .Values.dashboards.create }}
+apiVersion: grafana.integreatly.org/v1beta1
+kind: GrafanaDashboard
+metadata:
+  name:  unpoller-uap-insights
+  labels:
+    {{- include "unpoller.labels" . | nindent 4 }}
+spec:
+  instanceSelector:
+    matchLabels:
+      {{- include "unpoller.dashboadSelectorLabels" . | nindent 6 }}
+  url: "https://grafana.com/api/dashboards/11314/revisions/latest/download"
+  datasources:
+    - inputName: "DS_PROMETHEUS"
+      datasourceName: "Prometheus"
+---
+apiVersion: grafana.integreatly.org/v1beta1
+kind: GrafanaDashboard
+metadata:
+  name: unpoller-client-insights
+  labels:
+    {{- include "unpoller.labels" . | nindent 4 }}
+spec:
+  instanceSelector:
+    matchLabels:
+      {{- include "unpoller.dashboadSelectorLabels" . | nindent 6 }}
+  url: "https://grafana.com/api/dashboards/11315/revisions/latest/download"
+  datasources:
+    - inputName: "DS_PROMETHEUS"
+      datasourceName: "Prometheus"
+---
+apiVersion: grafana.integreatly.org/v1beta1
+kind: GrafanaDashboard
+metadata:
+  name: unpoller-usw-insights
+  labels:
+    {{- include "unpoller.labels" . | nindent 4 }}
+spec:
+  instanceSelector:
+    matchLabels:
+      {{- include "unpoller.dashboadSelectorLabels" . | nindent 6 }}
+  url: "https://grafana.com/api/dashboards/11312/revisions/latest/download"
+  datasources:
+    - inputName: "DS_PROMETHEUS"
+      datasourceName: "Prometheus"
+
+---
+apiVersion: grafana.integreatly.org/v1beta1
+kind: GrafanaDashboard
+metadata:
+  name: unpoller-network-sites
+  labels:
+    {{- include "unpoller.labels" . | nindent 4 }}
+spec:
+  instanceSelector:
+    matchLabels:
+      {{- include "unpoller.dashboadSelectorLabels" . | nindent 6 }}
+  url: "https://grafana.com/api/dashboards/11311/revisions/latest/download"
+  datasources:
+    - inputName: "DS_PROMETHEUS"
+      datasourceName: "Prometheus"
+
+---
+apiVersion: grafana.integreatly.org/v1beta1
+kind: GrafanaDashboard
+metadata:
+  name: unpoller-usg-insights
+  labels:
+    {{- include "unpoller.labels" . | nindent 4 }}
+spec:
+  instanceSelector:
+    matchLabels:
+      {{- include "unpoller.dashboadSelectorLabels" . | nindent 6 }}
+  url: "https://grafana.com/api/dashboards/11313/revisions/latest/download"
+  datasources:
+    - inputName: "DS_PROMETHEUS"
+      datasourceName: "Prometheus"
+{{- end }}

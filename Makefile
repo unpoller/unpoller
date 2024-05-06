@@ -83,3 +83,7 @@ test:
 
 integration-test:
 	go test -timeout=30m -args=integration ./...
+
+.PHONY: helm-docs
+helm-docs:
+	go run github.com/norwoodj/helm-docs/cmd/helm-docs@latest

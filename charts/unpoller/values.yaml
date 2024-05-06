@@ -1,0 +1,118 @@
+# Default values for unpoller.
+
+replicaCount: 1
+
+image:
+  repository:  "ghcr.io/unpoller/unpoller"
+  pullPolicy: IfNotPresent
+  # Overrides the image tag whose default is the chart appVersion.
+  tag: "v2.11.2"
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+serviceAccount:
+  # Specifies whether a service account should be created
+  create: true
+  # Automatically mount a ServiceAccount's API credentials?
+  automount: true
+  # Annotations to add to the service account
+  annotations: {}
+  # The name of the service account to use.
+  # If not set and create is true, a name is generated using the fullname template
+  name: ""
+
+podAnnotations: {}
+podLabels: {}
+
+podSecurityContext: {}
+  # fsGroup: 2000
+
+securityContext: {}
+  # capabilities:
+  #   drop:
+  #   - ALL
+  # readOnlyRootFilesystem: true
+  # runAsNonRoot: true
+  # runAsUser: 1000
+
+
+
+resources: {}
+  # We usually recommend not to specify default resources and to leave this as a conscious
+  # choice for the user. This also increases chances charts run on environments with little
+  # resources, such as Minikube. If you do want to specify resources, uncomment the following
+  # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+  # limits:
+  #   cpu: 100m
+  #   memory: 128Mi
+  # requests:
+  #   cpu: 100m
+  #   memory: 128Mi
+
+livenessProbe:
+  httpGet:
+    path: /
+    port: http
+readinessProbe:
+  httpGet:
+    path: /
+    port: http
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}
+
+# section to configure he unpoller dashboards, relaying on the CRDs from grafana operator. https://github.com/grafana/grafana-operator
+dashboards:
+  create: true
+  # Configures the Grafana instance (grafana.integreatly.org/v1beta1)
+  grafana:
+    # Whether the Grafana instance should be created, charts still can be created and
+    # use the selectorLabels to install the charts in an already existing Grafana.
+    create: true
+    # the set of labels to be matched against the existing Grafana CRD, must be provided when create is false.
+    selectorLabels: {}
+    # Url for the grafana instance, used as .spec.external.url in the Grafana instance
+    url: ""
+    # Configuration for the username/password of grafana
+    secret:
+      # if the secret is externally provisioned, you can reference the name here.
+      # it must contain two keys: GF_SECURITY_ADMIN_PASSWORD and GF_SECURITY_ADMIN_USER.
+      existingSecretName: ""
+      # When existingSecretName is not provided, username and password must be provided. A new secret will be
+      # created with the provided username and password. GF_SECURITY_ADMIN_USER.
+      username: "prom"
+      # Password for username, will create field GF_SECURITY_ADMIN_PASSWORD
+      password: "prom-operator"
+
+# Configuration file to be loaded by unpoller, See Github example page for more details.
+# https://github.com/unpoller/unpoller/blob/master/examples/up.conf.example
+upConfig: |
+  [poller]
+      debug = false
+      quiet = false
+      plugins = []
+  [prometheus]
+    disable = false
+    http_listen = "0.0.0.0:9130"
+    report_errors = false
+  [influxdb]
+    disable = true
+  [unifi]
+      dynamic = false
+  [loki]
+      disable = true
+  [[unifi.controller]]    
+      url         = "https://unifi.home:8443"
+      user        = "unifi"
+      pass        = "unifi"
+      sites       = ["all"]
+      save_ids    = true
+      save_dpi    = true
+      save_sites  = true
+      hash_pii    = false
+      verify_ssl  = false

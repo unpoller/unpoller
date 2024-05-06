@@ -1,0 +1,17 @@
+{{- if .Values.dashboards.grafana.create }}
+apiVersion: grafana.integreatly.org/v1beta1
+kind: Grafana
+metadata:
+  name:  {{ include "unpoller.fullname" . }}
+  labels:
+    {{- include "unpoller.labels" . | nindent 4 }}
+spec:
+  external:
+    url: http://monitoring-promstack-grafana #Grafana URL
+    adminPassword:
+      name: grafana-admin-credentials
+      key: GF_SECURITY_ADMIN_PASSWORD
+    adminUser:
+      name: grafana-admin-credentials
+      key: GF_SECURITY_ADMIN_USER
+{{- end }}

@@ -1,0 +1,12 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PodMonitor
+metadata:
+  name: unifi-poller
+  labels:
+    {{- include "unpoller.labels" . | nindent 4 }}
+spec:
+  selector:
+    matchLabels:
+      {{- include "unpoller.selectorLabels" . | nindent 6 }}
+  podMetricsEndpoints:
+    - port: tcp
