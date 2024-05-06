@@ -9,7 +9,7 @@ spec:
   instanceSelector:
     matchLabels:
       {{- include "unpoller.dashboadSelectorLabels" . | nindent 6 }}
-  url: "https://grafana.com/api/dashboards/11314/revisions/10/download"
+  url: "https://grafana.com/api/dashboards/11314/revisions/latest/download"
   datasources:
     - inputName: "DS_PROMETHEUS"
       datasourceName: "Prometheus"
@@ -24,7 +24,7 @@ spec:
   instanceSelector:
     matchLabels:
       {{- include "unpoller.dashboadSelectorLabels" . | nindent 6 }}
-  url: "https://grafana.com/api/dashboards/11315/revisions/9/download"
+  url: "https://grafana.com/api/dashboards/11315/revisions/latest/download"
   datasources:
     - inputName: "DS_PROMETHEUS"
       datasourceName: "Prometheus"
@@ -39,7 +39,7 @@ spec:
   instanceSelector:
     matchLabels:
       {{- include "unpoller.dashboadSelectorLabels" . | nindent 6 }}
-  url: "https://grafana.com/api/dashboards/11312/revisions/9/download"
+  url: "https://grafana.com/api/dashboards/11312/revisions/latest/download"
   datasources:
     - inputName: "DS_PROMETHEUS"
       datasourceName: "Prometheus"
@@ -55,7 +55,7 @@ spec:
   instanceSelector:
     matchLabels:
       {{- include "unpoller.dashboadSelectorLabels" . | nindent 6 }}
-  url: "https://grafana.com/api/dashboards/11311/revisions/5/download"
+  url: "https://grafana.com/api/dashboards/11311/revisions/latest/download"
   datasources:
     - inputName: "DS_PROMETHEUS"
       datasourceName: "Prometheus"
@@ -71,7 +71,7 @@ spec:
   instanceSelector:
     matchLabels:
       {{- include "unpoller.dashboadSelectorLabels" . | nindent 6 }}
-  url: "https://grafana.com/api/dashboards/11313/revisions/9/download"
+  url: "https://grafana.com/api/dashboards/11313/revisions/latest/download"
   datasources:
     - inputName: "DS_PROMETHEUS"
       datasourceName: "Prometheus"

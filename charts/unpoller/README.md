@@ -2,7 +2,16 @@
 
 ![Version: 2.11.2](https://img.shields.io/badge/Version-2.11.2-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v2.11.2](https://img.shields.io/badge/AppVersion-v2.11.2-informational?style=flat-square)
 
-A Helm chart for unpoller, a unifi prometheus exporter
+A Helm chart for unpoller, a unifi prometheus exporter. This chart helps deploy Unpoller (unifi metrics exporter)
+in kubernetes clusters.
+It crates a Deployment to run the unpoller container, confiuration is stored in a ConfigMap and mounted in the container.
+It supports integration with Prometheus operator, so a PodMonitor is created that will scrape the Deployment for the metrics.
+Optionally, it can deploy automatically the dashboards into a Grafana instance through the integration with GrafanaOperator:
+* Creates a Grafana CR with the credentials provided (or reuses existing Grafana object)
+* Creates a Dashboard instance for all the unpoller provided charts.
+See Readme.MD for details, and values.yaml for all the configuration options.
+
+See further documentation in how to install unpoller in Kubernetes in https://unpoller.com/PATH_TBD (will be updated)
 
 **Homepage:** <https://unpoller.com/>
 
