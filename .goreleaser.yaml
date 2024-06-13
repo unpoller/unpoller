@@ -1,4 +1,5 @@
 # .goreleaser.yaml
+version: 2
 before:
   hooks:
     - make man
