@@ -13,7 +13,7 @@ require (
 	github.com/prometheus/common v0.55.0
 	github.com/spf13/pflag v1.0.6-0.20201009195203-85dd5c8bc61c
 	github.com/stretchr/testify v1.9.0
-	golang.org/x/crypto v0.24.0
+	golang.org/x/crypto v0.25.0
 	golang.org/x/net v0.26.0
 	golang.org/x/term v0.22.0
 	golift.io/cnfg v0.2.3
