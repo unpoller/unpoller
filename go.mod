@@ -1,8 +1,8 @@
 module github.com/unpoller/unpoller
 
-go 1.21
+go 1.23
 
-toolchain go1.22.1
+toolchain go1.23.1
 
 require (
 	github.com/DataDog/datadog-go v4.8.3+incompatible
