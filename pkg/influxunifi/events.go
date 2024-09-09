@@ -9,11 +9,11 @@ import (
 // These constants are used as names for printed/logged counters.
 const (
 	eventT = item("Event")
-	idsT   = item("IDS")
+	idsT   = item("IDs")
 )
 
-// batchIDS generates intrusion detection datapoints for InfluxDB.
-func (u *InfluxUnifi) batchIDS(r report, i *unifi.IDS) { // nolint:dupl
+// batchIDs generates intrusion detection datapoints for InfluxDB.
+func (u *InfluxUnifi) batchIDs(r report, i *unifi.IDS) { // nolint:dupl
 	if time.Since(i.Datetime) > u.Interval.Duration+time.Second {
 		return // The event is older than our interval, ignore it.
 	}

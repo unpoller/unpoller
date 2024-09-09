@@ -38,7 +38,7 @@ type Controller struct {
 	SaveAnomal *bool        `json:"save_anomalies" toml:"save_anomalies" xml:"save_anomalies" yaml:"save_anomalies"`
 	SaveAlarms *bool        `json:"save_alarms"    toml:"save_alarms"    xml:"save_alarms"    yaml:"save_alarms"`
 	SaveEvents *bool        `json:"save_events"    toml:"save_events"    xml:"save_events"    yaml:"save_events"`
-	SaveIDS    *bool        `json:"save_ids"       toml:"save_ids"       xml:"save_ids"       yaml:"save_ids"`
+	SaveIDs    *bool        `json:"save_ids"       toml:"save_ids"       xml:"save_ids"       yaml:"save_ids"`
 	SaveDPI    *bool        `json:"save_dpi"       toml:"save_dpi"       xml:"save_dpi"       yaml:"save_dpi"`
 	SaveRogue  *bool        `json:"save_rogue"     toml:"save_rogue"     xml:"save_rogue"     yaml:"save_rogue"`
 	HashPII    *bool        `json:"hash_pii"       toml:"hash_pii"       xml:"hash_pii"       yaml:"hash_pii"`
@@ -132,7 +132,7 @@ func (u *InputUnifi) getUnifi(c *Controller) error {
 	})
 	if err != nil {
 		c.Unifi = nil
-		
+
 		return fmt.Errorf("unifi controller: %w", err)
 	}
 
@@ -231,8 +231,8 @@ func (u *InputUnifi) setDefaults(c *Controller) { //nolint:cyclop
 		c.SaveRogue = &f
 	}
 
-	if c.SaveIDS == nil {
-		c.SaveIDS = &f
+	if c.SaveIDs == nil {
+		c.SaveIDs = &f
 	}
 
 	if c.SaveEvents == nil {
@@ -296,8 +296,8 @@ func (u *InputUnifi) setControllerDefaults(c *Controller) *Controller { //nolint
 		c.SaveDPI = u.Default.SaveDPI
 	}
 
-	if c.SaveIDS == nil {
-		c.SaveIDS = u.Default.SaveIDS
+	if c.SaveIDs == nil {
+		c.SaveIDs = u.Default.SaveIDs
 	}
 
 	if c.SaveRogue == nil {

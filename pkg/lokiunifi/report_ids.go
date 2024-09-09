@@ -6,15 +6,15 @@ import (
 	"github.com/unpoller/unifi"
 )
 
-const typeIDS = "IDS"
+const typeIDs = "IDs"
 
 // event stores a structured event Event for batch sending to Loki.
-func (r *Report) IDS(event *unifi.IDS, logs *Logs) {
+func (r *Report) IDs(event *unifi.IDS, logs *Logs) {
 	if event.Datetime.Before(r.Oldest) {
 		return
 	}
 
-	r.Counts[typeIDS]++ // increase counter and append new log line.
+	r.Counts[typeIDs]++ // increase counter and append new log line.
 
 	logs.Streams = append(logs.Streams, LogStream{
 		Entries: [][]string{{strconv.FormatInt(event.Datetime.UnixNano(), 10), event.Msg}},

@@ -48,7 +48,7 @@ func (r *Report) ProcessEventLogs(events *poller.Events) *Logs {
 	for _, e := range events.Logs {
 		switch event := e.(type) {
 		case *unifi.IDS:
-			r.IDS(event, logs)
+			r.IDs(event, logs)
 		case *unifi.Event:
 			r.Event(event, logs)
 		case *unifi.Alarm:
@@ -65,7 +65,7 @@ func (r *Report) ProcessEventLogs(events *poller.Events) *Logs {
 
 func (r *Report) String() string {
 	return fmt.Sprintf("%s: %d, %s: %d, %s: %d, %s: %d, Dur: %v",
-		typeEvent, r.Counts[typeEvent], typeIDS, r.Counts[typeIDS],
+		typeEvent, r.Counts[typeEvent], typeIDs, r.Counts[typeIDs],
 		typeAlarm, r.Counts[typeAlarm], typeAnomaly, r.Counts[typeAnomaly],
 		time.Since(r.Start).Round(time.Millisecond))
 }

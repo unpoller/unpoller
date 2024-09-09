@@ -12,7 +12,7 @@ import (
 
 func (u *InputUnifi) collectControllerEvents(c *Controller) ([]any, error) {
 	u.LogDebugf("Collecting controller events: %s (%s)", c.URL, c.ID)
-	
+
 	if u.isNill(c) {
 		u.Logf("Re-authenticating to UniFi Controller: %s", c.URL)
 
@@ -34,7 +34,7 @@ func (u *InputUnifi) collectControllerEvents(c *Controller) ([]any, error) {
 
 	type caller func([]any, []*unifi.Site, *Controller) ([]any, error)
 
-	for _, call := range []caller{u.collectIDS, u.collectAnomalies, u.collectAlarms, u.collectEvents} {
+	for _, call := range []caller{u.collectIDs, u.collectAnomalies, u.collectAlarms, u.collectEvents} {
 		if newLogs, err = call(logs, sites, c); err != nil {
 			return logs, err
 		}
@@ -123,9 +123,9 @@ func (u *InputUnifi) collectEvents(logs []any, sites []*unifi.Site, c *Controlle
 	return logs, nil
 }
 
-func (u *InputUnifi) collectIDS(logs []any, sites []*unifi.Site, c *Controller) ([]any, error) {
-	if *c.SaveIDS {
-		u.LogDebugf("Collecting controller IDS data: %s (%s)", c.URL, c.ID)
+func (u *InputUnifi) collectIDs(logs []any, sites []*unifi.Site, c *Controller) ([]any, error) {
+	if *c.SaveIDs {
+		u.LogDebugf("Collecting controller IDs data: %s (%s)", c.URL, c.ID)
 
 		for _, s := range sites {
 			events, err := c.Unifi.GetIDSSite(s)
@@ -159,7 +159,7 @@ func redactEvent(e *unifi.Event, hash *bool, dropPII *bool) *unifi.Event {
 	// metrics.Events[i].Msg <-- not sure what to do here.
 	e.DestIPGeo = unifi.IPGeo{}
 	e.SourceIPGeo = unifi.IPGeo{}
-	
+
 	if *dropPII {
 		e.Host = ""
 		e.Hostname = ""

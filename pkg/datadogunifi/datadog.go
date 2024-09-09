@@ -140,7 +140,7 @@ func (u *DatadogUnifi) setConfigDefaults() {
 		u.options = append(u.options, statsd.WithNamespace(*u.Namespace))
 	}
 
-	if u.Tags != nil && len(u.Tags) > 0 {
+	if len(u.Tags) > 0 {
 		u.options = append(u.options, statsd.WithTags(u.Tags))
 	}
 
@@ -378,7 +378,7 @@ func (u *DatadogUnifi) switchExport(r report, v any) { //nolint:cyclop
 	case *unifi.Event:
 		u.batchEvent(r, v)
 	case *unifi.IDS:
-		u.batchIDS(r, v)
+		u.batchIDs(r, v)
 	case *unifi.Alarm:
 		u.batchAlarms(r, v)
 	case *unifi.Anomaly:

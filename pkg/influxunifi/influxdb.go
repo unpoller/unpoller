@@ -103,11 +103,11 @@ func (u *InfluxUnifi) PollController() {
 	interval := u.Interval.Round(time.Second)
 	ticker := time.NewTicker(interval)
 	version := "1"
-	
+
 	if u.IsVersion2 {
 		version = "2"
 	}
-	
+
 	u.Logf("Poller->InfluxDB started, version: %s, interval: %v, dp: %v, db: %s, url: %s, bucket: %s, org: %s",
 		version, interval, u.DeadPorts, u.DB, u.URL, u.Bucket, u.Org)
 
@@ -120,7 +120,7 @@ func (u *InfluxUnifi) Poll(interval time.Duration) {
 	metrics, err := u.Collector.Metrics(&poller.Filter{Name: "unifi"})
 	if err != nil {
 		u.LogErrorf("metric fetch for InfluxDB failed: %v", err)
-		
+
 		return
 	}
 
@@ -146,11 +146,11 @@ func (u *InfluxUnifi) Enabled() bool {
 	if u == nil {
 		return false
 	}
-	
+
 	if u.Config == nil {
 		return false
 	}
-	
+
 	return !u.Disable
 }
 
@@ -158,13 +158,13 @@ func (u *InfluxUnifi) DebugOutput() (bool, error) {
 	if u == nil {
 		return true, nil
 	}
-	
+
 	if !u.Enabled() {
 		return true, nil
 	}
-	
+
 	u.setConfigDefaults()
-	
+
 	_, err := url.Parse(u.Config.URL)
 	if err != nil {
 		return false, fmt.Errorf("invalid influx URL: %v", err)
@@ -175,7 +175,7 @@ func (u *InfluxUnifi) DebugOutput() (bool, error) {
 		tlsConfig := &tls.Config{InsecureSkipVerify: !u.VerifySSL} // nolint: gosec
 		serverOptions := influx.DefaultOptions().SetTLSConfig(tlsConfig).SetBatchSize(u.BatchSize)
 		u.InfluxV2Client = influx.NewClientWithOptions(u.URL, u.AuthToken, serverOptions)
-		
+
 		ctx, cancel := context.WithTimeout(context.Background(), time.Second*2)
 		defer cancel()
 
@@ -210,7 +210,7 @@ func (u *InfluxUnifi) DebugOutput() (bool, error) {
 // Run runs a ticker to poll the unifi server and update influxdb.
 func (u *InfluxUnifi) Run(c poller.Collect) error {
 	u.Collector = c
-	
+
 	if !u.Enabled() {
 		u.LogDebugf("InfluxDB config missing (or disabled), InfluxDB output disabled!")
 
@@ -452,7 +452,7 @@ func (u *InfluxUnifi) switchExport(r report, v any) { //nolint:cyclop
 	case *unifi.Event:
 		u.batchEvent(r, v)
 	case *unifi.IDS:
-		u.batchIDS(r, v)
+		u.batchIDs(r, v)
 	case *unifi.Alarm:
 		u.batchAlarms(r, v)
 	case *unifi.Anomaly:
