@@ -24,7 +24,7 @@ func NewTestSetup(t *testing.T) *TestRig {
 		SaveAnomal: &enabled,
 		SaveAlarms: &enabled,
 		SaveEvents: &enabled,
-		SaveIDS:    &enabled,
+		SaveIDs:    &enabled,
 		SaveDPI:    &enabled,
 		SaveRogue:  &enabled,
 		SaveSites:  &enabled,
@@ -42,7 +42,7 @@ func NewTestSetup(t *testing.T) *TestRig {
 		Name:  "unifi",
 		Input: in,
 	})
-	
+
 	return &TestRig{
 		MockServer: srv,
 		Collector:  testCollector,

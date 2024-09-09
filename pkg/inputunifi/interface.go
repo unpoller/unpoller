@@ -26,7 +26,7 @@ func (u *InputUnifi) Initialize(l poller.Logger) error {
 
 	if u.Logger = l; u.Disable {
 		u.Logf("UniFi input plugin disabled or missing configuration!")
-		
+
 		return nil
 	}
 
@@ -63,7 +63,7 @@ func (u *InputUnifi) DebugInput() (bool, error) {
 	if u == nil || u.Config == nil {
 		return true, nil
 	}
-	
+
 	if u.setDefaults(&u.Default); len(u.Controllers) == 0 && !u.Dynamic {
 		u.Controllers = []*Controller{&u.Default}
 	}
@@ -80,7 +80,7 @@ func (u *InputUnifi) DebugInput() (bool, error) {
 	for i, c := range u.Controllers {
 		if err := u.getUnifi(u.setControllerDefaults(c)); err != nil {
 			u.LogErrorf("Controller %d of %d Auth or Connection Error, retrying: %v", i+1, len(u.Controllers), err)
-			
+
 			allOK = false
 
 			if allErrors != nil {
@@ -94,7 +94,7 @@ func (u *InputUnifi) DebugInput() (bool, error) {
 
 		if err := u.checkSites(c); err != nil {
 			u.LogErrorf("checking sites on %s: %v", c.URL, err)
-			
+
 			allOK = false
 
 			if allErrors != nil {
@@ -127,12 +127,12 @@ func (u *InputUnifi) logController(c *Controller) {
 	u.Logf("   => Username: %s (has password: %v)", c.User, c.Pass != "")
 	u.Logf("   => Hash PII %v / Drop PII %v / Poll Sites: %s", *c.HashPII, *c.DropPII, strings.Join(c.Sites, ", "))
 	u.Logf("   => Save Sites %v / Save DPI %v (metrics)", *c.SaveSites, *c.SaveDPI)
-	u.Logf("   => Save Events %v / Save IDS %v (logs)", *c.SaveEvents, *c.SaveIDS)
+	u.Logf("   => Save Events %v / Save IDs %v (logs)", *c.SaveEvents, *c.SaveIDs)
 	u.Logf("   => Save Alarms %v / Anomalies %v (logs)", *c.SaveAlarms, *c.SaveAnomal)
 	u.Logf("   => Save Rogue APs: %v", *c.SaveRogue)
 }
 
-// Events allows you to pull only events (and IDS) from the UniFi Controller.
+// Events allows you to pull only events (and IDs) from the UniFi Controller.
 // This does not fully respect HashPII, but it may in the future!
 // Use Filter.Path to pick a specific controller, otherwise poll them all!
 func (u *InputUnifi) Events(filter *poller.Filter) (*poller.Events, error) {
