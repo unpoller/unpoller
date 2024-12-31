@@ -1,7 +1,7 @@
 package influxunifi
 
 import (
-	"github.com/unpoller/unifi"
+	"github.com/unpoller/unifi/v5"
 )
 
 // batchClient generates Unifi Client datapoints for InfluxDB.
@@ -33,7 +33,7 @@ func (u *InfluxUnifi) batchClient(r report, s *unifi.Client) { // nolint: funlen
 		"channel":     s.Channel.Txt,
 		"vlan":        s.Vlan.Txt,
 	}
-	
+
 	fields := map[string]any{
 		"anomalies":         s.Anomalies.Int64(),
 		"ip":                s.IP,
@@ -81,7 +81,7 @@ func (u *InfluxUnifi) batchClientDPI(r report, v any, appTotal, catTotal totalsD
 	s, ok := v.(*unifi.DPITable)
 	if !ok {
 		u.LogErrorf("invalid type given to batchClientDPI: %T", v)
-		
+
 		return
 	}
 

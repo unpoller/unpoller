@@ -1,7 +1,7 @@
 package influxunifi
 
 import (
-	"github.com/unpoller/unifi"
+	"github.com/unpoller/unifi/v5"
 )
 
 // batchSite generates Unifi Sites' datapoints for InfluxDB.
@@ -61,7 +61,7 @@ func (u *InfluxUnifi) batchSiteDPI(r report, v any) {
 	s, ok := v.(*unifi.DPITable)
 	if !ok {
 		u.LogErrorf("invalid type given to batchSiteDPI: %T", v)
-		
+
 		return
 	}
 

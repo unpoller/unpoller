@@ -39,3 +39,4 @@ github_deploy_key*
 /gpg.signing.key
 dist/
 .vscode/
+.idea/

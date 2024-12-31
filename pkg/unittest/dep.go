@@ -3,7 +3,7 @@ package unittest
 import (
 	"testing"
 
-	"github.com/unpoller/unifi/mocks"
+	"github.com/unpoller/unifi/v5/mocks"
 	"github.com/unpoller/unpoller/pkg/inputunifi"
 	"github.com/unpoller/unpoller/pkg/poller"
 )

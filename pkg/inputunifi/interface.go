@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/unpoller/unifi"
+	"github.com/unpoller/unifi/v5"
 	"github.com/unpoller/unpoller/pkg/poller"
 	"github.com/unpoller/unpoller/pkg/webserver"
 )

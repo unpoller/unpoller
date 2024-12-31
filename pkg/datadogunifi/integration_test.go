@@ -6,7 +6,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/DataDog/datadog-go/statsd"
+	"github.com/DataDog/datadog-go/v5/statsd"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/unpoller/unpoller/pkg/datadogunifi"
@@ -32,6 +32,56 @@ type mockStatsd struct {
 	timings       map[string]mockValue
 	events        []string
 	checks        []string
+}
+
+// GaugeWithTimestamp mock interface
+// nolint:all
+func (m *mockStatsd) GaugeWithTimestamp(name string, value float64, tags []string, rate float64, timestamp time.Time) error {
+	// not supported
+	return nil
+}
+
+// CountWithTimestamp mock interface
+// nolint:all
+func (m *mockStatsd) CountWithTimestamp(name string, value int64, tags []string, rate float64, timestamp time.Time) error {
+	// not supported
+	return nil
+}
+
+// IsClosed mock interface
+// nolint:all
+func (m *mockStatsd) IsClosed() bool {
+	return false
+}
+
+// HistogramWithTimestamp mock interface
+// nolint:all
+func (m *mockStatsd) HistogramWithTimestamp(name string, value float64, tags []string, rate float64, timestamp time.Time) error {
+	return nil
+}
+
+// DistributionWithTimestamp mock interface
+// nolint:all
+func (m *mockStatsd) DistributionWithTimestamp(name string, value float64, tags []string, rate float64, timestamp time.Time) error {
+	return nil
+}
+
+// SetWithTimestamp mock interface
+// nolint:all
+func (m *mockStatsd) SetWithTimestamp(name string, value float64, tags []string, rate float64, timestamp time.Time) error {
+	return nil
+}
+
+// TimingWithTimestamp mock interface
+// nolint:all
+func (m *mockStatsd) TimingWithTimestamp(name string, value int64, tags []string, rate float64) error {
+	return nil
+}
+
+// GetTelemetry mock interface
+// nolint:all
+func (m *mockStatsd) GetTelemetry() statsd.Telemetry {
+	return statsd.Telemetry{}
 }
 
 // Gauge measures the value of a metric at a particular time.

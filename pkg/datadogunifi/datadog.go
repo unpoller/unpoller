@@ -7,8 +7,8 @@ import (
 	"reflect"
 	"time"
 
-	"github.com/DataDog/datadog-go/statsd"
-	"github.com/unpoller/unifi"
+	"github.com/DataDog/datadog-go/v5/statsd"
+	"github.com/unpoller/unifi/v5"
 	"github.com/unpoller/unpoller/pkg/poller"
 	"golift.io/cnfg"
 )
@@ -58,11 +58,6 @@ type Config struct {
 	// BufferFlushInterval is the interval after which the current buffer will get flushed.
 	BufferFlushInterval *cnfg.Duration `json:"buffer_flush_interval" toml:"buffer_flush_interval" xml:"buffer_flush_interval,attr" yaml:"buffer_flush_interval"`
 
-	// BufferShardCount is the number of buffer "shards" that will be used.
-	// Those shards allows the use of multiple buffers at the same time to reduce
-	// lock contention.
-	BufferShardCount *int `json:"buffer_shard_count" toml:"buffer_shard_count" xml:"buffer_shard_count,attr" yaml:"buffer_shard_count"`
-
 	// SenderQueueSize is the size of the sender queue in number of buffers.
 	// The magic value 0 will set the option to the optimal size for the transport
 	// protocol used when creating the client: 2048 for UDP and 512 for UDS.
@@ -70,27 +65,6 @@ type Config struct {
 
 	// WriteTimeoutUDS is the timeout after which a UDS packet is dropped.
 	WriteTimeoutUDS *cnfg.Duration `json:"write_timeout_uds" toml:"write_timeout_uds" xml:"write_timeout_uds,attr" yaml:"write_timeout_uds"`
-
-	// ReceiveMode determines the behavior of the client when receiving to many
-	// metrics. The client will either drop the metrics if its buffers are
-	// full (ChannelMode mode) or block the caller until the metric can be
-	// handled (MutexMode mode). By default the client will MutexMode. This
-	// option should be set to ChannelMode only when use under very high
-	// load.
-	//
-	// MutexMode uses a mutex internally which is much faster than
-	// channel but causes some lock contention when used with a high number
-	// of threads. Mutex are sharded based on the metrics name which
-	// limit mutex contention when goroutines send different metrics.
-	//
-	// ChannelMode: uses channel (of ChannelModeBufferSize size) to send
-	// metrics and drop metrics if the channel is full. Sending metrics in
-	// this mode is slower that MutexMode (because of the channel), but
-	// will not block the application. This mode is made for application
-	// using many goroutines, sending the same metrics at a very high
-	// volume. The goal is to not slow down the application at the cost of
-	// dropping metrics and having a lower max throughput.
-	ReceiveMode *statsd.ReceivingMode `json:"receive_mode" toml:"receive_mode" xml:"receive_mode,attr" yaml:"receive_mode"`
 
 	// ChannelModeBufferSize is the size of the channel holding incoming metrics
 	ChannelModeBufferSize *int `json:"channel_mode_buffer_size" toml:"channel_mode_buffer_size" xml:"channel_mode_buffer_size,attr" yaml:"channel_mode_buffer_size"`
@@ -160,25 +134,12 @@ func (u *DatadogUnifi) setConfigDefaults() {
 		u.options = append(u.options, statsd.WithBufferFlushInterval((*u.BufferFlushInterval).Duration))
 	}
 
-	if u.BufferShardCount != nil {
-		u.options = append(u.options, statsd.WithBufferShardCount(*u.BufferShardCount))
-	}
-
 	if u.SenderQueueSize != nil {
 		u.options = append(u.options, statsd.WithSenderQueueSize(*u.SenderQueueSize))
 	}
 
 	if u.WriteTimeoutUDS != nil {
-		u.options = append(u.options, statsd.WithWriteTimeoutUDS((*u.WriteTimeoutUDS).Duration))
-	}
-
-	if u.ReceiveMode != nil {
-		switch *u.ReceiveMode {
-		case statsd.ChannelMode:
-			u.options = append(u.options, statsd.WithChannelMode())
-		case statsd.MutexMode:
-			u.options = append(u.options, statsd.WithMutexMode())
-		}
+		u.options = append(u.options, statsd.WithWriteTimeout((*u.WriteTimeoutUDS).Duration))
 	}
 
 	if u.ChannelModeBufferSize != nil {

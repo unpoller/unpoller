@@ -1,7 +1,7 @@
 package datadogunifi
 
 import (
-	"github.com/unpoller/unifi"
+	"github.com/unpoller/unifi/v5"
 )
 
 // batchClient generates Unifi Client datapoints for Datadog.
@@ -37,12 +37,12 @@ func (u *DatadogUnifi) batchClient(r report, s *unifi.Client) { // nolint: funle
 		"bssid":        s.Bssid,
 		"ip":           s.IP,
 	}
-	
+
 	powerSaveEnabled := 0.0
 	if s.PowersaveEnabled.Val {
 		powerSaveEnabled = 1.0
 	}
-	
+
 	data := map[string]float64{
 		"anomalies":         s.Anomalies.Val,
 		"channel":           s.Channel.Val,

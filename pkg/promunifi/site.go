@@ -2,7 +2,7 @@ package promunifi
 
 import (
 	"github.com/prometheus/client_golang/prometheus"
-	"github.com/unpoller/unifi"
+	"github.com/unpoller/unifi/v5"
 )
 
 type site struct {
@@ -79,7 +79,7 @@ func (u *promUnifi) exportSiteDPI(r report, v any) {
 	s, ok := v.(*unifi.DPITable)
 	if !ok {
 		u.LogErrorf("invalid type given to SiteDPI: %T", v)
-		
+
 		return
 	}
 

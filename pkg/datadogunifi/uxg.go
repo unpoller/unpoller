@@ -1,7 +1,7 @@
 package datadogunifi
 
 import (
-	"github.com/unpoller/unifi"
+	"github.com/unpoller/unifi/v5"
 )
 
 // uxgT is used as a name for printed/logged counters.
@@ -26,17 +26,17 @@ func (u *DatadogUnifi) batchUXG(r report, s *unifi.UXG) { // nolint: funlen
 		"ip":            s.IP,
 		"license_state": s.LicenseState,
 	})
-	
+
 	var gw *unifi.Gw
 	if s.Stat != nil {
 		gw = s.Stat.Gw
 	}
-	
+
 	var sw *unifi.Sw
 	if s.Stat != nil {
 		sw = s.Stat.Sw
 	}
-	
+
 	data := CombineFloat64(
 		u.batchUDMstorage(s.Storage),
 		u.batchUDMtemps(s.Temperatures),

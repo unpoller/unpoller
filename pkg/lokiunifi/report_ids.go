@@ -3,7 +3,7 @@ package lokiunifi
 import (
 	"strconv"
 
-	"github.com/unpoller/unifi"
+	"github.com/unpoller/unifi/v5"
 )
 
 const typeIDs = "IDs"

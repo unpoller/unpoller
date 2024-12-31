@@ -507,7 +507,7 @@ points:
       - usgip
     fields:
       dest_ip: string
-      dest_port: int
+      dest_port: string
       dst_mac: string
       dstip_asn: int
       dstip_city: string
@@ -521,7 +521,7 @@ points:
       msg: string
       src_ip: string
       src_mac: string
-      src_port: int
+      src_port: string
       srcip_asn: int
       srcip_city: string
       srcip_continent_code: string
