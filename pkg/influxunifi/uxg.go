@@ -1,7 +1,7 @@
 package influxunifi
 
 import (
-	"github.com/unpoller/unifi"
+	"github.com/unpoller/unifi/v5"
 )
 
 // uxgT is used as a name for printed/logged counters.
@@ -24,7 +24,7 @@ func (u *InfluxUnifi) batchUXG(r report, s *unifi.UXG) { // nolint: funlen
 		"serial":    s.Serial,
 		"type":      s.Type,
 	}
-	
+
 	var gw *unifi.Gw
 	if s.Stat != nil {
 		gw = s.Stat.Gw
@@ -34,7 +34,7 @@ func (u *InfluxUnifi) batchUXG(r report, s *unifi.UXG) { // nolint: funlen
 	if s.Stat != nil {
 		sw = s.Stat.Sw
 	}
-	
+
 	fields := Combine(
 		u.batchUDMstorage(s.Storage),
 		u.batchUDMtemps(s.Temperatures),

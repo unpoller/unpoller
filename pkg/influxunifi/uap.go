@@ -3,7 +3,7 @@ package influxunifi
 import (
 	"strings"
 
-	"github.com/unpoller/unifi"
+	"github.com/unpoller/unifi/v5"
 )
 
 // uapT is used as a name for printed/logged counters.

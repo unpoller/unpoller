@@ -4,7 +4,7 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/unpoller/unifi"
+	"github.com/unpoller/unifi/v5"
 )
 
 // udmT is used as a name for printed/logged counters.
