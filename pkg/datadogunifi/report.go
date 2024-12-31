@@ -4,7 +4,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/DataDog/datadog-go/statsd"
+	"github.com/DataDog/datadog-go/v5/statsd"
 	"github.com/unpoller/unpoller/pkg/poller"
 )
 
@@ -111,7 +111,7 @@ func (r *Report) reportEvent(title string, date time.Time, message string, tags 
 	if date.IsZero() {
 		date = time.Now()
 	}
-	
+
 	return r.client.Event(&statsd.Event{
 		Title:     title,
 		Text:      message,
