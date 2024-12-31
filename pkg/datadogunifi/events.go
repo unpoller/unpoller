@@ -21,8 +21,8 @@ func (u *DatadogUnifi) batchIDs(r report, i *unifi.IDS) { // nolint:dupl
 	}
 
 	tagMap := map[string]string{
-		"dest_port":             strconv.Itoa(i.DestPort),
-		"src_port":              strconv.Itoa(i.SrcPort),
+		"dest_port":             strconv.Itoa(i.DestPort.Int()),
+		"src_port":              strconv.Itoa(i.SrcPort.Int()),
 		"dest_ip":               i.DestIP,
 		"dst_mac":               i.DstMAC,
 		"host":                  i.Host,
