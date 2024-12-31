@@ -76,7 +76,7 @@ func (e Events) Groups(prefix string) (groups []string) {
 }
 
 // add adds a new event and makes sure the slice is not too big.
-func (e *EventGroup) add(event *Event, max int) {
+func (e *EventGroup) add(event *Event, maxValue int) {
 	if !e.Latest.Before(event.Ts) {
 		return // Ignore older events.
 	}
@@ -84,7 +84,7 @@ func (e *EventGroup) add(event *Event, max int) {
 	e.Latest = event.Ts
 	e.Events = append(e.Events, event)
 
-	if i := len(e.Events) - max; i > 0 {
+	if i := len(e.Events) - maxValue; i > 0 {
 		e.Events = e.Events[i:]
 	}
 }
