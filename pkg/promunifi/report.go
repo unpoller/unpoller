@@ -21,6 +21,8 @@ type report interface {
 	error(ch chan<- prometheus.Metric, d *prometheus.Desc, v any)
 	addUDM()
 	addUXG()
+	addUBB()
+	addUCI()
 	addUSG()
 	addUAP()
 	addUSW()
@@ -95,6 +97,14 @@ func (r *Report) addUDM() {
 
 func (r *Report) addUXG() {
 	r.UXG++
+}
+
+func (r *Report) addUBB() {
+	r.UCI++
+}
+
+func (r *Report) addUCI() {
+	r.UCI++
 }
 
 // close is not part of the interface.
