@@ -36,6 +36,7 @@ func (u *DatadogUnifi) batchUCI(r report, s *unifi.UCI) { // nolint: funlen
 	if s.SysStats != nil {
 		sysStats = *s.SysStats
 	}
+
 	systemStats := unifi.SystemStats{}
 	if s.SystemStats != nil {
 		systemStats = *s.SystemStats
@@ -53,7 +54,7 @@ func (u *DatadogUnifi) batchUCI(r report, s *unifi.UCI) { // nolint: funlen
 		},
 	)
 
-	r.addCount(uxgT)
+	r.addCount(uciT)
 
 	metricName := metricNamespace("usg")
 	reportGaugeForFloat64Map(r, metricName, data, tags)

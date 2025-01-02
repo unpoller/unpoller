@@ -36,6 +36,7 @@ func (u *DatadogUnifi) batchUBB(r report, s *unifi.UBB) { // nolint: funlen
 	if s.SysStats != nil {
 		sysStats = *s.SysStats
 	}
+
 	systemStats := unifi.SystemStats{}
 	if s.SystemStats != nil {
 		systemStats = *s.SystemStats
@@ -82,7 +83,6 @@ func (u *DatadogUnifi) batchUBB(r report, s *unifi.UBB) { // nolint: funlen
 
 	metricName = metricNamespace("usw")
 	reportGaugeForFloat64Map(r, metricName, data, tags)
-
 }
 
 func (u *DatadogUnifi) batchUBBstat(sw *unifi.Bb) map[string]float64 {

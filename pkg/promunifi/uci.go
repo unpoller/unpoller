@@ -19,9 +19,11 @@ func (u *promUnifi) exportUCI(r report, d *unifi.UCI) {
 	infoLabels := []string{d.Version, d.Model, d.Serial, d.Mac, d.IP, d.ID}
 	// Shared data (all devices do this).
 	u.exportBYTstats(r, labels, d.TxBytes, d.RxBytes)
+
 	if d.SysStats != nil && d.SystemStats != nil {
 		u.exportSYSstats(r, labels, *d.SysStats, *d.SystemStats)
 	}
+
 	// Switch Data
 	u.exportUSWstats(r, labels, sw)
 	// Dream Machine System Data.

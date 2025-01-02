@@ -24,6 +24,7 @@ func (u *InfluxUnifi) batchUBB(r report, s *unifi.UBB) { // nolint: funlen
 		"serial":    s.Serial,
 		"type":      s.Type,
 	}
+
 	var sw *unifi.Bb
 	if s.Stat != nil {
 		sw = s.Stat.Bb
@@ -33,6 +34,7 @@ func (u *InfluxUnifi) batchUBB(r report, s *unifi.UBB) { // nolint: funlen
 	if s.SysStats != nil {
 		sysStats = *s.SysStats
 	}
+
 	systemStats := unifi.SystemStats{}
 	if s.SystemStats != nil {
 		systemStats = *s.SystemStats

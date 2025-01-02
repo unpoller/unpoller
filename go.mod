@@ -13,7 +13,7 @@ require (
 	github.com/prometheus/common v0.61.0
 	github.com/spf13/pflag v1.0.6-0.20201009195203-85dd5c8bc61c
 	github.com/stretchr/testify v1.10.0
-	github.com/unpoller/unifi/v5 v5.0.5
+	github.com/unpoller/unifi/v5 v5.0.6
 	golang.org/x/crypto v0.31.0
 	golang.org/x/net v0.33.0
 	golang.org/x/term v0.27.0
@@ -48,4 +48,4 @@ require (
 )
 
 // for local iterative development only
-replace github.com/unpoller/unifi/v5 => ../unifi
+// replace github.com/unpoller/unifi/v5 => ../unifi

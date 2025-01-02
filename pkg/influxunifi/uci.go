@@ -34,6 +34,7 @@ func (u *InfluxUnifi) batchUCI(r report, s *unifi.UCI) { // nolint: funlen
 	if s.SysStats != nil {
 		sysStats = *s.SysStats
 	}
+
 	systemStats := unifi.SystemStats{}
 	if s.SystemStats != nil {
 		systemStats = *s.SystemStats
