@@ -366,6 +366,8 @@ gauges:
   - unifi.ubb.uptime
   - unifi.ubb.mem
   - unifi.ubb.network
+  - unifi.uplink_max_speed
+  - unifi.uplink_uptime
 counts:
   - unifi.collector.num_devices
   - unifi.collector.num_errors

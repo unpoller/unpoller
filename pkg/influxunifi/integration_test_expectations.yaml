@@ -615,9 +615,11 @@ points:
       tx_bytes: float
       upgradeable: bool
       uplink_latency: float
+      uplink_max_speed: float
       uplink_name: string
       uplink_speed: float
       uplink_type: string
+      uplink_uptime: float
       uptime: float
       user-num_sta: float
       version: string
