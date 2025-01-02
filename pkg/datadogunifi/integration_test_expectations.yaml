@@ -346,6 +346,26 @@ gauges:
   - unifi.usw.tx_bytes
   - unifi.usw.upgradeable
   - unifi.usw.uptime
+  - unifi.ubb.loadavg_1
+  - unifi.ubb.mem_used
+  - unifi.ubb.cpu
+  - unifi.ubb.system_uptime
+  - unifi.ubb.probe
+  - unifi.ubb.mem_total
+  - unifi.ubb.mem_buffer
+  - unifi.ubb.bytes
+  - unifi.ubb.loadavg_5
+  - unifi.ubb.state
+  - unifi.ubb.tx_bytes
+  - unifi.ubb.loadavg_15
+  - unifi.ubb.user_num_sta
+  - unifi.ubb.memory
+  - unifi.ubb.rx_bytes
+  - unifi.ubb.last_seen
+  - unifi.ubb.sys
+  - unifi.ubb.uptime
+  - unifi.ubb.mem
+  - unifi.ubb.network
 counts:
   - unifi.collector.num_devices
   - unifi.collector.num_errors
