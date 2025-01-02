@@ -390,6 +390,35 @@ points:
       wifi_tx_latency_mov_max: float
       wifi_tx_latency_mov_min: float
       wifi_tx_latency_mov_total: float
+  ubb:
+    tags:
+      - mac
+      - model
+      - name
+      - serial
+      - site_name
+      - source
+      - type
+      - version
+    fields:
+      bytes: float
+      ip: string
+      last_seen: float
+      rx_bytes: float
+      stat_bytes: float
+      stat_rx_bytes: float
+      stat_rx_crypts: float
+      stat_rx_dropped: float
+      stat_rx_errors: float
+      stat_rx_frags: float
+      stat_rx_packets: float
+      stat_tx_bytes: float
+      stat_tx_dropped: float
+      stat_tx_errors: float
+      stat_tx_packets: float
+      stat_tx_retries: float
+      tx_bytes: float
+      uptime: float
   unifi_alarm:
     tags:
       - action

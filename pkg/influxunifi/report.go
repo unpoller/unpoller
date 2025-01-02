@@ -117,7 +117,7 @@ func (r *Report) String() string {
 		"Gateways: %d, %s: %d, %s: %d, %s/%s/%s/%s: %d/%d/%d/%d, "+
 		"DPI Site/Client: %d/%d, %s: %d, %s: %d, Err: %d, Dur: %v",
 		len(m.Sites), len(m.Clients),
-		c[udmT]+c[usgT]+c[uxgT], uapT, c[uapT], uswT, c[uswT],
+		c[udmT]+c[usgT]+c[uxgT]+c[uciT]+c[ubbT], uapT, c[uapT], uswT, c[uswT],
 		idsT, eventT, alarmT, anomalyT, c[idsT], c[eventT], c[alarmT], c[anomalyT],
 		len(m.SitesDPI), len(m.ClientsDPI), pointT, c[pointT], fieldT, c[fieldT],
 		len(r.Errors), r.Elapsed.Round(time.Millisecond))

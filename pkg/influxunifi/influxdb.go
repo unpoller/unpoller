@@ -443,6 +443,10 @@ func (u *InfluxUnifi) switchExport(r report, v any) { //nolint:cyclop
 		u.batchUSG(r, v)
 	case *unifi.UXG:
 		u.batchUXG(r, v)
+	case *unifi.UBB:
+		u.batchUBB(r, v)
+	case *unifi.UCI:
+		u.batchUCI(r, v)
 	case *unifi.UDM:
 		u.batchUDM(r, v)
 	case *unifi.Site:
