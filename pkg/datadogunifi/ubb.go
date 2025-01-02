@@ -45,13 +45,17 @@ func (u *DatadogUnifi) batchUBB(r report, s *unifi.UBB) { // nolint: funlen
 	data := CombineFloat64(
 		u.batchSysStats(sysStats, systemStats),
 		map[string]float64{
-			"bytes":        s.Bytes.Val,
-			"last_seen":    s.LastSeen.Val,
-			"rx_bytes":     s.RxBytes.Val,
-			"tx_bytes":     s.TxBytes.Val,
-			"uptime":       s.Uptime.Val,
-			"state":        s.State.Val,
-			"user_num_sta": s.UserNumSta.Val,
+			"bytes":            s.Bytes.Val,
+			"last_seen":        s.LastSeen.Val,
+			"rx_bytes":         s.RxBytes.Val,
+			"tx_bytes":         s.TxBytes.Val,
+			"uptime":           s.Uptime.Val,
+			"state":            s.State.Val,
+			"user_num_sta":     s.UserNumSta.Val,
+			"uplink_speed":     s.Uplink.Speed.Val,
+			"uplink_max_speed": s.Uplink.MaxSpeed.Val,
+			"uplink_latency":   s.Uplink.Latency.Val,
+			"uplink_uptime":    s.Uplink.Uptime.Val,
 		},
 	)
 
