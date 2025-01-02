@@ -40,6 +40,10 @@ func (u *InfluxUnifi) batchUSW(r report, s *unifi.USW) {
 			"state":               s.State.Val,
 			"user-num_sta":        s.UserNumSta.Val,
 			"upgradeable":         s.Upgradable.Val,
+			"uplink_speed":        s.Uplink.Speed.Val,
+			"uplink_max_speed":    s.Uplink.MaxSpeed.Val,
+			"uplink_latency":      s.Uplink.Latency.Val,
+			"uplink_uptime":       s.Uplink.Uptime.Val,
 		})
 
 	r.addCount(uswT)

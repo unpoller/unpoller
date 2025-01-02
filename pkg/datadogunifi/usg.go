@@ -64,6 +64,8 @@ func (u *DatadogUnifi) batchUSGstats(ss unifi.SpeedtestStatus, gw *unifi.Gw, ul 
 	return map[string]float64{
 		"uplink_latency":                 ul.Latency.Val,
 		"uplink_speed":                   ul.Speed.Val,
+		"uplink_max_speed":               ul.MaxSpeed.Val,
+		"uplink_uptime":                  ul.Uptime.Val,
 		"speedtest_status_latency":       ss.Latency.Val,
 		"speedtest_status_runtime":       ss.Runtime.Val,
 		"speedtest_status_rundate":       ss.Rundate.Val,

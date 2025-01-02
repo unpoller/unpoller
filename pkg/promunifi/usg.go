@@ -32,6 +32,8 @@ type usg struct {
 	Latency        *prometheus.Desc
 	UplinkLatency  *prometheus.Desc
 	UplinkSpeed    *prometheus.Desc
+	UplinkMaxSpeed *prometheus.Desc
+	UplinkUptime   *prometheus.Desc
 	Runtime        *prometheus.Desc
 	Rundate        *prometheus.Desc
 	XputDownload   *prometheus.Desc
@@ -65,6 +67,8 @@ func descUSG(ns string) *usg {
 		LanTxBytes:     prometheus.NewDesc(ns+"lan_transmit_bytes_total", "LAN Transmit Bytes Total", labels, nil),
 		UplinkLatency:  prometheus.NewDesc(ns+"uplink_latency_seconds", "Uplink Latency", labels, nil),
 		UplinkSpeed:    prometheus.NewDesc(ns+"uplink_speed_mbps", "Uplink Speed", labels, nil),
+		UplinkMaxSpeed: prometheus.NewDesc(ns+"uplink_max_speed_mbps", "Uplink Max Speed", labels, nil),
+		UplinkUptime:   prometheus.NewDesc(ns+"uplink_uptime_seconds", "Uplink Uptime", labels, nil),
 		Latency:        prometheus.NewDesc(ns+"speedtest_latency_seconds", "Speedtest Latency", labels, nil),
 		Runtime:        prometheus.NewDesc(ns+"speedtest_runtime_seconds", "Speedtest Run Time", labels, nil),
 		Rundate:        prometheus.NewDesc(ns+"speedtest_rundate_seconds", "Speedtest Run Date", labels, nil),
@@ -132,6 +136,8 @@ func (u *promUnifi) exportUSGstats(r report, labels []string, gw *unifi.Gw, st u
 		{u.USG.LanRxDropped, counter, gw.LanRxDropped, labelLan},
 		{u.USG.UplinkLatency, gauge, ul.Latency.Val / 1000, labelWan},
 		{u.USG.UplinkSpeed, gauge, ul.Speed, labelWan},
+		{u.USG.UplinkMaxSpeed, gauge, ul.MaxSpeed, labelWan},
+		{u.USG.UplinkUptime, gauge, ul.Uptime, labelWan},
 		// Speed Test Stats
 		{u.USG.Latency, gauge, st.Latency.Val / 1000, labelWan},
 		{u.USG.Runtime, gauge, st.Runtime, labelWan},
