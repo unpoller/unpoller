@@ -47,6 +47,7 @@ type Controller struct {
 	CertPaths  []string     `json:"ssl_cert_paths" toml:"ssl_cert_paths" xml:"ssl_cert_path"  yaml:"ssl_cert_paths"`
 	User       string       `json:"user"           toml:"user"           xml:"user"           yaml:"user"`
 	Pass       string       `json:"pass"           toml:"pass"           xml:"pass"           yaml:"pass"`
+	APIKey     string       `json:"api_key"        toml:"api_key"        xml:"api_key"        yaml:"api_key"`
 	URL        string       `json:"url"            toml:"url"            xml:"url"            yaml:"url"`
 	Sites      []string     `json:"sites"          toml:"sites"          xml:"site"           yaml:"sites"`
 	Unifi      *unifi.Unifi `json:"-"              toml:"-"              xml:"-"              yaml:"-"`
@@ -124,6 +125,7 @@ func (u *InputUnifi) getUnifi(c *Controller) error {
 	c.Unifi, err = unifi.NewUnifi(&unifi.Config{
 		User:      c.User,
 		Pass:      c.Pass,
+		APIKey:    c.APIKey,
 		URL:       c.URL,
 		SSLCert:   certs,
 		VerifySSL: *c.VerifySSL,
@@ -255,12 +257,22 @@ func (u *InputUnifi) setDefaults(c *Controller) { //nolint:cyclop
 		c.Pass = u.getPassFromFile(strings.TrimPrefix(c.Pass, "file://"))
 	}
 
-	if c.Pass == "" {
-		c.Pass = defaultPass
+	if strings.HasPrefix(c.APIKey, "file://") {
+		c.APIKey = u.getPassFromFile(strings.TrimPrefix(c.APIKey, "file://"))
 	}
 
-	if c.User == "" {
-		c.User = defaultUser
+	if c.APIKey == "" {
+		if c.Pass == "" {
+			c.Pass = defaultPass
+		}
+
+		if c.User == "" {
+			c.User = defaultUser
+		}
+	} else {
+		// clear out user/pass combo, only use API-key
+		c.User = ""
+		c.Pass = ""
 	}
 
 	if len(c.Sites) == 0 {
@@ -324,12 +336,22 @@ func (u *InputUnifi) setControllerDefaults(c *Controller) *Controller { //nolint
 		c.Pass = u.getPassFromFile(strings.TrimPrefix(c.Pass, "file://"))
 	}
 
-	if c.Pass == "" {
-		c.Pass = u.Default.Pass
+	if strings.HasPrefix(c.APIKey, "file://") {
+		c.APIKey = u.getPassFromFile(strings.TrimPrefix(c.APIKey, "file://"))
 	}
 
-	if c.User == "" {
-		c.User = u.Default.User
+	if c.APIKey == "" {
+		if c.Pass == "" {
+			c.Pass = defaultPass
+		}
+
+		if c.User == "" {
+			c.User = defaultUser
+		}
+	} else {
+		// clear out user/pass combo, only use API-key
+		c.User = ""
+		c.Pass = ""
 	}
 
 	if len(c.Sites) == 0 {

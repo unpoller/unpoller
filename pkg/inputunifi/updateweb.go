@@ -51,6 +51,7 @@ func formatControllers(controllers []*Controller) []*Controller {
 			SaveSites:  c.SaveSites,
 			User:       c.User,
 			Pass:       strconv.FormatBool(c.Pass != ""),
+			APIKey:     strconv.FormatBool(c.APIKey != ""),
 			URL:        c.URL,
 			Sites:      c.Sites,
 			ID:         id,
