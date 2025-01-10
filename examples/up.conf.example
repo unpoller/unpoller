@@ -143,6 +143,10 @@
   # ex: file:///etc/unifi/passwd.file, windows: file://C:\\UserData\\Unifi\\Passwd.txt
   pass = "unifipoller"
 
+  # API Key
+  # Unifi now supports API Key authentication. This is exclusive of user/pass auth.
+  # api_key = "unifiapikey"
+
   # If the controller has more than one site, specify which sites to poll here.
   # Set this to ["default"] to poll only the first site on the controller.
   # A setting of ["all"] will poll all sites; this works if you only have 1 site too.
