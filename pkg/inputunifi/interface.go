@@ -124,7 +124,7 @@ func (u *InputUnifi) logController(c *Controller) {
 		u.Logf("   => Version: %s (%s)", c.Unifi.ServerVersion, c.Unifi.UUID)
 	}
 
-	u.Logf("   => Username: %s (has password: %v)", c.User, c.Pass != "")
+	u.Logf("   => Username: %s (has password: %v) (has api-key: %v)", c.User, c.Pass != "", c.APIKey != "")
 	u.Logf("   => Hash PII %v / Drop PII %v / Poll Sites: %s", *c.HashPII, *c.DropPII, strings.Join(c.Sites, ", "))
 	u.Logf("   => Save Sites %v / Save DPI %v (metrics)", *c.SaveSites, *c.SaveDPI)
 	u.Logf("   => Save Events %v / Save IDs %v (logs)", *c.SaveEvents, *c.SaveIDs)
