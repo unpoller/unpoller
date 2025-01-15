@@ -62,7 +62,7 @@ func (u *InfluxUnifi) batchUBB(r report, s *unifi.UBB) { // nolint: funlen
 	)
 
 	r.addCount(ubbT)
-	r.send(&metric{Table: "usg", Tags: tags, Fields: fields})
+	r.send(&metric{Table: "ubb", Tags: tags, Fields: fields})
 
 	tags = map[string]string{
 		"mac":       s.Mac,

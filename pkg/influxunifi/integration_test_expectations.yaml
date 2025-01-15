@@ -402,9 +402,19 @@ points:
       - version
     fields:
       bytes: float
+      cpu: float
       ip: string
       last_seen: float
+      license_state: string
+      loadavg_1: float
+      loadavg_5: float
+      loadavg_15: float
+      mem: float
+      mem_buffer: float
+      mem_total: float
+      mem_used: float
       rx_bytes: float
+      source: string
       stat_bytes: float
       stat_rx_bytes: float
       stat_rx_crypts: float
@@ -417,8 +427,68 @@ points:
       stat_tx_errors: float
       stat_tx_packets: float
       stat_tx_retries: float
+      state: float
+      system_uptime: float
+      temp_cpu: int
+      temp_memory: int
+      temp_network: int
+      temp_probe: int
+      temp_sys: int
+      tx_bytes: float
+      uplink_latency: float
+      uplink_max_speed: float
+      uplink_speed: float
+      uplink_uptime: float
+      uptime: float
+      user-num_sta: float
+      version: string
+  uci:
+    tags:
+      - mac
+      - model
+      - name
+      - serial
+      - site_name
+      - source
+      - type
+      - version
+    fields:
+      bytes: float
+      cpu: float
+      ip: string
+      last_seen: float
+      license_state: string
+      loadavg_1: float
+      loadavg_5: float
+      loadavg_15: float
+      mem: float
+      mem_buffer: float
+      mem_total: float
+      mem_used: float
+      rx_bytes: float
+      source: string
+      stat_bytes: float
+      stat_rx_bytes: float
+      stat_rx_crypts: float
+      stat_rx_dropped: float
+      stat_rx_errors: float
+      stat_rx_frags: float
+      stat_rx_packets: float
+      stat_tx_bytes: float
+      stat_tx_dropped: float
+      stat_tx_errors: float
+      stat_tx_packets: float
+      stat_tx_retries: float
+      state: float
+      system_uptime: float
+      temp_cpu: int
+      temp_memory: int
+      temp_network: int
+      temp_probe: int
+      temp_sys: int
       tx_bytes: float
       uptime: float
+      version: string
   unifi_alarm:
     tags:
       - action

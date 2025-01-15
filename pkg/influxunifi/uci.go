@@ -57,7 +57,7 @@ func (u *InfluxUnifi) batchUCI(r report, s *unifi.UCI) { // nolint: funlen
 	)
 
 	r.addCount(uciT)
-	r.send(&metric{Table: "usg", Tags: tags, Fields: fields})
+	r.send(&metric{Table: "uci", Tags: tags, Fields: fields})
 
 	tags = map[string]string{
 		"mac":       s.Mac,
@@ -80,5 +80,5 @@ func (u *InfluxUnifi) batchUCI(r report, s *unifi.UCI) { // nolint: funlen
 			"uptime":    s.Uptime.Val,
 		})
 
-	r.send(&metric{Table: "usw", Tags: tags, Fields: fields})
+	r.send(&metric{Table: "uci", Tags: tags, Fields: fields})
 }

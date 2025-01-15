@@ -372,6 +372,49 @@ gauges:
   - unifi.ubb.uplink_uptime
   - unifi.usg.uplink_max_speed
   - unifi.usg.uplink_uptime
+  - unifi.ubb.stat_rx_frags
+  - unifi.uci.stat_tx_retries
+  - unifi.uci.stat_rx_bytes
+  - unifi.ubb.stat_rx_errors
+  - unifi.uci.mem_total
+  - unifi.ubb.stat_rx_packets
+  - unifi.uci.sys
+  - unifi.uci.bytes
+  - unifi.uci.stat_bytes
+  - unifi.uci.stat_rx_errors
+  - unifi.ubb.stat_tx_bytes
+  - unifi.uci.rx_bytes
+  - unifi.uci.mem_used
+  - unifi.uci.probe
+  - unifi.uci.memory
+  - unifi.uci.mem_buffer
+  - unifi.uci.uptime
+  - unifi.ubb.stat_tx_packets
+  - unifi.ubb.stat_tx_retries
+  - unifi.uci.stat_rx_frags
+  - unifi.ubb.stat_rx_crypts
+  - unifi.ubb.stat_tx_dropped
+  - unifi.ubb.stat_rx_dropped
+  - unifi.ubb.stat_bytes
+  - unifi.uci.mem
+  - unifi.uci.stat_rx_crypts
+  - unifi.uci.last_seen
+  - unifi.ubb.stat_rx_bytes
+  - unifi.uci.stat_rx_dropped
+  - unifi.uci.system_uptime
+  - unifi.uci.stat_tx_errors
+  - unifi.uci.network
+  - unifi.ubb.stat_tx_errors
+  - unifi.uci.loadavg_1
+  - unifi.uci.loadavg_5
+  - unifi.uci.cpu
+  - unifi.uci.stat_tx_bytes
+  - unifi.uci.stat_tx_packets
+  - unifi.uci.loadavg_15
+  - unifi.uci.tx_bytes
+  - unifi.uci.stat_rx_packets
+  - unifi.uci.stat_tx_dropped
+  - unifi.uci.state
 counts:
   - unifi.collector.num_devices
   - unifi.collector.num_errors
