@@ -56,7 +56,7 @@ func (u *DatadogUnifi) batchUCI(r report, s *unifi.UCI) { // nolint: funlen
 
 	r.addCount(uciT)
 
-	metricName := metricNamespace("usg")
+	metricName := metricNamespace("uci")
 	reportGaugeForFloat64Map(r, metricName, data, tags)
 
 	tags = cleanTags(map[string]string{
@@ -80,6 +80,6 @@ func (u *DatadogUnifi) batchUCI(r report, s *unifi.UCI) { // nolint: funlen
 			"uptime":    s.Uptime.Val,
 		})
 
-	metricName = metricNamespace("usw")
+	metricName = metricNamespace("uci")
 	reportGaugeForFloat64Map(r, metricName, data, tags)
 }

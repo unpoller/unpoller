@@ -85,7 +85,7 @@ func (u *DatadogUnifi) batchUBB(r report, s *unifi.UBB) { // nolint: funlen
 			"uptime":    s.Uptime.Val,
 		})
 
-	metricName = metricNamespace("usw")
+	metricName = metricNamespace("ubb")
 	reportGaugeForFloat64Map(r, metricName, data, tags)
 }
 
