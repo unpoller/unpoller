@@ -106,7 +106,7 @@ func (u *DatadogUnifi) setConfigDefaults() {
 		u.Interval = cnfg.Duration{Duration: minimumInterval}
 	}
 
-	u.Interval = cnfg.Duration{Duration: u.Interval.Duration.Round(time.Second)}
+	u.Interval = cnfg.Duration{Duration: u.Interval.Round(time.Second)}
 
 	u.options = make([]statsd.Option, 0)
 
@@ -182,7 +182,7 @@ func (u *DatadogUnifi) DebugOutput() (bool, error) {
 
 	u.Statsd, err = statsd.New(u.Address, u.options...)
 	if err != nil {
-		return false, fmt.Errorf("Error configuration Datadog agent reporting: %+v", err)
+		return false, fmt.Errorf("error configuration Datadog agent reporting: %+v", err)
 	}
 
 	return true, nil

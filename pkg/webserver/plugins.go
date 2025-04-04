@@ -176,7 +176,7 @@ func (w *webPlugins) newInputEvent(plugin, id string, event *Event) {
 		input.Events[id] = &EventGroup{}
 	}
 
-	input.Events[id].add(event, int(w.Config.MaxEvents))
+	input.Events[id].add(event, int(w.MaxEvents))
 }
 
 func (w *webPlugins) newOutputEvent(plugin, id string, event *Event) {
@@ -196,7 +196,7 @@ func (w *webPlugins) newOutputEvent(plugin, id string, event *Event) {
 		output.Events[id] = &EventGroup{}
 	}
 
-	output.Events[id].add(event, int(w.Config.MaxEvents))
+	output.Events[id].add(event, int(w.MaxEvents))
 }
 
 func (w *webPlugins) newInput(config *Input) {

@@ -306,7 +306,7 @@ func (u *promUnifi) collect(ch chan<- prometheus.Metric, filter *poller.Filter) 
 
 	r := &Report{
 		Config: u.Config,
-		ch:     make(chan []*metric, u.Config.Buffer),
+		ch:     make(chan []*metric, u.Buffer),
 		Start:  time.Now(),
 	}
 	defer r.close()
