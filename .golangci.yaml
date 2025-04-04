@@ -1,27 +1,30 @@
-run:
-  timeout: 3m
-
+version: "2"
 linters:
   enable:
-    - wsl
     - nlreturn
-    - tagalign
     - revive
+    - tagalign
     - testpackage
-    - errcheck
-    - gosimple
-    - govet
-    - ineffassign
-    - staticcheck
-    - unused
-
-output:
-  sort-results: true
-
+    - wsl
+  exclusions:
+    generated: lax
+    presets:
+      - comments
+      - common-false-positives
+      - legacy
+      - std-error-handling
+    paths:
+      - third_party$
+      - builtin$
+      - examples$
 issues:
-  # disable the default limit so we see everything
-  max-same-issues: 0
   max-issues-per-linter: 0
-  
-  # default enable fix where the linter supports
+  max-same-issues: 0
   fix: true
+formatters:
+  exclusions:
+    generated: lax
+    paths:
+      - third_party$
+      - builtin$
+      - examples$
