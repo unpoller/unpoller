@@ -165,7 +165,7 @@ func (u *InfluxUnifi) DebugOutput() (bool, error) {
 
 	u.setConfigDefaults()
 
-	_, err := url.Parse(u.Config.URL)
+	_, err := url.Parse(u.URL)
 	if err != nil {
 		return false, fmt.Errorf("invalid influx URL: %v", err)
 	}
@@ -223,7 +223,7 @@ func (u *InfluxUnifi) Run(c poller.Collect) error {
 
 	u.setConfigDefaults()
 
-	_, err = url.Parse(u.Config.URL)
+	_, err = url.Parse(u.URL)
 	if err != nil {
 		u.LogErrorf("invalid influx URL: %v", err)
 
@@ -304,7 +304,7 @@ func (u *InfluxUnifi) setConfigDefaults() {
 		u.Interval = cnfg.Duration{Duration: minimumInterval}
 	}
 
-	u.Interval = cnfg.Duration{Duration: u.Interval.Duration.Round(time.Second)}
+	u.Interval = cnfg.Duration{Duration: u.Interval.Round(time.Second)}
 }
 
 func (u *InfluxUnifi) getPassFromFile(filename string) string {
