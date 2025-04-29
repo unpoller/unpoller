@@ -152,6 +152,9 @@
   # A setting of ["all"] will poll all sites; this works if you only have 1 site too.
   sites = ["all"]
 
+  # Added an example for overriding the default site name.
+  # default_site_name_override = "My Custom Default Site"
+
   # Specify a timeout, leave missing to declare infinite wait. This determines the maximum
   # time to wait for a response from the unifi controller on any API request.
   # timeout = 60s

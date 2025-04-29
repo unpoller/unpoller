@@ -278,7 +278,16 @@ func (u *InputUnifi) getFilteredSites(c *Controller) ([]*unifi.Site, error) {
 	sites, err := c.Unifi.GetSites()
 	if err != nil {
 		return nil, fmt.Errorf("controller: %w", err)
-	} else if len(c.Sites) == 0 || StringInSlice("all", c.Sites) {
+	}
+
+	// Apply the default_site_name_override if the site is marked as default.
+	for _, site := range sites {
+		if site.IsDefaultSite && c.DefaultSiteNameOverride != "" {
+			site.Name = c.DefaultSiteNameOverride
+		}
+	}
+
+	if len(c.Sites) == 0 || StringInSlice("all", c.Sites) {
 		return sites, nil
 	}
 

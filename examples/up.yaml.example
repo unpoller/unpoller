@@ -60,7 +60,8 @@ unifi:
     save_sites:  true
     hash_pii:    false
     verify_ssl:  false
-
+    # Added an example for overriding the default site name.
+    # default_site_name_override: "My Custom Default Site"
 
   controllers:
    # Repeat the following stanza to poll multiple controllers.
