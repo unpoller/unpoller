@@ -42,7 +42,7 @@
     "tags": [
       "customer:abcde"
     ]
-  }
+  },
 
   "unifi": {
     "dynamic": false,
@@ -59,7 +59,8 @@
       "save_dpi":    false,
       "save_sites":  true,
       "hash_pii":    false,
-      "verify_ssl":  false
+      "verify_ssl":  false,
+      "default_site_name_override": "My Custom Default Site"
     },
     "controllers": [
       {
