@@ -540,8 +540,8 @@ brews:
     service: |
       run ["#{opt_bin}/unpoller", "--config", "#{etc}/unpoller/up.conf"]
       keep_alive true
-      log_path var/"log/unpoller.log"
-      error_log_path var/"log/unpoller.log"
+      log_path "#{var}/log/unpoller.log"
+      error_log_path "#{var}/log/unpoller.log"
     url_template: "https://github.com/unpoller/unpoller/releases/download/{{ .Tag }}/{{ .ArtifactName }}"
     test: |
       assert_match "unpoller v#{version}", shell_output("#{bin}/unpoller -v 2>&1", 2)
