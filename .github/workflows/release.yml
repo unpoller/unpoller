@@ -19,7 +19,7 @@ jobs:
       DOCKER_REGISTRY: "ghcr.io"
       DOCKER_IMAGE_NAME: "unpoller/unpoller"
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           fetch-depth: 0
       - run: git fetch --force --tags
