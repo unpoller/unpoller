@@ -180,6 +180,11 @@ func (l *Loki) ProcessEvents(report *Report, events *poller.Events) error {
 	}
 
 	logs := report.ProcessEventLogs(events)
+	if len(logs.Streams) == 0 {
+		l.LogDebugf("No new events to send to Loki.")
+		return nil
+	}
+
 	if err := l.client.Post(logs); err != nil {
 		return fmt.Errorf("sending to Loki failed: %w", err)
 	}
