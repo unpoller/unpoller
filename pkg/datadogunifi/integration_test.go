@@ -36,14 +36,14 @@ type mockStatsd struct {
 
 // GaugeWithTimestamp mock interface
 // nolint:all
-func (m *mockStatsd) GaugeWithTimestamp(name string, value float64, tags []string, rate float64, timestamp time.Time) error {
+func (m *mockStatsd) GaugeWithTimestamp(name string, value float64, tags []string, rate float64, timestamp time.Time, _ ...statsd.Parameter) error {
 	// not supported
 	return nil
 }
 
 // CountWithTimestamp mock interface
 // nolint:all
-func (m *mockStatsd) CountWithTimestamp(name string, value int64, tags []string, rate float64, timestamp time.Time) error {
+func (m *mockStatsd) CountWithTimestamp(name string, value int64, tags []string, rate float64, timestamp time.Time, _ ...statsd.Parameter) error {
 	// not supported
 	return nil
 }
@@ -56,25 +56,25 @@ func (m *mockStatsd) IsClosed() bool {
 
 // HistogramWithTimestamp mock interface
 // nolint:all
-func (m *mockStatsd) HistogramWithTimestamp(name string, value float64, tags []string, rate float64, timestamp time.Time) error {
+func (m *mockStatsd) HistogramWithTimestamp(name string, value float64, tags []string, rate float64, timestamp time.Time, _ ...statsd.Parameter) error {
 	return nil
 }
 
 // DistributionWithTimestamp mock interface
 // nolint:all
-func (m *mockStatsd) DistributionWithTimestamp(name string, value float64, tags []string, rate float64, timestamp time.Time) error {
+func (m *mockStatsd) DistributionWithTimestamp(name string, value float64, tags []string, rate float64, timestamp time.Time, _ ...statsd.Parameter) error {
 	return nil
 }
 
 // SetWithTimestamp mock interface
 // nolint:all
-func (m *mockStatsd) SetWithTimestamp(name string, value float64, tags []string, rate float64, timestamp time.Time) error {
+func (m *mockStatsd) SetWithTimestamp(name string, value float64, tags []string, rate float64, timestamp time.Time, _ ...statsd.Parameter) error {
 	return nil
 }
 
 // TimingWithTimestamp mock interface
 // nolint:all
-func (m *mockStatsd) TimingWithTimestamp(name string, value int64, tags []string, rate float64) error {
+func (m *mockStatsd) TimingWithTimestamp(name string, value int64, tags []string, rate float64, _ ...statsd.Parameter) error {
 	return nil
 }
 
@@ -85,7 +85,7 @@ func (m *mockStatsd) GetTelemetry() statsd.Telemetry {
 }
 
 // Gauge measures the value of a metric at a particular time.
-func (m *mockStatsd) Gauge(name string, value float64, tags []string, _ float64) error {
+func (m *mockStatsd) Gauge(name string, value float64, tags []string, _ float64, _ ...statsd.Parameter) error {
 	m.Lock()
 	defer m.Unlock()
 
@@ -95,7 +95,7 @@ func (m *mockStatsd) Gauge(name string, value float64, tags []string, _ float64)
 }
 
 // Count tracks how many times something happened per second.
-func (m *mockStatsd) Count(name string, value int64, tags []string, _ float64) error {
+func (m *mockStatsd) Count(name string, value int64, tags []string, _ float64, _ ...statsd.Parameter) error {
 	m.Lock()
 	defer m.Unlock()
 
@@ -105,7 +105,7 @@ func (m *mockStatsd) Count(name string, value int64, tags []string, _ float64) e
 }
 
 // Histogram tracks the statistical distribution of a set of values on each host.
-func (m *mockStatsd) Histogram(name string, value float64, tags []string, _ float64) error {
+func (m *mockStatsd) Histogram(name string, value float64, tags []string, _ float64, _ ...statsd.Parameter) error {
 	m.Lock()
 	defer m.Unlock()
 
@@ -115,7 +115,7 @@ func (m *mockStatsd) Histogram(name string, value float64, tags []string, _ floa
 }
 
 // Distribution tracks the statistical distribution of a set of values across your infrastructure.
-func (m *mockStatsd) Distribution(name string, value float64, tags []string, _ float64) error {
+func (m *mockStatsd) Distribution(name string, value float64, tags []string, _ float64, _ ...statsd.Parameter) error {
 	m.Lock()
 	defer m.Unlock()
 
@@ -125,7 +125,7 @@ func (m *mockStatsd) Distribution(name string, value float64, tags []string, _ f
 }
 
 // Decr is just Count of -1
-func (m *mockStatsd) Decr(name string, tags []string, _ float64) error {
+func (m *mockStatsd) Decr(name string, tags []string, _ float64, _ ...statsd.Parameter) error {
 	m.Lock()
 	defer m.Unlock()
 
@@ -135,7 +135,7 @@ func (m *mockStatsd) Decr(name string, tags []string, _ float64) error {
 }
 
 // Incr is just Count of 1
-func (m *mockStatsd) Incr(name string, tags []string, _ float64) error {
+func (m *mockStatsd) Incr(name string, tags []string, _ float64, _ ...statsd.Parameter) error {
 	m.Lock()
 	defer m.Unlock()
 
@@ -145,7 +145,7 @@ func (m *mockStatsd) Incr(name string, tags []string, _ float64) error {
 }
 
 // Set counts the number of unique elements in a group.
-func (m *mockStatsd) Set(name string, value string, tags []string, _ float64) error {
+func (m *mockStatsd) Set(name string, value string, tags []string, _ float64, _ ...statsd.Parameter) error {
 	m.Lock()
 	defer m.Unlock()
 
@@ -155,7 +155,7 @@ func (m *mockStatsd) Set(name string, value string, tags []string, _ float64) er
 }
 
 // Timing sends timing information, it is an alias for TimeInMilliseconds
-func (m *mockStatsd) Timing(name string, value time.Duration, tags []string, _ float64) error {
+func (m *mockStatsd) Timing(name string, value time.Duration, tags []string, _ float64, _ ...statsd.Parameter) error {
 	m.Lock()
 	defer m.Unlock()
 
@@ -166,7 +166,7 @@ func (m *mockStatsd) Timing(name string, value time.Duration, tags []string, _ f
 
 // TimeInMilliseconds sends timing information in milliseconds.
 // It is flushed by statsd with percentiles, mean and other info (https://github.com/etsy/statsd/blob/master/docs/metric_types.md#timing)
-func (m *mockStatsd) TimeInMilliseconds(name string, value float64, tags []string, _ float64) error {
+func (m *mockStatsd) TimeInMilliseconds(name string, value float64, tags []string, _ float64, _ ...statsd.Parameter) error {
 	m.Lock()
 	defer m.Unlock()
 
@@ -176,7 +176,7 @@ func (m *mockStatsd) TimeInMilliseconds(name string, value float64, tags []strin
 }
 
 // Event sends the provided Event.
-func (m *mockStatsd) Event(e *statsd.Event) error {
+func (m *mockStatsd) Event(e *statsd.Event, _ ...statsd.Parameter) error {
 	m.Lock()
 	defer m.Unlock()
 
@@ -186,7 +186,7 @@ func (m *mockStatsd) Event(e *statsd.Event) error {
 }
 
 // SimpleEvent sends an event with the provided title and text.
-func (m *mockStatsd) SimpleEvent(title, _ string) error {
+func (m *mockStatsd) SimpleEvent(title, _ string, _ ...statsd.Parameter) error {
 	m.Lock()
 	defer m.Unlock()
 
@@ -196,7 +196,7 @@ func (m *mockStatsd) SimpleEvent(title, _ string) error {
 }
 
 // ServiceCheck sends the provided ServiceCheck.
-func (m *mockStatsd) ServiceCheck(sc *statsd.ServiceCheck) error {
+func (m *mockStatsd) ServiceCheck(sc *statsd.ServiceCheck, _ ...statsd.Parameter) error {
 	m.Lock()
 	defer m.Unlock()
 
@@ -206,7 +206,7 @@ func (m *mockStatsd) ServiceCheck(sc *statsd.ServiceCheck) error {
 }
 
 // SimpleServiceCheck sends an serviceCheck with the provided name and status.
-func (m *mockStatsd) SimpleServiceCheck(name string, _ statsd.ServiceCheckStatus) error {
+func (m *mockStatsd) SimpleServiceCheck(name string, _ statsd.ServiceCheckStatus, _ ...statsd.Parameter) error {
 	m.Lock()
 	defer m.Unlock()
 
