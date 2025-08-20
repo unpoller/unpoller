@@ -13,7 +13,7 @@ require (
 	github.com/prometheus/common v0.65.0
 	github.com/spf13/pflag v1.0.7
 	github.com/stretchr/testify v1.10.0
-	github.com/unpoller/unifi/v5 v5.1.0
+	github.com/unpoller/unifi/v5 v5.1.1
 	golang.org/x/crypto v0.41.0
 	golang.org/x/net v0.43.0
 	golang.org/x/term v0.34.0
