@@ -15,7 +15,7 @@ require (
 	github.com/stretchr/testify v1.11.1
 	github.com/unpoller/unifi/v5 v5.1.1
 	golang.org/x/crypto v0.43.0
-	golang.org/x/net v0.45.0
+	golang.org/x/net v0.46.0
 	golang.org/x/term v0.36.0
 	golift.io/cnfg v0.2.3
 	golift.io/cnfgfile v0.0.0-20240713024420-a5436d84eb48
