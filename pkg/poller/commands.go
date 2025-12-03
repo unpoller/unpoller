@@ -58,6 +58,7 @@ func (u *UnifiPoller) PrintPasswordHash() (err error) {
 func (u *UnifiPoller) DebugIO() error {
 	inputSync.RLock()
 	defer inputSync.RUnlock()
+
 	outputSync.RLock()
 	defer outputSync.RUnlock()
 

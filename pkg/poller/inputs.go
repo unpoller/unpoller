@@ -81,12 +81,14 @@ func (u *UnifiPoller) InitializeInputs() error {
 
 			if err := input.Initialize(u); err != nil {
 				u.LogDebugf("error initializing input ... %s", input.Name)
+
 				errChan <- err
 
 				return
 			}
 
 			u.LogDebugf("input successfully initialized ... %s", input.Name)
+
 			errChan <- nil
 		}(input)
 	}
@@ -142,7 +144,6 @@ func collectEvents(filter *Filter, inputs []*InputPlugin) (*Events, error) {
 			}
 
 			e, err := input.Events(filter)
-
 			if err != nil {
 				resultChan <- eventInputResult{err: err}
 

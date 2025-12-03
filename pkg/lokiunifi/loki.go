@@ -135,7 +135,7 @@ func (l *Loki) ValidateConfig() error {
 		pass, err := os.ReadFile(strings.TrimPrefix(l.Password, "file://"))
 		if err != nil {
 			l.LogErrorf("Reading Loki Password File: %v", err)
-			
+
 			return fmt.Errorf("error reading password file")
 		}
 
@@ -182,6 +182,7 @@ func (l *Loki) ProcessEvents(report *Report, events *poller.Events) error {
 	logs := report.ProcessEventLogs(events)
 	if len(logs.Streams) == 0 {
 		l.LogDebugf("No new events to send to Loki.")
+
 		return nil
 	}
 

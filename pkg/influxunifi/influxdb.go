@@ -346,7 +346,6 @@ func (u *InfluxUnifi) ReportMetrics(m *poller.Metrics, e *poller.Events) (*Repor
 
 		// Make a new Influx Points Batcher.
 		r.bp, err = influxV1.NewBatchPoints(influxV1.BatchPointsConfig{Database: u.DB})
-
 		if err != nil {
 			return nil, fmt.Errorf("influx.NewBatchPoint: %w", err)
 		}

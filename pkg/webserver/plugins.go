@@ -202,12 +202,14 @@ func (w *webPlugins) newOutputEvent(plugin, id string, event *Event) {
 func (w *webPlugins) newInput(config *Input) {
 	w.Lock()
 	defer w.Unlock()
+
 	w.inputs = append(w.inputs, config)
 }
 
 func (w *webPlugins) newOutput(config *Output) {
 	w.Lock()
 	defer w.Unlock()
+
 	w.outputs = append(w.outputs, config)
 }
 

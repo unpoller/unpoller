@@ -323,6 +323,7 @@ func (u *promUnifi) collect(ch chan<- prometheus.Metric, filter *poller.Filter) 
 
 	// Pass Report interface into our collecting and reporting methods.
 	go u.exportMetrics(r, ch, r.ch)
+
 	u.loopExports(r)
 }
 
