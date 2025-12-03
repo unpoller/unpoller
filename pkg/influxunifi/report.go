@@ -63,6 +63,7 @@ func (r *Report) done() {
 
 func (r *Report) send(m *metric) {
 	r.wg.Add(1)
+
 	r.ch <- m
 }
 

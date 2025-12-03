@@ -246,6 +246,7 @@ func TestDataDogUnifiIntegration(t *testing.T) {
 	require.NoError(t, err)
 
 	var testExpectationsData testExpectations
+
 	err = yaml.Unmarshal(yamlFile, &testExpectationsData)
 	require.NoError(t, err)
 
@@ -277,6 +278,7 @@ func TestDataDogUnifiIntegration(t *testing.T) {
 
 	u.Collector = testRig.Collector
 	u.Collect(time.Minute)
+
 	mockCapture.RLock()
 	defer mockCapture.RUnlock()
 

@@ -87,6 +87,7 @@ func (u *InputUnifi) collectController(c *Controller) (*poller.Metrics, error) {
 func (u *InputUnifi) pollController(c *Controller) (*poller.Metrics, error) {
 	u.RLock()
 	defer u.RUnlock()
+
 	u.LogDebugf("Polling controller: %s (%s)", c.URL, c.ID)
 
 	// Get the sites we care about.

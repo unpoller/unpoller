@@ -38,6 +38,7 @@ func (r *Report) done() {
 
 func (r *Report) send(m []*metric) {
 	r.wg.Add(1) // notlint: gomnd
+
 	r.ch <- m
 }
 
@@ -71,7 +72,7 @@ func (r *Report) error(ch chan<- prometheus.Metric, d *prometheus.Desc, v any) {
 	r.Errors++
 
 	if r.ReportErrors {
-		ch <- prometheus.NewInvalidMetric(d, fmt.Errorf("error: %v", v)) // nolint: goerr113
+		ch <- prometheus.NewInvalidMetric(d, fmt.Errorf("error: %v", v)) // nolint
 	}
 }
 

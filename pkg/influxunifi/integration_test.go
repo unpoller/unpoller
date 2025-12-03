@@ -161,6 +161,7 @@ func TestInfluxV1Integration(t *testing.T) {
 	require.NoError(t, err)
 
 	var testExpectationsData testExpectations
+
 	err = yaml.Unmarshal(yamlFile, &testExpectationsData)
 	require.NoError(t, err)
 

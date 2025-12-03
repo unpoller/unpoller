@@ -5,7 +5,7 @@ linters:
     - revive
     - tagalign
     - testpackage
-    - wsl
+    - wsl_v5
   exclusions:
     generated: lax
     presets:
@@ -17,6 +17,11 @@ linters:
       - third_party$
       - builtin$
       - examples$
+settings:
+  wsl_v5:
+    allow-first-in-block: true
+    allow-whole-block: false
+    branch-max-lines: 2
 issues:
   max-issues-per-linter: 0
   max-same-issues: 0
