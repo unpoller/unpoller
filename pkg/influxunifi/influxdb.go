@@ -3,6 +3,7 @@
 package influxunifi
 
 import (
+        "context"
 	"crypto/tls"
 	"fmt"
 	"net/url"
@@ -16,7 +17,6 @@ import (
 	"github.com/unpoller/unifi/v5"
 	"github.com/unpoller/unpoller/pkg/poller"
 	"github.com/unpoller/unpoller/pkg/webserver"
-	"golang.org/x/net/context"
 	"golift.io/cnfg"
 )
 
