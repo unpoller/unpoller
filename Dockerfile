@@ -12,4 +12,7 @@ FROM gcr.io/distroless/static-debian11
 COPY unpoller /usr/bin/unpoller
 COPY --from=builder /etc/unpoller /etc/unpoller
 
+HEALTHCHECK --interval=30s --timeout=10s --start-period=30s --retries=3 \
+  CMD ["/usr/bin/unpoller", "--health"]
+
 ENTRYPOINT [ "/usr/bin/unpoller" ]

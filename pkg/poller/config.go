@@ -73,6 +73,7 @@ type Flags struct {
 	HashPW     string
 	ShowVer    bool
 	DebugIO    bool
+	Health     bool
 	*pflag.FlagSet
 }
 
