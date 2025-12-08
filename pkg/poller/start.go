@@ -34,6 +34,10 @@ func (u *UnifiPoller) Start() error {
 		return u.PrintPasswordHash()
 	}
 
+	if u.Flags.Health {
+		return u.HealthCheck()
+	}
+
 	cfile, err := getFirstFile(strings.Split(u.Flags.ConfigFile, ","))
 	if err != nil {
 		return err
@@ -76,6 +80,7 @@ func (f *Flags) Parse(args []string) {
 	f.StringVarP(&f.DumpJSON, "dumpjson", "j", "",
 		"This debug option prints a json payload and exits. See man page for more info.")
 	f.BoolVarP(&f.DebugIO, "debugio", "d", false, "Debug the Inputs and Outputs configured and exit.")
+	f.BoolVarP(&f.Health, "health", "", false, "Run health check and exit with status 0 (healthy) or 1 (unhealthy).")
 	f.StringVarP(&f.ConfigFile, "config", "c", DefaultConfFile(),
 		"Poller config file path. Separating multiple paths with a comma will load the first config file found.")
 	f.BoolVarP(&f.ShowVer, "version", "v", false, "Print the version and exit.")

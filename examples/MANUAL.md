@@ -24,7 +24,7 @@ examples and default configurations.
 
 OPTIONS
 ---
-`unpoller [-c <config-file>,[config-file]] [-j <filter>] [-e <pass>] [-h] [-v]`
+`unpoller [-c <config-file>,[config-file]] [-j <filter>] [-e <pass>] [--health] [-d] [-h] [-v]`
 
     -c, --config <config-file>,[config-file]
         Provide a configuration file (instead of the default). You may provide
@@ -38,6 +38,17 @@ OPTIONS
 
     -v, --version
         Display version and exit.
+
+    --health
+        Run a health check and exit with status 0 (healthy) or 1 (unhealthy).
+        This validates the configuration file, ensures input and output plugins
+        are properly configured, and performs basic connectivity checks. Useful
+        for Docker HEALTHCHECK and container orchestration readiness probes.
+
+    -d, --debugio
+        Debug the inputs and outputs configured and exit. This performs more
+        verbose validation checks than --health and is useful for troubleshooting
+        configuration issues.
 
     -j, --dumpjson <filter>
         This is a debug option; use this when you are missing data in your graphs,

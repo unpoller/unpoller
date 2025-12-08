@@ -122,3 +122,66 @@ func (u *UnifiPoller) DebugIO() error {
 
 	return allErr
 }
+
+// HealthCheck performs a basic health check suitable for Docker HEALTHCHECK.
+// It validates configuration and checks if inputs/outputs are properly configured.
+// Returns nil (exit 0) if healthy, error (exit 1) if unhealthy.
+func (u *UnifiPoller) HealthCheck() error {
+	// Silence output for health checks (Docker doesn't need verbose logs).
+	u.Quiet = true
+
+	// Load configuration.
+	cfile, err := getFirstFile(strings.Split(u.Flags.ConfigFile, ","))
+	if err != nil {
+		return fmt.Errorf("health check failed: config file not found: %w", err)
+	}
+
+	u.Flags.ConfigFile = cfile
+
+	if err := u.ParseConfigs(); err != nil {
+		return fmt.Errorf("health check failed: config parse error: %w", err)
+	}
+
+	inputSync.RLock()
+	defer inputSync.RUnlock()
+
+	outputSync.RLock()
+	defer outputSync.RUnlock()
+
+	// Check that we have at least one input and one output configured.
+	if len(inputs) == 0 {
+		return fmt.Errorf("health check failed: no input plugins configured")
+	}
+
+	if len(outputs) == 0 {
+		return fmt.Errorf("health check failed: no output plugins configured")
+	}
+
+	// Check if at least one output is enabled.
+	hasEnabledOutput := false
+	for _, output := range outputs {
+		if output.Enabled() {
+			hasEnabledOutput = true
+			break
+		}
+	}
+
+	if !hasEnabledOutput {
+		return fmt.Errorf("health check failed: no enabled output plugins")
+	}
+
+	// Perform basic validation checks on enabled outputs.
+	for _, output := range outputs {
+		if !output.Enabled() {
+			continue
+		}
+
+		ok, err := output.DebugOutput()
+		if !ok || err != nil {
+			return fmt.Errorf("health check failed: output %s validation failed: %w", output.Name, err)
+		}
+	}
+
+	// All checks passed, application is healthy.
+	return nil
+}

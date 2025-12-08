@@ -36,6 +36,8 @@ services:
   unifi-poller:
     restart: always
     image: ghcr.io/unpoller/unpoller:${POLLER_TAG}
+    # Health check is built into the Docker image
+    # It validates configuration and checks plugin connectivity
     environment:
       - UP_INFLUXDB_USER=${INFLUXDB_ADMIN_USER}
       - UP_INFLUXDB_PASS=${INFLUXDB_ADMIN_PASSWORD}
