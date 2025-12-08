@@ -13,9 +13,8 @@ require (
 	github.com/prometheus/common v0.67.4
 	github.com/spf13/pflag v1.0.10
 	github.com/stretchr/testify v1.11.1
-	github.com/unpoller/unifi/v5 v5.1.1
+	github.com/unpoller/unifi/v5 v5.2.0
 	golang.org/x/crypto v0.45.0
-	golang.org/x/net v0.47.0
 	golang.org/x/term v0.37.0
 	golift.io/cnfg v0.2.3
 	golift.io/cnfgfile v0.0.0-20240713024420-a5436d84eb48
@@ -23,7 +22,10 @@ require (
 	gopkg.in/yaml.v3 v3.0.1
 )
 
-require go.yaml.in/yaml/v2 v2.4.3 // indirect
+require (
+	go.yaml.in/yaml/v2 v2.4.3 // indirect
+	golang.org/x/net v0.47.0 // indirect
+)
 
 require (
 	github.com/BurntSushi/toml v1.5.0 // indirect
