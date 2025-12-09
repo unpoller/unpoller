@@ -406,6 +406,9 @@ points:
       ip: string
       last_seen: float
       license_state: string
+      link_capacity: float
+      link_quality: float
+      link_quality_current: float
       loadavg_1: float
       loadavg_5: float
       loadavg_15: float
@@ -413,20 +416,108 @@ points:
       mem_buffer: float
       mem_total: float
       mem_used: float
+      p2p_rx_rate: float
+      p2p_throughput: float
+      p2p_tx_rate: float
       rx_bytes: float
       source: string
       stat_bytes: float
+      stat_duration: float
+      stat_mac_filter_rejections: float
       stat_rx_bytes: float
       stat_rx_crypts: float
       stat_rx_dropped: float
       stat_rx_errors: float
       stat_rx_frags: float
       stat_rx_packets: float
+      stat_terra2-mac_filter_rejections: float
+      stat_terra2-rx_bytes: float
+      stat_terra2-rx_crypts: float
+      stat_terra2-rx_dropped: float
+      stat_terra2-rx_errors: float
+      stat_terra2-rx_frags: float
+      stat_terra2-rx_packets: float
+      stat_terra2-tx_bytes: float
+      stat_terra2-tx_dropped: float
+      stat_terra2-tx_errors: float
+      stat_terra2-tx_packets: float
+      stat_terra2-tx_retries: float
+      stat_terra2-wifi_tx_attempts: float
+      stat_terra2-wifi_tx_dropped: float
       stat_tx_bytes: float
       stat_tx_dropped: float
       stat_tx_errors: float
       stat_tx_packets: float
       stat_tx_retries: float
+      stat_user-mac_filter_rejections: float
+      stat_user-rx_bytes: float
+      stat_user-rx_crypts: float
+      stat_user-rx_dropped: float
+      stat_user-rx_errors: float
+      stat_user-rx_frags: float
+      stat_user-rx_packets: float
+      stat_user-terra2-mac_filter_rejections: float
+      stat_user-terra2-rx_bytes: float
+      stat_user-terra2-rx_crypts: float
+      stat_user-terra2-rx_dropped: float
+      stat_user-terra2-rx_errors: float
+      stat_user-terra2-rx_frags: float
+      stat_user-terra2-rx_packets: float
+      stat_user-terra2-tx_bytes: float
+      stat_user-terra2-tx_dropped: float
+      stat_user-terra2-tx_errors: float
+      stat_user-terra2-tx_packets: float
+      stat_user-terra2-tx_retries: float
+      stat_user-terra2-wifi_tx_attempts: float
+      stat_user-terra2-wifi_tx_dropped: float
+      stat_user-terra2-wlan0-rx_bytes: float
+      stat_user-terra2-wlan0-rx_errors: float
+      stat_user-terra2-wlan0-rx_packets: float
+      stat_user-terra2-wlan0-tx_bytes: float
+      stat_user-terra2-wlan0-tx_dropped: float
+      stat_user-terra2-wlan0-tx_errors: float
+      stat_user-terra2-wlan0-tx_packets: float
+      stat_user-tx_bytes: float
+      stat_user-tx_dropped: float
+      stat_user-tx_errors: float
+      stat_user-tx_packets: float
+      stat_user-tx_retries: float
+      stat_user-wifi0-ath0-rx_bytes: float
+      stat_user-wifi0-ath0-rx_packets: float
+      stat_user-wifi0-ath0-tx_bytes: float
+      stat_user-wifi0-ath0-tx_packets: float
+      stat_user-wifi0-mac_filter_rejections: float
+      stat_user-wifi0-rx_bytes: float
+      stat_user-wifi0-rx_crypts: float
+      stat_user-wifi0-rx_dropped: float
+      stat_user-wifi0-rx_errors: float
+      stat_user-wifi0-rx_frags: float
+      stat_user-wifi0-rx_packets: float
+      stat_user-wifi0-tx_bytes: float
+      stat_user-wifi0-tx_dropped: float
+      stat_user-wifi0-tx_errors: float
+      stat_user-wifi0-tx_packets: float
+      stat_user-wifi0-tx_retries: float
+      stat_user-wifi0-wifi_tx_attempts: float
+      stat_user-wifi0-wifi_tx_dropped: float
+      stat_user-wifi_tx_attempts: float
+      stat_user-wifi_tx_dropped: float
+      stat_wifi0-mac_filter_rejections: float
+      stat_wifi0-rx_bytes: float
+      stat_wifi0-rx_crypts: float
+      stat_wifi0-rx_dropped: float
+      stat_wifi0-rx_errors: float
+      stat_wifi0-rx_frags: float
+      stat_wifi0-rx_packets: float
+      stat_wifi0-tx_bytes: float
+      stat_wifi0-tx_dropped: float
+      stat_wifi0-tx_errors: float
+      stat_wifi0-tx_packets: float
+      stat_wifi0-tx_retries: float
+      stat_wifi0-wifi_tx_attempts: float
+      stat_wifi0-wifi_tx_dropped: float
+      stat_wifi_tx_attempts: float
+      stat_wifi_tx_dropped: float
       state: float
       system_uptime: float
       temp_cpu: int
@@ -439,6 +530,7 @@ points:
       uplink_max_speed: float
       uplink_speed: float
       uplink_uptime: float
+      upgradeable: bool
       uptime: float
       user-num_sta: float
       version: string
