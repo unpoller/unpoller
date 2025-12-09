@@ -139,6 +139,12 @@ func (u *promUnifi) DebugOutput() (bool, error) {
 		return false, fmt.Errorf("invalid listen address: %s (must be of the form \"IP:Port\"", u.HTTPListen)
 	}
 
+	// Skip network binding check during health checks to avoid "address already in use"
+	// errors when the main application is already running and bound to the port.
+	if poller.IsHealthCheckMode() {
+		return true, nil
+	}
+
 	ln, err := net.Listen("tcp", u.HTTPListen)
 	if err != nil {
 		return false, err

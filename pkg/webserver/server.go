@@ -103,11 +103,11 @@ func (s *Server) DebugOutput() (bool, error) {
 	if s == nil {
 		return true, nil
 	}
-	
+
 	if !s.Enabled() {
 		return true, nil
 	}
-	
+
 	if s.HTMLPath == "" {
 		return true, nil
 	}
@@ -115,6 +115,12 @@ func (s *Server) DebugOutput() (bool, error) {
 	// check the html path
 	if _, err := os.Stat(s.HTMLPath); err != nil {
 		return false, fmt.Errorf("problem with HTML path: %w", err)
+	}
+
+	// Skip network binding check during health checks to avoid "address already in use"
+	// errors when the main application is already running and bound to the port.
+	if poller.IsHealthCheckMode() {
+		return true, nil
 	}
 
 	// check the port

@@ -11,6 +11,8 @@ var (
 	outputSync          sync.RWMutex // nolint: gochecknoglobals
 	errNoOutputPlugins  = fmt.Errorf("no output plugins imported")
 	errAllOutputStopped = fmt.Errorf("all output plugins have stopped, or none enabled")
+	// healthCheckMode indicates when we're running in health check mode to skip network operations
+	healthCheckMode     bool         // nolint: gochecknoglobals
 )
 
 // Collect is passed into output packages so they may collect metrics to output.
@@ -48,6 +50,17 @@ func NewOutput(o *Output) {
 	}
 
 	outputs = append(outputs, o)
+}
+
+// SetHealthCheckMode enables or disables health check mode.
+// When enabled, output plugins should skip network operations in DebugOutput().
+func SetHealthCheckMode(enabled bool) {
+	healthCheckMode = enabled
+}
+
+// IsHealthCheckMode returns true if we're running in health check mode.
+func IsHealthCheckMode() bool {
+	return healthCheckMode
 }
 
 // Poller returns the poller config.

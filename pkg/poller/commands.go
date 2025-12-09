@@ -127,6 +127,10 @@ func (u *UnifiPoller) DebugIO() error {
 // It validates configuration and checks if inputs/outputs are properly configured.
 // Returns nil (exit 0) if healthy, error (exit 1) if unhealthy.
 func (u *UnifiPoller) HealthCheck() error {
+	// Enable health check mode to skip network binding in output validation.
+	SetHealthCheckMode(true)
+	defer SetHealthCheckMode(false)
+
 	// Silence output for health checks (Docker doesn't need verbose logs).
 	u.Quiet = true
 
@@ -170,7 +174,8 @@ func (u *UnifiPoller) HealthCheck() error {
 		return fmt.Errorf("health check failed: no enabled output plugins")
 	}
 
-	// Perform basic validation checks on enabled outputs.
+	// Perform configuration validation on enabled outputs.
+	// Network binding checks will be skipped automatically due to health check mode.
 	for _, output := range outputs {
 		if !output.Enabled() {
 			continue
