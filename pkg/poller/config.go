@@ -86,6 +86,7 @@ type Metrics struct {
 	ClientsDPI []any
 	Devices    []any
 	RogueAPs   []any
+	SpeedTests []any
 }
 
 // Events defines the type for log entries.

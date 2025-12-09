@@ -72,6 +72,7 @@ type Metrics struct {
 	SitesDPI   []*unifi.DPITable
 	ClientsDPI []*unifi.DPITable
 	RogueAPs   []*unifi.RogueAP
+	SpeedTests []*unifi.SpeedTestResult
 	Devices    *unifi.Devices
 }
 

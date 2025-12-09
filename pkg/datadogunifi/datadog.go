@@ -302,6 +302,10 @@ func (u *DatadogUnifi) loopPoints(r report) {
 		u.switchExport(r, s)
 	}
 
+	for _, st := range m.SpeedTests {
+		u.switchExport(r, st)
+	}
+
 	for _, s := range r.events().Logs {
 		u.switchExport(r, s)
 	}
@@ -348,6 +352,8 @@ func (u *DatadogUnifi) switchExport(r report, v any) { //nolint:cyclop
 		u.batchAlarms(r, v)
 	case *unifi.Anomaly:
 		u.batchAnomaly(r, v)
+	case *unifi.SpeedTestResult:
+		u.batchSpeedTest(r, v)
 	default:
 		u.LogErrorf("invalid export, type=%+v", reflect.TypeOf(v))
 	}
