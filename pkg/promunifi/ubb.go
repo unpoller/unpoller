@@ -62,7 +62,7 @@ func (u *promUnifi) exportUBBstats(r report, labels []string, stat *unifi.UBBSta
 	bb := stat.Bb
 
 	// Export aggregated stats (total across both radios)
-	labelTotal := []string{"total", labels[1], labels[2], labels[3]}
+	labelTotal := append([]string{"total"}, labels[1:]...)
 	r.send([]*metric{
 		{u.UAP.ApRxPackets, counter, bb.RxPackets, labelTotal},
 		{u.UAP.ApRxBytes, counter, bb.RxBytes, labelTotal},
@@ -81,7 +81,7 @@ func (u *promUnifi) exportUBBstats(r report, labels []string, stat *unifi.UBBSta
 	})
 
 	// Export wifi0 radio stats (5GHz)
-	labelWifi0 := []string{"wifi0", labels[1], labels[2], labels[3]}
+	labelWifi0 := append([]string{"wifi0"}, labels[1:]...)
 	r.send([]*metric{
 		{u.UAP.ApRxPackets, counter, bb.Wifi0RxPackets, labelWifi0},
 		{u.UAP.ApRxBytes, counter, bb.Wifi0RxBytes, labelWifi0},
@@ -100,7 +100,7 @@ func (u *promUnifi) exportUBBstats(r report, labels []string, stat *unifi.UBBSta
 	})
 
 	// Export terra2 radio stats (60GHz - 802.11ad)
-	labelTerra2 := []string{"terra2", labels[1], labels[2], labels[3]}
+	labelTerra2 := append([]string{"terra2"}, labels[1:]...)
 	r.send([]*metric{
 		{u.UAP.ApRxPackets, counter, bb.Terra2RxPackets, labelTerra2},
 		{u.UAP.ApRxBytes, counter, bb.Terra2RxBytes, labelTerra2},
@@ -119,7 +119,7 @@ func (u *promUnifi) exportUBBstats(r report, labels []string, stat *unifi.UBBSta
 	})
 
 	// Export user stats for wifi0
-	labelUserWifi0 := []string{"user-wifi0", labels[1], labels[2], labels[3]}
+	labelUserWifi0 := append([]string{"user-wifi0"}, labels[1:]...)
 	r.send([]*metric{
 		{u.UAP.ApRxPackets, counter, bb.UserWifi0RxPackets, labelUserWifi0},
 		{u.UAP.ApRxBytes, counter, bb.UserWifi0RxBytes, labelUserWifi0},
@@ -138,7 +138,7 @@ func (u *promUnifi) exportUBBstats(r report, labels []string, stat *unifi.UBBSta
 	})
 
 	// Export user stats for terra2 (60GHz)
-	labelUserTerra2 := []string{"user-terra2", labels[1], labels[2], labels[3]}
+	labelUserTerra2 := append([]string{"user-terra2"}, labels[1:]...)
 	r.send([]*metric{
 		{u.UAP.ApRxPackets, counter, bb.UserTerra2RxPackets, labelUserTerra2},
 		{u.UAP.ApRxBytes, counter, bb.UserTerra2RxBytes, labelUserTerra2},
