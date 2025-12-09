@@ -36,14 +36,15 @@ var ErrMetricFetchFailed = fmt.Errorf("metric fetch failed")
 
 type promUnifi struct {
 	*Config `json:"prometheus" toml:"prometheus" xml:"prometheus" yaml:"prometheus"`
-	Client  *uclient
-	Device  *unifiDevice
-	UAP     *uap
-	USG     *usg
-	USW     *usw
-	PDU     *pdu
-	Site    *site
-	RogueAP *rogueap
+	Client    *uclient
+	Device    *unifiDevice
+	UAP       *uap
+	USG       *usg
+	USW       *usw
+	PDU       *pdu
+	Site      *site
+	RogueAP   *rogueap
+	SpeedTest *speedtest
 	// This interface is passed to the Collect() method. The Collect method uses
 	// this interface to retrieve the latest UniFi measurements and export them.
 	Collector poller.Collect
@@ -200,6 +201,7 @@ func (u *promUnifi) Run(c poller.Collect) error {
 	u.PDU = descPDU(u.Namespace + "_device_")
 	u.Site = descSite(u.Namespace + "_site_")
 	u.RogueAP = descRogueAP(u.Namespace + "_rogueap_")
+	u.SpeedTest = descSpeedTest(u.Namespace + "_speedtest_")
 
 	mux := http.NewServeMux()
 	promver.Version = version.Version
@@ -283,7 +285,7 @@ func (t *target) Describe(ch chan<- *prometheus.Desc) {
 // Describe satisfies the prometheus Collector. This returns all of the
 // metric descriptions that this packages produces.
 func (u *promUnifi) Describe(ch chan<- *prometheus.Desc) {
-	for _, f := range []any{u.Client, u.Device, u.UAP, u.USG, u.USW, u.PDU, u.Site} {
+	for _, f := range []any{u.Client, u.Device, u.UAP, u.USG, u.USW, u.PDU, u.Site, u.SpeedTest} {
 		v := reflect.Indirect(reflect.ValueOf(f))
 
 		// Loop each struct member and send it to the provided channel.
@@ -391,6 +393,10 @@ func (u *promUnifi) loopExports(r report) {
 		u.switchExport(r, d)
 	}
 
+	for _, st := range m.SpeedTests {
+		u.switchExport(r, st)
+	}
+
 	appTotal := make(totalsDPImap)
 	catTotal := make(totalsDPImap)
 
@@ -434,6 +440,8 @@ func (u *promUnifi) switchExport(r report, v any) {
 		u.exportSite(r, v)
 	case *unifi.Client:
 		u.exportClient(r, v)
+	case *unifi.SpeedTestResult:
+		u.exportSpeedTest(r, v)
 	default:
 		u.LogErrorf("invalid type: %T", v)
 	}

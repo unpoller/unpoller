@@ -124,6 +124,12 @@ func (u *InputUnifi) pollController(c *Controller) (*poller.Metrics, error) {
 		return nil, fmt.Errorf("unifi.GetDevices(%s): %w", c.URL, err)
 	}
 
+	// Get speed test results for all WANs
+	if m.SpeedTests, err = c.Unifi.GetSpeedTests(sites, 86400); err != nil {
+		// Don't fail collection if speed tests fail - older controllers may not have this endpoint
+		u.LogDebugf("unifi.GetSpeedTests(%s): %v (continuing)", c.URL, err)
+	}
+
 	return u.augmentMetrics(c, m), nil
 }
 
@@ -179,6 +185,10 @@ func (u *InputUnifi) augmentMetrics(c *Controller, metrics *Metrics) *poller.Met
 		for _, site := range metrics.SitesDPI {
 			m.SitesDPI = append(m.SitesDPI, site)
 		}
+	}
+
+	for _, speedTest := range metrics.SpeedTests {
+		m.SpeedTests = append(m.SpeedTests, speedTest)
 	}
 
 	return m
