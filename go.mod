@@ -1,8 +1,6 @@
 module github.com/unpoller/unpoller
 
-go 1.24.0
-
-toolchain go1.24.2
+go 1.25.5
 
 require (
 	github.com/DataDog/datadog-go/v5 v5.8.1
@@ -13,9 +11,9 @@ require (
 	github.com/prometheus/common v0.67.4
 	github.com/spf13/pflag v1.0.10
 	github.com/stretchr/testify v1.11.1
-	github.com/unpoller/unifi/v5 v5.2.0
-	golang.org/x/crypto v0.45.0
-	golang.org/x/term v0.37.0
+	github.com/unpoller/unifi/v5 v5.2.1
+	golang.org/x/crypto v0.46.0
+	golang.org/x/term v0.38.0
 	golift.io/cnfg v0.2.3
 	golift.io/cnfgfile v0.0.0-20240713024420-a5436d84eb48
 	golift.io/version v0.0.2
@@ -24,7 +22,7 @@ require (
 
 require (
 	go.yaml.in/yaml/v2 v2.4.3 // indirect
-	golang.org/x/net v0.47.0 // indirect
+	golang.org/x/net v0.48.0 // indirect
 )
 
 require (
@@ -44,11 +42,9 @@ require (
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/prometheus/client_model v0.6.2 // indirect
 	github.com/prometheus/procfs v0.16.1 // indirect
-	golang.org/x/sys v0.38.0 // indirect
+	golang.org/x/sys v0.39.0 // indirect
 	google.golang.org/protobuf v1.36.10 // indirect
 )
 
 // for local iterative development only
 // replace github.com/unpoller/unifi/v5 => ../unifi
-
-replace github.com/unpoller/unifi/v5 => ../unifi
