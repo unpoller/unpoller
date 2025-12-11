@@ -51,9 +51,9 @@ func (r *Report) report(c poller.Logger, descs map[*prometheus.Desc]bool) {
 
 	c.Logf("UniFi Measurements Exported. Site: %d, Client: %d, "+
 		"UAP: %d, USG/UDM: %d, USW: %d, DPI Site/Client: %d/%d, Desc: %d, "+
-		"Metric: %d, Err: %d, 0s: %d, Req/Total: %v / %v",
+		"Metric: %d, Bytes: %d, Err: %d, 0s: %d, Req/Total: %v / %v",
 		len(m.Sites), len(m.Clients), r.UAP, r.UDM+r.USG+r.UXG, r.USW, len(m.SitesDPI),
-		len(m.ClientsDPI), len(descs), r.Total, r.Errors, r.Zeros,
+		len(m.ClientsDPI), len(descs), r.Total, r.Bytes, r.Errors, r.Zeros,
 		r.Fetch.Round(time.Millisecond/oneDecimalPoint),
 		r.Elapsed.Round(time.Millisecond/oneDecimalPoint))
 }
@@ -64,6 +64,16 @@ func (r *Report) export(m *metric, v float64) prometheus.Metric {
 	if v == 0 {
 		r.Zeros++
 	}
+
+	// Calculate approximate byte size of the metric in Prometheus text format.
+	// Format: metric_name{label1="value1",label2="value2"} value timestamp
+	bytes := len(m.Desc.String()) // Metric name with label names
+	for _, label := range m.Labels {
+		bytes += len(label) + 3 // label value + quotes and comma/equals overhead
+	}
+	bytes += 20 // approximate size for value and timestamp
+
+	r.Bytes += bytes
 
 	return prometheus.MustNewConstMetric(m.Desc, m.ValueType, v, m.Labels...)
 }

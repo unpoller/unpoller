@@ -94,17 +94,40 @@ func (r *Report) error(err error) {
 const (
 	pointT = item("Point")
 	fieldT = item("Fields")
+	bytesT = item("Bytes")
 )
+
+// calculateMetricBytes estimates the size of a metric in InfluxDB line protocol format.
+// Format: measurement,tag1=value1,tag2=value2 field1=value1,field2=value2 timestamp
+func calculateMetricBytes(m *metric) int {
+	bytes := len(m.Table) // measurement name
+
+	// Add tags
+	for k, v := range m.Tags {
+		bytes += len(k) + len(v) + 2 // tag key + tag value + '=' and ','
+	}
+
+	// Add fields
+	for k, v := range m.Fields {
+		bytes += len(k) + len(fmt.Sprint(v)) + 2 // field key + field value + '=' and ','
+	}
+
+	bytes += 20 // approximate size for timestamp and separators
+
+	return bytes
+}
 
 func (r *Report) batchV1(m *metric, p *influxV1.Point) {
 	r.addCount(pointT)
 	r.addCount(fieldT, len(m.Fields))
+	r.addCount(bytesT, calculateMetricBytes(m))
 	r.bp.AddPoint(p)
 }
 
 func (r *Report) batchV2(m *metric, p *influxV2Write.Point) {
 	r.addCount(pointT)
 	r.addCount(fieldT, len(m.Fields))
+	r.addCount(bytesT, calculateMetricBytes(m))
 	r.writer.WritePoint(p)
 }
 
@@ -116,10 +139,10 @@ func (r *Report) String() string {
 
 	return fmt.Sprintf("Site: %d, Client: %d, "+
 		"Gateways: %d, %s: %d, %s: %d, %s/%s/%s/%s: %d/%d/%d/%d, "+
-		"DPI Site/Client: %d/%d, %s: %d, %s: %d, Err: %d, Dur: %v",
+		"DPI Site/Client: %d/%d, %s: %d, %s: %d, %s: %d, Err: %d, Dur: %v",
 		len(m.Sites), len(m.Clients),
 		c[udmT]+c[usgT]+c[uxgT]+c[uciT]+c[ubbT], uapT, c[uapT], uswT, c[uswT],
 		idsT, eventT, alarmT, anomalyT, c[idsT], c[eventT], c[alarmT], c[anomalyT],
 		len(m.SitesDPI), len(m.ClientsDPI), pointT, c[pointT], fieldT, c[fieldT],
-		len(r.Errors), r.Elapsed.Round(time.Millisecond))
+		bytesT, c[bytesT], len(r.Errors), r.Elapsed.Round(time.Millisecond))
 }

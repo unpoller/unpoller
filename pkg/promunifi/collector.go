@@ -87,6 +87,7 @@ type Report struct {
 	Total   int             // Total count of metrics recorded.
 	Errors  int             // Total count of errors recording metrics.
 	Zeros   int             // Total count of metrics equal to zero.
+	Bytes   int             // Total count of bytes written.
 	USG     int             // Total count of USG devices.
 	USW     int             // Total count of USW devices.
 	PDU     int             // Total count of PDU devices.
