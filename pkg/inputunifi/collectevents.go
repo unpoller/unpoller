@@ -34,7 +34,7 @@ func (u *InputUnifi) collectControllerEvents(c *Controller) ([]any, error) {
 
 	type caller func([]any, []*unifi.Site, *Controller) ([]any, error)
 
-	for _, call := range []caller{u.collectIDs, u.collectAnomalies, u.collectAlarms, u.collectEvents} {
+	for _, call := range []caller{u.collectIDs, u.collectAnomalies, u.collectAlarms, u.collectEvents, u.collectSyslog} {
 		if newLogs, err = call(logs, sites, c); err != nil {
 			return logs, err
 		}
@@ -98,7 +98,7 @@ func (u *InputUnifi) collectAnomalies(logs []any, sites []*unifi.Site, c *Contro
 
 func (u *InputUnifi) collectEvents(logs []any, sites []*unifi.Site, c *Controller) ([]any, error) {
 	if *c.SaveEvents {
-		u.LogDebugf("Collecting controller site events: %s (%s)", c.URL, c.ID)
+		u.LogDebugf("Collecting controller site events (v1): %s (%s)", c.URL, c.ID)
 
 		for _, s := range sites {
 			events, err := c.Unifi.GetSiteEvents(s, time.Hour)
@@ -117,6 +117,35 @@ func (u *InputUnifi) collectEvents(logs []any, sites []*unifi.Site, c *Controlle
 					},
 				})
 			}
+		}
+	}
+
+	return logs, nil
+}
+
+func (u *InputUnifi) collectSyslog(logs []any, sites []*unifi.Site, c *Controller) ([]any, error) {
+	if *c.SaveSyslog {
+		u.LogDebugf("Collecting controller syslog (v2): %s (%s)", c.URL, c.ID)
+
+		// Use v2 system-log API
+		req := unifi.DefaultSystemLogRequest(time.Hour)
+		entries, err := c.Unifi.GetSystemLog(sites, req)
+		if err != nil {
+			return logs, fmt.Errorf("unifi.GetSystemLog(): %w", err)
+		}
+
+		for _, e := range entries {
+			e := redactSystemLogEntry(e, c.HashPII, c.DropPII)
+			logs = append(logs, e)
+
+			webserver.NewInputEvent(PluginName, e.SiteName+"_syslog", &webserver.Event{
+				Msg: e.Msg(), Ts: e.Datetime(), Tags: map[string]string{
+					"type": "syslog", "key": e.Key, "event": e.Event,
+					"site_name": e.SiteName, "source": e.SourceName,
+					"category": e.Category, "subcategory": e.Subcategory,
+					"severity": e.Severity,
+				},
+			})
 		}
 	}
 
@@ -171,6 +200,53 @@ func redactEvent(e *unifi.Event, hash *bool, dropPII *bool) *unifi.Event {
 		e.Hostname = RedactNamePII(e.Hostname, hash, dropPII)
 		e.DstMAC = RedactMacPII(e.DstMAC, hash, dropPII)
 		e.SrcMAC = RedactMacPII(e.SrcMAC, hash, dropPII)
+	}
+
+	return e
+}
+
+// redactSystemLogEntry attempts to mask personally identifying information from v2 system log entries.
+func redactSystemLogEntry(e *unifi.SystemLogEntry, hash *bool, dropPII *bool) *unifi.SystemLogEntry {
+	if !*hash && !*dropPII {
+		return e
+	}
+
+	// Redact CLIENT parameter if present
+	if client, ok := e.Parameters["CLIENT"]; ok {
+		if *dropPII {
+			client.Hostname = ""
+			client.Name = ""
+			client.ID = ""
+			client.IP = ""
+		} else {
+			client.Hostname = RedactNamePII(client.Hostname, hash, dropPII)
+			client.Name = RedactNamePII(client.Name, hash, dropPII)
+			client.ID = RedactMacPII(client.ID, hash, dropPII)
+			client.IP = RedactIPPII(client.IP, hash, dropPII)
+		}
+		e.Parameters["CLIENT"] = client
+	}
+
+	// Redact IP parameter if present
+	if ip, ok := e.Parameters["IP"]; ok {
+		if *dropPII {
+			ip.ID = ""
+			ip.Name = ""
+		} else {
+			ip.ID = RedactIPPII(ip.ID, hash, dropPII)
+			ip.Name = RedactIPPII(ip.Name, hash, dropPII)
+		}
+		e.Parameters["IP"] = ip
+	}
+
+	// Redact ADMIN parameter if present
+	if admin, ok := e.Parameters["ADMIN"]; ok {
+		if *dropPII {
+			admin.Name = ""
+		} else {
+			admin.Name = RedactNamePII(admin.Name, hash, dropPII)
+		}
+		e.Parameters["ADMIN"] = admin
 	}
 
 	return e

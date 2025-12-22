@@ -174,12 +174,18 @@
   # Enable this only if using InfluxDB or Loki. This will leak PII data!
   save_ids = false
 
-  # Enable collection of UniFi Events (InfluxDB/Loki only).
-  # This may store a lot of information. Only recommended for testing and debugging.
-  # There are no dashboards to display this data. It can be used for annotations.
-  # This is a new (June, 2020) feature. Please provide feedback if you try it out!
-  # Enable this only if using InfluxDB or Loki. This will leak PII data!
+  # Enable collection of UniFi Events using the v1 API (InfluxDB/Loki only).
+  # This uses the legacy /api/s/{site}/stat/event endpoint.
+  # For UDM devices, use save_syslog instead (v2 API).
+  # Enable this only if using InfluxDB or Loki. This may leak PII data!
   save_events = false
+
+  # Enable collection of UniFi System Log using the v2 API (Loki only).
+  # This uses the /v2/api/site/{site}/system-log/all endpoint.
+  # Recommended for UDM/UDM-Pro/UCG devices running modern firmware.
+  # Provides richer event data including client roaming, admin access, etc.
+  # Enable this only if using Loki. This may leak PII data!
+  save_syslog = false
 
   # Enable collection of UniFi Alarms (InfluxDB/Loki only).
   # There are no dashboards to display this data. It can be used for annotations.
@@ -232,6 +238,7 @@
 #  hash_pii    = false
 #  save_ids    = false
 #  save_events = false
+#  save_syslog = false
 #  save_alarms = false
 #  save_anomalies = false
 #  save_dpi    = false
