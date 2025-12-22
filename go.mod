@@ -47,4 +47,4 @@ require (
 )
 
 // for local iterative development only
-replace github.com/unpoller/unifi/v5 => ../unifi
+// replace github.com/unpoller/unifi/v5 => ../unifi
