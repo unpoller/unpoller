@@ -55,6 +55,8 @@ func (r *Report) ProcessEventLogs(events *poller.Events) *Logs {
 			r.Alarm(event, logs)
 		case *unifi.Anomaly:
 			r.Anomaly(event, logs)
+		case *unifi.SystemLogEntry:
+			r.SystemLogEvent(event, logs)
 		default: // unlikely.
 			r.LogErrorf("unknown event type: %T", e)
 		}
@@ -64,9 +66,10 @@ func (r *Report) ProcessEventLogs(events *poller.Events) *Logs {
 }
 
 func (r *Report) String() string {
-	return fmt.Sprintf("%s: %d, %s: %d, %s: %d, %s: %d, Dur: %v",
+	return fmt.Sprintf("%s: %d, %s: %d, %s: %d, %s: %d, %s: %d, Dur: %v",
 		typeEvent, r.Counts[typeEvent], typeIDs, r.Counts[typeIDs],
 		typeAlarm, r.Counts[typeAlarm], typeAnomaly, r.Counts[typeAnomaly],
+		typeSystemLog, r.Counts[typeSystemLog],
 		time.Since(r.Start).Round(time.Millisecond))
 }
 

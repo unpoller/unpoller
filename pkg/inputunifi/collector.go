@@ -279,6 +279,22 @@ func RedactMacPII(pii string, hash *bool, dropPII *bool) (output string) {
 	return fmt.Sprintf("%s:%s:%s:%s:%s:%s:%s", s[:2], s[2:4], s[4:6], s[6:8], s[8:10], s[10:12], s[12:14])
 }
 
+// RedactIPPII converts an IP address to an md5 hashed version (first 12 chars only).
+// Useful for maskiing out personally identifying information.
+func RedactIPPII(pii string, hash *bool, dropPII *bool) string {
+	if dropPII != nil && *dropPII {
+		return ""
+	}
+
+	if hash == nil || !*hash || pii == "" {
+		return pii
+	}
+
+	s := fmt.Sprintf("%x", md5.Sum([]byte(pii))) // nolint: gosec
+	// Format as a "fake" IP-like string.
+	return fmt.Sprintf("%s.%s.%s", s[:4], s[4:8], s[8:12])
+}
+
 // getFilteredSites returns a list of sites to fetch data for.
 // Omits requested but unconfigured sites. Grabs the full list from the
 // controller and returns the sites provided in the config file.

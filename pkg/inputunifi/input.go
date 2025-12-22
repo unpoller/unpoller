@@ -38,6 +38,7 @@ type Controller struct {
 	SaveAnomal              *bool        `json:"save_anomalies"             toml:"save_anomalies"             xml:"save_anomalies"             yaml:"save_anomalies"`
 	SaveAlarms              *bool        `json:"save_alarms"                toml:"save_alarms"                xml:"save_alarms"                yaml:"save_alarms"`
 	SaveEvents              *bool        `json:"save_events"                toml:"save_events"                xml:"save_events"                yaml:"save_events"`
+	SaveSyslog              *bool        `json:"save_syslog"                toml:"save_syslog"                xml:"save_syslog"                yaml:"save_syslog"`
 	SaveIDs                 *bool        `json:"save_ids"                   toml:"save_ids"                   xml:"save_ids"                   yaml:"save_ids"`
 	SaveDPI                 *bool        `json:"save_dpi"                   toml:"save_dpi"                   xml:"save_dpi"                   yaml:"save_dpi"`
 	SaveRogue               *bool        `json:"save_rogue"                 toml:"save_rogue"                 xml:"save_rogue"                 yaml:"save_rogue"`
@@ -244,6 +245,10 @@ func (u *InputUnifi) setDefaults(c *Controller) { //nolint:cyclop
 		c.SaveEvents = &f
 	}
 
+	if c.SaveSyslog == nil {
+		c.SaveSyslog = &f
+	}
+
 	if c.SaveAlarms == nil {
 		c.SaveAlarms = &f
 	}
@@ -321,6 +326,10 @@ func (u *InputUnifi) setControllerDefaults(c *Controller) *Controller { //nolint
 
 	if c.SaveEvents == nil {
 		c.SaveEvents = u.Default.SaveEvents
+	}
+
+	if c.SaveSyslog == nil {
+		c.SaveSyslog = u.Default.SaveSyslog
 	}
 
 	if c.SaveAlarms == nil {
