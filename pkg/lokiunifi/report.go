@@ -57,6 +57,8 @@ func (r *Report) ProcessEventLogs(events *poller.Events) *Logs {
 			r.Anomaly(event, logs)
 		case *unifi.SystemLogEntry:
 			r.SystemLogEvent(event, logs)
+		case *unifi.ProtectLogEntry:
+			r.ProtectLogEvent(event, logs)
 		default: // unlikely.
 			r.LogErrorf("unknown event type: %T", e)
 		}
@@ -66,11 +68,17 @@ func (r *Report) ProcessEventLogs(events *poller.Events) *Logs {
 }
 
 func (r *Report) String() string {
-	return fmt.Sprintf("%s: %d, %s: %d, %s: %d, %s: %d, %s: %d, Dur: %v",
+	s := fmt.Sprintf("%s: %d, %s: %d, %s: %d, %s: %d, %s: %d, %s: %d",
 		typeEvent, r.Counts[typeEvent], typeIDs, r.Counts[typeIDs],
 		typeAlarm, r.Counts[typeAlarm], typeAnomaly, r.Counts[typeAnomaly],
-		typeSystemLog, r.Counts[typeSystemLog],
-		time.Since(r.Start).Round(time.Millisecond))
+		typeSystemLog, r.Counts[typeSystemLog], typeProtectLog, r.Counts[typeProtectLog])
+
+	if r.Counts[typeProtectThumbnail] > 0 {
+		s += fmt.Sprintf(" (thumbs: %d)", r.Counts[typeProtectThumbnail])
+	}
+
+	s += fmt.Sprintf(", Dur: %v", time.Since(r.Start).Round(time.Millisecond))
+	return s
 }
 
 // CleanLabels removes any tag that is empty.

@@ -1,6 +1,7 @@
 package inputunifi
 
 import (
+	"encoding/base64"
 	"fmt"
 	"time"
 
@@ -34,7 +35,7 @@ func (u *InputUnifi) collectControllerEvents(c *Controller) ([]any, error) {
 
 	type caller func([]any, []*unifi.Site, *Controller) ([]any, error)
 
-	for _, call := range []caller{u.collectIDs, u.collectAnomalies, u.collectAlarms, u.collectEvents, u.collectSyslog} {
+	for _, call := range []caller{u.collectIDs, u.collectAnomalies, u.collectAlarms, u.collectEvents, u.collectSyslog, u.collectProtectLogs} {
 		if newLogs, err = call(logs, sites, c); err != nil {
 			return logs, err
 		}
@@ -152,6 +153,53 @@ func (u *InputUnifi) collectSyslog(logs []any, sites []*unifi.Site, c *Controlle
 	return logs, nil
 }
 
+func (u *InputUnifi) collectProtectLogs(logs []any, _ []*unifi.Site, c *Controller) ([]any, error) {
+	if *c.SaveProtectLogs {
+		u.LogDebugf("Collecting Protect logs: %s (%s)", c.URL, c.ID)
+
+		req := unifi.DefaultProtectLogRequest(0) // Uses default 24-hour window
+		entries, err := c.Unifi.GetProtectLogs(req)
+		if err != nil {
+			return logs, fmt.Errorf("unifi.GetProtectLogs(): %w", err)
+		}
+
+		for _, e := range entries {
+			e := redactProtectLogEntry(e, c.HashPII, c.DropPII)
+
+			// Fetch thumbnail if enabled and event has a camera (only camera events have real thumbnails)
+			// Skip access/adminActivity events - they don't have actual camera thumbnails
+			if *c.ProtectThumbnails && e.Thumbnail != "" && e.Camera != "" && hasProtectThumbnail(e.Type) {
+				// Thumbnail field is like "e-69499de2037add03e4015fa8" - strip "e-" prefix
+				thumbID := e.Thumbnail
+				if len(thumbID) > 2 && thumbID[:2] == "e-" {
+					thumbID = thumbID[2:]
+				}
+				if thumbData, err := c.Unifi.GetProtectEventThumbnail(thumbID); err == nil {
+					e.ThumbnailBase64 = base64.StdEncoding.EncodeToString(thumbData)
+				} else {
+					u.LogDebugf("Failed to fetch thumbnail for event %s (thumb: %s): %v", e.ID, thumbID, err)
+				}
+			}
+
+			logs = append(logs, e)
+
+			webserver.NewInputEvent(PluginName, "protect_logs", &webserver.Event{
+				Msg: e.Msg(), Ts: e.Datetime(), Tags: map[string]string{
+					"type":        "protect_log",
+					"event_type":  e.GetEventType(),
+					"category":    e.GetCategory(),
+					"subcategory": e.GetSubCategory(),
+					"severity":    e.GetSeverity(),
+					"camera":      e.Camera,
+					"source":      e.SourceName,
+				},
+			})
+		}
+	}
+
+	return logs, nil
+}
+
 func (u *InputUnifi) collectIDs(logs []any, sites []*unifi.Site, c *Controller) ([]any, error) {
 	if *c.SaveIDs {
 		u.LogDebugf("Collecting controller IDs data: %s (%s)", c.URL, c.ID)
@@ -250,4 +298,39 @@ func redactSystemLogEntry(e *unifi.SystemLogEntry, hash *bool, dropPII *bool) *u
 	}
 
 	return e
+}
+
+// redactProtectLogEntry attempts to mask personally identifying information from Protect log entries.
+func redactProtectLogEntry(e *unifi.ProtectLogEntry, hash *bool, dropPII *bool) *unifi.ProtectLogEntry {
+	if !*hash && !*dropPII {
+		return e
+	}
+
+	// Redact user names from message keys
+	if e.Description != nil {
+		for i, mk := range e.Description.MessageKeys {
+			if mk.Key == "userLink" || mk.Action == "viewUsers" {
+				if *dropPII {
+					e.Description.MessageKeys[i].Text = ""
+				} else {
+					e.Description.MessageKeys[i].Text = RedactNamePII(mk.Text, hash, dropPII)
+				}
+			}
+		}
+	}
+
+	return e
+}
+
+// hasProtectThumbnail returns true if the event type has actual camera thumbnails.
+// Access and adminActivity events don't have real thumbnails (they're user activity logs).
+func hasProtectThumbnail(eventType string) bool {
+	switch eventType {
+	case "motion", "smartDetectZone", "smartDetectLine", "ring", "sensorMotion",
+		"sensorContact", "sensorAlarm", "doorbell", "package", "person", "vehicle",
+		"animal", "face", "licensePlate":
+		return true
+	default:
+		return false
+	}
 }

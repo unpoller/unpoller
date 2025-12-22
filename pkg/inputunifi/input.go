@@ -39,6 +39,8 @@ type Controller struct {
 	SaveAlarms              *bool        `json:"save_alarms"                toml:"save_alarms"                xml:"save_alarms"                yaml:"save_alarms"`
 	SaveEvents              *bool        `json:"save_events"                toml:"save_events"                xml:"save_events"                yaml:"save_events"`
 	SaveSyslog              *bool        `json:"save_syslog"                toml:"save_syslog"                xml:"save_syslog"                yaml:"save_syslog"`
+	SaveProtectLogs         *bool        `json:"save_protect_logs"          toml:"save_protect_logs"          xml:"save_protect_logs"          yaml:"save_protect_logs"`
+	ProtectThumbnails       *bool        `json:"protect_thumbnails"         toml:"protect_thumbnails"         xml:"protect_thumbnails"         yaml:"protect_thumbnails"`
 	SaveIDs                 *bool        `json:"save_ids"                   toml:"save_ids"                   xml:"save_ids"                   yaml:"save_ids"`
 	SaveDPI                 *bool        `json:"save_dpi"                   toml:"save_dpi"                   xml:"save_dpi"                   yaml:"save_dpi"`
 	SaveRogue               *bool        `json:"save_rogue"                 toml:"save_rogue"                 xml:"save_rogue"                 yaml:"save_rogue"`
@@ -249,6 +251,14 @@ func (u *InputUnifi) setDefaults(c *Controller) { //nolint:cyclop
 		c.SaveSyslog = &f
 	}
 
+	if c.SaveProtectLogs == nil {
+		c.SaveProtectLogs = &f
+	}
+
+	if c.ProtectThumbnails == nil {
+		c.ProtectThumbnails = &f
+	}
+
 	if c.SaveAlarms == nil {
 		c.SaveAlarms = &f
 	}
@@ -330,6 +340,14 @@ func (u *InputUnifi) setControllerDefaults(c *Controller) *Controller { //nolint
 
 	if c.SaveSyslog == nil {
 		c.SaveSyslog = u.Default.SaveSyslog
+	}
+
+	if c.SaveProtectLogs == nil {
+		c.SaveProtectLogs = u.Default.SaveProtectLogs
+	}
+
+	if c.ProtectThumbnails == nil {
+		c.ProtectThumbnails = u.Default.ProtectThumbnails
 	}
 
 	if c.SaveAlarms == nil {

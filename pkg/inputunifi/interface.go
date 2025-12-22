@@ -128,7 +128,7 @@ func (u *InputUnifi) logController(c *Controller) {
 	u.Logf("   => Hash PII %v / Drop PII %v / Poll Sites: %s", *c.HashPII, *c.DropPII, strings.Join(c.Sites, ", "))
 	u.Logf("   => Save Sites %v / Save DPI %v (metrics)", *c.SaveSites, *c.SaveDPI)
 	u.Logf("   => Save Events %v / Save Syslog %v / Save IDs %v (logs)", *c.SaveEvents, *c.SaveSyslog, *c.SaveIDs)
-	u.Logf("   => Save Alarms %v / Anomalies %v (logs)", *c.SaveAlarms, *c.SaveAnomal)
+	u.Logf("   => Save Alarms %v / Anomalies %v / Protect Logs %v (thumbnails: %v)", *c.SaveAlarms, *c.SaveAnomal, *c.SaveProtectLogs, *c.ProtectThumbnails)
 	u.Logf("   => Save Rogue APs: %v", *c.SaveRogue)
 }
 
