@@ -33,10 +33,10 @@ func DefaultConfFile() string {
 	case "netbsd":
 		fallthrough
 	case "openbsd":
-		return "/etc/unpoller/up.conf,/etc/unifi-poller/up.conf,/usr/local/etc/unifi-poller/up.conf"
+		return "/etc/unpoller/up.conf,/etc/unifi-poller/up.conf,/usr/local/etc/unifi-poller/up.conf,up.conf"
 	default:
 		// linux and everything else
-		return "/etc/unpoller/up.conf,/config/unifi-poller.conf,/etc/unifi-poller/up.conf"
+		return "/etc/unpoller/up.conf,/config/unifi-poller.conf,/etc/unifi-poller/up.conf,up.conf"
 	}
 }
 
@@ -79,14 +79,15 @@ type Flags struct {
 
 // Metrics is a type shared by the exporting and reporting packages.
 type Metrics struct {
-	TS         time.Time
-	Sites      []any
-	Clients    []any
-	SitesDPI   []any
-	ClientsDPI []any
-	Devices    []any
-	RogueAPs   []any
-	SpeedTests []any
+	TS             time.Time
+	Sites          []any
+	Clients        []any
+	SitesDPI       []any
+	ClientsDPI     []any
+	Devices        []any
+	RogueAPs       []any
+	SpeedTests     []any
+	CountryTraffic []any
 }
 
 // Events defines the type for log entries.

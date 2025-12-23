@@ -4,6 +4,7 @@ go 1.25.5
 
 require (
 	github.com/DataDog/datadog-go/v5 v5.8.2
+	github.com/flaticols/countrycodes v0.0.2
 	github.com/gorilla/mux v1.8.1
 	github.com/influxdata/influxdb1-client v0.0.0-20220302092344-a9ab5670611c
 	github.com/pkg/errors v0.9.1

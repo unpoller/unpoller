@@ -99,6 +99,10 @@ func (u *InputUnifi) pollController(c *Controller) (*poller.Metrics, error) {
 	m := &Metrics{TS: time.Now(), Sites: sites}
 	defer updateWeb(c, m)
 
+	// FIXME needs to be last poll time maybe
+	st := m.TS.Add(-1 * time.Hour * 24 * 28)
+	tp := unifi.EpochMillisTimePeriod{StartEpochMillis: st.UnixMilli(), EndEpochMillis: m.TS.UnixMilli()}
+
 	if c.SaveRogue != nil && *c.SaveRogue {
 		if m.RogueAPs, err = c.Unifi.GetRogueAPs(sites); err != nil {
 			return nil, fmt.Errorf("unifi.GetRogueAPs(%s): %w", c.URL, err)
@@ -113,6 +117,24 @@ func (u *InputUnifi) pollController(c *Controller) (*poller.Metrics, error) {
 		if m.ClientsDPI, err = c.Unifi.GetClientsDPI(sites); err != nil {
 			return nil, fmt.Errorf("unifi.GetClientsDPI(%s): %w", c.URL, err)
 		}
+	}
+
+	if c.SaveTraffic != nil && *c.SaveTraffic {
+		if m.CountryTraffic, err = c.Unifi.GetCountryTraffic(sites, &tp); err != nil {
+			return nil, fmt.Errorf("unifi.GetCountryTraffic(%s): %w", c.URL, err)
+		}
+		u.Logf("Found %d CountryTraffic entries", len(m.CountryTraffic))
+	}
+
+	if c.SaveTraffic != nil && *c.SaveTraffic && c.SaveDPI != nil && *c.SaveDPI {
+		clientUsageByApp, err := c.Unifi.GetClientTraffic(sites, &tp, true)
+		if err != nil {
+			return nil, fmt.Errorf("unifi.GetClientTraffic(%s): %w", c.URL, err)
+		}
+		u.Logf("Found %d ClientUsageByApp entries", len(clientUsageByApp))
+		b4 := len(m.ClientsDPI)
+		u.convertToClientDPI(clientUsageByApp, m)
+		u.Logf("Added %d ClientDPI entries for a total of %d", len(m.ClientsDPI)-b4, len(m.ClientsDPI))
 	}
 
 	// Get all the points.
@@ -131,6 +153,84 @@ func (u *InputUnifi) pollController(c *Controller) (*poller.Metrics, error) {
 	}
 
 	return u.augmentMetrics(c, m), nil
+}
+
+func (u *InputUnifi) intToFlexInt(i int) unifi.FlexInt {
+	return unifi.FlexInt{
+		Val: float64(i),
+		Txt: fmt.Sprintf("%d", i),
+	}
+}
+
+func (u *InputUnifi) int64ToFlexInt(i int64) unifi.FlexInt {
+	return unifi.FlexInt{
+		Val: float64(i),
+		Txt: fmt.Sprintf("%d", i),
+	}
+}
+
+func (u *InputUnifi) convertToClientDPI(clientUsageByApp []*unifi.ClientUsageByApp, metrics *Metrics) {
+	for _, client := range clientUsageByApp {
+		byApp := make([]unifi.DPIData, 0)
+		byCat := make([]unifi.DPIData, 0)
+		type catCount struct {
+			BytesReceived    int64
+			BytesTransmitted int64
+		}
+		byCatMap := make(map[int]catCount)
+		dpiClients := make([]*unifi.DPIClient, 0)
+		// TODO create cat table
+		for _, app := range client.UsageByApp {
+			dpiData := unifi.DPIData{
+				App:          u.intToFlexInt(app.Application),
+				Cat:          u.intToFlexInt(app.Category),
+				Clients:      dpiClients,
+				KnownClients: u.intToFlexInt(0),
+				RxBytes:      u.int64ToFlexInt(app.BytesReceived),
+				RxPackets:    u.int64ToFlexInt(0), // We don't have packets from Unifi Controller
+				TxBytes:      u.int64ToFlexInt(app.BytesTransmitted),
+				TxPackets:    u.int64ToFlexInt(0), // We don't have packets from Unifi Controller
+			}
+			cat, ok := byCatMap[app.Category]
+			if ok {
+				cat.BytesReceived += app.BytesReceived
+				cat.BytesTransmitted += app.BytesTransmitted
+			} else {
+				cat = catCount{
+					BytesReceived:    app.BytesReceived,
+					BytesTransmitted: app.BytesTransmitted,
+				}
+				byCatMap[app.Category] = cat
+			}
+			byApp = append(byApp, dpiData)
+		}
+		if len(byApp) <= 1 {
+			byCat = byApp
+		} else {
+			for category, cat := range byCatMap {
+				dpiData := unifi.DPIData{
+					App:          u.intToFlexInt(16777215), // Unknown
+					Cat:          u.intToFlexInt(category),
+					Clients:      dpiClients,
+					KnownClients: u.intToFlexInt(0),
+					RxBytes:      u.int64ToFlexInt(cat.BytesReceived),
+					RxPackets:    u.int64ToFlexInt(0), // We don't have packets from Unifi Controller
+					TxBytes:      u.int64ToFlexInt(cat.BytesTransmitted),
+					TxPackets:    u.int64ToFlexInt(0), // We don't have packets from Unifi Controller
+				}
+				byCat = append(byCat, dpiData)
+			}
+		}
+		dpiTable := unifi.DPITable{
+			ByApp:      byApp,
+			ByCat:      byCat,
+			MAC:        client.Client.Mac,
+			Name:       client.Client.Name,
+			SiteName:   client.TrafficSite.SiteName,
+			SourceName: client.TrafficSite.SourceName,
+		}
+		metrics.ClientsDPI = append(metrics.ClientsDPI, &dpiTable)
+	}
 }
 
 // augmentMetrics is our middleware layer between collecting metrics and writing them.
@@ -189,6 +289,10 @@ func (u *InputUnifi) augmentMetrics(c *Controller, metrics *Metrics) *poller.Met
 
 	for _, speedTest := range metrics.SpeedTests {
 		m.SpeedTests = append(m.SpeedTests, speedTest)
+	}
+
+	for _, traffic := range metrics.CountryTraffic {
+		m.CountryTraffic = append(m.CountryTraffic, traffic)
 	}
 
 	return m
