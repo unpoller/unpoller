@@ -114,7 +114,7 @@ func (u *InputUnifi) DebugInput() (bool, error) {
 }
 
 func (u *InputUnifi) logController(c *Controller) {
-	u.Logf("   => URL: %s (verify SSL: %v)", c.URL, *c.VerifySSL)
+	u.Logf("   => URL: %s (verify SSL: %v, timeout: %v)", c.URL, *c.VerifySSL, c.Timeout.Duration)
 
 	if len(c.CertPaths) > 0 {
 		u.Logf("   => Cert Files: %s", strings.Join(c.CertPaths, ", "))
