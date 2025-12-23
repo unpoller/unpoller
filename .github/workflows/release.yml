@@ -23,6 +23,8 @@ jobs:
         with:
           fetch-depth: 0
       - run: git fetch --force --tags
+      - uses: anchore/sbom-action/download-syft@v0.7.0 # installs syft
+      - uses: sigstore/cosign-installer@v2.1.0         # installs cosign
       - name: Install RPM tooling
         run: sudo apt-get install -y rpm
       - name: Set up QEMU

@@ -77,14 +77,14 @@ builds:
 
 archives:
   - id: unpoller
-    builds:
+    ids:
       - unpoller
     files:
       - LICENSE
       - README.md
       - examples/up.*.example
   - id: unpoller-linux-arm
-    builds:
+    ids:
       - unpoller-linux-arm
     files:
       - LICENSE
@@ -92,7 +92,7 @@ archives:
       - unpoller_manual.html
       - examples/up.*.example
   - id: unpoller-mac
-    builds:
+    ids:
       - unpoller-mac
     files:
       - LICENSE
@@ -102,8 +102,9 @@ archives:
   - id: unpoller-windows
     format_overrides:
       - goos: windows
-        format: zip
-    builds:
+        formats:
+          - zip
+    ids:
       - unpoller-windows
     files:
       - LICENSE
@@ -113,9 +114,10 @@ archives:
       - examples/up.*.example
       - init/windows/application.ico
   - id: unpoller-freebsd-pkg
-    builds:
+    ids:
       - unpoller-freebsd
-    format: tar.xz
+    formats:
+      - tar.xz
     wrap_in_directory: false
     files:
       # config files
@@ -309,9 +311,22 @@ docker_manifests:
       - "golift/unifi-poller:v{{ .Major }}-arm64v8"
       - "golift/unifi-poller:v{{ .Major }}-armv7"
 
+
+# signs our docker image
+# https://goreleaser.com/customization/docker_sign
+docker_signs:
+  - cmd: cosign
+    env:
+    - COSIGN_EXPERIMENTAL=1
+    artifacts: images
+    output: true
+    args:
+    - 'sign'
+    - '${artifact}'
+
 nfpms:
   - id: unpoller-packages
-    builds:
+    ids:
       - unpoller
       - unpoller-linux-arm
     file_name_template: '{{ .ProjectName }}_{{ if eq .Os "darwin" }}macOS{{ else if eq .Os "linux" }}Tux{{ else }}{{ .Os }}{{ end }}_{{ if eq .Arch "386" }}32-bit{{ else if eq .Arch "amd64" }}64-bit{{ else }}{{ .Arch }}{{ end }}{{ if .Arm }}v{{ .Arm }}{{ end }}'
@@ -507,6 +522,21 @@ signs:
       - unpoller-linux-arm
       - unpoller-windows
       - unpoller-mac
+  # signs the checksum file
+  # all files (including the sboms) are included in the checksum, so we don't need to sign each one if we don't want to
+  # https://goreleaser.com/customization/sign
+  - id: cosign
+    cmd: cosign
+    env:
+    - COSIGN_EXPERIMENTAL=1
+    certificate: '${artifact}.pem'
+    args:
+      - sign-blob
+      - '--output-certificate=${certificate}'
+      - '--output-signature=${signature}'
+      - '${artifact}'
+    artifacts: checksum
+    output: true
 
 universal_binaries:
   - replace: true
@@ -551,6 +581,15 @@ brews:
       etc.install "examples/up.conf" => "unpoller/up.conf.example"
     post_install: |
       etc.install "examples/up.conf" => "unpoller/up.conf"
+
+# creates SBOMs of all archives and the source tarball using syft
+# https://goreleaser.com/customization/sbom
+# Two different sbom configurations need two different IDs
+sboms:
+  - id: archive 
+    artifacts: archive
+  - id: source
+    artifacts: source
 
 publishers:
   - name: "packagecloud-publisher"
