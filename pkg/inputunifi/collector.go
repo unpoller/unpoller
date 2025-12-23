@@ -123,7 +123,7 @@ func (u *InputUnifi) pollController(c *Controller) (*poller.Metrics, error) {
 		if m.CountryTraffic, err = c.Unifi.GetCountryTraffic(sites, &tp); err != nil {
 			return nil, fmt.Errorf("unifi.GetCountryTraffic(%s): %w", c.URL, err)
 		}
-		u.Logf("Found %d CountryTraffic entries", len(m.CountryTraffic))
+		u.LogDebugf("Found %d CountryTraffic entries", len(m.CountryTraffic))
 	}
 
 	if c.SaveTraffic != nil && *c.SaveTraffic && c.SaveDPI != nil && *c.SaveDPI {
@@ -131,10 +131,10 @@ func (u *InputUnifi) pollController(c *Controller) (*poller.Metrics, error) {
 		if err != nil {
 			return nil, fmt.Errorf("unifi.GetClientTraffic(%s): %w", c.URL, err)
 		}
-		u.Logf("Found %d ClientUsageByApp entries", len(clientUsageByApp))
+		u.LogDebugf("Found %d ClientUsageByApp entries", len(clientUsageByApp))
 		b4 := len(m.ClientsDPI)
 		u.convertToClientDPI(clientUsageByApp, m)
-		u.Logf("Added %d ClientDPI entries for a total of %d", len(m.ClientsDPI)-b4, len(m.ClientsDPI))
+		u.LogDebugf("Added %d ClientDPI entries for a total of %d", len(m.ClientsDPI)-b4, len(m.ClientsDPI))
 	}
 
 	// Get all the points.

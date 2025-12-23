@@ -20,15 +20,17 @@ func NewTestSetup(t *testing.T) *TestRig {
 	testCollector := poller.NewTestCollector(t)
 
 	enabled := true
+	disabled := false
 	controller := inputunifi.Controller{
-		SaveAnomal: &enabled,
-		SaveAlarms: &enabled,
-		SaveEvents: &enabled,
-		SaveIDs:    &enabled,
-		SaveDPI:    &enabled,
-		SaveRogue:  &enabled,
-		SaveSites:  &enabled,
-		URL:        srv.Server.URL,
+		SaveAnomal:  &enabled,
+		SaveAlarms:  &enabled,
+		SaveEvents:  &enabled,
+		SaveIDs:     &enabled,
+		SaveDPI:     &enabled,
+		SaveRogue:   &enabled,
+		SaveSites:   &enabled,
+		SaveTraffic: &disabled,
+		URL:         srv.Server.URL,
 	}
 	in := &inputunifi.InputUnifi{
 		Logger: testCollector.Logger,

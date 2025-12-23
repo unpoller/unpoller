@@ -277,6 +277,10 @@ func (u *InputUnifi) setDefaults(c *Controller) { //nolint:cyclop
 		c.SaveAnomal = &f
 	}
 
+	if c.SaveTraffic == nil {
+		c.SaveTraffic = &f
+	}
+
 	if c.URL == "" {
 		c.URL = defaultURL
 	}
