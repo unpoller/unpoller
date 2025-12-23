@@ -11,16 +11,18 @@ import (
 
 	"github.com/unpoller/unifi/v5"
 	"github.com/unpoller/unpoller/pkg/poller"
+	"golift.io/cnfg"
 )
 
 // PluginName is the name of this input plugin.
 const PluginName = "unifi"
 
 const (
-	defaultURL  = "https://127.0.0.1:8443"
-	defaultUser = "unifipoller"
-	defaultPass = "unifipoller"
-	defaultSite = "all"
+	defaultURL     = "https://127.0.0.1:8443"
+	defaultUser    = "unifipoller"
+	defaultPass    = "unifipoller"
+	defaultSite    = "all"
+	defaultTimeout = 60 * time.Second
 )
 
 // InputUnifi contains the running data.
@@ -34,28 +36,29 @@ type InputUnifi struct {
 // Controller represents the configuration for a UniFi Controller.
 // Each polled controller may have its own configuration.
 type Controller struct {
-	VerifySSL               *bool        `json:"verify_ssl"                 toml:"verify_ssl"                 xml:"verify_ssl"                 yaml:"verify_ssl"`
-	SaveAnomal              *bool        `json:"save_anomalies"             toml:"save_anomalies"             xml:"save_anomalies"             yaml:"save_anomalies"`
-	SaveAlarms              *bool        `json:"save_alarms"                toml:"save_alarms"                xml:"save_alarms"                yaml:"save_alarms"`
-	SaveEvents              *bool        `json:"save_events"                toml:"save_events"                xml:"save_events"                yaml:"save_events"`
-	SaveSyslog              *bool        `json:"save_syslog"                toml:"save_syslog"                xml:"save_syslog"                yaml:"save_syslog"`
-	SaveProtectLogs         *bool        `json:"save_protect_logs"          toml:"save_protect_logs"          xml:"save_protect_logs"          yaml:"save_protect_logs"`
-	ProtectThumbnails       *bool        `json:"protect_thumbnails"         toml:"protect_thumbnails"         xml:"protect_thumbnails"         yaml:"protect_thumbnails"`
-	SaveIDs                 *bool        `json:"save_ids"                   toml:"save_ids"                   xml:"save_ids"                   yaml:"save_ids"`
-	SaveDPI                 *bool        `json:"save_dpi"                   toml:"save_dpi"                   xml:"save_dpi"                   yaml:"save_dpi"`
-	SaveRogue               *bool        `json:"save_rogue"                 toml:"save_rogue"                 xml:"save_rogue"                 yaml:"save_rogue"`
-	HashPII                 *bool        `json:"hash_pii"                   toml:"hash_pii"                   xml:"hash_pii"                   yaml:"hash_pii"`
-	DropPII                 *bool        `json:"drop_pii"                   toml:"drop_pii"                   xml:"drop_pii"                   yaml:"drop_pii"`
-	SaveSites               *bool        `json:"save_sites"                 toml:"save_sites"                 xml:"save_sites"                 yaml:"save_sites"`
-	CertPaths               []string     `json:"ssl_cert_paths"             toml:"ssl_cert_paths"             xml:"ssl_cert_path"              yaml:"ssl_cert_paths"`
-	User                    string       `json:"user"                       toml:"user"                       xml:"user"                       yaml:"user"`
-	Pass                    string       `json:"pass"                       toml:"pass"                       xml:"pass"                       yaml:"pass"`
-	APIKey                  string       `json:"api_key"                    toml:"api_key"                    xml:"api_key"                    yaml:"api_key"`
-	URL                     string       `json:"url"                        toml:"url"                        xml:"url"                        yaml:"url"`
-	Sites                   []string     `json:"sites"                      toml:"sites"                      xml:"site"                       yaml:"sites"`
-	DefaultSiteNameOverride string       `json:"default_site_name_override" toml:"default_site_name_override" xml:"default_site_name_override" yaml:"default_site_name_override"`
-	Unifi                   *unifi.Unifi `json:"-"                          toml:"-"                          xml:"-"                          yaml:"-"`
-	ID                      string       `json:"id,omitempty"` // this is an output, not an input.
+	VerifySSL               *bool         `json:"verify_ssl"                 toml:"verify_ssl"                 xml:"verify_ssl"                 yaml:"verify_ssl"`
+	SaveAnomal              *bool         `json:"save_anomalies"             toml:"save_anomalies"             xml:"save_anomalies"             yaml:"save_anomalies"`
+	SaveAlarms              *bool         `json:"save_alarms"                toml:"save_alarms"                xml:"save_alarms"                yaml:"save_alarms"`
+	SaveEvents              *bool         `json:"save_events"                toml:"save_events"                xml:"save_events"                yaml:"save_events"`
+	SaveSyslog              *bool         `json:"save_syslog"                toml:"save_syslog"                xml:"save_syslog"                yaml:"save_syslog"`
+	SaveProtectLogs         *bool         `json:"save_protect_logs"          toml:"save_protect_logs"          xml:"save_protect_logs"          yaml:"save_protect_logs"`
+	ProtectThumbnails       *bool         `json:"protect_thumbnails"         toml:"protect_thumbnails"         xml:"protect_thumbnails"         yaml:"protect_thumbnails"`
+	SaveIDs                 *bool         `json:"save_ids"                   toml:"save_ids"                   xml:"save_ids"                   yaml:"save_ids"`
+	SaveDPI                 *bool         `json:"save_dpi"                   toml:"save_dpi"                   xml:"save_dpi"                   yaml:"save_dpi"`
+	SaveRogue               *bool         `json:"save_rogue"                 toml:"save_rogue"                 xml:"save_rogue"                 yaml:"save_rogue"`
+	HashPII                 *bool         `json:"hash_pii"                   toml:"hash_pii"                   xml:"hash_pii"                   yaml:"hash_pii"`
+	DropPII                 *bool         `json:"drop_pii"                   toml:"drop_pii"                   xml:"drop_pii"                   yaml:"drop_pii"`
+	SaveSites               *bool         `json:"save_sites"                 toml:"save_sites"                 xml:"save_sites"                 yaml:"save_sites"`
+	Timeout                 cnfg.Duration `json:"timeout"                    toml:"timeout"                    xml:"timeout"                    yaml:"timeout"`
+	CertPaths               []string      `json:"ssl_cert_paths"             toml:"ssl_cert_paths"             xml:"ssl_cert_path"              yaml:"ssl_cert_paths"`
+	User                    string        `json:"user"                       toml:"user"                       xml:"user"                       yaml:"user"`
+	Pass                    string        `json:"pass"                       toml:"pass"                       xml:"pass"                       yaml:"pass"`
+	APIKey                  string        `json:"api_key"                    toml:"api_key"                    xml:"api_key"                    yaml:"api_key"`
+	URL                     string        `json:"url"                        toml:"url"                        xml:"url"                        yaml:"url"`
+	Sites                   []string      `json:"sites"                      toml:"sites"                      xml:"site"                       yaml:"sites"`
+	DefaultSiteNameOverride string        `json:"default_site_name_override" toml:"default_site_name_override" xml:"default_site_name_override" yaml:"default_site_name_override"`
+	Unifi                   *unifi.Unifi  `json:"-"                          toml:"-"                          xml:"-"                          yaml:"-"`
+	ID                      string        `json:"id,omitempty"` // this is an output, not an input.
 }
 
 // Config contains our configuration data.
@@ -134,6 +137,7 @@ func (u *InputUnifi) getUnifi(c *Controller) error {
 		URL:       c.URL,
 		SSLCert:   certs,
 		VerifySSL: *c.VerifySSL,
+		Timeout:   c.Timeout.Duration,
 		ErrorLog:  u.LogErrorf, // Log all errors.
 		DebugLog:  u.LogDebugf, // Log debug messages.
 	})
@@ -296,6 +300,10 @@ func (u *InputUnifi) setDefaults(c *Controller) { //nolint:cyclop
 	if len(c.Sites) == 0 {
 		c.Sites = []string{defaultSite}
 	}
+
+	if c.Timeout.Duration == 0 {
+		c.Timeout.Duration = defaultTimeout
+	}
 }
 
 // setControllerDefaults sets defaults for the for controllers.
@@ -391,6 +399,10 @@ func (u *InputUnifi) setControllerDefaults(c *Controller) *Controller { //nolint
 	// Added handling for the new default_site_name_override parameter.
 	if c.DefaultSiteNameOverride == "" {
 		c.DefaultSiteNameOverride = u.Default.DefaultSiteNameOverride
+	}
+
+	if c.Timeout.Duration == 0 {
+		c.Timeout = u.Default.Timeout
 	}
 
 	return c
