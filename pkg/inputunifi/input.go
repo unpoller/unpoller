@@ -45,7 +45,7 @@ type Controller struct {
 	ProtectThumbnails       *bool         `json:"protect_thumbnails"         toml:"protect_thumbnails"         xml:"protect_thumbnails"         yaml:"protect_thumbnails"`
 	SaveIDs                 *bool         `json:"save_ids"                   toml:"save_ids"                   xml:"save_ids"                   yaml:"save_ids"`
 	SaveDPI                 *bool         `json:"save_dpi"                   toml:"save_dpi"                   xml:"save_dpi"                   yaml:"save_dpi"`
-	SaveTraffic             *bool        `json:"save_traffic"               toml:"save_traffic"               xml:"save_traffic"               yaml:"save_traffic"`
+	SaveTraffic             *bool         `json:"save_traffic"               toml:"save_traffic"               xml:"save_traffic"               yaml:"save_traffic"`
 	SaveRogue               *bool         `json:"save_rogue"                 toml:"save_rogue"                 xml:"save_rogue"                 yaml:"save_rogue"`
 	HashPII                 *bool         `json:"hash_pii"                   toml:"hash_pii"                   xml:"hash_pii"                   yaml:"hash_pii"`
 	DropPII                 *bool         `json:"drop_pii"                   toml:"drop_pii"                   xml:"drop_pii"                   yaml:"drop_pii"`
@@ -344,6 +344,10 @@ func (u *InputUnifi) setControllerDefaults(c *Controller) *Controller { //nolint
 		c.SaveDPI = u.Default.SaveDPI
 	}
 
+	if c.SaveTraffic == nil {
+		c.SaveTraffic = u.Default.SaveTraffic
+	}
+	
 	if c.SaveIDs == nil {
 		c.SaveIDs = u.Default.SaveIDs
 	}
