@@ -166,6 +166,7 @@ func (u *UnifiPoller) HealthCheck() error {
 	for _, output := range outputs {
 		if output.Enabled() {
 			hasEnabledOutput = true
+
 			break
 		}
 	}

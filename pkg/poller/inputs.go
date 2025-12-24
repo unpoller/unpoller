@@ -269,6 +269,7 @@ func AppendMetrics(existing *Metrics, m *Metrics) *Metrics {
 	existing.Clients = append(existing.Clients, m.Clients...)
 	existing.Devices = append(existing.Devices, m.Devices...)
 	existing.CountryTraffic = append(existing.CountryTraffic, m.CountryTraffic...)
+
 	return existing
 }
 

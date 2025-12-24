@@ -12,8 +12,8 @@ import (
 )
 
 const (
-	history_seconds = 86400
-	poll_duration   = time.Second * history_seconds
+	historySeconds = 86400
+	pollDuration   = time.Second * historySeconds
 )
 
 var ErrScrapeFilterMatchFailed = fmt.Errorf("scrape filter match failed, and filter is not http URL")
@@ -105,13 +105,14 @@ func (u *InputUnifi) pollController(c *Controller) (*poller.Metrics, error) {
 	defer updateWeb(c, m)
 
 	// FIXME needs to be last poll time maybe
-	st := m.TS.Add(-1 * poll_duration)
+	st := m.TS.Add(-1 * pollDuration)
 	tp := unifi.EpochMillisTimePeriod{StartEpochMillis: st.UnixMilli(), EndEpochMillis: m.TS.UnixMilli()}
 
 	if c.SaveRogue != nil && *c.SaveRogue {
 		if m.RogueAPs, err = c.Unifi.GetRogueAPs(sites); err != nil {
 			return nil, fmt.Errorf("unifi.GetRogueAPs(%s): %w", c.URL, err)
 		}
+
 		u.LogDebugf("Found %d RogueAPs entries", len(m.RogueAPs))
 	}
 
@@ -119,11 +120,13 @@ func (u *InputUnifi) pollController(c *Controller) (*poller.Metrics, error) {
 		if m.SitesDPI, err = c.Unifi.GetSiteDPI(sites); err != nil {
 			return nil, fmt.Errorf("unifi.GetSiteDPI(%s): %w", c.URL, err)
 		}
+
 		u.LogDebugf("Found %d SitesDPI entries", len(m.SitesDPI))
 
 		if m.ClientsDPI, err = c.Unifi.GetClientsDPI(sites); err != nil {
 			return nil, fmt.Errorf("unifi.GetClientsDPI(%s): %w", c.URL, err)
 		}
+
 		u.LogDebugf("Found %d ClientsDPI entries", len(m.ClientsDPI))
 	}
 
@@ -131,6 +134,7 @@ func (u *InputUnifi) pollController(c *Controller) (*poller.Metrics, error) {
 		if m.CountryTraffic, err = c.Unifi.GetCountryTraffic(sites, &tp); err != nil {
 			return nil, fmt.Errorf("unifi.GetCountryTraffic(%s): %w", c.URL, err)
 		}
+
 		u.LogDebugf("Found %d CountryTraffic entries", len(m.CountryTraffic))
 	}
 
@@ -139,6 +143,7 @@ func (u *InputUnifi) pollController(c *Controller) (*poller.Metrics, error) {
 		if err != nil {
 			return nil, fmt.Errorf("unifi.GetClientTraffic(%s): %w", c.URL, err)
 		}
+
 		u.LogDebugf("Found %d ClientUsageByApp entries", len(clientUsageByApp))
 		b4 := len(m.ClientsDPI)
 		u.convertToClientDPI(clientUsageByApp, m)
@@ -149,11 +154,13 @@ func (u *InputUnifi) pollController(c *Controller) (*poller.Metrics, error) {
 	if m.Clients, err = c.Unifi.GetClients(sites); err != nil {
 		return nil, fmt.Errorf("unifi.GetClients(%s): %w", c.URL, err)
 	}
+
 	u.LogDebugf("Found %d Clients entries", len(m.Clients))
 
 	if m.Devices, err = c.Unifi.GetDevices(sites); err != nil {
 		return nil, fmt.Errorf("unifi.GetDevices(%s): %w", c.URL, err)
 	}
+
 	u.LogDebugf("Found %d UBB, %d UXG, %d PDU, %d UCI, %d UAP %d USG %d USW %d UDM devices",
 		len(m.Devices.UBBs), len(m.Devices.UXGs),
 		len(m.Devices.PDUs), len(m.Devices.UCIs),
@@ -161,7 +168,7 @@ func (u *InputUnifi) pollController(c *Controller) (*poller.Metrics, error) {
 		len(m.Devices.USWs), len(m.Devices.UDMs))
 
 	// Get speed test results for all WANs
-	if m.SpeedTests, err = c.Unifi.GetSpeedTests(sites, history_seconds); err != nil {
+	if m.SpeedTests, err = c.Unifi.GetSpeedTests(sites, historySeconds); err != nil {
 		// Don't fail collection if speed tests fail - older controllers may not have this endpoint
 		u.LogDebugf("unifi.GetSpeedTests(%s): %v (continuing)", c.URL, err)
 	} else {
@@ -191,10 +198,12 @@ func (u *InputUnifi) convertToClientDPI(clientUsageByApp []*unifi.ClientUsageByA
 	for _, client := range clientUsageByApp {
 		byApp := make([]unifi.DPIData, 0)
 		byCat := make([]unifi.DPIData, 0)
+
 		type catCount struct {
 			BytesReceived    int64
 			BytesTransmitted int64
 		}
+
 		byCatMap := make(map[int]catCount)
 		dpiClients := make([]*unifi.DPIClient, 0)
 		// TODO create cat table
@@ -209,6 +218,7 @@ func (u *InputUnifi) convertToClientDPI(clientUsageByApp []*unifi.ClientUsageByA
 				TxBytes:      u.int64ToFlexInt(app.BytesTransmitted),
 				TxPackets:    u.int64ToFlexInt(0), // We don't have packets from Unifi Controller
 			}
+
 			cat, ok := byCatMap[app.Category]
 			if ok {
 				cat.BytesReceived += app.BytesReceived
@@ -220,8 +230,10 @@ func (u *InputUnifi) convertToClientDPI(clientUsageByApp []*unifi.ClientUsageByA
 				}
 				byCatMap[app.Category] = cat
 			}
+
 			byApp = append(byApp, dpiData)
 		}
+
 		if len(byApp) <= 1 {
 			byCat = byApp
 		} else {
@@ -239,6 +251,7 @@ func (u *InputUnifi) convertToClientDPI(clientUsageByApp []*unifi.ClientUsageByA
 				byCat = append(byCat, dpiData)
 			}
 		}
+
 		dpiTable := unifi.DPITable{
 			ByApp:      byApp,
 			ByCat:      byCat,
