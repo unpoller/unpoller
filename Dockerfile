@@ -1,4 +1,4 @@
-FROM busybox:latest as builder
+FROM busybox:latest AS builder
 # we have to do this hop because distroless is bare without common shell commands
 
 RUN mkdir -p /etc/unpoller

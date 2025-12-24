@@ -45,6 +45,7 @@ type Controller struct {
 	ProtectThumbnails       *bool         `json:"protect_thumbnails"         toml:"protect_thumbnails"         xml:"protect_thumbnails"         yaml:"protect_thumbnails"`
 	SaveIDs                 *bool         `json:"save_ids"                   toml:"save_ids"                   xml:"save_ids"                   yaml:"save_ids"`
 	SaveDPI                 *bool         `json:"save_dpi"                   toml:"save_dpi"                   xml:"save_dpi"                   yaml:"save_dpi"`
+	SaveTraffic             *bool        `json:"save_traffic"               toml:"save_traffic"               xml:"save_traffic"               yaml:"save_traffic"`
 	SaveRogue               *bool         `json:"save_rogue"                 toml:"save_rogue"                 xml:"save_rogue"                 yaml:"save_rogue"`
 	HashPII                 *bool         `json:"hash_pii"                   toml:"hash_pii"                   xml:"hash_pii"                   yaml:"hash_pii"`
 	DropPII                 *bool         `json:"drop_pii"                   toml:"drop_pii"                   xml:"drop_pii"                   yaml:"drop_pii"`
@@ -72,14 +73,15 @@ type Config struct {
 
 // Metrics is simply a useful container for everything.
 type Metrics struct {
-	TS         time.Time
-	Sites      []*unifi.Site
-	Clients    []*unifi.Client
-	SitesDPI   []*unifi.DPITable
-	ClientsDPI []*unifi.DPITable
-	RogueAPs   []*unifi.RogueAP
-	SpeedTests []*unifi.SpeedTestResult
-	Devices    *unifi.Devices
+	TS             time.Time
+	Sites          []*unifi.Site
+	Clients        []*unifi.Client
+	SitesDPI       []*unifi.DPITable
+	ClientsDPI     []*unifi.DPITable
+	CountryTraffic []*unifi.UsageByCountry
+	RogueAPs       []*unifi.RogueAP
+	SpeedTests     []*unifi.SpeedTestResult
+	Devices        *unifi.Devices
 }
 
 func init() { // nolint: gochecknoinits
@@ -239,6 +241,10 @@ func (u *InputUnifi) setDefaults(c *Controller) { //nolint:cyclop
 		c.SaveDPI = &f
 	}
 
+	if c.SaveTraffic == nil {
+		c.SaveTraffic = &f
+	}
+
 	if c.SaveRogue == nil {
 		c.SaveRogue = &f
 	}
@@ -269,6 +275,10 @@ func (u *InputUnifi) setDefaults(c *Controller) { //nolint:cyclop
 
 	if c.SaveAnomal == nil {
 		c.SaveAnomal = &f
+	}
+
+	if c.SaveTraffic == nil {
+		c.SaveTraffic = &f
 	}
 
 	if c.URL == "" {

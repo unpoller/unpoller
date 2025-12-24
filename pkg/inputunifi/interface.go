@@ -130,6 +130,7 @@ func (u *InputUnifi) logController(c *Controller) {
 	u.Logf("   => Save Events %v / Save Syslog %v / Save IDs %v (logs)", *c.SaveEvents, *c.SaveSyslog, *c.SaveIDs)
 	u.Logf("   => Save Alarms %v / Anomalies %v / Protect Logs %v (thumbnails: %v)", *c.SaveAlarms, *c.SaveAnomal, *c.SaveProtectLogs, *c.ProtectThumbnails)
 	u.Logf("   => Save Rogue APs: %v", *c.SaveRogue)
+	u.Logf("   => Save Traffic %v", *c.SaveTraffic)
 }
 
 // Events allows you to pull only events (and IDs) from the UniFi Controller.

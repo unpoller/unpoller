@@ -35,16 +35,17 @@ const (
 var ErrMetricFetchFailed = fmt.Errorf("metric fetch failed")
 
 type promUnifi struct {
-	*Config `json:"prometheus" toml:"prometheus" xml:"prometheus" yaml:"prometheus"`
-	Client    *uclient
-	Device    *unifiDevice
-	UAP       *uap
-	USG       *usg
-	USW       *usw
-	PDU       *pdu
-	Site      *site
-	RogueAP   *rogueap
-	SpeedTest *speedtest
+	*Config        `json:"prometheus" toml:"prometheus" xml:"prometheus" yaml:"prometheus"`
+	Client         *uclient
+	Device         *unifiDevice
+	UAP            *uap
+	USG            *usg
+	USW            *usw
+	PDU            *pdu
+	Site           *site
+	RogueAP        *rogueap
+	SpeedTest      *speedtest
+	CountryTraffic *ucountrytraffic
 	// This interface is passed to the Collect() method. The Collect method uses
 	// this interface to retrieve the latest UniFi measurements and export them.
 	Collector poller.Collect
@@ -203,6 +204,7 @@ func (u *promUnifi) Run(c poller.Collect) error {
 	u.Site = descSite(u.Namespace + "_site_")
 	u.RogueAP = descRogueAP(u.Namespace + "_rogueap_")
 	u.SpeedTest = descSpeedTest(u.Namespace + "_speedtest_")
+	u.CountryTraffic = descCountryTraffic(u.Namespace + "_countrytraffic_")
 
 	mux := http.NewServeMux()
 	promver.Version = version.Version
@@ -405,6 +407,10 @@ func (u *promUnifi) loopExports(r report) {
 		u.exportClientDPI(r, c, appTotal, catTotal)
 	}
 
+	for _, ct := range m.CountryTraffic {
+		u.exportCountryTraffic(r, ct)
+	}
+
 	u.exportClientDPItotals(r, appTotal, catTotal)
 }
 
@@ -443,6 +449,8 @@ func (u *promUnifi) switchExport(r report, v any) {
 		u.exportClient(r, v)
 	case *unifi.SpeedTestResult:
 		u.exportSpeedTest(r, v)
+	case *unifi.UsageByCountry:
+		u.exportCountryTraffic(r, v)
 	default:
 		u.LogErrorf("invalid type: %T", v)
 	}

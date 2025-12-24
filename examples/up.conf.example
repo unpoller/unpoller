@@ -242,6 +242,7 @@
 #  save_alarms = false
 #  save_anomalies = false
 #  save_dpi    = false
+#  save_traffic = false
 #  save_rogue  = false
 #  verify_ssl  = false
 #  ssl_cert_paths = []

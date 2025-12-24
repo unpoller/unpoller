@@ -51,6 +51,7 @@ func formatControllers(controllers []*Controller) []*Controller {
 			HashPII:         c.HashPII,
 			DropPII:         c.DropPII,
 			SaveSites:       c.SaveSites,
+			SaveTraffic:     c.SaveTraffic,
 			User:            c.User,
 			Pass:            strconv.FormatBool(c.Pass != ""),
 			APIKey:          strconv.FormatBool(c.APIKey != ""),
