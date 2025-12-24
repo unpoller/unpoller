@@ -3,14 +3,13 @@ package promunifi
 
 import (
 	"fmt"
+	"github.com/prometheus/client_golang/prometheus/collectors"
 	"net"
 	"net/http"
 	"reflect"
 	"strings"
 	"sync"
 	"time"
-
-	"github.com/prometheus/client_golang/prometheus/collectors"
 
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
