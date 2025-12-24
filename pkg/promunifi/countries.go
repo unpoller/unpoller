@@ -15,6 +15,10 @@ func descCountryTraffic(ns string) *ucountrytraffic {
 	labels := []string{
 		"code",
 		"name",
+		"region",
+		"sub_region",
+		"site_name",
+		"source",
 	}
 
 	return &ucountrytraffic{
@@ -29,11 +33,19 @@ func (u *promUnifi) exportCountryTraffic(r report, v any) {
 		u.LogErrorf("invalid type given to CountryTraffic: %T", v)
 		return
 	}
-	name, ok := countrycodes.Alpha2ToName(s.Country)
-	if !ok {
-		name = "Unknown"
+	country, ok := countrycodes.GetByAlpha2(s.Country)
+	name := "Unknown"
+	region := "Unknown"
+	subRegion := "Unknown"
+	if ok {
+		name = country.Name
+		region = country.Region
+		subRegion = country.SubRegion
 	}
-	labels := []string{s.Country, name}
+	if s.Country == "GB" || s.Country == "UK" {
+		name = "United Kingdom" // Because the name is so long otherwise
+	}
+	labels := []string{s.Country, name, region, subRegion, s.TrafficSite.SiteName, s.TrafficSite.SourceName}
 	r.send([]*metric{
 		{u.CountryTraffic.RxBytes, counter, s.BytesReceived, labels},
 		{u.CountryTraffic.TxBytes, counter, s.BytesTransmitted, labels},
