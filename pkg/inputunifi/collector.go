@@ -11,6 +11,11 @@ import (
 	"github.com/unpoller/unpoller/pkg/poller"
 )
 
+const (
+	history_seconds = 86400
+	poll_duration   = time.Second * history_seconds
+)
+
 var ErrScrapeFilterMatchFailed = fmt.Errorf("scrape filter match failed, and filter is not http URL")
 
 func (u *InputUnifi) isNill(c *Controller) bool {
@@ -100,23 +105,26 @@ func (u *InputUnifi) pollController(c *Controller) (*poller.Metrics, error) {
 	defer updateWeb(c, m)
 
 	// FIXME needs to be last poll time maybe
-	st := m.TS.Add(-1 * time.Hour * 24 * 28)
+	st := m.TS.Add(-1 * poll_duration)
 	tp := unifi.EpochMillisTimePeriod{StartEpochMillis: st.UnixMilli(), EndEpochMillis: m.TS.UnixMilli()}
 
 	if c.SaveRogue != nil && *c.SaveRogue {
 		if m.RogueAPs, err = c.Unifi.GetRogueAPs(sites); err != nil {
 			return nil, fmt.Errorf("unifi.GetRogueAPs(%s): %w", c.URL, err)
 		}
+		u.LogDebugf("Found %d RogueAPs entries", len(m.RogueAPs))
 	}
 
 	if c.SaveDPI != nil && *c.SaveDPI {
 		if m.SitesDPI, err = c.Unifi.GetSiteDPI(sites); err != nil {
 			return nil, fmt.Errorf("unifi.GetSiteDPI(%s): %w", c.URL, err)
 		}
+		u.LogDebugf("Found %d SitesDPI entries", len(m.SitesDPI))
 
 		if m.ClientsDPI, err = c.Unifi.GetClientsDPI(sites); err != nil {
 			return nil, fmt.Errorf("unifi.GetClientsDPI(%s): %w", c.URL, err)
 		}
+		u.LogDebugf("Found %d ClientsDPI entries", len(m.ClientsDPI))
 	}
 
 	if c.SaveTraffic != nil && *c.SaveTraffic {
@@ -141,20 +149,29 @@ func (u *InputUnifi) pollController(c *Controller) (*poller.Metrics, error) {
 	if m.Clients, err = c.Unifi.GetClients(sites); err != nil {
 		return nil, fmt.Errorf("unifi.GetClients(%s): %w", c.URL, err)
 	}
+	u.LogDebugf("Found %d Clients entries", len(m.Clients))
 
 	if m.Devices, err = c.Unifi.GetDevices(sites); err != nil {
 		return nil, fmt.Errorf("unifi.GetDevices(%s): %w", c.URL, err)
 	}
+	u.LogDebugf("Found %d UBB, %d UXG, %d PDU, %d UCI, %d UAP %d USG %d USW %d UDM devices",
+		len(m.Devices.UBBs), len(m.Devices.UXGs),
+		len(m.Devices.PDUs), len(m.Devices.UCIs),
+		len(m.Devices.UAPs), len(m.Devices.USGs),
+		len(m.Devices.USWs), len(m.Devices.UDMs))
 
 	// Get speed test results for all WANs
-	if m.SpeedTests, err = c.Unifi.GetSpeedTests(sites, 86400); err != nil {
+	if m.SpeedTests, err = c.Unifi.GetSpeedTests(sites, history_seconds); err != nil {
 		// Don't fail collection if speed tests fail - older controllers may not have this endpoint
 		u.LogDebugf("unifi.GetSpeedTests(%s): %v (continuing)", c.URL, err)
+	} else {
+		u.LogDebugf("Found %d SpeedTests entries", len(m.SpeedTests))
 	}
 
 	return u.augmentMetrics(c, m), nil
 }
 
+// FIXME this would be better implemented on FlexInt itself
 func (u *InputUnifi) intToFlexInt(i int) unifi.FlexInt {
 	return unifi.FlexInt{
 		Val: float64(i),
@@ -162,6 +179,7 @@ func (u *InputUnifi) intToFlexInt(i int) unifi.FlexInt {
 	}
 }
 
+// FIXME this would be better implemented on FlexInt itself
 func (u *InputUnifi) int64ToFlexInt(i int64) unifi.FlexInt {
 	return unifi.FlexInt{
 		Val: float64(i),
