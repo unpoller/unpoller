@@ -9,12 +9,12 @@ require (
 	github.com/influxdata/influxdb1-client v0.0.0-20220302092344-a9ab5670611c
 	github.com/pkg/errors v0.9.1
 	github.com/prometheus/client_golang v1.23.2
-	github.com/prometheus/common v0.67.4
+	github.com/prometheus/common v0.67.5
 	github.com/spf13/pflag v1.0.10
 	github.com/stretchr/testify v1.11.1
 	github.com/unpoller/unifi/v5 v5.5.0
 	golang.org/x/crypto v0.46.0
-	golang.org/x/term v0.38.0
+	golang.org/x/term v0.39.0
 	golift.io/cnfg v0.2.3
 	golift.io/cnfgfile v0.0.0-20240713024420-a5436d84eb48
 	golift.io/version v0.0.2
@@ -43,8 +43,8 @@ require (
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/prometheus/client_model v0.6.2 // indirect
 	github.com/prometheus/procfs v0.16.1 // indirect
-	golang.org/x/sys v0.39.0 // indirect
-	google.golang.org/protobuf v1.36.10 // indirect
+	golang.org/x/sys v0.40.0 // indirect
+	google.golang.org/protobuf v1.36.11 // indirect
 )
 
 // for local iterative development only
