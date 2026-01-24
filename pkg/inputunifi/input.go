@@ -58,6 +58,8 @@ type Controller struct {
 	URL                     string        `json:"url"                        toml:"url"                        xml:"url"                        yaml:"url"`
 	Sites                   []string      `json:"sites"                      toml:"sites"                      xml:"site"                       yaml:"sites"`
 	DefaultSiteNameOverride string        `json:"default_site_name_override" toml:"default_site_name_override" xml:"default_site_name_override" yaml:"default_site_name_override"`
+	Remote                  bool          `json:"remote"                     toml:"remote"                     xml:"remote,attr"                yaml:"remote"`
+	ConsoleID               string        `json:"console_id,omitempty"       toml:"console_id,omitempty"       xml:"console_id,omitempty"        yaml:"console_id,omitempty"`
 	Unifi                   *unifi.Unifi  `json:"-"                          toml:"-"                          xml:"-"                          yaml:"-"`
 	ID                      string        `json:"id,omitempty"` // this is an output, not an input.
 }
@@ -68,6 +70,8 @@ type Config struct {
 	Default      Controller    `json:"defaults"    toml:"defaults"   xml:"default"      yaml:"defaults"`
 	Disable      bool          `json:"disable"     toml:"disable"    xml:"disable,attr" yaml:"disable"`
 	Dynamic      bool          `json:"dynamic"     toml:"dynamic"    xml:"dynamic,attr" yaml:"dynamic"`
+	Remote       bool          `json:"remote"      toml:"remote"     xml:"remote,attr"  yaml:"remote"`
+	RemoteAPIKey string        `json:"remote_api_key" toml:"remote_api_key" xml:"remote_api_key" yaml:"remote_api_key"`
 	Controllers  []*Controller `json:"controllers" toml:"controller" xml:"controller"   yaml:"controllers"`
 }
 
@@ -282,7 +286,12 @@ func (u *InputUnifi) setDefaults(c *Controller) { //nolint:cyclop
 	}
 
 	if c.URL == "" {
-		c.URL = defaultURL
+		if c.Remote {
+			// Remote mode: URL will be set during discovery
+			// Don't set a default here
+		} else {
+			c.URL = defaultURL
+		}
 	}
 
 	if strings.HasPrefix(c.Pass, "file://") {
@@ -293,18 +302,30 @@ func (u *InputUnifi) setDefaults(c *Controller) { //nolint:cyclop
 		c.APIKey = u.getPassFromFile(strings.TrimPrefix(c.APIKey, "file://"))
 	}
 
-	if c.APIKey == "" {
-		if c.Pass == "" {
-			c.Pass = defaultPass
-		}
-
-		if c.User == "" {
-			c.User = defaultUser
+	if c.Remote {
+		// Remote mode: only API key is used, no user/pass
+		if c.APIKey == "" {
+			// For remote mode, API key is required
+			// Will be set from RemoteAPIKey in Config if not provided
+		} else {
+			c.User = ""
+			c.Pass = ""
 		}
 	} else {
-		// clear out user/pass combo, only use API-key
-		c.User = ""
-		c.Pass = ""
+		// Local mode: use API key if provided, otherwise user/pass
+		if c.APIKey == "" {
+			if c.Pass == "" {
+				c.Pass = defaultPass
+			}
+
+			if c.User == "" {
+				c.User = defaultUser
+			}
+		} else {
+			// clear out user/pass combo, only use API-key
+			c.User = ""
+			c.Pass = ""
+		}
 	}
 
 	if len(c.Sites) == 0 {
@@ -381,7 +402,15 @@ func (u *InputUnifi) setControllerDefaults(c *Controller) *Controller { //nolint
 	}
 
 	if c.URL == "" {
-		c.URL = u.Default.URL
+		if c.Remote {
+			// Remote mode: URL will be set during discovery
+			// Don't set a default here
+		} else {
+			c.URL = u.Default.URL
+			if c.URL == "" {
+				c.URL = defaultURL
+			}
+		}
 	}
 
 	if strings.HasPrefix(c.Pass, "file://") {
@@ -392,18 +421,34 @@ func (u *InputUnifi) setControllerDefaults(c *Controller) *Controller { //nolint
 		c.APIKey = u.getPassFromFile(strings.TrimPrefix(c.APIKey, "file://"))
 	}
 
-	if c.APIKey == "" {
-		if c.Pass == "" {
-			c.Pass = defaultPass
+	if c.Remote {
+		// Remote mode: only API key is used
+		if c.APIKey == "" {
+			c.APIKey = u.Default.APIKey
 		}
-
-		if c.User == "" {
-			c.User = defaultUser
-		}
-	} else {
-		// clear out user/pass combo, only use API-key
 		c.User = ""
 		c.Pass = ""
+	} else {
+		// Local mode: use API key if provided, otherwise user/pass
+		if c.APIKey == "" {
+			if c.Pass == "" {
+				c.Pass = u.Default.Pass
+				if c.Pass == "" {
+					c.Pass = defaultPass
+				}
+			}
+
+			if c.User == "" {
+				c.User = u.Default.User
+				if c.User == "" {
+					c.User = defaultUser
+				}
+			}
+		} else {
+			// clear out user/pass combo, only use API-key
+			c.User = ""
+			c.Pass = ""
+		}
 	}
 
 	if len(c.Sites) == 0 {
