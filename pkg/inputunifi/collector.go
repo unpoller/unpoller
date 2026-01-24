@@ -336,43 +336,56 @@ func (u *InputUnifi) augmentMetrics(c *Controller, metrics *Metrics) *poller.Met
 	return m
 }
 
+// isDefaultSiteName checks if a site name represents a "default" site.
+// This handles variations like "default", "Default", "Default (default)", etc.
+func isDefaultSiteName(siteName string) bool {
+	if siteName == "" {
+		return false
+	}
+	lower := strings.ToLower(siteName)
+	// Check for exact match or if it contains "default" as a word
+	return lower == "default" || strings.Contains(lower, "default")
+}
+
 // applySiteNameOverride replaces "default" site names with the override name
 // in all devices, clients, and sites. This allows us to use console names
 // for Cloud Gateways in metrics while keeping "default" for API calls.
+// This makes metrics more compatible with existing dashboards that expect
+// meaningful site names instead of "Default" or "Default (default)".
 func applySiteNameOverride(m *poller.Metrics, overrideName string) {
 	// Apply to all devices - use type switch for known device types
 	for i := range m.Devices {
 		switch d := m.Devices[i].(type) {
 		case *unifi.UAP:
-			if strings.EqualFold(d.SiteName, "default") {
+			if isDefaultSiteName(d.SiteName) {
 				d.SiteName = overrideName
 			}
 		case *unifi.USG:
-			if strings.EqualFold(d.SiteName, "default") {
+			if isDefaultSiteName(d.SiteName) {
 				d.SiteName = overrideName
 			}
 		case *unifi.USW:
-			if strings.EqualFold(d.SiteName, "default") {
+			if isDefaultSiteName(d.SiteName) {
 				d.SiteName = overrideName
 			}
 		case *unifi.UDM:
-			if strings.EqualFold(d.SiteName, "default") {
+			if isDefaultSiteName(d.SiteName) {
 				d.SiteName = overrideName
 			}
 		case *unifi.UXG:
-			if strings.EqualFold(d.SiteName, "default") {
+			if isDefaultSiteName(d.SiteName) {
 				d.SiteName = overrideName
 			}
 		case *unifi.UBB:
-			if strings.EqualFold(d.SiteName, "default") {
+			if isDefaultSiteName(d.SiteName) {
 				d.SiteName = overrideName
 			}
 		case *unifi.UCI:
-			if strings.EqualFold(d.SiteName, "default") {
+			if isDefaultSiteName(d.SiteName) {
 				d.SiteName = overrideName
 			}
 		case *unifi.PDU:
-			if strings.EqualFold(d.SiteName, "default") {
+			if isDefaultSiteName(d.SiteName) {
 				d.SiteName = overrideName
 			}
 		}
@@ -381,17 +394,20 @@ func applySiteNameOverride(m *poller.Metrics, overrideName string) {
 	// Apply to all clients
 	for i := range m.Clients {
 		if client, ok := m.Clients[i].(*unifi.Client); ok {
-			if strings.EqualFold(client.SiteName, "default") {
+			if isDefaultSiteName(client.SiteName) {
 				client.SiteName = overrideName
 			}
 		}
 	}
 
-	// Apply to sites
+	// Apply to sites - check both Name and SiteName fields
 	for i := range m.Sites {
 		if site, ok := m.Sites[i].(*unifi.Site); ok {
-			if strings.EqualFold(site.Name, "default") {
+			if isDefaultSiteName(site.Name) {
 				site.Name = overrideName
+			}
+			if isDefaultSiteName(site.SiteName) {
+				site.SiteName = overrideName
 			}
 		}
 	}
@@ -399,7 +415,7 @@ func applySiteNameOverride(m *poller.Metrics, overrideName string) {
 	// Apply to rogue APs
 	for i := range m.RogueAPs {
 		if ap, ok := m.RogueAPs[i].(*unifi.RogueAP); ok {
-			if strings.EqualFold(ap.SiteName, "default") {
+			if isDefaultSiteName(ap.SiteName) {
 				ap.SiteName = overrideName
 			}
 		}
