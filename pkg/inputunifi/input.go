@@ -369,7 +369,7 @@ func (u *InputUnifi) setControllerDefaults(c *Controller) *Controller { //nolint
 	if c.SaveTraffic == nil {
 		c.SaveTraffic = u.Default.SaveTraffic
 	}
-	
+
 	if c.SaveIDs == nil {
 		c.SaveIDs = u.Default.SaveIDs
 	}

@@ -18,17 +18,17 @@ const (
 
 // Console represents a UniFi console from the remote API.
 type Console struct {
-	ID          string `json:"id"`
-	IPAddress   string `json:"ipAddress"`
-	Type        string `json:"type"`
-	Owner       bool   `json:"owner"`
-	IsBlocked   bool   `json:"isBlocked"`
+	ID            string `json:"id"`
+	IPAddress     string `json:"ipAddress"`
+	Type          string `json:"type"`
+	Owner         bool   `json:"owner"`
+	IsBlocked     bool   `json:"isBlocked"`
 	ReportedState struct {
-		Name      string `json:"name"`
-		Hostname  string `json:"hostname"`
-		IP        string `json:"ip"`
-		State     string `json:"state"`
-		Mac       string `json:"mac"`
+		Name     string `json:"name"`
+		Hostname string `json:"hostname"`
+		IP       string `json:"ip"`
+		State    string `json:"state"`
+		Mac      string `json:"mac"`
 	} `json:"reportedState"`
 	ConsoleName string // Derived field: name from reportedState
 }
@@ -273,7 +273,7 @@ func (u *InputUnifi) discoverRemoteControllers(apiKey string) ([]*Controller, er
 
 		// Ensure defaults are set before calling setControllerDefaults
 		u.setDefaults(&u.Default)
-		
+
 		// Copy defaults
 		controller = u.setControllerDefaults(controller)
 
