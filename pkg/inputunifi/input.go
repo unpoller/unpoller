@@ -193,7 +193,8 @@ func (u *InputUnifi) checkSites(c *Controller) error {
 FIRST:
 	for _, s := range c.Sites {
 		for _, site := range sites {
-			if s == site.Name {
+			// Case-insensitive comparison for site names
+			if strings.EqualFold(s, site.Name) {
 				keep = append(keep, s)
 
 				continue FIRST

@@ -30,16 +30,7 @@ func (u *InputUnifi) Initialize(l poller.Logger) error {
 		return nil
 	}
 
-	if u.setDefaults(&u.Default); len(u.Controllers) == 0 && !u.Dynamic {
-		// If remote mode is enabled at config level, set it on default controller
-		if u.Remote && u.RemoteAPIKey != "" {
-			u.Default.Remote = true
-			u.Default.APIKey = u.RemoteAPIKey
-		}
-		u.Controllers = []*Controller{&u.Default}
-	}
-
-	// Discover remote controllers if remote mode is enabled
+	// Discover remote controllers if remote mode is enabled at config level
 	if u.Remote && u.RemoteAPIKey != "" {
 		u.Logf("Remote API mode enabled, discovering controllers...")
 
@@ -47,32 +38,37 @@ func (u *InputUnifi) Initialize(l poller.Logger) error {
 		if err != nil {
 			u.LogErrorf("Failed to discover remote controllers: %v", err)
 		} else if len(discovered) > 0 {
-			// Merge discovered controllers with configured ones
-			u.Controllers = append(u.Controllers, discovered...)
+			// Replace controllers with discovered ones when using config-level remote mode
+			u.Controllers = discovered
 			u.Logf("Discovered %d remote controller(s)", len(discovered))
 		}
-	}
+	} else {
+		// Only set default controller if not using config-level remote mode
+		if u.setDefaults(&u.Default); len(u.Controllers) == 0 && !u.Dynamic {
+			u.Controllers = []*Controller{&u.Default}
+		}
 
-	// Also check individual controllers for remote flag
-	for _, c := range u.Controllers {
-		if c.Remote && c.APIKey != "" && c.ConsoleID == "" {
-			// This controller has remote flag but no console ID, try to discover
-			discovered, err := u.discoverRemoteControllers(c.APIKey)
-			if err != nil {
-				u.LogErrorf("Failed to discover remote controllers for controller: %v", err)
-				continue
-			}
-			if len(discovered) > 0 {
-				// Replace this controller with discovered ones
-				// Remove the current one and add discovered
-				newControllers := []*Controller{}
-				for _, existing := range u.Controllers {
-					if existing != c {
-						newControllers = append(newControllers, existing)
-					}
+		// Check individual controllers for remote flag (per-controller remote mode)
+		for _, c := range u.Controllers {
+			if c.Remote && c.APIKey != "" && c.ConsoleID == "" {
+				// This controller has remote flag but no console ID, try to discover
+				discovered, err := u.discoverRemoteControllers(c.APIKey)
+				if err != nil {
+					u.LogErrorf("Failed to discover remote controllers for controller: %v", err)
+					continue
 				}
-				newControllers = append(newControllers, discovered...)
-				u.Controllers = newControllers
+				if len(discovered) > 0 {
+					// Replace this controller with discovered ones
+					// Remove the current one and add discovered
+					newControllers := []*Controller{}
+					for _, existing := range u.Controllers {
+						if existing != c {
+							newControllers = append(newControllers, existing)
+						}
+					}
+					newControllers = append(newControllers, discovered...)
+					u.Controllers = newControllers
+				}
 			}
 		}
 	}

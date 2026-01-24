@@ -271,13 +271,57 @@ func (u *InputUnifi) discoverRemoteControllers(apiKey string) ([]*Controller, er
 			URL: fmt.Sprintf("%s/v1/connector/consoles/%s", remoteAPIBaseURL, console.ID),
 		}
 
+		// Ensure defaults are set before calling setControllerDefaults
+		u.setDefaults(&u.Default)
+		
 		// Copy defaults
 		controller = u.setControllerDefaults(controller)
 
-		// Set remote-specific defaults
+		// Set remote-specific defaults and ensure all boolean pointers are initialized
 		t := true
+		f := false
 		if controller.VerifySSL == nil {
 			controller.VerifySSL = &t // Remote API should verify SSL
+		}
+		// Ensure all boolean pointers are set (safety check)
+		if controller.HashPII == nil {
+			controller.HashPII = &f
+		}
+		if controller.DropPII == nil {
+			controller.DropPII = &f
+		}
+		if controller.SaveSites == nil {
+			controller.SaveSites = &t
+		}
+		if controller.SaveDPI == nil {
+			controller.SaveDPI = &f
+		}
+		if controller.SaveEvents == nil {
+			controller.SaveEvents = &f
+		}
+		if controller.SaveAlarms == nil {
+			controller.SaveAlarms = &f
+		}
+		if controller.SaveAnomal == nil {
+			controller.SaveAnomal = &f
+		}
+		if controller.SaveIDs == nil {
+			controller.SaveIDs = &f
+		}
+		if controller.SaveTraffic == nil {
+			controller.SaveTraffic = &f
+		}
+		if controller.SaveRogue == nil {
+			controller.SaveRogue = &f
+		}
+		if controller.SaveSyslog == nil {
+			controller.SaveSyslog = &f
+		}
+		if controller.SaveProtectLogs == nil {
+			controller.SaveProtectLogs = &f
+		}
+		if controller.ProtectThumbnails == nil {
+			controller.ProtectThumbnails = &f
 		}
 
 		// Extract site names
@@ -292,13 +336,13 @@ func (u *InputUnifi) discoverRemoteControllers(apiKey string) ([]*Controller, er
 		// as the default site name override. The console name is in reportedState.name
 		// (consoleName was already set above in the loop)
 
-		// If we only have one site and it's "default", use the console name as override
-		if len(siteNames) == 1 && (siteNames[0] == "default" || siteNames[0] == "") && consoleName != "" {
+		// If we only have one site and it's "default" (case-insensitive), use the console name as override
+		if len(siteNames) == 1 && strings.EqualFold(siteNames[0], "default") && consoleName != "" {
 			controller.DefaultSiteNameOverride = consoleName
+			// Set sites to "all" since we're overriding the default site name
+			controller.Sites = []string{"all"}
 			u.LogDebugf("Using console name '%s' as default site name override for Cloud Gateway", consoleName)
-		}
-
-		if len(siteNames) > 0 {
+		} else if len(siteNames) > 0 {
 			controller.Sites = siteNames
 		} else {
 			controller.Sites = []string{"all"}
