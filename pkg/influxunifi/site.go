@@ -19,8 +19,15 @@ func (u *InfluxUnifi) batchSite(r report, s *unifi.Site) {
 			"gw_name":   h.GwName,
 			"lan_ip":    h.LanIP,
 		}
+
+		// For VPN subsystem, use RemoteUserNumActive for num_user if NumUser is not set
+		numUser := h.NumUser.Val
+		if h.Subsystem == "vpn" && numUser == 0 && h.RemoteUserNumActive.Val > 0 {
+			numUser = h.RemoteUserNumActive.Val
+		}
+
 		fields := map[string]any{
-			"num_user":                 h.NumUser.Val,
+			"num_user":                 numUser,
 			"num_guest":                h.NumGuest.Val,
 			"num_iot":                  h.NumIot.Val,
 			"tx_bytes-r":               h.TxBytesR.Int64(),

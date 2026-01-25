@@ -146,7 +146,14 @@ func (u *promUnifi) exportSite(r report, s *unifi.Site) {
 				{u.Site.NumSw, gauge, h.NumSw, labels},
 			})
 		case "vpn":
+			// For VPN subsystem, use RemoteUserNumActive for NumUser if NumUser is not set
+			numUser := h.NumUser.Val
+			if numUser == 0 && h.RemoteUserNumActive.Val > 0 {
+				numUser = h.RemoteUserNumActive.Val
+			}
+
 			r.send([]*metric{
+				{u.Site.NumUser, gauge, numUser, labels},
 				{u.Site.RemoteUserNumActive, gauge, h.RemoteUserNumActive, labels},
 				{u.Site.RemoteUserNumInactive, gauge, h.RemoteUserNumInactive, labels},
 				{u.Site.RemoteUserRxBytes, counter, h.RemoteUserRxBytes, labels},
