@@ -547,7 +547,7 @@ brews:
       assert_match "unpoller v#{version}", shell_output("#{bin}/unpoller -v 2>&1", 2)
     install: |
       bin.install "unpoller"
-      etc.mkdir "unpoller"
+      (etc/"unpoller").mkpath
       etc.install "examples/up.conf" => "unpoller/up.conf.example"
     post_install: |
       etc.install "examples/up.conf" => "unpoller/up.conf"
