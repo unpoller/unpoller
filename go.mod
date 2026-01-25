@@ -23,7 +23,7 @@ require (
 
 require (
 	go.yaml.in/yaml/v2 v2.4.3 // indirect
-	golang.org/x/net v0.48.0 // indirect
+	golang.org/x/net v0.49.0 // indirect
 )
 
 require (
@@ -48,4 +48,4 @@ require (
 )
 
 // for local iterative development only
-// replace github.com/unpoller/unifi/v5 => ../unifi
+replace github.com/unpoller/unifi/v5 => ../unifi
