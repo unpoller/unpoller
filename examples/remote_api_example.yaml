@@ -1,0 +1,49 @@
+##############################################
+# UniFi Poller Remote API Configuration    #
+# YAML FORMAT - Remote API Example          #
+# Uses UniFi Site Manager API (api.ui.com)  #
+##############################################
+---
+poller:
+  debug: false
+  quiet: false
+
+unifi:
+  # Enable remote API mode - automatically discovers all consoles
+  remote: true
+  # Your API key from unifi.ui.com (Settings -> API Keys)
+  remote_api_key: "YOUR_API_KEY_HERE"
+  
+  defaults:
+    # Enable all metric collection
+    save_sites: true
+    save_dpi: true
+    save_events: true
+    save_alarms: true
+    save_anomalies: true
+    save_ids: true
+    save_traffic: true
+    save_rogue: true
+    save_syslog: true
+    save_protect_logs: false
+    # Remote API requires SSL verification
+    verify_ssl: true
+
+prometheus:
+  disable: false
+  http_listen: "0.0.0.0:9130"
+  namespace: "unpoller"
+  report_errors: false
+  dead_ports: false
+
+influxdb:
+  disable: true
+
+webserver:
+  enable: false
+
+datadog:
+  enable: false
+
+loki:
+  disable: true

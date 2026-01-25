@@ -1,0 +1,42 @@
+{
+  "poller": {
+    "debug": false,
+    "quiet": false
+  },
+  "unifi": {
+    "remote": true,
+    "remote_api_key": "YOUR_API_KEY_HERE",
+    "defaults": {
+      "save_sites": true,
+      "save_dpi": true,
+      "save_events": true,
+      "save_alarms": true,
+      "save_anomalies": true,
+      "save_ids": true,
+      "save_traffic": true,
+      "save_rogue": true,
+      "save_syslog": true,
+      "save_protect_logs": false,
+      "verify_ssl": true
+    }
+  },
+  "prometheus": {
+    "disable": false,
+    "http_listen": "0.0.0.0:9130",
+    "namespace": "unpoller",
+    "report_errors": false,
+    "dead_ports": false
+  },
+  "influxdb": {
+    "disable": true
+  },
+  "webserver": {
+    "enable": false
+  },
+  "datadog": {
+    "enable": false
+  },
+  "loki": {
+    "disable": true
+  }
+}

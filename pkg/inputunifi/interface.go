@@ -30,8 +30,47 @@ func (u *InputUnifi) Initialize(l poller.Logger) error {
 		return nil
 	}
 
-	if u.setDefaults(&u.Default); len(u.Controllers) == 0 && !u.Dynamic {
-		u.Controllers = []*Controller{&u.Default}
+	// Discover remote controllers if remote mode is enabled at config level
+	if u.Remote && u.RemoteAPIKey != "" {
+		u.Logf("Remote API mode enabled, discovering controllers...")
+
+		discovered, err := u.discoverRemoteControllers(u.RemoteAPIKey)
+		if err != nil {
+			u.LogErrorf("Failed to discover remote controllers: %v", err)
+		} else if len(discovered) > 0 {
+			// Replace controllers with discovered ones when using config-level remote mode
+			u.Controllers = discovered
+			u.Logf("Discovered %d remote controller(s)", len(discovered))
+		}
+	} else {
+		// Only set default controller if not using config-level remote mode
+		if u.setDefaults(&u.Default); len(u.Controllers) == 0 && !u.Dynamic {
+			u.Controllers = []*Controller{&u.Default}
+		}
+
+		// Check individual controllers for remote flag (per-controller remote mode)
+		for _, c := range u.Controllers {
+			if c.Remote && c.APIKey != "" && c.ConsoleID == "" {
+				// This controller has remote flag but no console ID, try to discover
+				discovered, err := u.discoverRemoteControllers(c.APIKey)
+				if err != nil {
+					u.LogErrorf("Failed to discover remote controllers for controller: %v", err)
+					continue
+				}
+				if len(discovered) > 0 {
+					// Replace this controller with discovered ones
+					// Remove the current one and add discovered
+					newControllers := []*Controller{}
+					for _, existing := range u.Controllers {
+						if existing != c {
+							newControllers = append(newControllers, existing)
+						}
+					}
+					newControllers = append(newControllers, discovered...)
+					u.Controllers = newControllers
+				}
+			}
+		}
 	}
 
 	if len(u.Controllers) == 0 {
@@ -114,6 +153,15 @@ func (u *InputUnifi) DebugInput() (bool, error) {
 }
 
 func (u *InputUnifi) logController(c *Controller) {
+	mode := "Local"
+	if c.Remote {
+		mode = "Remote"
+		if c.ConsoleID != "" {
+			mode += fmt.Sprintf(" (Console: %s)", c.ConsoleID)
+		}
+	}
+
+	u.Logf("   => Mode: %s", mode)
 	u.Logf("   => URL: %s (verify SSL: %v, timeout: %v)", c.URL, *c.VerifySSL, c.Timeout.Duration)
 
 	if len(c.CertPaths) > 0 {
@@ -124,7 +172,12 @@ func (u *InputUnifi) logController(c *Controller) {
 		u.Logf("   => Version: %s (%s)", c.Unifi.ServerVersion, c.Unifi.UUID)
 	}
 
-	u.Logf("   => Username: %s (has password: %v) (has api-key: %v)", c.User, c.Pass != "", c.APIKey != "")
+	if c.Remote {
+		u.Logf("   => API Key: %v", c.APIKey != "")
+	} else {
+		u.Logf("   => Username: %s (has password: %v) (has api-key: %v)", c.User, c.Pass != "", c.APIKey != "")
+	}
+
 	u.Logf("   => Hash PII %v / Drop PII %v / Poll Sites: %s", *c.HashPII, *c.DropPII, strings.Join(c.Sites, ", "))
 	u.Logf("   => Save Sites %v / Save DPI %v (metrics)", *c.SaveSites, *c.SaveDPI)
 	u.Logf("   => Save Events %v / Save Syslog %v / Save IDs %v (logs)", *c.SaveEvents, *c.SaveSyslog, *c.SaveIDs)

@@ -288,6 +288,12 @@ func (u *InputUnifi) augmentMetrics(c *Controller, metrics *Metrics) *poller.Met
 		client.ApName = devices[client.ApMac]
 		client.GwName = devices[client.GwMac]
 		client.RadioDescription = bssdIDs[client.Bssid] + client.RadioProto
+		
+		// Apply site name override for clients if configured
+		if c.DefaultSiteNameOverride != "" && isDefaultSiteName(client.SiteName) {
+			client.SiteName = c.DefaultSiteNameOverride
+		}
+		
 		m.Clients = append(m.Clients, client)
 	}
 
@@ -300,6 +306,12 @@ func (u *InputUnifi) augmentMetrics(c *Controller, metrics *Metrics) *poller.Met
 
 		client.Name = RedactNamePII(client.Name, c.HashPII, c.DropPII)
 		client.MAC = RedactMacPII(client.MAC, c.HashPII, c.DropPII)
+		
+		// Apply site name override for DPI clients if configured
+		if c.DefaultSiteNameOverride != "" && isDefaultSiteName(client.SiteName) {
+			client.SiteName = c.DefaultSiteNameOverride
+		}
+		
 		m.ClientsDPI = append(m.ClientsDPI, client)
 	}
 
@@ -310,23 +322,139 @@ func (u *InputUnifi) augmentMetrics(c *Controller, metrics *Metrics) *poller.Met
 
 	if *c.SaveSites {
 		for _, site := range metrics.Sites {
+			// Apply site name override for sites if configured
+			if c.DefaultSiteNameOverride != "" {
+				if isDefaultSiteName(site.Name) {
+					site.Name = c.DefaultSiteNameOverride
+				}
+				if isDefaultSiteName(site.SiteName) {
+					site.SiteName = c.DefaultSiteNameOverride
+				}
+			}
 			m.Sites = append(m.Sites, site)
 		}
 
 		for _, site := range metrics.SitesDPI {
+			// Apply site name override for DPI sites if configured
+			if c.DefaultSiteNameOverride != "" && isDefaultSiteName(site.SiteName) {
+				site.SiteName = c.DefaultSiteNameOverride
+			}
 			m.SitesDPI = append(m.SitesDPI, site)
 		}
 	}
 
 	for _, speedTest := range metrics.SpeedTests {
+		// Apply site name override for speed tests if configured
+		if c.DefaultSiteNameOverride != "" && isDefaultSiteName(speedTest.SiteName) {
+			speedTest.SiteName = c.DefaultSiteNameOverride
+		}
 		m.SpeedTests = append(m.SpeedTests, speedTest)
 	}
 
 	for _, traffic := range metrics.CountryTraffic {
+		// Apply site name override for country traffic if configured
+		// UsageByCountry has TrafficSite.SiteName, not SiteName directly
+		if c.DefaultSiteNameOverride != "" && isDefaultSiteName(traffic.TrafficSite.SiteName) {
+			traffic.TrafficSite.SiteName = c.DefaultSiteNameOverride
+		}
 		m.CountryTraffic = append(m.CountryTraffic, traffic)
 	}
 
+	// Apply default_site_name_override to all metrics if configured.
+	// This must be done AFTER all metrics are added to m, so everything is included.
+	// This allows us to use the console name for Cloud Gateways while keeping
+	// the actual site name ("default") for API calls.
+	if c.DefaultSiteNameOverride != "" {
+		applySiteNameOverride(m, c.DefaultSiteNameOverride)
+	}
+
 	return m
+}
+
+// isDefaultSiteName checks if a site name represents a "default" site.
+// This handles variations like "default", "Default", "Default (default)", etc.
+func isDefaultSiteName(siteName string) bool {
+	if siteName == "" {
+		return false
+	}
+	lower := strings.ToLower(siteName)
+	// Check for exact match or if it contains "default" as a word
+	return lower == "default" || strings.Contains(lower, "default")
+}
+
+// applySiteNameOverride replaces "default" site names with the override name
+// in all devices, clients, and sites. This allows us to use console names
+// for Cloud Gateways in metrics while keeping "default" for API calls.
+// This makes metrics more compatible with existing dashboards that expect
+// meaningful site names instead of "Default" or "Default (default)".
+func applySiteNameOverride(m *poller.Metrics, overrideName string) {
+	// Apply to all devices - use type switch for known device types
+	for i := range m.Devices {
+		switch d := m.Devices[i].(type) {
+		case *unifi.UAP:
+			if isDefaultSiteName(d.SiteName) {
+				d.SiteName = overrideName
+			}
+		case *unifi.USG:
+			if isDefaultSiteName(d.SiteName) {
+				d.SiteName = overrideName
+			}
+		case *unifi.USW:
+			if isDefaultSiteName(d.SiteName) {
+				d.SiteName = overrideName
+			}
+		case *unifi.UDM:
+			if isDefaultSiteName(d.SiteName) {
+				d.SiteName = overrideName
+			}
+		case *unifi.UXG:
+			if isDefaultSiteName(d.SiteName) {
+				d.SiteName = overrideName
+			}
+		case *unifi.UBB:
+			if isDefaultSiteName(d.SiteName) {
+				d.SiteName = overrideName
+			}
+		case *unifi.UCI:
+			if isDefaultSiteName(d.SiteName) {
+				d.SiteName = overrideName
+			}
+		case *unifi.PDU:
+			if isDefaultSiteName(d.SiteName) {
+				d.SiteName = overrideName
+			}
+		}
+	}
+
+	// Apply to all clients
+	for i := range m.Clients {
+		if client, ok := m.Clients[i].(*unifi.Client); ok {
+			if isDefaultSiteName(client.SiteName) {
+				client.SiteName = overrideName
+			}
+		}
+	}
+
+	// Apply to sites - check both Name and SiteName fields
+	for i := range m.Sites {
+		if site, ok := m.Sites[i].(*unifi.Site); ok {
+			if isDefaultSiteName(site.Name) {
+				site.Name = overrideName
+			}
+			if isDefaultSiteName(site.SiteName) {
+				site.SiteName = overrideName
+			}
+		}
+	}
+
+	// Apply to rogue APs
+	for i := range m.RogueAPs {
+		if ap, ok := m.RogueAPs[i].(*unifi.RogueAP); ok {
+			if isDefaultSiteName(ap.SiteName) {
+				ap.SiteName = overrideName
+			}
+		}
+	}
 }
 
 // this is a helper function for augmentMetrics.
@@ -442,10 +570,9 @@ func (u *InputUnifi) getFilteredSites(c *Controller) ([]*unifi.Site, error) {
 		return nil, fmt.Errorf("controller: %w", err)
 	}
 
-	// Apply the default_site_name_override to the first site in the list, if configured.
-	if len(sites) > 0 && c.DefaultSiteNameOverride != "" {
-		sites[0].Name = c.DefaultSiteNameOverride
-	}
+	// Note: We do NOT override the site name here because it's used in API calls.
+	// The API expects the actual site name (e.g., "default"), not the override.
+	// The override will be applied later when augmenting metrics for display purposes.
 
 	if len(c.Sites) == 0 || StringInSlice("all", c.Sites) {
 		return sites, nil

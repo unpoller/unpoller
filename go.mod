@@ -12,7 +12,7 @@ require (
 	github.com/prometheus/common v0.67.5
 	github.com/spf13/pflag v1.0.10
 	github.com/stretchr/testify v1.11.1
-	github.com/unpoller/unifi/v5 v5.5.0
+	github.com/unpoller/unifi/v5 v5.6.0
 	golang.org/x/crypto v0.47.0
 	golang.org/x/term v0.39.0
 	golift.io/cnfg v0.2.3
@@ -23,7 +23,7 @@ require (
 
 require (
 	go.yaml.in/yaml/v2 v2.4.3 // indirect
-	golang.org/x/net v0.48.0 // indirect
+	golang.org/x/net v0.49.0 // indirect
 )
 
 require (
@@ -46,6 +46,3 @@ require (
 	golang.org/x/sys v0.40.0 // indirect
 	google.golang.org/protobuf v1.36.11 // indirect
 )
-
-// for local iterative development only
-// replace github.com/unpoller/unifi/v5 => ../unifi
