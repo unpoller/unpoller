@@ -286,13 +286,10 @@ func (u *InputUnifi) setDefaults(c *Controller) { //nolint:cyclop
 		c.SaveTraffic = &f
 	}
 
-	if c.URL == "" {
-		if c.Remote {
-			// Remote mode: URL will be set during discovery
-			// Don't set a default here
-		} else {
-			c.URL = defaultURL
-		}
+	if c.URL == "" && !c.Remote {
+		// Remote mode: URL will be set during discovery
+		// Don't set a default here for remote mode
+		c.URL = defaultURL
 	}
 
 	if strings.HasPrefix(c.Pass, "file://") {
@@ -305,10 +302,9 @@ func (u *InputUnifi) setDefaults(c *Controller) { //nolint:cyclop
 
 	if c.Remote {
 		// Remote mode: only API key is used, no user/pass
-		if c.APIKey == "" {
-			// For remote mode, API key is required
-			// Will be set from RemoteAPIKey in Config if not provided
-		} else {
+		// For remote mode, API key is required
+		// Will be set from RemoteAPIKey in Config if not provided
+		if c.APIKey != "" {
 			c.User = ""
 			c.Pass = ""
 		}
@@ -402,15 +398,12 @@ func (u *InputUnifi) setControllerDefaults(c *Controller) *Controller { //nolint
 		c.SaveAnomal = u.Default.SaveAnomal
 	}
 
-	if c.URL == "" {
-		if c.Remote {
-			// Remote mode: URL will be set during discovery
-			// Don't set a default here
-		} else {
-			c.URL = u.Default.URL
-			if c.URL == "" {
-				c.URL = defaultURL
-			}
+	if c.URL == "" && !c.Remote {
+		// Remote mode: URL will be set during discovery
+		// Don't set a default here for remote mode
+		c.URL = u.Default.URL
+		if c.URL == "" {
+			c.URL = defaultURL
 		}
 	}
 
