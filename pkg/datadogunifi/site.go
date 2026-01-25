@@ -22,8 +22,14 @@ func (u *DatadogUnifi) reportSite(r report, s *unifi.Site) {
 			tag("lan_ip", h.LanIP),
 		}
 
+		// For VPN subsystem, use RemoteUserNumActive for num_user if NumUser is not set
+		numUser := h.NumUser.Val
+		if h.Subsystem == "vpn" && numUser == 0 && h.RemoteUserNumActive.Val > 0 {
+			numUser = h.RemoteUserNumActive.Val
+		}
+
 		data := map[string]float64{
-			"num_user":                 h.NumUser.Val,
+			"num_user":                 numUser,
 			"num_guest":                h.NumGuest.Val,
 			"num_iot":                  h.NumIot.Val,
 			"tx_bytes_r":               h.TxBytesR.Val,
