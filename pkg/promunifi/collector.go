@@ -452,6 +452,8 @@ func (u *promUnifi) switchExport(r report, v any) {
 	case *unifi.UsageByCountry:
 		u.exportCountryTraffic(r, v)
 	default:
-		u.LogErrorf("invalid type: %T", v)
+		if u.Collector.Poller().LogUnknownTypes {
+			u.LogDebugf("unknown type: %T", v)
+		}
 	}
 }

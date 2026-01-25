@@ -2,7 +2,8 @@
   "poller": {
     "debug":   false,
     "quiet":   false,
-    "plugins": []
+    "plugins": [],
+    "log_unknown_types": false
   },
 
   "prometheus": {

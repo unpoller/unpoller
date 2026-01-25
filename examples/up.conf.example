@@ -11,6 +11,11 @@
   # Recommend enabling debug with this setting for better error logging.
   quiet = false
 
+  # Log unknown device types as DEBUG messages. By default (false), newer UniFi
+  # device types that aren't recognized are silently ignored to reduce log volume.
+  # Enable this when debugging or reporting new device types to developers.
+  # log_unknown_types = false
+
   # Load dynamic plugins. Advanced use; only sample mysql plugin provided by default.
   plugins = []
 
