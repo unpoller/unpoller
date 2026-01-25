@@ -51,6 +51,56 @@ func (u *InputUnifi) collectAlarms(logs []any, sites []*unifi.Site, c *Controlle
 	if *c.SaveAlarms {
 		u.LogDebugf("Collecting controller alarms: %s (%s)", c.URL, c.ID)
 
+		// Get devices for all sites to build MAC-to-name lookup
+		devices, err := c.Unifi.GetDevices(sites)
+		if err != nil {
+			u.LogDebugf("Failed to get devices for alarm enrichment: %v (continuing without device names)", err)
+			devices = &unifi.Devices{} // Empty devices struct, alarms will not have device names
+		}
+
+		// Build MAC address to device name lookup map
+		macToName := make(map[string]string)
+		for _, d := range devices.UAPs {
+			if d.Mac != "" && d.Name != "" {
+				macToName[strings.ToLower(d.Mac)] = d.Name
+			}
+		}
+		for _, d := range devices.USGs {
+			if d.Mac != "" && d.Name != "" {
+				macToName[strings.ToLower(d.Mac)] = d.Name
+			}
+		}
+		for _, d := range devices.USWs {
+			if d.Mac != "" && d.Name != "" {
+				macToName[strings.ToLower(d.Mac)] = d.Name
+			}
+		}
+		for _, d := range devices.UDMs {
+			if d.Mac != "" && d.Name != "" {
+				macToName[strings.ToLower(d.Mac)] = d.Name
+			}
+		}
+		for _, d := range devices.UXGs {
+			if d.Mac != "" && d.Name != "" {
+				macToName[strings.ToLower(d.Mac)] = d.Name
+			}
+		}
+		for _, d := range devices.PDUs {
+			if d.Mac != "" && d.Name != "" {
+				macToName[strings.ToLower(d.Mac)] = d.Name
+			}
+		}
+		for _, d := range devices.UBBs {
+			if d.Mac != "" && d.Name != "" {
+				macToName[strings.ToLower(d.Mac)] = d.Name
+			}
+		}
+		for _, d := range devices.UCIs {
+			if d.Mac != "" && d.Name != "" {
+				macToName[strings.ToLower(d.Mac)] = d.Name
+			}
+		}
+
 		for _, s := range sites {
 			events, err := c.Unifi.GetAlarmsSite(s)
 			if err != nil {
@@ -58,6 +108,9 @@ func (u *InputUnifi) collectAlarms(logs []any, sites []*unifi.Site, c *Controlle
 			}
 
 			for _, e := range events {
+				// Try to extract MAC address from alarm message and enrich with device name
+				e.DeviceName = u.extractDeviceNameFromAlarm(e, macToName)
+
 				logs = append(logs, e)
 
 				webserver.NewInputEvent(PluginName, s.ID+"_alarms", &webserver.Event{
@@ -342,4 +395,40 @@ func hasProtectThumbnail(eventType string) bool {
 	default:
 		return false
 	}
+}
+
+// extractDeviceNameFromAlarm attempts to extract a device name for an alarm by looking up
+// MAC addresses found in the alarm message or fields. Returns empty string if no match found.
+func (u *InputUnifi) extractDeviceNameFromAlarm(alarm *unifi.Alarm, macToName map[string]string) string {
+	// Try to extract MAC from message like "AP[fc:ec:da:89:a6:91] was disconnected"
+	// Look for pattern: [XX:XX:XX:XX:XX:XX] where X is hex digit
+	msg := alarm.Msg
+
+	// Simple regex-like search for MAC address in brackets
+	start := strings.Index(msg, "[")
+	end := strings.Index(msg, "]")
+	if start >= 0 && end > start {
+		potentialMAC := msg[start+1 : end]
+		// Basic validation: should be 17 characters and contain colons
+		if len(potentialMAC) == 17 && strings.Count(potentialMAC, ":") == 5 {
+			if name, ok := macToName[strings.ToLower(potentialMAC)]; ok {
+				return name
+			}
+		}
+	}
+
+	// Also try SrcMAC and DstMAC fields if present
+	if alarm.SrcMAC != "" {
+		if name, ok := macToName[strings.ToLower(alarm.SrcMAC)]; ok {
+			return name
+		}
+	}
+
+	if alarm.DstMAC != "" {
+		if name, ok := macToName[strings.ToLower(alarm.DstMAC)]; ok {
+			return name
+		}
+	}
+
+	return ""
 }
