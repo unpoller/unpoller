@@ -200,6 +200,8 @@ func (u *InputUnifi) Events(filter *poller.Filter) (*poller.Events, error) {
 		filter = &poller.Filter{}
 	}
 
+	var collectionErrors []error
+
 	for _, c := range u.Controllers {
 		if filter.Path != "" && !strings.EqualFold(c.URL, filter.Path) {
 			continue
@@ -207,10 +209,19 @@ func (u *InputUnifi) Events(filter *poller.Filter) (*poller.Events, error) {
 
 		events, err := u.collectControllerEvents(c)
 		if err != nil {
-			return nil, err
+			// Log error but continue to next controller
+			u.LogErrorf("Failed to collect events from controller %s: %v", c.URL, err)
+			collectionErrors = append(collectionErrors, fmt.Errorf("%s: %w", c.URL, err))
+			continue
 		}
 
 		logs = append(logs, events...)
+	}
+
+	// Return collected events even if some controllers failed
+	// Only return error if ALL controllers failed and we have no events
+	if len(logs) == 0 && len(collectionErrors) > 0 {
+		return nil, collectionErrors[0]
 	}
 
 	return &poller.Events{Logs: logs}, nil
@@ -229,6 +240,8 @@ func (u *InputUnifi) Metrics(filter *poller.Filter) (*poller.Metrics, error) {
 		filter = &poller.Filter{}
 	}
 
+	var collectionErrors []error
+
 	// Check if the request is for an existing, configured controller (or all controllers)
 	for _, c := range u.Controllers {
 		if filter.Path != "" && !strings.EqualFold(c.URL, filter.Path) {
@@ -238,10 +251,23 @@ func (u *InputUnifi) Metrics(filter *poller.Filter) (*poller.Metrics, error) {
 
 		m, err := u.collectController(c)
 		if err != nil {
-			return metrics, err
+			// Log error but continue to next controller
+			u.LogErrorf("Failed to collect metrics from controller %s: %v", c.URL, err)
+			collectionErrors = append(collectionErrors, fmt.Errorf("%s: %w", c.URL, err))
+			continue
 		}
 
 		metrics = poller.AppendMetrics(metrics, m)
+	}
+
+	// If we collected data from at least one controller, return success
+	if len(metrics.Devices) > 0 || len(metrics.Clients) > 0 {
+		return metrics, nil
+	}
+
+	// If all controllers failed and we had errors, return the first error
+	if len(collectionErrors) > 0 {
+		return metrics, collectionErrors[0]
 	}
 
 	if filter.Path == "" || len(metrics.Clients) != 0 {
