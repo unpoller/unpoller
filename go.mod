@@ -12,7 +12,7 @@ require (
 	github.com/prometheus/common v0.67.5
 	github.com/spf13/pflag v1.0.10
 	github.com/stretchr/testify v1.11.1
-	github.com/unpoller/unifi/v5 v5.6.0
+	github.com/unpoller/unifi/v5 v5.7.0
 	golang.org/x/crypto v0.47.0
 	golang.org/x/term v0.39.0
 	golift.io/cnfg v0.2.3
@@ -47,4 +47,4 @@ require (
 	google.golang.org/protobuf v1.36.11 // indirect
 )
 
-replace github.com/unpoller/unifi/v5 => ../unifi
+// replace github.com/unpoller/unifi/v5 => ../unifi
