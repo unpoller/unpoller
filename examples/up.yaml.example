@@ -9,6 +9,10 @@ poller:
   debug: false
   quiet: false
   plugins: []
+  # log_unknown_types: false   # Set to true to log unknown device types as DEBUG messages.
+                               # By default, newer UniFi device types that aren't recognized
+                               # are silently ignored to reduce log volume. Enable this when
+                               # debugging or reporting new device types to developers.
 
 prometheus:
   disable:       false

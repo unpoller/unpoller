@@ -467,6 +467,8 @@ func (u *InfluxUnifi) switchExport(r report, v any) { //nolint:cyclop
 	case *unifi.SpeedTestResult:
 		u.batchSpeedTest(r, v)
 	default:
-		u.LogErrorf("invalid export type: %T", v)
+		if u.Collector.Poller().LogUnknownTypes {
+			u.LogDebugf("unknown export type: %T", v)
+		}
 	}
 }
