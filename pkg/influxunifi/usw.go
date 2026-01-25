@@ -75,8 +75,8 @@ func (u *InfluxUnifi) batchUSWstat(sw *unifi.Sw) map[string]any {
 //nolint:funlen
 func (u *InfluxUnifi) batchPortTable(r report, t map[string]string, pt []unifi.Port) {
 	for _, p := range pt {
-		if !u.DeadPorts && (!p.Up.Val || !p.Enable.Val) {
-			continue // only record UP ports.
+		if !u.DeadPorts && (!p.Up.Val || !p.Enable.Val) && p.PoePower.Val == 0 {
+			continue // only record UP ports, or ports providing PoE power.
 		}
 
 		tags := map[string]string{

@@ -79,8 +79,8 @@ func (u *DatadogUnifi) batchUSWstat(sw *unifi.Sw) map[string]float64 {
 //nolint:funlen
 func (u *DatadogUnifi) batchPortTable(r report, t map[string]string, pt []unifi.Port) {
 	for _, p := range pt {
-		if !u.DeadPorts && (!p.Up.Val || !p.Enable.Val) {
-			continue // only record UP ports.
+		if !u.DeadPorts && (!p.Up.Val || !p.Enable.Val) && p.PoePower.Val == 0 {
+			continue // only record UP ports, or ports providing PoE power.
 		}
 
 		tags := cleanTags(map[string]string{

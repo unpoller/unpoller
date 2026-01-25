@@ -176,8 +176,8 @@ func (u *promUnifi) exportUSWstats(r report, labels []string, sw *unifi.Sw) {
 func (u *promUnifi) exportPRTtable(r report, labels []string, pt []unifi.Port) {
 	// Per-port data on a switch
 	for _, p := range pt {
-		if !u.DeadPorts && (!p.Up.Val || !p.Enable.Val) {
-			continue
+		if !u.DeadPorts && (!p.Up.Val || !p.Enable.Val) && p.PoePower.Val == 0 {
+			continue // skip dead ports unless they're providing PoE power
 		}
 
 		// Copy labels, and add four new ones.
