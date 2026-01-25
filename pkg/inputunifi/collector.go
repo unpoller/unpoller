@@ -275,13 +275,6 @@ func (u *InputUnifi) augmentMetrics(c *Controller, metrics *Metrics) *poller.Met
 
 	m, devices, bssdIDs := extractDevices(metrics)
 
-	// Apply default_site_name_override to devices if configured.
-	// This allows us to use the console name for Cloud Gateways while keeping
-	// the actual site name ("default") for API calls.
-	if c.DefaultSiteNameOverride != "" {
-		applySiteNameOverride(m, c.DefaultSiteNameOverride)
-	}
-
 	// These come blank, so set them here.
 	for _, client := range metrics.Clients {
 		if devices[client.Mac] = client.Name; client.Name == "" {
@@ -295,6 +288,12 @@ func (u *InputUnifi) augmentMetrics(c *Controller, metrics *Metrics) *poller.Met
 		client.ApName = devices[client.ApMac]
 		client.GwName = devices[client.GwMac]
 		client.RadioDescription = bssdIDs[client.Bssid] + client.RadioProto
+		
+		// Apply site name override for clients if configured
+		if c.DefaultSiteNameOverride != "" && isDefaultSiteName(client.SiteName) {
+			client.SiteName = c.DefaultSiteNameOverride
+		}
+		
 		m.Clients = append(m.Clients, client)
 	}
 
@@ -307,6 +306,12 @@ func (u *InputUnifi) augmentMetrics(c *Controller, metrics *Metrics) *poller.Met
 
 		client.Name = RedactNamePII(client.Name, c.HashPII, c.DropPII)
 		client.MAC = RedactMacPII(client.MAC, c.HashPII, c.DropPII)
+		
+		// Apply site name override for DPI clients if configured
+		if c.DefaultSiteNameOverride != "" && isDefaultSiteName(client.SiteName) {
+			client.SiteName = c.DefaultSiteNameOverride
+		}
+		
 		m.ClientsDPI = append(m.ClientsDPI, client)
 	}
 
@@ -317,20 +322,50 @@ func (u *InputUnifi) augmentMetrics(c *Controller, metrics *Metrics) *poller.Met
 
 	if *c.SaveSites {
 		for _, site := range metrics.Sites {
+			// Apply site name override for sites if configured
+			if c.DefaultSiteNameOverride != "" {
+				if isDefaultSiteName(site.Name) {
+					site.Name = c.DefaultSiteNameOverride
+				}
+				if isDefaultSiteName(site.SiteName) {
+					site.SiteName = c.DefaultSiteNameOverride
+				}
+			}
 			m.Sites = append(m.Sites, site)
 		}
 
 		for _, site := range metrics.SitesDPI {
+			// Apply site name override for DPI sites if configured
+			if c.DefaultSiteNameOverride != "" && isDefaultSiteName(site.SiteName) {
+				site.SiteName = c.DefaultSiteNameOverride
+			}
 			m.SitesDPI = append(m.SitesDPI, site)
 		}
 	}
 
 	for _, speedTest := range metrics.SpeedTests {
+		// Apply site name override for speed tests if configured
+		if c.DefaultSiteNameOverride != "" && isDefaultSiteName(speedTest.SiteName) {
+			speedTest.SiteName = c.DefaultSiteNameOverride
+		}
 		m.SpeedTests = append(m.SpeedTests, speedTest)
 	}
 
 	for _, traffic := range metrics.CountryTraffic {
+		// Apply site name override for country traffic if configured
+		// UsageByCountry has TrafficSite.SiteName, not SiteName directly
+		if c.DefaultSiteNameOverride != "" && isDefaultSiteName(traffic.TrafficSite.SiteName) {
+			traffic.TrafficSite.SiteName = c.DefaultSiteNameOverride
+		}
 		m.CountryTraffic = append(m.CountryTraffic, traffic)
+	}
+
+	// Apply default_site_name_override to all metrics if configured.
+	// This must be done AFTER all metrics are added to m, so everything is included.
+	// This allows us to use the console name for Cloud Gateways while keeping
+	// the actual site name ("default") for API calls.
+	if c.DefaultSiteNameOverride != "" {
+		applySiteNameOverride(m, c.DefaultSiteNameOverride)
 	}
 
 	return m

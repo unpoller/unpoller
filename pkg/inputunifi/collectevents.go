@@ -3,6 +3,7 @@ package inputunifi
 import (
 	"encoding/base64"
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/unpoller/unifi/v5"
@@ -83,6 +84,14 @@ func (u *InputUnifi) collectAnomalies(logs []any, sites []*unifi.Site, c *Contro
 			}
 
 			for _, e := range events {
+				// Apply site name override for anomalies if configured
+				if c.DefaultSiteNameOverride != "" {
+					lower := strings.ToLower(e.SiteName)
+					if lower == "default" || strings.Contains(lower, "default") {
+						e.SiteName = c.DefaultSiteNameOverride
+					}
+				}
+				
 				logs = append(logs, e)
 
 				webserver.NewInputEvent(PluginName, s.ID+"_anomalies", &webserver.Event{
