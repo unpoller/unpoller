@@ -304,10 +304,8 @@ func (u *InputUnifi) setDefaults(c *Controller) { //nolint:cyclop
 		// Remote mode: only API key is used, no user/pass
 		// For remote mode, API key is required
 		// Will be set from RemoteAPIKey in Config if not provided
-		if c.APIKey != "" {
-			c.User = ""
-			c.Pass = ""
-		}
+		c.User = ""
+		c.Pass = ""
 	} else {
 		// Local mode: use API key if provided, otherwise user/pass
 		if c.APIKey == "" {
