@@ -80,9 +80,16 @@ func (u *InputUnifi) collectController(c *Controller) (*poller.Metrics, error) {
 	if err != nil {
 		u.Logf("Re-authenticating to UniFi Controller: %s", c.URL)
 
-		if err := u.getUnifi(c); err != nil {
-			return metrics, fmt.Errorf("re-authenticating to %s: %w", c.URL, err)
+		if authErr := u.getUnifi(c); authErr != nil {
+			return metrics, fmt.Errorf("re-authenticating to %s: %w", c.URL, authErr)
 		}
+
+		// Brief delay to allow controller to process new authentication
+		time.Sleep(500 * time.Millisecond)
+
+		// Retry the poll after successful re-authentication
+		u.LogDebugf("Retrying poll after re-authentication: %s", c.URL)
+		metrics, err = u.pollController(c)
 	}
 
 	return metrics, err
