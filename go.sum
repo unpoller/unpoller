@@ -77,8 +77,8 @@ github.com/stretchr/testify v1.8.0/go.mod h1:yNjHg4UonilssWZ8iaSj1OCr/vHnekPRkoO
 github.com/stretchr/testify v1.8.1/go.mod h1:w2LPCIKwWwSfY2zedu0+kehJoqGctiVI29o6fzry7u4=
 github.com/stretchr/testify v1.11.1 h1:7s2iGBzp5EwR7/aIZr8ao5+dra3wiQyKjjFuvgVKu7U=
 github.com/stretchr/testify v1.11.1/go.mod h1:wZwfW3scLgRK+23gO65QZefKpKQRnfz6sD981Nm4B6U=
-github.com/unpoller/unifi/v5 v5.7.0 h1:mGdHLOvmeQqnyB8mgI/ZzMMd/7kaGm+zd9p6iIF4W6g=
-github.com/unpoller/unifi/v5 v5.7.0/go.mod h1:vSIXIclPG9dpKxUp+pavfgENHWaTZXvDg7F036R1YCo=
+github.com/unpoller/unifi/v5 v5.8.0 h1:FbP0+4eC4T4lI/sacgwG+erRVHcyujioz8w5HWtqTJw=
+github.com/unpoller/unifi/v5 v5.8.0/go.mod h1:vSIXIclPG9dpKxUp+pavfgENHWaTZXvDg7F036R1YCo=
 github.com/yuin/goldmark v1.3.5/go.mod h1:mwnBkeHKe2W/ZEtQ+71ViKU8L12m81fl3OWwC1Zlc8k=
 go.uber.org/goleak v1.3.0 h1:2K3zAYmnTNqV73imy9J1T3WC+gmCePx2hEGkimedGto=
 go.uber.org/goleak v1.3.0/go.mod h1:CoHD4mav9JJNrW/WLlf7HGZPjdw8EucARQHekz1X6bE=
