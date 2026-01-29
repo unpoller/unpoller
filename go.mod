@@ -47,4 +47,4 @@ require (
 	google.golang.org/protobuf v1.36.11 // indirect
 )
 
-replace github.com/unpoller/unifi/v5 => ../unifi
+// replace github.com/unpoller/unifi/v5 => ../unifi

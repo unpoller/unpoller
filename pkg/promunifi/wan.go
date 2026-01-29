@@ -15,15 +15,15 @@ type wan struct {
 	MagicEnabled         *prometheus.Desc
 	VlanEnabled          *prometheus.Desc
 	// WAN Statistics metrics
-	UptimePercentage     *prometheus.Desc
-	PeakDownloadPercent  *prometheus.Desc
-	PeakUploadPercent    *prometheus.Desc
-	MaxRxBytesR          *prometheus.Desc
-	MaxTxBytesR          *prometheus.Desc
+	UptimePercentage    *prometheus.Desc
+	PeakDownloadPercent *prometheus.Desc
+	PeakUploadPercent   *prometheus.Desc
+	MaxRxBytesR         *prometheus.Desc
+	MaxTxBytesR         *prometheus.Desc
 	// WAN Service Provider metrics
-	ServiceProviderASN   *prometheus.Desc
+	ServiceProviderASN *prometheus.Desc
 	// WAN Creation timestamp
-	CreationTimestamp    *prometheus.Desc
+	CreationTimestamp *prometheus.Desc
 }
 
 func descWAN(ns string) *wan {
@@ -36,7 +36,7 @@ func descWAN(ns string) *wan {
 		"site_name",
 		"source",
 	}
-	
+
 	providerLabels := []string{
 		"wan_id",
 		"wan_name",
@@ -59,15 +59,15 @@ func descWAN(ns string) *wan {
 		MagicEnabled:         nd(ns+"wan_magic_enabled", "Magic WAN enabled (1) or disabled (0)", labels, nil),
 		VlanEnabled:          nd(ns+"wan_vlan_enabled", "VLAN enabled for WAN (1) or disabled (0)", labels, nil),
 		// Statistics
-		UptimePercentage:     nd(ns+"wan_uptime_percentage", "WAN uptime percentage", labels, nil),
-		PeakDownloadPercent:  nd(ns+"wan_peak_download_percent", "Peak download usage as percentage of configured capacity", labels, nil),
-		PeakUploadPercent:    nd(ns+"wan_peak_upload_percent", "Peak upload usage as percentage of configured capacity", labels, nil),
-		MaxRxBytesR:          nd(ns+"wan_max_rx_bytes_rate", "Maximum receive bytes rate", labels, nil),
-		MaxTxBytesR:          nd(ns+"wan_max_tx_bytes_rate", "Maximum transmit bytes rate", labels, nil),
+		UptimePercentage:    nd(ns+"wan_uptime_percentage", "WAN uptime percentage", labels, nil),
+		PeakDownloadPercent: nd(ns+"wan_peak_download_percent", "Peak download usage as percentage of configured capacity", labels, nil),
+		PeakUploadPercent:   nd(ns+"wan_peak_upload_percent", "Peak upload usage as percentage of configured capacity", labels, nil),
+		MaxRxBytesR:         nd(ns+"wan_max_rx_bytes_rate", "Maximum receive bytes rate", labels, nil),
+		MaxTxBytesR:         nd(ns+"wan_max_tx_bytes_rate", "Maximum transmit bytes rate", labels, nil),
 		// Service Provider
-		ServiceProviderASN:   nd(ns+"wan_service_provider_asn", "Service provider autonomous system number", providerLabels, nil),
+		ServiceProviderASN: nd(ns+"wan_service_provider_asn", "Service provider autonomous system number", providerLabels, nil),
 		// Creation
-		CreationTimestamp:    nd(ns+"wan_creation_timestamp", "WAN configuration creation timestamp", labels, nil),
+		CreationTimestamp: nd(ns+"wan_creation_timestamp", "WAN configuration creation timestamp", labels, nil),
 	}
 }
 
@@ -87,8 +87,8 @@ func (u *promUnifi) exportWAN(r report, w *unifi.WANEnrichedConfiguration) {
 		cfg.WANNetworkgroup,
 		cfg.WANType,
 		cfg.WANLoadBalanceType,
-		"",        // site_name - will be set by caller if available
-		"",        // source - will be set by caller if available
+		"", // site_name - will be set by caller if available
+		"", // source - will be set by caller if available
 	}
 
 	// Convert boolean FlexBool values to float64
@@ -130,8 +130,8 @@ func (u *promUnifi) exportWAN(r report, w *unifi.WANEnrichedConfiguration) {
 		cfg.WANNetworkgroup,
 		details.ServiceProvider.Name,
 		details.ServiceProvider.City,
-		"",        // site_name
-		"",        // source
+		"", // site_name
+		"", // source
 	}
 
 	metrics = append(metrics, &metric{u.WAN.ServiceProviderASN, gauge, details.ServiceProvider.ASN.Val, providerLabels})

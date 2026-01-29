@@ -317,6 +317,10 @@ func (u *DatadogUnifi) loopPoints(r report) {
 	}
 
 	reportClientDPItotals(r, appTotal, catTotal)
+
+	for _, w := range m.WANConfigs {
+		u.switchExport(r, w)
+	}
 }
 
 func (u *DatadogUnifi) switchExport(r report, v any) { //nolint:cyclop
@@ -353,6 +357,8 @@ func (u *DatadogUnifi) switchExport(r report, v any) { //nolint:cyclop
 		u.batchAnomaly(r, v)
 	case *unifi.SpeedTestResult:
 		u.batchSpeedTest(r, v)
+	case *unifi.WANEnrichedConfiguration:
+		u.batchWAN(r, v)
 	default:
 		if u.Collector != nil && u.Collector.Poller().LogUnknownTypes {
 			u.LogDebugf("unknown export type: %T", v)
