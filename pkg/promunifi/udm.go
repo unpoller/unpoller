@@ -77,13 +77,14 @@ func (u *promUnifi) exportUDM(r report, d *unifi.UDM) {
 
 	baseLabels := []string{d.Type, d.SiteName, d.Name, d.SourceName}
 	baseInfoLabels := []string{d.Version, d.Model, d.Serial, d.Mac, d.IP, d.ID}
-	
+
 	// Export metrics with tags - create separate series for each tag
 	u.exportWithTags(r, d.Tags, func(tagLabels []string) {
 		tag := tagLabels[0]
 		labels := baseLabels
+
 		infoLabels := append(baseInfoLabels, tag)
-		
+
 		// Shared data (all devices do this).
 		u.exportBYTstats(r, append(labels, tag), d.TxBytes, d.RxBytes)
 		u.exportSYSstats(r, append(labels, tag), d.SysStats, d.SystemStats)
@@ -129,10 +130,11 @@ func (u *promUnifi) exportUDM(r report, d *unifi.UDM) {
 
 // exportWithTags exports metrics with tag support. If device has multiple tags,
 // each tag creates a separate metric series. If no tags, exports with tag="".
-func (u *promUnifi) exportWithTags(r report, tags []string, fn func([]string)) {
+func (u *promUnifi) exportWithTags(_ report, tags []string, fn func([]string)) {
 	if len(tags) == 0 {
 		// No tags - export once with empty tag
 		fn([]string{""})
+
 		return
 	}
 	// Multiple tags - export once per tag
