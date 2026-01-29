@@ -41,7 +41,7 @@ type usg struct {
 }
 
 func descUSG(ns string) *usg {
-	labels := []string{"port", "site_name", "name", "source"}
+	labels := []string{"port", "site_name", "name", "source", "tag"}
 
 	return &usg{
 		WanRxPackets:   prometheus.NewDesc(ns+"wan_receive_packets_total", "WAN Receive Packets Total", labels, nil),
@@ -82,32 +82,38 @@ func (u *promUnifi) exportUSG(r report, d *unifi.USG) {
 		return
 	}
 
-	labels := []string{d.Type, d.SiteName, d.Name, d.SourceName}
-	infoLabels := []string{d.Version, d.Model, d.Serial, d.Mac, d.IP, d.ID}
+	baseLabels := []string{d.Type, d.SiteName, d.Name, d.SourceName}
+	baseInfoLabels := []string{d.Version, d.Model, d.Serial, d.Mac, d.IP, d.ID}
 
-	for _, t := range d.Temperatures {
-		r.send([]*metric{{u.Device.Temperature, gauge, t.Value, append(labels, t.Name, t.Type)}})
-	}
+	u.exportWithTags(r, d.Tags, func(tagLabels []string) {
+		tag := tagLabels[0]
+		labels := append(baseLabels, tag)
+		infoLabels := append(baseInfoLabels, tag)
 
-	for k, v := range d.SystemStats.Temps {
-		temp := v.CelsiusInt64()
-		k = strings.ReplaceAll(strings.ReplaceAll(strings.ReplaceAll(k, " ", "_"), ")", ""), "(", "")
-
-		if k = strings.ToLower(k); temp != 0 && k != "" {
-			r.send([]*metric{{u.Device.Temperature, gauge, temp, append(labels, k, k)}})
+		for _, t := range d.Temperatures {
+			r.send([]*metric{{u.Device.Temperature, gauge, t.Value, append(labels, t.Name, t.Type)}})
 		}
-	}
 
-	// Gateway System Data.
-	u.exportWANPorts(r, labels, d.Wan1, d.Wan2)
-	u.exportBYTstats(r, labels, d.TxBytes, d.RxBytes)
-	u.exportSYSstats(r, labels, d.SysStats, d.SystemStats)
-	u.exportUSGstats(r, labels, d.Stat.Gw, d.SpeedtestStatus, d.Uplink)
-	u.exportSTAcount(r, labels, d.UserNumSta, d.GuestNumSta, d.NumDesktop, d.UserNumSta, d.GuestNumSta)
-	r.send([]*metric{
-		{u.Device.Info, gauge, 1.0, append(labels, infoLabels...)},
-		{u.Device.Uptime, gauge, d.Uptime, labels},
-		{u.Device.Upgradeable, gauge, d.Upgradable.Val, labels},
+		for k, v := range d.SystemStats.Temps {
+			temp := v.CelsiusInt64()
+			k = strings.ReplaceAll(strings.ReplaceAll(strings.ReplaceAll(k, " ", "_"), ")", ""), "(", "")
+
+			if k = strings.ToLower(k); temp != 0 && k != "" {
+				r.send([]*metric{{u.Device.Temperature, gauge, temp, append(labels, k, k)}})
+			}
+		}
+
+		// Gateway System Data.
+		u.exportWANPorts(r, labels, d.Wan1, d.Wan2)
+		u.exportBYTstats(r, labels, d.TxBytes, d.RxBytes)
+		u.exportSYSstats(r, labels, d.SysStats, d.SystemStats)
+		u.exportUSGstats(r, labels, d.Stat.Gw, d.SpeedtestStatus, d.Uplink)
+		u.exportSTAcount(r, labels, d.UserNumSta, d.GuestNumSta, d.NumDesktop, d.UserNumSta, d.GuestNumSta)
+		r.send([]*metric{
+			{u.Device.Info, gauge, 1.0, append(baseLabels, infoLabels...)},
+			{u.Device.Uptime, gauge, d.Uptime, labels},
+			{u.Device.Upgradeable, gauge, d.Upgradable.Val, labels},
+		})
 	})
 }
 
@@ -125,8 +131,8 @@ func (u *promUnifi) exportUSGstats(r report, labels []string, gw *unifi.Gw, st u
 		return
 	}
 
-	labelLan := []string{"lan", labels[1], labels[2], labels[3]}
-	labelWan := []string{sourceInterface, labels[1], labels[2], labels[3]}
+	labelLan := []string{"lan", labels[1], labels[2], labels[3], labels[4]}
+	labelWan := []string{sourceInterface, labels[1], labels[2], labels[3], labels[4]}
 
 	r.send([]*metric{
 		{u.USG.LanRxPackets, counter, gw.LanRxPackets, labelLan},
@@ -154,7 +160,7 @@ func (u *promUnifi) exportWANPorts(r report, labels []string, wans ...unifi.Wan)
 			continue // only record UP interfaces.
 		}
 
-		labelWan := []string{wan.Name, labels[1], labels[2], labels[3]}
+		labelWan := []string{wan.Name, labels[1], labels[2], labels[3], labels[4]}
 
 		r.send([]*metric{
 			{u.USG.WanRxPackets, counter, wan.RxPackets, labelWan},

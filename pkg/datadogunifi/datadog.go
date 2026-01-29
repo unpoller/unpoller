@@ -4,7 +4,6 @@ package datadogunifi
 
 import (
 	"fmt"
-	"reflect"
 	"time"
 
 	"github.com/DataDog/datadog-go/v5/statsd"
@@ -355,7 +354,9 @@ func (u *DatadogUnifi) switchExport(r report, v any) { //nolint:cyclop
 	case *unifi.SpeedTestResult:
 		u.batchSpeedTest(r, v)
 	default:
-		u.LogErrorf("invalid export, type=%+v", reflect.TypeOf(v))
+		if u.Collector != nil && u.Collector.Poller().LogUnknownTypes {
+			u.LogDebugf("unknown export type: %T", v)
+		}
 	}
 }
 

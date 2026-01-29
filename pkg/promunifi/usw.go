@@ -55,11 +55,11 @@ type usw struct {
 func descUSW(ns string) *usw {
 	pns := ns + "port_"
 	sfp := pns + "sfp_"
-	labelS := []string{"site_name", "name", "source"}
-	labelP := []string{"port_id", "port_num", "port_name", "port_mac", "port_ip", "site_name", "name", "source"}
+	labelS := []string{"site_name", "name", "source", "tag"}
+	labelP := []string{"port_id", "port_num", "port_name", "port_mac", "port_ip", "site_name", "name", "source", "tag"}
 	labelF := []string{
 		"sfp_part", "sfp_vendor", "sfp_serial", "sfp_compliance",
-		"port_id", "port_num", "port_name", "port_mac", "port_ip", "site_name", "name", "source",
+		"port_id", "port_num", "port_name", "port_mac", "port_ip", "site_name", "name", "source", "tag",
 	}
 	nd := prometheus.NewDesc
 
@@ -116,32 +116,38 @@ func (u *promUnifi) exportUSW(r report, d *unifi.USW) {
 		return
 	}
 
-	labels := []string{d.Type, d.SiteName, d.Name, d.SourceName}
-	infoLabels := []string{d.Version, d.Model, d.Serial, d.Mac, d.IP, d.ID}
+	baseLabels := []string{d.Type, d.SiteName, d.Name, d.SourceName}
+	baseInfoLabels := []string{d.Version, d.Model, d.Serial, d.Mac, d.IP, d.ID}
 
-	u.exportUSWstats(r, labels, d.Stat.Sw)
-	u.exportPRTtable(r, labels, d.PortTable)
-	u.exportBYTstats(r, labels, d.TxBytes, d.RxBytes)
-	u.exportSYSstats(r, labels, d.SysStats, d.SystemStats)
-	u.exportSTAcount(r, labels, d.UserNumSta, d.GuestNumSta)
-	r.send([]*metric{
-		{u.Device.Info, gauge, 1.0, append(labels, infoLabels...)},
-		{u.Device.Uptime, gauge, d.Uptime, labels},
-		{u.Device.Upgradeable, gauge, d.Upgradable.Val, labels},
+	u.exportWithTags(r, d.Tags, func(tagLabels []string) {
+		tag := tagLabels[0]
+		labels := append(baseLabels, tag)
+		infoLabels := append(baseInfoLabels, tag)
+
+		u.exportUSWstats(r, labels, d.Stat.Sw)
+		u.exportPRTtable(r, labels, d.PortTable)
+		u.exportBYTstats(r, labels, d.TxBytes, d.RxBytes)
+		u.exportSYSstats(r, labels, d.SysStats, d.SystemStats)
+		u.exportSTAcount(r, labels, d.UserNumSta, d.GuestNumSta)
+		r.send([]*metric{
+			{u.Device.Info, gauge, 1.0, append(baseLabels, infoLabels...)},
+			{u.Device.Uptime, gauge, d.Uptime, labels},
+			{u.Device.Upgradeable, gauge, d.Upgradable.Val, labels},
+		})
+
+		// Switch System Data.
+		if d.HasTemperature.Val {
+			r.send([]*metric{{u.Device.Temperature, gauge, d.GeneralTemperature, append(labels, "general", "board")}})
+		}
+
+		if d.HasFan.Val {
+			r.send([]*metric{{u.Device.FanLevel, gauge, d.FanLevel, labels}})
+		}
+
+		if d.TotalMaxPower.Txt != "" {
+			r.send([]*metric{{u.Device.TotalMaxPower, gauge, d.TotalMaxPower, labels}})
+		}
 	})
-
-	// Switch System Data.
-	if d.HasTemperature.Val {
-		r.send([]*metric{{u.Device.Temperature, gauge, d.GeneralTemperature, append(labels, "general", "board")}})
-	}
-
-	if d.HasFan.Val {
-		r.send([]*metric{{u.Device.FanLevel, gauge, d.FanLevel, labels}})
-	}
-
-	if d.TotalMaxPower.Txt != "" {
-		r.send([]*metric{{u.Device.TotalMaxPower, gauge, d.TotalMaxPower, labels}})
-	}
 }
 
 // Switch Stats.
@@ -183,7 +189,7 @@ func (u *promUnifi) exportPRTtable(r report, labels []string, pt []unifi.Port) {
 		// Copy labels, and add four new ones.
 		labelP := []string{
 			labels[2] + " Port " + p.PortIdx.Txt, p.PortIdx.Txt,
-			p.Name, p.Mac, p.IP, labels[1], labels[2], labels[3],
+			p.Name, p.Mac, p.IP, labels[1], labels[2], labels[3], labels[4],
 		}
 
 		if p.PoeEnable.Val && p.PortPoe.Val {
@@ -197,7 +203,7 @@ func (u *promUnifi) exportPRTtable(r report, labels []string, pt []unifi.Port) {
 		if p.SFPFound.Val {
 			labelF := []string{
 				p.SFPPart, p.SFPVendor, p.SFPSerial, p.SFPCompliance,
-				labelP[0], labelP[1], labelP[2], labelP[3], labelP[4], labelP[5], labelP[6], labelP[7],
+				labelP[0], labelP[1], labelP[2], labelP[3], labelP[4], labelP[5], labelP[6], labelP[7], labelP[8],
 			}
 
 			r.send([]*metric{
