@@ -87,6 +87,7 @@ type Metrics struct {
 	SpeedTests     []*unifi.SpeedTestResult
 	Devices        *unifi.Devices
 	DHCPLeases     []*unifi.DHCPLease
+	WANConfigs     []*unifi.WANEnrichedConfiguration
 }
 
 func init() { // nolint: gochecknoinits
