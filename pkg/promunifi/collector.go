@@ -3,13 +3,14 @@ package promunifi
 
 import (
 	"fmt"
-	"github.com/prometheus/client_golang/prometheus/collectors"
 	"net"
 	"net/http"
 	"reflect"
 	"strings"
 	"sync"
 	"time"
+
+	"github.com/prometheus/client_golang/prometheus/collectors"
 
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
@@ -46,6 +47,7 @@ type promUnifi struct {
 	RogueAP        *rogueap
 	SpeedTest      *speedtest
 	CountryTraffic *ucountrytraffic
+	DHCPLease      *dhcplease
 	// This interface is passed to the Collect() method. The Collect method uses
 	// this interface to retrieve the latest UniFi measurements and export them.
 	Collector poller.Collect
@@ -205,6 +207,7 @@ func (u *promUnifi) Run(c poller.Collect) error {
 	u.RogueAP = descRogueAP(u.Namespace + "_rogueap_")
 	u.SpeedTest = descSpeedTest(u.Namespace + "_speedtest_")
 	u.CountryTraffic = descCountryTraffic(u.Namespace + "_countrytraffic_")
+	u.DHCPLease = descDHCPLease(u.Namespace + "_")
 
 	mux := http.NewServeMux()
 	promver.Version = version.Version
@@ -288,7 +291,7 @@ func (t *target) Describe(ch chan<- *prometheus.Desc) {
 // Describe satisfies the prometheus Collector. This returns all of the
 // metric descriptions that this packages produces.
 func (u *promUnifi) Describe(ch chan<- *prometheus.Desc) {
-	for _, f := range []any{u.Client, u.Device, u.UAP, u.USG, u.USW, u.PDU, u.Site, u.SpeedTest} {
+	for _, f := range []any{u.Client, u.Device, u.UAP, u.USG, u.USW, u.PDU, u.Site, u.SpeedTest, u.DHCPLease} {
 		v := reflect.Indirect(reflect.ValueOf(f))
 
 		// Loop each struct member and send it to the provided channel.
@@ -409,6 +412,24 @@ func (u *promUnifi) loopExports(r report) {
 
 	for _, ct := range m.CountryTraffic {
 		u.exportCountryTraffic(r, ct)
+	}
+
+	// Export network-level pool metrics first (once per network)
+	dhcpLeases := make([]*unifi.DHCPLease, 0, len(m.DHCPLeases))
+	for _, lease := range m.DHCPLeases {
+		if l, ok := lease.(*unifi.DHCPLease); ok {
+			dhcpLeases = append(dhcpLeases, l)
+		}
+	}
+	if len(dhcpLeases) > 0 {
+		u.exportDHCPNetworkPool(r, dhcpLeases)
+	}
+
+	// Export per-lease metrics
+	for _, lease := range m.DHCPLeases {
+		if l, ok := lease.(*unifi.DHCPLease); ok {
+			u.exportDHCPLease(r, l)
+		}
 	}
 
 	u.exportClientDPItotals(r, appTotal, catTotal)

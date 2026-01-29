@@ -86,6 +86,7 @@ type Metrics struct {
 	RogueAPs       []*unifi.RogueAP
 	SpeedTests     []*unifi.SpeedTestResult
 	Devices        *unifi.Devices
+	DHCPLeases     []*unifi.DHCPLease
 }
 
 func init() { // nolint: gochecknoinits

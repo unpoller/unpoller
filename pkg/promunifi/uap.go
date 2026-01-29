@@ -111,9 +111,9 @@ func descRogueAP(ns string) *rogueap {
 }
 
 func descUAP(ns string) *uap { // nolint: funlen
-	labelA := []string{"stat", "site_name", "name", "source"} // stat + labels[1:]
-	labelV := []string{"vap_name", "bssid", "radio", "radio_name", "essid", "usage", "site_name", "name", "source"}
-	labelR := []string{"radio_name", "radio", "site_name", "name", "source"}
+	labelA := []string{"stat", "site_name", "name", "source", "tag"} // stat + labels[1:]
+	labelV := []string{"vap_name", "bssid", "radio", "radio_name", "essid", "usage", "site_name", "name", "source", "tag"}
+	labelR := []string{"radio_name", "radio", "site_name", "name", "source", "tag"}
 	nd := prometheus.NewDesc
 
 	return &uap{
@@ -219,19 +219,26 @@ func (u *promUnifi) exportUAP(r report, d *unifi.UAP) {
 		return
 	}
 
-	labels := []string{d.Type, d.SiteName, d.Name, d.SourceName}
-	infoLabels := []string{d.Version, d.Model, d.Serial, d.Mac, d.IP, d.ID}
-	u.exportUAPstats(r, labels, d.Stat.Ap, d.BytesD, d.TxBytesD, d.RxBytesD, d.BytesR)
-	u.exportVAPtable(r, labels, d.VapTable)
-	u.exportPRTtable(r, labels, d.PortTable)
-	u.exportBYTstats(r, labels, d.TxBytes, d.RxBytes)
-	u.exportSYSstats(r, labels, d.SysStats, d.SystemStats)
-	u.exportSTAcount(r, labels, d.UserNumSta, d.GuestNumSta)
-	u.exportRADtable(r, labels, d.RadioTable, d.RadioTableStats)
-	r.send([]*metric{
-		{u.Device.Info, gauge, 1.0, append(labels, infoLabels...)},
-		{u.Device.Uptime, gauge, d.Uptime, labels},
-		{u.Device.Upgradeable, gauge, d.Upgradable.Val, labels},
+	baseLabels := []string{d.Type, d.SiteName, d.Name, d.SourceName}
+	baseInfoLabels := []string{d.Version, d.Model, d.Serial, d.Mac, d.IP, d.ID}
+
+	u.exportWithTags(r, d.Tags, func(tagLabels []string) {
+		tag := tagLabels[0]
+		labels := append(baseLabels, tag)
+		infoLabels := append(baseInfoLabels, tag)
+
+		u.exportUAPstats(r, labels, d.Stat.Ap, d.BytesD, d.TxBytesD, d.RxBytesD, d.BytesR)
+		u.exportVAPtable(r, labels, d.VapTable)
+		u.exportPRTtable(r, labels, d.PortTable)
+		u.exportBYTstats(r, labels, d.TxBytes, d.RxBytes)
+		u.exportSYSstats(r, labels, d.SysStats, d.SystemStats)
+		u.exportSTAcount(r, labels, d.UserNumSta, d.GuestNumSta)
+		u.exportRADtable(r, labels, d.RadioTable, d.RadioTableStats)
+		r.send([]*metric{
+			{u.Device.Info, gauge, 1.0, append(baseLabels, infoLabels...)},
+			{u.Device.Uptime, gauge, d.Uptime, labels},
+			{u.Device.Upgradeable, gauge, d.Upgradable.Val, labels},
+		})
 	})
 }
 
@@ -241,8 +248,8 @@ func (u *promUnifi) exportUAPstats(r report, labels []string, ap *unifi.Ap, byte
 		return
 	}
 
-	labelU := []string{"user", labels[1], labels[2], labels[3]}
-	labelG := []string{"guest", labels[1], labels[2], labels[3]}
+	labelU := []string{"user", labels[1], labels[2], labels[3], labels[4]}
+	labelG := []string{"guest", labels[1], labels[2], labels[3], labels[4]}
 	r.send([]*metric{
 		// ap only stuff.
 		{u.Device.BytesD, counter, bytes[0], labels},   // not sure if these 3 Ds are counters or gauges.
@@ -290,7 +297,7 @@ func (u *promUnifi) exportVAPtable(r report, labels []string, vt unifi.VapTable)
 			continue
 		}
 
-		labelV := []string{v.Name, v.Bssid, v.Radio, v.RadioName, v.Essid, v.Usage, labels[1], labels[2], labels[3]}
+		labelV := []string{v.Name, v.Bssid, v.Radio, v.RadioName, v.Essid, v.Usage, labels[1], labels[2], labels[3], labels[4]}
 		r.send([]*metric{
 			{u.UAP.VAPCcq, gauge, float64(v.Ccq) / 1000.0, labelV},
 			{u.UAP.VAPMacFilterRejections, counter, v.MacFilterRejections, labelV},
@@ -337,7 +344,7 @@ func (u *promUnifi) exportVAPtable(r report, labels []string, vt unifi.VapTable)
 func (u *promUnifi) exportRADtable(r report, labels []string, rt unifi.RadioTable, rts unifi.RadioTableStats) {
 	// radio table
 	for _, p := range rt {
-		labelR := []string{p.Name, p.Radio, labels[1], labels[2], labels[3]}
+		labelR := []string{p.Name, p.Radio, labels[1], labels[2], labels[3], labels[4]}
 		labelRUser := append(labelR, "user")
 		labelRGuest := append(labelR, "guest")
 

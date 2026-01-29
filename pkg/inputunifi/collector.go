@@ -182,6 +182,14 @@ func (u *InputUnifi) pollController(c *Controller) (*poller.Metrics, error) {
 		u.LogDebugf("Found %d SpeedTests entries", len(m.SpeedTests))
 	}
 
+	// Get DHCP leases with associations
+	if m.DHCPLeases, err = c.Unifi.GetActiveDHCPLeasesWithAssociations(sites); err != nil {
+		// Don't fail collection if DHCP leases fail - older controllers may not have this endpoint
+		u.LogDebugf("unifi.GetActiveDHCPLeasesWithAssociations(%s): %v (continuing)", c.URL, err)
+	} else {
+		u.LogDebugf("Found %d DHCPLeases entries", len(m.DHCPLeases))
+	}
+
 	return u.augmentMetrics(c, m), nil
 }
 
@@ -295,12 +303,12 @@ func (u *InputUnifi) augmentMetrics(c *Controller, metrics *Metrics) *poller.Met
 		client.ApName = devices[client.ApMac]
 		client.GwName = devices[client.GwMac]
 		client.RadioDescription = bssdIDs[client.Bssid] + client.RadioProto
-		
+
 		// Apply site name override for clients if configured
 		if c.DefaultSiteNameOverride != "" && isDefaultSiteName(client.SiteName) {
 			client.SiteName = c.DefaultSiteNameOverride
 		}
-		
+
 		m.Clients = append(m.Clients, client)
 	}
 
@@ -313,12 +321,12 @@ func (u *InputUnifi) augmentMetrics(c *Controller, metrics *Metrics) *poller.Met
 
 		client.Name = RedactNamePII(client.Name, c.HashPII, c.DropPII)
 		client.MAC = RedactMacPII(client.MAC, c.HashPII, c.DropPII)
-		
+
 		// Apply site name override for DPI clients if configured
 		if c.DefaultSiteNameOverride != "" && isDefaultSiteName(client.SiteName) {
 			client.SiteName = c.DefaultSiteNameOverride
 		}
-		
+
 		m.ClientsDPI = append(m.ClientsDPI, client)
 	}
 
@@ -365,6 +373,14 @@ func (u *InputUnifi) augmentMetrics(c *Controller, metrics *Metrics) *poller.Met
 			traffic.TrafficSite.SiteName = c.DefaultSiteNameOverride
 		}
 		m.CountryTraffic = append(m.CountryTraffic, traffic)
+	}
+
+	for _, lease := range metrics.DHCPLeases {
+		// Apply site name override for DHCP leases if configured
+		if c.DefaultSiteNameOverride != "" && isDefaultSiteName(lease.SiteName) {
+			lease.SiteName = c.DefaultSiteNameOverride
+		}
+		m.DHCPLeases = append(m.DHCPLeases, lease)
 	}
 
 	// Apply default_site_name_override to all metrics if configured.
@@ -459,6 +475,15 @@ func applySiteNameOverride(m *poller.Metrics, overrideName string) {
 		if ap, ok := m.RogueAPs[i].(*unifi.RogueAP); ok {
 			if isDefaultSiteName(ap.SiteName) {
 				ap.SiteName = overrideName
+			}
+		}
+	}
+
+	// Apply to DHCP leases
+	for i := range m.DHCPLeases {
+		if lease, ok := m.DHCPLeases[i].(*unifi.DHCPLease); ok {
+			if isDefaultSiteName(lease.SiteName) {
+				lease.SiteName = overrideName
 			}
 		}
 	}
