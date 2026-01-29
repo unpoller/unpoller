@@ -88,6 +88,7 @@ type Metrics struct {
 	RogueAPs       []any
 	SpeedTests     []any
 	CountryTraffic []any
+	DHCPLeases     []any
 }
 
 // Events defines the type for log entries.
