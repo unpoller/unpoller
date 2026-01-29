@@ -13,42 +13,48 @@ func (u *promUnifi) exportUBB(r report, d *unifi.UBB) {
 		return
 	}
 
-	labels := []string{d.Type, d.SiteName, d.Name, d.SourceName}
-	infoLabels := []string{d.Version, d.Model, d.Serial, d.Mac, d.IP, d.ID}
+	baseLabels := []string{d.Type, d.SiteName, d.Name, d.SourceName}
+	baseInfoLabels := []string{d.Version, d.Model, d.Serial, d.Mac, d.IP, d.ID}
 
-	// Export UBB-specific stats if available
-	u.exportUBBstats(r, labels, d.Stat)
+	u.exportWithTags(r, d.Tags, func(tagLabels []string) {
+		tag := tagLabels[0]
+		labels := append(baseLabels, tag)
+		infoLabels := append(baseInfoLabels, tag)
 
-	// Export VAP table (Virtual Access Point table - wireless interface stats)
-	u.exportVAPtable(r, labels, d.VapTable)
+		// Export UBB-specific stats if available
+		u.exportUBBstats(r, labels, d.Stat)
 
-	// Export Radio tables (includes 5GHz wifi0 and 60GHz terra2/ad radios)
-	u.exportRADtable(r, labels, d.RadioTable, d.RadioTableStats)
+		// Export VAP table (Virtual Access Point table - wireless interface stats)
+		u.exportVAPtable(r, labels, d.VapTable)
 
-	// Shared device stats
-	u.exportBYTstats(r, labels, d.TxBytes, d.RxBytes)
+		// Export Radio tables (includes 5GHz wifi0 and 60GHz terra2/ad radios)
+		u.exportRADtable(r, labels, d.RadioTable, d.RadioTableStats)
 
-	if d.SysStats != nil && d.SystemStats != nil {
-		u.exportSYSstats(r, labels, *d.SysStats, *d.SystemStats)
-	}
+		// Shared device stats
+		u.exportBYTstats(r, labels, d.TxBytes, d.RxBytes)
 
-	// Device info, uptime, and temperature
-	r.send([]*metric{
-		{u.Device.Info, gauge, 1.0, append(labels, infoLabels...)},
-		{u.Device.Uptime, gauge, d.Uptime, labels},
-		{u.Device.Temperature, gauge, d.GeneralTemperature.Val, append(labels, d.Name, "general")},
-	})
+		if d.SysStats != nil && d.SystemStats != nil {
+			u.exportSYSstats(r, labels, *d.SysStats, *d.SystemStats)
+		}
 
-	// UBB-specific metrics
-	if d.P2PStats != nil {
-		u.exportP2Pstats(r, labels, d.P2PStats)
-	}
+		// Device info, uptime, and temperature
+		r.send([]*metric{
+			{u.Device.Info, gauge, 1.0, append(baseLabels, infoLabels...)},
+			{u.Device.Uptime, gauge, d.Uptime, labels},
+			{u.Device.Temperature, gauge, d.GeneralTemperature.Val, append(labels, d.Name, "general")},
+		})
 
-	// Link quality metrics for point-to-point links
-	r.send([]*metric{
-		{u.Device.Counter, gauge, d.LinkQuality.Val, append(labels, "link_quality")},
-		{u.Device.Counter, gauge, d.LinkQualityCurrent.Val, append(labels, "link_quality_current")},
-		{u.Device.Counter, gauge, d.LinkCapacity.Val, append(labels, "link_capacity")},
+		// UBB-specific metrics
+		if d.P2PStats != nil {
+			u.exportP2Pstats(r, labels, d.P2PStats)
+		}
+
+		// Link quality metrics for point-to-point links
+		r.send([]*metric{
+			{u.Device.Counter, gauge, d.LinkQuality.Val, append(labels, "link_quality")},
+			{u.Device.Counter, gauge, d.LinkQualityCurrent.Val, append(labels, "link_quality_current")},
+			{u.Device.Counter, gauge, d.LinkCapacity.Val, append(labels, "link_capacity")},
+		})
 	})
 }
 
@@ -62,6 +68,7 @@ func (u *promUnifi) exportUBBstats(r report, labels []string, stat *unifi.UBBSta
 	bb := stat.Bb
 
 	// Export aggregated stats (total across both radios)
+	// labels is [type, site_name, name, source, tag], so labels[1:] = [site_name, name, source, tag]
 	labelTotal := append([]string{"total"}, labels[1:]...)
 	r.send([]*metric{
 		{u.UAP.ApRxPackets, counter, bb.RxPackets, labelTotal},
