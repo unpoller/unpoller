@@ -53,15 +53,15 @@ func (u *DatadogUnifi) batchWAN(r report, w *unifi.WANEnrichedConfiguration) {
 		"magic_enabled":          magicEnabled,
 		"vlan_enabled":           vlanEnabled,
 		// Statistics
-		"uptime_percentage":      stats.UptimePercentage,
-		"peak_download_percent":  stats.PeakUsage.DownloadPercentage,
-		"peak_upload_percent":    stats.PeakUsage.UploadPercentage,
-		"max_rx_bytes_rate":      stats.PeakUsage.MaxRxBytesR.Val,
-		"max_tx_bytes_rate":      stats.PeakUsage.MaxTxBytesR.Val,
+		"uptime_percentage":     stats.UptimePercentage,
+		"peak_download_percent": stats.PeakUsage.DownloadPercentage,
+		"peak_upload_percent":   stats.PeakUsage.UploadPercentage,
+		"max_rx_bytes_rate":     stats.PeakUsage.MaxRxBytesR.Val,
+		"max_tx_bytes_rate":     stats.PeakUsage.MaxTxBytesR.Val,
 		// Service Provider
-		"service_provider_asn":   details.ServiceProvider.ASN.Val,
+		"service_provider_asn": details.ServiceProvider.ASN.Val,
 		// Metadata
-		"creation_timestamp":     details.CreationTimestamp.Val,
+		"creation_timestamp": details.CreationTimestamp.Val,
 	}
 
 	for name, value := range data {

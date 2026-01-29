@@ -3,7 +3,7 @@
 package influxunifi
 
 import (
-        "context"
+	"context"
 	"crypto/tls"
 	"fmt"
 	"net/url"
