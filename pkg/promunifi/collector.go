@@ -48,6 +48,7 @@ type promUnifi struct {
 	SpeedTest      *speedtest
 	CountryTraffic *ucountrytraffic
 	DHCPLease      *dhcplease
+	WAN            *wan
 	// This interface is passed to the Collect() method. The Collect method uses
 	// this interface to retrieve the latest UniFi measurements and export them.
 	Collector poller.Collect
@@ -208,6 +209,7 @@ func (u *promUnifi) Run(c poller.Collect) error {
 	u.SpeedTest = descSpeedTest(u.Namespace + "_speedtest_")
 	u.CountryTraffic = descCountryTraffic(u.Namespace + "_countrytraffic_")
 	u.DHCPLease = descDHCPLease(u.Namespace + "_")
+	u.WAN = descWAN(u.Namespace + "_")
 
 	mux := http.NewServeMux()
 	promver.Version = version.Version
@@ -291,7 +293,7 @@ func (t *target) Describe(ch chan<- *prometheus.Desc) {
 // Describe satisfies the prometheus Collector. This returns all of the
 // metric descriptions that this packages produces.
 func (u *promUnifi) Describe(ch chan<- *prometheus.Desc) {
-	for _, f := range []any{u.Client, u.Device, u.UAP, u.USG, u.USW, u.PDU, u.Site, u.SpeedTest, u.DHCPLease} {
+	for _, f := range []any{u.Client, u.Device, u.UAP, u.USG, u.USW, u.PDU, u.Site, u.SpeedTest, u.DHCPLease, u.WAN} {
 		v := reflect.Indirect(reflect.ValueOf(f))
 
 		// Loop each struct member and send it to the provided channel.
@@ -429,6 +431,13 @@ func (u *promUnifi) loopExports(r report) {
 	for _, lease := range m.DHCPLeases {
 		if l, ok := lease.(*unifi.DHCPLease); ok {
 			u.exportDHCPLease(r, l)
+		}
+	}
+
+	// Export WAN metrics
+	for _, wanConfig := range m.WANConfigs {
+		if w, ok := wanConfig.(*unifi.WANEnrichedConfiguration); ok {
+			u.exportWAN(r, w)
 		}
 	}
 

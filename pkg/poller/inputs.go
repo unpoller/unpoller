@@ -270,6 +270,7 @@ func AppendMetrics(existing *Metrics, m *Metrics) *Metrics {
 	existing.Devices = append(existing.Devices, m.Devices...)
 	existing.CountryTraffic = append(existing.CountryTraffic, m.CountryTraffic...)
 	existing.DHCPLeases = append(existing.DHCPLeases, m.DHCPLeases...)
+	existing.WANConfigs = append(existing.WANConfigs, m.WANConfigs...)
 
 	return existing
 }

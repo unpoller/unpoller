@@ -190,6 +190,14 @@ func (u *InputUnifi) pollController(c *Controller) (*poller.Metrics, error) {
 		u.LogDebugf("Found %d DHCPLeases entries", len(m.DHCPLeases))
 	}
 
+	// Get WAN enriched configuration
+	if m.WANConfigs, err = c.Unifi.GetWANEnrichedConfiguration(sites); err != nil {
+		// Don't fail collection if WAN config fails - older controllers may not have this endpoint
+		u.LogDebugf("unifi.GetWANEnrichedConfiguration(%s): %v (continuing)", c.URL, err)
+	} else {
+		u.LogDebugf("Found %d WAN configuration entries", len(m.WANConfigs))
+	}
+
 	return u.augmentMetrics(c, m), nil
 }
 
@@ -383,6 +391,12 @@ func (u *InputUnifi) augmentMetrics(c *Controller, metrics *Metrics) *poller.Met
 		m.DHCPLeases = append(m.DHCPLeases, lease)
 	}
 
+	for _, wanConfig := range metrics.WANConfigs {
+		// WANEnrichedConfiguration doesn't have a SiteName field by default
+		// The site context is preserved via the collector's site list
+		m.WANConfigs = append(m.WANConfigs, wanConfig)
+	}
+
 	// Apply default_site_name_override to all metrics if configured.
 	// This must be done AFTER all metrics are added to m, so everything is included.
 	// This allows us to use the console name for Cloud Gateways while keeping
@@ -485,6 +499,14 @@ func applySiteNameOverride(m *poller.Metrics, overrideName string) {
 			if isDefaultSiteName(lease.SiteName) {
 				lease.SiteName = overrideName
 			}
+		}
+	}
+
+	// Apply to WAN configs
+	for i := range m.WANConfigs {
+		if wanConfig, ok := m.WANConfigs[i].(*unifi.WANEnrichedConfiguration); ok {
+			// WAN configs don't have SiteName field, but we'll add it in the exporter
+			_ = wanConfig
 		}
 	}
 }
