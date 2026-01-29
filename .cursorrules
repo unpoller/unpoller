@@ -1,0 +1,148 @@
+# UnPoller - Cursor AI Rules
+
+## Project Overview
+UnPoller is a Go application that collects metrics from UniFi network controllers and exports them to various backends (InfluxDB, Prometheus, Loki, DataDog). The architecture is plugin-based with input and output plugins.
+
+## Architecture
+
+### Core Components
+- **main.go**: Entry point, loads plugins via blank imports
+- **pkg/poller/**: Core library providing input/output interfaces and plugin management
+- **pkg/inputunifi/**: Input plugin for UniFi controller data collection
+- **pkg/influxunifi/**: Output plugin for InfluxDB
+- **pkg/promunifi/**: Output plugin for Prometheus
+- **pkg/lokiunifi/**: Output plugin for Loki
+- **pkg/datadogunifi/**: Output plugin for DataDog
+- **pkg/webserver/**: Web server for health checks and metrics
+- **pkg/mysqlunifi/**: MySQL output plugin
+
+### Plugin System
+- Plugins are loaded via blank imports (`_ "github.com/unpoller/unpoller/pkg/inputunifi"`)
+- Input plugins implement the `Input` interface from `pkg/poller/inputs.go`
+- Output plugins implement the `Output` interface from `pkg/poller/outputs.go`
+- The poller core automatically discovers and initializes imported plugins
+- Configuration is automatically unmarshaled from config files (TOML/JSON/YAML) and environment variables
+
+## Code Style & Conventions
+
+### Go Standards
+- Use Go 1.25.5+ features
+- Follow standard Go formatting (gofmt)
+- Use `golangci-lint` with the project's `.golangci.yaml` configuration
+- Enable linters: `nlreturn`, `revive`, `tagalign`, `testpackage`, `wsl_v5`
+- Use `//nolint:gci` for import ordering when needed
+
+### Naming Conventions
+- Package names should be lowercase, single word
+- Exported types/functions use PascalCase
+- Unexported types/functions use camelCase
+- Constants use PascalCase with descriptive names
+- Error variables should be named `err` and checked immediately
+
+### Error Handling
+- Always check errors, don't ignore them
+- Use `github.com/pkg/errors` for error wrapping when appropriate
+- Return errors from functions, don't log and continue
+- Use descriptive error messages
+
+### Configuration
+- Configuration uses `golift.io/cnfg` and `golift.io/cnfgfile`
+- Environment variables use `UP_` prefix (defined in `ENVConfigPrefix`)
+- Support TOML (default), JSON, and YAML formats
+- Config structs should have tags: `json`, `toml`, `xml`, `yaml`
+
+### Testing
+- Use `testpackage` linter - tests should be in separate `_test` packages
+- Use `github.com/stretchr/testify` for assertions
+- Integration tests use `integration_test_expectations.yaml` files
+
+### Logging
+- Use structured logging via logger interfaces
+- Log levels: ERROR, WARN, INFO, DEBUG
+- Prefix log messages with `[LEVEL]` when using standard log package
+
+## Dependencies
+
+### Key Libraries
+- `github.com/unpoller/unifi/v5` - UniFi API client (local replace: `/Users/briangates/unifi`)
+- `golift.io/cnfg` - Configuration management
+- `golift.io/cnfgfile` - Config file parsing
+- `github.com/spf13/pflag` - CLI flag parsing
+- `github.com/gorilla/mux` - HTTP router
+- `github.com/prometheus/client_golang` - Prometheus metrics
+
+### Output Backends
+- InfluxDB: `github.com/influxdata/influxdb1-client` and `github.com/influxdata/influxdb-client-go/v2`
+- Prometheus: `github.com/prometheus/client_golang`
+- Loki: Custom HTTP client
+- DataDog: `github.com/DataDog/datadog-go/v5`
+
+## Project Structure
+
+```
+unpoller/
+├── main.go                 # Entry point
+├── pkg/
+│   ├── poller/             # Core plugin system
+│   ├── inputunifi/         # UniFi input plugin
+│   ├── influxunifi/        # InfluxDB output
+│   ├── promunifi/          # Prometheus output
+│   ├── lokiunifi/          # Loki output
+│   ├── datadogunifi/       # DataDog output
+│   ├── mysqlunifi/         # MySQL output
+│   └── webserver/          # Web server
+├── examples/               # Configuration examples
+├── init/                   # Init scripts (systemd, docker, etc.)
+└── scripts/                # Build/deployment scripts
+```
+
+## Common Patterns
+
+### Adding a New Output Plugin
+1. Create new package in `pkg/` (e.g., `pkg/myoutput/`)
+2. Implement `Output` interface from `pkg/poller/outputs.go`
+3. Register plugin in `init()` function
+4. Add blank import to `main.go`
+5. Add configuration struct with proper tags
+6. Create README.md in package directory
+
+### Adding a New Input Plugin
+1. Create new package in `pkg/` (e.g., `pkg/myinput/`)
+2. Implement `Input` interface from `pkg/poller/inputs.go`
+3. Register plugin in `init()` function
+4. Add blank import to `main.go`
+5. Add configuration struct with proper tags
+
+### Device Type Reporting
+- Device types: UAP, USG, USW, UDM, UBB, UCI, UXG, PDU
+- Each output plugin has device-specific reporting functions (e.g., `uap.go`, `usg.go`)
+- Follow existing patterns in `pkg/promunifi/` or `pkg/influxunifi/`
+
+## Important Notes
+
+- The `pkg/poller` library is generic and has no knowledge of UniFi, Influx, Prometheus, etc.
+- It provides interfaces for any type of input/output plugin
+- Use `[]any` types for flexibility in the core library
+- Configuration is automatically loaded from files and environment variables
+- The application supports multiple UniFi controllers via configuration
+- Timezone can be set via `TZ` environment variable
+
+## Build & Deployment
+
+- Uses GitHub Actions for CI/CD
+- Uses `goreleaser` for multi-platform builds
+- Supports: Linux, macOS, Windows, FreeBSD
+- Docker images built automatically
+- Homebrew formula for macOS
+- Configuration examples in `examples/` directory
+
+## When Writing Code
+
+- Keep functions focused and single-purpose
+- Use interfaces for testability
+- Follow the existing plugin patterns
+- Document exported functions and types
+- Add appropriate error handling
+- Consider cross-platform compatibility (Windows, macOS, Linux, BSD)
+- Use context.Context for cancellable operations
+- Respect timeouts and deadlines
