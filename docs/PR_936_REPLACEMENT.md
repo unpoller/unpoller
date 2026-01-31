@@ -1,8 +1,6 @@
-# Replacement for PR #936: Endpoint discovery via `--discover` (Go)
+# Endpoint discovery via `--discover` (Go)
 
-**Supersedes:** [PR #936](https://github.com/unpoller/unpoller/pull/936) (Python endpoint-discovery tool in `tools/endpoint-discovery/`).
-
-PR #936 added a Python/Playwright tool to discover API endpoints by driving a headless browser. This replacement implements the same goal **inside unpoller** using the unifi library: no Python, no Playwright, same config as normal polling.
+The [unpoller](https://github.com/unpoller/unpoller) repo has a Python/Playwright endpoint-discovery tool in `tools/endpoint-discovery/` (browser-based; discovers unknown endpoints; more support currently). This doc describes the Go-based discovery: it lives in [unpoller/unifi](https://github.com/unpoller/unifi) and unpoller, probes a fixed list of known API paths, and discovers/confirms known endpoints only.
 
 ---
 
@@ -11,7 +9,7 @@ PR #936 added a Python/Playwright tool to discover API endpoints by driving a he
 - **Feature:** `--discover` flag on unpoller that probes known API endpoints on the controller and writes a shareable markdown report.
 - **Credentials:** Uses the same config file (and first unifi controller) as normal unpoller runs.
 - **Output:** Markdown file (default `api_endpoints_discovery.md`) with method, path, and HTTP status for each endpoint. Users can share this when reporting API/404 issues (e.g. [issue #935](https://github.com/unpoller/unpoller/issues/935)).
-- **Dependency:** Requires [unpoller/unifi](https://github.com/unpoller/unifi) with `DiscoverEndpoints` and `Probe` (unifi PR/branch with discovery support).
+- **Dependency:** Requires [unpoller/unifi](https://github.com/unpoller/unifi) with `DiscoverEndpoints` and `Probe` merged.
 
 ---
 
@@ -25,8 +23,6 @@ PR #936 added a Python/Playwright tool to discover API endpoints by driving a he
 | `pkg/poller/inputs.go` | Add optional interface `Discoverer` with `Discover(outputPath string) error`. |
 | `pkg/inputunifi/discover.go` | **New file.** Implement `Discoverer`: first controller, authenticate, get sites, call `c.Unifi.DiscoverEndpoints(site, outputPath)`. |
 | `.gitignore` | Add `up.discover-test.json`, `api_endpoints_discovery.md`. |
-
-**Removed (vs PR #936):** No `tools/endpoint-discovery/` (no Python, no Playwright).
 
 ---
 
@@ -45,15 +41,15 @@ unpoller --discover --discover-output api_endpoints_discovery.md
 
 ---
 
-## PR title (for replacement PR)
+## PR title
 
-**Add `--discover` to probe API endpoints and write shareable report (replaces #936)**
+**Add `--discover` to probe API endpoints and write shareable report**
 
 ---
 
 ## PR description (suggested)
 
-**Replaces #936** (Python endpoint-discovery tool). Implements endpoint discovery inside unpoller using the unifi library; no Python or Playwright.
+Go-based endpoint discovery: probes known API paths on the controller and writes a shareable report. Uses the [unifi](https://github.com/unpoller/unifi) library; same config as normal polling. The Python tool in `tools/endpoint-discovery/` remains for browser-based discovery (more coverage).
 
 **What it does**
 - `unpoller --discover` uses the first unifi controller from your config, authenticates, and probes a set of known API paths.
@@ -65,6 +61,6 @@ unpoller --discover --discover-output api_endpoints_discovery.md
 unpoller --discover --config /path/to/up.conf --discover-output api_endpoints_discovery.md
 ```
 
-**Requires** unpoller/unifi with `DiscoverEndpoints` (and `Probe`) merged or a compatible unifi version.
+**Requires** [unpoller/unifi](https://github.com/unpoller/unifi) with `DiscoverEndpoints` (and `Probe`) merged.
 
-**Closes #936** (replaced by this approach).
+**CI:** Merge unifi first, then this PR (or update go.mod to require the new unifi release). For local testing, use `replace github.com/unpoller/unifi/v5 => ../unifi` with the unifi repo checked out.

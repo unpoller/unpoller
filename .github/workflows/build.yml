@@ -20,12 +20,6 @@ jobs:
     steps:
       - uses: actions/checkout@v6
 
-      - name: Checkout unifi (when go.mod replace => ../unifi)
-        run: |
-          if grep -q 'replace github.com/unpoller/unifi/v5 => ../unifi' go.mod; then
-            git clone --depth 1 https://github.com/brngates98/unifi.git ../unifi -b discover-flag
-          fi
-
       - name: Set up Go
         uses: actions/setup-go@v6
         with:
@@ -45,13 +39,6 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v6
-
-      - name: Checkout unifi (when go.mod replace => ../unifi)
-        run: |
-          if grep -q 'replace github.com/unpoller/unifi/v5 => ../unifi' go.mod; then
-            git clone --depth 1 https://github.com/brngates98/unifi.git ../unifi -b discover-flag
-          fi
-
       - name: Set up Go
         uses: actions/setup-go@v6
         with:
