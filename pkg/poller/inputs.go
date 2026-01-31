@@ -24,6 +24,12 @@ type Input interface {
 	DebugInput() (bool, error)
 }
 
+// Discoverer is an optional interface for inputs that can discover API endpoints
+// on a controller and write a shareable report (e.g. for support/debugging).
+type Discoverer interface {
+	Discover(outputPath string) error
+}
+
 // InputPlugin describes an input plugin's consumable interface.
 type InputPlugin struct {
 	Name   string

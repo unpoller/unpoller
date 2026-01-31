@@ -68,12 +68,14 @@ type UnifiPoller struct {
 
 // Flags represents the CLI args available and their settings.
 type Flags struct {
-	ConfigFile string
-	DumpJSON   string
-	HashPW     string
-	ShowVer    bool
-	DebugIO    bool
-	Health     bool
+	ConfigFile     string
+	DumpJSON       string
+	HashPW         string
+	ShowVer        bool
+	DebugIO        bool
+	Health         bool
+	Discover       bool
+	DiscoverOutput string
 	*pflag.FlagSet
 }
 
