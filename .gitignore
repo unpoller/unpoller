@@ -40,3 +40,6 @@ github_deploy_key*
 dist/
 .vscode/
 .idea/
+# Endpoint discovery tool
+tools/endpoint-discovery/__pycache__
+tools/endpoint-discovery/.venv
