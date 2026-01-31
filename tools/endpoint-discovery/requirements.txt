@@ -1,0 +1,3 @@
+playwright>=1.49.0
+# Optional: for .env support
+# python-dotenv>=1.0.0

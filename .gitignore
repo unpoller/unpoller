@@ -40,3 +40,10 @@ github_deploy_key*
 dist/
 .vscode/
 .idea/
+# Local test config (contains credentials)
+up.discover-test.json
+# Generated discovery report (re-run with --discover to recreate)
+api_endpoints_discovery.md
+# Python endpoint-discovery tool (optional)
+tools/endpoint-discovery/__pycache__
+tools/endpoint-discovery/.venv
