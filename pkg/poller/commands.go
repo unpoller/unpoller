@@ -191,3 +191,45 @@ func (u *UnifiPoller) HealthCheck() error {
 	// All checks passed, application is healthy.
 	return nil
 }
+
+// RunDiscover loads config, initializes inputs, finds an input that implements
+// Discoverer, and runs Discover(outputPath). Uses the same config as normal polling.
+func (u *UnifiPoller) RunDiscover() error {
+	cfile, err := getFirstFile(strings.Split(u.Flags.ConfigFile, ","))
+	if err != nil {
+		return fmt.Errorf("discover: config file not found: %w", err)
+	}
+
+	u.Flags.ConfigFile = cfile
+	u.Logf("Loading Configuration File: %s", u.Flags.ConfigFile)
+
+	if err := u.ParseConfigs(); err != nil {
+		return fmt.Errorf("discover: parse config: %w", err)
+	}
+
+	if err := u.InitializeInputs(); err != nil {
+		return fmt.Errorf("discover: initialize inputs: %w", err)
+	}
+
+	outputPath := u.Flags.DiscoverOutput
+	if outputPath == "" {
+		outputPath = "api_endpoints_discovery.md"
+	}
+
+	inputSync.RLock()
+	defer inputSync.RUnlock()
+
+	for _, input := range inputs {
+		if d, ok := input.Input.(Discoverer); ok {
+			if err := d.Discover(outputPath); err != nil {
+				return fmt.Errorf("discover: %w", err)
+			}
+
+			u.Logf("Discovery report written to %s (share with maintainers for API/404 issues).", outputPath)
+
+			return nil
+		}
+	}
+
+	return fmt.Errorf("discover: no input plugin supports discovery (unifi input required)")
+}

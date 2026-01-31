@@ -38,6 +38,10 @@ func (u *UnifiPoller) Start() error {
 		return u.HealthCheck()
 	}
 
+	if u.Flags.Discover {
+		return u.RunDiscover()
+	}
+
 	cfile, err := getFirstFile(strings.Split(u.Flags.ConfigFile, ","))
 	if err != nil {
 		return err
@@ -81,6 +85,9 @@ func (f *Flags) Parse(args []string) {
 		"This debug option prints a json payload and exits. See man page for more info.")
 	f.BoolVarP(&f.DebugIO, "debugio", "d", false, "Debug the Inputs and Outputs configured and exit.")
 	f.BoolVarP(&f.Health, "health", "", false, "Run health check and exit with status 0 (healthy) or 1 (unhealthy).")
+	f.BoolVarP(&f.Discover, "discover", "", false, "Discover API endpoints on the controller and write a shareable report, then exit.")
+	f.StringVarP(&f.DiscoverOutput, "discover-output", "", "api_endpoints_discovery.md",
+		"Path for the discovery report when using --discover.")
 	f.StringVarP(&f.ConfigFile, "config", "c", DefaultConfFile(),
 		"Poller config file path. Separating multiple paths with a comma will load the first config file found.")
 	f.BoolVarP(&f.ShowVer, "version", "v", false, "Print the version and exit.")
