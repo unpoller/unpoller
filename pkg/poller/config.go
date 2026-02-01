@@ -92,6 +92,7 @@ type Metrics struct {
 	CountryTraffic []any
 	DHCPLeases     []any
 	WANConfigs     []any
+	Sysinfos       []any
 }
 
 // Events defines the type for log entries.

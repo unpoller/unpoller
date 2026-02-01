@@ -24,8 +24,7 @@ type Input interface {
 	DebugInput() (bool, error)
 }
 
-// Discoverer is an optional interface for inputs that can discover API endpoints
-// on a controller and write a shareable report (e.g. for support/debugging).
+// Discoverer is an optional interface for inputs that can discover API endpoints.
 type Discoverer interface {
 	Discover(outputPath string) error
 }
@@ -277,6 +276,7 @@ func AppendMetrics(existing *Metrics, m *Metrics) *Metrics {
 	existing.CountryTraffic = append(existing.CountryTraffic, m.CountryTraffic...)
 	existing.DHCPLeases = append(existing.DHCPLeases, m.DHCPLeases...)
 	existing.WANConfigs = append(existing.WANConfigs, m.WANConfigs...)
+	existing.Sysinfos = append(existing.Sysinfos, m.Sysinfos...)
 
 	return existing
 }

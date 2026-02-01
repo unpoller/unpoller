@@ -88,6 +88,7 @@ type Metrics struct {
 	Devices        *unifi.Devices
 	DHCPLeases     []*unifi.DHCPLease
 	WANConfigs     []*unifi.WANEnrichedConfiguration
+	Sysinfos       []*unifi.Sysinfo
 }
 
 func init() { // nolint: gochecknoinits

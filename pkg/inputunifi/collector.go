@@ -198,6 +198,14 @@ func (u *InputUnifi) pollController(c *Controller) (*poller.Metrics, error) {
 		u.LogDebugf("Found %d WAN configuration entries", len(m.WANConfigs))
 	}
 
+	// Get controller system info (UniFi OS only)
+	if m.Sysinfos, err = c.Unifi.GetSysinfo(sites); err != nil {
+		// Don't fail collection if sysinfo fails - older controllers may not have this endpoint
+		u.LogDebugf("unifi.GetSysinfo(%s): %v (continuing)", c.URL, err)
+	} else {
+		u.LogDebugf("Found %d Sysinfo entries", len(m.Sysinfos))
+	}
+
 	return u.augmentMetrics(c, m), nil
 }
 
@@ -397,6 +405,10 @@ func (u *InputUnifi) augmentMetrics(c *Controller, metrics *Metrics) *poller.Met
 		m.WANConfigs = append(m.WANConfigs, wanConfig)
 	}
 
+	for _, sysinfo := range metrics.Sysinfos {
+		m.Sysinfos = append(m.Sysinfos, sysinfo)
+	}
+
 	// Apply default_site_name_override to all metrics if configured.
 	// This must be done AFTER all metrics are added to m, so everything is included.
 	// This allows us to use the console name for Cloud Gateways while keeping
@@ -498,6 +510,15 @@ func applySiteNameOverride(m *poller.Metrics, overrideName string) {
 		if lease, ok := m.DHCPLeases[i].(*unifi.DHCPLease); ok {
 			if isDefaultSiteName(lease.SiteName) {
 				lease.SiteName = overrideName
+			}
+		}
+	}
+
+	// Apply to sysinfo (controller metrics)
+	for i := range m.Sysinfos {
+		if s, ok := m.Sysinfos[i].(*unifi.Sysinfo); ok {
+			if isDefaultSiteName(s.SiteName) {
+				s.SiteName = overrideName
 			}
 		}
 	}
