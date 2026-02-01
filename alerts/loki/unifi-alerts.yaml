@@ -49,6 +49,16 @@ groups:
 
   - name: unifi-system-log
     rules:
+      - alert: UnifiSystemLogCritical
+        expr: |
+          sum by (site_name, source) (count_over_time({application="unifi_system_log", severity="CRITICAL"}[5m])) > 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "UniFi CRITICAL system log on {{ $labels.site_name }}"
+          description: "{{ $value }} CRITICAL log(s) in 5m - immediate attention required"
+
       - alert: UnifiSystemLogHighSeverity
         expr: |
           sum by (site_name, severity) (count_over_time({application="unifi_system_log", severity=~"CRITICAL|HIGH|ERROR"}[15m])) > 10
@@ -58,6 +68,16 @@ groups:
         annotations:
           summary: "High-severity UniFi system log volume"
           description: "{{ $value }} {{ $labels.severity }} logs in 15m for site {{ $labels.site_name }}"
+
+      - alert: UnifiSystemLogAuthFailure
+        expr: |
+          sum by (site_name) (count_over_time({application="unifi_system_log"} |~ "(?i)(login failed|auth failed|authentication failure)"[1h])) > 5
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "UniFi authentication failures on {{ $labels.site_name }}"
+          description: "{{ $value }} auth failure(s) in 1h - possible brute force or credential leak"
 
   - name: unifi-events
     rules:
