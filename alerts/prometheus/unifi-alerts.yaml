@@ -1,0 +1,234 @@
+# Prometheus alerting rules for UniFi infrastructure (unPoller metrics)
+# Default namespace: unpoller. Adjust metric names if using a custom namespace.
+groups:
+  - name: unifi-ups
+    rules:
+      - alert: UnifiUPSLowBattery
+        expr: unpoller_device_ups_battery_level_percent < 20
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Low UPS battery on {{ $labels.device_name }}"
+          description: "UPS {{ $labels.device_name }} at {{ $value }}% battery (site: {{ $labels.site_name }})"
+
+      - alert: UnifiUPSCriticalBattery
+        expr: unpoller_device_ups_battery_level_percent < 10
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Critical UPS battery on {{ $labels.device_name }}"
+          description: "UPS {{ $labels.device_name }} at {{ $value }}% battery - prepare for shutdown"
+
+      - alert: UnifiUPSOnBattery
+        expr: unpoller_device_ups_battery_mode == 1
+        for: 1m
+        labels:
+          severity: warning
+        annotations:
+          summary: "UPS {{ $labels.device_name }} running on battery"
+          description: "Power outage or AC loss - UPS {{ $labels.device_name }} on battery (site: {{ $labels.site_name }})"
+
+      - alert: UnifiUPSLowRuntime
+        expr: unpoller_device_ups_battery_time_remaining_seconds < 300 and unpoller_device_ups_battery_time_remaining_seconds >= 0
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Low UPS runtime on {{ $labels.device_name }}"
+          description: "UPS {{ $labels.device_name }} has {{ $value | humanizeDuration }} runtime remaining"
+
+      - alert: UnifiUPSHighLoad
+        expr: unpoller_device_ups_load_percent > 80
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High UPS load on {{ $labels.device_name }}"
+          description: "UPS {{ $labels.device_name }} load at {{ $value }}% of capacity"
+
+      - alert: UnifiUPSBMSAnomaly
+        expr: unpoller_device_ups_bms_anomaly_count > 0
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "UPS BMS anomaly on {{ $labels.device_name }}"
+          description: "Battery management anomaly detected on {{ $labels.device_name }}"
+
+      - alert: UnifiUPSNotCharging
+        expr: unpoller_device_ups_battery_charging == 0 and unpoller_device_ups_battery_level_percent < 100
+        for: 30m
+        labels:
+          severity: warning
+        annotations:
+          summary: "UPS {{ $labels.device_name }} not charging"
+          description: "Battery at {{ $value }}% but not charging - check power or battery health"
+
+  - name: unifi-controller
+    rules:
+      - alert: UnifiControllerUpdateAvailable
+        expr: unpoller_controller_update_available == 1
+        for: 1h
+        labels:
+          severity: info
+        annotations:
+          summary: "UniFi controller update available ({{ $labels.hostname }})"
+          description: "Controller {{ $labels.hostname }} has an update available"
+
+      - alert: UnifiControllerUnsupportedDevices
+        expr: unpoller_controller_unsupported_device_count > 0
+        for: 1h
+        labels:
+          severity: warning
+        annotations:
+          summary: "Unsupported devices on controller {{ $labels.hostname }}"
+          description: "{{ $value }} unsupported device(s) on controller"
+
+  - name: unifi-devices
+    rules:
+      - alert: UnifiDeviceHighCPU
+        expr: unpoller_device_cpu_utilization_ratio > 0.9
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High CPU on {{ $labels.name }}"
+          description: "Device {{ $labels.name }} ({{ $labels.type }}) CPU at {{ $value | humanize }}"
+
+      - alert: UnifiDeviceHighMemory
+        expr: unpoller_device_memory_utilization_ratio > 0.9
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High memory on {{ $labels.name }}"
+          description: "Device {{ $labels.name }} memory at {{ $value | humanize }}"
+
+      - alert: UnifiDeviceUpgradeAvailable
+        expr: unpoller_device_upgradable == 1
+        for: 1h
+        labels:
+          severity: info
+        annotations:
+          summary: "Device {{ $labels.name }} has upgrade available"
+          description: "{{ $labels.type }} device {{ $labels.name }} has firmware update available (site: {{ $labels.site_name }})"
+
+  - name: unifi-site
+    rules:
+      - alert: UnifiSiteHighDisconnectedDevices
+        expr: unpoller_site_disconnected{subsystem=~"wlan|wan|lan"} > 0
+        for: 15m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Disconnected devices on {{ $labels.site_name }} ({{ $labels.subsystem }})"
+          description: "{{ $value }} device(s) disconnected in {{ $labels.subsystem }} subsystem"
+
+      - alert: UnifiSitePendingAdoptions
+        expr: unpoller_site_pending > 0
+        for: 1h
+        labels:
+          severity: info
+        annotations:
+          summary: "Pending device adoptions on {{ $labels.site_name }}"
+          description: "{{ $value }} device(s) pending adoption (subsystem: {{ $labels.subsystem }})"
+
+      - alert: UnifiSiteWANDrops
+        expr: increase(unpoller_site_intenet_drops_total[1h]) > 0
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "WAN disconnections on {{ $labels.site_name }}"
+          description: "WAN dropped {{ $value }} time(s) in the last hour"
+
+      - alert: UnifiSiteHighLatency
+        expr: unpoller_site_latency_seconds{subsystem="www"} > 0.5
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High internet latency on {{ $labels.site_name }}"
+          description: "Latency {{ $value }}s exceeds 500ms threshold"
+
+  - name: unifi-wan
+    rules:
+      - alert: UnifiWANLowUptime
+        expr: unpoller_wan_uptime_percentage < 95
+        for: 15m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Low WAN uptime on {{ $labels.wan_name }}"
+          description: "WAN {{ $labels.wan_name }} uptime at {{ $value }}% (site: {{ $labels.site_name }})"
+
+      - alert: UnifiWANPeakDownloadUtilization
+        expr: unpoller_wan_peak_download_percent > 90
+        for: 10m
+        labels:
+          severity: info
+        annotations:
+          summary: "WAN download near capacity on {{ $labels.wan_name }}"
+          description: "Peak download at {{ $value }}% - consider upgrading or load balancing"
+
+      - alert: UnifiWANPeakUploadUtilization
+        expr: unpoller_wan_peak_upload_percent > 90
+        for: 10m
+        labels:
+          severity: info
+        annotations:
+          summary: "WAN upload near capacity on {{ $labels.wan_name }}"
+          description: "Peak upload at {{ $value }}% - consider upgrading or load balancing"
+
+  - name: unifi-dhcp
+    rules:
+      - alert: UnifiDHCPPoolExhaustion
+        expr: unpoller_dhcp_utilization_percent > 90
+        for: 15m
+        labels:
+          severity: warning
+        annotations:
+          summary: "DHCP pool nearly exhausted on {{ $labels.network }}"
+          description: "DHCP utilization at {{ $value }}% - expand pool or reduce lease time"
+
+      - alert: UnifiDHCPPoolCritical
+        expr: unpoller_dhcp_utilization_percent > 98
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: "DHCP pool critically low on {{ $labels.network }}"
+          description: "Utilization at {{ $value }}% - new devices may not get IP addresses"
+
+  - name: unifi-rogue
+    rules:
+      - alert: UnifiRogueAPDetected
+        expr: count(unpoller_rogueap_rssi) > 0
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Rogue AP detected on {{ $labels.site_name }}"
+          description: "Unauthorized access point(s) detected - review and take action"
+
+  - name: unifi-controller-health
+    rules:
+      - alert: UnifiControllerRecentlyRestarted
+        expr: unpoller_controller_uptime_seconds < 3600
+        for: 5m
+        labels:
+          severity: info
+        annotations:
+          summary: "Controller {{ $labels.hostname }} recently restarted"
+          description: "Uptime {{ $value | humanizeDuration }} - may indicate maintenance or crash"
+
+      - alert: UnifiControllerBackupDisabled
+        expr: unpoller_controller_autobackup_enabled == 0
+        for: 24h
+        labels:
+          severity: info
+        annotations:
+          summary: "Auto backup disabled on {{ $labels.hostname }}"
+          description: "Controller has automatic backups disabled - enable for disaster recovery"

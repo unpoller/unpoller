@@ -58,6 +58,21 @@ type pdu struct {
 	OutletPower       *prometheus.Desc
 	OutletPowerFactor *prometheus.Desc
 	OutletVoltage     *prometheus.Desc
+	// UPS battery health (vbms_table)
+	BatteryLevelPercent    *prometheus.Desc
+	BatteryTimeRemaining   *prometheus.Desc
+	BatteryCharging        *prometheus.Desc
+	BatteryMode            *prometheus.Desc
+	BatteriesAvailable     *prometheus.Desc
+	BatteriesReady         *prometheus.Desc
+	PowerBudgetWatts       *prometheus.Desc
+	PowerOutputWatts       *prometheus.Desc
+	PowerFactor            *prometheus.Desc
+	OutputVoltage          *prometheus.Desc
+	OutputCurrentAmps      *prometheus.Desc
+	LoadPercent            *prometheus.Desc
+	BMSAnomalyCount             *prometheus.Desc
+	PowerCycleOnRecoveryEnabled *prometheus.Desc
 }
 
 func descPDU(ns string) *pdu {
@@ -73,6 +88,7 @@ func descPDU(ns string) *pdu {
 	labelO := []string{
 		"outlet_description", "outlet_index", "outlet_name", "site_name", "name", "source", "tag",
 	}
+	labelUPS := []string{"site_name", "device_name", "device_mac", "source", "tag"}
 	nd := prometheus.NewDesc
 
 	return &pdu{
@@ -128,6 +144,21 @@ func descPDU(ns string) *pdu {
 		OutletPower:       nd(outlet+"outlet_power", "Outlet Power", labelO, nil),
 		OutletPowerFactor: nd(outlet+"outlet_power_factor", "Outlet Power Factor", labelO, nil),
 		OutletVoltage:     nd(outlet+"outlet_voltage", "Outlet Voltage", labelO, nil),
+		// UPS battery health (vbms_table)
+		BatteryLevelPercent:         nd(ns+"ups_battery_level_percent", "Battery charge level (0-100%)", labelUPS, nil),
+		BatteryTimeRemaining:        nd(ns+"ups_battery_time_remaining_seconds", "Estimated runtime on battery", labelUPS, nil),
+		BatteryCharging:             nd(ns+"ups_battery_charging", "Battery charging (1/0)", labelUPS, nil),
+		BatteryMode:                 nd(ns+"ups_battery_mode", "Running on battery (1/0)", labelUPS, nil),
+		BatteriesAvailable:          nd(ns+"ups_batteries_available", "Number of batteries available", labelUPS, nil),
+		BatteriesReady:              nd(ns+"ups_batteries_ready", "Number of batteries ready", labelUPS, nil),
+		PowerBudgetWatts:            nd(ns+"ups_power_budget_watts", "Total power budget capacity", labelUPS, nil),
+		PowerOutputWatts:            nd(ns+"ups_power_output_watts", "Current power output", labelUPS, nil),
+		PowerFactor:                 nd(ns+"ups_power_factor", "Power factor (0-1)", labelUPS, nil),
+		OutputVoltage:               nd(ns+"ups_output_voltage", "Output voltage", labelUPS, nil),
+		OutputCurrentAmps:           nd(ns+"ups_output_current_amps", "Output current in amps", labelUPS, nil),
+		LoadPercent:                 nd(ns+"ups_load_percent", "Load as percentage of capacity", labelUPS, nil),
+		BMSAnomalyCount:             nd(ns+"ups_bms_anomaly_count", "Battery management anomalies", labelUPS, nil),
+		PowerCycleOnRecoveryEnabled: nd(ns+"ups_power_cycle_on_recovery_enabled", "Auto power cycle on AC recovery enabled (1/0)", labelUPS, nil),
 	}
 }
 
@@ -147,6 +178,10 @@ func (u *promUnifi) exportPDU(r report, d *unifi.PDU) {
 		u.exportPDUstats(r, labels, d.Stat.Sw)
 		u.exportPDUPrtTable(r, labels, d.PortTable)
 		u.exportPDUOutletTable(r, labels, d.OutletTable, d.OutletOverrides)
+
+		if d.VBMSTable != nil {
+			u.exportPDUVBMS(r, d, append([]string{d.SiteName, d.Name, d.Mac, d.SourceName}, tag))
+		}
 		u.exportBYTstats(r, labels, d.TxBytes, d.RxBytes)
 		u.exportSYSstats(r, labels, d.SysStats, d.SystemStats)
 		u.exportSTAcount(r, labels, d.UserNumSta, d.GuestNumSta)
@@ -196,6 +231,42 @@ func (u *promUnifi) exportPDUstats(r report, labels []string, sw *unifi.Sw) {
 		{u.PDU.SwTxMulticast, counter, sw.TxMulticast, labelS},
 		{u.PDU.SwTxBroadcast, counter, sw.TxBroadcast, labelS},
 		{u.PDU.SwBytes, counter, sw.Bytes, labelS},
+	})
+}
+
+// exportPDUVBMS exports UPS battery health metrics from vbms_table (UPS devices only).
+func (u *promUnifi) exportPDUVBMS(r report, d *unifi.PDU, labels []string) {
+	vbms := d.VBMSTable
+
+	r.send([]*metric{
+		{u.PDU.BMSAnomalyCount, gauge, vbms.BMSRunAnomaly, labels},
+		{u.PDU.BatteryMode, gauge, vbms.IsBatteryMode.Val, labels},
+		{u.PDU.PowerCycleOnRecoveryEnabled, gauge, d.OutletPowerCycleOnACRecoveryEnabled.Val, labels},
+	})
+
+	if vbms.BattPool == nil {
+		return
+	}
+
+	bp := vbms.BattPool
+	loadPct := 0.0
+
+	if bp.DeviceTotalPowerBudget.Val > 0 {
+		loadPct = (bp.DeviceTotalPowerOutput.Val / bp.DeviceTotalPowerBudget.Val) * 100
+	}
+
+	r.send([]*metric{
+		{u.PDU.BatteryLevelPercent, gauge, bp.BatteryLevel, labels},
+		{u.PDU.BatteryTimeRemaining, gauge, bp.TimeToRemain, labels},
+		{u.PDU.BatteryCharging, gauge, bp.IsCharging.Val, labels},
+		{u.PDU.BatteriesAvailable, gauge, bp.BattAvailableCnt, labels},
+		{u.PDU.BatteriesReady, gauge, bp.ReadyCnt, labels},
+		{u.PDU.PowerBudgetWatts, gauge, bp.DeviceTotalPowerBudget, labels},
+		{u.PDU.PowerOutputWatts, gauge, bp.DeviceTotalPowerOutput, labels},
+		{u.PDU.PowerFactor, gauge, bp.DeviceTotalPowerFactor, labels},
+		{u.PDU.OutputVoltage, gauge, bp.DeviceOutputVoltage, labels},
+		{u.PDU.OutputCurrentAmps, gauge, bp.DeviceOutputCurrent, labels},
+		{u.PDU.LoadPercent, gauge, loadPct, labels},
 	})
 }
 
