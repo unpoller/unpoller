@@ -1,0 +1,107 @@
+# Prometheus alerting rules for UniFi infrastructure (unPoller metrics)
+# Default namespace: unpoller. Adjust metric names if using a custom namespace.
+groups:
+  - name: unifi-ups
+    rules:
+      - alert: UnifiUPSLowBattery
+        expr: unpoller_device_ups_battery_level_percent < 20
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Low UPS battery on {{ $labels.device_name }}"
+          description: "UPS {{ $labels.device_name }} at {{ $value }}% battery (site: {{ $labels.site_name }})"
+
+      - alert: UnifiUPSCriticalBattery
+        expr: unpoller_device_ups_battery_level_percent < 10
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Critical UPS battery on {{ $labels.device_name }}"
+          description: "UPS {{ $labels.device_name }} at {{ $value }}% battery - prepare for shutdown"
+
+      - alert: UnifiUPSOnBattery
+        expr: unpoller_device_ups_battery_mode == 1
+        for: 1m
+        labels:
+          severity: warning
+        annotations:
+          summary: "UPS {{ $labels.device_name }} running on battery"
+          description: "Power outage or AC loss - UPS {{ $labels.device_name }} on battery (site: {{ $labels.site_name }})"
+
+      - alert: UnifiUPSLowRuntime
+        expr: unpoller_device_ups_battery_time_remaining_seconds < 300 and unpoller_device_ups_battery_time_remaining_seconds >= 0
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Low UPS runtime on {{ $labels.device_name }}"
+          description: "UPS {{ $labels.device_name }} has {{ $value | humanizeDuration }} runtime remaining"
+
+      - alert: UnifiUPSHighLoad
+        expr: unpoller_device_ups_load_percent > 80
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High UPS load on {{ $labels.device_name }}"
+          description: "UPS {{ $labels.device_name }} load at {{ $value }}% of capacity"
+
+      - alert: UnifiUPSBMSAnomaly
+        expr: unpoller_device_ups_bms_anomaly_count > 0
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "UPS BMS anomaly on {{ $labels.device_name }}"
+          description: "Battery management anomaly detected on {{ $labels.device_name }}"
+
+      - alert: UnifiUPSNotCharging
+        expr: unpoller_device_ups_battery_charging == 0 and unpoller_device_ups_battery_level_percent < 100
+        for: 30m
+        labels:
+          severity: warning
+        annotations:
+          summary: "UPS {{ $labels.device_name }} not charging"
+          description: "Battery at {{ $value }}% but not charging - check power or battery health"
+
+  - name: unifi-controller
+    rules:
+      - alert: UnifiControllerUpdateAvailable
+        expr: unpoller_controller_update_available == 1
+        for: 1h
+        labels:
+          severity: info
+        annotations:
+          summary: "UniFi controller update available ({{ $labels.hostname }})"
+          description: "Controller {{ $labels.hostname }} has an update available"
+
+      - alert: UnifiControllerUnsupportedDevices
+        expr: unpoller_controller_unsupported_device_count > 0
+        for: 1h
+        labels:
+          severity: warning
+        annotations:
+          summary: "Unsupported devices on controller {{ $labels.hostname }}"
+          description: "{{ $value }} unsupported device(s) on controller"
+
+  - name: unifi-devices
+    rules:
+      - alert: UnifiDeviceHighCPU
+        expr: unpoller_device_cpu_utilization_ratio > 0.9
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High CPU on {{ $labels.name }}"
+          description: "Device {{ $labels.name }} ({{ $labels.type }}) CPU at {{ $value | humanize }}"
+
+      - alert: UnifiDeviceHighMemory
+        expr: unpoller_device_memory_utilization_ratio > 0.9
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High memory on {{ $labels.name }}"
+          description: "Device {{ $labels.name }} memory at {{ $value | humanize }}"

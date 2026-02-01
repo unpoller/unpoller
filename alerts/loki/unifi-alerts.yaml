@@ -1,0 +1,72 @@
+# Loki alerting rules for UniFi logs (unPoller Loki output)
+# Requires: save_alarms, save_ids, save_anomalies, save_events, and/or save_syslog enabled
+groups:
+  - name: unifi-alarms
+    rules:
+      - alert: UnifiHighAlarmRate
+        expr: |
+          sum by (site_name, source) (count_over_time({application="unifi_alarm"}[15m])) > 20
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High UniFi alarm rate"
+          description: "{{ $value }} alarms in 15m for site {{ $labels.site_name }}"
+
+  - name: unifi-ids
+    rules:
+      - alert: UnifiIDSEvent
+        expr: |
+          count_over_time({application="unifi_ids"}[5m]) > 0
+        for: 1m
+        labels:
+          severity: warning
+        annotations:
+          summary: "UniFi IDS event detected"
+          description: "Intrusion detection event(s) from UniFi - review logs"
+
+      - alert: UnifiIDSHighVolume
+        expr: |
+          sum by (site_name) (count_over_time({application="unifi_ids"}[1h])) > 50
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: "High UniFi IDS event volume"
+          description: "{{ $value }} IDS events in 1h for site {{ $labels.site_name }} - possible attack"
+
+  - name: unifi-anomalies
+    rules:
+      - alert: UnifiAnomalyDetected
+        expr: |
+          count_over_time({application="unifi_anomaly"}[10m]) > 5
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "UniFi anomalies detected"
+          description: "Multiple anomalies in 10m - review network health"
+
+  - name: unifi-system-log
+    rules:
+      - alert: UnifiSystemLogHighSeverity
+        expr: |
+          sum by (site_name, severity) (count_over_time({application="unifi_system_log", severity=~"CRITICAL|HIGH|ERROR"}[15m])) > 10
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High-severity UniFi system log volume"
+          description: "{{ $value }} {{ $labels.severity }} logs in 15m for site {{ $labels.site_name }}"
+
+  - name: unifi-events
+    rules:
+      - alert: UnifiEventSpike
+        expr: |
+          sum by (site_name) (count_over_time({application="unifi_event"}[5m])) > 100
+        for: 5m
+        labels:
+          severity: info
+        annotations:
+          summary: "UniFi event spike"
+          description: "{{ $value }} events in 5m - may indicate network churn or issue"
