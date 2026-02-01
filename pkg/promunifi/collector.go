@@ -49,6 +49,7 @@ type promUnifi struct {
 	CountryTraffic *ucountrytraffic
 	DHCPLease      *dhcplease
 	WAN            *wan
+	Controller     *controller
 	// This interface is passed to the Collect() method. The Collect method uses
 	// this interface to retrieve the latest UniFi measurements and export them.
 	Collector poller.Collect
@@ -210,6 +211,7 @@ func (u *promUnifi) Run(c poller.Collect) error {
 	u.CountryTraffic = descCountryTraffic(u.Namespace + "_countrytraffic_")
 	u.DHCPLease = descDHCPLease(u.Namespace + "_")
 	u.WAN = descWAN(u.Namespace + "_")
+	u.Controller = descController(u.Namespace + "_")
 
 	mux := http.NewServeMux()
 	promver.Version = version.Version
@@ -438,6 +440,13 @@ func (u *promUnifi) loopExports(r report) {
 	for _, wanConfig := range m.WANConfigs {
 		if w, ok := wanConfig.(*unifi.WANEnrichedConfiguration); ok {
 			u.exportWAN(r, w)
+		}
+	}
+
+	// Export controller sysinfo metrics
+	for _, s := range m.Sysinfos {
+		if sysinfo, ok := s.(*unifi.Sysinfo); ok {
+			u.exportSysinfo(r, sysinfo)
 		}
 	}
 
