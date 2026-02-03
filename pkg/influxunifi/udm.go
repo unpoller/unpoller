@@ -41,7 +41,7 @@ func (u *InfluxUnifi) batchSysStats(s unifi.SysStats, ss unifi.SystemStats) map[
 	}
 
 	for k, v := range ss.Temps {
-		temp := v.CelsiusInt64()
+		temp := v.CelsiusSafe()
 
 		if temp != 0 && k != "" {
 			m["temp_"+sanitizeName(k)] = temp
