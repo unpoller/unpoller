@@ -115,11 +115,11 @@ points:
       stat_tx_retries: float
       state: float
       system_uptime: float
-      temp_cpu: int
-      temp_memory: int
-      temp_network: int
-      temp_probe: int
-      temp_sys: int
+      temp_cpu: float
+      temp_memory: float
+      temp_network: float
+      temp_probe: float
+      temp_sys: float
       total_max_power: float
       tx_bytes: float
       upgradeable: bool
@@ -275,11 +275,11 @@ points:
       stat_user-tx_retries: float
       state: string
       system_uptime: float
-      temp_cpu: int
-      temp_memory: int
-      temp_network: int
-      temp_probe: int
-      temp_sys: int
+      temp_cpu: float
+      temp_memory: float
+      temp_network: float
+      temp_probe: float
+      temp_sys: float
       tx_bytes: float
       upgradeable: bool
       uptime: float
@@ -520,11 +520,11 @@ points:
       stat_wifi_tx_dropped: float
       state: float
       system_uptime: float
-      temp_cpu: int
-      temp_memory: int
-      temp_network: int
-      temp_probe: int
-      temp_sys: int
+      temp_cpu: float
+      temp_memory: float
+      temp_network: float
+      temp_probe: float
+      temp_sys: float
       tx_bytes: float
       uplink_latency: float
       uplink_max_speed: float
@@ -573,11 +573,11 @@ points:
       stat_tx_retries: float
       state: float
       system_uptime: float
-      temp_cpu: int
-      temp_memory: int
-      temp_network: int
-      temp_probe: int
-      temp_sys: int
+      temp_cpu: float
+      temp_memory: float
+      temp_network: float
+      temp_probe: float
+      temp_sys: float
       tx_bytes: float
       uptime: float
       version: string
@@ -769,11 +769,11 @@ points:
       storage_foo_size: float
       storage_foo_used: float
       system_uptime: float
-      temp_cpu: int
-      temp_memory: int
-      temp_network: int
-      temp_probe: int
-      temp_sys: int
+      temp_cpu: float
+      temp_memory: float
+      temp_network: float
+      temp_probe: float
+      temp_sys: float
       tx_bytes: float
       upgradeable: bool
       uplink_latency: float

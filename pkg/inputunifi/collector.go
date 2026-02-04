@@ -100,6 +100,10 @@ func (u *InputUnifi) pollController(c *Controller) (*poller.Metrics, error) {
 	u.RLock()
 	defer u.RUnlock()
 
+	if c.Unifi == nil {
+		return nil, fmt.Errorf("controller client is nil (e.g. after 429 or auth failure): %s", c.URL)
+	}
+
 	u.LogDebugf("Polling controller: %s (%s)", c.URL, c.ID)
 
 	// Get the sites we care about.

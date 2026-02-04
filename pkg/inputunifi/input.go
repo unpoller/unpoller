@@ -3,6 +3,7 @@
 package inputunifi
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"strings"
@@ -123,8 +124,11 @@ func (c *Controller) getCerts() ([][]byte, error) {
 	return b, nil
 }
 
+const maxAuthRetries = 5
+
 // getUnifi (re-)authenticates to a unifi controller.
 // If certificate files are provided, they are re-read.
+// On 429 Too Many Requests, retries with exponential backoff (and Retry-After when present) up to maxAuthRetries.
 func (u *InputUnifi) getUnifi(c *Controller) error {
 	u.Lock()
 	defer u.Unlock()
@@ -138,8 +142,7 @@ func (u *InputUnifi) getUnifi(c *Controller) error {
 		return err
 	}
 
-	// Create an authenticated session to the Unifi Controller.
-	c.Unifi, err = unifi.NewUnifi(&unifi.Config{
+	cfg := &unifi.Config{
 		User:      c.User,
 		Pass:      c.Pass,
 		APIKey:    c.APIKey,
@@ -147,18 +150,42 @@ func (u *InputUnifi) getUnifi(c *Controller) error {
 		SSLCert:   certs,
 		VerifySSL: *c.VerifySSL,
 		Timeout:   c.Timeout.Duration,
-		ErrorLog:  u.LogErrorf, // Log all errors.
-		DebugLog:  u.LogDebugf, // Log debug messages.
-	})
-	if err != nil {
-		c.Unifi = nil
-
-		return fmt.Errorf("unifi controller: %w", err)
+		ErrorLog:  u.LogErrorf,
+		DebugLog:  u.LogDebugf,
 	}
 
-	u.LogDebugf("Authenticated with controller successfully, %s", c.URL)
+	var lastErr error
+	backoff := 30 * time.Second
 
-	return nil
+	for attempt := 0; attempt < maxAuthRetries; attempt++ {
+		c.Unifi, lastErr = unifi.NewUnifi(cfg)
+		if lastErr == nil {
+			u.LogDebugf("Authenticated with controller successfully, %s", c.URL)
+			return nil
+		}
+
+		if !errors.Is(lastErr, unifi.ErrTooManyRequests) {
+			c.Unifi = nil
+			return fmt.Errorf("unifi controller: %w", lastErr)
+		}
+
+		var rl *unifi.RateLimitError
+		if errors.As(lastErr, &rl) && rl.RetryAfter > 0 {
+			backoff = rl.RetryAfter
+		}
+
+		if attempt < maxAuthRetries-1 {
+			u.Logf("Controller %s returned 429 Too Many Requests; waiting %v before retry (%d/%d)",
+				c.URL, backoff, attempt+1, maxAuthRetries)
+			time.Sleep(backoff)
+			if backoff < 5*time.Minute {
+				backoff = backoff * 2
+			}
+		}
+	}
+
+	c.Unifi = nil
+	return fmt.Errorf("unifi controller: %w (gave up after %d retries)", lastErr, maxAuthRetries)
 }
 
 // checkSites makes sure the list of provided sites exists on the controller.
