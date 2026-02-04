@@ -11,6 +11,16 @@ import (
 
 /* This code reformats our data to be displayed on the built-in web interface. */
 
+// controllerID returns the controller UUID for display, or "" if the client is nil (e.g. after 429 re-auth failure).
+// Avoids SIGSEGV when updateWeb runs while c.Unifi is nil (see unpoller/unpoller#943).
+func controllerID(c *Controller) string {
+	if c == nil || c.Unifi == nil {
+		return ""
+	}
+
+	return c.Unifi.UUID
+}
+
 func updateWeb(c *Controller, metrics *Metrics) {
 	webserver.UpdateInput(&webserver.Input{
 		Name:    PluginName, // Forgetting this leads to 3 hours of head scratching.
@@ -65,13 +75,15 @@ func formatControllers(controllers []*Controller) []*Controller {
 }
 
 func formatSites(c *Controller, sites []*unifi.Site) (s webserver.Sites) {
+	id := controllerID(c)
+
 	for _, site := range sites {
 		s = append(s, &webserver.Site{
 			ID:         site.ID,
 			Name:       site.Name,
 			Desc:       site.Desc,
 			Source:     site.SourceName,
-			Controller: c.Unifi.UUID,
+			Controller: id,
 		})
 	}
 
@@ -97,7 +109,7 @@ func formatClients(c *Controller, clients []*unifi.Client) (d webserver.Clients)
 			Name:       client.Name,
 			SiteID:     client.SiteID,
 			Source:     client.SourceName,
-			Controller: c.Unifi.UUID,
+			Controller: controllerID(c),
 			MAC:        client.Mac,
 			IP:         client.IP,
 			Type:       clientType,
@@ -117,12 +129,14 @@ func formatDevices(c *Controller, devices *unifi.Devices) (d webserver.Devices) 
 		return d
 	}
 
+	id := controllerID(c)
+
 	for _, device := range devices.UAPs {
 		d = append(d, &webserver.Device{
 			Name:       device.Name,
 			SiteID:     device.SiteID,
 			Source:     device.SourceName,
-			Controller: c.Unifi.UUID,
+			Controller: id,
 			MAC:        device.Mac,
 			IP:         device.IP,
 			Type:       device.Type,
@@ -139,7 +153,7 @@ func formatDevices(c *Controller, devices *unifi.Devices) (d webserver.Devices) 
 			Name:       device.Name,
 			SiteID:     device.SiteID,
 			Source:     device.SourceName,
-			Controller: c.Unifi.UUID,
+			Controller: id,
 			MAC:        device.Mac,
 			IP:         device.IP,
 			Type:       device.Type,
@@ -156,7 +170,7 @@ func formatDevices(c *Controller, devices *unifi.Devices) (d webserver.Devices) 
 			Name:       device.Name,
 			SiteID:     device.SiteID,
 			Source:     device.SourceName,
-			Controller: c.Unifi.UUID,
+			Controller: id,
 			MAC:        device.Mac,
 			IP:         device.IP,
 			Type:       device.Type,
@@ -173,7 +187,7 @@ func formatDevices(c *Controller, devices *unifi.Devices) (d webserver.Devices) 
 			Name:       device.Name,
 			SiteID:     device.SiteID,
 			Source:     device.SourceName,
-			Controller: c.Unifi.UUID,
+			Controller: id,
 			MAC:        device.Mac,
 			IP:         device.IP,
 			Type:       device.Type,
