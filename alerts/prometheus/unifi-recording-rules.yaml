@@ -1,0 +1,60 @@
+# Prometheus recording rules for UniFi infrastructure (unPoller metrics)
+# Pre-compute aggregates for dashboards and simpler alerting.
+# Default namespace: unpoller. Adjust metric names if using a custom namespace.
+groups:
+  - name: unifi-ups-recording
+    interval: 1m
+    rules:
+      # Count of UPS devices running on battery per site (for "any UPS on battery" alerts/dashboards)
+      - record: unpoller:ups_on_battery:count
+        expr: count by (site_name, source) (unpoller_device_ups_battery_mode == 1)
+
+      # Minimum battery level across UPSes per site (worst-case for multi-UPS sites)
+      - record: unpoller:ups_min_battery_level_percent:min
+        expr: min by (site_name, source) (unpoller_device_ups_battery_level_percent)
+
+      # Minimum runtime remaining across UPSes per site (worst-case; excludes -1 unknown)
+      - record: unpoller:ups_min_runtime_seconds:min
+        expr: min by (site_name, source) (unpoller_device_ups_battery_time_remaining_seconds >= 0)
+
+      # Total power output across UPSes per site (capacity planning)
+      - record: unpoller:ups_total_power_output_watts:sum
+        expr: sum by (site_name, source) (unpoller_device_ups_power_output_watts)
+
+      # Total power budget across UPSes per site
+      - record: unpoller:ups_total_power_budget_watts:sum
+        expr: sum by (site_name, source) (unpoller_device_ups_power_budget_watts)
+
+      # Count of UPS devices with BMS anomalies per site
+      - record: unpoller:ups_bms_anomaly_count:sum
+        expr: sum by (site_name, source) (unpoller_device_ups_bms_anomaly_count > 0)
+
+  - name: unifi-devices-recording
+    interval: 1m
+    rules:
+      # Device count by type per site (capacity dashboards)
+      - record: unpoller:device_count:by_type
+        expr: count by (site_name, source, type) (unpoller_device_info)
+
+      # Total device count per site
+      - record: unpoller:device_count:total
+        expr: count by (site_name, source) (unpoller_device_info)
+
+      # Count of devices with high CPU per site
+      - record: unpoller:device_high_cpu_count:count
+        expr: count by (site_name, source) (unpoller_device_cpu_utilization_ratio > 0.9)
+
+      # Count of devices with high memory per site
+      - record: unpoller:device_high_memory_count:count
+        expr: count by (site_name, source) (unpoller_device_memory_utilization_ratio > 0.9)
+
+  - name: unifi-controller-recording
+    interval: 5m
+    rules:
+      # Count of controllers with updates available (multi-controller orgs)
+      - record: unpoller:controller_update_available:count
+        expr: count(unpoller_controller_update_available == 1)
+
+      # Total unsupported devices across all controllers
+      - record: unpoller:controller_unsupported_devices_total:sum
+        expr: sum(unpoller_controller_unsupported_device_count)

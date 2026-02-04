@@ -55,7 +55,7 @@ func (u *InfluxUnifi) batchUDMtemps(temps []unifi.Temperature) map[string]any {
 	output := make(map[string]any)
 
 	for _, t := range temps {
-		output["temp_"+sanitizeName(t.Name)] = t.Value
+		output["temp_"+sanitizeName(t.Name)] = int64(t.Value)
 	}
 
 	return output
