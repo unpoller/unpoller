@@ -59,18 +59,18 @@ type pdu struct {
 	OutletPowerFactor *prometheus.Desc
 	OutletVoltage     *prometheus.Desc
 	// UPS battery health (vbms_table)
-	BatteryLevelPercent    *prometheus.Desc
-	BatteryTimeRemaining   *prometheus.Desc
-	BatteryCharging        *prometheus.Desc
-	BatteryMode            *prometheus.Desc
-	BatteriesAvailable     *prometheus.Desc
-	BatteriesReady         *prometheus.Desc
-	PowerBudgetWatts       *prometheus.Desc
-	PowerOutputWatts       *prometheus.Desc
-	PowerFactor            *prometheus.Desc
-	OutputVoltage          *prometheus.Desc
-	OutputCurrentAmps      *prometheus.Desc
-	LoadPercent            *prometheus.Desc
+	BatteryLevelPercent         *prometheus.Desc
+	BatteryTimeRemaining        *prometheus.Desc
+	BatteryCharging             *prometheus.Desc
+	BatteryMode                 *prometheus.Desc
+	BatteriesAvailable          *prometheus.Desc
+	BatteriesReady              *prometheus.Desc
+	PowerBudgetWatts            *prometheus.Desc
+	PowerOutputWatts            *prometheus.Desc
+	PowerFactor                 *prometheus.Desc
+	OutputVoltage               *prometheus.Desc
+	OutputCurrentAmps           *prometheus.Desc
+	LoadPercent                 *prometheus.Desc
 	BMSAnomalyCount             *prometheus.Desc
 	PowerCycleOnRecoveryEnabled *prometheus.Desc
 }
@@ -182,6 +182,7 @@ func (u *promUnifi) exportPDU(r report, d *unifi.PDU) {
 		if d.VBMSTable != nil {
 			u.exportPDUVBMS(r, d, append([]string{d.SiteName, d.Name, d.Mac, d.SourceName}, tag))
 		}
+
 		u.exportBYTstats(r, labels, d.TxBytes, d.RxBytes)
 		u.exportSYSstats(r, labels, d.SysStats, d.SystemStats)
 		u.exportSTAcount(r, labels, d.UserNumSta, d.GuestNumSta)

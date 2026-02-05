@@ -581,6 +581,64 @@ points:
       tx_bytes: float
       uptime: float
       version: string
+  udb:
+    tags:
+      - mac
+      - model
+      - name
+      - serial
+      - site_name
+      - source
+      - type
+      - version
+    fields:
+      bytes: float
+      cpu: float
+      fan_level: float
+      general_temperature: float
+      guest-num_sta: float
+      guest-wlan-num_sta: float
+      ip: string
+      last_seen: float
+      loadavg_1: float
+      loadavg_5: float
+      loadavg_15: float
+      mem: float
+      mem_buffer: float
+      mem_total: float
+      mem_used: float
+      num_sta: float
+      rx_bytes: float
+      satisfaction: float
+      stat_bytes: float
+      stat_rx_bytes: float
+      stat_rx_crypts: float
+      stat_rx_dropped: float
+      stat_rx_errors: float
+      stat_rx_frags: float
+      stat_rx_packets: float
+      stat_tx_bytes: float
+      stat_tx_dropped: float
+      stat_tx_errors: float
+      stat_tx_packets: float
+      stat_tx_retries: float
+      state: float
+      system_uptime: float
+      temp_cpu: float
+      temp_memory: float
+      temp_network: float
+      temp_probe: float
+      temp_sys: float
+      total_max_power: float
+      tx_bytes: float
+      upgradeable: bool
+      uplink_latency: float
+      uplink_max_speed: float
+      uplink_speed: float
+      uplink_uptime: float
+      uptime: float
+      user-num_sta: float
+      user-wlan-num_sta: float
   unifi_alarm:
     tags:
       - action

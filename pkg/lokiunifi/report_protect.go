@@ -25,10 +25,12 @@ func (r *Report) ProtectLogEvent(event *unifi.ProtectLogEntry, logs *Logs) {
 
 	// Marshal event to JSON for the log line (without thumbnail to keep it small)
 	event.ThumbnailBase64 = "" // Temporarily clear for marshaling
+
 	msg, err := json.Marshal(event)
 	if err != nil {
 		msg = []byte(event.Msg())
 	}
+
 	event.ThumbnailBase64 = thumbnailBase64 // Restore
 
 	// Add event log line
@@ -66,4 +68,3 @@ func (r *Report) ProtectLogEvent(event *unifi.ProtectLogEntry, logs *Logs) {
 		})
 	}
 }
-
