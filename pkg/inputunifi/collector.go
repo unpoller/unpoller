@@ -172,10 +172,10 @@ func (u *InputUnifi) pollController(c *Controller) (*poller.Metrics, error) {
 		return nil, fmt.Errorf("unifi.GetDevices(%s): %w", c.URL, err)
 	}
 
-	u.LogDebugf("Found %d UBB, %d UXG, %d PDU, %d UCI, %d UAP %d USG %d USW %d UDM devices",
+	u.LogDebugf("Found %d UBB, %d UXG, %d PDU, %d UCI, %d UDB, %d UAP %d USG %d USW %d UDM devices",
 		len(m.Devices.UBBs), len(m.Devices.UXGs),
 		len(m.Devices.PDUs), len(m.Devices.UCIs),
-		len(m.Devices.UAPs), len(m.Devices.USGs),
+		len(m.Devices.UDBs), len(m.Devices.UAPs), len(m.Devices.USGs),
 		len(m.Devices.USWs), len(m.Devices.UDMs))
 
 	// Get speed test results for all WANs
@@ -362,10 +362,12 @@ func (u *InputUnifi) augmentMetrics(c *Controller, metrics *Metrics) *poller.Met
 				if isDefaultSiteName(site.Name) {
 					site.Name = c.DefaultSiteNameOverride
 				}
+
 				if isDefaultSiteName(site.SiteName) {
 					site.SiteName = c.DefaultSiteNameOverride
 				}
 			}
+
 			m.Sites = append(m.Sites, site)
 		}
 
@@ -374,6 +376,7 @@ func (u *InputUnifi) augmentMetrics(c *Controller, metrics *Metrics) *poller.Met
 			if c.DefaultSiteNameOverride != "" && isDefaultSiteName(site.SiteName) {
 				site.SiteName = c.DefaultSiteNameOverride
 			}
+
 			m.SitesDPI = append(m.SitesDPI, site)
 		}
 	}
@@ -383,6 +386,7 @@ func (u *InputUnifi) augmentMetrics(c *Controller, metrics *Metrics) *poller.Met
 		if c.DefaultSiteNameOverride != "" && isDefaultSiteName(speedTest.SiteName) {
 			speedTest.SiteName = c.DefaultSiteNameOverride
 		}
+
 		m.SpeedTests = append(m.SpeedTests, speedTest)
 	}
 
@@ -392,6 +396,7 @@ func (u *InputUnifi) augmentMetrics(c *Controller, metrics *Metrics) *poller.Met
 		if c.DefaultSiteNameOverride != "" && isDefaultSiteName(traffic.TrafficSite.SiteName) {
 			traffic.TrafficSite.SiteName = c.DefaultSiteNameOverride
 		}
+
 		m.CountryTraffic = append(m.CountryTraffic, traffic)
 	}
 
@@ -400,6 +405,7 @@ func (u *InputUnifi) augmentMetrics(c *Controller, metrics *Metrics) *poller.Met
 		if c.DefaultSiteNameOverride != "" && isDefaultSiteName(lease.SiteName) {
 			lease.SiteName = c.DefaultSiteNameOverride
 		}
+
 		m.DHCPLeases = append(m.DHCPLeases, lease)
 	}
 
@@ -430,6 +436,7 @@ func isDefaultSiteName(siteName string) bool {
 	if siteName == "" {
 		return false
 	}
+
 	lower := strings.ToLower(siteName)
 	// Check for exact match or if it contains "default" as a word
 	return lower == "default" || strings.Contains(lower, "default")
@@ -476,6 +483,10 @@ func applySiteNameOverride(m *poller.Metrics, overrideName string) {
 			if isDefaultSiteName(d.SiteName) {
 				d.SiteName = overrideName
 			}
+		case *unifi.UDB:
+			if isDefaultSiteName(d.SiteName) {
+				d.SiteName = overrideName
+			}
 		}
 	}
 
@@ -494,6 +505,7 @@ func applySiteNameOverride(m *poller.Metrics, overrideName string) {
 			if isDefaultSiteName(site.Name) {
 				site.Name = overrideName
 			}
+
 			if isDefaultSiteName(site.SiteName) {
 				site.SiteName = overrideName
 			}
@@ -584,6 +596,15 @@ func extractDevices(metrics *Metrics) (*poller.Metrics, map[string]string, map[s
 	for _, r := range metrics.Devices.PDUs {
 		devices[r.Mac] = r.Name
 		m.Devices = append(m.Devices, r)
+	}
+
+	for _, r := range metrics.Devices.UDBs {
+		devices[r.Mac] = r.Name
+		m.Devices = append(m.Devices, r)
+
+		for _, v := range r.VapTable {
+			bssdIDs[v.Bssid] = fmt.Sprintf("%s %s %s:", r.Name, v.Radio, v.RadioName)
+		}
 	}
 
 	return m, devices, bssdIDs

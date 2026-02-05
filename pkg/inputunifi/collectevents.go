@@ -55,46 +55,55 @@ func (u *InputUnifi) collectAlarms(logs []any, sites []*unifi.Site, c *Controlle
 		devices, err := c.Unifi.GetDevices(sites)
 		if err != nil {
 			u.LogDebugf("Failed to get devices for alarm enrichment: %v (continuing without device names)", err)
+
 			devices = &unifi.Devices{} // Empty devices struct, alarms will not have device names
 		}
 
 		// Build MAC address to device name lookup map
 		macToName := make(map[string]string)
+
 		for _, d := range devices.UAPs {
 			if d.Mac != "" && d.Name != "" {
 				macToName[strings.ToLower(d.Mac)] = d.Name
 			}
 		}
+
 		for _, d := range devices.USGs {
 			if d.Mac != "" && d.Name != "" {
 				macToName[strings.ToLower(d.Mac)] = d.Name
 			}
 		}
+
 		for _, d := range devices.USWs {
 			if d.Mac != "" && d.Name != "" {
 				macToName[strings.ToLower(d.Mac)] = d.Name
 			}
 		}
+
 		for _, d := range devices.UDMs {
 			if d.Mac != "" && d.Name != "" {
 				macToName[strings.ToLower(d.Mac)] = d.Name
 			}
 		}
+
 		for _, d := range devices.UXGs {
 			if d.Mac != "" && d.Name != "" {
 				macToName[strings.ToLower(d.Mac)] = d.Name
 			}
 		}
+
 		for _, d := range devices.PDUs {
 			if d.Mac != "" && d.Name != "" {
 				macToName[strings.ToLower(d.Mac)] = d.Name
 			}
 		}
+
 		for _, d := range devices.UBBs {
 			if d.Mac != "" && d.Name != "" {
 				macToName[strings.ToLower(d.Mac)] = d.Name
 			}
 		}
+
 		for _, d := range devices.UCIs {
 			if d.Mac != "" && d.Name != "" {
 				macToName[strings.ToLower(d.Mac)] = d.Name
@@ -144,7 +153,7 @@ func (u *InputUnifi) collectAnomalies(logs []any, sites []*unifi.Site, c *Contro
 						e.SiteName = c.DefaultSiteNameOverride
 					}
 				}
-				
+
 				logs = append(logs, e)
 
 				webserver.NewInputEvent(PluginName, s.ID+"_anomalies", &webserver.Event{
@@ -192,6 +201,7 @@ func (u *InputUnifi) collectSyslog(logs []any, sites []*unifi.Site, c *Controlle
 
 		// Use v2 system-log API
 		req := unifi.DefaultSystemLogRequest(time.Hour)
+
 		entries, err := c.Unifi.GetSystemLog(sites, req)
 		if err != nil {
 			return logs, fmt.Errorf("unifi.GetSystemLog(): %w", err)
@@ -220,6 +230,7 @@ func (u *InputUnifi) collectProtectLogs(logs []any, _ []*unifi.Site, c *Controll
 		u.LogDebugf("Collecting Protect logs: %s (%s)", c.URL, c.ID)
 
 		req := unifi.DefaultProtectLogRequest(0) // Uses default 24-hour window
+
 		entries, err := c.Unifi.GetProtectLogs(req)
 		if err != nil {
 			return logs, fmt.Errorf("unifi.GetProtectLogs(): %w", err)
@@ -236,6 +247,7 @@ func (u *InputUnifi) collectProtectLogs(logs []any, _ []*unifi.Site, c *Controll
 				if len(thumbID) > 2 && thumbID[:2] == "e-" {
 					thumbID = thumbID[2:]
 				}
+
 				if thumbData, err := c.Unifi.GetProtectEventThumbnail(thumbID); err == nil {
 					e.ThumbnailBase64 = base64.StdEncoding.EncodeToString(thumbData)
 				} else {
@@ -334,6 +346,7 @@ func redactSystemLogEntry(e *unifi.SystemLogEntry, hash *bool, dropPII *bool) *u
 			client.ID = RedactMacPII(client.ID, hash, dropPII)
 			client.IP = RedactIPPII(client.IP, hash, dropPII)
 		}
+
 		e.Parameters["CLIENT"] = client
 	}
 
@@ -346,6 +359,7 @@ func redactSystemLogEntry(e *unifi.SystemLogEntry, hash *bool, dropPII *bool) *u
 			ip.ID = RedactIPPII(ip.ID, hash, dropPII)
 			ip.Name = RedactIPPII(ip.Name, hash, dropPII)
 		}
+
 		e.Parameters["IP"] = ip
 	}
 
@@ -356,6 +370,7 @@ func redactSystemLogEntry(e *unifi.SystemLogEntry, hash *bool, dropPII *bool) *u
 		} else {
 			admin.Name = RedactNamePII(admin.Name, hash, dropPII)
 		}
+
 		e.Parameters["ADMIN"] = admin
 	}
 
@@ -406,6 +421,7 @@ func (u *InputUnifi) extractDeviceNameFromAlarm(alarm *unifi.Alarm, macToName ma
 
 	// Simple regex-like search for MAC address in brackets
 	start := strings.Index(msg, "[")
+
 	end := strings.Index(msg, "]")
 	if start >= 0 && end > start {
 		potentialMAC := msg[start+1 : end]

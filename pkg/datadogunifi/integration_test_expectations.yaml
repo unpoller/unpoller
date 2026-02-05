@@ -507,6 +507,51 @@ gauges:
   - unifi.uci.stat_rx_packets
   - unifi.uci.stat_tx_dropped
   - unifi.uci.state
+  - unifi.udb.bytes
+  - unifi.udb.cpu
+  - unifi.udb.fan_level
+  - unifi.udb.general_temperature
+  - unifi.udb.guest_num_sta
+  - unifi.udb.guest_wlan_num_sta
+  - unifi.udb.last_seen
+  - unifi.udb.loadavg_1
+  - unifi.udb.loadavg_5
+  - unifi.udb.loadavg_15
+  - unifi.udb.mem
+  - unifi.udb.mem_buffer
+  - unifi.udb.mem_total
+  - unifi.udb.mem_used
+  - unifi.udb.memory
+  - unifi.udb.network
+  - unifi.udb.num_sta
+  - unifi.udb.probe
+  - unifi.udb.rx_bytes
+  - unifi.udb.satisfaction
+  - unifi.udb.stat_bytes
+  - unifi.udb.stat_rx_bytes
+  - unifi.udb.stat_rx_crypts
+  - unifi.udb.stat_rx_dropped
+  - unifi.udb.stat_rx_errors
+  - unifi.udb.stat_rx_frags
+  - unifi.udb.stat_rx_packets
+  - unifi.udb.stat_tx_bytes
+  - unifi.udb.stat_tx_dropped
+  - unifi.udb.stat_tx_errors
+  - unifi.udb.stat_tx_packets
+  - unifi.udb.stat_tx_retries
+  - unifi.udb.state
+  - unifi.udb.sys
+  - unifi.udb.system_uptime
+  - unifi.udb.total_max_power
+  - unifi.udb.tx_bytes
+  - unifi.udb.upgradeable
+  - unifi.udb.uplink_latency
+  - unifi.udb.uplink_max_speed
+  - unifi.udb.uplink_speed
+  - unifi.udb.uplink_uptime
+  - unifi.udb.uptime
+  - unifi.udb.user_num_sta
+  - unifi.udb.user_wlan_num_sta
 counts:
   - unifi.collector.num_devices
   - unifi.collector.num_errors
