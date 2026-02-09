@@ -3,7 +3,7 @@ module github.com/unpoller/unpoller
 go 1.25.5
 
 require (
-	github.com/DataDog/datadog-go/v5 v5.8.2
+	github.com/DataDog/datadog-go/v5 v5.8.3
 	github.com/flaticols/countrycodes v0.0.2
 	github.com/gorilla/mux v1.8.1
 	github.com/influxdata/influxdb1-client v0.0.0-20220302092344-a9ab5670611c
@@ -12,7 +12,7 @@ require (
 	github.com/prometheus/common v0.67.5
 	github.com/spf13/pflag v1.0.10
 	github.com/stretchr/testify v1.11.1
-	github.com/unpoller/unifi/v5 v5.17.0
+	github.com/unpoller/unifi/v5 v5.18.0
 	golang.org/x/crypto v0.47.0
 	golang.org/x/term v0.39.0
 	golift.io/cnfg v0.2.3
