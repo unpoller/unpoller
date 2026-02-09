@@ -101,6 +101,7 @@ type Report struct {
 	UXG     int             // Total count of UXG devices.
 	UBB     int             // Total count of UBB devices.
 	UCI     int             // Total count of UCI devices.
+	UDB     int             // Total count of UDB devices.
 	Metrics *poller.Metrics // Metrics collected and recorded.
 	Elapsed time.Duration   // Duration elapsed collecting and exporting.
 	Fetch   time.Duration   // Duration elapsed making controller requests.
@@ -425,6 +426,7 @@ func (u *promUnifi) loopExports(r report) {
 			dhcpLeases = append(dhcpLeases, l)
 		}
 	}
+
 	if len(dhcpLeases) > 0 {
 		u.exportDHCPNetworkPool(r, dhcpLeases)
 	}
@@ -479,6 +481,9 @@ func (u *promUnifi) switchExport(r report, v any) {
 	case *unifi.UCI:
 		r.addUCI()
 		u.exportUCI(r, v)
+	case *unifi.UDB:
+		r.addUDB()
+		u.exportUDB(r, v)
 	case *unifi.UDM:
 		r.addUDM()
 		u.exportUDM(r, v)

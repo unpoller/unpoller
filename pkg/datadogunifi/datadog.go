@@ -343,6 +343,8 @@ func (u *DatadogUnifi) switchExport(r report, v any) { //nolint:cyclop
 		u.batchUBB(r, v)
 	case *unifi.UCI:
 		u.batchUCI(r, v)
+	case *unifi.UDB:
+		u.batchUDB(r, v)
 	case *unifi.Site:
 		u.reportSite(r, v)
 	case *unifi.Client:

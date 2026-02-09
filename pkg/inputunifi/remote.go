@@ -30,6 +30,7 @@ func (u *InputUnifi) discoverRemoteControllers(apiKey string) ([]*Controller, er
 
 	if len(consoles) == 0 {
 		u.Logf("No consoles found via remote API")
+
 		return nil, nil
 	}
 
@@ -42,19 +43,23 @@ func (u *InputUnifi) discoverRemoteControllers(apiKey string) ([]*Controller, er
 		if consoleName == "" {
 			consoleName = console.ReportedState.Name
 		}
+
 		if consoleName == "" {
 			consoleName = console.ReportedState.Hostname
 		}
+
 		u.LogDebugf("Discovering sites for console: %s (%s)", console.ID, consoleName)
 
 		sites, err := client.DiscoverSites(console.ID)
 		if err != nil {
 			u.LogErrorf("Failed to discover sites for console %s: %v", console.ID, err)
+
 			continue
 		}
 
 		if len(sites) == 0 {
 			u.LogDebugf("No sites found for console %s", console.ID)
+
 			continue
 		}
 
@@ -81,6 +86,7 @@ func (u *InputUnifi) discoverRemoteControllers(apiKey string) ([]*Controller, er
 		// Set remote-specific defaults and ensure all boolean pointers are initialized
 		t := true
 		f := false
+
 		if controller.VerifySSL == nil {
 			controller.VerifySSL = &t // Remote API should verify SSL
 		}
@@ -88,39 +94,51 @@ func (u *InputUnifi) discoverRemoteControllers(apiKey string) ([]*Controller, er
 		if controller.HashPII == nil {
 			controller.HashPII = &f
 		}
+
 		if controller.DropPII == nil {
 			controller.DropPII = &f
 		}
+
 		if controller.SaveSites == nil {
 			controller.SaveSites = &t
 		}
+
 		if controller.SaveDPI == nil {
 			controller.SaveDPI = &f
 		}
+
 		if controller.SaveEvents == nil {
 			controller.SaveEvents = &f
 		}
+
 		if controller.SaveAlarms == nil {
 			controller.SaveAlarms = &f
 		}
+
 		if controller.SaveAnomal == nil {
 			controller.SaveAnomal = &f
 		}
+
 		if controller.SaveIDs == nil {
 			controller.SaveIDs = &f
 		}
+
 		if controller.SaveTraffic == nil {
 			controller.SaveTraffic = &f
 		}
+
 		if controller.SaveRogue == nil {
 			controller.SaveRogue = &f
 		}
+
 		if controller.SaveSyslog == nil {
 			controller.SaveSyslog = &f
 		}
+
 		if controller.SaveProtectLogs == nil {
 			controller.SaveProtectLogs = &f
 		}
+
 		if controller.ProtectThumbnails == nil {
 			controller.ProtectThumbnails = &f
 		}
@@ -144,6 +162,7 @@ func (u *InputUnifi) discoverRemoteControllers(apiKey string) ([]*Controller, er
 			controller.DefaultSiteNameOverride = consoleName
 			// Keep the actual site name for API calls
 			controller.Sites = siteNames
+
 			u.LogDebugf("Using console name '%s' as default site name override for Cloud Gateway (API will use 'default')", consoleName)
 		} else if len(siteNames) > 0 {
 			controller.Sites = siteNames
