@@ -13,8 +13,8 @@ require (
 	github.com/spf13/pflag v1.0.10
 	github.com/stretchr/testify v1.11.1
 	github.com/unpoller/unifi/v5 v5.18.0
-	golang.org/x/crypto v0.47.0
-	golang.org/x/term v0.39.0
+	golang.org/x/crypto v0.48.0
+	golang.org/x/term v0.40.0
 	golift.io/cnfg v0.2.3
 	golift.io/cnfgfile v0.0.0-20240713024420-a5436d84eb48
 	golift.io/version v0.0.2
@@ -43,6 +43,6 @@ require (
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/prometheus/client_model v0.6.2 // indirect
 	github.com/prometheus/procfs v0.16.1 // indirect
-	golang.org/x/sys v0.40.0 // indirect
+	golang.org/x/sys v0.41.0 // indirect
 	google.golang.org/protobuf v1.36.11 // indirect
 )
