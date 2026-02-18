@@ -48,4 +48,6 @@ jobs:
         uses: golangci/golangci-lint-action@v9
         with:
           # Required: the version of golangci-lint is required and must be specified without patch version: we always use the latest patch version.
-          version: v2.6
+          # v2.9 is built with Go 1.26 so it can type-check deps (e.g. golang.org/x/crypto, x/net) that include go1.26-only files.
+          version: v2.9
+          skip-cache: true

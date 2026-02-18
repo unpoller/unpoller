@@ -74,6 +74,7 @@ func (u *InputUnifi) Initialize(l poller.Logger) error {
 	}
 
 	if len(u.Controllers) == 0 {
+		u.setDefaults(&u.Default)
 		u.Logf("No controllers configured. Polling dynamic controllers only! Defaults:")
 		u.logController(&u.Default)
 	}
@@ -108,6 +109,7 @@ func (u *InputUnifi) DebugInput() (bool, error) {
 	}
 
 	if len(u.Controllers) == 0 {
+		u.setDefaults(&u.Default)
 		u.Logf("No controllers configured. Polling dynamic controllers only! Defaults:")
 		u.logController(&u.Default)
 	}
