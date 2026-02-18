@@ -100,6 +100,9 @@ func (u *InputUnifi) pollController(c *Controller) (*poller.Metrics, error) {
 	u.RLock()
 	defer u.RUnlock()
 
+	if c == nil {
+		return nil, fmt.Errorf("controller is nil")
+	}
 	if c.Unifi == nil {
 		return nil, fmt.Errorf("controller client is nil (e.g. after 429 or auth failure): %s", c.URL)
 	}
@@ -113,7 +116,6 @@ func (u *InputUnifi) pollController(c *Controller) (*poller.Metrics, error) {
 	}
 
 	m := &Metrics{TS: time.Now(), Sites: sites}
-	defer updateWeb(c, m)
 
 	// FIXME needs to be last poll time maybe
 	st := m.TS.Add(-1 * pollDuration)
@@ -210,6 +212,18 @@ func (u *InputUnifi) pollController(c *Controller) (*poller.Metrics, error) {
 		u.LogDebugf("Found %d Sysinfo entries", len(m.Sysinfos))
 	}
 
+	// Update web UI only on success; call explicitly so we never run with nil c/c.Unifi (no defer).
+	// Recover so a panic in updateWeb (e.g. old image, race) never kills the poller.
+	if c != nil && c.Unifi != nil {
+		func() {
+			defer func() {
+				if r := recover(); r != nil {
+					u.LogErrorf("updateWeb panic recovered (upgrade image if this persists): %v", r)
+				}
+			}()
+			updateWeb(c, m)
+		}()
+	}
 	return u.augmentMetrics(c, m), nil
 }
 

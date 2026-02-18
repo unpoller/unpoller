@@ -1,0 +1,32 @@
+# Dockerfile.local: build unpoller with a local unifi library (no published module).
+# Build context must be the parent directory containing both unifi/ and unpoller/.
+#
+#   docker build -f unpoller/Dockerfile.local -t unpoller-test-local .
+#
+# (Run from the directory that contains unifi and unpoller as subdirs.)
+
+FROM golang:1.25-alpine AS builder
+WORKDIR /build
+
+# Context is parent dir: copy both repos
+COPY unifi /build/unifi
+COPY unpoller /build/unpoller
+
+WORKDIR /build/unpoller
+RUN go mod edit -replace github.com/unpoller/unifi/v5=/build/unifi && \
+    CGO_ENABLED=0 go build -o unpoller -ldflags "-s -w" .
+
+FROM busybox:latest AS config
+RUN mkdir -p /etc/unpoller
+COPY unpoller/examples/up.conf.example /etc/unpoller/up.conf
+COPY unpoller/unpoller_manual.html /etc/unpoller/manual.html
+COPY unpoller/README.html /etc/unpoller/readme.html
+
+FROM gcr.io/distroless/static-debian11
+COPY --from=builder /build/unpoller/unpoller /usr/bin/unpoller
+COPY --from=config /etc/unpoller /etc/unpoller
+
+HEALTHCHECK --interval=30s --timeout=10s --start-period=30s --retries=3 \
+  CMD ["/usr/bin/unpoller", "--health"]
+
+ENTRYPOINT [ "/usr/bin/unpoller" ]
