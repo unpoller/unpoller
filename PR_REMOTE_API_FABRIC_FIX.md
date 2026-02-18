@@ -37,3 +37,7 @@ With **remote API mode** enabled and an API key (e.g. from unifi.ui.com / Fabric
 ## Dependencies
 
 - Requires **unpoller/unifi** changes (429 retry, `DiscoverNetworkConsoles`, error body handling). Until that library is released, build unpoller with a local unifi clone and `Dockerfile.local` (or `go mod replace`).
+
+## CI / Workflows
+
+**Workflows are expected to fail on this PR until [unpoller/unifi#200](https://github.com/unpoller/unifi/pull/200) is merged and a new unifi release is available.** This PR calls `DiscoverNetworkConsoles()` and uses 429/error behavior that exist only in the unifi library PR. The current `go.mod` points at the published unifi module, which does not yet provide `DiscoverNetworkConsoles`, so `go build` and `go test` in CI will fail with an undefined method error. Once unifi is updated and unpoller’s `go.mod` is updated to that version (or the unifi PR is merged and a release cut), CI should pass.
