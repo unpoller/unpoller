@@ -60,7 +60,7 @@ type Controller struct {
 	Sites                   []string      `json:"sites"                      toml:"sites"                      xml:"site"                       yaml:"sites"`
 	DefaultSiteNameOverride string        `json:"default_site_name_override" toml:"default_site_name_override" xml:"default_site_name_override" yaml:"default_site_name_override"`
 	Remote                  bool          `json:"remote"                     toml:"remote"                     xml:"remote,attr"                yaml:"remote"`
-	ConsoleID               string        `json:"console_id,omitempty"       toml:"console_id,omitempty"       xml:"console_id,omitempty"        yaml:"console_id,omitempty"`
+	ConsoleID               string        `json:"console_id,omitempty"       toml:"console_id,omitempty"       xml:"console_id,omitempty"       yaml:"console_id,omitempty"`
 	Unifi                   *unifi.Unifi  `json:"-"                          toml:"-"                          xml:"-"                          yaml:"-"`
 	ID                      string        `json:"id,omitempty"` // this is an output, not an input.
 }
@@ -68,12 +68,12 @@ type Controller struct {
 // Config contains our configuration data.
 type Config struct {
 	sync.RWMutex               // locks the Unifi struct member when re-authing to unifi.
-	Default      Controller    `json:"defaults"    toml:"defaults"   xml:"default"      yaml:"defaults"`
-	Disable      bool          `json:"disable"     toml:"disable"    xml:"disable,attr" yaml:"disable"`
-	Dynamic      bool          `json:"dynamic"     toml:"dynamic"    xml:"dynamic,attr" yaml:"dynamic"`
-	Remote       bool          `json:"remote"      toml:"remote"     xml:"remote,attr"  yaml:"remote"`
+	Default      Controller    `json:"defaults"       toml:"defaults"       xml:"default"        yaml:"defaults"`
+	Disable      bool          `json:"disable"        toml:"disable"        xml:"disable,attr"   yaml:"disable"`
+	Dynamic      bool          `json:"dynamic"        toml:"dynamic"        xml:"dynamic,attr"   yaml:"dynamic"`
+	Remote       bool          `json:"remote"         toml:"remote"         xml:"remote,attr"    yaml:"remote"`
 	RemoteAPIKey string        `json:"remote_api_key" toml:"remote_api_key" xml:"remote_api_key" yaml:"remote_api_key"`
-	Controllers  []*Controller `json:"controllers" toml:"controller" xml:"controller"   yaml:"controllers"`
+	Controllers  []*Controller `json:"controllers"    toml:"controller"     xml:"controller"     yaml:"controllers"`
 }
 
 // Metrics is simply a useful container for everything.
@@ -155,17 +155,20 @@ func (u *InputUnifi) getUnifi(c *Controller) error {
 	}
 
 	var lastErr error
+
 	backoff := 30 * time.Second
 
 	for attempt := 0; attempt < maxAuthRetries; attempt++ {
 		c.Unifi, lastErr = unifi.NewUnifi(cfg)
 		if lastErr == nil {
 			u.LogDebugf("Authenticated with controller successfully, %s", c.URL)
+
 			return nil
 		}
 
 		if !errors.Is(lastErr, unifi.ErrTooManyRequests) {
 			c.Unifi = nil
+
 			return fmt.Errorf("unifi controller: %w", lastErr)
 		}
 
@@ -178,6 +181,7 @@ func (u *InputUnifi) getUnifi(c *Controller) error {
 			u.Logf("Controller %s returned 429 Too Many Requests; waiting %v before retry (%d/%d)",
 				c.URL, backoff, attempt+1, maxAuthRetries)
 			time.Sleep(backoff)
+
 			if backoff < 5*time.Minute {
 				backoff = backoff * 2
 			}
@@ -185,6 +189,7 @@ func (u *InputUnifi) getUnifi(c *Controller) error {
 	}
 
 	c.Unifi = nil
+
 	return fmt.Errorf("unifi controller: %w (gave up after %d retries)", lastErr, maxAuthRetries)
 }
 
@@ -448,6 +453,7 @@ func (u *InputUnifi) setControllerDefaults(c *Controller) *Controller { //nolint
 		if c.APIKey == "" {
 			c.APIKey = u.Default.APIKey
 		}
+
 		c.User = ""
 		c.Pass = ""
 	} else {

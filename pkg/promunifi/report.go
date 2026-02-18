@@ -23,6 +23,7 @@ type report interface {
 	addUXG()
 	addUBB()
 	addUCI()
+	addUDB()
 	addUSG()
 	addUAP()
 	addUSW()
@@ -71,6 +72,7 @@ func (r *Report) export(m *metric, v float64) prometheus.Metric {
 	for _, label := range m.Labels {
 		bytes += len(label) + 3 // label value + quotes and comma/equals overhead
 	}
+
 	bytes += 20 // approximate size for value and timestamp
 
 	r.Bytes += bytes
@@ -111,11 +113,15 @@ func (r *Report) addUXG() {
 }
 
 func (r *Report) addUBB() {
-	r.UCI++
+	r.UBB++
 }
 
 func (r *Report) addUCI() {
 	r.UCI++
+}
+
+func (r *Report) addUDB() {
+	r.UDB++
 }
 
 // close is not part of the interface.

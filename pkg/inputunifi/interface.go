@@ -55,17 +55,21 @@ func (u *InputUnifi) Initialize(l poller.Logger) error {
 				discovered, err := u.discoverRemoteControllers(c.APIKey)
 				if err != nil {
 					u.LogErrorf("Failed to discover remote controllers for controller: %v", err)
+
 					continue
 				}
+
 				if len(discovered) > 0 {
 					// Replace this controller with discovered ones
 					// Remove the current one and add discovered
 					newControllers := []*Controller{}
+
 					for _, existing := range u.Controllers {
 						if existing != c {
 							newControllers = append(newControllers, existing)
 						}
 					}
+
 					newControllers = append(newControllers, discovered...)
 					u.Controllers = newControllers
 				}
@@ -214,6 +218,7 @@ func (u *InputUnifi) Events(filter *poller.Filter) (*poller.Events, error) {
 			// Log error but continue to next controller
 			u.LogErrorf("Failed to collect events from controller %s: %v", c.URL, err)
 			collectionErrors = append(collectionErrors, fmt.Errorf("%s: %w", c.URL, err))
+
 			continue
 		}
 
@@ -256,6 +261,7 @@ func (u *InputUnifi) Metrics(filter *poller.Filter) (*poller.Metrics, error) {
 			// Log error but continue to next controller
 			u.LogErrorf("Failed to collect metrics from controller %s: %v", c.URL, err)
 			collectionErrors = append(collectionErrors, fmt.Errorf("%s: %w", c.URL, err))
+
 			continue
 		}
 
