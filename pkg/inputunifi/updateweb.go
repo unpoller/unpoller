@@ -2,6 +2,7 @@ package inputunifi
 
 import (
 	"fmt"
+	"log"
 	"strconv"
 	"time"
 
@@ -14,14 +15,29 @@ import (
 // controllerID returns the controller UUID for display, or "" if the client is nil (e.g. after 429 re-auth failure).
 // Avoids SIGSEGV when updateWeb runs while c.Unifi is nil (see unpoller/unpoller#943).
 func controllerID(c *Controller) string {
-	if c == nil || c.Unifi == nil {
+	if c == nil {
 		return ""
 	}
-
-	return c.Unifi.UUID
+	client := c.Unifi
+	if client == nil {
+		return ""
+	}
+	return client.UUID
 }
 
 func updateWeb(c *Controller, metrics *Metrics) {
+	defer func() {
+		if r := recover(); r != nil {
+			// Log and swallow panic so one bad controller doesn't kill the process (e.g. nil c/c.Unifi race).
+			log.Printf("[ERROR] updateWeb panic recovered: %v", r)
+		}
+	}()
+	if c == nil || metrics == nil {
+		return
+	}
+	if c.Unifi == nil {
+		return
+	}
 	webserver.UpdateInput(&webserver.Input{
 		Name:    PluginName, // Forgetting this leads to 3 hours of head scratching.
 		Sites:   formatSites(c, metrics.Sites),
@@ -78,6 +94,9 @@ func formatSites(c *Controller, sites []*unifi.Site) (s webserver.Sites) {
 	id := controllerID(c)
 
 	for _, site := range sites {
+		if site == nil {
+			continue
+		}
 		s = append(s, &webserver.Site{
 			ID:         site.ID,
 			Name:       site.Name,
@@ -92,6 +111,9 @@ func formatSites(c *Controller, sites []*unifi.Site) (s webserver.Sites) {
 
 func formatClients(c *Controller, clients []*unifi.Client) (d webserver.Clients) {
 	for _, client := range clients {
+		if client == nil {
+			continue
+		}
 		clientType, deviceMAC := "unknown", "unknown"
 		if client.ApMac != "" {
 			clientType = "wireless"
@@ -132,6 +154,9 @@ func formatDevices(c *Controller, devices *unifi.Devices) (d webserver.Devices) 
 	id := controllerID(c)
 
 	for _, device := range devices.UAPs {
+		if device == nil {
+			continue
+		}
 		d = append(d, &webserver.Device{
 			Name:       device.Name,
 			SiteID:     device.SiteID,
@@ -149,6 +174,9 @@ func formatDevices(c *Controller, devices *unifi.Devices) (d webserver.Devices) 
 	}
 
 	for _, device := range devices.UDMs {
+		if device == nil {
+			continue
+		}
 		d = append(d, &webserver.Device{
 			Name:       device.Name,
 			SiteID:     device.SiteID,
@@ -166,6 +194,9 @@ func formatDevices(c *Controller, devices *unifi.Devices) (d webserver.Devices) 
 	}
 
 	for _, device := range devices.USWs {
+		if device == nil {
+			continue
+		}
 		d = append(d, &webserver.Device{
 			Name:       device.Name,
 			SiteID:     device.SiteID,
@@ -183,6 +214,9 @@ func formatDevices(c *Controller, devices *unifi.Devices) (d webserver.Devices) 
 	}
 
 	for _, device := range devices.USGs {
+		if device == nil {
+			continue
+		}
 		d = append(d, &webserver.Device{
 			Name:       device.Name,
 			SiteID:     device.SiteID,

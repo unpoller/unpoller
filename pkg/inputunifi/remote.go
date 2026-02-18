@@ -3,9 +3,13 @@ package inputunifi
 import (
 	"fmt"
 	"strings"
+	"time"
 
 	"github.com/unpoller/unifi/v5"
 )
+
+const discoverMaxAttempts = 3
+const discoverRetryDelay = 5 * time.Second
 
 // discoverRemoteControllers discovers all controllers via remote API and creates Controller entries.
 func (u *InputUnifi) discoverRemoteControllers(apiKey string) ([]*Controller, error) {
@@ -23,17 +27,17 @@ func (u *InputUnifi) discoverRemoteControllers(apiKey string) ([]*Controller, er
 
 	u.Logf("Discovering remote UniFi consoles...")
 
-	consoles, err := client.DiscoverConsoles()
+	consoles, err := client.DiscoverNetworkConsoles()
 	if err != nil {
 		return nil, fmt.Errorf("discovering consoles: %w", err)
 	}
 
 	if len(consoles) == 0 {
-		u.Logf("No consoles found via remote API")
+		u.Logf("No Network-capable consoles found via remote API (NVR/Protect/display-only consoles are excluded)")
 		return nil, nil
 	}
 
-	u.Logf("Found %d console(s) via remote API", len(consoles))
+	u.Logf("Found %d Network-capable console(s) via remote API", len(consoles))
 
 	var controllers []*Controller
 
@@ -45,11 +49,25 @@ func (u *InputUnifi) discoverRemoteControllers(apiKey string) ([]*Controller, er
 		if consoleName == "" {
 			consoleName = console.ReportedState.Hostname
 		}
+		if consoleName == "" {
+			consoleName = console.ID
+		}
 		u.LogDebugf("Discovering sites for console: %s (%s)", console.ID, consoleName)
 
-		sites, err := client.DiscoverSites(console.ID)
-		if err != nil {
-			u.LogErrorf("Failed to discover sites for console %s: %v", console.ID, err)
+		var sites []unifi.RemoteSite
+		var lastErr error
+		for attempt := 1; attempt <= discoverMaxAttempts; attempt++ {
+			sites, lastErr = client.DiscoverSites(console.ID)
+			if lastErr == nil {
+				break
+			}
+			if attempt < discoverMaxAttempts {
+				u.LogDebugf("Discover sites attempt %d/%d failed for %s: %v; retrying in %v", attempt, discoverMaxAttempts, consoleName, lastErr, discoverRetryDelay)
+				time.Sleep(discoverRetryDelay)
+			}
+		}
+		if lastErr != nil {
+			u.Logf("Excluding controller %s: api key does not have permissions (after %d attempts)", consoleName, discoverMaxAttempts)
 			continue
 		}
 
