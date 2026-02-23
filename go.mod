@@ -13,9 +13,9 @@ require (
 	github.com/spf13/pflag v1.0.10
 	github.com/stretchr/testify v1.11.1
 	github.com/unpoller/unifi/v5 v5.20.0
-	golang.org/x/crypto v0.47.0
-	golang.org/x/term v0.39.0
-	golift.io/cnfg v0.2.3
+	golang.org/x/crypto v0.48.0
+	golang.org/x/term v0.40.0
+	golift.io/cnfg v0.2.5
 	golift.io/cnfgfile v0.0.0-20240713024420-a5436d84eb48
 	golift.io/version v0.0.2
 	gopkg.in/yaml.v3 v3.0.1
