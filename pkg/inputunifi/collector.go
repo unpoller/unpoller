@@ -188,13 +188,23 @@ func (u *InputUnifi) pollController(c *Controller) (*poller.Metrics, error) {
 		u.LogDebugf("Found %d SpeedTests entries", len(m.SpeedTests))
 	}
 
-	// Get DHCP leases with associations
-	if m.DHCPLeases, err = c.Unifi.GetActiveDHCPLeasesWithAssociations(sites); err != nil {
-		// Don't fail collection if DHCP leases fail - older controllers may not have this endpoint
-		u.LogDebugf("unifi.GetActiveDHCPLeasesWithAssociations(%s): %v (continuing)", c.URL, err)
-	} else {
-		u.LogDebugf("Found %d DHCPLeases entries", len(m.DHCPLeases))
-	}
+	// Get DHCP leases with associations.
+	// Wrapped in recover so a nil-pointer panic in the library (e.g. when a 401 causes nil devices)
+	// never crashes the poller. See https://github.com/unpoller/unpoller/issues/965
+	func() {
+		defer func() {
+			if r := recover(); r != nil {
+				u.LogErrorf("GetActiveDHCPLeasesWithAssociations panic recovered (see issue #965): %v", r)
+			}
+		}()
+
+		if m.DHCPLeases, err = c.Unifi.GetActiveDHCPLeasesWithAssociations(sites); err != nil {
+			// Don't fail collection if DHCP leases fail - older controllers may not have this endpoint
+			u.LogDebugf("unifi.GetActiveDHCPLeasesWithAssociations(%s): %v (continuing)", c.URL, err)
+		} else {
+			u.LogDebugf("Found %d DHCPLeases entries", len(m.DHCPLeases))
+		}
+	}()
 
 	// Get WAN enriched configuration
 	if m.WANConfigs, err = c.Unifi.GetWANEnrichedConfiguration(sites); err != nil {
