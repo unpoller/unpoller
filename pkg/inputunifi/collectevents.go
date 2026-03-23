@@ -2,6 +2,7 @@ package inputunifi
 
 import (
 	"encoding/base64"
+	"errors"
 	"fmt"
 	"strings"
 	"time"
@@ -38,6 +39,14 @@ func (u *InputUnifi) collectControllerEvents(c *Controller) ([]any, error) {
 
 	for _, call := range []caller{u.collectIDs, u.collectAnomalies, u.collectAlarms, u.collectEvents, u.collectSyslog, u.collectProtectLogs} {
 		if newLogs, err = call(logs, sites, c); err != nil {
+			if c.Remote && errors.Is(err, unifi.ErrInvalidStatusCode) {
+				// The remote API (api.ui.com) does not support all event endpoints (e.g. /stat/event
+				// returns 404). Log a warning and continue so other collectors still run.
+				u.LogErrorf("Failed to collect events from controller %s: %v (endpoint may not be supported by the remote API)", c.URL, err)
+
+				continue
+			}
+
 			return logs, err
 		}
 
