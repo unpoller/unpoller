@@ -79,20 +79,30 @@ type Flags struct {
 	*pflag.FlagSet
 }
 
+// ControllerStatus carries the per-controller poll result (up/down) so that
+// output plugins can expose a health gauge without knowing UniFi internals.
+type ControllerStatus struct {
+	// Source is a stable identifier for the controller (URL or configured ID).
+	Source string
+	// Up is true when the last poll of this controller succeeded.
+	Up bool
+}
+
 // Metrics is a type shared by the exporting and reporting packages.
 type Metrics struct {
-	TS             time.Time
-	Sites          []any
-	Clients        []any
-	SitesDPI       []any
-	ClientsDPI     []any
-	Devices        []any
-	RogueAPs       []any
-	SpeedTests     []any
-	CountryTraffic []any
-	DHCPLeases     []any
-	WANConfigs     []any
-	Sysinfos       []any
+	TS                 time.Time
+	Sites              []any
+	Clients            []any
+	SitesDPI           []any
+	ClientsDPI         []any
+	Devices            []any
+	RogueAPs           []any
+	SpeedTests         []any
+	CountryTraffic     []any
+	DHCPLeases         []any
+	WANConfigs         []any
+	Sysinfos           []any
+	ControllerStatuses []ControllerStatus
 }
 
 // Events defines the type for log entries.

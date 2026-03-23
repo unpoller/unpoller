@@ -256,7 +256,32 @@ func (u *InputUnifi) Metrics(filter *poller.Filter) (*poller.Metrics, error) {
 			// Log error but continue to next controller
 			u.LogErrorf("Failed to collect metrics from controller %s: %v", c.URL, err)
 			collectionErrors = append(collectionErrors, fmt.Errorf("%s: %w", c.URL, err))
+
+			// Record controller as down so output plugins can expose the status.
+			source := c.URL
+			if c.ID != "" {
+				source = c.ID
+			}
+
+			metrics.ControllerStatuses = append(metrics.ControllerStatuses, poller.ControllerStatus{
+				Source: source,
+				Up:     false,
+			})
+
 			continue
+		}
+
+		// Record controller as up.
+		source := c.URL
+		if c.ID != "" {
+			source = c.ID
+		}
+
+		if m != nil {
+			m.ControllerStatuses = append(m.ControllerStatuses, poller.ControllerStatus{
+				Source: source,
+				Up:     true,
+			})
 		}
 
 		metrics = poller.AppendMetrics(metrics, m)
