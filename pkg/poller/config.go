@@ -104,6 +104,7 @@ type Metrics struct {
 	Sysinfos           []any
 	FirewallPolicies   []any
 	Topologies         []any
+	PortAnomalies      []any
 	ControllerStatuses []ControllerStatus
 }
 

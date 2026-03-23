@@ -92,6 +92,7 @@ type Metrics struct {
 	Sysinfos         []*unifi.Sysinfo
 	FirewallPolicies []*unifi.FirewallPolicy
 	Topologies       []*unifi.Topology
+	PortAnomalies    []*unifi.PortAnomaly
 }
 
 func init() { // nolint: gochecknoinits
