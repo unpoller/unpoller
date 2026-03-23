@@ -193,10 +193,6 @@ func descUAP(ns string) *uap { // nolint: funlen
 }
 
 func (u *promUnifi) exportRogueAP(r report, d *unifi.RogueAP) {
-	if d.Age.Val == 0 {
-		return // only keep things that are recent.
-	}
-
 	labels := []string{
 		d.Security, d.Oui, d.Band, d.Bssid, d.ApMac, d.Radio, d.RadioName, d.SiteName, d.Essid, d.SourceName,
 	}

@@ -11,10 +11,6 @@ const uapT = item("UAP")
 
 // batchRogueAP generates metric points for neighboring access points.
 func (u *DatadogUnifi) batchRogueAP(r report, s *unifi.RogueAP) {
-	if s.Age.Val == 0 {
-		return // only keep metrics for things that are recent.
-	}
-
 	tags := cleanTags(map[string]string{
 		"security":   s.Security,
 		"oui":        s.Oui,
