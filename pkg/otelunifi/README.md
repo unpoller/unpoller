@@ -6,7 +6,7 @@ Compatible backends include Grafana Alloy/Mimir, Honeycomb, Datadog (via OTel co
 
 ## Configuration
 
-The plugin is **disabled by default**. Set `disable = false` (or `UP_OTEL_DISABLE=false`) to enable it.
+The plugin is **disabled by default**. Set `enable = true` (or `UP_OTEL_ENABLE=true`) to enable it.
 
 ### TOML
 
@@ -16,7 +16,7 @@ The plugin is **disabled by default**. Set `disable = false` (or `UP_OTEL_DISABL
   protocol = "http"                    # "http" (default) or "grpc"
   interval = "30s"
   timeout  = "10s"
-  disable  = false
+  enable   = true
   dead_ports = false
 
   # Optional bearer token for authenticated collectors (e.g. Grafana Cloud)
@@ -31,7 +31,7 @@ otel:
   protocol: http
   interval: 30s
   timeout: 10s
-  disable: false
+  enable: true
   dead_ports: false
   api_key: ""
 ```
@@ -46,7 +46,7 @@ All config keys use the `UP_OTEL_` prefix:
 | `UP_OTEL_PROTOCOL` | `http` | Transport: `http` or `grpc` |
 | `UP_OTEL_INTERVAL` | `30s` | Push interval |
 | `UP_OTEL_TIMEOUT` | `10s` | Per-export timeout |
-| `UP_OTEL_DISABLE` | `true` | Set to `false` to enable |
+| `UP_OTEL_ENABLE` | `false` | Set to `true` to enable |
 | `UP_OTEL_API_KEY` | `` | Bearer token for auth |
 | `UP_OTEL_DEAD_PORTS` | `false` | Include down/disabled switch ports |
 
@@ -136,7 +136,7 @@ otelcol.receiver.otlp "default" {
 }
 ```
 
-Set `UP_OTEL_URL=http://alloy-host:4318` and `UP_OTEL_DISABLE=false` in unpoller's environment.
+Set `UP_OTEL_URL=http://alloy-host:4318` and `UP_OTEL_ENABLE=true` in unpoller's environment.
 
 ## Example: Grafana Cloud (OTLP with auth)
 
@@ -146,5 +146,5 @@ Set `UP_OTEL_URL=http://alloy-host:4318` and `UP_OTEL_DISABLE=false` in unpoller
   protocol = "http"
   api_key  = "instanceID:grafana_cloud_api_token"
   interval = "60s"
-  disable  = false
+  enable   = true
 ```

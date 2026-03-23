@@ -51,8 +51,8 @@ type Config struct {
 	// Protocol selects the OTLP transport protocol: "http" (default) or "grpc".
 	Protocol string `json:"protocol,omitempty" toml:"protocol,omitempty" xml:"protocol" yaml:"protocol"`
 
-	// Disable when true disables this output plugin.
-	Disable bool `json:"disable" toml:"disable" xml:"disable,attr" yaml:"disable"`
+	// Enable when true enables this output plugin.
+	Enable bool `json:"enable" toml:"enable" xml:"enable,attr" yaml:"enable"`
 
 	// DeadPorts when true will save data for dead ports, for example ports that are down or disabled.
 	DeadPorts bool `json:"dead_ports" toml:"dead_ports" xml:"dead_ports" yaml:"dead_ports"`
@@ -83,7 +83,7 @@ func init() { //nolint:gochecknoinits
 	})
 }
 
-// Enabled returns true when the plugin is configured and not disabled.
+// Enabled returns true when the plugin is configured and enabled.
 func (u *OtelOutput) Enabled() bool {
 	if u == nil {
 		return false
@@ -93,7 +93,7 @@ func (u *OtelOutput) Enabled() bool {
 		return false
 	}
 
-	return !u.Disable
+	return u.Enable
 }
 
 // DebugOutput validates the plugin configuration without starting the run loop.
@@ -125,7 +125,7 @@ func (u *OtelOutput) Run(c poller.Collect) error {
 	u.Collector = c
 
 	if !u.Enabled() {
-		u.LogDebugf("OTel config missing (or disabled), OTel output disabled!")
+		u.LogDebugf("OTel output not enabled, skipping.")
 
 		return nil
 	}
