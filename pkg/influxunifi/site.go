@@ -57,6 +57,7 @@ func (u *InfluxUnifi) batchSite(r report, s *unifi.Site) {
 			"remote_user_tx_bytes":     h.RemoteUserTxBytes.Val,
 			"remote_user_rx_packets":   h.RemoteUserRxPackets.Val,
 			"remote_user_tx_packets":   h.RemoteUserTxPackets.Val,
+			"site_to_site_enabled":     h.SiteToSiteEnabled.Val,
 			"num_new_alarms":           s.NumNewAlarms.Val,
 		}
 
