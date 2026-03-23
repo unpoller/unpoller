@@ -54,12 +54,16 @@ points:
       rssi: int
       rx_bytes: int
       rx_bytes_r: int
+      rx_mcs: int
+      rx_nss: int
       rx_packets: int
       rx_rate: int
       satisfaction: float
       signal: int
       tx_bytes: int
       tx_bytes_r: int
+      tx_mcs: int
+      tx_nss: int
       tx_packets: int
       tx_power: int
       tx_rate: int
