@@ -26,6 +26,8 @@ require (
 	golang.org/x/net v0.51.0 // indirect
 )
 
+replace github.com/unpoller/unifi/v5 => /Users/cody.lee/go/src/github.com/unpoller/unifi
+
 require (
 	github.com/BurntSushi/toml v1.5.0 // indirect
 	github.com/Microsoft/go-winio v0.6.2 // indirect

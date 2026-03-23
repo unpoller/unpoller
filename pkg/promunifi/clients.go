@@ -15,11 +15,15 @@ type uclient struct {
 	RSSI           *prometheus.Desc
 	RxBytes        *prometheus.Desc
 	RxBytesR       *prometheus.Desc
+	RxMcs          *prometheus.Desc
+	RxNSS          *prometheus.Desc
 	RxPackets      *prometheus.Desc
 	RxRate         *prometheus.Desc
 	Signal         *prometheus.Desc
 	TxBytes        *prometheus.Desc
 	TxBytesR       *prometheus.Desc
+	TxMcs          *prometheus.Desc
+	TxNSS          *prometheus.Desc
 	TxPackets      *prometheus.Desc
 	TxRetries      *prometheus.Desc
 	TxPower        *prometheus.Desc
@@ -56,11 +60,15 @@ func descClient(ns string) *uclient {
 		RSSI:           prometheus.NewDesc(ns+"rssi_db", "Client RSSI", labelW, nil),
 		RxBytes:        prometheus.NewDesc(ns+"receive_bytes_total", "Client Receive Bytes", labels, nil),
 		RxBytesR:       prometheus.NewDesc(ns+"receive_rate_bytes", "Client Receive Data Rate", labels, nil),
+		RxMcs:          prometheus.NewDesc(ns+"radio_receive_mcs_index", "Client Receive MCS Index", labelW, nil),
+		RxNSS:          prometheus.NewDesc(ns+"radio_receive_spatial_streams", "Client Receive Spatial Streams (MIMO)", labelW, nil),
 		RxPackets:      prometheus.NewDesc(ns+"receive_packets_total", "Client Receive Packets", labels, nil),
 		RxRate:         prometheus.NewDesc(ns+"radio_receive_rate_bps", "Client Receive Rate", labelW, nil),
 		Signal:         prometheus.NewDesc(ns+"radio_signal_db", "Client Signal Strength", labelW, nil),
 		TxBytes:        prometheus.NewDesc(ns+"transmit_bytes_total", "Client Transmit Bytes", labels, nil),
 		TxBytesR:       prometheus.NewDesc(ns+"transmit_rate_bytes", "Client Transmit Data Rate", labels, nil),
+		TxMcs:          prometheus.NewDesc(ns+"radio_transmit_mcs_index", "Client Transmit MCS Index", labelW, nil),
+		TxNSS:          prometheus.NewDesc(ns+"radio_transmit_spatial_streams", "Client Transmit Spatial Streams (MIMO)", labelW, nil),
 		TxPackets:      prometheus.NewDesc(ns+"transmit_packets_total", "Client Transmit Packets", labels, nil),
 		TxRetries:      prometheus.NewDesc(ns+"transmit_retries_total", "Client Transmit Retries", labels, nil),
 		TxPower:        prometheus.NewDesc(ns+"radio_transmit_power_dbm", "Client Transmit Power", labelW, nil),
@@ -133,9 +141,13 @@ func (u *promUnifi) exportClient(r report, c *unifi.Client) {
 			{u.Client.RoamCount, counter, c.RoamCount, labelW},
 			{u.Client.RSSI, gauge, c.Rssi, labelW},
 			{u.Client.Signal, gauge, c.Signal, labelW},
+			{u.Client.TxMcs, gauge, c.TxMcs, labelW},
+			{u.Client.TxNSS, gauge, c.TxNSS, labelW},
 			{u.Client.TxPower, gauge, c.TxPower, labelW},
 			{u.Client.TxRate, gauge, c.TxRate.Val * 1000, labelW},
 			{u.Client.WifiTxAttempts, counter, c.WifiTxAttempts, labelW},
+			{u.Client.RxMcs, gauge, c.RxMcs, labelW},
+			{u.Client.RxNSS, gauge, c.RxNSS, labelW},
 			{u.Client.RxRate, gauge, c.RxRate.Val * 1000, labelW},
 			{u.Client.TxRetries, counter, c.TxRetries, labels},
 			{u.Client.TxBytes, counter, c.TxBytes, labels},
