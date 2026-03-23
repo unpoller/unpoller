@@ -42,7 +42,7 @@ func (u *InputUnifi) collectControllerEvents(c *Controller) ([]any, error) {
 			if c.Remote && errors.Is(err, unifi.ErrInvalidStatusCode) {
 				// The remote API (api.ui.com) does not support all event endpoints (e.g. /stat/event
 				// returns 404). Log a warning and continue so other collectors still run.
-				u.LogErrorf("Failed to collect events from controller %s: %v (endpoint may not be supported by the remote API)", c.URL, err)
+				u.Logf("Failed to collect events from controller %s: %v (endpoint may not be supported by the remote API)", c.URL, err)
 
 				continue
 			}
