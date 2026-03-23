@@ -27,9 +27,12 @@ func (r *Report) IDs(event *unifi.IDS, logs *Logs) {
 	logs.Streams = append(logs.Streams, LogStream{
 		Entries: [][]string{{strconv.FormatInt(event.Datetime.UnixNano(), 10), string(msg)}},
 		Labels: CleanLabels(MergeLabels(map[string]string{
-			"application": "unifi_ids",
-			"source":      event.SourceName,
-			"site_name":   event.SiteName,
+			"application":        "unifi_ids",
+			"job":                "unpoller",
+			"source":             event.SourceName,
+			"site_name":          event.SiteName,
+			"event_type":         event.EventType,
+			"inner_alert_action": event.InnerAlertAction,
 		}, r.ExtraLabels)),
 	})
 }

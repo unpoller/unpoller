@@ -28,6 +28,7 @@ func (r *Report) Anomaly(event *unifi.Anomaly, logs *Logs) {
 		Entries: [][]string{{strconv.FormatInt(event.Datetime.UnixNano(), 10), string(msg)}},
 		Labels: CleanLabels(MergeLabels(map[string]string{
 			"application": "unifi_anomaly",
+			"job":         "unpoller",
 			"source":      event.SourceName,
 			"site_name":   event.SiteName,
 		}, r.ExtraLabels)),

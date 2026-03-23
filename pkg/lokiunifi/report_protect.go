@@ -36,6 +36,7 @@ func (r *Report) ProtectLogEvent(event *unifi.ProtectLogEntry, logs *Logs) {
 		Entries: [][]string{{strconv.FormatInt(event.Datetime().UnixNano(), 10), string(msg)}},
 		Labels: CleanLabels(MergeLabels(map[string]string{
 			"application": "unifi_protect_log",
+			"job":         "unpoller",
 			"source":      event.SourceName,
 			"event_type":  event.GetEventType(),
 			"category":    event.GetCategory(),
@@ -59,6 +60,7 @@ func (r *Report) ProtectLogEvent(event *unifi.ProtectLogEntry, logs *Logs) {
 			Entries: [][]string{{strconv.FormatInt(event.Datetime().UnixNano()+1, 10), string(thumbnailJSON)}},
 			Labels: CleanLabels(MergeLabels(map[string]string{
 				"application": "unifi_protect_thumbnail",
+				"job":         "unpoller",
 				"source":      event.SourceName,
 				"event_id":    event.ID,
 				"camera":      event.Camera,
