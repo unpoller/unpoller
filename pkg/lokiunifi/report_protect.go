@@ -34,14 +34,14 @@ func (r *Report) ProtectLogEvent(event *unifi.ProtectLogEntry, logs *Logs) {
 	// Add event log line
 	logs.Streams = append(logs.Streams, LogStream{
 		Entries: [][]string{{strconv.FormatInt(event.Datetime().UnixNano(), 10), string(msg)}},
-		Labels: CleanLabels(map[string]string{
+		Labels: CleanLabels(MergeLabels(map[string]string{
 			"application": "unifi_protect_log",
 			"source":      event.SourceName,
 			"event_type":  event.GetEventType(),
 			"category":    event.GetCategory(),
 			"severity":    event.GetSeverity(),
 			"camera":      event.Camera,
-		}),
+		}, r.ExtraLabels)),
 	})
 
 	// Add thumbnail as separate log line if present
@@ -57,12 +57,12 @@ func (r *Report) ProtectLogEvent(event *unifi.ProtectLogEntry, logs *Logs) {
 		// Use timestamp + 1 nanosecond to ensure ordering (thumbnail after event)
 		logs.Streams = append(logs.Streams, LogStream{
 			Entries: [][]string{{strconv.FormatInt(event.Datetime().UnixNano()+1, 10), string(thumbnailJSON)}},
-			Labels: CleanLabels(map[string]string{
+			Labels: CleanLabels(MergeLabels(map[string]string{
 				"application": "unifi_protect_thumbnail",
 				"source":      event.SourceName,
 				"event_id":    event.ID,
 				"camera":      event.Camera,
-			}),
+			}, r.ExtraLabels)),
 		})
 	}
 }
