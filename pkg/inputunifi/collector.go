@@ -214,6 +214,14 @@ func (u *InputUnifi) pollController(c *Controller) (*poller.Metrics, error) {
 		u.LogDebugf("Found %d WAN configuration entries", len(m.WANConfigs))
 	}
 
+	// Get firewall policies
+	if m.FirewallPolicies, err = c.Unifi.GetFirewallPolicies(sites); err != nil {
+		// Don't fail collection if firewall policies fail - older controllers may not have this endpoint
+		u.LogDebugf("unifi.GetFirewallPolicies(%s): %v (continuing)", c.URL, err)
+	} else {
+		u.LogDebugf("Found %d FirewallPolicies entries", len(m.FirewallPolicies))
+	}
+
 	// Get controller system info (UniFi OS only)
 	if m.Sysinfos, err = c.Unifi.GetSysinfo(sites); err != nil {
 		// Don't fail collection if sysinfo fails - older controllers may not have this endpoint
@@ -437,6 +445,15 @@ func (u *InputUnifi) augmentMetrics(c *Controller, metrics *Metrics) *poller.Met
 		m.Sysinfos = append(m.Sysinfos, sysinfo)
 	}
 
+	for _, policy := range metrics.FirewallPolicies {
+		// Apply site name override for firewall policies if configured
+		if c.DefaultSiteNameOverride != "" && isDefaultSiteName(policy.SiteName) {
+			policy.SiteName = c.DefaultSiteNameOverride
+		}
+
+		m.FirewallPolicies = append(m.FirewallPolicies, policy)
+	}
+
 	// Apply default_site_name_override to all metrics if configured.
 	// This must be done AFTER all metrics are added to m, so everything is included.
 	// This allows us to use the console name for Cloud Gateways while keeping
@@ -560,6 +577,15 @@ func applySiteNameOverride(m *poller.Metrics, overrideName string) {
 		if wanConfig, ok := m.WANConfigs[i].(*unifi.WANEnrichedConfiguration); ok {
 			// WAN configs don't have SiteName field, but we'll add it in the exporter
 			_ = wanConfig
+		}
+	}
+
+	// Apply to firewall policies
+	for i := range m.FirewallPolicies {
+		if policy, ok := m.FirewallPolicies[i].(*unifi.FirewallPolicy); ok {
+			if isDefaultSiteName(policy.SiteName) {
+				policy.SiteName = overrideName
+			}
 		}
 	}
 }

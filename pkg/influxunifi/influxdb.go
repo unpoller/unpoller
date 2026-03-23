@@ -434,6 +434,10 @@ func (u *InfluxUnifi) loopPoints(r report) {
 	for _, w := range m.WANConfigs {
 		u.switchExport(r, w)
 	}
+
+	for _, p := range m.FirewallPolicies {
+		u.switchExport(r, p)
+	}
 }
 
 func (u *InfluxUnifi) switchExport(r report, v any) { //nolint:cyclop
@@ -474,6 +478,8 @@ func (u *InfluxUnifi) switchExport(r report, v any) { //nolint:cyclop
 		u.batchSpeedTest(r, v)
 	case *unifi.WANEnrichedConfiguration:
 		u.batchWAN(r, v)
+	case *unifi.FirewallPolicy:
+		u.batchFirewallPolicy(r, v)
 	default:
 		if u.Collector.Poller().LogUnknownTypes {
 			u.LogDebugf("unknown export type: %T", v)
