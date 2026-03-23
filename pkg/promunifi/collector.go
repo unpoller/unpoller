@@ -50,6 +50,8 @@ type promUnifi struct {
 	DHCPLease      *dhcplease
 	WAN            *wan
 	Controller     *controller
+	// controllerUp tracks per-controller poll success (1) or failure (0).
+	controllerUp *prometheus.GaugeVec
 	// This interface is passed to the Collect() method. The Collect method uses
 	// this interface to retrieve the latest UniFi measurements and export them.
 	Collector poller.Collect
@@ -213,6 +215,10 @@ func (u *promUnifi) Run(c poller.Collect) error {
 	u.DHCPLease = descDHCPLease(u.Namespace + "_")
 	u.WAN = descWAN(u.Namespace + "_")
 	u.Controller = descController(u.Namespace + "_")
+	u.controllerUp = prometheus.NewGaugeVec(prometheus.GaugeOpts{
+		Name: u.Namespace + "_controller_up",
+		Help: "Whether the last poll of the UniFi controller succeeded (1) or failed (0).",
+	}, []string{"source"})
 
 	mux := http.NewServeMux()
 	promver.Version = version.Version
@@ -221,6 +227,7 @@ func (u *promUnifi) Run(c poller.Collect) error {
 
 	webserver.UpdateOutput(&webserver.Output{Name: PluginName, Config: u.Config})
 	prometheus.MustRegister(collectors.NewBuildInfoCollector())
+	prometheus.MustRegister(u.controllerUp)
 	prometheus.MustRegister(u)
 	mux.Handle("/metrics", promhttp.HandlerFor(prometheus.DefaultGatherer,
 		promhttp.HandlerOpts{ErrorHandling: promhttp.ContinueOnError},
@@ -338,6 +345,18 @@ func (u *promUnifi) collect(ch chan<- prometheus.Metric, filter *poller.Filter) 
 		u.LogErrorf("metric fetch failed: %v", err)
 
 		return
+	}
+
+	// Export per-controller up/down gauge values.
+	if u.controllerUp != nil && r.Metrics != nil {
+		for _, cs := range r.Metrics.ControllerStatuses {
+			val := 0.0
+			if cs.Up {
+				val = 1.0
+			}
+
+			u.controllerUp.WithLabelValues(cs.Source).Set(val)
+		}
 	}
 
 	// Pass Report interface into our collecting and reporting methods.
