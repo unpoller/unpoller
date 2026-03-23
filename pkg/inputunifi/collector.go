@@ -230,6 +230,14 @@ func (u *InputUnifi) pollController(c *Controller) (*poller.Metrics, error) {
 		u.LogDebugf("Found %d Sysinfo entries", len(m.Sysinfos))
 	}
 
+	// Get network topology
+	if m.Topologies, err = c.Unifi.GetTopology(sites); err != nil {
+		// Don't fail collection if topology fails - older controllers may not have this endpoint
+		u.LogDebugf("unifi.GetTopology(%s): %v (continuing)", c.URL, err)
+	} else {
+		u.LogDebugf("Found %d Topology entries", len(m.Topologies))
+	}
+
 	// Update web UI only on success; call explicitly so we never run with nil c/c.Unifi (no defer).
 	// Recover so a panic in updateWeb (e.g. old image, race) never kills the poller.
 	if c != nil && c.Unifi != nil {
@@ -454,6 +462,15 @@ func (u *InputUnifi) augmentMetrics(c *Controller, metrics *Metrics) *poller.Met
 		m.FirewallPolicies = append(m.FirewallPolicies, policy)
 	}
 
+	for _, topo := range metrics.Topologies {
+		// Apply site name override for topology if configured
+		if c.DefaultSiteNameOverride != "" && isDefaultSiteName(topo.SiteName) {
+			topo.SiteName = c.DefaultSiteNameOverride
+		}
+
+		m.Topologies = append(m.Topologies, topo)
+	}
+
 	// Apply default_site_name_override to all metrics if configured.
 	// This must be done AFTER all metrics are added to m, so everything is included.
 	// This allows us to use the console name for Cloud Gateways while keeping
@@ -585,6 +602,14 @@ func applySiteNameOverride(m *poller.Metrics, overrideName string) {
 		if policy, ok := m.FirewallPolicies[i].(*unifi.FirewallPolicy); ok {
 			if isDefaultSiteName(policy.SiteName) {
 				policy.SiteName = overrideName
+			}
+		}
+	}
+
+	for i := range m.Topologies {
+		if topo, ok := m.Topologies[i].(*unifi.Topology); ok {
+			if isDefaultSiteName(topo.SiteName) {
+				topo.SiteName = overrideName
 			}
 		}
 	}

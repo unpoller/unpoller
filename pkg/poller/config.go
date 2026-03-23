@@ -103,6 +103,7 @@ type Metrics struct {
 	WANConfigs         []any
 	Sysinfos           []any
 	FirewallPolicies   []any
+	Topologies         []any
 	ControllerStatuses []ControllerStatus
 }
 

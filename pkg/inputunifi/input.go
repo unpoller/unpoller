@@ -91,6 +91,7 @@ type Metrics struct {
 	WANConfigs       []*unifi.WANEnrichedConfiguration
 	Sysinfos         []*unifi.Sysinfo
 	FirewallPolicies []*unifi.FirewallPolicy
+	Topologies       []*unifi.Topology
 }
 
 func init() { // nolint: gochecknoinits

@@ -325,6 +325,10 @@ func (u *DatadogUnifi) loopPoints(r report) {
 	for _, p := range m.FirewallPolicies {
 		u.switchExport(r, p)
 	}
+
+	for _, t := range m.Topologies {
+		u.switchExport(r, t)
+	}
 }
 
 func (u *DatadogUnifi) switchExport(r report, v any) { //nolint:cyclop
@@ -367,6 +371,8 @@ func (u *DatadogUnifi) switchExport(r report, v any) { //nolint:cyclop
 		u.batchWAN(r, v)
 	case *unifi.FirewallPolicy:
 		u.batchFirewallPolicy(r, v)
+	case *unifi.Topology:
+		u.batchTopology(r, v)
 	default:
 		if u.Collector != nil && u.Collector.Poller().LogUnknownTypes {
 			u.LogDebugf("unknown export type: %T", v)
