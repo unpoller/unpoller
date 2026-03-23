@@ -202,7 +202,7 @@ func (u *OtelOutput) exportDevices(ctx context.Context, meter metric.Meter, m *p
 
 // recordGauge is a helper that records a single float64 gauge observation.
 func (u *OtelOutput) recordGauge(
-	ctx context.Context,
+	_ context.Context,
 	meter metric.Meter,
 	r *Report,
 	name, description string,
