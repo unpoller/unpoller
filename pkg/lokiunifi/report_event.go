@@ -29,6 +29,7 @@ func (r *Report) Event(event *unifi.Event, logs *Logs) {
 		Entries: [][]string{{strconv.FormatInt(event.Datetime.UnixNano(), 10), string(msg)}},
 		Labels: CleanLabels(MergeLabels(map[string]string{
 			"application": "unifi_event",
+			"job":         "unpoller",
 			"site_name":   event.SiteName,
 			"source":      event.SourceName,
 		}, r.ExtraLabels)),
@@ -54,6 +55,7 @@ func (r *Report) SystemLogEvent(event *unifi.SystemLogEntry, logs *Logs) {
 		Entries: [][]string{{strconv.FormatInt(event.Datetime().UnixNano(), 10), string(msg)}},
 		Labels: CleanLabels(MergeLabels(map[string]string{
 			"application": "unifi_system_log",
+			"job":         "unpoller",
 			"site_name":   event.SiteName,
 			"source":      event.SourceName,
 			"category":    event.Category,
