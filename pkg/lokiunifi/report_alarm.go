@@ -26,10 +26,10 @@ func (r *Report) Alarm(event *unifi.Alarm, logs *Logs) {
 
 	logs.Streams = append(logs.Streams, LogStream{
 		Entries: [][]string{{strconv.FormatInt(event.Datetime.UnixNano(), 10), string(msg)}},
-		Labels: CleanLabels(map[string]string{
+		Labels: CleanLabels(MergeLabels(map[string]string{
 			"application": "unifi_alarm",
 			"source":      event.SourceName,
 			"site_name":   event.SiteName,
-		}),
+		}, r.ExtraLabels)),
 	})
 }

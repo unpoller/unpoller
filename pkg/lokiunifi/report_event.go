@@ -27,11 +27,11 @@ func (r *Report) Event(event *unifi.Event, logs *Logs) {
 
 	logs.Streams = append(logs.Streams, LogStream{
 		Entries: [][]string{{strconv.FormatInt(event.Datetime.UnixNano(), 10), string(msg)}},
-		Labels: CleanLabels(map[string]string{
+		Labels: CleanLabels(MergeLabels(map[string]string{
 			"application": "unifi_event",
 			"site_name":   event.SiteName,
 			"source":      event.SourceName,
-		}),
+		}, r.ExtraLabels)),
 	})
 }
 
@@ -52,12 +52,12 @@ func (r *Report) SystemLogEvent(event *unifi.SystemLogEntry, logs *Logs) {
 
 	logs.Streams = append(logs.Streams, LogStream{
 		Entries: [][]string{{strconv.FormatInt(event.Datetime().UnixNano(), 10), string(msg)}},
-		Labels: CleanLabels(map[string]string{
+		Labels: CleanLabels(MergeLabels(map[string]string{
 			"application": "unifi_system_log",
 			"site_name":   event.SiteName,
 			"source":      event.SourceName,
 			"category":    event.Category,
 			"severity":    event.Severity,
-		}),
+		}, r.ExtraLabels)),
 	})
 }

@@ -34,8 +34,9 @@ type Config struct {
 	Username  string        `json:"user"       toml:"user"       xml:"user"       yaml:"user"`
 	Password  string        `json:"pass"       toml:"pass"       xml:"pass"       yaml:"pass"`
 	TenantID  string        `json:"tenant_id"  toml:"tenant_id"  xml:"tenant_id"  yaml:"tenant_id"`
-	Interval  cnfg.Duration `json:"interval"   toml:"interval"   xml:"interval"   yaml:"interval"`
-	Timeout   cnfg.Duration `json:"timeout"    toml:"timeout"    xml:"timeout"    yaml:"timeout"`
+	Interval    cnfg.Duration     `json:"interval"      toml:"interval"      xml:"interval"      yaml:"interval"`
+	Timeout     cnfg.Duration     `json:"timeout"       toml:"timeout"       xml:"timeout"       yaml:"timeout"`
+	ExtraLabels map[string]string `json:"extra_labels"  toml:"extra_labels"  xml:"extra_labels"  yaml:"extra_labels"`
 }
 
 // Loki is the main library struct. This satisfies the poller.Output interface.

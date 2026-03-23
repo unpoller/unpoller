@@ -26,10 +26,10 @@ func (r *Report) Anomaly(event *unifi.Anomaly, logs *Logs) {
 
 	logs.Streams = append(logs.Streams, LogStream{
 		Entries: [][]string{{strconv.FormatInt(event.Datetime.UnixNano(), 10), string(msg)}},
-		Labels: CleanLabels(map[string]string{
+		Labels: CleanLabels(MergeLabels(map[string]string{
 			"application": "unifi_anomaly",
 			"source":      event.SourceName,
 			"site_name":   event.SiteName,
-		}),
+		}, r.ExtraLabels)),
 	})
 }
