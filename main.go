@@ -13,6 +13,7 @@ import (
 	_ "github.com/unpoller/unpoller/pkg/datadogunifi"
 	_ "github.com/unpoller/unpoller/pkg/influxunifi"
 	_ "github.com/unpoller/unpoller/pkg/lokiunifi"
+	_ "github.com/unpoller/unpoller/pkg/otelunifi"
 	_ "github.com/unpoller/unpoller/pkg/promunifi"
 )
 
