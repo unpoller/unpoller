@@ -211,6 +211,7 @@ points:
       rx_bytes-r: int
       speedtest_lastrun: float
       speedtest_ping: float
+      site_to_site_enabled: bool
       tx_bytes-r: int
       uptime: int
       wan_ip: string

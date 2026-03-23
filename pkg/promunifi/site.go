@@ -31,6 +31,7 @@ type site struct {
 	RemoteUserTxBytes     *prometheus.Desc
 	RemoteUserRxPackets   *prometheus.Desc
 	RemoteUserTxPackets   *prometheus.Desc
+	SiteToSiteEnabled     *prometheus.Desc
 	DPITxPackets          *prometheus.Desc
 	DPIRxPackets          *prometheus.Desc
 	DPITxBytes            *prometheus.Desc
@@ -68,6 +69,7 @@ func descSite(ns string) *site {
 		RemoteUserTxBytes:     nd(ns+"remote_user_transmit_bytes_total", "Remote Users Transmit Bytes", labels, nil),
 		RemoteUserRxPackets:   nd(ns+"remote_user_receive_packets_total", "Remote Users Receive Packets", labels, nil),
 		RemoteUserTxPackets:   nd(ns+"remote_user_transmit_packets_total", "Remote Users Transmit Packets", labels, nil),
+		SiteToSiteEnabled:     nd(ns+"site_to_site_enabled", "Site-to-site VPN enabled (1/0)", labels, nil),
 		DPITxPackets:          nd(ns+"dpi_transmit_packets", "Site DPI Transmit Packets", labelDPI, nil),
 		DPIRxPackets:          nd(ns+"dpi_receive_packets", "Site DPI Receive Packets", labelDPI, nil),
 		DPITxBytes:            nd(ns+"dpi_transmit_bytes", "Site DPI Transmit Bytes", labelDPI, nil),
@@ -160,6 +162,7 @@ func (u *promUnifi) exportSite(r report, s *unifi.Site) {
 				{u.Site.RemoteUserTxBytes, counter, h.RemoteUserTxBytes, labels},
 				{u.Site.RemoteUserRxPackets, counter, h.RemoteUserRxPackets, labels},
 				{u.Site.RemoteUserTxPackets, counter, h.RemoteUserTxPackets, labels},
+				{u.Site.SiteToSiteEnabled, gauge, h.SiteToSiteEnabled.Val, labels},
 			})
 		}
 	}
