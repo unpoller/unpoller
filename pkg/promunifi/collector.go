@@ -50,6 +50,7 @@ type promUnifi struct {
 	DHCPLease      *dhcplease
 	WAN            *wan
 	Controller     *controller
+	FirewallPolicy *firewallpolicy
 	// controllerUp tracks per-controller poll success (1) or failure (0).
 	controllerUp *prometheus.GaugeVec
 	// This interface is passed to the Collect() method. The Collect method uses
@@ -215,6 +216,7 @@ func (u *promUnifi) Run(c poller.Collect) error {
 	u.DHCPLease = descDHCPLease(u.Namespace + "_")
 	u.WAN = descWAN(u.Namespace + "_")
 	u.Controller = descController(u.Namespace + "_")
+	u.FirewallPolicy = descFirewallPolicy(u.Namespace + "_")
 	u.controllerUp = prometheus.NewGaugeVec(prometheus.GaugeOpts{
 		Name: u.Namespace + "_controller_up",
 		Help: "Whether the last poll of the UniFi controller succeeded (1) or failed (0).",
@@ -303,7 +305,7 @@ func (t *target) Describe(ch chan<- *prometheus.Desc) {
 // Describe satisfies the prometheus Collector. This returns all of the
 // metric descriptions that this packages produces.
 func (u *promUnifi) Describe(ch chan<- *prometheus.Desc) {
-	for _, f := range []any{u.Client, u.Device, u.UAP, u.USG, u.USW, u.PDU, u.Site, u.SpeedTest, u.DHCPLease, u.WAN} {
+	for _, f := range []any{u.Client, u.Device, u.UAP, u.USG, u.USW, u.PDU, u.Site, u.SpeedTest, u.DHCPLease, u.WAN, u.FirewallPolicy} {
 		v := reflect.Indirect(reflect.ValueOf(f))
 
 		// Loop each struct member and send it to the provided channel.
@@ -469,6 +471,16 @@ func (u *promUnifi) loopExports(r report) {
 			u.exportSysinfo(r, sysinfo)
 		}
 	}
+
+	// Export firewall policy metrics
+	firewallPolicies := make([]*unifi.FirewallPolicy, 0, len(m.FirewallPolicies))
+	for _, p := range m.FirewallPolicies {
+		if policy, ok := p.(*unifi.FirewallPolicy); ok {
+			firewallPolicies = append(firewallPolicies, policy)
+		}
+	}
+
+	u.exportFirewallPolicies(r, firewallPolicies)
 
 	u.exportClientDPItotals(r, appTotal, catTotal)
 }
