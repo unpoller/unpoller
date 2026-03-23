@@ -47,6 +47,7 @@ func (u *OtelOutput) reportMetrics(m *poller.Metrics, _ *poller.Events) (*Report
 	u.exportSites(ctx, meter, m, r)
 	u.exportClients(ctx, meter, m, r)
 	u.exportDevices(ctx, meter, m, r)
+	u.exportFirewallPolicies(ctx, meter, m, r)
 
 	r.Elapsed = time.Since(start)
 
