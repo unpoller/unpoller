@@ -50,6 +50,7 @@ func (u *OtelOutput) reportMetrics(m *poller.Metrics, _ *poller.Events) (*Report
 	u.exportFirewallPolicies(ctx, meter, m, r)
 	u.exportTopology(ctx, meter, m, r)
 	u.exportPortAnomalies(ctx, meter, m, r)
+	u.exportVPNMeshes(ctx, meter, m, r)
 
 	r.Elapsed = time.Since(start)
 
@@ -215,6 +216,7 @@ func (u *OtelOutput) recordGauge(
 	g, err := meter.Float64ObservableGauge(name, metric.WithDescription(description))
 	if err != nil {
 		r.Errors++
+
 		u.LogDebugf("otel: creating gauge %s: %v", name, err)
 
 		return
@@ -227,6 +229,7 @@ func (u *OtelOutput) recordGauge(
 	}, g)
 	if err != nil {
 		r.Errors++
+
 		u.LogDebugf("otel: registering callback for %s: %v", name, err)
 
 		return
