@@ -65,9 +65,9 @@ type OtelUnifi struct {
 
 // OtelOutput is the working struct for this plugin.
 type OtelOutput struct {
-	Collector  poller.Collect
-	LastCheck  time.Time
-	provider   *sdkmetric.MeterProvider
+	Collector poller.Collect
+	LastCheck time.Time
+	provider  *sdkmetric.MeterProvider
 	*OtelUnifi
 }
 
@@ -154,7 +154,7 @@ func (u *OtelOutput) Run(c poller.Collect) error {
 
 // pollController runs the ticker loop, pushing metrics on each tick.
 func (u *OtelOutput) pollController() {
-	interval := u.Interval.Duration.Round(time.Second)
+	interval := u.Interval.Round(time.Second)
 	ticker := time.NewTicker(interval)
 
 	defer ticker.Stop()
@@ -290,7 +290,7 @@ func (u *OtelOutput) setConfigDefaults() {
 		u.Interval = cnfg.Duration{Duration: minimumInterval}
 	}
 
-	u.Interval = cnfg.Duration{Duration: u.Interval.Duration.Round(time.Second)}
+	u.Interval = cnfg.Duration{Duration: u.Interval.Round(time.Second)}
 
 	if u.Timeout.Duration == 0 {
 		u.Timeout = cnfg.Duration{Duration: 10 * time.Second}

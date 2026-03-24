@@ -42,9 +42,9 @@ func (u *OtelOutput) exportUSW(ctx context.Context, meter metric.Meter, r *Repor
 	u.recordGauge(ctx, meter, r, "unifi_device_usw_load_avg_1",
 		"USW load average 1-minute", s.SysStats.Loadavg1.Val, attrs)
 	u.recordGauge(ctx, meter, r, "unifi_device_usw_rx_bytes",
-		"USW total receive bytes", s.Stat.Sw.RxBytes.Val, attrs)
+		"USW total receive bytes", s.Stat.RxBytes.Val, attrs)
 	u.recordGauge(ctx, meter, r, "unifi_device_usw_tx_bytes",
-		"USW total transmit bytes", s.Stat.Sw.TxBytes.Val, attrs)
+		"USW total transmit bytes", s.Stat.TxBytes.Val, attrs)
 
 	if !u.DeadPorts {
 		for _, p := range s.PortTable {

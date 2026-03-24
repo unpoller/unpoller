@@ -13,6 +13,7 @@ import (
 // exportFirewallPolicies emits per-rule and per-site aggregate firewall policy metrics.
 func (u *OtelOutput) exportFirewallPolicies(ctx context.Context, meter metric.Meter, m *poller.Metrics, r *Report) {
 	type siteKey struct{ site, source string }
+
 	type siteStats struct {
 		total    int
 		enabled  int

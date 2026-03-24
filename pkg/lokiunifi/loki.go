@@ -28,15 +28,15 @@ const (
 
 // Config is the plugin's input data.
 type Config struct {
-	Disable   bool          `json:"disable"    toml:"disable"    xml:"disable"    yaml:"disable"`
-	VerifySSL bool          `json:"verify_ssl" toml:"verify_ssl" xml:"verify_ssl" yaml:"verify_ssl"`
-	URL       string        `json:"url"        toml:"url"        xml:"url"        yaml:"url"`
-	Username  string        `json:"user"       toml:"user"       xml:"user"       yaml:"user"`
-	Password  string        `json:"pass"       toml:"pass"       xml:"pass"       yaml:"pass"`
-	TenantID  string        `json:"tenant_id"  toml:"tenant_id"  xml:"tenant_id"  yaml:"tenant_id"`
-	Interval    cnfg.Duration     `json:"interval"      toml:"interval"      xml:"interval"      yaml:"interval"`
-	Timeout     cnfg.Duration     `json:"timeout"       toml:"timeout"       xml:"timeout"       yaml:"timeout"`
-	ExtraLabels map[string]string `json:"extra_labels"  toml:"extra_labels"  xml:"extra_labels"  yaml:"extra_labels"`
+	Disable     bool              `json:"disable"      toml:"disable"      xml:"disable"      yaml:"disable"`
+	VerifySSL   bool              `json:"verify_ssl"   toml:"verify_ssl"   xml:"verify_ssl"   yaml:"verify_ssl"`
+	URL         string            `json:"url"          toml:"url"          xml:"url"          yaml:"url"`
+	Username    string            `json:"user"         toml:"user"         xml:"user"         yaml:"user"`
+	Password    string            `json:"pass"         toml:"pass"         xml:"pass"         yaml:"pass"`
+	TenantID    string            `json:"tenant_id"    toml:"tenant_id"    xml:"tenant_id"    yaml:"tenant_id"`
+	Interval    cnfg.Duration     `json:"interval"     toml:"interval"     xml:"interval"     yaml:"interval"`
+	Timeout     cnfg.Duration     `json:"timeout"      toml:"timeout"      xml:"timeout"      yaml:"timeout"`
+	ExtraLabels map[string]string `json:"extra_labels" toml:"extra_labels" xml:"extra_labels" yaml:"extra_labels"`
 }
 
 // Loki is the main library struct. This satisfies the poller.Output interface.

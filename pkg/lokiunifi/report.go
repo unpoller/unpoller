@@ -84,6 +84,7 @@ func (r *Report) String() string {
 	}
 
 	s += fmt.Sprintf(", Dur: %v", time.Since(r.Start).Round(time.Millisecond))
+
 	return s
 }
 

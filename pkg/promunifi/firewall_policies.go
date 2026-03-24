@@ -58,6 +58,7 @@ func (u *promUnifi) exportFirewallPolicies(r report, policies []*unifi.FirewallP
 
 	// Per-site aggregate counters, keyed by "siteName|source"
 	type siteKey struct{ site, source string }
+
 	type siteStats struct {
 		total    int
 		enabled  int
