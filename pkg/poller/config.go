@@ -105,6 +105,7 @@ type Metrics struct {
 	FirewallPolicies   []any
 	Topologies         []any
 	PortAnomalies      []any
+	VPNMeshes          []any
 	ControllerStatuses []ControllerStatus
 }
 
@@ -120,10 +121,10 @@ type Config struct {
 
 // Poller is the global config values.
 type Poller struct {
-	Plugins         []string `json:"plugins"           toml:"plugins"           xml:"plugin"               yaml:"plugins"`
-	Debug           bool     `json:"debug"             toml:"debug"             xml:"debug,attr"           yaml:"debug"`
-	Quiet           bool     `json:"quiet"             toml:"quiet"             xml:"quiet,attr"           yaml:"quiet"`
-	LogUnknownTypes bool     `json:"log_unknown_types" toml:"log_unknown_types" xml:"log_unknown_types"    yaml:"log_unknown_types"`
+	Plugins         []string `json:"plugins"           toml:"plugins"           xml:"plugin"            yaml:"plugins"`
+	Debug           bool     `json:"debug"             toml:"debug"             xml:"debug,attr"        yaml:"debug"`
+	Quiet           bool     `json:"quiet"             toml:"quiet"             xml:"quiet,attr"        yaml:"quiet"`
+	LogUnknownTypes bool     `json:"log_unknown_types" toml:"log_unknown_types" xml:"log_unknown_types" yaml:"log_unknown_types"`
 }
 
 // LoadPlugins reads-in dynamic shared libraries.

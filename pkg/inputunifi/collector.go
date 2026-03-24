@@ -103,6 +103,7 @@ func (u *InputUnifi) pollController(c *Controller) (*poller.Metrics, error) {
 	if c == nil {
 		return nil, fmt.Errorf("controller is nil")
 	}
+
 	if c.Unifi == nil {
 		return nil, fmt.Errorf("controller client is nil (e.g. after 429 or auth failure): %s", c.URL)
 	}
@@ -246,6 +247,14 @@ func (u *InputUnifi) pollController(c *Controller) (*poller.Metrics, error) {
 		u.LogDebugf("Found %d PortAnomalies entries", len(m.PortAnomalies))
 	}
 
+	// Get Site Magic site-to-site VPN mesh data
+	if m.VPNMeshes, err = c.Unifi.GetMagicSiteToSiteVPN(sites); err != nil {
+		// Don't fail collection if VPN data fails - older controllers may not have this endpoint
+		u.LogDebugf("unifi.GetMagicSiteToSiteVPN(%s): %v (continuing)", c.URL, err)
+	} else {
+		u.LogDebugf("Found %d VPNMeshes entries", len(m.VPNMeshes))
+	}
+
 	// Update web UI only on success; call explicitly so we never run with nil c/c.Unifi (no defer).
 	// Recover so a panic in updateWeb (e.g. old image, race) never kills the poller.
 	if c != nil && c.Unifi != nil {
@@ -255,9 +264,11 @@ func (u *InputUnifi) pollController(c *Controller) (*poller.Metrics, error) {
 					u.LogErrorf("updateWeb panic recovered (upgrade image if this persists): %v", r)
 				}
 			}()
+
 			updateWeb(c, m)
 		}()
 	}
+
 	return u.augmentMetrics(c, m), nil
 }
 
@@ -410,10 +421,12 @@ func (u *InputUnifi) augmentMetrics(c *Controller, metrics *Metrics) *poller.Met
 				if isDefaultSiteName(site.Name) {
 					site.Name = c.DefaultSiteNameOverride
 				}
+
 				if isDefaultSiteName(site.SiteName) {
 					site.SiteName = c.DefaultSiteNameOverride
 				}
 			}
+
 			m.Sites = append(m.Sites, site)
 		}
 
@@ -422,6 +435,7 @@ func (u *InputUnifi) augmentMetrics(c *Controller, metrics *Metrics) *poller.Met
 			if c.DefaultSiteNameOverride != "" && isDefaultSiteName(site.SiteName) {
 				site.SiteName = c.DefaultSiteNameOverride
 			}
+
 			m.SitesDPI = append(m.SitesDPI, site)
 		}
 	}
@@ -431,6 +445,7 @@ func (u *InputUnifi) augmentMetrics(c *Controller, metrics *Metrics) *poller.Met
 		if c.DefaultSiteNameOverride != "" && isDefaultSiteName(speedTest.SiteName) {
 			speedTest.SiteName = c.DefaultSiteNameOverride
 		}
+
 		m.SpeedTests = append(m.SpeedTests, speedTest)
 	}
 
@@ -440,6 +455,7 @@ func (u *InputUnifi) augmentMetrics(c *Controller, metrics *Metrics) *poller.Met
 		if c.DefaultSiteNameOverride != "" && isDefaultSiteName(traffic.TrafficSite.SiteName) {
 			traffic.TrafficSite.SiteName = c.DefaultSiteNameOverride
 		}
+
 		m.CountryTraffic = append(m.CountryTraffic, traffic)
 	}
 
@@ -448,6 +464,7 @@ func (u *InputUnifi) augmentMetrics(c *Controller, metrics *Metrics) *poller.Met
 		if c.DefaultSiteNameOverride != "" && isDefaultSiteName(lease.SiteName) {
 			lease.SiteName = c.DefaultSiteNameOverride
 		}
+
 		m.DHCPLeases = append(m.DHCPLeases, lease)
 	}
 
@@ -487,6 +504,14 @@ func (u *InputUnifi) augmentMetrics(c *Controller, metrics *Metrics) *poller.Met
 		m.PortAnomalies = append(m.PortAnomalies, anomaly)
 	}
 
+	for _, mesh := range metrics.VPNMeshes {
+		if c.DefaultSiteNameOverride != "" && isDefaultSiteName(mesh.SiteName) {
+			mesh.SiteName = c.DefaultSiteNameOverride
+		}
+
+		m.VPNMeshes = append(m.VPNMeshes, mesh)
+	}
+
 	// Apply default_site_name_override to all metrics if configured.
 	// This must be done AFTER all metrics are added to m, so everything is included.
 	// This allows us to use the console name for Cloud Gateways while keeping
@@ -504,6 +529,7 @@ func isDefaultSiteName(siteName string) bool {
 	if siteName == "" {
 		return false
 	}
+
 	lower := strings.ToLower(siteName)
 	// Check for exact match or if it contains "default" as a word
 	return lower == "default" || strings.Contains(lower, "default")
@@ -572,6 +598,7 @@ func applySiteNameOverride(m *poller.Metrics, overrideName string) {
 			if isDefaultSiteName(site.Name) {
 				site.Name = overrideName
 			}
+
 			if isDefaultSiteName(site.SiteName) {
 				site.SiteName = overrideName
 			}
@@ -634,6 +661,14 @@ func applySiteNameOverride(m *poller.Metrics, overrideName string) {
 		if anomaly, ok := m.PortAnomalies[i].(*unifi.PortAnomaly); ok {
 			if isDefaultSiteName(anomaly.SiteName) {
 				anomaly.SiteName = overrideName
+			}
+		}
+	}
+
+	for i := range m.VPNMeshes {
+		if mesh, ok := m.VPNMeshes[i].(*unifi.MagicSiteToSiteVPN); ok {
+			if isDefaultSiteName(mesh.SiteName) {
+				mesh.SiteName = overrideName
 			}
 		}
 	}
