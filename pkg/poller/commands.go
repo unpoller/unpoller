@@ -163,6 +163,7 @@ func (u *UnifiPoller) HealthCheck() error {
 
 	// Check if at least one output is enabled.
 	hasEnabledOutput := false
+
 	for _, output := range outputs {
 		if output.Enabled() {
 			hasEnabledOutput = true

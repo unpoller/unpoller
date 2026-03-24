@@ -72,6 +72,7 @@ func (r *Report) export(m *metric, v float64) prometheus.Metric {
 	for _, label := range m.Labels {
 		bytes += len(label) + 3 // label value + quotes and comma/equals overhead
 	}
+
 	bytes += 20 // approximate size for value and timestamp
 
 	r.Bytes += bytes

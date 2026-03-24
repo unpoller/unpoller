@@ -18,10 +18,12 @@ func controllerID(c *Controller) string {
 	if c == nil {
 		return ""
 	}
+
 	client := c.Unifi
 	if client == nil {
 		return ""
 	}
+
 	return client.UUID
 }
 
@@ -32,12 +34,15 @@ func updateWeb(c *Controller, metrics *Metrics) {
 			log.Printf("[ERROR] updateWeb panic recovered: %v", r)
 		}
 	}()
+
 	if c == nil || metrics == nil {
 		return
 	}
+
 	if c.Unifi == nil {
 		return
 	}
+
 	webserver.UpdateInput(&webserver.Input{
 		Name:    PluginName, // Forgetting this leads to 3 hours of head scratching.
 		Sites:   formatSites(c, metrics.Sites),
@@ -97,6 +102,7 @@ func formatSites(c *Controller, sites []*unifi.Site) (s webserver.Sites) {
 		if site == nil {
 			continue
 		}
+
 		s = append(s, &webserver.Site{
 			ID:         site.ID,
 			Name:       site.Name,
@@ -114,6 +120,7 @@ func formatClients(c *Controller, clients []*unifi.Client) (d webserver.Clients)
 		if client == nil {
 			continue
 		}
+
 		clientType, deviceMAC := "unknown", "unknown"
 		if client.ApMac != "" {
 			clientType = "wireless"
@@ -157,6 +164,7 @@ func formatDevices(c *Controller, devices *unifi.Devices) (d webserver.Devices) 
 		if device == nil {
 			continue
 		}
+
 		d = append(d, &webserver.Device{
 			Name:       device.Name,
 			SiteID:     device.SiteID,
@@ -177,6 +185,7 @@ func formatDevices(c *Controller, devices *unifi.Devices) (d webserver.Devices) 
 		if device == nil {
 			continue
 		}
+
 		d = append(d, &webserver.Device{
 			Name:       device.Name,
 			SiteID:     device.SiteID,
@@ -197,6 +206,7 @@ func formatDevices(c *Controller, devices *unifi.Devices) (d webserver.Devices) 
 		if device == nil {
 			continue
 		}
+
 		d = append(d, &webserver.Device{
 			Name:       device.Name,
 			SiteID:     device.SiteID,
@@ -217,6 +227,7 @@ func formatDevices(c *Controller, devices *unifi.Devices) (d webserver.Devices) 
 		if device == nil {
 			continue
 		}
+
 		d = append(d, &webserver.Device{
 			Name:       device.Name,
 			SiteID:     device.SiteID,
