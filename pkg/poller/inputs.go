@@ -280,6 +280,7 @@ func AppendMetrics(existing *Metrics, m *Metrics) *Metrics {
 	existing.FirewallPolicies = append(existing.FirewallPolicies, m.FirewallPolicies...)
 	existing.Topologies = append(existing.Topologies, m.Topologies...)
 	existing.PortAnomalies = append(existing.PortAnomalies, m.PortAnomalies...)
+	existing.VPNMeshes = append(existing.VPNMeshes, m.VPNMeshes...)
 	existing.ControllerStatuses = append(existing.ControllerStatuses, m.ControllerStatuses...)
 
 	return existing

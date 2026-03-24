@@ -53,6 +53,7 @@ type promUnifi struct {
 	FirewallPolicy *firewallpolicy
 	Topology       *topology
 	PortAnomaly    *portanomaly
+	VPNMesh        *vpnmesh
 	// controllerUp tracks per-controller poll success (1) or failure (0).
 	controllerUp *prometheus.GaugeVec
 	// This interface is passed to the Collect() method. The Collect method uses
@@ -221,6 +222,7 @@ func (u *promUnifi) Run(c poller.Collect) error {
 	u.FirewallPolicy = descFirewallPolicy(u.Namespace + "_")
 	u.Topology = descTopology(u.Namespace + "_")
 	u.PortAnomaly = descPortAnomaly(u.Namespace + "_")
+	u.VPNMesh = descVPNMesh(u.Namespace + "_")
 	u.controllerUp = prometheus.NewGaugeVec(prometheus.GaugeOpts{
 		Name: u.Namespace + "_controller_up",
 		Help: "Whether the last poll of the UniFi controller succeeded (1) or failed (0).",
@@ -309,7 +311,7 @@ func (t *target) Describe(ch chan<- *prometheus.Desc) {
 // Describe satisfies the prometheus Collector. This returns all of the
 // metric descriptions that this packages produces.
 func (u *promUnifi) Describe(ch chan<- *prometheus.Desc) {
-	for _, f := range []any{u.Client, u.Device, u.UAP, u.USG, u.USW, u.PDU, u.Site, u.SpeedTest, u.DHCPLease, u.WAN, u.FirewallPolicy, u.Topology, u.PortAnomaly} {
+	for _, f := range []any{u.Client, u.Device, u.UAP, u.USG, u.USW, u.PDU, u.Site, u.SpeedTest, u.DHCPLease, u.WAN, u.FirewallPolicy, u.Topology, u.PortAnomaly, u.VPNMesh} {
 		v := reflect.Indirect(reflect.ValueOf(f))
 
 		// Loop each struct member and send it to the provided channel.
@@ -451,6 +453,7 @@ func (u *promUnifi) loopExports(r report) {
 			dhcpLeases = append(dhcpLeases, l)
 		}
 	}
+
 	if len(dhcpLeases) > 0 {
 		u.exportDHCPNetworkPool(r, dhcpLeases)
 	}
@@ -500,6 +503,12 @@ func (u *promUnifi) loopExports(r report) {
 	}
 
 	u.exportPortAnomalies(r, portAnomalies)
+
+	for _, v := range m.VPNMeshes {
+		if mesh, ok := v.(*unifi.MagicSiteToSiteVPN); ok {
+			u.exportVPNMesh(r, mesh)
+		}
+	}
 
 	u.exportClientDPItotals(r, appTotal, catTotal)
 }
