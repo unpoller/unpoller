@@ -152,16 +152,23 @@ func (u *InputUnifi) pollController(c *Controller) (*poller.Metrics, error) {
 		u.LogDebugf("Found %d CountryTraffic entries", len(m.CountryTraffic))
 	}
 
-	if c.SaveTraffic != nil && *c.SaveTraffic && c.SaveDPI != nil && *c.SaveDPI {
+	if c.SaveDPI != nil && *c.SaveDPI {
+		// Supplement DPI data with the v2 traffic API, which works on newer firmware
+		// (Network 9.1+) where the legacy /stat/stadpi and /stat/sitedpi endpoints
+		// return empty results. GetClientTraffic is called regardless of SaveTraffic
+		// because it provides DPI-equivalent per-client app/category breakdowns.
 		clientUsageByApp, err := c.Unifi.GetClientTraffic(sites, &tp, true)
 		if err != nil {
-			return nil, fmt.Errorf("unifi.GetClientTraffic(%s): %w", c.URL, err)
+			u.LogDebugf("unifi.GetClientTraffic(%s): %v (legacy DPI endpoints will be used if available)", c.URL, err)
+		} else {
+			u.LogDebugf("Found %d ClientUsageByApp entries", len(clientUsageByApp))
+			b4 := len(m.ClientsDPI)
+			u.convertToClientDPI(clientUsageByApp, m)
+			u.LogDebugf("Added %d ClientDPI entries from v2 traffic API for a total of %d", len(m.ClientsDPI)-b4, len(m.ClientsDPI))
+			b4Sites := len(m.SitesDPI)
+			u.convertToSiteDPI(clientUsageByApp, m)
+			u.LogDebugf("Added %d SitesDPI entries from v2 traffic API for a total of %d", len(m.SitesDPI)-b4Sites, len(m.SitesDPI))
 		}
-
-		u.LogDebugf("Found %d ClientUsageByApp entries", len(clientUsageByApp))
-		b4 := len(m.ClientsDPI)
-		u.convertToClientDPI(clientUsageByApp, m)
-		u.LogDebugf("Added %d ClientDPI entries for a total of %d", len(m.ClientsDPI)-b4, len(m.ClientsDPI))
 	}
 
 	// Get all the points.
@@ -355,6 +362,99 @@ func (u *InputUnifi) convertToClientDPI(clientUsageByApp []*unifi.ClientUsageByA
 			SourceName: client.TrafficSite.SourceName,
 		}
 		metrics.ClientsDPI = append(metrics.ClientsDPI, &dpiTable)
+	}
+}
+
+// convertToSiteDPI aggregates v2 client traffic data into per-site DPITable entries.
+// It only adds a site entry if the site doesn't already have one from the legacy API,
+// so old-firmware users are unaffected.
+func (u *InputUnifi) convertToSiteDPI(clientUsageByApp []*unifi.ClientUsageByApp, metrics *Metrics) {
+	// Build a set of sites already covered by the legacy API.
+	existing := make(map[string]bool)
+
+	for _, s := range metrics.SitesDPI {
+		existing[s.SiteName] = true
+	}
+
+	type appKey struct {
+		App int
+		Cat int
+	}
+
+	type siteAgg struct {
+		byApp      map[appKey]*unifi.DPIData
+		byCat      map[int]*unifi.DPIData
+		sourceName string
+	}
+
+	siteMap := make(map[string]*siteAgg)
+
+	for _, client := range clientUsageByApp {
+		siteName := client.TrafficSite.SiteName
+		if existing[siteName] {
+			continue
+		}
+
+		agg, ok := siteMap[siteName]
+		if !ok {
+			agg = &siteAgg{
+				byApp:      make(map[appKey]*unifi.DPIData),
+				byCat:      make(map[int]*unifi.DPIData),
+				sourceName: client.TrafficSite.SourceName,
+			}
+			siteMap[siteName] = agg
+		}
+
+		for _, app := range client.UsageByApp {
+			k := appKey{App: app.Application, Cat: app.Category}
+
+			if d, ok := agg.byApp[k]; ok {
+				d.RxBytes.Val += float64(app.BytesReceived)
+				d.TxBytes.Val += float64(app.BytesTransmitted)
+			} else {
+				agg.byApp[k] = &unifi.DPIData{
+					App:       u.intToFlexInt(app.Application),
+					Cat:       u.intToFlexInt(app.Category),
+					RxBytes:   u.int64ToFlexInt(app.BytesReceived),
+					RxPackets: u.int64ToFlexInt(0),
+					TxBytes:   u.int64ToFlexInt(app.BytesTransmitted),
+					TxPackets: u.int64ToFlexInt(0),
+				}
+			}
+
+			if d, ok := agg.byCat[app.Category]; ok {
+				d.RxBytes.Val += float64(app.BytesReceived)
+				d.TxBytes.Val += float64(app.BytesTransmitted)
+			} else {
+				agg.byCat[app.Category] = &unifi.DPIData{
+					App:       u.intToFlexInt(16777215), // unknown app — category aggregate
+					Cat:       u.intToFlexInt(app.Category),
+					RxBytes:   u.int64ToFlexInt(app.BytesReceived),
+					RxPackets: u.int64ToFlexInt(0),
+					TxBytes:   u.int64ToFlexInt(app.BytesTransmitted),
+					TxPackets: u.int64ToFlexInt(0),
+				}
+			}
+		}
+	}
+
+	for siteName, agg := range siteMap {
+		byApp := make([]unifi.DPIData, 0, len(agg.byApp))
+		for _, d := range agg.byApp {
+			byApp = append(byApp, *d)
+		}
+
+		byCat := make([]unifi.DPIData, 0, len(agg.byCat))
+		for _, d := range agg.byCat {
+			byCat = append(byCat, *d)
+		}
+
+		metrics.SitesDPI = append(metrics.SitesDPI, &unifi.DPITable{
+			ByApp:      byApp,
+			ByCat:      byCat,
+			SiteName:   siteName,
+			SourceName: agg.sourceName,
+		})
 	}
 }
 
