@@ -1,0 +1,51 @@
+# UniFi Poller with InfluxDB + Grafana using remote (ui.com cloud) mode.
+# Requires an API key from https://api.unifi.ui.com — no controller user/pass needed.
+version: '3'
+services:
+  influxdb:
+    restart: always
+    image: influxdb:1.8
+    ports:
+      - '8086:8086'
+    volumes:
+      - influxdb-storage:/var/lib/influxdb
+    environment:
+      - INFLUXDB_DB=${INFLUXDB_DB}
+      - INFLUXDB_HTTP_AUTH_ENABLED=${INFLUXDB_HTTP_AUTH_ENABLED}
+      - DOCKER_INFLUXDB_INIT_MODE=setup
+      - DOCKER_INFLUXDB_INIT_USERNAME=${INFLUXDB_ADMIN_USER}
+      - DOCKER_INFLUXDB_INIT_PASSWORD=${INFLUXDB_ADMIN_PASSWORD}
+  grafana:
+    image: grafana/grafana:latest
+    restart: always
+    ports:
+      - '3000:3000'
+    volumes:
+      - grafana-storage:/var/lib/grafana
+    depends_on:
+      - influxdb
+    environment:
+      - GF_SECURITY_ADMIN_USER=${GRAFANA_USERNAME}
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_PASSWORD}
+      - GF_INSTALL_PLUGINS=grafana-clock-panel,natel-discrete-panel,grafana-piechart-panel
+  unifi-poller:
+    restart: always
+    image: ghcr.io/unpoller/unpoller:${POLLER_TAG}
+    depends_on:
+      - grafana
+      - influxdb
+    environment:
+      - UP_INFLUXDB_DB=${INFLUXDB_DB}
+      - UP_INFLUXDB_USER=${INFLUXDB_ADMIN_USER}
+      - UP_INFLUXDB_PASS=${INFLUXDB_ADMIN_PASSWORD}
+      - UP_INFLUXDB_URL=http://influxdb:8086
+      # Remote (cloud) mode: connects via api.ui.com, no controller URL or user/pass required.
+      # UP_UNIFI_REMOTE enables auto-discovery of all Network-capable consoles on your account.
+      - UP_UNIFI_REMOTE=true
+      - UP_UNIFI_REMOTE_API_KEY=${UNIFI_API_KEY}
+      - UP_POLLER_DEBUG=${POLLER_DEBUG}
+      - UP_UNIFI_DEFAULT_SAVE_DPI=${POLLER_SAVE_DPI}
+      - UP_PROMETHEUS_NAMESPACE=unpoller
+volumes:
+  influxdb-storage:
+  grafana-storage:
