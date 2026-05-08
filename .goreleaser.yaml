@@ -548,9 +548,9 @@ brews:
     install: |
       bin.install "unpoller"
       (etc/"unpoller").mkpath
-      etc.install "examples/up.conf" => "unpoller/up.conf.example"
+      etc.install "examples/up.conf.example" => "unpoller/up.conf.example"
     post_install: |
-      etc.install "examples/up.conf" => "unpoller/up.conf"
+      etc.install "examples/up.conf.example" => "unpoller/up.conf"
 
 publishers:
   - name: "packagecloud-publisher"
