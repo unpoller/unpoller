@@ -337,6 +337,90 @@ func (u *DatadogUnifi) loopPoints(r report) {
 	for _, v := range m.VPNMeshes {
 		u.switchExport(r, v)
 	}
+
+	for _, v := range m.PortForwards {
+		u.switchExport(r, v)
+	}
+
+	for _, v := range m.SSLCertificates {
+		u.switchExport(r, v)
+	}
+
+	for _, v := range m.UPSDevices {
+		u.switchExport(r, v)
+	}
+
+	for _, v := range m.WANStatuses {
+		u.switchExport(r, v)
+	}
+
+	for _, v := range m.IntegrationDevStats {
+		u.switchExport(r, v)
+	}
+
+	for _, v := range m.WifiBroadcasts {
+		u.switchExport(r, v)
+	}
+
+	for _, v := range m.FirewallZones {
+		u.switchExport(r, v)
+	}
+
+	for _, v := range m.ACLRules {
+		u.switchExport(r, v)
+	}
+
+	for _, v := range m.VPNServers {
+		u.switchExport(r, v)
+	}
+
+	for _, v := range m.SiteToSiteTunnels {
+		u.switchExport(r, v)
+	}
+
+	for _, v := range m.LAGs {
+		u.switchExport(r, v)
+	}
+
+	for _, v := range m.MCLAGDomains {
+		u.switchExport(r, v)
+	}
+
+	for _, v := range m.SwitchStacks {
+		u.switchExport(r, v)
+	}
+
+	for _, v := range m.DNSPolicies {
+		u.switchExport(r, v)
+	}
+
+	for _, v := range m.RADIUSProfiles {
+		u.switchExport(r, v)
+	}
+
+	for _, v := range m.TrafficMatchingLists {
+		u.switchExport(r, v)
+	}
+
+	for _, v := range m.HotspotVouchers {
+		u.switchExport(r, v)
+	}
+
+	for _, v := range m.DPIApplications {
+		u.switchExport(r, v)
+	}
+
+	for _, v := range m.DPICategories {
+		u.switchExport(r, v)
+	}
+
+	for _, v := range m.PendingDevices {
+		u.switchExport(r, v)
+	}
+
+	for _, v := range m.Countries {
+		u.switchExport(r, v)
+	}
 }
 
 func (u *DatadogUnifi) switchExport(r report, v any) { //nolint:cyclop
@@ -385,6 +469,48 @@ func (u *DatadogUnifi) switchExport(r report, v any) { //nolint:cyclop
 		u.batchPortAnomaly(r, v)
 	case *unifi.MagicSiteToSiteVPN:
 		u.batchMagicSiteToSiteVPN(r, v)
+	case *unifi.PortForward:
+		u.batchPortForward(r, v)
+	case *unifi.SSLCertificate:
+		u.batchSSLCertificate(r, v)
+	case *unifi.UPSDeviceSelector:
+		u.batchUPSDevice(r, v)
+	case *unifi.WANStatus:
+		u.batchWANStatus(r, v)
+	case *unifi.IntegrationDeviceStats:
+		u.batchIntegrationDevStats(r, v)
+	case *unifi.WifiBroadcast:
+		u.batchWifiBroadcast(r, v)
+	case *unifi.FirewallZone:
+		u.batchFirewallZone(r, v)
+	case *unifi.ACLRule:
+		u.batchACLRule(r, v)
+	case *unifi.VPNServer:
+		u.batchVPNServer(r, v)
+	case *unifi.SiteToSiteTunnel:
+		u.batchSiteToSiteTunnel(r, v)
+	case *unifi.LAG:
+		u.batchLAG(r, v)
+	case *unifi.MCLAGDomain:
+		u.batchMCLAGDomain(r, v)
+	case *unifi.SwitchStack:
+		u.batchSwitchStack(r, v)
+	case *unifi.DNSPolicy:
+		u.batchDNSPolicy(r, v)
+	case *unifi.RADIUSProfile:
+		u.batchRADIUSProfile(r, v)
+	case *unifi.TrafficMatchingList:
+		u.batchTrafficMatchingList(r, v)
+	case *unifi.HotspotVoucher:
+		u.batchHotspotVoucher(r, v)
+	case *unifi.DPIApplication:
+		u.batchDPIApplication(r, v)
+	case *unifi.DPICategory:
+		u.batchDPICategory(r, v)
+	case *unifi.PendingDevice:
+		u.batchPendingDevice(r, v)
+	case *unifi.Country:
+		u.batchCountry(r, v)
 	default:
 		if u.Collector != nil && u.Collector.Poller().LogUnknownTypes {
 			u.LogDebugf("unknown export type: %T", v)

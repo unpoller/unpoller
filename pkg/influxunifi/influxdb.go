@@ -450,6 +450,133 @@ func (u *InfluxUnifi) loopPoints(r report) {
 	for _, v := range m.VPNMeshes {
 		u.switchExport(r, v)
 	}
+
+	// v5.26.0 additions.
+	for _, ds := range m.IntegrationDevStats {
+		if d, ok := ds.(*unifi.IntegrationDeviceStats); ok {
+			u.batchIntegrationDeviceStats(r, d)
+		}
+	}
+
+	for _, ws := range m.WANStatuses {
+		if w, ok := ws.(*unifi.WANStatus); ok {
+			u.batchWANStatus(r, w)
+		}
+	}
+
+	for _, pf := range m.PortForwards {
+		if v, ok := pf.(*unifi.PortForward); ok {
+			u.batchPortForward(r, v)
+		}
+	}
+
+	for _, sc := range m.SSLCertificates {
+		if v, ok := sc.(*unifi.SSLCertificate); ok {
+			u.batchSSLCertificate(r, v)
+		}
+	}
+
+	for _, ud := range m.UPSDevices {
+		if v, ok := ud.(*unifi.UPSDeviceSelector); ok {
+			u.batchUPSDevice(r, v)
+		}
+	}
+
+	for _, wb := range m.WifiBroadcasts {
+		if v, ok := wb.(*unifi.WifiBroadcast); ok {
+			u.batchWifiBroadcast(r, v)
+		}
+	}
+
+	for _, fz := range m.FirewallZones {
+		if v, ok := fz.(*unifi.FirewallZone); ok {
+			u.batchFirewallZone(r, v)
+		}
+	}
+
+	for _, ar := range m.ACLRules {
+		if v, ok := ar.(*unifi.ACLRule); ok {
+			u.batchACLRule(r, v)
+		}
+	}
+
+	for _, vs := range m.VPNServers {
+		if v, ok := vs.(*unifi.VPNServer); ok {
+			u.batchVPNServer(r, v)
+		}
+	}
+
+	for _, st := range m.SiteToSiteTunnels {
+		if v, ok := st.(*unifi.SiteToSiteTunnel); ok {
+			u.batchSiteToSiteTunnel(r, v)
+		}
+	}
+
+	for _, lag := range m.LAGs {
+		if v, ok := lag.(*unifi.LAG); ok {
+			u.batchLAG(r, v)
+		}
+	}
+
+	for _, md := range m.MCLAGDomains {
+		if v, ok := md.(*unifi.MCLAGDomain); ok {
+			u.batchMCLAGDomain(r, v)
+		}
+	}
+
+	for _, ss := range m.SwitchStacks {
+		if v, ok := ss.(*unifi.SwitchStack); ok {
+			u.batchSwitchStack(r, v)
+		}
+	}
+
+	for _, dp := range m.DNSPolicies {
+		if v, ok := dp.(*unifi.DNSPolicy); ok {
+			u.batchDNSPolicy(r, v)
+		}
+	}
+
+	for _, rp := range m.RADIUSProfiles {
+		if v, ok := rp.(*unifi.RADIUSProfile); ok {
+			u.batchRADIUSProfile(r, v)
+		}
+	}
+
+	for _, tml := range m.TrafficMatchingLists {
+		if v, ok := tml.(*unifi.TrafficMatchingList); ok {
+			u.batchTrafficMatchingList(r, v)
+		}
+	}
+
+	for _, hv := range m.HotspotVouchers {
+		if v, ok := hv.(*unifi.HotspotVoucher); ok {
+			u.batchHotspotVoucher(r, v)
+		}
+	}
+
+	for _, da := range m.DPIApplications {
+		if v, ok := da.(*unifi.DPIApplication); ok {
+			u.batchDPIApplication(r, v)
+		}
+	}
+
+	for _, dc := range m.DPICategories {
+		if v, ok := dc.(*unifi.DPICategory); ok {
+			u.batchDPICategory(r, v)
+		}
+	}
+
+	for _, pd := range m.PendingDevices {
+		if v, ok := pd.(*unifi.PendingDevice); ok {
+			u.batchPendingDevice(r, v)
+		}
+	}
+
+	for _, co := range m.Countries {
+		if v, ok := co.(*unifi.Country); ok {
+			u.batchCountry(r, v)
+		}
+	}
 }
 
 func (u *InfluxUnifi) switchExport(r report, v any) { //nolint:cyclop
