@@ -107,6 +107,28 @@ type Metrics struct {
 	PortAnomalies      []any
 	VPNMeshes          []any
 	ControllerStatuses []ControllerStatus
+	// Added in v5.26.0 integration:
+	WANStatuses          []any // *unifi.WANStatus — per-site WAN failover state
+	PortForwards         []any // *unifi.PortForward — port forwarding rules
+	SSLCertificates      []any // *unifi.SSLCertificate — controller SSL cert info
+	UPSDevices           []any // *unifi.UPSDeviceSelector — UPS selector list
+	IntegrationDevStats  []any // *unifi.IntegrationDeviceStats — CPU/mem/radio/uplink per device
+	WifiBroadcasts       []any // *unifi.WifiBroadcast — WiFi SSID broadcasts
+	FirewallZones        []any // *unifi.FirewallZone — firewall zones
+	ACLRules             []any // *unifi.ACLRule — access control rules
+	VPNServers           []any // *unifi.VPNServer — VPN server inventory
+	SiteToSiteTunnels    []any // *unifi.SiteToSiteTunnel — site-to-site VPN tunnels
+	LAGs                 []any // *unifi.LAG — link aggregation groups
+	MCLAGDomains         []any // *unifi.MCLAGDomain — multi-chassis LAG domains
+	SwitchStacks         []any // *unifi.SwitchStack — switch stacks
+	DNSPolicies          []any // *unifi.DNSPolicy — DNS policies
+	RADIUSProfiles       []any // *unifi.RADIUSProfile — RADIUS profiles
+	TrafficMatchingLists []any // *unifi.TrafficMatchingList — traffic matching lists
+	HotspotVouchers      []any // *unifi.HotspotVoucher — hotspot vouchers
+	DPIApplications      []any // *unifi.DPIApplication — DPI app catalogue (global)
+	DPICategories        []any // *unifi.DPICategory — DPI category catalogue (global)
+	PendingDevices       []any // *unifi.PendingDevice — devices awaiting adoption (global)
+	Countries            []any // *unifi.Country — country list for geo-filters (global)
 }
 
 // Events defines the type for log entries.

@@ -3,6 +3,7 @@ package inputunifi
 // nolint: gosec
 import (
 	"crypto/md5"
+	"errors"
 	"fmt"
 	"strings"
 	"time"
@@ -78,7 +79,7 @@ func (u *InputUnifi) collectController(c *Controller) (*poller.Metrics, error) {
 
 	metrics, err := u.pollController(c)
 	if err != nil {
-		u.Logf("Re-authenticating to UniFi Controller: %s", c.URL)
+		u.Logf("Re-authenticating to UniFi Controller %s (poll error: %v)", c.URL, err)
 
 		if authErr := u.getUnifi(c); authErr != nil {
 			return metrics, fmt.Errorf("re-authenticating to %s: %w", c.URL, authErr)
@@ -260,6 +261,14 @@ func (u *InputUnifi) pollController(c *Controller) (*poller.Metrics, error) {
 		u.LogDebugf("unifi.GetMagicSiteToSiteVPN(%s): %v (continuing)", c.URL, err)
 	} else {
 		u.LogDebugf("Found %d VPNMeshes entries", len(m.VPNMeshes))
+	}
+
+	// Legacy API additions (v5.26.0) — available on most firmware, no API key required.
+	u.collectLegacyPerSite(c, sites, m)
+
+	// Integration/v1 API additions (v5.26.0) — require API key and Network 9.3.43+.
+	if c.APIKey != "" {
+		u.collectIntegrationV1(c, sites, m)
 	}
 
 	// Update web UI only on success; call explicitly so we never run with nil c/c.Unifi (no defer).
@@ -458,6 +467,182 @@ func (u *InputUnifi) convertToSiteDPI(clientUsageByApp []*unifi.ClientUsageByApp
 	}
 }
 
+// collectLegacyPerSite collects v5.26.0 additions that use the legacy API (no API key needed).
+// Failures are non-fatal: older firmware may not expose these endpoints.
+func (u *InputUnifi) collectLegacyPerSite(c *Controller, sites []*unifi.Site, m *Metrics) {
+	for _, site := range sites {
+		if wan, err := c.Unifi.GetWANStatus(site); err != nil {
+			u.LogDebugf("unifi.GetWANStatus(%s, %s): %v (continuing)", c.URL, site.Name, err)
+		} else {
+			m.WANStatuses = append(m.WANStatuses, wan)
+		}
+
+		if forwards, err := c.Unifi.GetPortForwards(site); err != nil {
+			u.LogDebugf("unifi.GetPortForwards(%s, %s): %v (continuing)", c.URL, site.Name, err)
+		} else {
+			m.PortForwards = append(m.PortForwards, forwards...)
+		}
+
+		if cert, err := c.Unifi.GetSSLCertificate(site); err != nil {
+			u.LogDebugf("unifi.GetSSLCertificate(%s, %s): %v (continuing)", c.URL, site.Name, err)
+		} else if cert.ID != "" {
+			m.SSLCertificates = append(m.SSLCertificates, cert)
+		}
+
+		if upsList, err := c.Unifi.GetUPSDeviceList(site); err != nil {
+			u.LogDebugf("unifi.GetUPSDeviceList(%s, %s): %v (continuing)", c.URL, site.Name, err)
+		} else {
+			m.UPSDevices = append(m.UPSDevices, upsList...)
+		}
+	}
+}
+
+// collectIntegrationV1 collects all Integration/v1 endpoints (Network 9.3.43+, API key required).
+// Only called when c.APIKey != "", so ErrAPIKeyRequired will not be returned.
+// ErrEndpointNotFound is expected on firmware older than Network 9.3.43.
+//
+//nolint:cyclop,funlen
+func (u *InputUnifi) collectIntegrationV1(c *Controller, sites []*unifi.Site, m *Metrics) {
+	// Fetch integration sites — required for all per-site Integration/v1 calls.
+	integrationSites, err := c.Unifi.GetIntegrationSites()
+	if err != nil {
+		if errors.Is(err, unifi.ErrEndpointNotFound) {
+			// Integration/v1 requires Network 9.3.43+. Controllers below that return 404.
+			u.LogDebugf("unifi.GetIntegrationSites(%s): Integration/v1 not available (Network 9.3.43+ required)", c.URL)
+		} else {
+			// Unexpected failure (auth expiry, network error, 500) while an API key is configured.
+			// All per-site Integration/v1 data will be absent until this resolves.
+			u.Logf("unifi.GetIntegrationSites(%s): %v (skipping Integration/v1 per-site collection)", c.URL, err)
+		}
+
+		return
+	}
+
+	u.LogDebugf("Found %d IntegrationSites", len(integrationSites))
+
+	// Build a map from legacy site name → IntegrationSite to match user-configured sites.
+	// IntegrationSite.InternalReference is the same short name used in the legacy API (e.g. "default").
+	intSiteByName := make(map[string]*unifi.IntegrationSite, len(integrationSites))
+	for _, is := range integrationSites {
+		intSiteByName[is.InternalReference] = is
+	}
+
+	// Per-site Integration/v1 collections — only for user-configured sites.
+	for _, site := range sites {
+		is, ok := intSiteByName[site.Name]
+		if !ok {
+			continue
+		}
+
+		if devStats, err := c.Unifi.GetAllIntegrationDeviceStats(is); err != nil {
+			u.LogDebugf("unifi.GetAllIntegrationDeviceStats(%s, %s): %v (continuing)", c.URL, is.Name, err)
+		} else {
+			m.IntegrationDevStats = append(m.IntegrationDevStats, devStats...)
+		}
+
+		if broadcasts, err := c.Unifi.GetWifiBroadcasts(is); err != nil {
+			u.LogDebugf("unifi.GetWifiBroadcasts(%s, %s): %v (continuing)", c.URL, is.Name, err)
+		} else {
+			m.WifiBroadcasts = append(m.WifiBroadcasts, broadcasts...)
+		}
+
+		if zones, err := c.Unifi.GetFirewallZones(is); err != nil {
+			u.LogDebugf("unifi.GetFirewallZones(%s, %s): %v (continuing)", c.URL, is.Name, err)
+		} else {
+			m.FirewallZones = append(m.FirewallZones, zones...)
+		}
+
+		if rules, err := c.Unifi.GetACLRules(is); err != nil {
+			u.LogDebugf("unifi.GetACLRules(%s, %s): %v (continuing)", c.URL, is.Name, err)
+		} else {
+			m.ACLRules = append(m.ACLRules, rules...)
+		}
+
+		if servers, err := c.Unifi.GetVPNServers(is); err != nil {
+			u.LogDebugf("unifi.GetVPNServers(%s, %s): %v (continuing)", c.URL, is.Name, err)
+		} else {
+			m.VPNServers = append(m.VPNServers, servers...)
+		}
+
+		if tunnels, err := c.Unifi.GetSiteToSiteTunnels(is); err != nil {
+			u.LogDebugf("unifi.GetSiteToSiteTunnels(%s, %s): %v (continuing)", c.URL, is.Name, err)
+		} else {
+			m.SiteToSiteTunnels = append(m.SiteToSiteTunnels, tunnels...)
+		}
+
+		if lags, err := c.Unifi.GetLAGs(is); err != nil {
+			u.LogDebugf("unifi.GetLAGs(%s, %s): %v (continuing)", c.URL, is.Name, err)
+		} else {
+			m.LAGs = append(m.LAGs, lags...)
+		}
+
+		if mclags, err := c.Unifi.GetMCLAGDomains(is); err != nil {
+			u.LogDebugf("unifi.GetMCLAGDomains(%s, %s): %v (continuing)", c.URL, is.Name, err)
+		} else {
+			m.MCLAGDomains = append(m.MCLAGDomains, mclags...)
+		}
+
+		if stacks, err := c.Unifi.GetSwitchStacks(is); err != nil {
+			u.LogDebugf("unifi.GetSwitchStacks(%s, %s): %v (continuing)", c.URL, is.Name, err)
+		} else {
+			m.SwitchStacks = append(m.SwitchStacks, stacks...)
+		}
+
+		if policies, err := c.Unifi.GetDNSPolicies(is); err != nil {
+			u.LogDebugf("unifi.GetDNSPolicies(%s, %s): %v (continuing)", c.URL, is.Name, err)
+		} else {
+			m.DNSPolicies = append(m.DNSPolicies, policies...)
+		}
+
+		if profiles, err := c.Unifi.GetRADIUSProfiles(is); err != nil {
+			u.LogDebugf("unifi.GetRADIUSProfiles(%s, %s): %v (continuing)", c.URL, is.Name, err)
+		} else {
+			m.RADIUSProfiles = append(m.RADIUSProfiles, profiles...)
+		}
+
+		if lists, err := c.Unifi.GetTrafficMatchingLists(is); err != nil {
+			u.LogDebugf("unifi.GetTrafficMatchingLists(%s, %s): %v (continuing)", c.URL, is.Name, err)
+		} else {
+			m.TrafficMatchingLists = append(m.TrafficMatchingLists, lists...)
+		}
+
+		if vouchers, err := c.Unifi.GetHotspotVouchers(is); err != nil {
+			u.LogDebugf("unifi.GetHotspotVouchers(%s, %s): %v (continuing)", c.URL, is.Name, err)
+		} else {
+			m.HotspotVouchers = append(m.HotspotVouchers, vouchers...)
+		}
+	}
+
+	// Global Integration/v1 collections (not per-site).
+	if apps, err := c.Unifi.GetDPIApplications(); err != nil {
+		u.LogDebugf("unifi.GetDPIApplications(%s): %v (continuing)", c.URL, err)
+	} else {
+		m.DPIApplications = append(m.DPIApplications, apps...)
+		u.LogDebugf("Found %d DPIApplications", len(apps))
+	}
+
+	if cats, err := c.Unifi.GetDPICategories(); err != nil {
+		u.LogDebugf("unifi.GetDPICategories(%s): %v (continuing)", c.URL, err)
+	} else {
+		m.DPICategories = append(m.DPICategories, cats...)
+		u.LogDebugf("Found %d DPICategories", len(cats))
+	}
+
+	if pending, err := c.Unifi.GetPendingDevices(); err != nil {
+		u.LogDebugf("unifi.GetPendingDevices(%s): %v (continuing)", c.URL, err)
+	} else {
+		m.PendingDevices = append(m.PendingDevices, pending...)
+		u.LogDebugf("Found %d PendingDevices", len(pending))
+	}
+
+	if countries, err := c.Unifi.GetCountries(); err != nil {
+		u.LogDebugf("unifi.GetCountries(%s): %v (continuing)", c.URL, err)
+	} else {
+		m.Countries = append(m.Countries, countries...)
+		u.LogDebugf("Found %d Countries", len(countries))
+	}
+}
+
 // augmentMetrics is our middleware layer between collecting metrics and writing them.
 // This is where we can manipuate the returned data or make arbitrary decisions.
 // This method currently adds parent device names to client metrics and hashes PII.
@@ -610,6 +795,156 @@ func (u *InputUnifi) augmentMetrics(c *Controller, metrics *Metrics) *poller.Met
 		}
 
 		m.VPNMeshes = append(m.VPNMeshes, mesh)
+	}
+
+	// v5.26.0 additions — pass through with site name override applied.
+	for _, ws := range metrics.WANStatuses {
+		if c.DefaultSiteNameOverride != "" && isDefaultSiteName(ws.SiteName) {
+			ws.SiteName = c.DefaultSiteNameOverride
+		}
+
+		m.WANStatuses = append(m.WANStatuses, ws)
+	}
+
+	for _, pf := range metrics.PortForwards {
+		if c.DefaultSiteNameOverride != "" && isDefaultSiteName(pf.SiteName) {
+			pf.SiteName = c.DefaultSiteNameOverride
+		}
+
+		m.PortForwards = append(m.PortForwards, pf)
+	}
+
+	for _, cert := range metrics.SSLCertificates {
+		if c.DefaultSiteNameOverride != "" && isDefaultSiteName(cert.SiteName) {
+			cert.SiteName = c.DefaultSiteNameOverride
+		}
+
+		m.SSLCertificates = append(m.SSLCertificates, cert)
+	}
+
+	for _, ups := range metrics.UPSDevices {
+		if c.DefaultSiteNameOverride != "" && isDefaultSiteName(ups.SiteName) {
+			ups.SiteName = c.DefaultSiteNameOverride
+		}
+
+		m.UPSDevices = append(m.UPSDevices, ups)
+	}
+
+	for _, ds := range metrics.IntegrationDevStats {
+		m.IntegrationDevStats = append(m.IntegrationDevStats, ds)
+	}
+
+	for _, wb := range metrics.WifiBroadcasts {
+		if c.DefaultSiteNameOverride != "" && isDefaultSiteName(wb.SiteName) {
+			wb.SiteName = c.DefaultSiteNameOverride
+		}
+
+		m.WifiBroadcasts = append(m.WifiBroadcasts, wb)
+	}
+
+	for _, fz := range metrics.FirewallZones {
+		if c.DefaultSiteNameOverride != "" && isDefaultSiteName(fz.SiteName) {
+			fz.SiteName = c.DefaultSiteNameOverride
+		}
+
+		m.FirewallZones = append(m.FirewallZones, fz)
+	}
+
+	for _, rule := range metrics.ACLRules {
+		if c.DefaultSiteNameOverride != "" && isDefaultSiteName(rule.SiteName) {
+			rule.SiteName = c.DefaultSiteNameOverride
+		}
+
+		m.ACLRules = append(m.ACLRules, rule)
+	}
+
+	for _, vs := range metrics.VPNServers {
+		if c.DefaultSiteNameOverride != "" && isDefaultSiteName(vs.SiteName) {
+			vs.SiteName = c.DefaultSiteNameOverride
+		}
+
+		m.VPNServers = append(m.VPNServers, vs)
+	}
+
+	for _, t := range metrics.SiteToSiteTunnels {
+		if c.DefaultSiteNameOverride != "" && isDefaultSiteName(t.SiteName) {
+			t.SiteName = c.DefaultSiteNameOverride
+		}
+
+		m.SiteToSiteTunnels = append(m.SiteToSiteTunnels, t)
+	}
+
+	for _, lag := range metrics.LAGs {
+		if c.DefaultSiteNameOverride != "" && isDefaultSiteName(lag.SiteName) {
+			lag.SiteName = c.DefaultSiteNameOverride
+		}
+
+		m.LAGs = append(m.LAGs, lag)
+	}
+
+	for _, mc := range metrics.MCLAGDomains {
+		if c.DefaultSiteNameOverride != "" && isDefaultSiteName(mc.SiteName) {
+			mc.SiteName = c.DefaultSiteNameOverride
+		}
+
+		m.MCLAGDomains = append(m.MCLAGDomains, mc)
+	}
+
+	for _, ss := range metrics.SwitchStacks {
+		if c.DefaultSiteNameOverride != "" && isDefaultSiteName(ss.SiteName) {
+			ss.SiteName = c.DefaultSiteNameOverride
+		}
+
+		m.SwitchStacks = append(m.SwitchStacks, ss)
+	}
+
+	for _, dp := range metrics.DNSPolicies {
+		if c.DefaultSiteNameOverride != "" && isDefaultSiteName(dp.SiteName) {
+			dp.SiteName = c.DefaultSiteNameOverride
+		}
+
+		m.DNSPolicies = append(m.DNSPolicies, dp)
+	}
+
+	for _, rp := range metrics.RADIUSProfiles {
+		if c.DefaultSiteNameOverride != "" && isDefaultSiteName(rp.SiteName) {
+			rp.SiteName = c.DefaultSiteNameOverride
+		}
+
+		m.RADIUSProfiles = append(m.RADIUSProfiles, rp)
+	}
+
+	for _, tl := range metrics.TrafficMatchingLists {
+		if c.DefaultSiteNameOverride != "" && isDefaultSiteName(tl.SiteName) {
+			tl.SiteName = c.DefaultSiteNameOverride
+		}
+
+		m.TrafficMatchingLists = append(m.TrafficMatchingLists, tl)
+	}
+
+	for _, hv := range metrics.HotspotVouchers {
+		if c.DefaultSiteNameOverride != "" && isDefaultSiteName(hv.SiteName) {
+			hv.SiteName = c.DefaultSiteNameOverride
+		}
+
+		m.HotspotVouchers = append(m.HotspotVouchers, hv)
+	}
+
+	// Global types — no site name to override.
+	for _, app := range metrics.DPIApplications {
+		m.DPIApplications = append(m.DPIApplications, app)
+	}
+
+	for _, cat := range metrics.DPICategories {
+		m.DPICategories = append(m.DPICategories, cat)
+	}
+
+	for _, pd := range metrics.PendingDevices {
+		m.PendingDevices = append(m.PendingDevices, pd)
+	}
+
+	for _, co := range metrics.Countries {
+		m.Countries = append(m.Countries, co)
 	}
 
 	// Apply default_site_name_override to all metrics if configured.
@@ -770,6 +1105,103 @@ func applySiteNameOverride(m *poller.Metrics, overrideName string) {
 			if isDefaultSiteName(mesh.SiteName) {
 				mesh.SiteName = overrideName
 			}
+		}
+	}
+
+	// v5.26.0 additions.
+	for i := range m.WANStatuses {
+		if ws, ok := m.WANStatuses[i].(*unifi.WANStatus); ok && isDefaultSiteName(ws.SiteName) {
+			ws.SiteName = overrideName
+		}
+	}
+
+	for i := range m.PortForwards {
+		if pf, ok := m.PortForwards[i].(*unifi.PortForward); ok && isDefaultSiteName(pf.SiteName) {
+			pf.SiteName = overrideName
+		}
+	}
+
+	for i := range m.SSLCertificates {
+		if cert, ok := m.SSLCertificates[i].(*unifi.SSLCertificate); ok && isDefaultSiteName(cert.SiteName) {
+			cert.SiteName = overrideName
+		}
+	}
+
+	for i := range m.UPSDevices {
+		if ups, ok := m.UPSDevices[i].(*unifi.UPSDeviceSelector); ok && isDefaultSiteName(ups.SiteName) {
+			ups.SiteName = overrideName
+		}
+	}
+
+	for i := range m.WifiBroadcasts {
+		if wb, ok := m.WifiBroadcasts[i].(*unifi.WifiBroadcast); ok && isDefaultSiteName(wb.SiteName) {
+			wb.SiteName = overrideName
+		}
+	}
+
+	for i := range m.FirewallZones {
+		if fz, ok := m.FirewallZones[i].(*unifi.FirewallZone); ok && isDefaultSiteName(fz.SiteName) {
+			fz.SiteName = overrideName
+		}
+	}
+
+	for i := range m.ACLRules {
+		if r, ok := m.ACLRules[i].(*unifi.ACLRule); ok && isDefaultSiteName(r.SiteName) {
+			r.SiteName = overrideName
+		}
+	}
+
+	for i := range m.VPNServers {
+		if vs, ok := m.VPNServers[i].(*unifi.VPNServer); ok && isDefaultSiteName(vs.SiteName) {
+			vs.SiteName = overrideName
+		}
+	}
+
+	for i := range m.SiteToSiteTunnels {
+		if t, ok := m.SiteToSiteTunnels[i].(*unifi.SiteToSiteTunnel); ok && isDefaultSiteName(t.SiteName) {
+			t.SiteName = overrideName
+		}
+	}
+
+	for i := range m.LAGs {
+		if lag, ok := m.LAGs[i].(*unifi.LAG); ok && isDefaultSiteName(lag.SiteName) {
+			lag.SiteName = overrideName
+		}
+	}
+
+	for i := range m.MCLAGDomains {
+		if mc, ok := m.MCLAGDomains[i].(*unifi.MCLAGDomain); ok && isDefaultSiteName(mc.SiteName) {
+			mc.SiteName = overrideName
+		}
+	}
+
+	for i := range m.SwitchStacks {
+		if ss, ok := m.SwitchStacks[i].(*unifi.SwitchStack); ok && isDefaultSiteName(ss.SiteName) {
+			ss.SiteName = overrideName
+		}
+	}
+
+	for i := range m.DNSPolicies {
+		if dp, ok := m.DNSPolicies[i].(*unifi.DNSPolicy); ok && isDefaultSiteName(dp.SiteName) {
+			dp.SiteName = overrideName
+		}
+	}
+
+	for i := range m.RADIUSProfiles {
+		if rp, ok := m.RADIUSProfiles[i].(*unifi.RADIUSProfile); ok && isDefaultSiteName(rp.SiteName) {
+			rp.SiteName = overrideName
+		}
+	}
+
+	for i := range m.TrafficMatchingLists {
+		if tl, ok := m.TrafficMatchingLists[i].(*unifi.TrafficMatchingList); ok && isDefaultSiteName(tl.SiteName) {
+			tl.SiteName = overrideName
+		}
+	}
+
+	for i := range m.HotspotVouchers {
+		if hv, ok := m.HotspotVouchers[i].(*unifi.HotspotVoucher); ok && isDefaultSiteName(hv.SiteName) {
+			hv.SiteName = overrideName
 		}
 	}
 }

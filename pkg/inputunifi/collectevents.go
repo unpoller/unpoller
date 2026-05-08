@@ -39,9 +39,15 @@ func (u *InputUnifi) collectControllerEvents(c *Controller) ([]any, error) {
 
 	for _, call := range []caller{u.collectIDs, u.collectAnomalies, u.collectAlarms, u.collectEvents, u.collectSyslog, u.collectProtectLogs} {
 		if newLogs, err = call(logs, sites, c); err != nil {
-			if c.Remote && errors.Is(err, unifi.ErrInvalidStatusCode) {
-				// The remote API (api.ui.com) does not support all event endpoints (e.g. /stat/event
-				// returns 404). Log a warning and continue so other collectors still run.
+			if c.Remote && (errors.Is(err, unifi.ErrInvalidStatusCode) || errors.Is(err, unifi.ErrEndpointNotFound)) {
+				// The remote API (api.ui.com) does not support all event endpoints.
+				// ErrInvalidStatusCode is retained for backward compatibility: before
+				// ErrEndpointNotFound was split out, all non-200 remote responses were
+				// soft-skipped via ErrInvalidStatusCode.
+				// Note: most inner callers (collectAlarms, collectAnomalies, collectEvents,
+				// collectIDs, collectProtectLogs) handle ErrEndpointNotFound internally and
+				// return nil, so this branch fires primarily for collectSyslog and for
+				// ErrInvalidStatusCode cases on remote controllers.
 				u.Logf("Failed to collect events from controller %s: %v (endpoint may not be supported by the remote API)", c.URL, err)
 
 				continue
@@ -121,6 +127,14 @@ func (u *InputUnifi) collectAlarms(logs []any, sites []*unifi.Site, c *Controlle
 
 		for _, s := range sites {
 			events, err := c.Unifi.GetAlarmsSite(s)
+			if errors.Is(err, unifi.ErrEndpointNotFound) {
+				// /stat/alarm is removed controller-wide in Network 10.x+; once the first
+				// site returns 404 all remaining sites on the same controller will too.
+				u.LogDebugf("[%s] Alarms endpoint not available (Network 10.x+): %v", c.URL, err)
+
+				return logs, nil
+			}
+
 			if err != nil {
 				return logs, fmt.Errorf("unifi.GetAlarms(): %w", err)
 			}
@@ -150,17 +164,21 @@ func (u *InputUnifi) collectAnomalies(logs []any, sites []*unifi.Site, c *Contro
 
 		for _, s := range sites {
 			events, err := c.Unifi.GetAnomaliesSite(s)
+			if errors.Is(err, unifi.ErrEndpointNotFound) {
+				// /stat/anomaly is removed controller-wide in Network 10.x+; once the first
+				// site returns 404 all remaining sites on the same controller will too.
+				u.LogDebugf("[%s] Anomalies endpoint not available (Network 10.x+): %v", c.URL, err)
+
+				return logs, nil
+			}
+
 			if err != nil {
 				return logs, fmt.Errorf("unifi.GetAnomalies(): %w", err)
 			}
 
 			for _, e := range events {
-				// Apply site name override for anomalies if configured
-				if c.DefaultSiteNameOverride != "" {
-					lower := strings.ToLower(e.SiteName)
-					if lower == "default" || strings.Contains(lower, "default") {
-						e.SiteName = c.DefaultSiteNameOverride
-					}
+				if c.DefaultSiteNameOverride != "" && isDefaultSiteName(e.SiteName) {
+					e.SiteName = c.DefaultSiteNameOverride
 				}
 
 				logs = append(logs, e)
@@ -183,6 +201,15 @@ func (u *InputUnifi) collectEvents(logs []any, sites []*unifi.Site, c *Controlle
 
 		for _, s := range sites {
 			events, err := c.Unifi.GetSiteEvents(s, time.Hour)
+			if errors.Is(err, unifi.ErrEndpointNotFound) {
+				// stat/event was removed in Network 10.x. The path is per-site but the
+				// removal is controller-wide: if the first site returns 404, every site
+				// on the same controller will too. No replacement exists in integration/v1.
+				u.Logf("[%s] Events endpoint removed (Network 10.x+): use save_syslog instead", c.URL)
+
+				return logs, nil
+			}
+
 			if err != nil {
 				return logs, fmt.Errorf("unifi.GetEvents(): %w", err)
 			}
@@ -242,6 +269,12 @@ func (u *InputUnifi) collectProtectLogs(logs []any, _ []*unifi.Site, c *Controll
 
 		entries, err := c.Unifi.GetProtectLogs(req)
 		if err != nil {
+			if errors.Is(err, unifi.ErrEndpointNotFound) {
+				u.Logf("[%s] Protect logs endpoint not available (404) — ensure UniFi Protect is installed, or disable save_protect_logs", c.URL)
+
+				return logs, nil
+			}
+
 			return logs, fmt.Errorf("unifi.GetProtectLogs(): %w", err)
 		}
 
@@ -257,10 +290,11 @@ func (u *InputUnifi) collectProtectLogs(logs []any, _ []*unifi.Site, c *Controll
 					thumbID = thumbID[2:]
 				}
 
-				if thumbData, err := c.Unifi.GetProtectEventThumbnail(thumbID); err == nil {
-					e.ThumbnailBase64 = base64.StdEncoding.EncodeToString(thumbData)
+				thumbData, thumbErr := c.Unifi.GetProtectEventThumbnail(thumbID)
+				if thumbErr != nil {
+					u.LogDebugf("Failed to fetch thumbnail for event %s (thumb: %s): %v", e.ID, thumbID, thumbErr)
 				} else {
-					u.LogDebugf("Failed to fetch thumbnail for event %s (thumb: %s): %v", e.ID, thumbID, err)
+					e.ThumbnailBase64 = base64.StdEncoding.EncodeToString(thumbData)
 				}
 			}
 
@@ -289,6 +323,15 @@ func (u *InputUnifi) collectIDs(logs []any, sites []*unifi.Site, c *Controller) 
 
 		for _, s := range sites {
 			events, err := c.Unifi.GetIDSSite(s)
+			if errors.Is(err, unifi.ErrEndpointNotFound) {
+				// stat/ips/event was removed in Network 10.x. The path is per-site but
+				// the removal is controller-wide: if the first site returns 404, every
+				// site on the same controller will too. No replacement exists.
+				u.Logf("[%s] IDS/IPS endpoint removed (Network 10.x+): no replacement available", c.URL)
+
+				return logs, nil
+			}
+
 			if err != nil {
 				return logs, fmt.Errorf("unifi.GetIDS(): %w", err)
 			}

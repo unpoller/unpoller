@@ -94,6 +94,28 @@ type Metrics struct {
 	Topologies       []*unifi.Topology
 	PortAnomalies    []*unifi.PortAnomaly
 	VPNMeshes        []*unifi.MagicSiteToSiteVPN
+	// Added in v5.26.0 integration:
+	WANStatuses          []*unifi.WANStatus
+	PortForwards         []*unifi.PortForward
+	SSLCertificates      []*unifi.SSLCertificate
+	UPSDevices           []*unifi.UPSDeviceSelector
+	IntegrationDevStats  []*unifi.IntegrationDeviceStats
+	WifiBroadcasts       []*unifi.WifiBroadcast
+	FirewallZones        []*unifi.FirewallZone
+	ACLRules             []*unifi.ACLRule
+	VPNServers           []*unifi.VPNServer
+	SiteToSiteTunnels    []*unifi.SiteToSiteTunnel
+	LAGs                 []*unifi.LAG
+	MCLAGDomains         []*unifi.MCLAGDomain
+	SwitchStacks         []*unifi.SwitchStack
+	DNSPolicies          []*unifi.DNSPolicy
+	RADIUSProfiles       []*unifi.RADIUSProfile
+	TrafficMatchingLists []*unifi.TrafficMatchingList
+	HotspotVouchers      []*unifi.HotspotVoucher
+	DPIApplications      []*unifi.DPIApplication
+	DPICategories        []*unifi.DPICategory
+	PendingDevices       []*unifi.PendingDevice
+	Countries            []*unifi.Country
 }
 
 func init() { // nolint: gochecknoinits

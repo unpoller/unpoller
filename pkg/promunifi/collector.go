@@ -36,24 +36,45 @@ const (
 var ErrMetricFetchFailed = fmt.Errorf("metric fetch failed")
 
 type promUnifi struct {
-	*Config        `json:"prometheus" toml:"prometheus" xml:"prometheus" yaml:"prometheus"`
-	Client         *uclient
-	Device         *unifiDevice
-	UAP            *uap
-	USG            *usg
-	USW            *usw
-	PDU            *pdu
-	Site           *site
-	RogueAP        *rogueap
-	SpeedTest      *speedtest
-	CountryTraffic *ucountrytraffic
-	DHCPLease      *dhcplease
-	WAN            *wan
-	Controller     *controller
-	FirewallPolicy *firewallpolicy
-	Topology       *topology
-	PortAnomaly    *portanomaly
-	VPNMesh        *vpnmesh
+	*Config           `json:"prometheus" toml:"prometheus" xml:"prometheus" yaml:"prometheus"`
+	Client            *uclient
+	Device            *unifiDevice
+	UAP               *uap
+	USG               *usg
+	USW               *usw
+	PDU               *pdu
+	Site              *site
+	RogueAP           *rogueap
+	SpeedTest         *speedtest
+	CountryTraffic    *ucountrytraffic
+	DHCPLease         *dhcplease
+	WAN               *wan
+	Controller        *controller
+	FirewallPolicy    *firewallpolicy
+	Topology          *topology
+	PortAnomaly       *portanomaly
+	VPNMesh           *vpnmesh
+	IntegrationDevice   *integrationDevice
+	WANStatus           *wanStatus
+	PortForward         *portForward
+	SSLCertificate      *sslCertificate
+	UPSDevice           *upsDevice
+	WifiBroadcast       *wifiBroadcast
+	FirewallZone        *firewallZone
+	ACLRule             *aclRule
+	VPNServer           *vpnServer
+	SiteToSiteTunnel    *siteToSiteTunnel
+	LAG                 *lag
+	MCLAGDomain         *mclagDomain
+	SwitchStack         *switchStack
+	DNSPolicy           *dnsPolicy
+	RADIUSProfile       *radiusProfile
+	TrafficMatchingList *trafficMatchingList
+	HotspotVoucher      *hotspotVoucher
+	DPIApplication      *dpiApplication
+	DPICategory         *dpiCategory
+	PendingDevice       *pendingDevice
+	Country             *country
 	// controllerUp tracks per-controller poll success (1) or failure (0).
 	controllerUp *prometheus.GaugeVec
 	// This interface is passed to the Collect() method. The Collect method uses
@@ -223,6 +244,27 @@ func (u *promUnifi) Run(c poller.Collect) error {
 	u.Topology = descTopology(u.Namespace + "_")
 	u.PortAnomaly = descPortAnomaly(u.Namespace + "_")
 	u.VPNMesh = descVPNMesh(u.Namespace + "_")
+	u.IntegrationDevice = descIntegrationDevice(u.Namespace + "_device_")
+	u.WANStatus = descWANStatus(u.Namespace + "_")
+	u.PortForward = descPortForward(u.Namespace + "_")
+	u.SSLCertificate = descSSLCertificate(u.Namespace + "_")
+	u.UPSDevice = descUPSDevice(u.Namespace + "_")
+	u.WifiBroadcast = descWifiBroadcast(u.Namespace + "_")
+	u.FirewallZone = descFirewallZone(u.Namespace + "_")
+	u.ACLRule = descACLRule(u.Namespace + "_")
+	u.VPNServer = descVPNServer(u.Namespace + "_")
+	u.SiteToSiteTunnel = descSiteToSiteTunnel(u.Namespace + "_")
+	u.LAG = descLAG(u.Namespace + "_")
+	u.MCLAGDomain = descMCLAGDomain(u.Namespace + "_")
+	u.SwitchStack = descSwitchStack(u.Namespace + "_")
+	u.DNSPolicy = descDNSPolicy(u.Namespace + "_")
+	u.RADIUSProfile = descRADIUSProfile(u.Namespace + "_")
+	u.TrafficMatchingList = descTrafficMatchingList(u.Namespace + "_")
+	u.HotspotVoucher = descHotspotVoucher(u.Namespace + "_")
+	u.DPIApplication = descDPIApplication(u.Namespace + "_")
+	u.DPICategory = descDPICategory(u.Namespace + "_")
+	u.PendingDevice = descPendingDevice(u.Namespace + "_")
+	u.Country = descCountry(u.Namespace + "_")
 	u.controllerUp = prometheus.NewGaugeVec(prometheus.GaugeOpts{
 		Name: u.Namespace + "_controller_up",
 		Help: "Whether the last poll of the UniFi controller succeeded (1) or failed (0).",
@@ -311,7 +353,16 @@ func (t *target) Describe(ch chan<- *prometheus.Desc) {
 // Describe satisfies the prometheus Collector. This returns all of the
 // metric descriptions that this packages produces.
 func (u *promUnifi) Describe(ch chan<- *prometheus.Desc) {
-	for _, f := range []any{u.Client, u.Device, u.UAP, u.USG, u.USW, u.PDU, u.Site, u.SpeedTest, u.DHCPLease, u.WAN, u.FirewallPolicy, u.Topology, u.PortAnomaly, u.VPNMesh} {
+	for _, f := range []any{
+		u.Client, u.Device, u.UAP, u.USG, u.USW, u.PDU, u.Site, u.SpeedTest,
+		u.DHCPLease, u.WAN, u.FirewallPolicy, u.Topology, u.PortAnomaly, u.VPNMesh,
+		u.IntegrationDevice, u.WANStatus,
+		u.PortForward, u.SSLCertificate, u.UPSDevice, u.WifiBroadcast,
+		u.FirewallZone, u.ACLRule, u.VPNServer, u.SiteToSiteTunnel,
+		u.LAG, u.MCLAGDomain, u.SwitchStack, u.DNSPolicy, u.RADIUSProfile,
+		u.TrafficMatchingList, u.HotspotVoucher,
+		u.DPIApplication, u.DPICategory, u.PendingDevice, u.Country,
+	} {
 		v := reflect.Indirect(reflect.ValueOf(f))
 
 		// Loop each struct member and send it to the provided channel.
@@ -507,6 +558,133 @@ func (u *promUnifi) loopExports(r report) {
 	for _, v := range m.VPNMeshes {
 		if mesh, ok := v.(*unifi.MagicSiteToSiteVPN); ok {
 			u.exportVPNMesh(r, mesh)
+		}
+	}
+
+	// v5.26.0 additions.
+	for _, ds := range m.IntegrationDevStats {
+		if d, ok := ds.(*unifi.IntegrationDeviceStats); ok {
+			u.exportIntegrationDeviceStats(r, d)
+		}
+	}
+
+	for _, ws := range m.WANStatuses {
+		if w, ok := ws.(*unifi.WANStatus); ok {
+			u.exportWANStatus(r, w)
+		}
+	}
+
+	for _, pf := range m.PortForwards {
+		if v, ok := pf.(*unifi.PortForward); ok {
+			u.exportPortForward(r, v)
+		}
+	}
+
+	for _, sc := range m.SSLCertificates {
+		if v, ok := sc.(*unifi.SSLCertificate); ok {
+			u.exportSSLCertificate(r, v)
+		}
+	}
+
+	for _, ud := range m.UPSDevices {
+		if v, ok := ud.(*unifi.UPSDeviceSelector); ok {
+			u.exportUPSDevice(r, v)
+		}
+	}
+
+	for _, wb := range m.WifiBroadcasts {
+		if v, ok := wb.(*unifi.WifiBroadcast); ok {
+			u.exportWifiBroadcast(r, v)
+		}
+	}
+
+	for _, fz := range m.FirewallZones {
+		if v, ok := fz.(*unifi.FirewallZone); ok {
+			u.exportFirewallZone(r, v)
+		}
+	}
+
+	for _, ar := range m.ACLRules {
+		if v, ok := ar.(*unifi.ACLRule); ok {
+			u.exportACLRule(r, v)
+		}
+	}
+
+	for _, vs := range m.VPNServers {
+		if v, ok := vs.(*unifi.VPNServer); ok {
+			u.exportVPNServer(r, v)
+		}
+	}
+
+	for _, st := range m.SiteToSiteTunnels {
+		if v, ok := st.(*unifi.SiteToSiteTunnel); ok {
+			u.exportSiteToSiteTunnel(r, v)
+		}
+	}
+
+	for _, l := range m.LAGs {
+		if v, ok := l.(*unifi.LAG); ok {
+			u.exportLAG(r, v)
+		}
+	}
+
+	for _, md := range m.MCLAGDomains {
+		if v, ok := md.(*unifi.MCLAGDomain); ok {
+			u.exportMCLAGDomain(r, v)
+		}
+	}
+
+	for _, ss := range m.SwitchStacks {
+		if v, ok := ss.(*unifi.SwitchStack); ok {
+			u.exportSwitchStack(r, v)
+		}
+	}
+
+	for _, dp := range m.DNSPolicies {
+		if v, ok := dp.(*unifi.DNSPolicy); ok {
+			u.exportDNSPolicy(r, v)
+		}
+	}
+
+	for _, rp := range m.RADIUSProfiles {
+		if v, ok := rp.(*unifi.RADIUSProfile); ok {
+			u.exportRADIUSProfile(r, v)
+		}
+	}
+
+	for _, tml := range m.TrafficMatchingLists {
+		if v, ok := tml.(*unifi.TrafficMatchingList); ok {
+			u.exportTrafficMatchingList(r, v)
+		}
+	}
+
+	for _, hv := range m.HotspotVouchers {
+		if v, ok := hv.(*unifi.HotspotVoucher); ok {
+			u.exportHotspotVoucher(r, v)
+		}
+	}
+
+	for _, app := range m.DPIApplications {
+		if v, ok := app.(*unifi.DPIApplication); ok {
+			u.exportDPIApplication(r, v)
+		}
+	}
+
+	for _, cat := range m.DPICategories {
+		if v, ok := cat.(*unifi.DPICategory); ok {
+			u.exportDPICategory(r, v)
+		}
+	}
+
+	for _, pd := range m.PendingDevices {
+		if v, ok := pd.(*unifi.PendingDevice); ok {
+			u.exportPendingDevice(r, v)
+		}
+	}
+
+	for _, c := range m.Countries {
+		if v, ok := c.(*unifi.Country); ok {
+			u.exportCountry(r, v)
 		}
 	}
 
