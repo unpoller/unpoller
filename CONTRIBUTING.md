@@ -19,7 +19,6 @@ As long as this document is kept up to date, this is what github does:
 -      Linux, Mac and Windows Binaries
 -      Provides a packaged source copy
 -      Builds Debian, RedHat packages
--      Builds Mac universal binary
 -      Builds Windows executable
 -      Builds numerous platform docker images and uploads them
 

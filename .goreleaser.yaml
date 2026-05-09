@@ -384,11 +384,6 @@ signs:
       - unpoller-windows
       - unpoller-mac
 
-universal_binaries:
-  - replace: true
-    ids:
-      - unpoller-mac
-
 homebrew_casks:
   - name: unpoller
     ids:
