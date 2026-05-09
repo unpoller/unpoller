@@ -117,6 +117,25 @@ func (u *promUnifi) exportUSG(r report, d *unifi.USG) {
 	})
 }
 
+// exportDeviceUplink emits the shared uplink metrics for any device that
+// carries a unifi.Uplink (USW/UBB/UDB). The uplink port name is used as the
+// first label, matching the convention used by exportUSGstats.
+func (u *promUnifi) exportDeviceUplink(r report, labels []string, ul unifi.Uplink) {
+	port := ul.Name
+	if port == "" {
+		port = "uplink"
+	}
+
+	labelUL := []string{port, labels[1], labels[2], labels[3], labels[4]}
+
+	r.send([]*metric{
+		{u.USG.UplinkLatency, gauge, ul.Latency.Val / 1000, labelUL},
+		{u.USG.UplinkSpeed, gauge, ul.Speed, labelUL},
+		{u.USG.UplinkMaxSpeed, gauge, ul.MaxSpeed, labelUL},
+		{u.USG.UplinkUptime, gauge, ul.Uptime, labelUL},
+	})
+}
+
 // Gateway Stats.
 func (u *promUnifi) exportUSGstats(r report, labels []string, gw *unifi.Gw, st unifi.SpeedtestStatus, ul unifi.Uplink) {
 	var sourceInterface string

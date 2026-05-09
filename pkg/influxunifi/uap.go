@@ -67,6 +67,14 @@ func (u *InfluxUnifi) batchUAP(r report, s *unifi.UAP) {
 	fields["guest-num_sta"] = int(s.GuestNumSta.Val)
 	fields["num_sta"] = s.NumSta.Val
 	fields["upgradeable"] = s.Upgradable.Val
+	fields["uplink_type"] = s.Uplink.Type
+	fields["uplink_speed"] = s.Uplink.Speed.Val
+	fields["uplink_max_speed"] = s.Uplink.MaxSpeed.Val
+	fields["uplink_up"] = s.Uplink.Up.Val
+	fields["uplink_full_duplex"] = s.Uplink.FullDuplex.Val
+	fields["uplink_num_port"] = s.Uplink.NumPort
+	fields["uplink_rx_bytes"] = s.Uplink.RxBytes.Val
+	fields["uplink_tx_bytes"] = s.Uplink.TxBytes.Val
 
 	r.addCount(uapT)
 	r.send(&metric{Table: "uap", Tags: tags, Fields: fields})
