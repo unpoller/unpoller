@@ -25,15 +25,15 @@ func descIntegrationDevice(ns string) *integrationDevice {
 	uplinkLabels := []string{"device_id", "uplink_index"}
 
 	return &integrationDevice{
-		CPUUtilizationPct:    prometheus.NewDesc(ns+"cpu_utilization_pct", "Device CPU utilization percentage (Integration/v1)", labels, nil),
-		MemoryUtilizationPct: prometheus.NewDesc(ns+"memory_utilization_pct", "Device memory utilization percentage (Integration/v1)", labels, nil),
-		LoadAverage1Min:      prometheus.NewDesc(ns+"load_average_1min", "Device 1-minute load average (Integration/v1)", labels, nil),
-		LoadAverage5Min:      prometheus.NewDesc(ns+"load_average_5min", "Device 5-minute load average (Integration/v1)", labels, nil),
-		LoadAverage15Min:     prometheus.NewDesc(ns+"load_average_15min", "Device 15-minute load average (Integration/v1)", labels, nil),
-		UptimeSec:            prometheus.NewDesc(ns+"uptime_seconds", "Device uptime in seconds (Integration/v1)", labels, nil),
-		RadioTxRetriesPct:    prometheus.NewDesc(ns+"radio_tx_retries_pct", "Per-radio TX retry percentage (Integration/v1)", radioLabels, nil),
-		UplinkRxRateBps:      prometheus.NewDesc(ns+"uplink_rx_rate_bps", "Per-uplink receive rate in bps (Integration/v1)", uplinkLabels, nil),
-		UplinkTxRateBps:      prometheus.NewDesc(ns+"uplink_tx_rate_bps", "Per-uplink transmit rate in bps (Integration/v1)", uplinkLabels, nil),
+		CPUUtilizationPct:    prometheus.NewDesc(ns+"integration_device_cpu_utilization_pct", "Device CPU utilization percentage (Integration/v1)", labels, nil),
+		MemoryUtilizationPct: prometheus.NewDesc(ns+"integration_device_memory_utilization_pct", "Device memory utilization percentage (Integration/v1)", labels, nil),
+		LoadAverage1Min:      prometheus.NewDesc(ns+"integration_device_load_average_1min", "Device 1-minute load average (Integration/v1)", labels, nil),
+		LoadAverage5Min:      prometheus.NewDesc(ns+"integration_device_load_average_5min", "Device 5-minute load average (Integration/v1)", labels, nil),
+		LoadAverage15Min:     prometheus.NewDesc(ns+"integration_device_load_average_15min", "Device 15-minute load average (Integration/v1)", labels, nil),
+		UptimeSec:            prometheus.NewDesc(ns+"integration_device_uptime_seconds", "Device uptime in seconds (Integration/v1)", labels, nil),
+		RadioTxRetriesPct:    prometheus.NewDesc(ns+"integration_device_radio_tx_retries_pct", "Per-radio TX retry percentage (Integration/v1)", radioLabels, nil),
+		UplinkRxRateBps:      prometheus.NewDesc(ns+"integration_device_uplink_rx_rate_bps", "Per-uplink receive rate in bps (Integration/v1)", uplinkLabels, nil),
+		UplinkTxRateBps:      prometheus.NewDesc(ns+"integration_device_uplink_tx_rate_bps", "Per-uplink transmit rate in bps (Integration/v1)", uplinkLabels, nil),
 	}
 }
 

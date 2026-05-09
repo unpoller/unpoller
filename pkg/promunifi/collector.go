@@ -244,7 +244,7 @@ func (u *promUnifi) Run(c poller.Collect) error {
 	u.Topology = descTopology(u.Namespace + "_")
 	u.PortAnomaly = descPortAnomaly(u.Namespace + "_")
 	u.VPNMesh = descVPNMesh(u.Namespace + "_")
-	u.IntegrationDevice = descIntegrationDevice(u.Namespace + "_device_")
+	u.IntegrationDevice = descIntegrationDevice(u.Namespace + "_")
 	u.WANStatus = descWANStatus(u.Namespace + "_")
 	u.PortForward = descPortForward(u.Namespace + "_")
 	u.SSLCertificate = descSSLCertificate(u.Namespace + "_")
