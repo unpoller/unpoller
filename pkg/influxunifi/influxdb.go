@@ -61,6 +61,9 @@ type Config struct {
 	VerifySSL bool `json:"verify_ssl" toml:"verify_ssl" xml:"verify_ssl" yaml:"verify_ssl"`
 	// DeadPorts when true will save data for dead ports, for example ports that are down or disabled.
 	DeadPorts bool `json:"dead_ports" toml:"dead_ports" xml:"dead_ports" yaml:"dead_ports"`
+	// Tags are global tags applied to every metric written to InfluxDB. Per-metric
+	// tags take precedence and will not be overwritten by a global tag of the same name.
+	Tags map[string]string `json:"tags,omitempty" toml:"tags,omitempty" xml:"tags" yaml:"tags,omitempty"`
 }
 
 // InfluxDB allows the data to be nested in the config file.
@@ -373,11 +376,13 @@ func (u *InfluxUnifi) collect(r report, ch chan *metric) {
 			m.TS = r.metrics().TS
 		}
 
+		tags := u.mergeGlobalTags(m.Tags)
+
 		if u.IsVersion2 {
-			pt := influx.NewPoint(m.Table, m.Tags, m.Fields, m.TS)
+			pt := influx.NewPoint(m.Table, tags, m.Fields, m.TS)
 			r.batchV2(m, pt)
 		} else {
-			pt, err := influxV1.NewPoint(m.Table, m.Tags, m.Fields, m.TS)
+			pt, err := influxV1.NewPoint(m.Table, tags, m.Fields, m.TS)
 			if err == nil {
 				r.batchV1(m, pt)
 			}
@@ -387,6 +392,26 @@ func (u *InfluxUnifi) collect(r report, ch chan *metric) {
 
 		r.done()
 	}
+}
+
+// mergeGlobalTags returns a tag map containing the per-metric tags layered on
+// top of the configured global tags. Per-metric tags win on key collision so
+// device/site identifiers can never be overwritten by a misconfigured global.
+func (u *InfluxUnifi) mergeGlobalTags(tags map[string]string) map[string]string {
+	if len(u.Tags) == 0 {
+		return tags
+	}
+
+	merged := make(map[string]string, len(u.Tags)+len(tags))
+	for k, v := range u.Tags {
+		merged[k] = v
+	}
+
+	for k, v := range tags {
+		merged[k] = v
+	}
+
+	return merged
 }
 
 // loopPoints kicks off 3 or 7 go routines to process metrics and send them

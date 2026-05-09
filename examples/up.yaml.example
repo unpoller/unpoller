@@ -29,6 +29,9 @@ influxdb:
   pass: "unifipoller"
   db:   "unifi"
   verify_ssl: false
+  tags:
+    customer: abc_corp
+    env: prod
 
 webserver:
   enable:        false

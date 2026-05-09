@@ -21,7 +21,11 @@
      "pass": "unifipoller",
      "db":   "unifi",
      "verify_ssl": false,
-     "interval":   "30s"
+     "interval":   "30s",
+     "tags": {
+       "customer": "abc_corp",
+       "env":      "prod"
+     }
   },
 
   "webserver": {

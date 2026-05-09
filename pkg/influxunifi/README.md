@@ -45,3 +45,24 @@ influxdb:
   # the influxdb api password 
   pass: supersecret
 ```
+
+### Global Tags
+
+Tags configured under `tags` are attached to every measurement written to
+InfluxDB. Per-metric tags (site, device id, etc.) take precedence on key
+collision so they cannot be overwritten by a misconfigured global tag.
+
+```yaml
+influxdb:
+  tags:
+    customer: abc_corp
+    env: prod
+```
+
+Equivalent TOML:
+
+```toml
+[influxdb.tags]
+  customer = "abc_corp"
+  env      = "prod"
+```
