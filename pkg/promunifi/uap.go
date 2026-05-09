@@ -230,10 +230,16 @@ func (u *promUnifi) exportUAP(r report, d *unifi.UAP) {
 		u.exportSYSstats(r, labels, d.SysStats, d.SystemStats)
 		u.exportSTAcount(r, labels, d.UserNumSta, d.GuestNumSta)
 		u.exportRADtable(r, labels, d.RadioTable, d.RadioTableStats)
+		// UAP uplink metrics. The uplink "type" (e.g. "wire" / "wireless")
+		// is encoded as the first label, matching the convention used by
+		// USG/USW/UBB/UDB so dashboards can group by port.
+		labelUL := append([]string{d.Uplink.Type}, labels[1:]...)
 		r.send([]*metric{
 			{u.Device.Info, gauge, 1.0, append(baseLabels, infoLabels...)},
 			{u.Device.Uptime, gauge, d.Uptime, labels},
 			{u.Device.Upgradeable, gauge, d.Upgradable.Val, labels},
+			{u.USG.UplinkSpeed, gauge, d.Uplink.Speed, labelUL},
+			{u.USG.UplinkMaxSpeed, gauge, d.Uplink.MaxSpeed, labelUL},
 		})
 	})
 }

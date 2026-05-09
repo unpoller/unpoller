@@ -31,6 +31,7 @@ func (u *promUnifi) exportUDB(r report, d *unifi.UDB) {
 		u.exportBYTstats(r, labels, d.TxBytes, d.RxBytes)
 		u.exportSYSstats(r, labels, d.SysStats, d.SystemStats)
 		u.exportSTAcount(r, labels, d.UserNumSta, d.GuestNumSta)
+		u.exportDeviceUplink(r, labels, d.Uplink)
 
 		r.send([]*metric{
 			{u.Device.Info, gauge, 1.0, append(baseLabels, infoLabels...)},

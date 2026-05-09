@@ -37,6 +37,10 @@ func (u *promUnifi) exportUBB(r report, d *unifi.UBB) {
 			u.exportSYSstats(r, labels, *d.SysStats, *d.SystemStats)
 		}
 
+		if d.Uplink != nil {
+			u.exportDeviceUplink(r, labels, *d.Uplink)
+		}
+
 		// Device info, uptime, and temperature
 		r.send([]*metric{
 			{u.Device.Info, gauge, 1.0, append(baseLabels, infoLabels...)},
