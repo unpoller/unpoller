@@ -45,15 +45,16 @@ func (u *DatadogUnifi) batchRogueAP(r report, s *unifi.RogueAP) {
 // These points can be passed directly to datadog.
 func (u *DatadogUnifi) batchUAP(r report, s *unifi.UAP) {
 	tags := cleanTags(map[string]string{
-		"mac":       s.Mac,
-		"site_name": s.SiteName,
-		"source":    s.SourceName,
-		"name":      s.Name,
-		"version":   s.Version,
-		"model":     s.Model,
-		"serial":    s.Serial,
-		"type":      s.Type,
-		"ip":        s.IP,
+		"mac":         s.Mac,
+		"site_name":   s.SiteName,
+		"source":      s.SourceName,
+		"name":        s.Name,
+		"version":     s.Version,
+		"model":       s.Model,
+		"serial":      s.Serial,
+		"type":        s.Type,
+		"ip":          s.IP,
+		"uplink_type": s.Uplink.Type,
 	})
 	data := CombineFloat64(
 		u.processUAPstats(s.Stat.Ap),
@@ -70,6 +71,13 @@ func (u *DatadogUnifi) batchUAP(r report, s *unifi.UAP) {
 	data["upgradeable"] = s.Upgradable.Float64()
 	data["adopted"] = s.Adopted.Float64()
 	data["locating"] = s.Locating.Float64()
+	data["uplink_speed"] = s.Uplink.Speed.Val
+	data["uplink_max_speed"] = s.Uplink.MaxSpeed.Val
+	data["uplink_up"] = s.Uplink.Up.Float64()
+	data["uplink_full_duplex"] = s.Uplink.FullDuplex.Float64()
+	data["uplink_num_port"] = float64(s.Uplink.NumPort)
+	data["uplink_rx_bytes"] = s.Uplink.RxBytes.Val
+	data["uplink_tx_bytes"] = s.Uplink.TxBytes.Val
 
 	r.addCount(uapT)
 

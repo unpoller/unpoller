@@ -287,6 +287,14 @@ points:
       temp_sys: float
       tx_bytes: float
       upgradeable: bool
+      uplink_full_duplex: bool
+      uplink_max_speed: float
+      uplink_num_port: int
+      uplink_rx_bytes: float
+      uplink_speed: float
+      uplink_tx_bytes: float
+      uplink_type: string
+      uplink_up: bool
       uptime: float
       user-num_sta: int
   uap_radios:

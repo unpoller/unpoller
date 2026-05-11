@@ -77,14 +77,14 @@ builds:
 
 archives:
   - id: unpoller
-    builds:
+    ids:
       - unpoller
     files:
       - LICENSE
       - README.md
       - examples/up.*.example
   - id: unpoller-linux-arm
-    builds:
+    ids:
       - unpoller-linux-arm
     files:
       - LICENSE
@@ -92,7 +92,7 @@ archives:
       - unpoller_manual.html
       - examples/up.*.example
   - id: unpoller-mac
-    builds:
+    ids:
       - unpoller-mac
     files:
       - LICENSE
@@ -102,8 +102,9 @@ archives:
   - id: unpoller-windows
     format_overrides:
       - goos: windows
-        format: zip
-    builds:
+        formats:
+          - zip
+    ids:
       - unpoller-windows
     files:
       - LICENSE
@@ -113,9 +114,10 @@ archives:
       - examples/up.*.example
       - init/windows/application.ico
   - id: unpoller-freebsd-pkg
-    builds:
+    ids:
       - unpoller-freebsd
-    format: tar.xz
+    formats:
+      - tar.xz
     wrap_in_directory: false
     files:
       # config files
@@ -148,170 +150,44 @@ archives:
           mode: 0755
     
 
-dockers:
-  - id: docker-linux-amd64
+dockers_v2:
+  - id: unpoller-multiarch
+    dockerfile: Dockerfile
     ids:
       - unpoller
-    goos: linux
-    goarch: amd64
-    image_templates:
-      - "ghcr.io/unpoller/unpoller:latest-amd64"
-      - "ghcr.io/unpoller/unpoller:{{ .Tag }}-amd64"
-      - "ghcr.io/unpoller/unpoller:v{{ .Major }}-amd64"
-      - "golift/unifi-poller:latest-amd64"
-      - "golift/unifi-poller:{{ .Tag }}-amd64"
-      - "golift/unifi-poller:v{{ .Major }}-amd64"
-    use: buildx
-    build_flag_templates:
-      - "--pull"
-      - "--label=org.opencontainers.image.created={{.Date}}"
-      - "--label=org.opencontainers.image.title={{.ProjectName}}"
-      - "--label=org.opencontainers.image.revision={{.FullCommit}}"
-      - "--label=org.opencontainers.image.version={{.Version}}"
-      - "--label=org.opencontainers.image.documentation='https://unpoller.com/docs/install/docker'"
-      - "--label=org.opencontainers.image.description='Telemetry and Observability for your UniFi Network'"
-      - "--label=org.opencontainers.image.url='https://unpoller.com'"
-      - "--label=org.opencontainers.image.source={{ .GitURL }}"
-      - "--label=org.opencontainers.image.vendor=unpoller"
-      - "--label=org.opencontainers.image.licenses=MIT"
-      - "--platform=linux/amd64"
-    push_flags:
-      - --tls-verify=false
-    extra_files:
-      - "examples/up.conf.example"
-      - "examples/up.json.example"
-      - "examples/up.yaml.example"
-      - "README.html"
-      - "unpoller_manual.html"
-  - id: docker-linux-arm64
-    ids:
       - unpoller-linux-arm
-    goos: linux
-    goarch: arm64
-    image_templates:
-      - "ghcr.io/unpoller/unpoller:latest-arm64v8"
-      - "ghcr.io/unpoller/unpoller:{{ .Tag }}-arm64v8"
-      - "ghcr.io/unpoller/unpoller:v{{ .Major }}-arm64v8"
-      - "golift/unifi-poller:latest-arm64v8"
-      - "golift/unifi-poller:{{ .Tag }}-arm64v8"
-      - "golift/unifi-poller:v{{ .Major }}-arm64v8"
-    use: buildx
-    build_flag_templates:
-      - "--pull"
-      - "--label=org.opencontainers.image.created={{.Date}}"
-      - "--label=org.opencontainers.image.title={{.ProjectName}}"
-      - "--label=org.opencontainers.image.revision={{.FullCommit}}"
-      - "--label=org.opencontainers.image.version={{.Version}}"
-      - "--label=org.opencontainers.image.documentation='https://unpoller.com/docs/install/docker'"
-      - "--label=org.opencontainers.image.description='Telemetry and Observability for your UniFi Network'"
-      - "--label=org.opencontainers.image.url='https://unpoller.com'"
-      - "--label=org.opencontainers.image.source={{ .GitURL }}"
-      - "--label=org.opencontainers.image.vendor=unpoller"
-      - "--label=org.opencontainers.image.licenses=MIT"
-      - "--platform=linux/arm64"
-    push_flags:
-      - --tls-verify=false
+    images:
+      - ghcr.io/unpoller/unpoller
+      - docker.io/golift/unifi-poller
+    tags:
+      - "latest"
+      - "{{ .Tag }}"
+      - "v{{ .Major }}"
+    platforms:
+      - linux/amd64
+      - linux/arm64
+      - linux/arm/v7
     extra_files:
-      - "examples/up.conf.example"
-      - "examples/up.json.example"
-      - "examples/up.yaml.example"
-      - "README.html"
-      - "unpoller_manual.html"
-  - id: docker-linux-armv7
-    ids:
-      - unpoller-linux-arm
-    goos: linux
-    goarch: arm
-    goarm: "7"
-    image_templates:
-      - "ghcr.io/unpoller/unpoller:latest-armv7"
-      - "ghcr.io/unpoller/unpoller:{{ .Tag }}-armv7"
-      - "ghcr.io/unpoller/unpoller:v{{ .Major }}-armv7"
-      - "golift/unifi-poller:latest-armv7"
-      - "golift/unifi-poller:{{ .Tag }}-armv7"
-      - "golift/unifi-poller:v{{ .Major }}-armv7"
-    use: buildx
-    build_flag_templates:
-      - "--pull"
-      - "--label=org.opencontainers.image.created={{.Date}}"
-      - "--label=org.opencontainers.image.title={{.ProjectName}}"
-      - "--label=org.opencontainers.image.revision={{.FullCommit}}"
-      - "--label=org.opencontainers.image.version={{.Version}}"
-      - "--label=org.opencontainers.image.documentation='https://unpoller.com/docs/install/docker'"
-      - "--label=org.opencontainers.image.description='Telemetry and Observability for your UniFi Network'"
-      - "--label=org.opencontainers.image.url='https://unpoller.com'"
-      - "--label=org.opencontainers.image.source={{ .GitURL }}"
-      - "--label=org.opencontainers.image.vendor=unpoller"
-      - "--label=org.opencontainers.image.licenses=MIT"
-      - "--platform=linux/arm/v7"
-    push_flags:
-      - --tls-verify=false
-    extra_files:
-      - "examples/up.conf.example"
-      - "examples/up.json.example"
-      - "examples/up.yaml.example"
-      - "README.html"
-      - "unpoller_manual.html"
-
-docker_manifests:
-  - name_template: 'ghcr.io/unpoller/unpoller:latest'
-    create_flags:
-      - --insecure
-    push_flags:
-      - --insecure
-    image_templates:
-      - "ghcr.io/unpoller/unpoller:latest-amd64"
-      - "ghcr.io/unpoller/unpoller:latest-arm64v8"
-      - "ghcr.io/unpoller/unpoller:latest-armv7"
-  - name_template: 'ghcr.io/unpoller/unpoller:{{ .Tag }}'
-    create_flags:
-      - --insecure
-    push_flags:
-      - --insecure
-    image_templates:
-      - "ghcr.io/unpoller/unpoller:{{ .Tag }}-amd64"
-      - "ghcr.io/unpoller/unpoller:{{ .Tag }}-arm64v8"
-      - "ghcr.io/unpoller/unpoller:{{ .Tag }}-armv7"
-  - name_template: 'ghcr.io/unpoller/unpoller:v{{ .Major }}'
-    create_flags:
-      - --insecure
-    push_flags:
-      - --insecure
-    image_templates:
-      - "ghcr.io/unpoller/unpoller:v{{ .Major }}-amd64"
-      - "ghcr.io/unpoller/unpoller:v{{ .Major }}-arm64v8"
-      - "ghcr.io/unpoller/unpoller:v{{ .Major }}-armv7"
-  - name_template: 'golift/unifi-poller:latest'
-    create_flags:
-      - --insecure
-    push_flags:
-      - --insecure
-    image_templates:
-      - "golift/unifi-poller:latest-amd64"
-      - "golift/unifi-poller:latest-arm64v8"
-      - "golift/unifi-poller:latest-armv7"
-  - name_template: 'golift/unifi-poller:{{ .Tag }}'
-    create_flags:
-      - --insecure
-    push_flags:
-      - --insecure
-    image_templates:
-      - "golift/unifi-poller:{{ .Tag }}-amd64"
-      - "golift/unifi-poller:{{ .Tag }}-arm64v8"
-      - "golift/unifi-poller:{{ .Tag }}-armv7"
-  - name_template: 'golift/unifi-poller:v{{ .Major }}'
-    create_flags:
-      - --insecure
-    push_flags:
-      - --insecure
-    image_templates:
-      - "golift/unifi-poller:v{{ .Major }}-amd64"
-      - "golift/unifi-poller:v{{ .Major }}-arm64v8"
-      - "golift/unifi-poller:v{{ .Major }}-armv7"
+      - examples/up.conf.example
+      - examples/up.json.example
+      - examples/up.yaml.example
+      - README.html
+      - unpoller_manual.html
+    labels:
+      org.opencontainers.image.created: "{{ .Date }}"
+      org.opencontainers.image.title: "{{ .ProjectName }}"
+      org.opencontainers.image.revision: "{{ .FullCommit }}"
+      org.opencontainers.image.version: "{{ .Version }}"
+      org.opencontainers.image.documentation: "https://unpoller.com/docs/install/docker"
+      org.opencontainers.image.description: "Telemetry and Observability for your UniFi Network"
+      org.opencontainers.image.url: "https://unpoller.com"
+      org.opencontainers.image.source: "{{ .GitURL }}"
+      org.opencontainers.image.vendor: "unpoller"
+      org.opencontainers.image.licenses: "MIT"
 
 nfpms:
   - id: unpoller-packages
-    builds:
+    ids:
       - unpoller
       - unpoller-linux-arm
     file_name_template: '{{ .ProjectName }}_{{ if eq .Os "darwin" }}macOS{{ else if eq .Os "linux" }}Tux{{ else }}{{ .Os }}{{ end }}_{{ if eq .Arch "386" }}32-bit{{ else if eq .Arch "amd64" }}64-bit{{ else }}{{ .Arch }}{{ end }}{{ if .Arm }}v{{ .Arm }}{{ end }}'
@@ -508,17 +384,12 @@ signs:
       - unpoller-windows
       - unpoller-mac
 
-universal_binaries:
-  - replace: true
-    ids:
-      - unpoller-mac
-
-brews:
+homebrew_casks:
   - name: unpoller
     ids:
-      - unpoller
-      - unpoller-linux-arm
       - unpoller-mac
+    binaries:
+      - unpoller
     repository:
       owner: golift
       name: homebrew-mugs
@@ -527,30 +398,27 @@ brews:
     commit_author:
       name: goreleaserbot
       email: bot@goreleaser.com
-    commit_msg_template: "Brew formula update for {{ .ProjectName }} version {{ .Tag }}"
-    directory: Formula
+    commit_msg_template: "Brew cask update for {{ .ProjectName }} version {{ .Tag }}"
+    directory: Casks
     # enable the line below only for testing locally
     # skip_upload: true
     homepage: https://unpoller.com/
     description: "Polls a UniFi controller, exports metrics to InfluxDB, Prometheus and Datadog"
     caveats: "Edit the config file at #{etc}/unpoller/up.conf then start unpoller with brew services start unpoller ~ log file: #{var}/log/unpoller.log The manual explains the config file options: man unpoller"
-    conflicts:
-      - unifi-poller
     license: MIT
     service: |
       run ["#{opt_bin}/unpoller", "--config", "#{etc}/unpoller/up.conf"]
       keep_alive true
       log_path "#{var}/log/unpoller.log"
       error_log_path "#{var}/log/unpoller.log"
-    url_template: "https://github.com/unpoller/unpoller/releases/download/{{ .Tag }}/{{ .ArtifactName }}"
-    test: |
-      assert_match "unpoller v#{version}", shell_output("#{bin}/unpoller -v 2>&1", 2)
-    install: |
-      bin.install "unpoller"
-      (etc/"unpoller").mkpath
-      etc.install "examples/up.conf.example" => "unpoller/up.conf.example"
-    post_install: |
-      etc.install "examples/up.conf.example" => "unpoller/up.conf"
+    url:
+      template: "https://github.com/unpoller/unpoller/releases/download/{{ .Tag }}/{{ .ArtifactName }}"
+    hooks:
+      post:
+        install: |
+          (etc/"unpoller").mkpath
+          FileUtils.cp "#{staged_path}/examples/up.conf.example", "#{etc}/unpoller/up.conf.example"
+          FileUtils.cp "#{staged_path}/examples/up.conf.example", "#{etc}/unpoller/up.conf" unless File.exist?("#{etc}/unpoller/up.conf")
 
 publishers:
   - name: "packagecloud-publisher"

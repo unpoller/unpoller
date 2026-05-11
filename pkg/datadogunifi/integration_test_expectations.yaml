@@ -165,6 +165,13 @@ gauges:
   - unifi.uap.system_uptime
   - unifi.uap.tx_bytes
   - unifi.uap.upgradeable
+  - unifi.uap.uplink_full_duplex
+  - unifi.uap.uplink_max_speed
+  - unifi.uap.uplink_num_port
+  - unifi.uap.uplink_rx_bytes
+  - unifi.uap.uplink_speed
+  - unifi.uap.uplink_tx_bytes
+  - unifi.uap.uplink_up
   - unifi.uap.uptime
   - unifi.uap.user_num_sta
   - unifi.uap_radios.ast_be_xmit

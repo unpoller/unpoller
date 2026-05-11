@@ -8,8 +8,9 @@ COPY unpoller_manual.html /etc/unpoller/manual.html
 COPY README.html /etc/unpoller/readme.html
 
 FROM gcr.io/distroless/static-debian11
+ARG TARGETPLATFORM
 
-COPY unpoller /usr/bin/unpoller
+COPY ${TARGETPLATFORM}/unpoller /usr/bin/unpoller
 COPY --from=builder /etc/unpoller /etc/unpoller
 
 HEALTHCHECK --interval=30s --timeout=10s --start-period=30s --retries=3 \

@@ -56,6 +56,12 @@
   ## Record data for disabled or down (unlinked) switch ports.
   dead_ports = false
 
+  # Global tags applied to every InfluxDB measurement. Per-metric tags
+  # (site, device id, etc.) always win on key collision.
+  # [influxdb.tags]
+  #   customer = "abc_corp"
+  #   env      = "prod"
+
 # To enable output of UniFi Events to Loki, add a URL; it's disabled otherwise.
 # User, pass and tenant_id are optional and most folks wont set them.
 # Pick which logs you want per-controller in the [unifi.controller] section.
