@@ -6,6 +6,7 @@ import (
 	"net"
 	"net/http"
 	"reflect"
+	"runtime/debug"
 	"strings"
 	"sync"
 	"time"
@@ -18,6 +19,8 @@ import (
 	"github.com/unpoller/unifi/v5"
 	"github.com/unpoller/unpoller/pkg/poller"
 	"github.com/unpoller/unpoller/pkg/webserver"
+	"golang.org/x/sync/singleflight"
+	"golift.io/cnfg"
 	"golift.io/version"
 )
 
@@ -28,11 +31,18 @@ const (
 	// channel buffer, fits at least one batch.
 	defaultBuffer     = 50
 	defaultHTTPListen = "0.0.0.0:9130"
+	// defaultInterval matches the typical UniFi Retry-After window; gives the
+	// controller time to recover between background polls without starving
+	// scrapes for fresh data.
+	defaultInterval = 60 * time.Second
+	minimumInterval = 15 * time.Second
 	// simply fewer letters.
 	counter = prometheus.CounterValue
 	gauge   = prometheus.GaugeValue
 )
 
+// ErrMetricFetchFailed is reported as an invalid metric description when a
+// scrape cannot obtain data from the configured collector.
 var ErrMetricFetchFailed = fmt.Errorf("metric fetch failed")
 
 type promUnifi struct {
@@ -76,10 +86,58 @@ type promUnifi struct {
 	PendingDevice       *pendingDevice
 	Country             *country
 	// controllerUp tracks per-controller poll success (1) or failure (0).
+	// Reflects the most recent background poll — when /metrics is served from
+	// a stale cache, controllerUp lags real-time health; pair with
+	// unpoller_prometheus_cache_age_seconds for staleness signals.
 	controllerUp *prometheus.GaugeVec
+	// refreshFailures counts background refresh failures since process start
+	// so operators can alert on failure rate independently of cache staleness.
+	refreshFailures prometheus.Counter
+	// cache holds the last successful metrics snapshot from the background
+	// poller. Run() always initializes it; the nil-guards in cache-using
+	// methods exist only for tests that exercise those methods directly
+	// without invoking Run().
+	cache *metricsCache
+	// scrapeFlight coalesces concurrent /scrape requests targeting the same
+	// controller URL so a noisy scraper can't multiply upstream load.
+	scrapeFlight singleflight.Group
 	// This interface is passed to the Collect() method. The Collect method uses
 	// this interface to retrieve the latest UniFi measurements and export them.
 	Collector poller.Collect
+}
+
+// metricsCache stores the latest background-poller snapshot. Reads and writes
+// are serialized by an RWMutex so scrapes observe a consistent (metrics,
+// fetchedAt, lastErr) triple while the background ticker refreshes in place.
+// Failed refreshes preserve the prior good snapshot so /metrics never blanks
+// out under transient 429 backoffs.
+type metricsCache struct {
+	mu        sync.RWMutex
+	metrics   *poller.Metrics
+	fetchedAt time.Time
+	lastErr   error
+}
+
+func (c *metricsCache) get() (*poller.Metrics, time.Time, error) {
+	c.mu.RLock()
+	defer c.mu.RUnlock()
+
+	return c.metrics, c.fetchedAt, c.lastErr
+}
+
+func (c *metricsCache) set(m *poller.Metrics, err error) {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+
+	c.lastErr = err
+	// Keep the last good snapshot on error so /metrics never blanks out
+	// during transient upstream failures (e.g. 429 backoff). Also reject
+	// (nil, nil) — a "successful" empty fetch would otherwise leave us with
+	// nil metrics but a fresh fetchedAt, fooling the cache-age gauge.
+	if err == nil && m != nil {
+		c.metrics = m
+		c.fetchedAt = time.Now()
+	}
 }
 
 var _ poller.OutputPlugin = &promUnifi{}
@@ -104,6 +162,13 @@ type Config struct {
 	Disable      bool `json:"disable"       toml:"disable"       xml:"disable"       yaml:"disable"`
 	// Save data for dead ports? ie. ports that are down or disabled.
 	DeadPorts bool `json:"dead_ports" toml:"dead_ports" xml:"dead_ports" yaml:"dead_ports"`
+	// Interval controls how often the background poller refreshes the cached
+	// metrics that /metrics scrapes are served from. Decouples Prometheus
+	// scrape cadence from upstream UniFi API calls so 429 backoff loops cannot
+	// stall scrapes. Defaults to defaultInterval; values below minimumInterval
+	// are clamped up. Must be > 0 before use; normalizeInterval applies the
+	// default and floor during Run().
+	Interval cnfg.Duration `json:"interval" toml:"interval" xml:"interval" yaml:"interval"`
 }
 
 type metric struct {
@@ -155,6 +220,8 @@ func init() { // nolint: gochecknoinits
 	})
 }
 
+// DebugOutput validates the Prometheus output configuration: address format
+// and (outside of health-check mode) bindability of the listen port.
 func (u *promUnifi) DebugOutput() (bool, error) {
 	if u == nil {
 		return true, nil
@@ -190,6 +257,7 @@ func (u *promUnifi) DebugOutput() (bool, error) {
 	return true, nil
 }
 
+// Enabled reports whether this output plugin is configured and active.
 func (u *promUnifi) Enabled() bool {
 	if u == nil {
 		return false
@@ -226,6 +294,8 @@ func (u *promUnifi) Run(c poller.Collect) error {
 	if u.Buffer == 0 {
 		u.Buffer = defaultBuffer
 	}
+
+	u.normalizeInterval()
 
 	u.Client = descClient(u.Namespace + "_client_")
 	u.Device = descDevice(u.Namespace + "_device_") // stats for all device types.
@@ -267,8 +337,14 @@ func (u *promUnifi) Run(c poller.Collect) error {
 	u.Country = descCountry(u.Namespace + "_")
 	u.controllerUp = prometheus.NewGaugeVec(prometheus.GaugeOpts{
 		Name: u.Namespace + "_controller_up",
-		Help: "Whether the last poll of the UniFi controller succeeded (1) or failed (0).",
+		Help: "Whether the most recent background poll of the UniFi controller succeeded (1) or failed (0). " +
+			"Reflects the last poll attempt, not real-time health; pair with " +
+			u.Namespace + "_prometheus_cache_age_seconds for liveness signals when scrapes are served from a stale cache.",
 	}, []string{"source"})
+	u.refreshFailures = prometheus.NewCounter(prometheus.CounterOpts{
+		Name: u.Namespace + "_prometheus_refresh_failures_total",
+		Help: "Total background metrics refresh failures since process start.",
+	})
 
 	mux := http.NewServeMux()
 	promver.Version = version.Version
@@ -278,7 +354,19 @@ func (u *promUnifi) Run(c poller.Collect) error {
 	webserver.UpdateOutput(&webserver.Output{Name: PluginName, Config: u.Config})
 	prometheus.MustRegister(collectors.NewBuildInfoCollector())
 	prometheus.MustRegister(u.controllerUp)
+	prometheus.MustRegister(u.refreshFailures)
 	prometheus.MustRegister(u)
+
+	u.cache = &metricsCache{}
+	prometheus.MustRegister(u.cacheAgeGauge())
+	// safeRefresh (not refreshCache) because a panic in the initial upstream
+	// fetch must not kill Run() before the HTTP listener starts.
+	u.safeRefresh()
+
+	go u.backgroundPoll()
+
+	u.Logf("Prometheus scrape cache enabled, refresh interval: %v", u.Interval.Duration)
+
 	mux.Handle("/metrics", promhttp.HandlerFor(prometheus.DefaultGatherer,
 		promhttp.HandlerOpts{ErrorHandling: promhttp.ContinueOnError},
 	))
@@ -295,6 +383,163 @@ func (u *promUnifi) Run(c poller.Collect) error {
 
 		return http.ListenAndServeTLS(u.HTTPListen, u.SSLCrtPath, u.SSLKeyPath, mux)
 	}
+}
+
+// normalizeInterval applies defaults and the minimum-interval floor to the
+// configured scrape cache refresh interval. Values <= 0 use the default.
+func (u *promUnifi) normalizeInterval() {
+	if u.Interval.Duration <= 0 {
+		u.Interval.Duration = defaultInterval
+
+		return
+	}
+
+	if u.Interval.Duration < minimumInterval {
+		u.Logf("Prometheus interval %v is below minimum %v; clamping to minimum",
+			u.Interval.Duration, minimumInterval)
+
+		u.Interval.Duration = minimumInterval
+	}
+}
+
+// backgroundPoll runs forever, refreshing the metrics cache on the configured
+// interval. Returns immediately if the cache is not configured. A panic in
+// upstream collection is logged and the loop continues so one bad payload
+// doesn't silently stop refreshes (operator would only see cache_age climb).
+func (u *promUnifi) backgroundPoll() {
+	if u.cache == nil {
+		return
+	}
+
+	ticker := time.NewTicker(u.Interval.Duration)
+	defer ticker.Stop()
+
+	for range ticker.C {
+		u.safeRefresh()
+	}
+}
+
+// safeRefresh wraps refreshCache with a recover so a panic in an input
+// plugin doesn't kill the background poller. The panic message and stack
+// trace are logged separately so log aggregators (Sentry, Datadog, Loki)
+// group panics by their headline rather than treating each stack line as
+// an independent event.
+func (u *promUnifi) safeRefresh() {
+	defer func() {
+		r := recover()
+		if r == nil {
+			return
+		}
+
+		u.LogErrorf("background metrics refresh panicked; continuing: %v", r)
+		u.LogDebugf("panic stack:\n%s", debug.Stack())
+
+		if u.cache != nil {
+			u.cache.set(nil, fmt.Errorf("refresh panicked: %v", r))
+		}
+
+		if u.refreshFailures != nil {
+			u.refreshFailures.Inc()
+		}
+	}()
+
+	u.refreshCache()
+}
+
+// refreshCache polls upstream once and updates the cache. On error the last
+// successful snapshot is preserved so scrapes keep returning data during
+// transient upstream failures (e.g. 429 backoff loops). Failures are also
+// counted in refreshFailures so operators can alert on failure rate
+// independently of cache staleness.
+//
+// The cache.set call happens before logging and counter increment so the
+// cache update is the most-protected statement — if anything in the
+// post-set bookkeeping ever panics, safeRefresh's recover still sees a
+// correctly updated cache.
+func (u *promUnifi) refreshCache() {
+	if u.cache == nil {
+		return
+	}
+
+	m, err := u.Collector.Metrics(nil)
+	u.cache.set(m, err)
+
+	if err != nil {
+		u.LogErrorf("background metrics refresh failed (serving last good snapshot): %v", err)
+
+		if u.refreshFailures != nil {
+			u.refreshFailures.Inc()
+		}
+	}
+}
+
+// cacheAgeGauge returns a GaugeFunc reporting seconds since the last
+// successful background refresh. Returns -1 if no refresh has succeeded yet.
+func (u *promUnifi) cacheAgeGauge() prometheus.Collector {
+	return prometheus.NewGaugeFunc(
+		prometheus.GaugeOpts{
+			Name: u.Namespace + "_prometheus_cache_age_seconds",
+			Help: "Seconds since the last successful background metrics refresh. -1 means no refresh has succeeded yet.",
+		},
+		func() float64 {
+			if u.cache == nil {
+				return -1
+			}
+
+			_, fetchedAt, _ := u.cache.get()
+			if fetchedAt.IsZero() {
+				return -1
+			}
+
+			return time.Since(fetchedAt).Seconds()
+		},
+	)
+}
+
+// fetchMetrics returns the metrics for a scrape, using the cache for global
+// /metrics scrapes and singleflight-coalesced live calls for per-target
+// /scrape requests.
+func (u *promUnifi) fetchMetrics(filter *poller.Filter) (*poller.Metrics, error) {
+	if filter == nil {
+		if u.cache == nil {
+			return u.Collector.Metrics(nil)
+		}
+
+		m, _, err := u.cache.get()
+		if m != nil {
+			// Serve cached data even if the most recent refresh errored.
+			return m, nil
+		}
+
+		if err != nil {
+			return nil, err
+		}
+
+		return nil, fmt.Errorf("metrics cache not yet populated")
+	}
+
+	// /scrape path: coalesce concurrent scrapes for the same target so a
+	// noisy scraper can't multiply upstream API load.
+	key := filter.Path
+	if key == "" {
+		key = filter.Name
+	}
+
+	result, err, _ := u.scrapeFlight.Do(key, func() (any, error) {
+		return u.Collector.Metrics(filter)
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	// Strict assertion: silently dropping a wrong-type result would turn an
+	// upstream regression into an empty 200 OK scrape with no log entry.
+	m, ok := result.(*poller.Metrics)
+	if !ok {
+		return nil, fmt.Errorf("singleflight returned unexpected type %T", result)
+	}
+
+	return m, nil
 }
 
 // ScrapeHandler allows prometheus to scrape a single source, instead of all sources.
@@ -339,6 +584,8 @@ func (u *promUnifi) ScrapeHandler(w http.ResponseWriter, r *http.Request) {
 	).ServeHTTP(w, r)
 }
 
+// DefaultHandler serves the HTTP root with a simple liveness response naming
+// the application.
 func (u *promUnifi) DefaultHandler(w http.ResponseWriter, _ *http.Request) {
 	w.WriteHeader(http.StatusOK)
 	_, _ = w.Write([]byte(poller.AppName + "\n"))
@@ -396,7 +643,7 @@ func (u *promUnifi) collect(ch chan<- prometheus.Metric, filter *poller.Filter) 
 	}
 	defer r.close()
 
-	r.Metrics, err = u.Collector.Metrics(filter)
+	r.Metrics, err = u.fetchMetrics(filter)
 	r.Fetch = time.Since(r.Start)
 
 	if err != nil {

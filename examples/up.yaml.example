@@ -20,6 +20,7 @@ prometheus:
   ssl_cert_path: ""
   ssl_key_path:  ""
   report_errors: false
+  interval:      "60s"
 
 influxdb:
   disable: false
