@@ -35,6 +35,10 @@
   report_errors = false
   ## Record data for disabled or down (unlinked) switch ports.
   dead_ports = false
+  # How often the background poller refreshes the cache served to /metrics.
+  # Decouples scrape cadence from UniFi API calls so 429 backoff loops no
+  # longer block /metrics. Default: 60s. Values below 15s are clamped to 15s.
+  interval = "60s"
 
 [influxdb]
   disable = false
