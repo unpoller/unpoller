@@ -37,5 +37,32 @@ func (u *promUnifi) exportUCI(r report, d *unifi.UCI) {
 			{u.Device.Info, gauge, 1.0, append(baseLabels, infoLabels...)},
 			{u.Device.Uptime, gauge, d.Uptime, labels},
 		})
+
+		// DOCSIS / Cable Internet state.
+		//
+		// The controller exposes a top-level `internet` boolean on UCI devices,
+		// but it is not a reliable WAN-reachability signal — it stays false
+		// even when the cable link is fully up and traffic is flowing. The
+		// UCI is a cable bridge with no independent internet-reachability
+		// check; real WAN health lives on the upstream gateway (e.g. UDM
+		// `wan1.up`).
+		//
+		// Instead, derive an operational gauge from the DOCSIS CI state,
+		// which IS reported reliably by the controller. The full state
+		// string is also exposed as a label on `*_ci_state_info`.
+		if d.CiStateTable != nil {
+			r.send([]*metric{
+				{
+					u.Device.CiStateOperational, gauge,
+					d.CiStateTable.CIState == "Operational",
+					labels,
+				},
+				{
+					u.Device.CiStateInfo, gauge, 1.0,
+					append(labels, d.CiStateTable.CIState, d.CiStateTable.CISwDlStatus,
+						d.CiStateTable.CIMac, d.CiStateTable.CIVersion, d.CiStateTable.CIMode),
+				},
+			})
+		}
 	})
 }

@@ -32,6 +32,8 @@ type unifiDevice struct {
 	CPU                      *prometheus.Desc
 	Mem                      *prometheus.Desc
 	Upgradeable              *prometheus.Desc
+	CiStateOperational       *prometheus.Desc // uci only
+	CiStateInfo              *prometheus.Desc // uci only
 }
 
 func descDevice(ns string) *unifiDevice {
@@ -66,6 +68,12 @@ func descDevice(ns string) *unifiDevice {
 		CPU:                      prometheus.NewDesc(ns+"cpu_utilization_ratio", "System CPU % Utilized", append(labels, "tag"), nil),
 		Mem:                      prometheus.NewDesc(ns+"memory_utilization_ratio", "System Memory % Utilized", append(labels, "tag"), nil),
 		Upgradeable:              prometheus.NewDesc(ns+"upgradable", "Upgrade-able", append(labels, "tag"), nil),
+		CiStateOperational: prometheus.NewDesc(ns+"ci_state_operational",
+			"DOCSIS Cable Internet Operational State (1=Operational, 0=other). UCI devices only.",
+			append(labels, "tag"), nil),
+		CiStateInfo: prometheus.NewDesc(ns+"ci_state_info",
+			"DOCSIS CI State Information. UCI devices only.",
+			append(append(labels, "tag"), "ci_state", "ci_sw_dl_status", "ci_mac", "ci_version", "ci_mode"), nil),
 	}
 }
 
