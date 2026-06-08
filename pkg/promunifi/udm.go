@@ -130,8 +130,8 @@ func (u *promUnifi) exportUDM(r report, d *unifi.UDM) {
 			tag := tagLabels[0]
 			labels := append(baseLabels, tag)
 			u.exportUAPstats(r, labels, d.Stat.Ap, d.BytesD, d.TxBytesD, d.RxBytesD, d.BytesR)
-			u.exportVAPtable(r, labels, *d.VapTable)
-			u.exportRADtable(r, labels, *d.RadioTable, *d.RadioTableStats)
+			u.exportVAPtable(r, labels, *d.VapTable, d.Mac)
+			u.exportRADtable(r, labels, *d.RadioTable, *d.RadioTableStats, d.Mac)
 		})
 	}
 }

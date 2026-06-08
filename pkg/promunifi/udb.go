@@ -24,8 +24,8 @@ func (u *promUnifi) exportUDB(r report, d *unifi.UDB) {
 		u.exportPRTtable(r, labels, d.PortTable)
 
 		// Export wireless stats (reuse UAP functions)
-		u.exportVAPtable(r, labels, d.VapTable)
-		u.exportRADtable(r, labels, d.RadioTable, d.RadioTableStats)
+		u.exportVAPtable(r, labels, d.VapTable, d.Mac)
+		u.exportRADtable(r, labels, d.RadioTable, d.RadioTableStats, d.Mac)
 
 		// Common device stats
 		u.exportBYTstats(r, labels, d.TxBytes, d.RxBytes)

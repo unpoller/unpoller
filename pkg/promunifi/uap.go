@@ -112,8 +112,8 @@ func descRogueAP(ns string) *rogueap {
 
 func descUAP(ns string) *uap { // nolint: funlen
 	labelA := []string{"stat", "site_name", "name", "source", "tag"} // stat + labels[1:]
-	labelV := []string{"vap_name", "bssid", "radio", "radio_name", "essid", "usage", "site_name", "name", "source", "tag"}
-	labelR := []string{"radio_name", "radio", "site_name", "name", "source", "tag"}
+	labelV := []string{"vap_name", "bssid", "radio", "radio_name", "essid", "usage", "mac", "site_name", "name", "source", "tag"}
+	labelR := []string{"radio_name", "radio", "mac", "site_name", "name", "source", "tag"}
 	nd := prometheus.NewDesc
 
 	return &uap{
@@ -224,12 +224,12 @@ func (u *promUnifi) exportUAP(r report, d *unifi.UAP) {
 		infoLabels := append(baseInfoLabels, tag)
 
 		u.exportUAPstats(r, labels, d.Stat.Ap, d.BytesD, d.TxBytesD, d.RxBytesD, d.BytesR)
-		u.exportVAPtable(r, labels, d.VapTable)
+		u.exportVAPtable(r, labels, d.VapTable, d.Mac)
 		u.exportPRTtable(r, labels, d.PortTable)
 		u.exportBYTstats(r, labels, d.TxBytes, d.RxBytes)
 		u.exportSYSstats(r, labels, d.SysStats, d.SystemStats)
 		u.exportSTAcount(r, labels, d.UserNumSta, d.GuestNumSta)
-		u.exportRADtable(r, labels, d.RadioTable, d.RadioTableStats)
+		u.exportRADtable(r, labels, d.RadioTable, d.RadioTableStats, d.Mac)
 		// UAP uplink metrics. The uplink "type" (e.g. "wire" / "wireless")
 		// is encoded as the first label, matching the convention used by
 		// USG/USW/UBB/UDB so dashboards can group by port.
@@ -292,14 +292,14 @@ func (u *promUnifi) exportUAPstats(r report, labels []string, ap *unifi.Ap, byte
 }
 
 // UAP VAP Table.
-func (u *promUnifi) exportVAPtable(r report, labels []string, vt unifi.VapTable) {
+func (u *promUnifi) exportVAPtable(r report, labels []string, vt unifi.VapTable, mac string) {
 	// vap table stats
 	for _, v := range vt {
 		if !v.Up.Val {
 			continue
 		}
 
-		labelV := []string{v.Name, v.Bssid, v.Radio, v.RadioName, v.Essid, v.Usage, labels[1], labels[2], labels[3], labels[4]}
+		labelV := []string{v.Name, v.Bssid, v.Radio, v.RadioName, v.Essid, v.Usage, mac, labels[1], labels[2], labels[3], labels[4]}
 		r.send([]*metric{
 			{u.UAP.VAPCcq, gauge, float64(v.Ccq) / 1000.0, labelV},
 			{u.UAP.VAPMacFilterRejections, counter, v.MacFilterRejections, labelV},
@@ -343,10 +343,10 @@ func (u *promUnifi) exportVAPtable(r report, labels []string, vt unifi.VapTable)
 }
 
 // UAP Radio Table.
-func (u *promUnifi) exportRADtable(r report, labels []string, rt unifi.RadioTable, rts unifi.RadioTableStats) {
+func (u *promUnifi) exportRADtable(r report, labels []string, rt unifi.RadioTable, rts unifi.RadioTableStats, mac string) {
 	// radio table
 	for _, p := range rt {
-		labelR := []string{p.Name, p.Radio, labels[1], labels[2], labels[3], labels[4]}
+		labelR := []string{p.Name, p.Radio, mac, labels[1], labels[2], labels[3], labels[4]}
 		labelRUser := append(labelR, "user")
 		labelRGuest := append(labelR, "guest")
 
