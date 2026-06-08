@@ -25,10 +25,10 @@ func (u *promUnifi) exportUBB(r report, d *unifi.UBB) {
 		u.exportUBBstats(r, labels, d.Stat)
 
 		// Export VAP table (Virtual Access Point table - wireless interface stats)
-		u.exportVAPtable(r, labels, d.VapTable)
+		u.exportVAPtable(r, labels, d.VapTable, d.Mac)
 
 		// Export Radio tables (includes 5GHz wifi0 and 60GHz terra2/ad radios)
-		u.exportRADtable(r, labels, d.RadioTable, d.RadioTableStats)
+		u.exportRADtable(r, labels, d.RadioTable, d.RadioTableStats, d.Mac)
 
 		// Shared device stats
 		u.exportBYTstats(r, labels, d.TxBytes, d.RxBytes)
