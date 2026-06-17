@@ -112,8 +112,8 @@ func descRogueAP(ns string) *rogueap {
 
 func descUAP(ns string) *uap { // nolint: funlen
 	labelA := []string{"stat", "site_name", "name", "source", "tag"} // stat + labels[1:]
-	labelV := []string{"vap_name", "bssid", "radio", "radio_name", "essid", "usage", "mac", "site_name", "name", "source", "tag"}
-	labelR := []string{"radio_name", "radio", "mac", "site_name", "name", "source", "tag"}
+	labelV := []string{"vap_name", "bssid", "radio", "band", "radio_name", "essid", "usage", "mac", "site_name", "name", "source", "tag"}
+	labelR := []string{"radio_name", "radio", "band", "mac", "site_name", "name", "source", "tag"}
 	nd := prometheus.NewDesc
 
 	return &uap{
@@ -291,6 +291,23 @@ func (u *promUnifi) exportUAPstats(r report, labels []string, ap *unifi.Ap, byte
 	})
 }
 
+// radioBand maps a UniFi radio identifier to its frequency band in GHz.
+// UniFi reports the radio as ng (2.4 GHz), na (5 GHz) or 6e (6 GHz); the band
+// is not carried as its own field on the radio/VAP structs, so it is derived
+// here. Unknown identifiers yield an empty band label.
+func radioBand(radio string) string {
+	switch radio {
+	case "ng":
+		return "2.4"
+	case "na":
+		return "5"
+	case "6e":
+		return "6"
+	default:
+		return ""
+	}
+}
+
 // UAP VAP Table.
 func (u *promUnifi) exportVAPtable(r report, labels []string, vt unifi.VapTable, mac string) {
 	// vap table stats
@@ -299,7 +316,7 @@ func (u *promUnifi) exportVAPtable(r report, labels []string, vt unifi.VapTable,
 			continue
 		}
 
-		labelV := []string{v.Name, v.Bssid, v.Radio, v.RadioName, v.Essid, v.Usage, mac, labels[1], labels[2], labels[3], labels[4]}
+		labelV := []string{v.Name, v.Bssid, v.Radio, radioBand(v.Radio), v.RadioName, v.Essid, v.Usage, mac, labels[1], labels[2], labels[3], labels[4]}
 		r.send([]*metric{
 			{u.UAP.VAPCcq, gauge, float64(v.Ccq) / 1000.0, labelV},
 			{u.UAP.VAPMacFilterRejections, counter, v.MacFilterRejections, labelV},
@@ -346,7 +363,7 @@ func (u *promUnifi) exportVAPtable(r report, labels []string, vt unifi.VapTable,
 func (u *promUnifi) exportRADtable(r report, labels []string, rt unifi.RadioTable, rts unifi.RadioTableStats, mac string) {
 	// radio table
 	for _, p := range rt {
-		labelR := []string{p.Name, p.Radio, mac, labels[1], labels[2], labels[3], labels[4]}
+		labelR := []string{p.Name, p.Radio, radioBand(p.Radio), mac, labels[1], labels[2], labels[3], labels[4]}
 		labelRUser := append(labelR, "user")
 		labelRGuest := append(labelR, "guest")
 
