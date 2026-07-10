@@ -16,6 +16,7 @@ points:
       tx_packets: int
   clients:
     tags:
+      - 1x_identity
       - channel
       - dev_cat
       - dev_family

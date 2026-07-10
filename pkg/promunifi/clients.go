@@ -45,7 +45,7 @@ type uclient struct {
 func descClient(ns string) *uclient {
 	labels := []string{
 		"name", "mac", "site_name", "gw_name", "sw_name", "vlan",
-		"ip", "oui", "network", "sw_port", "ap_name", "source", "wired",
+		"ip", "oui", "network", "sw_port", "ap_name", "source", "identity", "wired",
 	}
 	labelW := append([]string{"radio_name", "radio", "radio_proto", "channel", "essid", "bssid", "radio_desc"}, labels...)
 	labelDPI := []string{"name", "mac", "site_name", "source", "category", "application"}
@@ -111,7 +111,7 @@ func (u *promUnifi) exportClientDPI(r report, v any, appTotal, catTotal totalsDP
 func (u *promUnifi) exportClient(r report, c *unifi.Client) {
 	labels := []string{
 		c.Name, c.Mac, c.SiteName, c.GwName, c.SwName, c.Vlan.Txt,
-		c.IP, c.Oui, c.Network, c.SwPort.Txt, c.ApName, c.SourceName, "",
+		c.IP, c.Oui, c.Network, c.SwPort.Txt, c.ApName, c.SourceName, c.Identity1x, "",
 	}
 	labelW := append([]string{
 		c.RadioName, c.Radio, c.RadioProto, c.Channel.Txt, c.Essid, c.Bssid, c.RadioDescription,

@@ -32,6 +32,7 @@ func (u *InfluxUnifi) batchClient(r report, s *unifi.Client) { // nolint: funlen
 		"use_fixedip": s.UseFixedIP.Txt,
 		"channel":     s.Channel.Txt,
 		"vlan":        s.Vlan.Txt,
+		"1x_identity": s.Identity1x,
 	}
 
 	fields := map[string]any{

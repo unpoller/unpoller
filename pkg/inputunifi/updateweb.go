@@ -143,6 +143,7 @@ func formatClients(c *Controller, clients []*unifi.Client) (d webserver.Clients)
 			IP:         client.IP,
 			Type:       clientType,
 			DeviceMAC:  deviceMAC,
+			Identity1x: client.Identity1x,
 			Rx:         client.RxBytes.Int64(),
 			Tx:         client.TxBytes.Int64(),
 			Since:      time.Unix(client.FirstSeen.Int64(), 0),
