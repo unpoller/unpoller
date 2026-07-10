@@ -133,6 +133,7 @@ type Client struct {
 	IP         string    `json:"ip"`
 	Type       string    `json:"type"`
 	DeviceMAC  string    `json:"device_mac"`
+	Identity1x string    `json:"1x_identity"`
 	Since      time.Time `json:"since"`
 	Last       time.Time `json:"last"`
 }

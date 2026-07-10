@@ -127,6 +127,7 @@ func (u *OtelOutput) exportClients(ctx context.Context, meter metric.Meter, m *p
 			attribute.String("network", c.Network),
 			attribute.String("ap_name", c.ApName),
 			attribute.String("sw_name", c.SwName),
+			attribute.String("identity", c.Identity1x),
 			attribute.Bool("wired", c.IsWired.Val),
 		)
 

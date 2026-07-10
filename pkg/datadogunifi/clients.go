@@ -36,6 +36,7 @@ func (u *DatadogUnifi) batchClient(r report, s *unifi.Client) { // nolint: funle
 		"essid":        s.Essid,
 		"bssid":        s.Bssid,
 		"ip":           s.IP,
+		"1x_identity":  s.Identity1x,
 	}
 
 	powerSaveEnabled := 0.0
