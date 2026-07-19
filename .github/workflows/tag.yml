@@ -1,0 +1,47 @@
+name: Create Tag
+
+on:
+  workflow_dispatch:
+    inputs:
+      bump:
+        description: 'Version component to bump'
+        required: true
+        default: 'minor'
+        type: choice
+        options:
+          - patch
+          - minor
+          - major
+
+permissions:
+  contents: write
+
+jobs:
+  tag:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+      - run: git fetch --force --tags
+      - uses: actions/setup-go@v6
+        with:
+          go-version: 'stable'
+          cache: true
+      - name: Install git-semver
+        run: go install github.com/mdomke/git-semver/v6@latest
+      - name: Compute next version
+        id: semver
+        env:
+          BUMP: ${{ inputs.bump }}
+        run: |
+          NEXT_VERSION=$(git-semver -target "$BUMP" -prefix v)
+          echo "version=${NEXT_VERSION}" >> "$GITHUB_OUTPUT"
+      - name: Create and push tag
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git tag -a "${{ steps.semver.outputs.version }}" -m "Release ${{ steps.semver.outputs.version }}"
+          git push origin "${{ steps.semver.outputs.version }}"
+      - name: Summary
+        run: echo "Created tag ${{ steps.semver.outputs.version }}" >> "$GITHUB_STEP_SUMMARY"
