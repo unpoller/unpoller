@@ -15,6 +15,7 @@ on:
 
 permissions:
   contents: write
+  actions: write
 
 jobs:
   tag:
@@ -43,5 +44,12 @@ jobs:
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git tag -a "${{ steps.semver.outputs.version }}" -m "Release ${{ steps.semver.outputs.version }}"
           git push origin "${{ steps.semver.outputs.version }}"
+      - name: Trigger release workflow
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ steps.semver.outputs.version }}
+        run: gh workflow run release.yml --ref "$TAG"
       - name: Summary
-        run: echo "Created tag ${{ steps.semver.outputs.version }}" >> "$GITHUB_STEP_SUMMARY"
+        env:
+          TAG: ${{ steps.semver.outputs.version }}
+        run: echo "Created tag $TAG" >> "$GITHUB_STEP_SUMMARY"
