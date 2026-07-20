@@ -5,6 +5,7 @@ on:
     # run only against tags
     tags:
       - '*'
+  workflow_dispatch:
 
 permissions:
   contents: write
