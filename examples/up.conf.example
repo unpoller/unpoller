@@ -226,6 +226,11 @@
   ## This saves neighboring access point metrics in a dedicated table or namespace.
   save_rogue = false
 
+  ## WAN speed test results, polled from the controller's aggregated-dashboard
+  ## endpoint. Enabled by default. Set to false to skip that request entirely if
+  ## your controller misbehaves on it or you simply don't want the metrics.
+  save_speedtest = true
+
   # If your UniFi controller has a valid SSL certificate (like lets encrypt),
   # you can enable this option to validate it. Otherwise, any SSL certificate is
   # valid. If you don't know if you have a valid SSL cert, then you don't have one.
@@ -259,5 +264,6 @@
 #  save_dpi    = false
 #  save_traffic = false
 #  save_rogue  = false
+#  save_speedtest = true
 #  verify_ssl  = false
 #  ssl_cert_paths = []

@@ -74,6 +74,7 @@ func formatControllers(controllers []*Controller) []*Controller {
 			SaveAnomal:      c.SaveAnomal,
 			SaveAlarms:      c.SaveAlarms,
 			SaveRogue:       c.SaveRogue,
+			SaveSpeedTest:   c.SaveSpeedTest,
 			SaveEvents:      c.SaveEvents,
 			SaveSyslog:      c.SaveSyslog,
 			SaveProtectLogs: c.SaveProtectLogs,

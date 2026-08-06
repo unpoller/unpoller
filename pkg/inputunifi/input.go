@@ -48,6 +48,7 @@ type Controller struct {
 	SaveDPI                 *bool         `json:"save_dpi"                   toml:"save_dpi"                   xml:"save_dpi"                   yaml:"save_dpi"`
 	SaveTraffic             *bool         `json:"save_traffic"               toml:"save_traffic"               xml:"save_traffic"               yaml:"save_traffic"`
 	SaveRogue               *bool         `json:"save_rogue"                 toml:"save_rogue"                 xml:"save_rogue"                 yaml:"save_rogue"`
+	SaveSpeedTest           *bool         `json:"save_speedtest"             toml:"save_speedtest"             xml:"save_speedtest"             yaml:"save_speedtest"`
 	HashPII                 *bool         `json:"hash_pii"                   toml:"hash_pii"                   xml:"hash_pii"                   yaml:"hash_pii"`
 	DropPII                 *bool         `json:"drop_pii"                   toml:"drop_pii"                   xml:"drop_pii"                   yaml:"drop_pii"`
 	SaveSites               *bool         `json:"save_sites"                 toml:"save_sites"                 xml:"save_sites"                 yaml:"save_sites"`
@@ -315,6 +316,12 @@ func (u *InputUnifi) setDefaults(c *Controller) { //nolint:cyclop
 		c.SaveRogue = &f
 	}
 
+	// Defaults to true: the speed test poll has always run unconditionally,
+	// so an explicit opt-out keeps existing setups behaving the same.
+	if c.SaveSpeedTest == nil {
+		c.SaveSpeedTest = &t
+	}
+
 	if c.SaveIDs == nil {
 		c.SaveIDs = &f
 	}
@@ -431,6 +438,10 @@ func (u *InputUnifi) setControllerDefaults(c *Controller) *Controller { //nolint
 
 	if c.SaveRogue == nil {
 		c.SaveRogue = u.Default.SaveRogue
+	}
+
+	if c.SaveSpeedTest == nil {
+		c.SaveSpeedTest = u.Default.SaveSpeedTest
 	}
 
 	if c.SaveEvents == nil {
