@@ -15,6 +15,7 @@
       "save_ids": true,
       "save_traffic": true,
       "save_rogue": true,
+      "save_speedtest": true,
       "save_syslog": true,
       "save_protect_logs": false,
       "verify_ssl": true

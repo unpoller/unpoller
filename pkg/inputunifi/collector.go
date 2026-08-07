@@ -190,11 +190,13 @@ func (u *InputUnifi) pollController(c *Controller) (*poller.Metrics, error) {
 		len(m.Devices.USWs), len(m.Devices.UDMs))
 
 	// Get speed test results for all WANs
-	if m.SpeedTests, err = c.Unifi.GetSpeedTests(sites, historySeconds); err != nil {
-		// Don't fail collection if speed tests fail - older controllers may not have this endpoint
-		u.LogDebugf("unifi.GetSpeedTests(%s): %v (continuing)", c.URL, err)
-	} else {
-		u.LogDebugf("Found %d SpeedTests entries", len(m.SpeedTests))
+	if c.SaveSpeedTest != nil && *c.SaveSpeedTest {
+		if m.SpeedTests, err = c.Unifi.GetSpeedTests(sites, historySeconds); err != nil {
+			// Don't fail collection if speed tests fail - older controllers may not have this endpoint
+			u.LogDebugf("unifi.GetSpeedTests(%s): %v (continuing)", c.URL, err)
+		} else {
+			u.LogDebugf("Found %d SpeedTests entries", len(m.SpeedTests))
+		}
 	}
 
 	// Get DHCP leases with associations.
