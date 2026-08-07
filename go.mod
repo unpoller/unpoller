@@ -12,7 +12,7 @@ require (
 	github.com/prometheus/common v0.70.1
 	github.com/spf13/pflag v1.0.10
 	github.com/stretchr/testify v1.11.1
-	github.com/unpoller/unifi/v5 v5.29.0
+	github.com/unpoller/unifi/v5 v5.30.0
 	go.opentelemetry.io/otel v1.44.0
 	go.opentelemetry.io/otel/exporters/otlp/otlpmetric/otlpmetricgrpc v1.44.0
 	go.opentelemetry.io/otel/exporters/otlp/otlpmetric/otlpmetrichttp v1.44.0
