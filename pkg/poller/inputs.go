@@ -81,11 +81,28 @@ func (u *UnifiPoller) InitializeInputs() error {
 
 		go func(input *InputPlugin) {
 			defer wg.Done()
+
+			sent := false
+
+			// A panicking input plugin runs in its own goroutine, so it cannot be
+			// caught by a recover() in the caller. Without this, a panic here
+			// crashes the whole process before the app even starts.
+			// See https://github.com/unpoller/unpoller/issues/1030
+			defer func() {
+				if r := recover(); r != nil && !sent {
+					u.LogErrorf("input plugin %s panicked initializing (see issue #1030): %v", input.Name, r)
+
+					errChan <- fmt.Errorf("input plugin %s panicked initializing: %v", input.Name, r) //nolint:err113
+				}
+			}()
+
 			// This must return, or the app locks up here.
 			u.LogDebugf("inititalizing input... %s", input.Name)
 
 			if err := input.Initialize(u); err != nil {
 				u.LogDebugf("error initializing input ... %s", input.Name)
+
+				sent = true
 
 				errChan <- err
 
@@ -93,6 +110,8 @@ func (u *UnifiPoller) InitializeInputs() error {
 			}
 
 			u.LogDebugf("input successfully initialized ... %s", input.Name)
+
+			sent = true
 
 			errChan <- nil
 		}(input)
@@ -140,9 +159,25 @@ func collectEvents(filter *Filter, inputs []*InputPlugin) (*Events, error) {
 		go func(input *InputPlugin) {
 			defer wg.Done()
 
+			sent := false
+
+			// A panicking input plugin runs in its own goroutine, so it cannot be
+			// caught by a recover() in the caller. Without this, a panic here
+			// (e.g. from a malformed controller response) crashes the whole
+			// process. See https://github.com/unpoller/unpoller/issues/1030
+			defer func() {
+				if r := recover(); r != nil && !sent {
+					resultChan <- eventInputResult{
+						err: fmt.Errorf("input plugin %s panicked collecting events (see issue #1030): %v", input.Name, r),
+					}
+				}
+			}()
+
 			if filter != nil &&
 				filter.Name != "" &&
 				!strings.EqualFold(input.Name, filter.Name) {
+				sent = true
+
 				resultChan <- eventInputResult{}
 
 				return
@@ -150,10 +185,14 @@ func collectEvents(filter *Filter, inputs []*InputPlugin) (*Events, error) {
 
 			e, err := input.Events(filter)
 			if err != nil {
+				sent = true
+
 				resultChan <- eventInputResult{err: err}
 
 				return
 			}
+
+			sent = true
 
 			resultChan <- eventInputResult{logs: e.Logs}
 		}(input)
@@ -209,15 +248,34 @@ func collectMetrics(filter *Filter, inputs []*InputPlugin) (*Metrics, error) {
 		go func(input *InputPlugin) {
 			defer wg.Done()
 
+			sent := false
+
+			// A panicking input plugin runs in its own goroutine, so it cannot be
+			// caught by a recover() in the caller. Without this, a panic here
+			// (e.g. from a malformed controller response, such as an unexpected
+			// Site Speed Test aggregated-dashboard payload) crashes the whole
+			// process. See https://github.com/unpoller/unpoller/issues/1030
+			defer func() {
+				if r := recover(); r != nil && !sent {
+					resultChan <- metricInputResult{
+						err: fmt.Errorf("input plugin %s panicked collecting metrics (see issue #1030): %v", input.Name, r),
+					}
+				}
+			}()
+
 			if filter != nil &&
 				filter.Name != "" &&
 				!strings.EqualFold(input.Name, filter.Name) {
+				sent = true
+
 				resultChan <- metricInputResult{}
 
 				return
 			}
 
 			m, err := input.Metrics(filter)
+			sent = true
+
 			resultChan <- metricInputResult{metric: m, err: err}
 		}(input)
 	}
