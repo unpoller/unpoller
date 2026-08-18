@@ -10,11 +10,13 @@ type wanStatus struct {
 }
 
 func descWANStatus(ns string) *wanStatus {
-	labels := []string{"site_name", "wan_interface", "wan_networkgroup"}
+	labels := []string{"site_name", "wan_interface", "wan_networkgroup", "state"}
 
 	return &wanStatus{
 		InterfaceState: prometheus.NewDesc(ns+"wan_interface_state",
-			"WAN interface state: 1=ACTIVE, 0=other",
+			"WAN interface state: 1=ACTIVE, 0=other. The state label carries the raw "+
+				"controller value (ACTIVE, BACKUP, or DISCONNECTED) so BACKUP and DISCONNECTED "+
+				"can be distinguished.",
 			labels, nil),
 	}
 }
@@ -33,7 +35,7 @@ func (u *promUnifi) exportWANStatus(r report, ws *unifi.WANStatus) {
 	}
 
 	for _, iface := range ws.WANInterfaces {
-		labels := []string{ws.SiteName, iface.Name, iface.WANNetworkgroup}
+		labels := []string{ws.SiteName, iface.Name, iface.WANNetworkgroup, iface.State}
 
 		r.send([]*metric{
 			{u.WANStatus.InterfaceState, gauge, wanStateValue(iface.State), labels},
