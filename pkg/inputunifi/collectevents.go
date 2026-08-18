@@ -135,6 +135,16 @@ func (u *InputUnifi) collectAlarms(logs []any, sites []*unifi.Site, c *Controlle
 				return logs, nil
 			}
 
+			if isAlarmsInvalidObject(err) {
+				// Some Network 10.x+ controllers (see unpoller/unpoller#1050) return
+				// HTTP 400 api.err.InvalidObject for list/alarm instead of a 404 when
+				// the endpoint is gone. unifi.ErrInvalidStatusCode doesn't carry a
+				// parsed status code, so we match on the formatted resp.Status text.
+				u.Logf("[%s] Alarms endpoint returned 400 (likely removed on this controller version): %v", c.URL, err)
+
+				return logs, nil
+			}
+
 			if err != nil {
 				return logs, fmt.Errorf("unifi.GetAlarms(): %w", err)
 			}
@@ -156,6 +166,12 @@ func (u *InputUnifi) collectAlarms(logs []any, sites []*unifi.Site, c *Controlle
 	}
 
 	return logs, nil
+}
+
+// isAlarmsInvalidObject reports whether err is a 400 api.err.InvalidObject response,
+// which some Network 10.x+ controllers return from list/alarm in place of a 404.
+func isAlarmsInvalidObject(err error) bool {
+	return errors.Is(err, unifi.ErrInvalidStatusCode) && strings.Contains(err.Error(), ": 400 ")
 }
 
 func (u *InputUnifi) collectAnomalies(logs []any, sites []*unifi.Site, c *Controller) ([]any, error) {
