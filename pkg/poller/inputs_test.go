@@ -46,6 +46,38 @@ func TestCollectMetricsRecoversPanickingInput(t *testing.T) {
 	assert.Contains(t, err.Error(), "panic-input")
 }
 
+// nilEventsInput simulates a disabled input plugin, which returns (nil, nil)
+// from Events. See https://github.com/unpoller/unpoller/issues/1030.
+type nilEventsInput struct{}
+
+func (nilEventsInput) Initialize(poller.Logger) error { return nil }
+
+func (nilEventsInput) Metrics(*poller.Filter) (*poller.Metrics, error) { return nil, nil }
+
+func (nilEventsInput) Events(*poller.Filter) (*poller.Events, error) { return nil, nil }
+
+func (nilEventsInput) RawMetrics(*poller.Filter) ([]byte, error) { return nil, nil }
+
+func (nilEventsInput) DebugInput() (bool, error) { return false, nil }
+
+func TestCollectEventsHandlesNilEventsResult(t *testing.T) {
+	t.Parallel()
+
+	collector := poller.NewTestCollector(t)
+	collector.AddInput(&poller.InputPlugin{Name: "nil-events-input", Input: nilEventsInput{}})
+
+	var events *poller.Events
+
+	var err error
+
+	require.NotPanics(t, func() {
+		events, err = collector.Events(nil)
+	})
+
+	assert.NotNil(t, events)
+	require.NoError(t, err)
+}
+
 func TestCollectEventsRecoversPanickingInput(t *testing.T) {
 	t.Parallel()
 

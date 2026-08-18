@@ -183,6 +183,12 @@ func collectEvents(filter *Filter, inputs []*InputPlugin) (*Events, error) {
 				return
 			}
 
+			if e == nil {
+				resultChan <- eventInputResult{}
+
+				return
+			}
+
 			resultChan <- eventInputResult{logs: e.Logs}
 		}(input)
 	}
