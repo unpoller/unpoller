@@ -366,6 +366,7 @@ func AppendMetrics(existing *Metrics, m *Metrics) *Metrics {
 	existing.PendingDevices = append(existing.PendingDevices, m.PendingDevices...)
 	existing.Countries = append(existing.Countries, m.Countries...)
 	existing.UNASDevices = append(existing.UNASDevices, m.UNASDevices...)
+	existing.ProtectDevices = append(existing.ProtectDevices, m.ProtectDevices...)
 
 	return existing
 }

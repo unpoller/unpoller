@@ -2,18 +2,18 @@ package promunifi
 
 import (
 	"github.com/prometheus/client_golang/prometheus"
-	"github.com/unpoller/unifi/v5"
+	"github.com/unpoller/unifi/v6"
 )
 
 type vpnmesh struct {
-	MeshPaused          *prometheus.Desc
-	MeshConnectionsTotal *prometheus.Desc
-	MeshDevicesTotal    *prometheus.Desc
-	TunnelConnected     *prometheus.Desc
+	MeshPaused            *prometheus.Desc
+	MeshConnectionsTotal  *prometheus.Desc
+	MeshDevicesTotal      *prometheus.Desc
+	TunnelConnected       *prometheus.Desc
 	TunnelAssociationTime *prometheus.Desc
-	TunnelErrors        *prometheus.Desc
-	StatusErrors        *prometheus.Desc
-	StatusWarnings      *prometheus.Desc
+	TunnelErrors          *prometheus.Desc
+	StatusErrors          *prometheus.Desc
+	StatusWarnings        *prometheus.Desc
 }
 
 func descVPNMesh(ns string) *vpnmesh {

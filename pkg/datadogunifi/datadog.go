@@ -7,7 +7,7 @@ import (
 	"time"
 
 	"github.com/DataDog/datadog-go/v5/statsd"
-	"github.com/unpoller/unifi/v5"
+	"github.com/unpoller/unifi/v6"
 	"github.com/unpoller/unpoller/pkg/poller"
 	"golift.io/cnfg"
 )
@@ -354,6 +354,10 @@ func (u *DatadogUnifi) loopPoints(r report) {
 		u.switchExport(r, v)
 	}
 
+	for _, v := range m.ProtectDevices {
+		u.switchExport(r, v)
+	}
+
 	for _, v := range m.WANStatuses {
 		u.switchExport(r, v)
 	}
@@ -481,6 +485,8 @@ func (u *DatadogUnifi) switchExport(r report, v any) { //nolint:cyclop
 		u.batchUPSDevice(r, v)
 	case *unifi.UNASDevice:
 		u.batchUNASDevice(r, v)
+	case *unifi.ProtectDevices:
+		u.batchProtectDevices(r, v)
 	case *unifi.WANStatus:
 		u.batchWANStatus(r, v)
 	case *unifi.IntegrationDeviceStats:

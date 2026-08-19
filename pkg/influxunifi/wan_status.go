@@ -1,7 +1,7 @@
 package influxunifi
 
 import (
-	"github.com/unpoller/unifi/v5"
+	"github.com/unpoller/unifi/v6"
 )
 
 // batchWANStatus generates InfluxDB points for WAN interface state.

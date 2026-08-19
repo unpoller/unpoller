@@ -1,6 +1,6 @@
 package influxunifi
 
-import "github.com/unpoller/unifi/v5"
+import "github.com/unpoller/unifi/v6"
 
 // udbT is used as a name for printed/logged counters.
 const udbT = item("UDB")

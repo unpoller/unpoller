@@ -14,7 +14,7 @@ import (
 
 	influx "github.com/influxdata/influxdb-client-go/v2"
 	influxV1 "github.com/influxdata/influxdb1-client/v2"
-	"github.com/unpoller/unifi/v5"
+	"github.com/unpoller/unifi/v6"
 	"github.com/unpoller/unpoller/pkg/poller"
 	"github.com/unpoller/unpoller/pkg/webserver"
 	"golift.io/cnfg"
@@ -510,6 +510,12 @@ func (u *InfluxUnifi) loopPoints(r report) {
 	for _, nd := range m.UNASDevices {
 		if v, ok := nd.(*unifi.UNASDevice); ok {
 			u.batchUNASDevice(r, v)
+		}
+	}
+
+	for _, pd := range m.ProtectDevices {
+		if v, ok := pd.(*unifi.ProtectDevices); ok {
+			u.batchProtectDevices(r, v)
 		}
 	}
 

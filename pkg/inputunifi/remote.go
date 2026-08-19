@@ -5,7 +5,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/unpoller/unifi/v5"
+	"github.com/unpoller/unifi/v6"
 )
 
 const discoverMaxAttempts = 3
@@ -169,6 +169,10 @@ func (u *InputUnifi) discoverRemoteControllers(apiKey string) ([]*Controller, er
 
 		if controller.ProtectThumbnails == nil {
 			controller.ProtectThumbnails = &f
+		}
+
+		if controller.SaveProtectDevices == nil {
+			controller.SaveProtectDevices = &f
 		}
 
 		// Extract site names

@@ -1,7 +1,7 @@
 package promunifi
 
 import (
-	"github.com/unpoller/unifi/v5"
+	"github.com/unpoller/unifi/v6"
 )
 
 // exportUCI is a collection of stats from UCI.
@@ -17,12 +17,12 @@ func (u *promUnifi) exportUCI(r report, d *unifi.UCI) {
 
 	baseLabels := []string{d.Type, d.SiteName, d.Name, d.SourceName}
 	baseInfoLabels := []string{d.Version, d.Model, d.Serial, d.Mac, d.IP, d.ID}
-	
+
 	u.exportWithTags(r, d.Tags, func(tagLabels []string) {
 		tag := tagLabels[0]
 		labels := append(baseLabels, tag)
 		infoLabels := append(baseInfoLabels, tag)
-		
+
 		// Shared data (all devices do this).
 		u.exportBYTstats(r, labels, d.TxBytes, d.RxBytes)
 
