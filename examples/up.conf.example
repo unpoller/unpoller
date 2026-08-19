@@ -267,3 +267,35 @@
 #  save_speedtest = true
 #  verify_ssl  = false
 #  ssl_cert_paths = []
+
+##############################
+### UNAS Pro (opt-in)
+##############################
+
+# A UNAS Pro is a standalone UniFi OS console with no Network application, so it is polled
+# by its own input plugin with its own credentials and host -- not as a UniFi controller.
+#
+# This section is entirely optional. The plugin is off unless you set enable = true and
+# add at least one [[unas.device]] below; otherwise it stays silent and inert.
+# Metrics land under the unifi_unas_ prefix in Prometheus, and in the unas_device,
+# unas_pool, unas_disk, and unas_share measurements in InfluxDB.
+#
+#[unas]
+#  enable = true
+#
+# Defaults applied to every device that does not set its own value.
+#[unas.defaults]
+#  user       = "unpoller"
+#  pass       = ""
+#  verify_ssl = false
+#  timeout    = "60s"
+#
+# Repeat the following stanza for each UNAS console you want to poll.
+# Use the console's own local-account credentials. Do not add a path after the host.
+#[[unas.device]]
+#  url            = "https://192.168.1.10"
+#  user           = "unpoller"
+#  pass           = "unpoller"
+#  verify_ssl     = false
+#  timeout        = "60s"
+#  ssl_cert_paths = []

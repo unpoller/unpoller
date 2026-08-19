@@ -315,10 +315,24 @@ func AppendMetrics(existing *Metrics, m *Metrics) *Metrics {
 		return existing
 	}
 
+	// The aggregate starts as a bare &Metrics{}, so without this its TS stays zero and
+	// influxunifi's per-point fallback (see influxdb.go collect) stamps every point that
+	// carries no timestamp of its own with the zero time.
+	//
+	// First writer wins, and that is whichever input's result is merged first -- in
+	// collectMetrics the inputs run concurrently and are drained in completion order, so with
+	// more than one input configured it is not deterministic which one supplies the TS. That
+	// is fine here: every input stamps the moment it began polling within the same tick, so
+	// any of them places the batch in the right poll interval. Do not read this as "earliest".
+	if existing.TS.IsZero() {
+		existing.TS = m.TS
+	}
+
 	existing.SitesDPI = append(existing.SitesDPI, m.SitesDPI...)
 	existing.Sites = append(existing.Sites, m.Sites...)
 	existing.ClientsDPI = append(existing.ClientsDPI, m.ClientsDPI...)
 	existing.RogueAPs = append(existing.RogueAPs, m.RogueAPs...)
+	existing.SpeedTests = append(existing.SpeedTests, m.SpeedTests...)
 	existing.Clients = append(existing.Clients, m.Clients...)
 	existing.Devices = append(existing.Devices, m.Devices...)
 	existing.CountryTraffic = append(existing.CountryTraffic, m.CountryTraffic...)
@@ -351,6 +365,7 @@ func AppendMetrics(existing *Metrics, m *Metrics) *Metrics {
 	existing.DPICategories = append(existing.DPICategories, m.DPICategories...)
 	existing.PendingDevices = append(existing.PendingDevices, m.PendingDevices...)
 	existing.Countries = append(existing.Countries, m.Countries...)
+	existing.UNASDevices = append(existing.UNASDevices, m.UNASDevices...)
 
 	return existing
 }

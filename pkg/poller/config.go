@@ -129,6 +129,8 @@ type Metrics struct {
 	DPICategories        []any // *unifi.DPICategory — DPI category catalogue (global)
 	PendingDevices       []any // *unifi.PendingDevice — devices awaiting adoption (global)
 	Countries            []any // *unifi.Country — country list for geo-filters (global)
+	// Added by the inputunas plugin:
+	UNASDevices []any // *unifi.UNASDevice — UNAS Pro storage console (one per configured device)
 }
 
 // Events defines the type for log entries.

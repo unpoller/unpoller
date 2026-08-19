@@ -86,3 +86,21 @@ unifi:
       save_sites:  true
       hash_pii:    false
       verify_ssl:  false
+
+# A UNAS Pro is a standalone UniFi OS console with no Network application, so it is polled
+# by its own input plugin with its own credentials and host -- not as a UniFi controller.
+# This section is optional: with no devices configured the plugin stays silent and inert.
+#unas:
+#  enable: true
+#  defaults:
+#    user:       "unpoller"
+#    pass:       ""
+#    verify_ssl: false
+#    timeout:    "60s"
+#  devices:
+#   # Repeat the following stanza to poll multiple UNAS consoles.
+#    - url:  "https://192.168.1.10"
+#      user: "unpoller"
+#      pass: "unpoller"
+#      verify_ssl: false
+#      timeout: "60s"
