@@ -350,6 +350,10 @@ func (u *DatadogUnifi) loopPoints(r report) {
 		u.switchExport(r, v)
 	}
 
+	for _, v := range m.UNASDevices {
+		u.switchExport(r, v)
+	}
+
 	for _, v := range m.WANStatuses {
 		u.switchExport(r, v)
 	}
@@ -475,6 +479,8 @@ func (u *DatadogUnifi) switchExport(r report, v any) { //nolint:cyclop
 		u.batchSSLCertificate(r, v)
 	case *unifi.UPSDeviceSelector:
 		u.batchUPSDevice(r, v)
+	case *unifi.UNASDevice:
+		u.batchUNASDevice(r, v)
 	case *unifi.WANStatus:
 		u.batchWANStatus(r, v)
 	case *unifi.IntegrationDeviceStats:

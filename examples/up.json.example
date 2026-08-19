@@ -84,5 +84,25 @@
        "verify_ssl":  false
       }
     ]
+  },
+
+  "unas": {
+    "//": "UNAS Pro consoles. JSON cannot carry comments, so this section ships disabled: it shows the shape, and flipping disable to false with a real url turns it on.",
+    "disable": true,
+    "defaults": {
+      "user":       "unpoller",
+      "pass":       "",
+      "verify_ssl": false,
+      "timeout":    "60s"
+    },
+    "devices": [
+      {
+       "url":  "https://192.168.1.10",
+       "user": "unpoller",
+       "pass": "unpoller",
+       "verify_ssl": false,
+       "timeout":    "60s"
+      }
+    ]
   }
 }

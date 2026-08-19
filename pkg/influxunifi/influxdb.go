@@ -507,6 +507,12 @@ func (u *InfluxUnifi) loopPoints(r report) {
 		}
 	}
 
+	for _, nd := range m.UNASDevices {
+		if v, ok := nd.(*unifi.UNASDevice); ok {
+			u.batchUNASDevice(r, v)
+		}
+	}
+
 	for _, wb := range m.WifiBroadcasts {
 		if v, ok := wb.(*unifi.WifiBroadcast); ok {
 			u.batchWifiBroadcast(r, v)

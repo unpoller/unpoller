@@ -46,29 +46,30 @@ const (
 var ErrMetricFetchFailed = fmt.Errorf("metric fetch failed")
 
 type promUnifi struct {
-	*Config           `json:"prometheus" toml:"prometheus" xml:"prometheus" yaml:"prometheus"`
-	Client            *uclient
-	Device            *unifiDevice
-	UAP               *uap
-	USG               *usg
-	USW               *usw
-	PDU               *pdu
-	Site              *site
-	RogueAP           *rogueap
-	SpeedTest         *speedtest
-	CountryTraffic    *ucountrytraffic
-	DHCPLease         *dhcplease
-	WAN               *wan
-	Controller        *controller
-	FirewallPolicy    *firewallpolicy
-	Topology          *topology
-	PortAnomaly       *portanomaly
-	VPNMesh           *vpnmesh
+	*Config             `json:"prometheus" toml:"prometheus" xml:"prometheus" yaml:"prometheus"`
+	Client              *uclient
+	Device              *unifiDevice
+	UAP                 *uap
+	USG                 *usg
+	USW                 *usw
+	PDU                 *pdu
+	Site                *site
+	RogueAP             *rogueap
+	SpeedTest           *speedtest
+	CountryTraffic      *ucountrytraffic
+	DHCPLease           *dhcplease
+	WAN                 *wan
+	Controller          *controller
+	FirewallPolicy      *firewallpolicy
+	Topology            *topology
+	PortAnomaly         *portanomaly
+	VPNMesh             *vpnmesh
 	IntegrationDevice   *integrationDevice
 	WANStatus           *wanStatus
 	PortForward         *portForward
 	SSLCertificate      *sslCertificate
 	UPSDevice           *upsDevice
+	UNASDevice          *unasDevice
 	WifiBroadcast       *wifiBroadcast
 	FirewallZone        *firewallZone
 	ACLRule             *aclRule
@@ -319,6 +320,7 @@ func (u *promUnifi) Run(c poller.Collect) error {
 	u.PortForward = descPortForward(u.Namespace + "_")
 	u.SSLCertificate = descSSLCertificate(u.Namespace + "_")
 	u.UPSDevice = descUPSDevice(u.Namespace + "_")
+	u.UNASDevice = descUNASDevice(u.Namespace + "_")
 	u.WifiBroadcast = descWifiBroadcast(u.Namespace + "_")
 	u.FirewallZone = descFirewallZone(u.Namespace + "_")
 	u.ACLRule = descACLRule(u.Namespace + "_")
@@ -609,6 +611,7 @@ func (u *promUnifi) Describe(ch chan<- *prometheus.Desc) {
 		u.LAG, u.MCLAGDomain, u.SwitchStack, u.DNSPolicy, u.RADIUSProfile,
 		u.TrafficMatchingList, u.HotspotVoucher,
 		u.DPIApplication, u.DPICategory, u.PendingDevice, u.Country,
+		u.UNASDevice,
 	} {
 		v := reflect.Indirect(reflect.ValueOf(f))
 
@@ -836,6 +839,12 @@ func (u *promUnifi) loopExports(r report) {
 	for _, ud := range m.UPSDevices {
 		if v, ok := ud.(*unifi.UPSDeviceSelector); ok {
 			u.exportUPSDevice(r, v)
+		}
+	}
+
+	for _, nd := range m.UNASDevices {
+		if v, ok := nd.(*unifi.UNASDevice); ok {
+			u.exportUNASDevice(r, v)
 		}
 	}
 
