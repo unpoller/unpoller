@@ -131,6 +131,8 @@ type Metrics struct {
 	Countries            []any // *unifi.Country — country list for geo-filters (global)
 	// Added by the inputunas plugin:
 	UNASDevices []any // *unifi.UNASDevice — UNAS Pro storage console (one per configured device)
+	// Added when save_protect_devices is enabled:
+	ProtectDevices []any // *unifi.ProtectDevices — one per Protect-enabled controller
 }
 
 // Events defines the type for log entries.

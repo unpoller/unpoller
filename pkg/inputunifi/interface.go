@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/unpoller/unifi/v5"
+	"github.com/unpoller/unifi/v6"
 	"github.com/unpoller/unpoller/pkg/poller"
 	"github.com/unpoller/unpoller/pkg/webserver"
 )
@@ -188,6 +188,7 @@ func (u *InputUnifi) logController(c *Controller) {
 	u.Logf("   => Save Sites %v / Save DPI %v (metrics)", *c.SaveSites, *c.SaveDPI)
 	u.Logf("   => Save Events %v / Save Syslog %v / Save IDs %v (logs)", *c.SaveEvents, *c.SaveSyslog, *c.SaveIDs)
 	u.Logf("   => Save Alarms %v / Anomalies %v / Protect Logs %v (thumbnails: %v)", *c.SaveAlarms, *c.SaveAnomal, *c.SaveProtectLogs, *c.ProtectThumbnails)
+	u.Logf("   => Save Protect Devices: %v (has protect-api-key: %v)", *c.SaveProtectDevices, c.ProtectAPIKey != "")
 	u.Logf("   => Save Rogue APs: %v", *c.SaveRogue)
 	u.Logf("   => Save Traffic %v", *c.SaveTraffic)
 	u.Logf("   => Save Speed Tests: %v", *c.SaveSpeedTest)

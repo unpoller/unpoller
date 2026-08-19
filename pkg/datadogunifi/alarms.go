@@ -5,7 +5,7 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/unpoller/unifi/v5"
+	"github.com/unpoller/unifi/v6"
 )
 
 const (

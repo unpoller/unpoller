@@ -8,7 +8,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/unpoller/unifi/v5"
+	"github.com/unpoller/unifi/v6"
 	"github.com/unpoller/unpoller/pkg/poller"
 )
 
@@ -271,6 +271,11 @@ func (u *InputUnifi) pollController(c *Controller) (*poller.Metrics, error) {
 	// Integration/v1 API additions (v5.26.0) — require API key and Network 9.3.43+.
 	if c.APIKey != "" {
 		u.collectIntegrationV1(c, sites, m)
+	}
+
+	// Protect Integration API — opt-in, requires protect_api_key (or api_key as a fallback).
+	if *c.SaveProtectDevices && (c.ProtectAPIKey != "" || c.APIKey != "") {
+		u.collectProtect(c, m)
 	}
 
 	// Update web UI only on success; call explicitly so we never run with nil c/c.Unifi (no defer).
@@ -645,6 +650,68 @@ func (u *InputUnifi) collectIntegrationV1(c *Controller, sites []*unifi.Site, m 
 	}
 }
 
+// collectProtect collects UniFi Protect device metrics via the Protect Integration API.
+// Only called when SaveProtectDevices is enabled and a protect_api_key (or api_key fallback) is
+// configured. ErrEndpointNotFound is expected when Protect is not installed on the controller.
+func (u *InputUnifi) collectProtect(c *Controller, m *Metrics) {
+	info, err := c.Unifi.GetProtectMetaInfo()
+	if err != nil {
+		if errors.Is(err, unifi.ErrEndpointNotFound) {
+			u.LogDebugf("unifi.GetProtectMetaInfo(%s): Protect not installed (404), disable save_protect_devices", c.URL)
+		} else {
+			u.Logf("unifi.GetProtectMetaInfo(%s): %v (check protect_api_key; skipping Protect collection)", c.URL, err)
+		}
+
+		return
+	}
+
+	devices, err := c.Unifi.GetProtectDevices()
+	if err != nil {
+		u.Logf("unifi.GetProtectDevices(%s): %v (check protect_api_key; skipping Protect collection)", c.URL, err)
+
+		return
+	}
+
+	devices.Version = info.ApplicationVersion
+	m.ProtectDevices = devices
+
+	u.LogDebugf("Found %d Protect Sensors, %d Cameras, %d Lights, %d Bridges, %d LinkStations",
+		len(devices.Sensors), len(devices.Cameras), len(devices.Lights), len(devices.Bridges), len(devices.LinkStations))
+}
+
+// redactProtectDevices masks the Name and MAC on every Protect device kind in place.
+func redactProtectDevices(pd *unifi.ProtectDevices, hash *bool, dropPII *bool) {
+	if pd.NVR != nil {
+		pd.NVR.Name = RedactNamePII(pd.NVR.Name, hash, dropPII)
+		pd.NVR.MAC = RedactMacPII(pd.NVR.MAC, hash, dropPII)
+	}
+
+	for _, s := range pd.Sensors {
+		s.Name = RedactNamePII(s.Name, hash, dropPII)
+		s.MAC = RedactMacPII(s.MAC, hash, dropPII)
+	}
+
+	for _, c := range pd.Cameras {
+		c.Name = RedactNamePII(c.Name, hash, dropPII)
+		c.MAC = RedactMacPII(c.MAC, hash, dropPII)
+	}
+
+	for _, l := range pd.Lights {
+		l.Name = RedactNamePII(l.Name, hash, dropPII)
+		l.MAC = RedactMacPII(l.MAC, hash, dropPII)
+	}
+
+	for _, b := range pd.Bridges {
+		b.Name = RedactNamePII(b.Name, hash, dropPII)
+		b.MAC = RedactMacPII(b.MAC, hash, dropPII)
+	}
+
+	for _, ls := range pd.LinkStations {
+		ls.Name = RedactNamePII(ls.Name, hash, dropPII)
+		ls.MAC = RedactMacPII(ls.MAC, hash, dropPII)
+	}
+}
+
 // augmentMetrics is our middleware layer between collecting metrics and writing them.
 // This is where we can manipuate the returned data or make arbitrary decisions.
 // This method currently adds parent device names to client metrics and hashes PII.
@@ -947,6 +1014,11 @@ func (u *InputUnifi) augmentMetrics(c *Controller, metrics *Metrics) *poller.Met
 
 	for _, co := range metrics.Countries {
 		m.Countries = append(m.Countries, co)
+	}
+
+	if pd := metrics.ProtectDevices; pd != nil {
+		redactProtectDevices(pd, c.HashPII, c.DropPII)
+		m.ProtectDevices = append(m.ProtectDevices, pd)
 	}
 
 	// Apply default_site_name_override to all metrics if configured.

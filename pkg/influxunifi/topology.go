@@ -1,7 +1,7 @@
 package influxunifi
 
 import (
-	"github.com/unpoller/unifi/v5"
+	"github.com/unpoller/unifi/v6"
 )
 
 // batchTopology generates topology datapoints for InfluxDB.
@@ -79,14 +79,14 @@ func (u *InfluxUnifi) batchTopology(r report, t *unifi.Topology) {
 	}
 
 	summaryFields := map[string]any{
-		"vertices_total":     len(t.Vertices),
-		"edges_total":        len(t.Edges),
-		"devices_total":      devices,
-		"clients_total":      clients,
-		"connections_wired":  wired,
+		"vertices_total":       len(t.Vertices),
+		"edges_total":          len(t.Edges),
+		"devices_total":        devices,
+		"clients_total":        clients,
+		"connections_wired":    wired,
 		"connections_wireless": wireless,
-		"wired_full_duplex":  fullDuplex,
-		"has_unknown_switch": unknownSwitch,
+		"wired_full_duplex":    fullDuplex,
+		"has_unknown_switch":   unknownSwitch,
 	}
 
 	r.send(&metric{Table: "topology_summary", Tags: summaryTags, Fields: summaryFields})

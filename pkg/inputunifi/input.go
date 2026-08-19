@@ -10,7 +10,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/unpoller/unifi/v5"
+	"github.com/unpoller/unifi/v6"
 	"github.com/unpoller/unpoller/pkg/poller"
 	"golift.io/cnfg"
 )
@@ -44,6 +44,8 @@ type Controller struct {
 	SaveSyslog              *bool         `json:"save_syslog"                toml:"save_syslog"                xml:"save_syslog"                yaml:"save_syslog"`
 	SaveProtectLogs         *bool         `json:"save_protect_logs"          toml:"save_protect_logs"          xml:"save_protect_logs"          yaml:"save_protect_logs"`
 	ProtectThumbnails       *bool         `json:"protect_thumbnails"         toml:"protect_thumbnails"         xml:"protect_thumbnails"         yaml:"protect_thumbnails"`
+	SaveProtectDevices      *bool         `json:"save_protect_devices"       toml:"save_protect_devices"       xml:"save_protect_devices"       yaml:"save_protect_devices"`
+	ProtectAPIKey           string        `json:"protect_api_key"            toml:"protect_api_key"            xml:"protect_api_key"            yaml:"protect_api_key"`
 	SaveIDs                 *bool         `json:"save_ids"                   toml:"save_ids"                   xml:"save_ids"                   yaml:"save_ids"`
 	SaveDPI                 *bool         `json:"save_dpi"                   toml:"save_dpi"                   xml:"save_dpi"                   yaml:"save_dpi"`
 	SaveTraffic             *bool         `json:"save_traffic"               toml:"save_traffic"               xml:"save_traffic"               yaml:"save_traffic"`
@@ -117,6 +119,7 @@ type Metrics struct {
 	DPICategories        []*unifi.DPICategory
 	PendingDevices       []*unifi.PendingDevice
 	Countries            []*unifi.Country
+	ProtectDevices       *unifi.ProtectDevices
 }
 
 func init() { // nolint: gochecknoinits
@@ -170,15 +173,16 @@ func (u *InputUnifi) getUnifi(c *Controller) error {
 	}
 
 	cfg := &unifi.Config{
-		User:      c.User,
-		Pass:      c.Pass,
-		APIKey:    c.APIKey,
-		URL:       c.URL,
-		SSLCert:   certs,
-		VerifySSL: *c.VerifySSL,
-		Timeout:   c.Timeout.Duration,
-		ErrorLog:  u.LogErrorf,
-		DebugLog:  u.LogDebugf,
+		User:          c.User,
+		Pass:          c.Pass,
+		APIKey:        c.APIKey,
+		ProtectAPIKey: c.ProtectAPIKey,
+		URL:           c.URL,
+		SSLCert:       certs,
+		VerifySSL:     *c.VerifySSL,
+		Timeout:       c.Timeout.Duration,
+		ErrorLog:      u.LogErrorf,
+		DebugLog:      u.LogDebugf,
 	}
 
 	var lastErr error
@@ -342,6 +346,10 @@ func (u *InputUnifi) setDefaults(c *Controller) { //nolint:cyclop
 		c.ProtectThumbnails = &f
 	}
 
+	if c.SaveProtectDevices == nil {
+		c.SaveProtectDevices = &f
+	}
+
 	if c.SaveAlarms == nil {
 		c.SaveAlarms = &f
 	}
@@ -366,6 +374,10 @@ func (u *InputUnifi) setDefaults(c *Controller) { //nolint:cyclop
 
 	if strings.HasPrefix(c.APIKey, "file://") {
 		c.APIKey = u.getPassFromFile(strings.TrimPrefix(c.APIKey, "file://"))
+	}
+
+	if strings.HasPrefix(c.ProtectAPIKey, "file://") {
+		c.ProtectAPIKey = u.getPassFromFile(strings.TrimPrefix(c.ProtectAPIKey, "file://"))
 	}
 
 	if c.Remote {
@@ -460,6 +472,10 @@ func (u *InputUnifi) setControllerDefaults(c *Controller) *Controller { //nolint
 		c.ProtectThumbnails = u.Default.ProtectThumbnails
 	}
 
+	if c.SaveProtectDevices == nil {
+		c.SaveProtectDevices = u.Default.SaveProtectDevices
+	}
+
 	if c.SaveAlarms == nil {
 		c.SaveAlarms = u.Default.SaveAlarms
 	}
@@ -483,6 +499,14 @@ func (u *InputUnifi) setControllerDefaults(c *Controller) *Controller { //nolint
 
 	if strings.HasPrefix(c.APIKey, "file://") {
 		c.APIKey = u.getPassFromFile(strings.TrimPrefix(c.APIKey, "file://"))
+	}
+
+	if strings.HasPrefix(c.ProtectAPIKey, "file://") {
+		c.ProtectAPIKey = u.getPassFromFile(strings.TrimPrefix(c.ProtectAPIKey, "file://"))
+	}
+
+	if c.ProtectAPIKey == "" {
+		c.ProtectAPIKey = u.Default.ProtectAPIKey
 	}
 
 	if c.Remote {

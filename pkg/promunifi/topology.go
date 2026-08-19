@@ -2,7 +2,7 @@ package promunifi
 
 import (
 	"github.com/prometheus/client_golang/prometheus"
-	"github.com/unpoller/unifi/v5"
+	"github.com/unpoller/unifi/v6"
 )
 
 type topology struct {
@@ -54,12 +54,12 @@ func (u *promUnifi) exportTopology(r report, t *unifi.Topology) {
 	siteLabels := []string{t.SiteName, t.SourceName}
 
 	var (
-		devices     int
-		clients     int
-		wired       int
-		wireless    int
-		fullDuplex  int
-		bandCounts  = make(map[string]int)
+		devices       int
+		clients       int
+		wired         int
+		wireless      int
+		fullDuplex    int
+		bandCounts    = make(map[string]int)
 		unknownSwitch float64
 	)
 

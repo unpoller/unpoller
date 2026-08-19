@@ -6,7 +6,7 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/unpoller/unifi/v5"
+	"github.com/unpoller/unifi/v6"
 	"github.com/unpoller/unpoller/pkg/webserver"
 )
 
@@ -70,26 +70,28 @@ func formatControllers(controllers []*Controller) []*Controller {
 		}
 
 		fixed = append(fixed, &Controller{
-			VerifySSL:       c.VerifySSL,
-			SaveAnomal:      c.SaveAnomal,
-			SaveAlarms:      c.SaveAlarms,
-			SaveRogue:       c.SaveRogue,
-			SaveSpeedTest:   c.SaveSpeedTest,
-			SaveEvents:      c.SaveEvents,
-			SaveSyslog:      c.SaveSyslog,
-			SaveProtectLogs: c.SaveProtectLogs,
-			SaveIDs:         c.SaveIDs,
-			SaveDPI:         c.SaveDPI,
-			HashPII:         c.HashPII,
-			DropPII:         c.DropPII,
-			SaveSites:       c.SaveSites,
-			SaveTraffic:     c.SaveTraffic,
-			User:            c.User,
-			Pass:            strconv.FormatBool(c.Pass != ""),
-			APIKey:          strconv.FormatBool(c.APIKey != ""),
-			URL:             c.URL,
-			Sites:           c.Sites,
-			ID:              id,
+			VerifySSL:          c.VerifySSL,
+			SaveAnomal:         c.SaveAnomal,
+			SaveAlarms:         c.SaveAlarms,
+			SaveRogue:          c.SaveRogue,
+			SaveSpeedTest:      c.SaveSpeedTest,
+			SaveEvents:         c.SaveEvents,
+			SaveSyslog:         c.SaveSyslog,
+			SaveProtectLogs:    c.SaveProtectLogs,
+			SaveProtectDevices: c.SaveProtectDevices,
+			SaveIDs:            c.SaveIDs,
+			SaveDPI:            c.SaveDPI,
+			HashPII:            c.HashPII,
+			DropPII:            c.DropPII,
+			SaveSites:          c.SaveSites,
+			SaveTraffic:        c.SaveTraffic,
+			User:               c.User,
+			Pass:               strconv.FormatBool(c.Pass != ""),
+			APIKey:             strconv.FormatBool(c.APIKey != ""),
+			ProtectAPIKey:      strconv.FormatBool(c.ProtectAPIKey != ""),
+			URL:                c.URL,
+			Sites:              c.Sites,
+			ID:                 id,
 		})
 	}
 

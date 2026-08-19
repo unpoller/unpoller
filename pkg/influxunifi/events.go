@@ -3,7 +3,7 @@ package influxunifi
 import (
 	"time"
 
-	"github.com/unpoller/unifi/v5"
+	"github.com/unpoller/unifi/v6"
 )
 
 // These constants are used as names for printed/logged counters.

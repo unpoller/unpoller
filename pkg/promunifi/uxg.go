@@ -1,7 +1,7 @@
 package promunifi
 
 import (
-	"github.com/unpoller/unifi/v5"
+	"github.com/unpoller/unifi/v6"
 )
 
 // exportUXG is a collection of stats from USG and USW. It has no unique stats.
@@ -22,12 +22,12 @@ func (u *promUnifi) exportUXG(r report, d *unifi.UXG) {
 
 	baseLabels := []string{d.Type, d.SiteName, d.Name, d.SourceName}
 	baseInfoLabels := []string{d.Version, d.Model, d.Serial, d.Mac, d.IP, d.ID}
-	
+
 	u.exportWithTags(r, d.Tags, func(tagLabels []string) {
 		tag := tagLabels[0]
 		labels := append(baseLabels, tag)
 		infoLabels := append(baseInfoLabels, tag)
-		
+
 		// Shared data (all devices do this).
 		u.exportBYTstats(r, labels, d.TxBytes, d.RxBytes)
 		u.exportSYSstats(r, labels, d.SysStats, d.SystemStats)
