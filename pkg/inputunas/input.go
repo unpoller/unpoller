@@ -21,18 +21,26 @@ var ErrNoDevices = errors.New("no UNAS devices configured")
 // Satisfies poller.Input interface.
 func (u *InputUNAS) Initialize(l poller.Logger) error {
 	if u.Config == nil {
-		u.Config = &Config{Disable: true}
+		u.Config = &Config{}
 	}
 
-	if u.Logger = l; u.Disable {
+	u.Logger = l
+
+	// enable defaults to false, so the plugin is off until an operator asks for it. Warn when
+	// consoles are configured but the switch was never flipped -- that combination is always a
+	// mistake, and silence would leave the operator hunting for missing metrics. An operator
+	// who has never heard of UNAS has no devices either, and still sees nothing.
+	if !u.Enable {
+		if len(u.configuredDevices()) > 0 {
+			u.LogErrorf("UNAS devices are configured but unas.enable is false; not polling them")
+		}
+
 		return nil
 	}
 
 	u.Devices = u.configuredDevices()
 
-	// No [unas] block means no devices, which means nothing to say. Staying silent here is
-	// what makes the plugin opt-in: an operator who has never heard of UNAS should see no
-	// trace of it in the log.
+	// Enabled with nothing to poll: nothing to say, and nothing to do.
 	if len(u.Devices) == 0 {
 		return nil
 	}
@@ -96,7 +104,7 @@ func (u *InputUNAS) logDevice(d *Device) {
 // returning `(metrics, err)` after one console of three fails would throw away the two that
 // worked. Satisfies poller.Input interface.
 func (u *InputUNAS) Metrics(filter *poller.Filter) (*poller.Metrics, error) {
-	if u.Disable {
+	if !u.Enable {
 		return nil, nil
 	}
 
@@ -234,7 +242,7 @@ func (u *InputUNAS) RawMetrics(filter *poller.Filter) ([]byte, error) {
 // DebugInput checks that every configured console can be reached and authenticated against.
 // Satisfies poller.Input interface.
 func (u *InputUNAS) DebugInput() (bool, error) {
-	if u == nil || u.Config == nil || u.Disable {
+	if u == nil || u.Config == nil || !u.Enable {
 		return true, nil
 	}
 
@@ -294,7 +302,7 @@ func formatConfig(config *Config) *Config {
 			CertPaths: config.Default.CertPaths,
 			Timeout:   config.Default.Timeout,
 		},
-		Disable: config.Disable,
+		Enable:  config.Enable,
 		Devices: devices,
 	}
 }

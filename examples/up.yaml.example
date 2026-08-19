@@ -91,7 +91,7 @@ unifi:
 # by its own input plugin with its own credentials and host -- not as a UniFi controller.
 # This section is optional: with no devices configured the plugin stays silent and inert.
 #unas:
-#  disable: false
+#  enable: true
 #  defaults:
 #    user:       "unpoller"
 #    pass:       ""

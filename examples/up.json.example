@@ -87,8 +87,8 @@
   },
 
   "unas": {
-    "//": "UNAS Pro consoles. JSON cannot carry comments, so this section ships disabled: it shows the shape, and flipping disable to false with a real url turns it on.",
-    "disable": true,
+    "//": "UNAS Pro consoles. JSON cannot carry comments, so this section ships off: it shows the shape, and setting enable to true with a real url turns it on.",
+    "enable": false,
     "defaults": {
       "user":       "unpoller",
       "pass":       "",

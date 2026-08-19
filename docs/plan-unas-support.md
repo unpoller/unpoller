@@ -9,8 +9,8 @@ alexgreenbank in the package header and README.
 UNAS Pro is a standalone UniFi OS console with **no Network application**: no sites, no
 `/status`, its own credentials, its own host. `inputunifi`'s sites → devices → per-site flow
 has nothing to offer it, and folding it in would mean bolting a second credential set onto
-`Controller`. So: a new `pkg/inputunas` plugin with its own `[unas]` config block, disabled
-by default and a no-op when unconfigured.
+`Controller`. So: a new `pkg/inputunas` plugin with its own `[unas]` config block, off by
+default and a no-op when unconfigured.
 
 ### The one real blocker
 
@@ -130,11 +130,13 @@ in all three example configs. `go test ./...` and `golangci-lint run` are clean.
 
 Refinements over the plan below:
 
-1. **The opt-in mechanism is "no devices configured", not `disable`.** `Disable` zero-values
-   to false, so a field named `disable` cannot make a plugin default-off. `Initialize` returns
-   silently when the device list is empty, and unlike `inputunifi` it does **not** synthesize
-   a default device from `[unas.defaults]` — doing so would poll a host the operator never
-   named. `disable` remains as an explicit off switch.
+1. **Opt-in is `enable`, defaulting to false — not `disable`.** A field named `disable`
+   zero-values to false, so it cannot make a plugin default-off and reads as a double
+   negative; `enable bool` defaults to off and says what it does. Two further guards:
+   `Initialize` returns silently when the device list is empty, and unlike `inputunifi` it
+   does **not** synthesize a default device from `[unas.defaults]` — doing so would poll a
+   host the operator never named. Devices configured while `enable` is false log one error,
+   since that combination is always a mistake.
 2. **`Metrics` returns `(metrics, nil)` whenever any console was collected.** Not politeness:
    `poller.collectMetrics` uses `if result.err != nil { ... } else if result.metric != nil`,
    so returning both discards every metric in that cycle. One dead console out of three would
@@ -156,7 +158,7 @@ Refinements over the plan below:
 
 ```toml
 [unas]
-  disable = false
+  enable = true
   [unas.defaults]
     user       = "unpoller"
     pass       = ""

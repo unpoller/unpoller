@@ -275,13 +275,13 @@
 # A UNAS Pro is a standalone UniFi OS console with no Network application, so it is polled
 # by its own input plugin with its own credentials and host -- not as a UniFi controller.
 #
-# This section is entirely optional and does nothing unless you add at least one
-# [[unas.device]] below: with no devices configured the plugin stays silent and inert.
+# This section is entirely optional. The plugin is off unless you set enable = true and
+# add at least one [[unas.device]] below; otherwise it stays silent and inert.
 # Metrics land under the unifi_unas_ prefix in Prometheus, and in the unas_device,
 # unas_pool, unas_disk, and unas_share measurements in InfluxDB.
 #
 #[unas]
-#  disable = false
+#  enable = true
 #
 # Defaults applied to every device that does not set its own value.
 #[unas.defaults]

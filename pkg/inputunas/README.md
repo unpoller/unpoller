@@ -2,9 +2,10 @@
 
 Polls UniFi UNAS Pro storage consoles and hands their metrics to every configured output.
 
-**This plugin is opt-in and does nothing until you configure at least one device.** With no
-`[unas]` section, or a section with no devices, it stays silent and inert — it logs nothing
-and polls nothing.
+**This plugin is opt-in: `enable` defaults to `false`.** It does nothing until you set
+`enable = true` *and* configure at least one device. With no `[unas]` section it stays silent
+and inert — it logs nothing and polls nothing. If you configure devices but leave `enable`
+unset, it logs one error saying so rather than failing quietly.
 
 ## Why a separate plugin?
 
@@ -17,7 +18,7 @@ rather than as another UniFi controller.
 
 ```toml
 [unas]
-  disable = false
+  enable = true
 
 # Applied to any device that does not set its own value.
 [unas.defaults]
@@ -44,7 +45,7 @@ tables. See `examples/up.{conf,json,yaml}.example`.
 
 | Variable | Meaning |
 |---|---|
-| `UP_UNAS_DISABLE` | Disable the plugin outright. |
+| `UP_UNAS_ENABLE` | Turn the plugin on. Defaults to `false`. |
 | `UP_UNAS_DEFAULT_USER` | Default username for every device. |
 | `UP_UNAS_DEFAULT_PASS` | Default password. |
 | `UP_UNAS_DEFAULT_VERIFY_SSL` | Default TLS verification. |

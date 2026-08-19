@@ -3,6 +3,8 @@ package inputunas_test
 import (
 	"net/http"
 	"net/http/httptest"
+	"os"
+	"path/filepath"
 	"sync/atomic"
 	"testing"
 
@@ -11,6 +13,8 @@ import (
 	"github.com/unpoller/unifi/v5"
 	"github.com/unpoller/unpoller/pkg/inputunas"
 	"github.com/unpoller/unpoller/pkg/poller"
+	"golift.io/cnfg"
+	"golift.io/cnfgfile"
 )
 
 const (
@@ -76,7 +80,7 @@ func newInput(t *testing.T, urls ...string) *inputunas.InputUNAS {
 		devices[i] = &inputunas.Device{URL: u, User: "unpoller", Pass: "secret"}
 	}
 
-	return &inputunas.InputUNAS{Config: &inputunas.Config{Devices: devices}}
+	return &inputunas.InputUNAS{Config: &inputunas.Config{Enable: true, Devices: devices}}
 }
 
 func TestMetricsCollectsConsole(t *testing.T) {
@@ -155,15 +159,25 @@ func TestMetricsPartialFailureStillReportsHealthyConsole(t *testing.T) {
 	require.Len(t, m.UNASDevices, 1)
 }
 
-func TestMetricsDisabled(t *testing.T) {
+// enable defaults to false, so a config that names consoles but never sets it must not poll
+// them. Configuring the devices here is the point: an empty config would pass even if the
+// switch were ignored entirely.
+func TestNotEnabled(t *testing.T) {
 	t.Parallel()
 
-	u := &inputunas.InputUNAS{Config: &inputunas.Config{Disable: true}}
+	srv := (&unasServer{}).start(t)
+	u := &inputunas.InputUNAS{Config: &inputunas.Config{
+		Devices: []*inputunas.Device{{URL: srv.URL, User: "unpoller", Pass: "secret"}},
+	}}
 	require.NoError(t, u.Initialize(nil))
 
 	m, err := u.Metrics(nil)
 	require.NoError(t, err)
-	require.Nil(t, m)
+	require.Nil(t, m, "enable is false, so nothing is polled")
+
+	ok, err := u.DebugInput()
+	require.NoError(t, err)
+	require.True(t, ok, "--debugio must not reach a console the operator has not enabled")
 }
 
 // With no [unas] block the plugin must be silent and inert: that is what makes UNAS support
@@ -176,7 +190,7 @@ func TestUnconfiguredIsInert(t *testing.T) {
 
 	m, err := u.Metrics(nil)
 	require.NoError(t, err)
-	require.Nil(t, m, "an unconfigured plugin disables itself")
+	require.Nil(t, m, "an unconfigured plugin stays off")
 
 	ok, err := u.DebugInput()
 	require.NoError(t, err)
@@ -186,7 +200,7 @@ func TestUnconfiguredIsInert(t *testing.T) {
 func TestDeviceWithNoURLIsIgnored(t *testing.T) {
 	t.Parallel()
 
-	u := &inputunas.InputUNAS{Config: &inputunas.Config{Devices: []*inputunas.Device{{}, nil}}}
+	u := &inputunas.InputUNAS{Config: &inputunas.Config{Enable: true, Devices: []*inputunas.Device{{}, nil}}}
 	require.NoError(t, u.Initialize(nil))
 
 	m, err := u.Metrics(nil)
@@ -216,4 +230,71 @@ func TestRawMetrics(t *testing.T) {
 
 	_, err = u.RawMetrics(&poller.Filter{Unit: 9})
 	require.ErrorIs(t, err, inputunas.ErrNoDevices)
+}
+
+// The enable switch has to survive four independent binding paths -- toml, json, yaml and the
+// UP_ environment -- each driven by its own struct tag. A typo in any one tag leaves the
+// plugin silently off for users of that format, which is the same class of invisible failure
+// as a missing tag anywhere else in this config. Note the env name derives from the xml tag,
+// not the json one.
+func TestEnableBindsInEveryConfigFormat(t *testing.T) {
+	t.Parallel()
+
+	write := func(t *testing.T, name, body string) string {
+		t.Helper()
+
+		path := filepath.Join(t.TempDir(), name)
+		require.NoError(t, os.WriteFile(path, []byte(body), 0o600))
+
+		return path
+	}
+
+	for _, tc := range []struct {
+		name string
+		file string
+		body string
+	}{
+		{"toml", "up.conf", "[unas]\n  enable = true\n[[unas.device]]\n  url = \"https://nas\"\n"},
+		{"json", "up.json", `{"unas":{"enable":true,"devices":[{"url":"https://nas"}]}}`},
+		{"yaml", "up.yaml", "unas:\n  enable: true\n  devices:\n    - url: \"https://nas\"\n"},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
+
+			input := &inputunas.InputUNAS{Config: &inputunas.Config{}}
+			require.NoError(t, cnfgfile.Unmarshal(input, write(t, tc.file, tc.body)))
+			assert.True(t, input.Enable, "enable did not bind from %s", tc.name)
+			require.Len(t, input.Devices, 1)
+			assert.Equal(t, "https://nas", input.Devices[0].URL)
+		})
+	}
+}
+
+// Not parallel: t.Setenv is incompatible with a parallel test or parent.
+//
+// The env variable name comes from the xml tag, not the json one, which is why this is worth
+// asserting rather than assuming from the toml/json/yaml cases above.
+func TestEnableBindsFromEnvironment(t *testing.T) {
+	t.Setenv("UP_UNAS_ENABLE", "true")
+
+	input := &inputunas.InputUNAS{Config: &inputunas.Config{}}
+	_, err := cnfg.UnmarshalENV(input, "UP")
+	require.NoError(t, err)
+	assert.True(t, input.Enable, "UP_UNAS_ENABLE did not bind")
+}
+
+// The shipped examples must all default to off, so that installing unpoller never starts
+// polling a storage console nobody asked for.
+func TestShippedExamplesDoNotEnableUNAS(t *testing.T) {
+	t.Parallel()
+
+	for _, name := range []string{"up.conf.example", "up.json.example", "up.yaml.example"} {
+		t.Run(name, func(t *testing.T) {
+			t.Parallel()
+
+			input := &inputunas.InputUNAS{Config: &inputunas.Config{}}
+			require.NoError(t, cnfgfile.Unmarshal(input, filepath.Join("..", "..", "examples", name)))
+			assert.False(t, input.Enable, "%s ships with UNAS enabled", name)
+		})
+	}
 }

@@ -46,9 +46,9 @@ type Device struct {
 // Config contains our configuration data.
 type Config struct {
 	sync.RWMutex           // locks a Device's client while it re-authenticates.
-	Default      Device    `json:"defaults" toml:"defaults" xml:"default"      yaml:"defaults"`
-	Disable      bool      `json:"disable"  toml:"disable"  xml:"disable,attr" yaml:"disable"`
-	Devices      []*Device `json:"devices"  toml:"device"   xml:"device"       yaml:"devices"`
+	Default      Device    `json:"defaults" toml:"defaults" xml:"default"     yaml:"defaults"`
+	Enable       bool      `json:"enable"   toml:"enable"   xml:"enable,attr" yaml:"enable"`
+	Devices      []*Device `json:"devices"  toml:"device"   xml:"device"      yaml:"devices"`
 }
 
 func init() { // nolint: gochecknoinits
@@ -64,7 +64,7 @@ func init() { // nolint: gochecknoinits
 // setDefaults fills a device's unset fields from the defaults block, then from package
 // defaults. It never invents a URL: an empty URL is how "not configured" is expressed, and
 // synthesizing one (as inputunifi does with localhost:8443) would make the plugin poll a
-// host the operator never named. That is what keeps UNAS support opt-in.
+// host the operator never named. Opt-in rests on Config.Enable; this is the second guard.
 func (u *InputUNAS) setDefaults(d *Device) *Device {
 	if d.User == "" {
 		d.User = u.Default.User
