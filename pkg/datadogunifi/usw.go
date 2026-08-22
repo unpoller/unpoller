@@ -67,7 +67,7 @@ func (u *DatadogUnifi) batchUSWstat(sw *unifi.Sw) map[string]float64 {
 		"stat_rx_dropped": sw.RxDropped.Val,
 		"stat_rx_errors":  sw.RxErrors.Val,
 		"stat_rx_frags":   sw.RxFrags.Val,
-		"stat_rx_packets": sw.TxPackets.Val,
+		"stat_rx_packets": sw.RxPackets.Val,
 		"stat_tx_bytes":   sw.TxBytes.Val,
 		"stat_tx_dropped": sw.TxDropped.Val,
 		"stat_tx_errors":  sw.TxErrors.Val,
