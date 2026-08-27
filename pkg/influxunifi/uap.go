@@ -211,7 +211,7 @@ func (u *InfluxUnifi) processRadTable(r report, t map[string]string, rt unifi.Ra
 		for _, t := range rts {
 			if strings.EqualFold(t.Name, p.Name) {
 				fields["ast_be_xmit"] = t.AstBeXmit.Val
-				fields["channel"] = t.Channel.Val
+				fields["channel_num"] = t.Channel.Val
 				fields["cu_self_rx"] = t.CuSelfRx.Val
 				fields["cu_self_tx"] = t.CuSelfTx.Val
 				fields["cu_total"] = t.CuTotal.Val
@@ -219,7 +219,6 @@ func (u *InfluxUnifi) processRadTable(r report, t map[string]string, rt unifi.Ra
 				fields["gain"] = t.Gain.Val
 				fields["guest-num_sta"] = t.GuestNumSta.Val
 				fields["num_sta"] = t.NumSta.Val
-				fields["radio"] = t.Radio
 				fields["tx_packets"] = t.TxPackets.Val
 				fields["tx_power"] = t.TxPower.Val
 				fields["tx_retries"] = t.TxRetries.Val

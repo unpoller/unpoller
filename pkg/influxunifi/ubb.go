@@ -41,7 +41,6 @@ func (u *InfluxUnifi) batchUBB(r report, s *unifi.UBB) { // nolint: funlen
 		u.batchSysStats(sysStats, systemStats),
 		u.batchUBBstats(s.Stat),
 		map[string]any{
-			"source":           s.SourceName,
 			"ip":               s.IP,
 			"bytes":            s.Bytes.Val,
 			"last_seen":        s.LastSeen.Val,
@@ -51,7 +50,6 @@ func (u *InfluxUnifi) batchUBB(r report, s *unifi.UBB) { // nolint: funlen
 			"uptime":           s.Uptime.Val,
 			"state":            s.State.Val,
 			"user-num_sta":     s.UserNumSta.Val,
-			"version":          s.Version,
 			"uplink_speed":     s.Uplink.Speed.Val,
 			"uplink_max_speed": s.Uplink.MaxSpeed.Val,
 			"uplink_latency":   s.Uplink.Latency.Val,

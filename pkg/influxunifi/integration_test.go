@@ -172,7 +172,7 @@ func TestInfluxV1Integration(t *testing.T) {
 
 	u := influxunifi.InfluxUnifi{
 		Collector:      testRig.Collector,
-		IsVersion2:     false,
+		Version:        influxunifi.InfluxV1,
 		InfluxV1Client: mockCapture,
 		InfluxDB: &influxunifi.InfluxDB{
 			Config: &influxunifi.Config{

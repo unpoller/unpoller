@@ -2,18 +2,35 @@
 
 Collects UniFi data from a UniFi controller using the API.
 
-This is meant for InfluxDB users 1.8+ and 2.x series.
+This supports InfluxDB 1.x, 2.x, and 3.x.
 
 ## Configuration
 
-### InfluxDB 1.8+, 2.x
+### InfluxDB 3.x
 
-Note the use of `auth_token` to enable this mode.
+Set `version: 3` and provide a token plus database name. For InfluxDB 3 Core/Enterprise,
+leave `use_v2_api` unset (defaults to the native v3 write API). For InfluxDB Cloud
+Serverless or Clustered, set `use_v2_api: true`.
 
 ```yaml
 influxdb:
   disable: false
-  # How often to poll UniFi and report to Datadog.
+  version: 3
+  interval: "30s"
+  url: http://influxdb3:8181
+  auth_token: somesecret
+  database: unifi
+  verify_ssl: false
+```
+
+### InfluxDB 1.8+, 2.x
+
+Note the use of `auth_token` to enable v2 mode when `version` is omitted.
+
+```yaml
+influxdb:
+  disable: false
+  # How often to poll UniFi and report to InfluxDB.
   interval: "2m"
   # the influxdb url to post data
   url: http://somehost:1234
@@ -34,7 +51,7 @@ Note the lack of `auth_token` to enable this mode.
 ```yaml
 influxdb:
   disable: false
-  # How often to poll UniFi and report to Datadog.
+  # How often to poll UniFi and report to InfluxDB.
   interval: "2m"
   # the influxdb url to post data
   url: http://somehost:1234

@@ -38,7 +38,6 @@ func (u *InfluxUnifi) batchSite(r report, s *unifi.Site) {
 			"num_disconnected":         h.NumDisconnected.Val,
 			"num_pending":              h.NumPending.Val,
 			"num_gw":                   h.NumGw.Val,
-			"wan_ip":                   h.WanIP,
 			"num_sta":                  h.NumSta.Val,
 			"gw_cpu":                   h.GwSystemStats.CPU.Val,
 			"gw_mem":                   h.GwSystemStats.Mem.Val,
