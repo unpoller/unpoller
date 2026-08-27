@@ -1,7 +1,7 @@
 package promunifi
 
 import (
-	"github.com/unpoller/unifi/v5"
+	"github.com/unpoller/unifi/v6"
 )
 
 // exportUBB is a collection of stats from UBB (UniFi Building Bridge).

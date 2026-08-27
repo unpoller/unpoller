@@ -6,7 +6,7 @@ import (
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/metric"
 
-	"github.com/unpoller/unifi/v5"
+	"github.com/unpoller/unifi/v6"
 )
 
 // exportUSG emits metrics for a UniFi Security Gateway.

@@ -2,7 +2,7 @@ package promunifi
 
 import (
 	"github.com/prometheus/client_golang/prometheus"
-	"github.com/unpoller/unifi/v5"
+	"github.com/unpoller/unifi/v6"
 )
 
 // upsDevice holds Prometheus descriptors for UPS device selector metrics.

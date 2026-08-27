@@ -1,6 +1,6 @@
 package promunifi
 
-import "github.com/unpoller/unifi/v5"
+import "github.com/unpoller/unifi/v6"
 
 // exportUDB exports metrics for UDB (UniFi Device Bridge) devices.
 // The UDB range includes UDB-Switch, UDB-Pro, UDB-Pro-Sector.

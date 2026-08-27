@@ -8,7 +8,7 @@ import (
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"github.com/unpoller/unifi/v5"
+	"github.com/unpoller/unifi/v6"
 )
 
 // fakeReport collects the metrics an export function sends, and nothing else. It embeds

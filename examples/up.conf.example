@@ -162,6 +162,12 @@
   # Unifi now supports API Key authentication. This is exclusive of user/pass auth.
   # api_key = "unifiapikey"
 
+  # UniFi Protect Integration API Key. Required to poll Protect device metrics
+  # (see save_protect_devices, below). Falls back to api_key (above) if unset.
+  # If the value provided here begins with file:// then it's read in from the
+  # file path that follows the file:// prefix, same as pass (above).
+  # protect_api_key = "unifiprotectapikey"
+
   # If the controller has more than one site, specify which sites to poll here.
   # Set this to ["default"] to poll only the first site on the controller.
   # A setting of ["all"] will poll all sites; this works if you only have 1 site too.
@@ -214,6 +220,19 @@
   # Enable this only if using InfluxDB or Loki.
   save_anomalies = false
 
+  # Enable collection of UniFi Protect event logs (Loki only). Requires a Protect
+  # console reachable from this controller. This may leak PII data!
+  save_protect_logs = false
+
+  # Include base64-encoded thumbnails with Protect event logs (above). Loki only.
+  protect_thumbnails = false
+
+  # Enable collection of UniFi Protect device metrics (sensors, cameras, lights,
+  # bridges, link stations, NVR) via the Protect Integration API. Requires
+  # protect_api_key (or api_key, above) and a Protect console reachable from
+  # this controller.
+  save_protect_devices = false
+
   # Enable collection of Deep Packet Inspection data. This data breaks down traffic
   # types for each client and site, it powers a dedicated DPI dashboard.
   # Enabling this adds roughly 150 data points per client.  That's 6000 metrics for
@@ -261,6 +280,10 @@
 #  save_syslog = false
 #  save_alarms = false
 #  save_anomalies = false
+#  save_protect_logs = false
+#  protect_thumbnails = false
+#  save_protect_devices = false
+#  protect_api_key = "unifiprotectapikey"
 #  save_dpi    = false
 #  save_traffic = false
 #  save_rogue  = false

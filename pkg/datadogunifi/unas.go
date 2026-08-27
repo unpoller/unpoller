@@ -1,7 +1,7 @@
 package datadogunifi
 
 import (
-	"github.com/unpoller/unifi/v5"
+	"github.com/unpoller/unifi/v6"
 )
 
 // batchUNASDevice generates UNAS Pro storage console datapoints for Datadog.

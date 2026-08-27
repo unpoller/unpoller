@@ -1,7 +1,7 @@
 package influxunifi
 
 import (
-	"github.com/unpoller/unifi/v5"
+	"github.com/unpoller/unifi/v6"
 )
 
 // batchFirewallPolicy generates a firewall policy datapoint for InfluxDB.

@@ -1,7 +1,7 @@
 package datadogunifi
 
 import (
-	"github.com/unpoller/unifi/v5"
+	"github.com/unpoller/unifi/v6"
 )
 
 // batchIntegrationDevStats generates integration device statistics datapoints for Datadog.

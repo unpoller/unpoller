@@ -16,7 +16,7 @@ import (
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	promver "github.com/prometheus/common/version"
-	"github.com/unpoller/unifi/v5"
+	"github.com/unpoller/unifi/v6"
 	"github.com/unpoller/unpoller/pkg/poller"
 	"github.com/unpoller/unpoller/pkg/webserver"
 	"golang.org/x/sync/singleflight"
@@ -86,6 +86,7 @@ type promUnifi struct {
 	DPICategory         *dpiCategory
 	PendingDevice       *pendingDevice
 	Country             *country
+	ProtectDevices      *protectDevices
 	// controllerUp tracks per-controller poll success (1) or failure (0).
 	// Reflects the most recent background poll — when /metrics is served from
 	// a stale cache, controllerUp lags real-time health; pair with
@@ -337,6 +338,7 @@ func (u *promUnifi) Run(c poller.Collect) error {
 	u.DPICategory = descDPICategory(u.Namespace + "_")
 	u.PendingDevice = descPendingDevice(u.Namespace + "_")
 	u.Country = descCountry(u.Namespace + "_")
+	u.ProtectDevices = descProtectDevices(u.Namespace + "_")
 	u.controllerUp = prometheus.NewGaugeVec(prometheus.GaugeOpts{
 		Name: u.Namespace + "_controller_up",
 		Help: "Whether the most recent background poll of the UniFi controller succeeded (1) or failed (0). " +
@@ -611,7 +613,7 @@ func (u *promUnifi) Describe(ch chan<- *prometheus.Desc) {
 		u.LAG, u.MCLAGDomain, u.SwitchStack, u.DNSPolicy, u.RADIUSProfile,
 		u.TrafficMatchingList, u.HotspotVoucher,
 		u.DPIApplication, u.DPICategory, u.PendingDevice, u.Country,
-		u.UNASDevice,
+		u.UNASDevice, u.ProtectDevices,
 	} {
 		v := reflect.Indirect(reflect.ValueOf(f))
 
@@ -845,6 +847,12 @@ func (u *promUnifi) loopExports(r report) {
 	for _, nd := range m.UNASDevices {
 		if v, ok := nd.(*unifi.UNASDevice); ok {
 			u.exportUNASDevice(r, v)
+		}
+	}
+
+	for _, pd := range m.ProtectDevices {
+		if v, ok := pd.(*unifi.ProtectDevices); ok {
+			u.exportProtectDevices(r, v)
 		}
 	}
 

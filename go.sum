@@ -85,8 +85,8 @@ github.com/stretchr/testify v1.8.0/go.mod h1:yNjHg4UonilssWZ8iaSj1OCr/vHnekPRkoO
 github.com/stretchr/testify v1.8.1/go.mod h1:w2LPCIKwWwSfY2zedu0+kehJoqGctiVI29o6fzry7u4=
 github.com/stretchr/testify v1.12.1 h1:EuwCh5fleGS7H32xRwO3wRGT7DxrDhLAT6FF8MpWDWE=
 github.com/stretchr/testify v1.12.1/go.mod h1:MDEgiDPPsNp5cuIrHPPCyornHKgEVbtFUmoNlxoYthg=
-github.com/unpoller/unifi/v5 v5.31.0 h1:WKrVxDP5YZetehFnqDoalb3+eALbR33zWFV0eyBhk08=
-github.com/unpoller/unifi/v5 v5.31.0/go.mod h1:gbg5QyCqI7PFjSLAlm3IfEE1m0205LQF8nUYRtuOrAE=
+github.com/unpoller/unifi/v6 v6.0.0 h1:NVlAWgHpW1HsS9gRgu/RVHasPfoyrzAl/TB18qMu6wc=
+github.com/unpoller/unifi/v6 v6.0.0/go.mod h1:ad72+qBh3C4avgn2ZCwfMJlLuEKOMqQzKE9RvzE0Nfg=
 github.com/yuin/goldmark v1.3.5/go.mod h1:mwnBkeHKe2W/ZEtQ+71ViKU8L12m81fl3OWwC1Zlc8k=
 go.opentelemetry.io/auto/sdk v1.2.1 h1:jXsnJ4Lmnqd11kwkBV2LgLoFMZKizbCi5fNZ/ipaZ64=
 go.opentelemetry.io/auto/sdk v1.2.1/go.mod h1:KRTj+aOaElaLi+wW1kO/DZRXwkF4C5xPbEe3ZiIhN7Y=
