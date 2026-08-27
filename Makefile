@@ -43,7 +43,7 @@ $(BINARY).1.gz: md2roff
 
 md2roff: $(shell go env GOPATH)/bin/md2roff
 $(shell go env GOPATH)/bin/md2roff:
-	cd /tmp ; go get $(MD2ROFF_BIN) ; go install $(MD2ROFF_BIN)
+	go install $(MD2ROFF_BIN)
 
 # TODO: provide a template that adds the date to the built html file.
 readme: README.html
@@ -55,7 +55,7 @@ rsrc: rsrc.syso
 rsrc.syso: init/windows/application.ico init/windows/manifest.xml $(shell go env GOPATH)/bin/rsrc
 	$(shell go env GOPATH)/bin/rsrc -ico init/windows/application.ico -manifest init/windows/manifest.xml
 $(shell go env GOPATH)/bin/rsrc:
-	cd /tmp ; go get $(RSRC_BIN) ; go install $(RSRC_BIN)@latest
+	go install $(RSRC_BIN)@latest
 
 build-and-release: export DOCKER_REGISTRY = ghcr.io
 build-and-release: export DOCKER_IMAGE_NAME = unpoller/unpoller
