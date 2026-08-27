@@ -1,0 +1,52 @@
+# UniFi Poller with InfluxDB 3 Core.
+# See README.md in this directory and pkg/influxunifi/README.md.
+version: '3'
+services:
+  influxdb3:
+    restart: always
+    image: influxdb:3-core
+    ports:
+      - '8181:8181'
+    command:
+      - influxdb3
+      - serve
+      - --node-id=node0
+      - --object-store=file
+      - --data-dir=/var/lib/influxdb3/data
+      - --plugin-dir=/var/lib/influxdb3/plugins
+    volumes:
+      - influxdb3-data:/var/lib/influxdb3/data
+      - influxdb3-plugins:/var/lib/influxdb3/plugins
+  grafana:
+    image: grafana/grafana:latest
+    restart: always
+    ports:
+      - '3000:3000'
+    volumes:
+      - grafana-storage:/var/lib/grafana
+    depends_on:
+      - influxdb3
+    environment:
+      - GF_SECURITY_ADMIN_USER=${GRAFANA_USERNAME}
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_PASSWORD}
+      - GF_INSTALL_PLUGINS=grafana-clock-panel,natel-discrete-panel,grafana-piechart-panel
+  unifi-poller:
+    restart: always
+    image: ghcr.io/unpoller/unpoller:${POLLER_TAG}
+    depends_on:
+      - grafana
+      - influxdb3
+    environment:
+      - UP_INFLUXDB_VERSION=3
+      - UP_INFLUXDB_URL=http://influxdb3:8181
+      - UP_INFLUXDB_AUTH_TOKEN=${INFLUXDB_ADMIN_TOKEN}
+      - UP_INFLUXDB_DATABASE=${INFLUXDB_DATABASE}
+      - UP_UNIFI_DEFAULT_USER=${UNIFI_USER}
+      - UP_UNIFI_DEFAULT_PASS=${UNIFI_PASS}
+      - UP_UNIFI_DEFAULT_URL=${UNIFI_URL}
+      - UP_POLLER_DEBUG=${POLLER_DEBUG}
+      - UP_UNIFI_DEFAULT_SAVE_DPI=${POLLER_SAVE_DPI}
+volumes:
+  influxdb3-data:
+  influxdb3-plugins:
+  grafana-storage:

@@ -23,6 +23,8 @@ influxdb:
   verify_ssl: false
 ```
 
+See [MIGRATION.md](MIGRATION.md) for schema changes affecting Grafana dashboards.
+
 ### InfluxDB 1.8+, 2.x
 
 Note the use of `auth_token` to enable v2 mode when `version` is omitted.
