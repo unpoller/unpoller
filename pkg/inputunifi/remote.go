@@ -188,14 +188,17 @@ func (u *InputUnifi) discoverRemoteControllers(apiKey string) ([]*Controller, er
 		// (consoleName was already set above in the loop)
 
 		// If we only have one site and it's "default" (case-insensitive), use the console name as override
+		// unless the user already configured default_site_name_override in up.conf.
 		// Note: We keep the actual site name ("default") for API calls, but set the override
 		// for display/metric naming purposes.
 		if len(siteNames) == 1 && strings.EqualFold(siteNames[0], "default") && consoleName != "" {
-			controller.DefaultSiteNameOverride = consoleName
+			if controller.DefaultSiteNameOverride == "" {
+				controller.DefaultSiteNameOverride = consoleName
+				u.LogDebugf("Using console name '%s' as default site name override for Cloud Gateway (API will use 'default')", consoleName)
+			}
+
 			// Keep the actual site name for API calls
 			controller.Sites = siteNames
-
-			u.LogDebugf("Using console name '%s' as default site name override for Cloud Gateway (API will use 'default')", consoleName)
 		} else if len(siteNames) > 0 {
 			controller.Sites = siteNames
 		} else {
