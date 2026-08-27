@@ -17,7 +17,7 @@ points:
   clients:
     tags:
       - 1x_identity
-      - channel
+      - channel_name
       - dev_cat
       - dev_family
       - dev_id
@@ -219,7 +219,6 @@ points:
       site_to_site_enabled: bool
       tx_bytes-r: int
       uptime: int
-      wan_ip: string
       xput_down: float
       xput_up: float
   uap:
@@ -307,7 +306,7 @@ points:
       - source
     fields:
       ast_be_xmit: float
-      channel: float
+      channel_num: float
       cu_self_rx: float
       cu_self_tx: float
       cu_total: float
@@ -320,7 +319,6 @@ points:
       min_txpower: float
       nss: float
       num_sta: float
-      radio: string
       radio_caps: float
       tx_packets: float
       tx_power: float
@@ -434,7 +432,6 @@ points:
       p2p_throughput: float
       p2p_tx_rate: float
       rx_bytes: float
-      source: string
       stat_bytes: float
       stat_duration: float
       stat_mac_filter_rejections: float
@@ -547,7 +544,6 @@ points:
       upgradeable: bool
       uptime: float
       user-num_sta: float
-      version: string
   uci:
     tags:
       - mac
@@ -572,7 +568,6 @@ points:
       mem_total: float
       mem_used: float
       rx_bytes: float
-      source: string
       stat_bytes: float
       stat_rx_bytes: float
       stat_rx_crypts: float
@@ -594,7 +589,6 @@ points:
       temp_sys: float
       tx_bytes: float
       uptime: float
-      version: string
   udb:
     tags:
       - mac
@@ -826,7 +820,6 @@ points:
       num_handheld: float
       num_mobile: float
       rx_bytes: float
-      source: string
       speedtest-status_latency: float
       speedtest-status_ping: float
       speedtest-status_rundate: float
@@ -856,7 +849,6 @@ points:
       uplink_uptime: float
       uptime: float
       user-num_sta: float
-      version: string
   usg_networks:
     tags:
       - device_name

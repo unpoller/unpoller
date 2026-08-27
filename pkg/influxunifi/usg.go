@@ -39,7 +39,6 @@ func (u *InfluxUnifi) batchUSG(r report, s *unifi.USG) {
 			"uptime":        s.Uptime.Val,
 			"state":         s.State.Val,
 			"user-num_sta":  s.UserNumSta.Val,
-			"version":       s.Version,
 			"num_desktop":   s.NumDesktop.Val,
 			"num_handheld":  s.NumHandheld.Val,
 			"num_mobile":    s.NumMobile.Val,

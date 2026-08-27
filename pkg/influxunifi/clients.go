@@ -30,7 +30,7 @@ func (u *InfluxUnifi) batchClient(r report, s *unifi.Client) { // nolint: funlen
 		"is_wired":    s.IsWired.Txt,
 		"is_guest":    s.IsGuest.Txt,
 		"use_fixedip": s.UseFixedIP.Txt,
-		"channel":     s.Channel.Txt,
+		"channel_name": s.Channel.Txt,
 		"vlan":        s.Vlan.Txt,
 		"1x_identity": s.Identity1x,
 	}

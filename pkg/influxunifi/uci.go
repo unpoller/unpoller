@@ -43,7 +43,6 @@ func (u *InfluxUnifi) batchUCI(r report, s *unifi.UCI) { // nolint: funlen
 	fields := Combine(
 		u.batchSysStats(sysStats, systemStats),
 		map[string]any{
-			"source":        s.SourceName,
 			"ip":            s.IP,
 			"bytes":         s.Bytes.Val,
 			"last_seen":     s.LastSeen.Val,
@@ -52,7 +51,6 @@ func (u *InfluxUnifi) batchUCI(r report, s *unifi.UCI) { // nolint: funlen
 			"tx_bytes":      s.TxBytes.Val,
 			"uptime":        s.Uptime.Val,
 			"state":         s.State.Val,
-			"version":       s.Version,
 		},
 	)
 

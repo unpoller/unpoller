@@ -24,3 +24,12 @@ docker exec <container_name> /usr/bin/unpoller --health
 
 The health check is automatically used by Docker and container orchestration
 platforms (Kubernetes, Docker Swarm, etc.) to determine container health status.
+
+## InfluxDB 3 Core
+
+Use `docker-compose-influxdb3.yml` with `docker-compose-influxdb3.env.example` to run UniFi Poller against InfluxDB 3 Core on port `8181`. Copy the env example, set `INFLUXDB_ADMIN_TOKEN` to a token created in InfluxDB 3, then start the stack:
+
+```bash
+cp docker-compose-influxdb3.env.example docker-compose-influxdb3.env
+docker compose -f docker-compose-influxdb3.yml --env-file docker-compose-influxdb3.env up -d
+```

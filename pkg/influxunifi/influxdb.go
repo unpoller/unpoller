@@ -6,12 +6,14 @@ import (
 	"context"
 	"crypto/tls"
 	"fmt"
+	"net/http"
 	"net/url"
 	"os"
 	"strconv"
 	"strings"
 	"time"
 
+	influxdb3 "github.com/InfluxCommunity/influxdb3-go/v2/influxdb3"
 	influx "github.com/influxdata/influxdb-client-go/v2"
 	influxV1 "github.com/influxdata/influxdb1-client/v2"
 	"github.com/unpoller/unifi/v6"
@@ -31,6 +33,7 @@ const (
 	defaultInfluxOrg    = "unifi"
 	defaultInfluxBucket = "unifi"
 	defaultInfluxURL    = "http://127.0.0.1:8086"
+	defaultInfluxDBV3   = "unifi"
 )
 
 // Config defines the data needed to store metrics in InfluxDB.
@@ -52,6 +55,13 @@ type Config struct {
 	Bucket string `json:"bucket,omitempty" toml:"bucket,omitempty" xml:"bucket" yaml:"bucket"`
 	// BatchSize controls the async batch size for v2 influxdb client mode
 	BatchSize uint `json:"batch_size,omitempty" toml:"batch_size,omitempty" xml:"batch_size" yaml:"batch_size"`
+
+	// Version selects the InfluxDB API: 1, 2, or 3. When unset, auth_token enables v2, otherwise v1.
+	Version uint `json:"version,omitempty" toml:"version,omitempty" xml:"version" yaml:"version"`
+	// Database is the InfluxDB v3 database to write metrics to.
+	Database string `json:"database,omitempty" toml:"database,omitempty" xml:"database" yaml:"database"`
+	// UseV2API when true sends v3 writes through the v2-compatible API (InfluxDB Cloud).
+	UseV2API bool `json:"use_v2_api,omitempty" toml:"use_v2_api,omitempty" xml:"use_v2_api" yaml:"use_v2_api"`
 
 	// URL details which influxdb url to use to report metrics to.
 	URL string `json:"url,omitempty" toml:"url,omitempty" xml:"url" yaml:"url"`
@@ -76,8 +86,9 @@ type InfluxUnifi struct {
 	Collector      poller.Collect
 	InfluxV1Client influxV1.Client
 	InfluxV2Client influx.Client
+	InfluxV3Client *influxdb3.Client
 	LastCheck      time.Time
-	IsVersion2     bool
+	Version        InfluxVersion
 	*InfluxDB
 }
 
@@ -105,14 +116,10 @@ func init() { // nolint: gochecknoinits
 func (u *InfluxUnifi) PollController() {
 	interval := u.Interval.Round(time.Second)
 	ticker := time.NewTicker(interval)
-	version := "1"
+	version := strconv.FormatUint(uint64(u.Version), 10)
 
-	if u.IsVersion2 {
-		version = "2"
-	}
-
-	u.Logf("Poller->InfluxDB started, version: %s, interval: %v, dp: %v, db: %s, url: %s, bucket: %s, org: %s",
-		version, interval, u.DeadPorts, u.DB, u.URL, u.Bucket, u.Org)
+	u.Logf("Poller->InfluxDB started, version: %s, interval: %v, dp: %v, db: %s, url: %s, bucket: %s, org: %s, database: %s",
+		version, interval, u.DeadPorts, u.DB, u.URL, u.Bucket, u.Org, u.Database)
 
 	for u.LastCheck = range ticker.C {
 		u.Poll(interval)
@@ -173,7 +180,15 @@ func (u *InfluxUnifi) DebugOutput() (bool, error) {
 		return false, fmt.Errorf("invalid influx URL: %v", err)
 	}
 
-	if u.IsVersion2 {
+	switch u.Version {
+	case InfluxV3:
+		client, err := u.newInfluxV3Client()
+		if err != nil {
+			return false, err
+		}
+
+		u.InfluxV3Client = client
+	case InfluxV2:
 		// we're a version 2
 		tlsConfig := &tls.Config{InsecureSkipVerify: !u.VerifySSL} // nolint: gosec
 		serverOptions := influx.DefaultOptions().SetTLSConfig(tlsConfig).SetBatchSize(u.BatchSize)
@@ -190,7 +205,7 @@ func (u *InfluxUnifi) DebugOutput() (bool, error) {
 		if !ok {
 			return false, fmt.Errorf("unsuccessful ping to influxdb2")
 		}
-	} else {
+	default:
 		u.InfluxV1Client, err = influxV1.NewHTTPClient(influxV1.HTTPConfig{
 			Addr:      u.URL,
 			Username:  u.User,
@@ -233,12 +248,20 @@ func (u *InfluxUnifi) Run(c poller.Collect) error {
 		return err
 	}
 
-	if u.IsVersion2 {
+	switch u.Version {
+	case InfluxV3:
+		client, err := u.newInfluxV3Client()
+		if err != nil {
+			return err
+		}
+
+		u.InfluxV3Client = client
+	case InfluxV2:
 		// we're a version 2
 		tlsConfig := &tls.Config{InsecureSkipVerify: !u.VerifySSL} // nolint: gosec
 		serverOptions := influx.DefaultOptions().SetTLSConfig(tlsConfig).SetBatchSize(u.BatchSize)
 		u.InfluxV2Client = influx.NewClientWithOptions(u.URL, u.AuthToken, serverOptions)
-	} else {
+	default:
 		u.InfluxV1Client, err = influxV1.NewHTTPClient(influxV1.HTTPConfig{
 			Addr:      u.URL,
 			Username:  u.User,
@@ -268,9 +291,14 @@ func (u *InfluxUnifi) setConfigDefaults() {
 		u.AuthToken = u.getPassFromFile(strings.TrimPrefix(u.AuthToken, "file://"))
 	}
 
-	if u.AuthToken != "" {
-		// Version >= 1.8 influx
-		u.IsVersion2 = true
+	u.Version = u.resolveInfluxVersion()
+
+	switch u.Version {
+	case InfluxV3:
+		if u.Database == "" {
+			u.Database = defaultInfluxDBV3
+		}
+	case InfluxV2:
 		if u.Org == "" {
 			u.Org = defaultInfluxOrg
 		}
@@ -282,8 +310,7 @@ func (u *InfluxUnifi) setConfigDefaults() {
 		if u.BatchSize == 0 {
 			u.BatchSize = 20
 		}
-	} else {
-		// Version < 1.8 influx
+	default:
 		if u.User == "" {
 			u.User = defaultInfluxUser
 		}
@@ -310,6 +337,45 @@ func (u *InfluxUnifi) setConfigDefaults() {
 	u.Interval = cnfg.Duration{Duration: u.Interval.Round(time.Second)}
 }
 
+func (u *InfluxUnifi) resolveInfluxVersion() InfluxVersion {
+	switch u.Config.Version {
+	case 3:
+		return InfluxV3
+	case 2:
+		return InfluxV2
+	case 1:
+		return InfluxV1
+	default:
+		if u.AuthToken != "" {
+			return InfluxV2
+		}
+
+		return InfluxV1
+	}
+}
+
+func (u *InfluxUnifi) newInfluxV3Client() (*influxdb3.Client, error) {
+	if u.AuthToken == "" {
+		return nil, fmt.Errorf("influxdb v3 requires auth_token")
+	}
+
+	httpClient := &http.Client{
+		Transport: &http.Transport{
+			TLSClientConfig: &tls.Config{InsecureSkipVerify: !u.VerifySSL}, //nolint:gosec
+		},
+	}
+
+	return influxdb3.New(influxdb3.ClientConfig{
+		Host:       u.URL,
+		Token:      u.AuthToken,
+		Database:   u.Database,
+		HTTPClient: httpClient,
+		WriteOptions: &influxdb3.WriteOptions{
+			UseV2Api: u.UseV2API,
+		},
+	})
+}
+
 func (u *InfluxUnifi) getPassFromFile(filename string) string {
 	b, err := os.ReadFile(filename)
 	if err != nil {
@@ -324,7 +390,7 @@ func (u *InfluxUnifi) getPassFromFile(filename string) string {
 // Returns an error if influxdb calls fail, otherwise returns a report.
 func (u *InfluxUnifi) ReportMetrics(m *poller.Metrics, e *poller.Events) (*Report, error) {
 	r := &Report{
-		UseV2:   u.IsVersion2,
+		Version: u.Version,
 		Metrics: m,
 		Events:  e,
 		ch:      make(chan *metric),
@@ -333,7 +399,19 @@ func (u *InfluxUnifi) ReportMetrics(m *poller.Metrics, e *poller.Events) (*Repor
 	}
 	defer close(r.ch)
 
-	if u.IsVersion2 {
+	switch u.Version {
+	case InfluxV3:
+		go u.collect(r, r.ch)
+		u.loopPoints(r)
+		r.wg.Wait()
+
+		ctx, cancel := context.WithTimeout(context.Background(), time.Minute)
+		defer cancel()
+
+		if err := u.InfluxV3Client.WritePoints(ctx, r.v3); err != nil {
+			return nil, fmt.Errorf("influxdb3.WritePoints: %w", err)
+		}
+	case InfluxV2:
 		// Make a new Influx Points Batcher.
 		r.writer = u.InfluxV2Client.WriteAPI(u.Org, u.Bucket)
 
@@ -344,7 +422,7 @@ func (u *InfluxUnifi) ReportMetrics(m *poller.Metrics, e *poller.Events) (*Repor
 
 		// Flush all the points.
 		r.writer.Flush()
-	} else {
+	default:
 		var err error
 
 		// Make a new Influx Points Batcher.
@@ -378,10 +456,14 @@ func (u *InfluxUnifi) collect(r report, ch chan *metric) {
 
 		tags := u.mergeGlobalTags(m.Tags)
 
-		if u.IsVersion2 {
+		switch u.Version {
+		case InfluxV3:
+			pt := influxdb3.NewPoint(m.Table, tags, m.Fields, m.TS)
+			r.batchV3(m, pt)
+		case InfluxV2:
 			pt := influx.NewPoint(m.Table, tags, m.Fields, m.TS)
 			r.batchV2(m, pt)
-		} else {
+		default:
 			pt, err := influxV1.NewPoint(m.Table, tags, m.Fields, m.TS)
 			if err == nil {
 				r.batchV1(m, pt)

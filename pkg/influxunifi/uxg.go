@@ -41,7 +41,6 @@ func (u *InfluxUnifi) batchUXG(r report, s *unifi.UXG) { // nolint: funlen
 		u.batchUSGstats(s.SpeedtestStatus, gw, s.Uplink),
 		u.batchSysStats(s.SysStats, s.SystemStats),
 		map[string]any{
-			"source":        s.SourceName,
 			"ip":            s.IP,
 			"bytes":         s.Bytes.Val,
 			"last_seen":     s.LastSeen.Val,
@@ -52,7 +51,6 @@ func (u *InfluxUnifi) batchUXG(r report, s *unifi.UXG) { // nolint: funlen
 			"uptime":        s.Uptime.Val,
 			"state":         s.State.Val,
 			"user-num_sta":  s.UserNumSta.Val,
-			"version":       s.Version,
 			"num_desktop":   s.NumDesktop.Val,
 			"num_handheld":  s.NumHandheld.Val,
 			"num_mobile":    s.NumMobile.Val,

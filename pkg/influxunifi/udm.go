@@ -101,7 +101,6 @@ func (u *InfluxUnifi) batchUDM(r report, s *unifi.UDM) { // nolint: funlen
 		u.batchUSGstats(s.SpeedtestStatus, s.Stat.Gw, s.Uplink),
 		u.batchSysStats(s.SysStats, s.SystemStats),
 		map[string]any{
-			"source":        s.SourceName,
 			"ip":            s.IP,
 			"bytes":         s.Bytes.Val,
 			"last_seen":     s.LastSeen.Val,
@@ -112,7 +111,6 @@ func (u *InfluxUnifi) batchUDM(r report, s *unifi.UDM) { // nolint: funlen
 			"uptime":        s.Uptime.Val,
 			"state":         s.State.Val,
 			"user-num_sta":  s.UserNumSta.Val,
-			"version":       s.Version,
 			"num_desktop":   s.NumDesktop.Val,
 			"num_handheld":  s.NumHandheld.Val,
 			"num_mobile":    s.NumMobile.Val,
