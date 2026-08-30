@@ -74,6 +74,32 @@ builds:
       - amd64
     ldflags:
       - -s -w -X main.version={{.Version}} -X main.commit={{.Commit}} -X main.date={{.Date}} -X main.builtBy=goreleaser -X "golift.io/version.Version={{.Version}}" -X "golift.io/version.Branch={{.Branch}} ({{.Commit}})" -X "golift.io/version.BuildDate={{.Date}}" -X "golift.io/version.BuildUser=goreleaser" -X "golift.io/version.Revision=1"
+    hooks:
+      post:
+        - cmd: bash init/windows/signexe.sh "{{ .Path }}"
+          if: '{{ eq .Os "windows" }}'
+
+universal_binaries:
+  - id: unpoller-mac
+    ids: [unpoller-mac]
+    replace: true
+
+# Sign + notarize the macOS universal binary (quill; works on Linux CI).
+# Enabled only when MACOS_SIGN_P12 is set so local snapshots still work.
+notarize:
+  macos:
+    - enabled: '{{ isEnvSet "MACOS_SIGN_P12" }}'
+      ids:
+        - unpoller-mac
+      sign:
+        certificate: "{{ .Env.MACOS_SIGN_P12 }}"
+        password: "{{ .Env.MACOS_SIGN_PASSWORD }}"
+      notarize:
+        issuer_id: "{{ .Env.MACOS_NOTARY_ISSUER_ID }}"
+        key_id: "{{ .Env.MACOS_NOTARY_KEY_ID }}"
+        key: "{{ .Env.MACOS_NOTARY_KEY }}"
+        wait: true
+        timeout: 20m
 
 archives:
   - id: unpoller
