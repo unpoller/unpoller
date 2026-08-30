@@ -280,6 +280,44 @@ func TestProtectOnlyWarnsWithoutAPIKey(t *testing.T) {
 	assert.Contains(t, logger.errors(), "no protect_api_key")
 }
 
+// A key-only config is what an operator actually writes for a UNVR, and setDefaults fills the
+// unset user with "unifipoller". Sending that placeholder made the console answer 403 and
+// killed the controller outright, so the credentials must not be sent when no session can be
+// used -- and the startup summary must not claim an authentication that never happens.
+func TestProtectOnlyDoesNotSendUnusedCredentials(t *testing.T) {
+	t.Parallel()
+
+	fake := &unvr{}
+	srv := fake.start(t)
+
+	logger := &captureLogger{}
+	u := newProtectOnlyInput(srv.URL, func(c *inputunifi.Controller) {
+		c.User = ""
+		c.Pass = ""
+	})
+	require.NoError(t, u.Initialize(logger))
+
+	a := assert.New(t)
+	require.NotNil(t, u.Controllers[0].Unifi)
+	a.NotContains(fake.paths(), unifi.APILoginPathNew, "no session is usable, so none should be attempted")
+	a.Contains(logger.infoLines(), "Protect API key only (no session needed)")
+	a.NotContains(logger.infoLines(), "unifipoller")
+}
+
+// With Protect logs enabled the session is genuinely needed, so the credentials are sent.
+func TestProtectOnlyLogsInForProtectLogs(t *testing.T) {
+	t.Parallel()
+
+	enabled := true
+	fake := &unvr{}
+	srv := fake.start(t)
+
+	u := newProtectOnlyInput(srv.URL, func(c *inputunifi.Controller) { c.SaveProtectLogs = &enabled })
+	require.NoError(t, u.Initialize(nil))
+
+	assert.Contains(t, fake.paths(), unifi.APILoginPathNew)
+}
+
 // disable_network has to survive four independent binding paths -- toml, json, yaml and the
 // UP_ environment -- each driven by its own struct tag. A typo in any one tag leaves the
 // option silently inert for users of that format. Note the env name derives from the xml tag.
@@ -355,12 +393,19 @@ func TestShippedExamplesDoNotDisableNetwork(t *testing.T) {
 
 // captureLogger records what Initialize logs, so the startup warnings can be asserted on.
 type captureLogger struct {
-	mu   sync.Mutex
-	errs []string
+	mu    sync.Mutex
+	errs  []string
+	infos []string
 }
 
-func (l *captureLogger) Logf(string, ...any)      {}
 func (l *captureLogger) LogDebugf(string, ...any) {}
+
+func (l *captureLogger) Logf(msg string, v ...any) {
+	l.mu.Lock()
+	defer l.mu.Unlock()
+
+	l.infos = append(l.infos, fmt.Sprintf(msg, v...))
+}
 
 func (l *captureLogger) LogErrorf(msg string, v ...any) {
 	l.mu.Lock()
@@ -374,4 +419,11 @@ func (l *captureLogger) errors() string {
 	defer l.mu.Unlock()
 
 	return strings.Join(l.errs, "\n")
+}
+
+func (l *captureLogger) infoLines() string {
+	l.mu.Lock()
+	defer l.mu.Unlock()
+
+	return strings.Join(l.infos, "\n")
 }

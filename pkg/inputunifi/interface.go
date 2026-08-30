@@ -191,9 +191,16 @@ func (u *InputUnifi) logController(c *Controller) {
 		u.Logf("   => Version: %s (%s)", c.Unifi.ServerVersion, c.Unifi.UUID)
 	}
 
-	if c.Remote {
+	switch {
+	case c.Remote:
 		u.Logf("   => API Key: %v", c.APIKey != "")
-	} else {
+	case *c.DisableNetwork && !*c.SaveProtectLogs:
+		// getUnifi withholds the credentials entirely in this case, so naming a user here
+		// would describe an authentication that never happens.
+		u.Logf("   => Auth: Protect API key only (no session needed)")
+	case *c.DisableNetwork:
+		u.Logf("   => Username: %s (has password: %v) — used only for Protect logs", c.User, c.Pass != "")
+	default:
 		u.Logf("   => Username: %s (has password: %v) (has api-key: %v)", c.User, c.Pass != "", c.APIKey != "")
 	}
 

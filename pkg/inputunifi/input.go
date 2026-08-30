@@ -186,6 +186,16 @@ func (u *InputUnifi) getUnifi(c *Controller) error {
 		DebugLog:      u.LogDebugf,
 	}
 
+	// Nothing on a Protect-only console uses a session unless Protect logs are wanted: the
+	// Integration API authenticates with the key alone. Withholding the credentials here
+	// keeps NewProtectClient from attempting -- and logging -- a login on every re-auth,
+	// which matters because an unset user is filled in above with a placeholder that no
+	// console will ever accept.
+	if *c.DisableNetwork && !*c.SaveProtectLogs {
+		cfg.User = ""
+		cfg.Pass = ""
+	}
+
 	var lastErr error
 
 	backoff := 30 * time.Second
