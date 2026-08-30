@@ -15,6 +15,7 @@ var (
 	ErrDynamicLookupsDisabled = fmt.Errorf("filter path requested but dynamic lookups disabled")
 	ErrControllerNumNotFound  = fmt.Errorf("controller number not found")
 	ErrNoFilterKindProvided   = fmt.Errorf("must provide filter: devices, clients, other")
+	ErrNetworkDisabled        = fmt.Errorf("controller has disable_network set: no Network application to query")
 )
 
 // Initialize gets called one time when starting up.
@@ -84,14 +85,19 @@ func (u *InputUnifi) Initialize(l poller.Logger) error {
 	}
 
 	for i, c := range u.Controllers {
-		if err := u.getUnifi(u.setControllerDefaults(c)); err != nil {
+		u.warnProtectOnly(u.setControllerDefaults(c))
+
+		if err := u.getUnifi(c); err != nil {
 			u.LogErrorf("Controller %d of %d Auth or Connection Error, retrying: %v", i+1, len(u.Controllers), err)
 
 			continue
 		}
 
-		if err := u.checkSites(c); err != nil {
-			u.LogErrorf("checking sites on %s: %v", c.URL, err)
+		// A Protect-only console has no sites to check.
+		if !*c.DisableNetwork {
+			if err := u.checkSites(c); err != nil {
+				u.LogErrorf("checking sites on %s: %v", c.URL, err)
+			}
 		}
 
 		u.Logf("Configured UniFi Controller %d of %d:", i+1, len(u.Controllers))
@@ -137,18 +143,21 @@ func (u *InputUnifi) DebugInput() (bool, error) {
 			continue
 		}
 
-		if err := u.checkSites(c); err != nil {
-			u.LogErrorf("checking sites on %s: %v", c.URL, err)
+		// A Protect-only console has no sites to check.
+		if !*c.DisableNetwork {
+			if err := u.checkSites(c); err != nil {
+				u.LogErrorf("checking sites on %s: %v", c.URL, err)
 
-			allOK = false
+				allOK = false
 
-			if allErrors != nil {
-				allErrors = fmt.Errorf("%v: %w", err, allErrors)
-			} else {
-				allErrors = err
+				if allErrors != nil {
+					allErrors = fmt.Errorf("%v: %w", err, allErrors)
+				} else {
+					allErrors = err
+				}
+
+				continue
 			}
-
-			continue
 		}
 
 		u.Logf("Valid UniFi Controller %d of %d:", i+1, len(u.Controllers))
@@ -165,6 +174,10 @@ func (u *InputUnifi) logController(c *Controller) {
 		if c.ConsoleID != "" {
 			mode += fmt.Sprintf(" (Console: %s)", c.ConsoleID)
 		}
+	}
+
+	if *c.DisableNetwork {
+		mode += " (Protect only: no Network application)"
 	}
 
 	u.Logf("   => Mode: %s", mode)
@@ -184,14 +197,42 @@ func (u *InputUnifi) logController(c *Controller) {
 		u.Logf("   => Username: %s (has password: %v) (has api-key: %v)", c.User, c.Pass != "", c.APIKey != "")
 	}
 
-	u.Logf("   => Hash PII %v / Drop PII %v / Poll Sites: %s", *c.HashPII, *c.DropPII, strings.Join(c.Sites, ", "))
+	u.Logf("   => Hash PII %v / Drop PII %v", *c.HashPII, *c.DropPII)
+	u.Logf("   => Save Protect Devices: %v (has protect-api-key: %v)", *c.SaveProtectDevices, c.ProtectAPIKey != "")
+	u.Logf("   => Save Protect Logs %v (thumbnails: %v)", *c.SaveProtectLogs, *c.ProtectThumbnails)
+
+	// The rest are all Network-application settings; printing them for a Protect-only
+	// console would only suggest data that is never collected.
+	if *c.DisableNetwork {
+		return
+	}
+
+	u.Logf("   => Poll Sites: %s", strings.Join(c.Sites, ", "))
 	u.Logf("   => Save Sites %v / Save DPI %v (metrics)", *c.SaveSites, *c.SaveDPI)
 	u.Logf("   => Save Events %v / Save Syslog %v / Save IDs %v (logs)", *c.SaveEvents, *c.SaveSyslog, *c.SaveIDs)
-	u.Logf("   => Save Alarms %v / Anomalies %v / Protect Logs %v (thumbnails: %v)", *c.SaveAlarms, *c.SaveAnomal, *c.SaveProtectLogs, *c.ProtectThumbnails)
-	u.Logf("   => Save Protect Devices: %v (has protect-api-key: %v)", *c.SaveProtectDevices, c.ProtectAPIKey != "")
+	u.Logf("   => Save Alarms %v / Anomalies %v", *c.SaveAlarms, *c.SaveAnomal)
 	u.Logf("   => Save Rogue APs: %v", *c.SaveRogue)
 	u.Logf("   => Save Traffic %v", *c.SaveTraffic)
 	u.Logf("   => Save Speed Tests: %v", *c.SaveSpeedTest)
+}
+
+// warnProtectOnly reports a disable_network controller that can never collect anything.
+// Neither case is fatal -- the controller is still polled -- but both are always a mistake,
+// and silently collecting nothing is the failure mode hardest to diagnose from a log.
+func (u *InputUnifi) warnProtectOnly(c *Controller) {
+	if !*c.DisableNetwork {
+		return
+	}
+
+	if !*c.SaveProtectDevices && !*c.SaveProtectLogs {
+		u.LogErrorf("Controller %s sets disable_network but neither save_protect_devices nor "+
+			"save_protect_logs: nothing will be collected from it", c.URL)
+	}
+
+	if *c.SaveProtectDevices && c.ProtectAPIKey == "" && c.APIKey == "" {
+		u.LogErrorf("Controller %s sets disable_network and save_protect_devices but no "+
+			"protect_api_key: the Protect Integration API cannot be authenticated", c.URL)
+	}
 }
 
 // Events allows you to pull only events (and IDs) from the UniFi Controller.
@@ -294,8 +335,10 @@ func (u *InputUnifi) Metrics(filter *poller.Filter) (*poller.Metrics, error) {
 		metrics = poller.AppendMetrics(metrics, m)
 	}
 
-	// If we collected data from at least one controller, return success
-	if len(metrics.Devices) > 0 || len(metrics.Clients) > 0 {
+	// If we collected data from at least one controller, return success. ProtectDevices counts:
+	// a Protect-only console contributes no devices and no clients, and without it a filtered
+	// scrape of one would fall through to the dynamic-controller path and fail.
+	if len(metrics.Devices) > 0 || len(metrics.Clients) > 0 || len(metrics.ProtectDevices) > 0 {
 		return metrics, nil
 	}
 
@@ -330,6 +373,17 @@ func (u *InputUnifi) RawMetrics(filter *poller.Filter) ([]byte, error) {
 		if err := u.getUnifi(c); err != nil {
 			return nil, fmt.Errorf("re-authenticating to %s: %w", c.URL, err)
 		}
+	}
+
+	// Every site-scoped kind below needs a Network application. Only the raw-path kind can
+	// say anything about a Protect-only console, so answer that and reject the rest plainly
+	// rather than returning a confusing empty result.
+	if *c.DisableNetwork {
+		if filter.Kind == "other" || filter.Kind == "o" {
+			return c.Unifi.GetJSON(filter.Path)
+		}
+
+		return nil, fmt.Errorf("%s: %w", c.URL, ErrNetworkDisabled)
 	}
 
 	if err := u.checkSites(c); err != nil {

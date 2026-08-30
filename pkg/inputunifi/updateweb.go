@@ -79,6 +79,7 @@ func formatControllers(controllers []*Controller) []*Controller {
 			SaveSyslog:         c.SaveSyslog,
 			SaveProtectLogs:    c.SaveProtectLogs,
 			SaveProtectDevices: c.SaveProtectDevices,
+			DisableNetwork:     c.DisableNetwork,
 			SaveIDs:            c.SaveIDs,
 			SaveDPI:            c.SaveDPI,
 			HashPII:            c.HashPII,

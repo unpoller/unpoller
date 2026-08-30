@@ -24,20 +24,29 @@ func (u *InputUnifi) collectControllerEvents(c *Controller) ([]any, error) {
 		}
 	}
 
+	type caller func([]any, []*unifi.Site, *Controller) ([]any, error)
+
 	var (
 		logs    = []any{}
 		newLogs []any
+		sites   []*unifi.Site
+		err     error
+		calls   = []caller{u.collectIDs, u.collectAnomalies, u.collectAlarms, u.collectEvents, u.collectSyslog, u.collectProtectLogs}
 	)
 
-	// Get the sites we care about.
-	sites, err := u.getFilteredSites(c)
-	if err != nil {
-		return nil, fmt.Errorf("unifi.GetSites(): %w", err)
+	// A Protect-only console (UNVR) has no sites and no Network application, so every
+	// site-scoped collector below would fail. collectProtectLogs is the only one that is not
+	// site-scoped -- it already ignores the argument. See unpoller/unpoller#1066.
+	if *c.DisableNetwork {
+		calls = []caller{u.collectProtectLogs}
+	} else {
+		// Get the sites we care about.
+		if sites, err = u.getFilteredSites(c); err != nil {
+			return nil, fmt.Errorf("unifi.GetSites(): %w", err)
+		}
 	}
 
-	type caller func([]any, []*unifi.Site, *Controller) ([]any, error)
-
-	for _, call := range []caller{u.collectIDs, u.collectAnomalies, u.collectAlarms, u.collectEvents, u.collectSyslog, u.collectProtectLogs} {
+	for _, call := range calls {
 		if newLogs, err = call(logs, sites, c); err != nil {
 			if c.Remote && (errors.Is(err, unifi.ErrInvalidStatusCode) || errors.Is(err, unifi.ErrEndpointNotFound)) {
 				// The remote API (api.ui.com) does not support all event endpoints.
