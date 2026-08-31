@@ -175,13 +175,9 @@ func (u *InputUnifi) discoverRemoteControllers(apiKey string) ([]*Controller, er
 			controller.SaveProtectDevices = &f
 		}
 
-		// Extract site names
-		siteNames := make([]string, 0, len(sites))
-		for _, site := range sites {
-			if site.Name != "" {
-				siteNames = append(siteNames, site.Name)
-			}
-		}
+		// checkSites / getFilteredSites match against legacy Site.Name, which is
+		// RemoteSite.InternalReference, not the display Name. See unpoller/unpoller#986.
+		siteNames := RemoteSitePollNames(sites)
 
 		// For Cloud Gateways, if the only site is "default", use the console name from hosts response
 		// as the default site name override. The console name is in reportedState.name
@@ -208,8 +204,54 @@ func (u *InputUnifi) discoverRemoteControllers(apiKey string) ([]*Controller, er
 		controller.ID = console.ID
 		controllers = append(controllers, controller)
 
-		u.Logf("Discovered console %s with %d site(s): %v", consoleName, len(sites), siteNames)
+		u.Logf("Discovered console %s with %d site(s): %v", consoleName, len(sites), FormatRemoteSites(sites))
 	}
 
 	return controllers, nil
+}
+
+// RemoteSitePollNames returns the legacy site identifiers used by checkSites
+// and getFilteredSites. Prefer InternalReference (OpenAPI Site overview);
+// fall back to Name when the field is missing (older firmware).
+func RemoteSitePollNames(sites []unifi.RemoteSite) []string {
+	names := make([]string, 0, len(sites))
+
+	for _, site := range sites {
+		name := site.InternalReference
+		if name == "" {
+			name = site.Name
+		}
+
+		if name != "" {
+			names = append(names, name)
+		}
+	}
+
+	return names
+}
+
+// FormatRemoteSites logs display name plus legacy id when they differ.
+func FormatRemoteSites(sites []unifi.RemoteSite) []string {
+	out := make([]string, 0, len(sites))
+
+	for _, site := range sites {
+		id := site.InternalReference
+		if id == "" {
+			id = site.Name
+		}
+
+		if id == "" {
+			continue
+		}
+
+		if site.Name != "" && !strings.EqualFold(site.Name, id) {
+			out = append(out, site.Name+" ("+id+")")
+
+			continue
+		}
+
+		out = append(out, id)
+	}
+
+	return out
 }

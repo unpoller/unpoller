@@ -121,8 +121,8 @@ github.com/stretchr/testify v1.8.0/go.mod h1:yNjHg4UonilssWZ8iaSj1OCr/vHnekPRkoO
 github.com/stretchr/testify v1.8.1/go.mod h1:w2LPCIKwWwSfY2zedu0+kehJoqGctiVI29o6fzry7u4=
 github.com/stretchr/testify v1.12.1 h1:EuwCh5fleGS7H32xRwO3wRGT7DxrDhLAT6FF8MpWDWE=
 github.com/stretchr/testify v1.12.1/go.mod h1:MDEgiDPPsNp5cuIrHPPCyornHKgEVbtFUmoNlxoYthg=
-github.com/unpoller/unifi/v6 v6.0.3 h1:NoxbSA5HLMErs/1yVkmuwm+lcyy9SxSfOLDW58PKqrQ=
-github.com/unpoller/unifi/v6 v6.0.3/go.mod h1:d7dz1cBxVbbFZobNRcdUHHYtTdicVyZ05J5OmgoINa8=
+github.com/unpoller/unifi/v6 v6.1.0 h1:VDUZSCkK5BS3qF39MgTsJa1plwqZ4sIqBa+JYVamLnE=
+github.com/unpoller/unifi/v6 v6.1.0/go.mod h1:d7dz1cBxVbbFZobNRcdUHHYtTdicVyZ05J5OmgoINa8=
 github.com/yuin/goldmark v1.3.5/go.mod h1:mwnBkeHKe2W/ZEtQ+71ViKU8L12m81fl3OWwC1Zlc8k=
 github.com/zeebo/assert v1.3.0 h1:g7C04CbJuIDKNPFHmsk4hwZDO5O+kntRxzaUoNXj+IQ=
 github.com/zeebo/assert v1.3.0/go.mod h1:Pq9JiuJQpG8JLJdtkwrJESF0Foym2/D9XMU5ciN/wJ0=
