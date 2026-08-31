@@ -87,8 +87,8 @@ func (u *promUnifi) exportWAN(r report, w *unifi.WANEnrichedConfiguration) {
 		cfg.WANNetworkgroup,
 		cfg.WANType,
 		cfg.WANLoadBalanceType,
-		"", // site_name - will be set by caller if available
-		"", // source - will be set by caller if available
+		w.SiteName,
+		w.SourceName,
 	}
 
 	// Convert boolean FlexBool values to float64
@@ -130,8 +130,8 @@ func (u *promUnifi) exportWAN(r report, w *unifi.WANEnrichedConfiguration) {
 		cfg.WANNetworkgroup,
 		details.ServiceProvider.Name,
 		details.ServiceProvider.City,
-		"", // site_name
-		"", // source
+		w.SiteName,
+		w.SourceName,
 	}
 
 	metrics = append(metrics, &metric{u.WAN.ServiceProviderASN, gauge, details.ServiceProvider.ASN.Val, providerLabels})
