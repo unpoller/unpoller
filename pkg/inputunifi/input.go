@@ -46,6 +46,7 @@ type Controller struct {
 	ProtectThumbnails       *bool         `json:"protect_thumbnails"         toml:"protect_thumbnails"         xml:"protect_thumbnails"         yaml:"protect_thumbnails"`
 	SaveProtectDevices      *bool         `json:"save_protect_devices"       toml:"save_protect_devices"       xml:"save_protect_devices"       yaml:"save_protect_devices"`
 	ProtectAPIKey           string        `json:"protect_api_key"            toml:"protect_api_key"            xml:"protect_api_key"            yaml:"protect_api_key"`
+	DisableNetwork          *bool         `json:"disable_network"            toml:"disable_network"            xml:"disable_network"            yaml:"disable_network"`
 	SaveIDs                 *bool         `json:"save_ids"                   toml:"save_ids"                   xml:"save_ids"                   yaml:"save_ids"`
 	SaveDPI                 *bool         `json:"save_dpi"                   toml:"save_dpi"                   xml:"save_dpi"                   yaml:"save_dpi"`
 	SaveTraffic             *bool         `json:"save_traffic"               toml:"save_traffic"               xml:"save_traffic"               yaml:"save_traffic"`
@@ -185,12 +186,31 @@ func (u *InputUnifi) getUnifi(c *Controller) error {
 		DebugLog:      u.LogDebugf,
 	}
 
+	// Nothing on a Protect-only console uses a session unless Protect logs are wanted: the
+	// Integration API authenticates with the key alone. Withholding the credentials here
+	// keeps NewProtectClient from attempting -- and logging -- a login on every re-auth,
+	// which matters because an unset user is filled in above with a placeholder that no
+	// console will ever accept.
+	if *c.DisableNetwork && !*c.SaveProtectLogs {
+		cfg.User = ""
+		cfg.Pass = ""
+	}
+
 	var lastErr error
 
 	backoff := 30 * time.Second
 
 	for attempt := 0; attempt < maxAuthRetries; attempt++ {
-		c.Unifi, lastErr = unifi.NewUnifi(cfg)
+		// A Protect-only console (UNVR) runs no Network application, so NewUnifi's closing
+		// GetServerData() -- a GET of /proxy/network/status -- gets the UniFi OS SPA HTML back
+		// and fails the whole controller. NewProtectClient skips that probe and validates the
+		// Protect Integration API instead. See unpoller/unpoller#1066.
+		if *c.DisableNetwork {
+			c.Unifi, lastErr = unifi.NewProtectClient(cfg)
+		} else {
+			c.Unifi, lastErr = unifi.NewUnifi(cfg)
+		}
+
 		if lastErr == nil {
 			u.LogDebugf("Authenticated with controller successfully, %s", c.URL)
 
@@ -350,6 +370,10 @@ func (u *InputUnifi) setDefaults(c *Controller) { //nolint:cyclop
 		c.SaveProtectDevices = &f
 	}
 
+	if c.DisableNetwork == nil {
+		c.DisableNetwork = &f
+	}
+
 	if c.SaveAlarms == nil {
 		c.SaveAlarms = &f
 	}
@@ -474,6 +498,10 @@ func (u *InputUnifi) setControllerDefaults(c *Controller) *Controller { //nolint
 
 	if c.SaveProtectDevices == nil {
 		c.SaveProtectDevices = u.Default.SaveProtectDevices
+	}
+
+	if c.DisableNetwork == nil {
+		c.DisableNetwork = u.Default.DisableNetwork
 	}
 
 	if c.SaveAlarms == nil {

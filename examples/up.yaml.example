@@ -68,6 +68,8 @@ unifi:
     protect_thumbnails: false
     save_protect_devices: false
     # protect_api_key: "unifiprotectapikey"
+    # Set true only on a Protect-only console (UNVR): skips the Network API entirely.
+    disable_network: false
     save_dpi:    false
     save_sites:  true
     hash_pii:    false
@@ -90,6 +92,8 @@ unifi:
       protect_thumbnails: false
       save_protect_devices: false
       # protect_api_key: "unifiprotectapikey"
+      # Set true only on a Protect-only console (UNVR): skips the Network API entirely.
+      disable_network: false
       save_dpi:    false
       save_sites:  true
       hash_pii:    false

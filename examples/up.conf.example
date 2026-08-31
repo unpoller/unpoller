@@ -233,6 +233,12 @@
   # this controller.
   save_protect_devices = false
 
+  # Set this on a Protect-only console -- a UNVR or UNVR Pro, which runs UniFi Protect
+  # with no Network application installed. UnPoller then skips the Network API entirely:
+  # no sites, clients, devices, DPI, events, alarms or IDs are collected, only Protect.
+  # Leave it false for every normal controller, including a UDM or UCG that runs both.
+  disable_network = false
+
   # Enable collection of Deep Packet Inspection data. This data breaks down traffic
   # types for each client and site, it powers a dedicated DPI dashboard.
   # Enabling this adds roughly 150 data points per client.  That's 6000 metrics for
@@ -284,6 +290,7 @@
 #  protect_thumbnails = false
 #  save_protect_devices = false
 #  protect_api_key = "unifiprotectapikey"
+#  disable_network = false
 #  save_dpi    = false
 #  save_traffic = false
 #  save_rogue  = false

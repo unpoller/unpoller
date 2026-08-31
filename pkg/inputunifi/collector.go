@@ -111,13 +111,54 @@ func (u *InputUnifi) pollController(c *Controller) (*poller.Metrics, error) {
 
 	u.LogDebugf("Polling controller: %s (%s)", c.URL, c.ID)
 
-	// Get the sites we care about.
-	sites, err := u.getFilteredSites(c)
-	if err != nil {
-		return nil, fmt.Errorf("unifi.GetSites(): %w", err)
+	m := &Metrics{TS: time.Now()}
+
+	// A Protect-only console (UNVR) has no Network application: no sites, and nothing behind
+	// /proxy/network to poll. Skipping the whole Network pass is what lets it reach the
+	// Protect collection below, which is not site-scoped. See unpoller/unpoller#1066.
+	if !*c.DisableNetwork {
+		// Get the sites we care about.
+		sites, err := u.getFilteredSites(c)
+		if err != nil {
+			return nil, fmt.Errorf("unifi.GetSites(): %w", err)
+		}
+
+		m.Sites = sites
+
+		if err := u.pollNetwork(c, sites, m); err != nil {
+			return nil, err
+		}
 	}
 
-	m := &Metrics{TS: time.Now(), Sites: sites}
+	// Protect Integration API — opt-in, requires protect_api_key (or api_key as a fallback).
+	if c.SaveProtectDevices != nil && *c.SaveProtectDevices && (c.ProtectAPIKey != "" || c.APIKey != "") {
+		u.collectProtect(c, m)
+	}
+
+	// Update web UI only on success; call explicitly so we never run with nil c/c.Unifi (no defer).
+	// Recover so a panic in updateWeb (e.g. old image, race) never kills the poller.
+	if c != nil && c.Unifi != nil {
+		func() {
+			defer func() {
+				if r := recover(); r != nil {
+					u.LogErrorf("updateWeb panic recovered (upgrade image if this persists): %v", r)
+				}
+			}()
+
+			updateWeb(c, m)
+		}()
+	}
+
+	return u.augmentMetrics(c, m), nil
+}
+
+// pollNetwork collects everything served by the UniFi Network application into m. It is
+// split out of pollController so a Protect-only console, which has no Network application at
+// all, can skip the entire pass rather than failing on its first site-scoped call.
+//
+//nolint:cyclop
+func (u *InputUnifi) pollNetwork(c *Controller, sites []*unifi.Site, m *Metrics) error {
+	var err error
 
 	// FIXME needs to be last poll time maybe
 	st := m.TS.Add(-1 * pollDuration)
@@ -125,7 +166,7 @@ func (u *InputUnifi) pollController(c *Controller) (*poller.Metrics, error) {
 
 	if c.SaveRogue != nil && *c.SaveRogue {
 		if m.RogueAPs, err = c.Unifi.GetRogueAPs(sites); err != nil {
-			return nil, fmt.Errorf("unifi.GetRogueAPs(%s): %w", c.URL, err)
+			return fmt.Errorf("unifi.GetRogueAPs(%s): %w", c.URL, err)
 		}
 
 		u.LogDebugf("Found %d RogueAPs entries", len(m.RogueAPs))
@@ -133,13 +174,13 @@ func (u *InputUnifi) pollController(c *Controller) (*poller.Metrics, error) {
 
 	if c.SaveDPI != nil && *c.SaveDPI {
 		if m.SitesDPI, err = c.Unifi.GetSiteDPI(sites); err != nil {
-			return nil, fmt.Errorf("unifi.GetSiteDPI(%s): %w", c.URL, err)
+			return fmt.Errorf("unifi.GetSiteDPI(%s): %w", c.URL, err)
 		}
 
 		u.LogDebugf("Found %d SitesDPI entries", len(m.SitesDPI))
 
 		if m.ClientsDPI, err = c.Unifi.GetClientsDPI(sites); err != nil {
-			return nil, fmt.Errorf("unifi.GetClientsDPI(%s): %w", c.URL, err)
+			return fmt.Errorf("unifi.GetClientsDPI(%s): %w", c.URL, err)
 		}
 
 		u.LogDebugf("Found %d ClientsDPI entries", len(m.ClientsDPI))
@@ -147,7 +188,7 @@ func (u *InputUnifi) pollController(c *Controller) (*poller.Metrics, error) {
 
 	if c.SaveTraffic != nil && *c.SaveTraffic {
 		if m.CountryTraffic, err = c.Unifi.GetCountryTraffic(sites, &tp); err != nil {
-			return nil, fmt.Errorf("unifi.GetCountryTraffic(%s): %w", c.URL, err)
+			return fmt.Errorf("unifi.GetCountryTraffic(%s): %w", c.URL, err)
 		}
 
 		u.LogDebugf("Found %d CountryTraffic entries", len(m.CountryTraffic))
@@ -174,13 +215,13 @@ func (u *InputUnifi) pollController(c *Controller) (*poller.Metrics, error) {
 
 	// Get all the points.
 	if m.Clients, err = c.Unifi.GetClients(sites); err != nil {
-		return nil, fmt.Errorf("unifi.GetClients(%s): %w", c.URL, err)
+		return fmt.Errorf("unifi.GetClients(%s): %w", c.URL, err)
 	}
 
 	u.LogDebugf("Found %d Clients entries", len(m.Clients))
 
 	if m.Devices, err = c.Unifi.GetDevices(sites); err != nil {
-		return nil, fmt.Errorf("unifi.GetDevices(%s): %w", c.URL, err)
+		return fmt.Errorf("unifi.GetDevices(%s): %w", c.URL, err)
 	}
 
 	u.LogDebugf("Found %d UBB, %d UXG, %d PDU, %d UCI, %d UDB, %d UAP %d USG %d USW %d UDM devices",
@@ -273,26 +314,7 @@ func (u *InputUnifi) pollController(c *Controller) (*poller.Metrics, error) {
 		u.collectIntegrationV1(c, sites, m)
 	}
 
-	// Protect Integration API — opt-in, requires protect_api_key (or api_key as a fallback).
-	if *c.SaveProtectDevices && (c.ProtectAPIKey != "" || c.APIKey != "") {
-		u.collectProtect(c, m)
-	}
-
-	// Update web UI only on success; call explicitly so we never run with nil c/c.Unifi (no defer).
-	// Recover so a panic in updateWeb (e.g. old image, race) never kills the poller.
-	if c != nil && c.Unifi != nil {
-		func() {
-			defer func() {
-				if r := recover(); r != nil {
-					u.LogErrorf("updateWeb panic recovered (upgrade image if this persists): %v", r)
-				}
-			}()
-
-			updateWeb(c, m)
-		}()
-	}
-
-	return u.augmentMetrics(c, m), nil
+	return nil
 }
 
 // FIXME this would be better implemented on FlexInt itself
@@ -1285,6 +1307,12 @@ func extractDevices(metrics *Metrics) (*poller.Metrics, map[string]string, map[s
 	m := &poller.Metrics{TS: metrics.TS}
 	devices := make(map[string]string)
 	bssdIDs := make(map[string]string)
+
+	// Devices is nil whenever GetDevices never ran -- a Protect-only console skips the whole
+	// Network pass -- and every loop below would otherwise dereference it.
+	if metrics.Devices == nil {
+		metrics.Devices = &unifi.Devices{}
+	}
 
 	for _, r := range metrics.Devices.UAPs {
 		devices[r.Mac] = r.Name
