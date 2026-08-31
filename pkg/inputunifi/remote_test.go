@@ -1,10 +1,11 @@
-package inputunifi
+package inputunifi_test
 
 import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/unpoller/unifi/v6"
+	"github.com/unpoller/unpoller/pkg/inputunifi"
 )
 
 func TestRemoteSitePollNames(t *testing.T) {
@@ -48,7 +49,8 @@ func TestRemoteSitePollNames(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
-			assert.Equal(t, tt.want, remoteSitePollNames(tt.sites))
+
+			assert.Equal(t, tt.want, inputunifi.RemoteSitePollNames(tt.sites))
 		})
 	}
 }
@@ -68,5 +70,5 @@ func TestFormatRemoteSites(t *testing.T) {
 		"Office (abc1def2)",
 		"only-id",
 		"legacy-name-only",
-	}, formatRemoteSites(sites))
+	}, inputunifi.FormatRemoteSites(sites))
 }

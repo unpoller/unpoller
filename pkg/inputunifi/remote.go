@@ -177,7 +177,7 @@ func (u *InputUnifi) discoverRemoteControllers(apiKey string) ([]*Controller, er
 
 		// checkSites / getFilteredSites match against legacy Site.Name, which is
 		// RemoteSite.InternalReference, not the display Name. See unpoller/unpoller#986.
-		siteNames := remoteSitePollNames(sites)
+		siteNames := RemoteSitePollNames(sites)
 
 		// For Cloud Gateways, if the only site is "default", use the console name from hosts response
 		// as the default site name override. The console name is in reportedState.name
@@ -204,16 +204,16 @@ func (u *InputUnifi) discoverRemoteControllers(apiKey string) ([]*Controller, er
 		controller.ID = console.ID
 		controllers = append(controllers, controller)
 
-		u.Logf("Discovered console %s with %d site(s): %v", consoleName, len(sites), formatRemoteSites(sites))
+		u.Logf("Discovered console %s with %d site(s): %v", consoleName, len(sites), FormatRemoteSites(sites))
 	}
 
 	return controllers, nil
 }
 
-// remoteSitePollNames returns the legacy site identifiers used by checkSites
+// RemoteSitePollNames returns the legacy site identifiers used by checkSites
 // and getFilteredSites. Prefer InternalReference (OpenAPI Site overview);
 // fall back to Name when the field is missing (older firmware).
-func remoteSitePollNames(sites []unifi.RemoteSite) []string {
+func RemoteSitePollNames(sites []unifi.RemoteSite) []string {
 	names := make([]string, 0, len(sites))
 
 	for _, site := range sites {
@@ -230,8 +230,8 @@ func remoteSitePollNames(sites []unifi.RemoteSite) []string {
 	return names
 }
 
-// formatRemoteSites logs display name plus legacy id when they differ.
-func formatRemoteSites(sites []unifi.RemoteSite) []string {
+// FormatRemoteSites logs display name plus legacy id when they differ.
+func FormatRemoteSites(sites []unifi.RemoteSite) []string {
 	out := make([]string, 0, len(sites))
 
 	for _, site := range sites {
