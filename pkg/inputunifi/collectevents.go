@@ -71,6 +71,21 @@ func (u *InputUnifi) collectControllerEvents(c *Controller) ([]any, error) {
 	return logs, nil
 }
 
+// overrideSiteName applies the controller's default_site_name_override to a
+// site name that is still the controller's stock default.
+//
+// Log entries need this applied here, one collector at a time. Metrics get the
+// override from augmentMetrics, but log entries never pass through it: they
+// leave by collectControllerEvents, which reads its sites straight from
+// getFilteredSites. So whatever a collector appends is what ships.
+func overrideSiteName(c *Controller, siteName string) string {
+	if c.DefaultSiteNameOverride != "" && isDefaultSiteName(siteName) {
+		return c.DefaultSiteNameOverride
+	}
+
+	return siteName
+}
+
 func (u *InputUnifi) collectAlarms(logs []any, sites []*unifi.Site, c *Controller) ([]any, error) {
 	if *c.SaveAlarms {
 		u.LogDebugf("Collecting controller alarms: %s (%s)", c.URL, c.ID)
@@ -161,6 +176,7 @@ func (u *InputUnifi) collectAlarms(logs []any, sites []*unifi.Site, c *Controlle
 			for _, e := range events {
 				// Try to extract MAC address from alarm message and enrich with device name
 				e.DeviceName = u.extractDeviceNameFromAlarm(e, macToName)
+				e.SiteName = overrideSiteName(c, e.SiteName)
 
 				logs = append(logs, e)
 
@@ -202,9 +218,7 @@ func (u *InputUnifi) collectAnomalies(logs []any, sites []*unifi.Site, c *Contro
 			}
 
 			for _, e := range events {
-				if c.DefaultSiteNameOverride != "" && isDefaultSiteName(e.SiteName) {
-					e.SiteName = c.DefaultSiteNameOverride
-				}
+				e.SiteName = overrideSiteName(c, e.SiteName)
 
 				logs = append(logs, e)
 
@@ -241,6 +255,8 @@ func (u *InputUnifi) collectEvents(logs []any, sites []*unifi.Site, c *Controlle
 
 			for _, e := range events {
 				e := redactEvent(e, c.HashPII, c.DropPII)
+				e.SiteName = overrideSiteName(c, e.SiteName)
+
 				logs = append(logs, e)
 
 				webserver.NewInputEvent(PluginName, s.ID+"_events", &webserver.Event{
@@ -270,6 +286,8 @@ func (u *InputUnifi) collectSyslog(logs []any, sites []*unifi.Site, c *Controlle
 
 		for _, e := range entries {
 			e := redactSystemLogEntry(e, c.HashPII, c.DropPII)
+			e.SiteName = overrideSiteName(c, e.SiteName)
+
 			logs = append(logs, e)
 
 			webserver.NewInputEvent(PluginName, e.SiteName+"_syslog", &webserver.Event{
@@ -362,6 +380,8 @@ func (u *InputUnifi) collectIDs(logs []any, sites []*unifi.Site, c *Controller) 
 			}
 
 			for _, e := range events {
+				e.SiteName = overrideSiteName(c, e.SiteName)
+
 				logs = append(logs, e)
 
 				webserver.NewInputEvent(PluginName, s.ID+"_ids", &webserver.Event{
