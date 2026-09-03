@@ -234,7 +234,7 @@ func (u *promUnifi) DebugOutput() (bool, error) {
 	}
 
 	if u.HTTPListen == "" {
-		return false, fmt.Errorf("invalid listen string")
+		u.HTTPListen = defaultHTTPListen
 	}
 
 	// check the port
