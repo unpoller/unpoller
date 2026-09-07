@@ -46,6 +46,11 @@ func (u *InputUnifi) collectControllerEvents(c *Controller) ([]any, error) {
 		}
 	}
 
+	// Every collector takes the accumulated slice, appends its own entries and
+	// returns THE WHOLE THING, so the return value replaces logs; it is not
+	// appended to it. Appending here stored every entry once per collector that
+	// ran after the one that found it: syslog entries (5th of 6) landed in Loki
+	// twice, alarms (3rd) eight times.
 	for _, call := range calls {
 		if newLogs, err = call(logs, sites, c); err != nil {
 			if c.Remote && (errors.Is(err, unifi.ErrInvalidStatusCode) || errors.Is(err, unifi.ErrEndpointNotFound)) {
@@ -65,7 +70,7 @@ func (u *InputUnifi) collectControllerEvents(c *Controller) ([]any, error) {
 			return logs, err
 		}
 
-		logs = append(logs, newLogs...)
+		logs = newLogs
 	}
 
 	return logs, nil
