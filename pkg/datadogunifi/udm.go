@@ -106,7 +106,7 @@ func (u *DatadogUnifi) batchUDMstorage(storage []*unifi.Storage) map[string]floa
 // batchUDM generates Unifi Gateway datapoints for Datadog.
 // These points can be passed directly to datadog.
 func (u *DatadogUnifi) batchUDM(r report, s *unifi.UDM) { // nolint: funlen
-	if !s.Adopted.Val || s.Locating.Val {
+	if !s.Adopted.Val {
 		return
 	}
 

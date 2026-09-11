@@ -11,7 +11,7 @@ import (
 
 // exportUSW emits metrics for a UniFi switch.
 func (u *OtelOutput) exportUSW(ctx context.Context, meter metric.Meter, r *Report, s *unifi.USW) {
-	if !s.Adopted.Val || s.Locating.Val {
+	if !s.Adopted.Val {
 		return
 	}
 

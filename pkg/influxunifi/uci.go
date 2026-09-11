@@ -10,7 +10,7 @@ const uciT = item("UCI")
 // batchUCI generates UCI datapoints for InfluxDB.
 // These points can be passed directly to influx.
 func (u *InfluxUnifi) batchUCI(r report, s *unifi.UCI) { // nolint: funlen
-	if !s.Adopted.Val || s.Locating.Val {
+	if !s.Adopted.Val {
 		return
 	}
 

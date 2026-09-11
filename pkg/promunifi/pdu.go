@@ -163,7 +163,7 @@ func descPDU(ns string) *pdu {
 }
 
 func (u *promUnifi) exportPDU(r report, d *unifi.PDU) {
-	if !d.Adopted.Val || d.Locating.Val {
+	if !d.Adopted.Val {
 		return
 	}
 

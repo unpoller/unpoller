@@ -4,6 +4,8 @@ package promunifi
 import (
 	"errors"
 	"fmt"
+	"os"
+	"path/filepath"
 	"sync"
 	"sync/atomic"
 	"testing"
@@ -16,6 +18,7 @@ import (
 	"github.com/stretchr/testify/require"
 	"github.com/unpoller/unpoller/pkg/poller"
 	"golift.io/cnfg"
+	"golift.io/cnfgfile"
 )
 
 // stubCollect is a minimal poller.Collect implementation for cache tests.
@@ -57,6 +60,10 @@ func (s *stubCollect) Outputs() []string                               { return 
 func (s *stubCollect) Logf(string, ...any)                             {}
 func (s *stubCollect) LogErrorf(string, ...any)                        { s.errLogs.Add(1) }
 func (s *stubCollect) LogDebugf(string, ...any)                        {}
+
+func interval(d time.Duration) *cnfg.Duration {
+	return &cnfg.Duration{Duration: d}
+}
 
 func TestMetricsCacheSetKeepsLastGoodOnError(t *testing.T) {
 	t.Parallel()
@@ -115,19 +122,53 @@ func TestFetchMetricsReturnsErrorWhenCacheEmpty(t *testing.T) {
 	assert.Error(t, err)
 }
 
-// TestFetchMetricsBypassesNilCache covers the nil-cache defensive branch.
-// Run() always initializes the cache in production; this branch exists only
-// for tests that exercise fetchMetrics directly without invoking Run.
-func TestFetchMetricsBypassesNilCache(t *testing.T) {
+// TestFetchMetricsCacheOffHitsUpstream is the production cache-off path:
+// Interval = 0 leaves cache nil, so /metrics live-fetches and must not
+// serve a leftover snapshot from a previous cache.
+func TestFetchMetricsCacheOffHitsUpstream(t *testing.T) {
 	t.Parallel()
 
-	stub := &stubCollect{metrics: &poller.Metrics{}}
-	u := &promUnifi{Config: &Config{}, Collector: stub}
+	leftover := &poller.Metrics{}
+	live := &poller.Metrics{}
+	stub := &stubCollect{metrics: live}
+	u := &promUnifi{Config: &Config{Interval: interval(0)}, Collector: stub}
+
+	abandoned := &metricsCache{}
+	abandoned.set(leftover, nil)
+
+	u.cache = nil
 
 	got, err := u.fetchMetrics(nil)
 	require.NoError(t, err)
-	assert.Same(t, stub.metrics, got)
+	assert.Same(t, live, got)
+	assert.NotSame(t, leftover, got)
 	assert.EqualValues(t, 1, stub.calls.Load())
+}
+
+func TestFetchMetricsCacheOffSingleflightCoalesces(t *testing.T) {
+	t.Parallel()
+
+	stub := &stubCollect{metrics: &poller.Metrics{}, delay: 50 * time.Millisecond}
+	u := &promUnifi{Config: &Config{Interval: interval(0)}, Collector: stub}
+
+	const concurrent = 20
+
+	var wg sync.WaitGroup
+
+	wg.Add(concurrent)
+
+	for i := 0; i < concurrent; i++ {
+		go func() {
+			defer wg.Done()
+
+			_, _ = u.fetchMetrics(nil)
+		}()
+	}
+
+	wg.Wait()
+
+	assert.LessOrEqual(t, stub.calls.Load(), int64(2),
+		"singleflight should coalesce concurrent cache-off /metrics scrapes to ~1 upstream call")
 }
 
 func TestFetchMetricsSingleflightCoalescesScrapes(t *testing.T) {
@@ -186,15 +227,17 @@ func TestNormalizeInterval(t *testing.T) {
 	t.Parallel()
 
 	cases := []struct {
-		name string
-		in   time.Duration
-		want time.Duration
+		name    string
+		in      *cnfg.Duration
+		want    time.Duration
+		cacheOn bool
 	}{
-		{"unset uses default", 0, defaultInterval},
-		{"negative uses default", -1, defaultInterval},
-		{"below minimum clamps", time.Second, minimumInterval},
-		{"exact minimum unchanged", minimumInterval, minimumInterval},
-		{"above minimum unchanged", 2 * time.Minute, 2 * time.Minute},
+		{"nil uses default, cache on", nil, defaultInterval, true},
+		{"explicit 0 disables cache", interval(0), 0, false},
+		{"2s kept, cache on", interval(2 * time.Second), 2 * time.Second, true},
+		{"exact minimum unchanged", interval(minimumInterval), minimumInterval, true},
+		{"above minimum unchanged", interval(2 * time.Minute), 2 * time.Minute, true},
+		{"negative uses default, cache on", interval(-time.Second), defaultInterval, true},
 	}
 
 	for _, tc := range cases {
@@ -203,11 +246,87 @@ func TestNormalizeInterval(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			t.Parallel()
 
-			u := &promUnifi{Config: &Config{Interval: cnfg.Duration{Duration: tc.in}}}
+			u := &promUnifi{Config: &Config{Interval: tc.in}}
 			u.normalizeInterval()
-			assert.Equal(t, tc.want, u.Interval.Duration)
+			assert.Equal(t, tc.want, u.refreshInterval())
+			assert.Equal(t, tc.cacheOn, u.scrapeCacheEnabled())
 		})
 	}
+}
+
+func TestPrometheusIntervalOmittedFromFile(t *testing.T) {
+	t.Parallel()
+
+	u := &promUnifi{Config: &Config{}}
+	require.NoError(t, cnfgfile.Unmarshal(u, writeConfig(t, "up.conf", "[prometheus]\n  http_listen = \"0.0.0.0:9130\"\n")))
+	assert.Nil(t, u.Interval)
+	assert.True(t, u.scrapeCacheEnabled())
+	assert.Equal(t, defaultInterval, u.refreshInterval())
+}
+
+func TestPrometheusIntervalZeroFromFile(t *testing.T) {
+	t.Parallel()
+
+	u := &promUnifi{Config: &Config{}}
+	require.NoError(t, cnfgfile.Unmarshal(u, writeConfig(t, "up.conf", "[prometheus]\n  interval = \"0s\"\n")))
+	require.NotNil(t, u.Interval)
+	assert.Equal(t, time.Duration(0), u.Interval.Duration)
+	assert.False(t, u.scrapeCacheEnabled())
+}
+
+func TestPrometheusIntervalTwoSecondsFromFile(t *testing.T) {
+	t.Parallel()
+
+	u := &promUnifi{Config: &Config{}}
+	require.NoError(t, cnfgfile.Unmarshal(u, writeConfig(t, "up.conf", "[prometheus]\n  interval = \"2s\"\n")))
+	require.NotNil(t, u.Interval)
+	assert.Equal(t, 2*time.Second, u.Interval.Duration)
+	assert.True(t, u.scrapeCacheEnabled())
+	assert.Equal(t, 2*time.Second, u.refreshInterval())
+}
+
+// Not parallel: t.Setenv is incompatible with a parallel test or parent.
+func TestPrometheusIntervalBindsFromEnvironment(t *testing.T) {
+	t.Run("omitted stays nil", func(t *testing.T) {
+		u := &promUnifi{Config: &Config{}}
+		_, err := cnfg.UnmarshalENV(u, "UP")
+		require.NoError(t, err)
+		assert.Nil(t, u.Interval)
+		assert.True(t, u.scrapeCacheEnabled())
+		assert.Equal(t, defaultInterval, u.refreshInterval())
+	})
+
+	t.Run("UP_PROMETHEUS_INTERVAL=0 disables cache", func(t *testing.T) {
+		t.Setenv("UP_PROMETHEUS_INTERVAL", "0")
+
+		u := &promUnifi{Config: &Config{}}
+		_, err := cnfg.UnmarshalENV(u, "UP")
+		require.NoError(t, err)
+		require.NotNil(t, u.Interval)
+		assert.Equal(t, time.Duration(0), u.Interval.Duration)
+		assert.False(t, u.scrapeCacheEnabled())
+	})
+
+	t.Run("UP_PROMETHEUS_INTERVAL=2s", func(t *testing.T) {
+		t.Setenv("UP_PROMETHEUS_INTERVAL", "2s")
+
+		u := &promUnifi{Config: &Config{}}
+		_, err := cnfg.UnmarshalENV(u, "UP")
+		require.NoError(t, err)
+		require.NotNil(t, u.Interval)
+		assert.Equal(t, 2*time.Second, u.Interval.Duration)
+		assert.True(t, u.scrapeCacheEnabled())
+		assert.Equal(t, 2*time.Second, u.refreshInterval())
+	})
+}
+
+func writeConfig(t *testing.T, name, body string) string {
+	t.Helper()
+
+	path := filepath.Join(t.TempDir(), name)
+	require.NoError(t, os.WriteFile(path, []byte(body), 0o600))
+
+	return path
 }
 
 func TestRefreshCachePreservesLastGoodAcrossError(t *testing.T) {

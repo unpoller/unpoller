@@ -11,7 +11,7 @@ import (
 
 // exportUDM emits metrics for a UniFi Dream Machine (all variants).
 func (u *OtelOutput) exportUDM(ctx context.Context, meter metric.Meter, r *Report, s *unifi.UDM) {
-	if !s.Adopted.Val || s.Locating.Val {
+	if !s.Adopted.Val {
 		return
 	}
 
@@ -49,7 +49,7 @@ func (u *OtelOutput) exportUDM(ctx context.Context, meter metric.Meter, r *Repor
 
 // exportUXG emits metrics for a UniFi Next-Gen Gateway.
 func (u *OtelOutput) exportUXG(ctx context.Context, meter metric.Meter, r *Report, s *unifi.UXG) {
-	if !s.Adopted.Val || s.Locating.Val {
+	if !s.Adopted.Val {
 		return
 	}
 

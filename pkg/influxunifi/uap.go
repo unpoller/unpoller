@@ -42,7 +42,7 @@ func (u *InfluxUnifi) batchRogueAP(r report, s *unifi.RogueAP) {
 // batchUAP generates Wireless-Access-Point datapoints for InfluxDB.
 // These points can be passed directly to influx.
 func (u *InfluxUnifi) batchUAP(r report, s *unifi.UAP) {
-	if !s.Adopted.Val || s.Locating.Val {
+	if !s.Adopted.Val {
 		return
 	}
 

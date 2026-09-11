@@ -10,7 +10,7 @@ const pduT = item("PDU")
 // batchPDU generates Unifi PDU datapoints for Datadog.
 // These points can be passed directly to datadog.
 func (u *DatadogUnifi) batchPDU(r report, s *unifi.PDU) {
-	if !s.Adopted.Val || s.Locating.Val {
+	if !s.Adopted.Val {
 		return
 	}
 

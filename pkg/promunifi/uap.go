@@ -211,7 +211,7 @@ func (u *promUnifi) exportRogueAP(r report, d *unifi.RogueAP) {
 }
 
 func (u *promUnifi) exportUAP(r report, d *unifi.UAP) {
-	if !d.Adopted.Val || d.Locating.Val {
+	if !d.Adopted.Val {
 		return
 	}
 

@@ -20,6 +20,8 @@ prometheus:
   ssl_cert_path: ""
   ssl_key_path:  ""
   report_errors: false
+  # Cache refresh. Omitted: 60s. 0 / "0s" disables the cache (live /metrics).
+  # Values below 15s warn but are not clamped. Env: UP_PROMETHEUS_INTERVAL.
   interval:      "60s"
 
 influxdb:

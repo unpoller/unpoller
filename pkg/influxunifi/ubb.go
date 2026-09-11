@@ -12,7 +12,7 @@ const ubbT = item("UBB")
 //   - wifi0: 5GHz radio (802.11ac)
 //   - terra2/wlan0/ad: 60GHz radio (802.11ad - Terragraph/WiGig)
 func (u *InfluxUnifi) batchUBB(r report, s *unifi.UBB) { // nolint: funlen
-	if !s.Adopted.Val || s.Locating.Val {
+	if !s.Adopted.Val {
 		return
 	}
 

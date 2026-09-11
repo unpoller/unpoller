@@ -10,7 +10,7 @@ const uswT = item("USW")
 // batchUSW generates Unifi Switch datapoints for InfluxDB.
 // These points can be passed directly to influx.
 func (u *InfluxUnifi) batchUSW(r report, s *unifi.USW) {
-	if !s.Adopted.Val || s.Locating.Val {
+	if !s.Adopted.Val {
 		return
 	}
 

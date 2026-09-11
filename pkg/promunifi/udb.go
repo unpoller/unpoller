@@ -7,7 +7,7 @@ import "github.com/unpoller/unifi/v6"
 // UDB-Switch is a hybrid device combining switch ports (8 PoE ports)
 // with WiFi 7 wireless bridge capability (5GHz + 6GHz radios).
 func (u *promUnifi) exportUDB(r report, d *unifi.UDB) {
-	if !d.Adopted.Val || d.Locating.Val {
+	if !d.Adopted.Val {
 		return
 	}
 
