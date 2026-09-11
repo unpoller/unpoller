@@ -10,7 +10,7 @@ const uxgT = item("UXG")
 // batchUXG generates 10Gb Unifi Gateway datapoints for Datadog.
 // These points can be passed directly to datadog.
 func (u *DatadogUnifi) batchUXG(r report, s *unifi.UXG) { // nolint: funlen
-	if !s.Adopted.Val || s.Locating.Val {
+	if !s.Adopted.Val {
 		return
 	}
 

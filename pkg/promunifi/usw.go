@@ -112,7 +112,7 @@ func descUSW(ns string) *usw {
 }
 
 func (u *promUnifi) exportUSW(r report, d *unifi.USW) {
-	if !d.Adopted.Val || d.Locating.Val {
+	if !d.Adopted.Val {
 		return
 	}
 

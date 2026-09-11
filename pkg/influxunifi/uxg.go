@@ -10,7 +10,7 @@ const uxgT = item("UXG")
 // batchUXG generates 10Gb Unifi Gateway datapoints for InfluxDB.
 // These points can be passed directly to influx.
 func (u *InfluxUnifi) batchUXG(r report, s *unifi.UXG) { // nolint: funlen
-	if !s.Adopted.Val || s.Locating.Val {
+	if !s.Adopted.Val {
 		return
 	}
 

@@ -96,9 +96,9 @@ type promUnifi struct {
 	// so operators can alert on failure rate independently of cache staleness.
 	refreshFailures prometheus.Counter
 	// cache holds the last successful metrics snapshot from the background
-	// poller. Run() always initializes it; the nil-guards in cache-using
-	// methods exist only for tests that exercise those methods directly
-	// without invoking Run().
+	// poller. Run() initializes it when the scrape cache is enabled
+	// (Interval omitted or > 0). When Interval is explicitly 0 the cache
+	// stays nil and /metrics fetches live.
 	cache *metricsCache
 	// scrapeFlight coalesces concurrent /scrape requests targeting the same
 	// controller URL so a noisy scraper can't multiply upstream load.
@@ -167,10 +167,12 @@ type Config struct {
 	// Interval controls how often the background poller refreshes the cached
 	// metrics that /metrics scrapes are served from. Decouples Prometheus
 	// scrape cadence from upstream UniFi API calls so 429 backoff loops cannot
-	// stall scrapes. Defaults to defaultInterval; values below minimumInterval
-	// are clamped up. Must be > 0 before use; normalizeInterval applies the
-	// default and floor during Run().
-	Interval cnfg.Duration `json:"interval" toml:"interval" xml:"interval" yaml:"interval"`
+	// stall scrapes. Omitted (nil) enables the cache at defaultInterval.
+	// An explicit 0 disables the cache so /metrics fetches live. Any duration
+	// greater than 0 is used as-is; values below minimumInterval log a warning
+	// but are not rewritten. Negative values are invalid and fall back to
+	// defaultInterval.
+	Interval *cnfg.Duration `json:"interval" toml:"interval" xml:"interval" yaml:"interval"`
 }
 
 type metric struct {
@@ -361,15 +363,19 @@ func (u *promUnifi) Run(c poller.Collect) error {
 	prometheus.MustRegister(u.refreshFailures)
 	prometheus.MustRegister(u)
 
-	u.cache = &metricsCache{}
-	prometheus.MustRegister(u.cacheAgeGauge())
-	// safeRefresh (not refreshCache) because a panic in the initial upstream
-	// fetch must not kill Run() before the HTTP listener starts.
-	u.safeRefresh()
+	if u.scrapeCacheEnabled() {
+		u.cache = &metricsCache{}
+		prometheus.MustRegister(u.cacheAgeGauge())
+		// safeRefresh (not refreshCache) because a panic in the initial upstream
+		// fetch must not kill Run() before the HTTP listener starts.
+		u.safeRefresh()
 
-	go u.backgroundPoll()
+		go u.backgroundPoll()
 
-	u.Logf("Prometheus scrape cache enabled, refresh interval: %v", u.Interval.Duration)
+		u.Logf("Prometheus scrape cache enabled, refresh interval: %v", u.refreshInterval())
+	} else {
+		u.Logf("Prometheus scrape cache disabled; /metrics fetches live")
+	}
 
 	mux.Handle("/metrics", promhttp.HandlerFor(prometheus.DefaultGatherer,
 		promhttp.HandlerOpts{ErrorHandling: promhttp.ContinueOnError},
@@ -389,20 +395,48 @@ func (u *promUnifi) Run(c poller.Collect) error {
 	}
 }
 
-// normalizeInterval applies defaults and the minimum-interval floor to the
-// configured scrape cache refresh interval. Values <= 0 use the default.
+// scrapeCacheEnabled reports whether /metrics is served from the
+// background-refreshed cache. False only when Interval is explicitly 0.
+func (u *promUnifi) scrapeCacheEnabled() bool {
+	return u.Interval == nil || u.Interval.Duration != 0
+}
+
+// refreshInterval is the cache refresh period. Omitted or negative
+// values use defaultInterval; any configured duration (including 0) is
+// returned as-is.
+func (u *promUnifi) refreshInterval() time.Duration {
+	if u.Interval == nil || u.Interval.Duration < 0 {
+		return defaultInterval
+	}
+
+	return u.Interval.Duration
+}
+
+// normalizeInterval applies the scrape-cache interval contract: omitted/nil
+// keeps the default (cache on, 60s); explicit 0 disables the cache; negative
+// values are invalid and fall back to the default; values below
+// minimumInterval log a warning but are not rewritten.
 func (u *promUnifi) normalizeInterval() {
-	if u.Interval.Duration <= 0 {
+	if u.Interval == nil {
+		return
+	}
+
+	if u.Interval.Duration < 0 {
+		u.Logf("Prometheus interval %v is invalid; using default %v",
+			u.Interval.Duration, defaultInterval)
+
 		u.Interval.Duration = defaultInterval
 
 		return
 	}
 
-	if u.Interval.Duration < minimumInterval {
-		u.Logf("Prometheus interval %v is below minimum %v; clamping to minimum",
-			u.Interval.Duration, minimumInterval)
+	if u.Interval.Duration == 0 {
+		return
+	}
 
-		u.Interval.Duration = minimumInterval
+	if u.Interval.Duration < minimumInterval {
+		u.Logf("Prometheus interval %v is below recommended minimum %v; this may increase UniFi API load",
+			u.Interval.Duration, minimumInterval)
 	}
 }
 
@@ -415,7 +449,7 @@ func (u *promUnifi) backgroundPoll() {
 		return
 	}
 
-	ticker := time.NewTicker(u.Interval.Duration)
+	ticker := time.NewTicker(u.refreshInterval())
 	defer ticker.Stop()
 
 	for range ticker.C {
@@ -501,12 +535,14 @@ func (u *promUnifi) cacheAgeGauge() prometheus.Collector {
 }
 
 // fetchMetrics returns the metrics for a scrape, using the cache for global
-// /metrics scrapes and singleflight-coalesced live calls for per-target
-// /scrape requests.
+// /metrics scrapes when the cache is enabled. A nil cache (interval = 0)
+// live-fetches under a singleflight key so concurrent /metrics scrapes
+// cannot multiply upstream load. Per-target /scrape requests always
+// live-fetch, coalesced by filter path.
 func (u *promUnifi) fetchMetrics(filter *poller.Filter) (*poller.Metrics, error) {
 	if filter == nil {
 		if u.cache == nil {
-			return u.Collector.Metrics(nil)
+			return u.liveMetrics("global", nil)
 		}
 
 		m, _, err := u.cache.get()
@@ -529,6 +565,12 @@ func (u *promUnifi) fetchMetrics(filter *poller.Filter) (*poller.Metrics, error)
 		key = filter.Name
 	}
 
+	return u.liveMetrics(key, filter)
+}
+
+// liveMetrics fetches from the collector once per singleflight key so
+// concurrent scrapes (cache-off /metrics or /scrape) share one upstream call.
+func (u *promUnifi) liveMetrics(key string, filter *poller.Filter) (*poller.Metrics, error) {
 	result, err, _ := u.scrapeFlight.Do(key, func() (any, error) {
 		return u.Collector.Metrics(filter)
 	})

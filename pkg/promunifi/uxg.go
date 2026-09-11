@@ -6,7 +6,7 @@ import (
 
 // exportUXG is a collection of stats from USG and USW. It has no unique stats.
 func (u *promUnifi) exportUXG(r report, d *unifi.UXG) {
-	if !d.Adopted.Val || d.Locating.Val {
+	if !d.Adopted.Val {
 		return
 	}
 

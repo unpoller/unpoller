@@ -81,7 +81,7 @@ func (u *InfluxUnifi) batchUDMstorage(storage []*unifi.Storage) map[string]any {
 // batchUDM generates Unifi Gateway datapoints for InfluxDB.
 // These points can be passed directly to influx.
 func (u *InfluxUnifi) batchUDM(r report, s *unifi.UDM) { // nolint: funlen
-	if !s.Adopted.Val || s.Locating.Val {
+	if !s.Adopted.Val {
 		return
 	}
 

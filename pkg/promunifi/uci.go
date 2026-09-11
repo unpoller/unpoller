@@ -6,7 +6,7 @@ import (
 
 // exportUCI is a collection of stats from UCI.
 func (u *promUnifi) exportUCI(r report, d *unifi.UCI) {
-	if !d.Adopted.Val || d.Locating.Val {
+	if !d.Adopted.Val {
 		return
 	}
 

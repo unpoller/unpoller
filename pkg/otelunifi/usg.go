@@ -11,7 +11,7 @@ import (
 
 // exportUSG emits metrics for a UniFi Security Gateway.
 func (u *OtelOutput) exportUSG(ctx context.Context, meter metric.Meter, r *Report, s *unifi.USG) {
-	if !s.Adopted.Val || s.Locating.Val {
+	if !s.Adopted.Val {
 		return
 	}
 

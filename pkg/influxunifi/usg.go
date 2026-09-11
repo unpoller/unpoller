@@ -10,7 +10,7 @@ const usgT = item("USG")
 // batchUSG generates Unifi Gateway datapoints for InfluxDB.
 // These points can be passed directly to influx.
 func (u *InfluxUnifi) batchUSG(r report, s *unifi.USG) {
-	if !s.Adopted.Val || s.Locating.Val {
+	if !s.Adopted.Val {
 		return
 	}
 

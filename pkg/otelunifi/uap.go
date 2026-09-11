@@ -11,7 +11,7 @@ import (
 
 // exportUAP emits metrics for a wireless access point.
 func (u *OtelOutput) exportUAP(ctx context.Context, meter metric.Meter, r *Report, s *unifi.UAP) {
-	if !s.Adopted.Val || s.Locating.Val {
+	if !s.Adopted.Val {
 		return
 	}
 

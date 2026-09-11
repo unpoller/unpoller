@@ -9,7 +9,7 @@ const udbT = item("UDB")
 // UDB-Switch is a hybrid device combining switch ports with WiFi 7
 // wireless bridge capability.
 func (u *DatadogUnifi) batchUDB(r report, s *unifi.UDB) {
-	if !s.Adopted.Val || s.Locating.Val {
+	if !s.Adopted.Val {
 		return
 	}
 

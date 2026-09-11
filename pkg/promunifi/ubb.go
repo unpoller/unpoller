@@ -9,7 +9,7 @@ import (
 //   - wifi0: 5GHz radio (802.11ac)
 //   - terra2/wlan0/ad: 60GHz radio (802.11ad - Terragraph/WiGig)
 func (u *promUnifi) exportUBB(r report, d *unifi.UBB) {
-	if !d.Adopted.Val || d.Locating.Val {
+	if !d.Adopted.Val {
 		return
 	}
 

@@ -10,7 +10,7 @@ const pduT = item("PDU")
 // batchPDU generates Unifi PDU data points for InfluxDB.
 // These points can be passed directly to influx.
 func (u *InfluxUnifi) batchPDU(r report, s *unifi.PDU) {
-	if !s.Adopted.Val || s.Locating.Val {
+	if !s.Adopted.Val {
 		return
 	}
 

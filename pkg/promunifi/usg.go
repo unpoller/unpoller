@@ -78,7 +78,7 @@ func descUSG(ns string) *usg {
 }
 
 func (u *promUnifi) exportUSG(r report, d *unifi.USG) {
-	if !d.Adopted.Val || d.Locating.Val {
+	if !d.Adopted.Val {
 		return
 	}
 
