@@ -240,9 +240,8 @@ func (u *promUnifi) DebugOutput() (bool, error) {
 	}
 
 	// check the port
-	parts := strings.Split(u.HTTPListen, ":")
-	if len(parts) != 2 {
-		return false, fmt.Errorf("invalid listen address: %s (must be of the form \"IP:Port\"", u.HTTPListen)
+	if _, _, err := net.SplitHostPort(u.HTTPListen); err != nil {
+		return false, fmt.Errorf("invalid listen address: %s (must be of the form \"IP:Port\")", u.HTTPListen)
 	}
 
 	// Skip network binding check during health checks to avoid "address already in use"
