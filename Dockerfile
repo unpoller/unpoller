@@ -7,7 +7,7 @@ COPY examples/up.conf.example /etc/unpoller/up.conf
 COPY unpoller_manual.html /etc/unpoller/manual.html
 COPY README.html /etc/unpoller/readme.html
 
-FROM gcr.io/distroless/static-debian11
+FROM gcr.io/distroless/static-debian13
 ARG TARGETPLATFORM
 
 COPY ${TARGETPLATFORM}/unpoller /usr/bin/unpoller
