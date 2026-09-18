@@ -9,8 +9,8 @@
 
 Collect your UniFi controller data and report it to an InfluxDB instance,
 or export it for Prometheus collection.
-[Twelve Grafana Dashboards](http://grafana.com/dashboards?search=unifi-poller)
-included; with screenshots. Six for InfluxDB and six for Prometheus.
+[Thirteen Grafana Dashboards](https://grafana.com/grafana/dashboards/?search=unifi-poller)
+included; with screenshots. Six for InfluxDB and seven for Prometheus.
 
 ## Installation
 
