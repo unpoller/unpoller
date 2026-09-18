@@ -207,14 +207,14 @@ func (u *OtelOutput) exportDevices(ctx context.Context, meter metric.Meter, m *p
 
 // recordGauge is a helper that records a single float64 gauge observation.
 func (u *OtelOutput) recordGauge(
-	_ context.Context,
+	ctx context.Context,
 	meter metric.Meter,
 	r *Report,
 	name, description string,
 	value float64,
 	attrs attribute.Set,
 ) {
-	g, err := meter.Float64ObservableGauge(name, metric.WithDescription(description))
+	g, err := meter.Float64Gauge(name, metric.WithDescription(description))
 	if err != nil {
 		r.Errors++
 
@@ -223,18 +223,7 @@ func (u *OtelOutput) recordGauge(
 		return
 	}
 
-	_, err = meter.RegisterCallback(func(_ context.Context, o metric.Observer) error {
-		o.ObserveFloat64(g, value, metric.WithAttributeSet(attrs))
-
-		return nil
-	}, g)
-	if err != nil {
-		r.Errors++
-
-		u.LogDebugf("otel: registering callback for %s: %v", name, err)
-
-		return
-	}
+	g.Record(ctx, value, metric.WithAttributeSet(attrs))
 
 	r.Total++
 }
