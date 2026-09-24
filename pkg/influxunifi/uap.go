@@ -125,6 +125,23 @@ func (u *InfluxUnifi) processUAPstats(ap *unifi.Ap) map[string]any {
 	}
 }
 
+// radioBand maps a UniFi radio identifier to its frequency band in GHz.
+// UniFi reports the radio as ng (2.4 GHz), na (5 GHz) or 6e (6 GHz); the band
+// is not carried as its own field on the radio/VAP structs, so it is derived
+// here. Unknown identifiers yield an empty band label.
+func radioBand(radio string) string {
+	switch radio {
+	case "ng":
+		return "2.4"
+	case "na":
+		return "5"
+	case "6e":
+		return "6"
+	default:
+		return ""
+	}
+}
+
 // processVAPTable creates points for Wifi Radios. This works with several types of UAP-capable devices.
 func (u *InfluxUnifi) processVAPTable(r report, t map[string]string, vt unifi.VapTable) { // nolint: funlen
 	for _, s := range vt {
@@ -138,6 +155,7 @@ func (u *InfluxUnifi) processVAPTable(r report, t map[string]string, vt unifi.Va
 			"name":        s.Name,
 			"radio_name":  s.RadioName,
 			"radio":       s.Radio,
+			"band":        radioBand(s.Radio),
 			"essid":       s.Essid,
 			"site_id":     s.SiteID,
 			"usage":       s.Usage,
@@ -198,6 +216,7 @@ func (u *InfluxUnifi) processRadTable(r report, t map[string]string, rt unifi.Ra
 			"source":      t["source"],
 			"channel":     p.Channel.Txt,
 			"radio":       p.Radio,
+			"band":        radioBand(p.Radio),
 		}
 		fields := map[string]any{
 			"current_antenna_gain": p.CurrentAntennaGain.Val,
