@@ -84,16 +84,16 @@ used to work but no longer does.
 
 `Config File Parameters`
 
-Configuration file (up.conf) parameters are documented in the wiki.
+Configuration file (up.conf) parameters are documented on the website.
 
-*   [https://github.com/unpoller/unpoller/wiki/Configuration](https://github.com/unpoller/unpoller/wiki/Configuration)
+*   [https://unpoller.com/docs/install/configuration](https://unpoller.com/docs/install/configuration)
 
 `Shell Environment Parameters`
 
 This application can be fully configured using shell environment variables.
-Find documentation for this feature on the Docker Wiki page, and the above Configuration wiki.
+Find documentation for this feature on the Docker page, and the above Configuration page.
 
-*   [https://github.com/unpoller/unpoller/wiki/Docker](https://github.com/unpoller/unpoller/wiki/Docker)
+*   [https://unpoller.com/docs/install/docker](https://unpoller.com/docs/install/docker)
 
 GO DURATION
 ---
