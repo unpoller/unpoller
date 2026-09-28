@@ -419,7 +419,7 @@ homebrew_casks:
     repository:
       owner: golift
       name: homebrew-mugs
-      branch: master
+      branch: main
       token: "{{ .Env.HOMEBREW_TAP_GITHUB_TOKEN }}"
     commit_author:
       name: goreleaserbot
