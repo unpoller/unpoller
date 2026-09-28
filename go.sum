@@ -1,5 +1,5 @@
-github.com/BurntSushi/toml v1.5.0 h1:W5quZX/G/csjUnuI8SUYlsHs9M38FC7znL0lIO+DvMg=
-github.com/BurntSushi/toml v1.5.0/go.mod h1:ukJfTF/6rtPPRCnwkur4qwRxa8vTRFBF0uk2lLoLwho=
+github.com/BurntSushi/toml v1.6.0 h1:dRaEfpa2VI55EwlIW72hMRHdWouJeRF7TPYhI+AUQjk=
+github.com/BurntSushi/toml v1.6.0/go.mod h1:ukJfTF/6rtPPRCnwkur4qwRxa8vTRFBF0uk2lLoLwho=
 github.com/DataDog/datadog-go/v5 v5.9.1 h1:jOxw/TaxGWok8RIxbpqn2p3RzSnQr/m3Q6TgaHqqOU0=
 github.com/DataDog/datadog-go/v5 v5.9.1/go.mod h1:2SBt8zJu6r7sRQHZFMQ8oCukWTKj0ymwulmNgQzJ1JM=
 github.com/InfluxCommunity/influxdb3-go/v2 v2.17.0 h1:mmaojtPoRZ6QmOXEHt5mMmfYupJ2VPUUYnUEyZf9XX0=
@@ -193,10 +193,10 @@ golang.org/x/xerrors v0.0.0-20190717185122-a985d3407aa7/go.mod h1:I/5z698sn9Ka8T
 golang.org/x/xerrors v0.0.0-20191011141410-1b5146add898/go.mod h1:I/5z698sn9Ka8TeJc9MKroUUfqBBauWjQqLJ2OPfmY0=
 golang.org/x/xerrors v0.0.0-20191204190536-9bdfabe68543/go.mod h1:I/5z698sn9Ka8TeJc9MKroUUfqBBauWjQqLJ2OPfmY0=
 golang.org/x/xerrors v0.0.0-20200804184101-5ec99f83aff1/go.mod h1:I/5z698sn9Ka8TeJc9MKroUUfqBBauWjQqLJ2OPfmY0=
-golift.io/cnfg v0.4.0 h1:HRxcfI8xhRt4Kw9TpP1ZFiMgBDLzXv2sT/goI1/ZRn4=
-golift.io/cnfg v0.4.0/go.mod h1:+u238cgJJf1shXJmzMV4I7+F3EACg3NfKSe/g9yRKMY=
-golift.io/cnfgfile v0.0.0-20240713024420-a5436d84eb48 h1:c7cJWRr0cUnFHKtq072esKzhQHKlFA5YRY/hPzQrdko=
-golift.io/cnfgfile v0.0.0-20240713024420-a5436d84eb48/go.mod h1:zHm9o8SkZ6Mm5DfGahsrEJPsogyR0qItP59s5lJ98/I=
+golift.io/cnfg v0.5.0 h1:aQ/Etf81BnSnv9ET8vTjEvdxmmWBTjsPOQbq8E2F9oA=
+golift.io/cnfg v0.5.0/go.mod h1:+u238cgJJf1shXJmzMV4I7+F3EACg3NfKSe/g9yRKMY=
+golift.io/cnfgfile v0.1.0 h1:MaRWg9KSZ1hLQFxLMO5PXdMygQLKGTGlft8MIqppe2U=
+golift.io/cnfgfile v0.1.0/go.mod h1:ykGrv8TZ9ez5qju4bEGQ7EcrtV3yhXET8qWPOz3Jecw=
 golift.io/version v0.0.2 h1:i0gXRuSDHKs4O0sVDUg4+vNIuOxYoXhaxspftu2FRTE=
 golift.io/version v0.0.2/go.mod h1:76aHNz8/Pm7CbuxIsDi97jABL5Zui3f2uZxDm4vB6hU=
 gonum.org/v1/gonum v0.17.0 h1:VbpOemQlsSMrYmn7T2OUvQ4dqxQXU+ouZFQsZOx50z4=
