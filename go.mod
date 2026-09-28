@@ -23,8 +23,8 @@ require (
 	golang.org/x/crypto v0.57.0
 	golang.org/x/sync v0.23.0
 	golang.org/x/term v0.46.0
-	golift.io/cnfg v0.4.0
-	golift.io/cnfgfile v0.0.0-20240713024420-a5436d84eb48
+	golift.io/cnfg v0.5.0
+	golift.io/cnfgfile v0.1.0
 	golift.io/version v0.0.2
 	gopkg.in/yaml.v3 v3.0.1
 )
@@ -55,7 +55,7 @@ require (
 )
 
 require (
-	github.com/BurntSushi/toml v1.5.0 // indirect
+	github.com/BurntSushi/toml v1.6.0 // indirect
 	github.com/Microsoft/go-winio v0.6.2 // indirect
 	github.com/apapsch/go-jsonmerge/v2 v2.0.0 // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
