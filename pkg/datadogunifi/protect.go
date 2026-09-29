@@ -83,18 +83,45 @@ func (u *DatadogUnifi) batchProtectSensor(r report, d *unifi.ProtectDevices, s *
 		_ = r.reportGauge(metricName("battery_low"), boolToFloat64(s.BatteryStatus.IsLow.Val), tags)
 	}
 
-	if s.Stats != nil {
-		if s.Stats.Temperature != nil {
-			_ = r.reportGauge(metricName("temperature"), s.Stats.Temperature.Value.Val, tags)
+	if temp, ok := s.TemperatureReading(); ok {
+		_ = r.reportGauge(metricName("temperature"), temp, tags)
+	}
+
+	if humidity, ok := s.HumidityReading(); ok {
+		_ = r.reportGauge(metricName("humidity"), humidity, tags)
+	}
+
+	if light, ok := s.LightReading(); ok {
+		_ = r.reportGauge(metricName("light"), light, tags)
+	}
+
+	if s.AirQuality == nil {
+		return
+	}
+
+	aq := s.AirQuality
+	channels := []struct {
+		name    string
+		reading *unifi.ProtectSensorStatValue
+	}{
+		{"aqi", aq.AQI},
+		{"co2_ppm", aq.CO2},
+		{"tvoc", aq.TVOC},
+		{"voc", aq.VOC},
+		{"vape", aq.Vape},
+		{"pm1_0", aq.PM1p0},
+		{"pm2_5", aq.PM2p5},
+		{"pm4_0", aq.PM4p0},
+		{"pm10", aq.PM10p0},
+	}
+
+	for _, ch := range channels {
+		value, ok := ch.reading.Reading()
+		if !ok {
+			continue
 		}
 
-		if s.Stats.Humidity != nil {
-			_ = r.reportGauge(metricName("humidity"), s.Stats.Humidity.Value.Val, tags)
-		}
-
-		if s.Stats.Light != nil {
-			_ = r.reportGauge(metricName("light"), s.Stats.Light.Value.Val, tags)
-		}
+		_ = r.reportGauge(metricName(ch.name), value, tags)
 	}
 }
 

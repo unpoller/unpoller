@@ -48,17 +48,42 @@ func (u *InfluxUnifi) batchProtectDevices(r report, d *unifi.ProtectDevices) {
 			fields["battery_low"] = s.BatteryStatus.IsLow.Val
 		}
 
-		if s.Stats != nil {
-			if s.Stats.Temperature != nil {
-				fields["temperature"] = s.Stats.Temperature.Value.Val
+		if temp, ok := s.TemperatureReading(); ok {
+			fields["temperature"] = temp
+		}
+
+		if humidity, ok := s.HumidityReading(); ok {
+			fields["humidity"] = humidity
+		}
+
+		if light, ok := s.LightReading(); ok {
+			fields["light"] = light
+		}
+
+		if s.AirQuality != nil {
+			aq := s.AirQuality
+			channels := []struct {
+				name    string
+				reading *unifi.ProtectSensorStatValue
+			}{
+				{"aqi", aq.AQI},
+				{"co2_ppm", aq.CO2},
+				{"tvoc", aq.TVOC},
+				{"voc", aq.VOC},
+				{"vape", aq.Vape},
+				{"pm1_0", aq.PM1p0},
+				{"pm2_5", aq.PM2p5},
+				{"pm4_0", aq.PM4p0},
+				{"pm10", aq.PM10p0},
 			}
 
-			if s.Stats.Humidity != nil {
-				fields["humidity"] = s.Stats.Humidity.Value.Val
-			}
+			for _, ch := range channels {
+				value, ok := ch.reading.Reading()
+				if !ok {
+					continue
+				}
 
-			if s.Stats.Light != nil {
-				fields["light"] = s.Stats.Light.Value.Val
+				fields[ch.name] = value
 			}
 		}
 

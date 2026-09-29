@@ -21,6 +21,15 @@ type protectDevices struct {
 	SensorTemperature    *prometheus.Desc
 	SensorHumidity       *prometheus.Desc
 	SensorLight          *prometheus.Desc
+	SensorAQI            *prometheus.Desc
+	SensorCO2            *prometheus.Desc
+	SensorTVOC           *prometheus.Desc
+	SensorVOC            *prometheus.Desc
+	SensorVape           *prometheus.Desc
+	SensorPM1            *prometheus.Desc
+	SensorPM2_5          *prometheus.Desc
+	SensorPM4            *prometheus.Desc
+	SensorPM10           *prometheus.Desc
 	SensorIsOpened       *prometheus.Desc
 	SensorIsMotion       *prometheus.Desc
 	// Cameras.
@@ -56,6 +65,24 @@ func descProtectDevices(ns string) *protectDevices { // nolint: funlen
 			"Protect sensor humidity reading", device, nil),
 		SensorLight: prometheus.NewDesc(ns+"sensor_light_lux",
 			"Protect sensor light reading", device, nil),
+		SensorAQI: prometheus.NewDesc(ns+"sensor_aqi",
+			"Protect air quality index", device, nil),
+		SensorCO2: prometheus.NewDesc(ns+"sensor_co2_ppm",
+			"Protect air quality CO2 reading in ppm", device, nil),
+		SensorTVOC: prometheus.NewDesc(ns+"sensor_tvoc",
+			"Protect air quality total volatile organic compounds", device, nil),
+		SensorVOC: prometheus.NewDesc(ns+"sensor_voc",
+			"Protect air quality volatile organic compounds", device, nil),
+		SensorVape: prometheus.NewDesc(ns+"sensor_vape",
+			"Protect air quality vape detection reading", device, nil),
+		SensorPM1: prometheus.NewDesc(ns+"sensor_pm1_0",
+			"Protect air quality PM1.0 reading", device, nil),
+		SensorPM2_5: prometheus.NewDesc(ns+"sensor_pm2_5",
+			"Protect air quality PM2.5 reading", device, nil),
+		SensorPM4: prometheus.NewDesc(ns+"sensor_pm4_0",
+			"Protect air quality PM4.0 reading", device, nil),
+		SensorPM10: prometheus.NewDesc(ns+"sensor_pm10",
+			"Protect air quality PM10 reading", device, nil),
 		SensorIsOpened: prometheus.NewDesc(ns+"sensor_is_opened",
 			"Protect door/window sensor is opened (1) or closed (0)", device, nil),
 		SensorIsMotion: prometheus.NewDesc(ns+"sensor_is_motion_detected",
@@ -112,19 +139,7 @@ func (u *promUnifi) exportProtectDevices(r report, d *unifi.ProtectDevices) {
 			r.send([]*metric{{u.ProtectDevices.SensorBatteryLow, gauge, isLow, labels}})
 		}
 
-		if s.Stats != nil {
-			if s.Stats.Temperature != nil {
-				r.send([]*metric{{u.ProtectDevices.SensorTemperature, gauge, s.Stats.Temperature.Value.Val, labels}})
-			}
-
-			if s.Stats.Humidity != nil {
-				r.send([]*metric{{u.ProtectDevices.SensorHumidity, gauge, s.Stats.Humidity.Value.Val, labels}})
-			}
-
-			if s.Stats.Light != nil {
-				r.send([]*metric{{u.ProtectDevices.SensorLight, gauge, s.Stats.Light.Value.Val, labels}})
-			}
-		}
+		u.exportProtectSensorReadings(r, s, labels)
 
 		isOpened := 0.0
 		if s.IsOpened.Val {
@@ -219,6 +234,54 @@ func (u *promUnifi) exportProtectDevices(r report, d *unifi.ProtectDevices) {
 
 			r.send([]*metric{{u.ProtectDevices.LinkStationArmed, gauge, armed, labels}})
 		}
+	}
+}
+
+// exportProtectSensorReadings emits environmental and air-quality gauges for one sensor.
+//
+// A channel whose status is "unknown" is omitted. Temperature and humidity prefer
+// stats and fall back to airQuality, which is where a UP-AirQuality sensor reports
+// them. The air-quality series are emitted only when that object is present.
+func (u *promUnifi) exportProtectSensorReadings(r report, s *unifi.ProtectSensor, labels []string) {
+	if temp, ok := s.TemperatureReading(); ok {
+		r.send([]*metric{{u.ProtectDevices.SensorTemperature, gauge, temp, labels}})
+	}
+
+	if humidity, ok := s.HumidityReading(); ok {
+		r.send([]*metric{{u.ProtectDevices.SensorHumidity, gauge, humidity, labels}})
+	}
+
+	if light, ok := s.LightReading(); ok {
+		r.send([]*metric{{u.ProtectDevices.SensorLight, gauge, light, labels}})
+	}
+
+	if s.AirQuality == nil {
+		return
+	}
+
+	aq := s.AirQuality
+	channels := []struct {
+		desc    *prometheus.Desc
+		reading *unifi.ProtectSensorStatValue
+	}{
+		{u.ProtectDevices.SensorAQI, aq.AQI},
+		{u.ProtectDevices.SensorCO2, aq.CO2},
+		{u.ProtectDevices.SensorTVOC, aq.TVOC},
+		{u.ProtectDevices.SensorVOC, aq.VOC},
+		{u.ProtectDevices.SensorVape, aq.Vape},
+		{u.ProtectDevices.SensorPM1, aq.PM1p0},
+		{u.ProtectDevices.SensorPM2_5, aq.PM2p5},
+		{u.ProtectDevices.SensorPM4, aq.PM4p0},
+		{u.ProtectDevices.SensorPM10, aq.PM10p0},
+	}
+
+	for _, ch := range channels {
+		value, ok := ch.reading.Reading()
+		if !ok {
+			continue
+		}
+
+		r.send([]*metric{{ch.desc, gauge, value, labels}})
 	}
 }
 
