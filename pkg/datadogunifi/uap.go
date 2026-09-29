@@ -84,6 +84,7 @@ func (u *DatadogUnifi) batchUAP(r report, s *unifi.UAP) {
 	metricName := metricNamespace("uap")
 
 	reportGaugeForFloat64Map(r, metricName, data, tags)
+	u.batchLTE(r, s)
 
 	u.processVAPTable(r, tags, s.VapTable)
 	u.batchPortTable(r, tags, s.PortTable)
@@ -129,6 +130,49 @@ func (u *DatadogUnifi) processUAPstats(ap *unifi.Ap) map[string]float64 {
 		"stat_user-tx_retries":  ap.UserTxRetries.Val,
 		"stat_guest-tx_retries": ap.GuestTxRetries.Val,
 	}
+}
+
+// batchLTE writes live cellular backup status for U-LTE and U-LTE-Pro.
+// Those modules are reported as access points; wired WAN ports do not carry this data.
+func (u *DatadogUnifi) batchLTE(r report, s *unifi.UAP) {
+	if !hasLTEStatus(s) {
+		return
+	}
+
+	tags := cleanTags(map[string]string{
+		"mac":           s.Mac,
+		"site_name":     s.SiteName,
+		"source":        s.SourceName,
+		"name":          s.Name,
+		"model":         s.Model,
+		"type":          s.Type,
+		"state":         s.LteState.Txt,
+		"failover_mode": s.LteFailoverMode,
+		"signal":        s.LteSignal,
+		"rat":           s.LteRat,
+		"mode":          s.LteMode,
+		"band":          s.LteBand,
+		"pdp_type":      s.LtePdpType,
+		"operator":      s.LteNetworkOperator,
+	})
+	data := map[string]float64{
+		"connected": s.LteConnected.Float64(),
+		"failover":  s.LteFailover.Float64(),
+		"rssi":      s.LteRssi.Val,
+		"rsrp":      s.LteRsrp.Val,
+		"rsrq":      s.LteRsrq.Val,
+		"rx_chan":   s.LteRxChannel.Val,
+		"tx_chan":   s.LteTxChannel.Val,
+	}
+
+	reportGaugeForFloat64Map(r, metricNamespace("uap_lte"), data, tags)
+}
+
+// hasLTEStatus reports whether this access point is a cellular backup module.
+// U-LTE and U-LTE-Pro are typed as UAPs; their live modem status arrives as lte_* fields.
+func hasLTEStatus(d *unifi.UAP) bool {
+	return d.LteState.Txt != "" || d.LteFailoverMode != "" || d.LteRat != "" ||
+		d.LteNetworkOperator != "" || d.LteSignal != "" || d.LteConnected.Txt != ""
 }
 
 // processVAPTable creates points for Wifi Radios. This works with several types of UAP-capable devices.

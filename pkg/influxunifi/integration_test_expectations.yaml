@@ -297,6 +297,30 @@ points:
       uplink_up: bool
       uptime: float
       user-num_sta: int
+  uap_lte:
+    tags:
+      - band
+      - failover_mode
+      - mac
+      - mode
+      - model
+      - name
+      - operator
+      - pdp_type
+      - rat
+      - signal
+      - site_name
+      - source
+      - state
+      - type
+    fields:
+      connected: bool
+      failover: bool
+      rsrp: float
+      rsrq: float
+      rssi: float
+      rx_chan: float
+      tx_chan: float
   uap_radios:
     tags:
       - channel
