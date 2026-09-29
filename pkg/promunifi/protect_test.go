@@ -3,6 +3,7 @@ package promunifi
 
 import (
 	"reflect"
+	"strings"
 	"testing"
 
 	"github.com/prometheus/client_golang/prometheus"
@@ -131,4 +132,105 @@ func TestExportProtectDevicesSensorTolerantOfNilBatteryAndStats(t *testing.T) {
 
 	// identity(2) + is_opened/is_motion(2), no battery or stats series.
 	assert.Len(t, r.sent, 4)
+}
+
+func TestExportProtectSensorAirQuality(t *testing.T) {
+	t.Parallel()
+
+	u := &promUnifi{ProtectDevices: descProtectDevices("unifi_")}
+
+	unknownOnly := &fakeReport{}
+	u.exportProtectDevices(unknownOnly, &unifi.ProtectDevices{
+		SourceName: "https://protect.example",
+		Sensors: []*unifi.ProtectSensor{{
+			ProtectDeviceIdentity: unifi.ProtectDeviceIdentity{Name: "AQ", Type: "UP-AirQuality", ModelKey: "sensor", State: "CONNECTED"},
+			Stats: &unifi.ProtectSensorStats{
+				Temperature: &unifi.ProtectSensorStatValue{Status: "unknown"},
+				Humidity:    &unifi.ProtectSensorStatValue{Status: "unknown"},
+				Light:       &unifi.ProtectSensorStatValue{Status: "unknown"},
+			},
+		}},
+	})
+
+	unknown := readingsByName(t, unknownOnly.sent)
+	assert.NotContains(t, unknown, "unifi_protect_sensor_temperature_celsius")
+	assert.NotContains(t, unknown, "unifi_protect_sensor_humidity_percent")
+	assert.NotContains(t, unknown, "unifi_protect_sensor_light_lux")
+	assert.NotContains(t, unknown, "unifi_protect_sensor_aqi")
+
+	withAir := &fakeReport{}
+	u.exportProtectDevices(withAir, &unifi.ProtectDevices{
+		SourceName: "https://protect.example",
+		Sensors: []*unifi.ProtectSensor{{
+			ProtectDeviceIdentity: unifi.ProtectDeviceIdentity{Name: "AQ", Type: "UP-AirQuality", ModelKey: "sensor", State: "CONNECTED"},
+			Stats: &unifi.ProtectSensorStats{
+				Temperature: &unifi.ProtectSensorStatValue{Status: "unknown"},
+				Humidity:    &unifi.ProtectSensorStatValue{Status: "unknown"},
+			},
+			AirQuality: &unifi.ProtectAirQuality{
+				AQI:         &unifi.ProtectSensorStatValue{Value: unifi.FlexFloat{Val: 7}, Status: "neutral"},
+				Vape:        &unifi.ProtectSensorStatValue{Value: unifi.FlexFloat{Val: 0}, Status: "safe"},
+				CO2:         &unifi.ProtectSensorStatValue{Value: unifi.FlexFloat{Val: 452}, Status: "neutral"},
+				PM2p5:       &unifi.ProtectSensorStatValue{Value: unifi.FlexFloat{Val: 1.79}, Status: "neutral"},
+				Humidity:    &unifi.ProtectSensorStatValue{Value: unifi.FlexFloat{Val: 51}, Status: "neutral"},
+				Temperature: &unifi.ProtectSensorStatValue{Value: unifi.FlexFloat{Val: 25.4}, Status: "neutral"},
+			},
+		}},
+	})
+
+	got := readingsByName(t, withAir.sent)
+	assert.InDelta(t, 25.4, got["unifi_protect_sensor_temperature_celsius"], 0.001)
+	assert.InDelta(t, 51, got["unifi_protect_sensor_humidity_percent"], 0.001)
+	assert.InDelta(t, 7, got["unifi_protect_sensor_aqi"], 0.001)
+	assert.InDelta(t, 0, got["unifi_protect_sensor_vape"], 0.001)
+	assert.InDelta(t, 452, got["unifi_protect_sensor_co2_ppm"], 0.001)
+	assert.InDelta(t, 1.79, got["unifi_protect_sensor_pm2_5"], 0.001)
+	assert.NotContains(t, got, "unifi_protect_sensor_tvoc")
+
+	statsWin := &fakeReport{}
+	u.exportProtectDevices(statsWin, &unifi.ProtectDevices{
+		SourceName: "https://protect.example",
+		Sensors: []*unifi.ProtectSensor{{
+			ProtectDeviceIdentity: unifi.ProtectDeviceIdentity{Name: "Both", Type: "sensor", ModelKey: "sensor", State: "CONNECTED"},
+			Stats: &unifi.ProtectSensorStats{
+				Temperature: &unifi.ProtectSensorStatValue{Value: unifi.FlexFloat{Val: 21.5}, Status: "safe"},
+			},
+			AirQuality: &unifi.ProtectAirQuality{
+				Temperature: &unifi.ProtectSensorStatValue{Value: unifi.FlexFloat{Val: 99}, Status: "neutral"},
+			},
+		}},
+	})
+
+	assert.InDelta(t, 21.5, readingsByName(t, statsWin.sent)["unifi_protect_sensor_temperature_celsius"], 0.001)
+}
+
+func readingsByName(t *testing.T, sent []*metric) map[string]float64 {
+	t.Helper()
+
+	out := make(map[string]float64, len(sent))
+	for _, m := range sent {
+		name := prometheusDescName(t, m.Desc)
+		value, ok := m.Value.(float64)
+		require.True(t, ok, "metric %s value is %T", name, m.Value)
+
+		out[name] = value
+	}
+
+	return out
+}
+
+func prometheusDescName(t *testing.T, desc *prometheus.Desc) string {
+	t.Helper()
+
+	const key = `fqName: "`
+
+	text := desc.String()
+	start := strings.Index(text, key)
+	require.GreaterOrEqual(t, start, 0, "descriptor has no fqName: %s", text)
+
+	rest := text[start+len(key):]
+	end := strings.Index(rest, `"`)
+	require.GreaterOrEqual(t, end, 0, "descriptor fqName is unclosed: %s", text)
+
+	return rest[:end]
 }
