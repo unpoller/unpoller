@@ -78,6 +78,7 @@ func (u *InfluxUnifi) batchUAP(r report, s *unifi.UAP) {
 
 	r.addCount(uapT)
 	r.send(&metric{Table: "uap", Tags: tags, Fields: fields})
+	u.batchLTE(r, s)
 	u.processRadTable(r, tags, s.RadioTable, s.RadioTableStats)
 	u.processVAPTable(r, tags, s.VapTable)
 	u.batchPortTable(r, tags, s.PortTable)
@@ -123,6 +124,50 @@ func (u *InfluxUnifi) processUAPstats(ap *unifi.Ap) map[string]any {
 		"stat_user-tx_retries":  ap.UserTxRetries.Val,
 		"stat_guest-tx_retries": ap.GuestTxRetries.Val,
 	}
+}
+
+// batchLTE writes live cellular backup status for U-LTE and U-LTE-Pro.
+// Those modules are reported as access points; wired WAN ports do not carry this data.
+func (u *InfluxUnifi) batchLTE(r report, s *unifi.UAP) {
+	if !hasLTEStatus(s) {
+		return
+	}
+
+	r.send(&metric{
+		Table: "uap_lte",
+		Tags: map[string]string{
+			"mac":           s.Mac,
+			"site_name":     s.SiteName,
+			"source":        s.SourceName,
+			"name":          s.Name,
+			"model":         s.Model,
+			"type":          s.Type,
+			"state":         s.LteState.Txt,
+			"failover_mode": s.LteFailoverMode,
+			"signal":        s.LteSignal,
+			"rat":           s.LteRat,
+			"mode":          s.LteMode,
+			"band":          s.LteBand,
+			"pdp_type":      s.LtePdpType,
+			"operator":      s.LteNetworkOperator,
+		},
+		Fields: map[string]any{
+			"connected": s.LteConnected.Val,
+			"failover":  s.LteFailover.Val,
+			"rssi":      s.LteRssi.Val,
+			"rsrp":      s.LteRsrp.Val,
+			"rsrq":      s.LteRsrq.Val,
+			"rx_chan":   s.LteRxChannel.Val,
+			"tx_chan":   s.LteTxChannel.Val,
+		},
+	})
+}
+
+// hasLTEStatus reports whether this access point is a cellular backup module.
+// U-LTE and U-LTE-Pro are typed as UAPs; their live modem status arrives as lte_* fields.
+func hasLTEStatus(d *unifi.UAP) bool {
+	return d.LteState.Txt != "" || d.LteFailoverMode != "" || d.LteRat != "" ||
+		d.LteNetworkOperator != "" || d.LteSignal != "" || d.LteConnected.Txt != ""
 }
 
 // radioBand maps a UniFi radio identifier to its frequency band in GHz.

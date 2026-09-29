@@ -78,6 +78,15 @@ type uap struct {
 	RadioNumSta             *prometheus.Desc
 	RadioTxPackets          *prometheus.Desc
 	RadioTxRetries          *prometheus.Desc
+	// LTE backup modem (U-LTE / U-LTE-Pro). These devices are typed as UAPs.
+	LteConnected *prometheus.Desc
+	LteFailover  *prometheus.Desc
+	LteRssi      *prometheus.Desc
+	LteRsrp      *prometheus.Desc
+	LteRsrq      *prometheus.Desc
+	LteRxChannel *prometheus.Desc
+	LteTxChannel *prometheus.Desc
+	LteInfo      *prometheus.Desc
 }
 
 type rogueap struct {
@@ -114,6 +123,11 @@ func descUAP(ns string) *uap { // nolint: funlen
 	labelA := []string{"stat", "site_name", "name", "source", "tag"} // stat + labels[1:]
 	labelV := []string{"vap_name", "bssid", "radio", "band", "radio_name", "essid", "usage", "mac", "site_name", "name", "source", "tag"}
 	labelR := []string{"radio_name", "radio", "band", "mac", "site_name", "name", "source", "tag"}
+	labelL := []string{"type", "site_name", "name", "source", "tag"}
+	labelLI := []string{
+		"type", "site_name", "name", "source", "tag",
+		"lte_state", "failover_mode", "signal", "rat", "mode", "band", "pdp_type", "operator",
+	}
 	nd := prometheus.NewDesc
 
 	return &uap{
@@ -189,6 +203,14 @@ func descUAP(ns string) *uap { // nolint: funlen
 		RadioNumSta:             nd(ns+"radio_stations", "Radio Total Station Count", append(labelR, "station_type"), nil),
 		RadioTxPackets:          nd(ns+"radio_transmit_packets", "Radio Transmitted Packets", labelR, nil),
 		RadioTxRetries:          nd(ns+"radio_transmit_retries", "Radio Transmit Retries", labelR, nil),
+		LteConnected:            nd(ns+"lte_connected", "LTE modem connected to the carrier (1) or not (0). U-LTE devices only.", labelL, nil),
+		LteFailover:             nd(ns+"lte_failover", "LTE failover is carrying traffic (1) or standing by (0). U-LTE devices only.", labelL, nil),
+		LteRssi:                 nd(ns+"lte_rssi_dbm", "LTE RSSI in dBm. U-LTE devices only.", labelL, nil),
+		LteRsrp:                 nd(ns+"lte_rsrp_dbm", "LTE RSRP in dBm. U-LTE devices only.", labelL, nil),
+		LteRsrq:                 nd(ns+"lte_rsrq_db", "LTE RSRQ in dB. U-LTE devices only.", labelL, nil),
+		LteRxChannel:            nd(ns+"lte_rx_channel", "LTE receive channel. U-LTE devices only.", labelL, nil),
+		LteTxChannel:            nd(ns+"lte_tx_channel", "LTE transmit channel. U-LTE devices only.", labelL, nil),
+		LteInfo:                 nd(ns+"lte_info", "LTE modem state. Always 1; carrier and signal details are labels. U-LTE devices only.", labelLI, nil),
 	}
 }
 
@@ -230,6 +252,7 @@ func (u *promUnifi) exportUAP(r report, d *unifi.UAP) {
 		u.exportSYSstats(r, labels, d.SysStats, d.SystemStats)
 		u.exportSTAcount(r, labels, d.UserNumSta, d.GuestNumSta)
 		u.exportRADtable(r, labels, d.RadioTable, d.RadioTableStats, d.Mac)
+		u.exportLTE(r, d, labels)
 		// UAP uplink metrics. The uplink "type" (e.g. "wire" / "wireless")
 		// is encoded as the first label, matching the convention used by
 		// USG/USW/UBB/UDB so dashboards can group by port.
@@ -400,4 +423,40 @@ func (u *promUnifi) exportRADtable(r report, labels []string, rt unifi.RadioTabl
 			break
 		}
 	}
+}
+
+// hasLTEStatus reports whether this access point is a cellular backup module.
+// U-LTE and U-LTE-Pro are typed as UAPs; their live modem status arrives as lte_* fields
+// on the device list, not on the gateway WAN ports.
+func hasLTEStatus(d *unifi.UAP) bool {
+	return d.LteState.Txt != "" || d.LteFailoverMode != "" || d.LteRat != "" ||
+		d.LteNetworkOperator != "" || d.LteSignal != "" || d.LteConnected.Txt != ""
+}
+
+func (u *promUnifi) exportLTE(r report, d *unifi.UAP, labels []string) {
+	if !hasLTEStatus(d) {
+		return
+	}
+
+	info := append(append([]string{}, labels...),
+		d.LteState.Txt,
+		d.LteFailoverMode,
+		d.LteSignal,
+		d.LteRat,
+		d.LteMode,
+		d.LteBand,
+		d.LtePdpType,
+		d.LteNetworkOperator,
+	)
+
+	r.send([]*metric{
+		{u.UAP.LteConnected, gauge, d.LteConnected.Val, labels},
+		{u.UAP.LteFailover, gauge, d.LteFailover.Val, labels},
+		{u.UAP.LteRssi, gauge, d.LteRssi, labels},
+		{u.UAP.LteRsrp, gauge, d.LteRsrp, labels},
+		{u.UAP.LteRsrq, gauge, d.LteRsrq, labels},
+		{u.UAP.LteRxChannel, gauge, d.LteRxChannel, labels},
+		{u.UAP.LteTxChannel, gauge, d.LteTxChannel, labels},
+		{u.UAP.LteInfo, gauge, 1.0, info},
+	})
 }
