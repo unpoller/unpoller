@@ -567,19 +567,25 @@ gauges:
   - unifi.udb.user_num_sta
   - unifi.udb.user_wlan_num_sta
   - unifi.umbb_sim.active
+  - unifi.umbb_sim.card_present
+  - unifi.umbb_sim.data_limited
+  - unifi.umbb_sim.data_warning
   - unifi.umbb_sim.display_state_elapsed
-  - unifi.umbb_sim.network_reject_age
+  - unifi.umbb_sim.pin_blocked
   - unifi.umbb_sim.rx_bytes
   - unifi.umbb_sim.tx_bytes
   - unifi.umbb.cpu
   - unifi.umbb.current_slot
   - unifi.umbb.dl_bandwidth_mhz
   - unifi.umbb.has_coverage
+  - unifi.umbb.internet
   - unifi.umbb.last_seen
   - unifi.umbb.loadavg_1
   - unifi.umbb.loadavg_15
   - unifi.umbb.loadavg_5
   - unifi.umbb.lte_carriers
+  - unifi.umbb.lte_max_bitrate_dl
+  - unifi.umbb.lte_max_bitrate_ul
   - unifi.umbb.mem
   - unifi.umbb.mem_buffer
   - unifi.umbb.mem_total
@@ -587,6 +593,12 @@ gauges:
   - unifi.umbb.memory
   - unifi.umbb.network
   - unifi.umbb.nr_carriers
+  - unifi.umbb.nr_max_bitrate_dl
+  - unifi.umbb.nr_max_bitrate_ul
+  - unifi.umbb.nr_rsrp
+  - unifi.umbb.nr_rsrq
+  - unifi.umbb.nr_snr
+  - unifi.umbb.primary_slot
   - unifi.umbb.probe
   - unifi.umbb.registration_state
   - unifi.umbb.roaming

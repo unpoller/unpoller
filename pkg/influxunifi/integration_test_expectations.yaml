@@ -683,24 +683,38 @@ points:
       - version
     fields:
       band: string
+      cell_id: float
+      channel: float
       cpu: float
       current_slot: float
       dl_bandwidth_mhz: float
+      failover_mode: string
       has_coverage: bool
+      internet: bool
       ip: string
       last_seen: float
       loadavg_1: float
       loadavg_5: float
       loadavg_15: float
       lte_carriers: float
-      mbb_mode: string
+      lte_max_bitrate_dl: float
+      lte_max_bitrate_ul: float
       mbb_state: string
+      mcc: float
       mem: float
       mem_buffer: float
       mem_total: float
       mem_used: float
+      mnc: float
       nr_carriers: float
+      nr_max_bitrate_dl: float
+      nr_max_bitrate_ul: float
+      nr_rsrp: float
+      nr_rsrq: float
+      nr_snr: float
       operator: string
+      pci: float
+      primary_slot: float
       rat: string
       registration_state: float
       roaming: bool
@@ -737,11 +751,16 @@ points:
       - type
     fields:
       active: bool
+      card_present: bool
+      data_limited: bool
+      data_warning: bool
       display_state: string
       display_state_elapsed: float
-      network_reject_age: float
+      has_carrier: bool
+      metered: bool
       network_reject_text: string
       network_reject_type: string
+      pin_blocked: bool
       rx_bytes: float
       tx_bytes: float
   unifi_alarm:

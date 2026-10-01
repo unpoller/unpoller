@@ -10,9 +10,13 @@ import (
 
 // umbb holds the cellular modem descriptors for UMBB (mobile broadband) devices, such as the U5G Max.
 type umbb struct {
+	Internet          *prometheus.Desc
 	Rsrp              *prometheus.Desc
 	Rsrq              *prometheus.Desc
 	Snr               *prometheus.Desc
+	RsrpNr            *prometheus.Desc
+	RsrqNr            *prometheus.Desc
+	SnrNr             *prometheus.Desc
 	SignalBars        *prometheus.Desc
 	SignalPercent     *prometheus.Desc
 	Coverage          *prometheus.Desc
@@ -20,12 +24,16 @@ type umbb struct {
 	RegistrationState *prometheus.Desc
 	Carriers          *prometheus.Desc
 	BandwidthMhz      *prometheus.Desc
+	MaxBitrate        *prometheus.Desc
 	Info              *prometheus.Desc
 	SimActive         *prometheus.Desc
+	SimCardPresent    *prometheus.Desc
+	SimPinBlocked     *prometheus.Desc
+	SimDataWarning    *prometheus.Desc
+	SimDataLimited    *prometheus.Desc
 	SimRxBytes        *prometheus.Desc
 	SimTxBytes        *prometheus.Desc
 	SimStateSeconds   *prometheus.Desc
-	SimRejectAge      *prometheus.Desc
 	SimInfo           *prometheus.Desc
 }
 
@@ -35,26 +43,44 @@ func descUMBB(ns string) *umbb {
 	nd := prometheus.NewDesc
 
 	return &umbb{
-		Rsrp:              nd(ns+"mbb_rsrp_dbm", "Cellular RSRP in dBm.", labels, nil),
-		Rsrq:              nd(ns+"mbb_rsrq_db", "Cellular RSRQ in dB.", labels, nil),
-		Snr:               nd(ns+"mbb_snr_db", "Cellular signal-to-noise ratio in dB.", labels, nil),
-		SignalBars:        nd(ns+"mbb_signal_bars", "Cellular signal strength in bars (0-5).", labels, nil),
-		SignalPercent:     nd(ns+"mbb_signal_percent", "Cellular signal strength percentage.", labels, nil),
-		Coverage:          nd(ns+"mbb_coverage", "Modem has cellular coverage (1) or not (0).", labels, nil),
-		Roaming:           nd(ns+"mbb_roaming", "Modem is roaming (1) or on its home network (0).", labels, nil),
-		RegistrationState: nd(ns+"mbb_registration_state", "Cellular network registration state code.", labels, nil),
-		Carriers:          nd(ns+"mbb_carriers", "Aggregated component carriers in use.", append(labels, "carrier_type"), nil),
-		BandwidthMhz:      nd(ns+"mbb_bandwidth_mhz", "Total aggregated carrier bandwidth in MHz.", append(labels, "direction"), nil),
+		Internet: nd(ns+"mbb_internet", "Modem reports internet connectivity (1) or not (0).", labels, nil),
+		Rsrp:     nd(ns+"mbb_rsrp_dbm", "Cellular RSRP of the serving cell in dBm. LTE anchor in 5G NSA mode.", labels, nil),
+		Rsrq:     nd(ns+"mbb_rsrq_db", "Cellular RSRQ of the serving cell in dB. LTE anchor in 5G NSA mode.", labels, nil),
+		Snr:      nd(ns+"mbb_snr_db", "Cellular signal-to-noise ratio of the serving cell in dB. LTE anchor in 5G NSA mode.", labels, nil),
+		RsrpNr:   nd(ns+"mbb_nr_rsrp_dbm", "5G NR RSRP in dBm. Same as mbb_rsrp_dbm in 5G SA mode.", labels, nil),
+		RsrqNr:   nd(ns+"mbb_nr_rsrq_db", "5G NR RSRQ in dB. Same as mbb_rsrq_db in 5G SA mode.", labels, nil),
+		SnrNr:    nd(ns+"mbb_nr_snr_db", "5G NR signal-to-noise ratio in dB. Same as mbb_snr_db in 5G SA mode.", labels, nil),
+		SignalBars: nd(ns+"mbb_signal_bars",
+			"Cellular signal strength in bars, as shown by the controller.", labels, nil),
+		SignalPercent: nd(ns+"mbb_signal_percent",
+			"Cellular signal strength percentage (0-100), as computed by the controller.", labels, nil),
+		Coverage: nd(ns+"mbb_coverage", "Modem has cellular coverage (1) or not (0).", labels, nil),
+		Roaming:  nd(ns+"mbb_roaming", "Modem is roaming (1) or on its home network (0).", labels, nil),
+		RegistrationState: nd(ns+"mbb_registration_state",
+			"Cellular network registration state code. Undocumented; likely 0 not registered, 1 registered home, "+
+				"2 searching, 3 denied, 4 unknown, 5 registered roaming.", labels, nil),
+		Carriers: nd(ns+"mbb_carriers", "Aggregated component carriers in use.", append(labels, "carrier_type"), nil),
+		BandwidthMhz: nd(ns+"mbb_bandwidth_mhz", "Total aggregated carrier bandwidth in MHz.",
+			append(labels, "direction"), nil),
+		MaxBitrate: nd(ns+"mbb_max_bitrate_bps", "Maximum bitrate negotiated with the network, in bits per second.",
+			append(labels, "carrier_type", "direction"), nil),
 		Info: nd(ns+"mbb_info", "Cellular modem state. Always 1; state and network details are labels.",
-			append(labels, "mbb_state", "mbb_mode", "rat", "band", "operator", "sa_mode", "current_slot"), nil),
-		SimActive:       nd(ns+"mbb_sim_active", "SIM slot is the active data SIM (1) or not (0).", labelS, nil),
-		SimRxBytes:      nd(ns+"mbb_sim_receive_bytes_total", "Bytes received over this SIM.", labelS, nil),
-		SimTxBytes:      nd(ns+"mbb_sim_transmit_bytes_total", "Bytes transmitted over this SIM.", labelS, nil),
-		SimStateSeconds: nd(ns+"mbb_sim_state_seconds", "Seconds the SIM has been in its current display state.", labelS, nil),
-		SimRejectAge: nd(ns+"mbb_sim_network_reject_age",
-			"Age of the last carrier network reject, as reported by the controller.", labelS, nil),
+			append(labels, "mbb_state", "failover_mode", "rat", "band", "operator", "sa_mode", "current_slot",
+				"primary_slot", "mcc", "mnc", "cell_id", "pci", "channel"), nil),
+		SimActive:      nd(ns+"mbb_sim_active", "SIM slot is the active data SIM (1) or not (0).", labelS, nil),
+		SimCardPresent: nd(ns+"mbb_sim_card_present", "SIM card or eSIM profile is present (1) or not (0).", labelS, nil),
+		SimPinBlocked:  nd(ns+"mbb_sim_pin_blocked", "SIM is PIN blocked (1) or not (0).", labelS, nil),
+		SimDataWarning: nd(ns+"mbb_sim_data_warning", "SIM has passed its data usage warning threshold (1) or not (0).",
+			labelS, nil),
+		SimDataLimited: nd(ns+"mbb_sim_data_limited", "SIM has reached its data limit (1) or not (0).", labelS, nil),
+		SimRxBytes: nd(ns+"mbb_sim_receive_bytes_total",
+			"Bytes received over this SIM. Cumulative; not reset when the modem reboots.", labelS, nil),
+		SimTxBytes: nd(ns+"mbb_sim_transmit_bytes_total",
+			"Bytes transmitted over this SIM. Cumulative; not reset when the modem reboots.", labelS, nil),
+		SimStateSeconds: nd(ns+"mbb_sim_state_seconds", "Seconds the SIM has been in its current display state.",
+			labelS, nil),
 		SimInfo: nd(ns+"mbb_sim_info", "SIM state. Always 1; display state and last network reject are labels.",
-			append(labelS, "display_state", "network_reject_type", "network_reject_text"), nil),
+			append(labelS, "display_state", "has_carrier", "metered", "network_reject_type", "network_reject_text"), nil),
 	}
 }
 
@@ -74,7 +100,7 @@ func (u *promUnifi) exportUMBB(r report, d *unifi.UMBB) {
 
 		u.exportSYSstats(r, labels, d.SysStats, d.SystemStats)
 		u.exportDeviceUplink(r, labels, d.Uplink)
-		u.exportMBB(r, labels, d.Mbb)
+		u.exportMBB(r, labels, d)
 
 		r.send([]*metric{
 			{u.Device.Info, gauge, 1.0, append(append([]string{}, baseLabels...), infoLabels...)},
@@ -84,19 +110,17 @@ func (u *promUnifi) exportUMBB(r report, d *unifi.UMBB) {
 	})
 }
 
-func (u *promUnifi) exportMBB(r report, labels []string, m unifi.MBB) {
+func (u *promUnifi) exportMBB(r report, labels []string, d *unifi.UMBB) {
+	m := d.Mbb
 	rad := m.Radio
 	dl, ul := mbbBandwidth(rad)
 	info := append(append([]string{}, labels...),
 		m.State, m.Mode, rad.Rat, rad.Band, rad.NetworkOperator,
-		strconv.FormatBool(rad.SA5GMode.Val), rad.CurrentSlot.Txt)
+		strconv.FormatBool(rad.SA5GMode.Val), rad.CurrentSlot.Txt, d.MbbOverrides.PrimarySlot.Txt,
+		rad.Mcc.Txt, rad.Mnc.Txt, rad.CellID.Txt, rad.Pci.Txt, rad.Channel.Txt)
 
 	r.send([]*metric{
-		{u.UMBB.Rsrp, gauge, rad.Rsrp, labels},
-		{u.UMBB.Rsrq, gauge, rad.Rsrq, labels},
-		{u.UMBB.Snr, gauge, rad.Snr, labels},
-		{u.UMBB.SignalBars, gauge, rad.Signal, labels},
-		{u.UMBB.SignalPercent, gauge, rad.SignalPercent, labels},
+		{u.UMBB.Internet, gauge, d.Internet.Val, labels},
 		{u.UMBB.Coverage, gauge, rad.HasCoverage.Val, labels},
 		{u.UMBB.Roaming, gauge, rad.Roaming.Val, labels},
 		{u.UMBB.RegistrationState, gauge, rad.RegistrationState, labels},
@@ -107,18 +131,47 @@ func (u *promUnifi) exportMBB(r report, labels []string, m unifi.MBB) {
 		{u.UMBB.Info, gauge, 1.0, info},
 	})
 
+	// Signal readings and bitrates are left out when the modem does not report them,
+	// so a missing reading is not mistaken for 0 dBm.
+	for _, s := range []struct {
+		desc *prometheus.Desc
+		val  unifi.FlexInt
+		dims []string
+	}{
+		{u.UMBB.Rsrp, rad.Rsrp, nil},
+		{u.UMBB.Rsrq, rad.Rsrq, nil},
+		{u.UMBB.Snr, rad.Snr, nil},
+		{u.UMBB.RsrpNr, rad.RsrpNr, nil},
+		{u.UMBB.RsrqNr, rad.RsrqNr, nil},
+		{u.UMBB.SnrNr, rad.SnrNr, nil},
+		{u.UMBB.SignalBars, rad.Signal, nil},
+		{u.UMBB.SignalPercent, rad.SignalPercent, nil},
+		{u.UMBB.MaxBitrate, rad.MaxBitrateDl, []string{"lte", "dl"}},
+		{u.UMBB.MaxBitrate, rad.MaxBitrateUl, []string{"lte", "ul"}},
+		{u.UMBB.MaxBitrate, rad.MaxBitrateDlNr, []string{"nr", "dl"}},
+		{u.UMBB.MaxBitrate, rad.MaxBitrateUlNr, []string{"nr", "ul"}},
+	} {
+		if s.val.Txt != "" {
+			r.send([]*metric{{s.desc, gauge, s.val.Val, append(append([]string{}, labels...), s.dims...)}})
+		}
+	}
+
 	for _, sim := range m.Sim {
 		simLabels := append(append([]string{}, labels...),
 			sim.Slot.Txt, strconv.FormatBool(sim.Esim.Val), sim.Spn)
 		simInfo := append(append([]string{}, simLabels...),
-			sim.DisplayState, sim.NetworkRejectType, sim.NetworkRejectText)
+			sim.DisplayState, strconv.FormatBool(sim.HasCarrier.Val), strconv.FormatBool(sim.Metered.Val),
+			sim.NetworkRejectType, sim.NetworkRejectText)
 
 		r.send([]*metric{
 			{u.UMBB.SimActive, gauge, sim.Active.Val, simLabels},
+			{u.UMBB.SimCardPresent, gauge, sim.CardPresent.Val, simLabels},
+			{u.UMBB.SimPinBlocked, gauge, sim.PinBlocked.Val, simLabels},
+			{u.UMBB.SimDataWarning, gauge, sim.DataWarning.Val, simLabels},
+			{u.UMBB.SimDataLimited, gauge, sim.DataLimited.Val, simLabels},
 			{u.UMBB.SimRxBytes, counter, sim.RxBytes, simLabels},
 			{u.UMBB.SimTxBytes, counter, sim.TxBytes, simLabels},
 			{u.UMBB.SimStateSeconds, gauge, sim.DisplayStateElapsed, simLabels},
-			{u.UMBB.SimRejectAge, gauge, sim.NetworkRejectAge, simLabels},
 			{u.UMBB.SimInfo, gauge, 1.0, simInfo},
 		})
 	}

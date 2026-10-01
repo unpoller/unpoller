@@ -21,20 +21,20 @@ func (u *DatadogUnifi) batchUMBB(r report, s *unifi.UMBB) {
 	dl, ul := mbbBandwidth(rad)
 
 	tags := cleanTags(map[string]string{
-		"mac":       s.Mac,
-		"site_name": s.SiteName,
-		"source":    s.SourceName,
-		"name":      s.Name,
-		"version":   s.Version,
-		"model":     s.Model,
-		"serial":    s.Serial,
-		"type":      s.Type,
-		"ip":        s.IP,
-		"mbb_state": s.Mbb.State,
-		"mbb_mode":  s.Mbb.Mode,
-		"rat":       rad.Rat,
-		"band":      rad.Band,
-		"operator":  rad.NetworkOperator,
+		"mac":           s.Mac,
+		"site_name":     s.SiteName,
+		"source":        s.SourceName,
+		"name":          s.Name,
+		"version":       s.Version,
+		"model":         s.Model,
+		"serial":        s.Serial,
+		"type":          s.Type,
+		"ip":            s.IP,
+		"mbb_state":     s.Mbb.State,
+		"failover_mode": s.Mbb.Mode,
+		"rat":           rad.Rat,
+		"band":          rad.Band,
+		"operator":      rad.NetworkOperator,
 	})
 
 	data := CombineFloat64(
@@ -50,11 +50,8 @@ func (u *DatadogUnifi) batchUMBB(r report, s *unifi.UMBB) {
 			"uplink_uptime":      s.Uplink.Uptime.Val,
 			"sa_mode":            rad.SA5GMode.Float64(),
 			"current_slot":       rad.CurrentSlot.Val,
-			"rsrp":               rad.Rsrp.Val,
-			"rsrq":               rad.Rsrq.Val,
-			"snr":                rad.Snr.Val,
-			"signal":             rad.Signal.Val,
-			"signal_percent":     rad.SignalPercent.Val,
+			"primary_slot":       s.MbbOverrides.PrimarySlot.Val,
+			"internet":           s.Internet.Float64(),
 			"has_coverage":       rad.HasCoverage.Float64(),
 			"roaming":            rad.Roaming.Float64(),
 			"registration_state": rad.RegistrationState.Val,
@@ -62,7 +59,8 @@ func (u *DatadogUnifi) batchUMBB(r report, s *unifi.UMBB) {
 			"lte_carriers":       float64(len(rad.CaLte)),
 			"dl_bandwidth_mhz":   dl,
 			"ul_bandwidth_mhz":   ul,
-		})
+		},
+		mbbOptional(rad))
 
 	r.addCount(umbbT)
 	reportGaugeForFloat64Map(r, metricNamespace("umbb"), data, tags)
@@ -79,19 +77,51 @@ func (u *DatadogUnifi) batchUMBB(r report, s *unifi.UMBB) {
 			"esim":                strconv.FormatBool(sim.Esim.Val),
 			"spn":                 sim.Spn,
 			"display_state":       sim.DisplayState,
+			"has_carrier":         strconv.FormatBool(sim.HasCarrier.Val),
+			"metered":             strconv.FormatBool(sim.Metered.Val),
 			"network_reject_type": sim.NetworkRejectType,
 			"network_reject_text": sim.NetworkRejectText,
 		})
 		simData := map[string]float64{
 			"active":                sim.Active.Float64(),
+			"card_present":          sim.CardPresent.Float64(),
+			"pin_blocked":           sim.PinBlocked.Float64(),
+			"data_warning":          sim.DataWarning.Float64(),
+			"data_limited":          sim.DataLimited.Float64(),
 			"display_state_elapsed": sim.DisplayStateElapsed.Val,
-			"network_reject_age":    sim.NetworkRejectAge.Val,
 			"rx_bytes":              sim.RxBytes.Val,
 			"tx_bytes":              sim.TxBytes.Val,
 		}
 
 		reportGaugeForFloat64Map(r, metricNamespace("umbb_sim"), simData, simTags)
 	}
+}
+
+// mbbOptional returns the signal readings and bitrates the modem reported, keyed by field name.
+// Missing readings are left out, so they are not mistaken for 0 dBm.
+func mbbOptional(rad unifi.MBBRadio) map[string]float64 {
+	out := map[string]float64{}
+
+	for k, v := range map[string]unifi.FlexInt{
+		"rsrp":               rad.Rsrp,
+		"rsrq":               rad.Rsrq,
+		"snr":                rad.Snr,
+		"nr_rsrp":            rad.RsrpNr,
+		"nr_rsrq":            rad.RsrqNr,
+		"nr_snr":             rad.SnrNr,
+		"signal":             rad.Signal,
+		"signal_percent":     rad.SignalPercent,
+		"lte_max_bitrate_dl": rad.MaxBitrateDl,
+		"lte_max_bitrate_ul": rad.MaxBitrateUl,
+		"nr_max_bitrate_dl":  rad.MaxBitrateDlNr,
+		"nr_max_bitrate_ul":  rad.MaxBitrateUlNr,
+	} {
+		if v.Txt != "" {
+			out[k] = v.Val
+		}
+	}
+
+	return out
 }
 
 // mbbBandwidth sums the downlink and uplink bandwidth of every aggregated carrier, NR and LTE.
