@@ -71,3 +71,5 @@ require (
 	golang.org/x/sys v0.48.0 // indirect
 	google.golang.org/protobuf v1.36.12 // indirect
 )
+
+replace github.com/unpoller/unifi/v6 => github.com/tomwilkie/unifi/v6 v6.2.1-0.20261001091512-6281bfb42116

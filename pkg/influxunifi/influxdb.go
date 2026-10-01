@@ -718,6 +718,8 @@ func (u *InfluxUnifi) switchExport(r report, v any) { //nolint:cyclop
 		u.batchUCI(r, v)
 	case *unifi.UDB:
 		u.batchUDB(r, v)
+	case *unifi.UMBB:
+		u.batchUMBB(r, v)
 	case *unifi.UDM:
 		u.batchUDM(r, v)
 	case *unifi.Site:

@@ -24,6 +24,7 @@ type Report struct {
 	USG     int           // Total count of USG devices exported.
 	UDM     int           // Total count of UDM devices exported.
 	UXG     int           // Total count of UXG devices exported.
+	UMBB    int           // Total count of UMBB devices exported.
 	Elapsed time.Duration // Duration elapsed collecting and exporting.
 }
 
@@ -196,6 +197,10 @@ func (u *OtelOutput) exportDevices(ctx context.Context, meter metric.Meter, m *p
 		case *unifi.UXG:
 			r.UXG++
 			u.exportUXG(ctx, meter, r, d)
+
+		case *unifi.UMBB:
+			r.UMBB++
+			u.exportUMBB(ctx, meter, r, d)
 
 		default:
 			if u.Collector.Poller().LogUnknownTypes {

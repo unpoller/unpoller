@@ -24,6 +24,7 @@ type report interface {
 	addUBB()
 	addUCI()
 	addUDB()
+	addUMBB()
 	addUSG()
 	addUAP()
 	addUSW()
@@ -122,6 +123,10 @@ func (r *Report) addUCI() {
 
 func (r *Report) addUDB() {
 	r.UDB++
+}
+
+func (r *Report) addUMBB() {
+	r.UMBB++
 }
 
 // close is not part of the interface.

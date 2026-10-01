@@ -224,10 +224,10 @@ func (u *InputUnifi) pollNetwork(c *Controller, sites []*unifi.Site, m *Metrics)
 		return fmt.Errorf("unifi.GetDevices(%s): %w", c.URL, err)
 	}
 
-	u.LogDebugf("Found %d UBB, %d UXG, %d PDU, %d UCI, %d UDB, %d UAP %d USG %d USW %d UDM devices",
+	u.LogDebugf("Found %d UBB, %d UXG, %d PDU, %d UCI, %d UDB, %d UMBB, %d UAP %d USG %d USW %d UDM devices",
 		len(m.Devices.UBBs), len(m.Devices.UXGs),
 		len(m.Devices.PDUs), len(m.Devices.UCIs),
-		len(m.Devices.UDBs), len(m.Devices.UAPs), len(m.Devices.USGs),
+		len(m.Devices.UDBs), len(m.Devices.UMBBs), len(m.Devices.UAPs), len(m.Devices.USGs),
 		len(m.Devices.USWs), len(m.Devices.UDMs))
 
 	// Get speed test results for all WANs
@@ -1107,6 +1107,10 @@ func applySiteNameOverride(m *poller.Metrics, overrideName string) {
 			if isDefaultSiteName(d.SiteName) {
 				d.SiteName = overrideName
 			}
+		case *unifi.UMBB:
+			if isDefaultSiteName(d.SiteName) {
+				d.SiteName = overrideName
+			}
 		case *unifi.PDU:
 			if isDefaultSiteName(d.SiteName) {
 				d.SiteName = overrideName
@@ -1360,6 +1364,11 @@ func extractDevices(metrics *Metrics) (*poller.Metrics, map[string]string, map[s
 		for _, v := range r.VapTable {
 			bssdIDs[v.Bssid] = fmt.Sprintf("%s %s %s:", r.Name, v.Radio, v.RadioName)
 		}
+	}
+
+	for _, r := range metrics.Devices.UMBBs {
+		devices[r.Mac] = r.Name
+		m.Devices = append(m.Devices, r)
 	}
 
 	for _, r := range metrics.Devices.PDUs {

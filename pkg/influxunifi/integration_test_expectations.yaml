@@ -671,6 +671,79 @@ points:
       uptime: float
       user-num_sta: float
       user-wlan-num_sta: float
+  umbb:
+    tags:
+      - mac
+      - model
+      - name
+      - serial
+      - site_name
+      - source
+      - type
+      - version
+    fields:
+      band: string
+      cpu: float
+      current_slot: float
+      dl_bandwidth_mhz: float
+      has_coverage: bool
+      ip: string
+      last_seen: float
+      loadavg_1: float
+      loadavg_5: float
+      loadavg_15: float
+      lte_carriers: float
+      mbb_mode: string
+      mbb_state: string
+      mem: float
+      mem_buffer: float
+      mem_total: float
+      mem_used: float
+      nr_carriers: float
+      operator: string
+      rat: string
+      registration_state: float
+      roaming: bool
+      rsrp: float
+      rsrq: float
+      sa_mode: bool
+      signal: float
+      signal_percent: float
+      snr: float
+      state: float
+      system_uptime: float
+      temp_cpu: float
+      temp_memory: float
+      temp_network: float
+      temp_probe: float
+      temp_sys: float
+      ul_bandwidth_mhz: float
+      upgradeable: bool
+      uplink_latency: float
+      uplink_max_speed: float
+      uplink_speed: float
+      uplink_uptime: float
+      uptime: float
+  umbb_sim:
+    tags:
+      - esim
+      - mac
+      - model
+      - name
+      - site_name
+      - slot
+      - source
+      - spn
+      - type
+    fields:
+      active: bool
+      display_state: string
+      display_state_elapsed: float
+      network_reject_age: float
+      network_reject_text: string
+      network_reject_type: string
+      rx_bytes: float
+      tx_bytes: float
   unifi_alarm:
     tags:
       - action

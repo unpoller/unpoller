@@ -149,6 +149,12 @@ func (u *InputUnifi) collectAlarms(logs []any, sites []*unifi.Site, c *Controlle
 			}
 		}
 
+		for _, d := range devices.UMBBs {
+			if d.Mac != "" && d.Name != "" {
+				macToName[strings.ToLower(d.Mac)] = d.Name
+			}
+		}
+
 		for _, s := range sites {
 			events, err := c.Unifi.GetAlarmsSite(s)
 			if errors.Is(err, unifi.ErrEndpointNotFound) {
