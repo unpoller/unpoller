@@ -53,6 +53,7 @@ type promUnifi struct {
 	USG                 *usg
 	USW                 *usw
 	PDU                 *pdu
+	UMBB                *umbb
 	Site                *site
 	RogueAP             *rogueap
 	SpeedTest           *speedtest
@@ -198,6 +199,7 @@ type Report struct {
 	UBB     int             // Total count of UBB devices.
 	UCI     int             // Total count of UCI devices.
 	UDB     int             // Total count of UDB devices.
+	UMBB    int             // Total count of UMBB devices.
 	Metrics *poller.Metrics // Metrics collected and recorded.
 	Elapsed time.Duration   // Duration elapsed collecting and exporting.
 	Fetch   time.Duration   // Duration elapsed making controller requests.
@@ -306,6 +308,7 @@ func (u *promUnifi) Run(c poller.Collect) error {
 	u.USG = descUSG(u.Namespace + "_device_")
 	u.USW = descUSW(u.Namespace + "_device_")
 	u.PDU = descPDU(u.Namespace + "_device_")
+	u.UMBB = descUMBB(u.Namespace + "_device_")
 	u.Site = descSite(u.Namespace + "_site_")
 	u.RogueAP = descRogueAP(u.Namespace + "_rogueap_")
 	u.SpeedTest = descSpeedTest(u.Namespace + "_speedtest_")
@@ -1025,6 +1028,9 @@ func (u *promUnifi) switchExport(r report, v any) {
 	case *unifi.UDB:
 		r.addUDB()
 		u.exportUDB(r, v)
+	case *unifi.UMBB:
+		r.addUMBB()
+		u.exportUMBB(r, v)
 	case *unifi.UDM:
 		r.addUDM()
 		u.exportUDM(r, v)

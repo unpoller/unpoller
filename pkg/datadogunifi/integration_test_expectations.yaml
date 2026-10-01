@@ -566,6 +566,58 @@ gauges:
   - unifi.udb.uptime
   - unifi.udb.user_num_sta
   - unifi.udb.user_wlan_num_sta
+  - unifi.umbb_sim.active
+  - unifi.umbb_sim.card_present
+  - unifi.umbb_sim.data_limited
+  - unifi.umbb_sim.data_warning
+  - unifi.umbb_sim.display_state_elapsed
+  - unifi.umbb_sim.pin_blocked
+  - unifi.umbb_sim.rx_bytes
+  - unifi.umbb_sim.tx_bytes
+  - unifi.umbb.cpu
+  - unifi.umbb.current_slot
+  - unifi.umbb.dl_bandwidth_mhz
+  - unifi.umbb.has_coverage
+  - unifi.umbb.internet
+  - unifi.umbb.last_seen
+  - unifi.umbb.loadavg_1
+  - unifi.umbb.loadavg_15
+  - unifi.umbb.loadavg_5
+  - unifi.umbb.lte_carriers
+  - unifi.umbb.lte_max_bitrate_dl
+  - unifi.umbb.lte_max_bitrate_ul
+  - unifi.umbb.mem
+  - unifi.umbb.mem_buffer
+  - unifi.umbb.mem_total
+  - unifi.umbb.mem_used
+  - unifi.umbb.memory
+  - unifi.umbb.network
+  - unifi.umbb.nr_carriers
+  - unifi.umbb.nr_max_bitrate_dl
+  - unifi.umbb.nr_max_bitrate_ul
+  - unifi.umbb.nr_rsrp
+  - unifi.umbb.nr_rsrq
+  - unifi.umbb.nr_snr
+  - unifi.umbb.primary_slot
+  - unifi.umbb.probe
+  - unifi.umbb.registration_state
+  - unifi.umbb.roaming
+  - unifi.umbb.rsrp
+  - unifi.umbb.rsrq
+  - unifi.umbb.sa_mode
+  - unifi.umbb.signal
+  - unifi.umbb.signal_percent
+  - unifi.umbb.snr
+  - unifi.umbb.state
+  - unifi.umbb.sys
+  - unifi.umbb.system_uptime
+  - unifi.umbb.ul_bandwidth_mhz
+  - unifi.umbb.upgradeable
+  - unifi.umbb.uplink_latency
+  - unifi.umbb.uplink_max_speed
+  - unifi.umbb.uplink_speed
+  - unifi.umbb.uplink_uptime
+  - unifi.umbb.uptime
 counts:
   - unifi.collector.num_devices
   - unifi.collector.num_errors
