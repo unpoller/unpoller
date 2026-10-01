@@ -13,7 +13,7 @@ require (
 	github.com/prometheus/common v0.71.0
 	github.com/spf13/pflag v1.0.10
 	github.com/stretchr/testify v1.12.1
-	github.com/unpoller/unifi/v6 v6.2.0
+	github.com/unpoller/unifi/v6 v6.3.0
 	go.opentelemetry.io/otel v1.46.0
 	go.opentelemetry.io/otel/exporters/otlp/otlpmetric/otlpmetricgrpc v1.46.0
 	go.opentelemetry.io/otel/exporters/otlp/otlpmetric/otlpmetrichttp v1.46.0
@@ -71,5 +71,3 @@ require (
 	golang.org/x/sys v0.48.0 // indirect
 	google.golang.org/protobuf v1.36.12 // indirect
 )
-
-replace github.com/unpoller/unifi/v6 => github.com/tomwilkie/unifi/v6 v6.2.1-0.20261001091512-6281bfb42116
