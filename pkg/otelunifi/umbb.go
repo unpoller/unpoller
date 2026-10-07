@@ -53,24 +53,24 @@ func (u *OtelOutput) exportUMBB(ctx context.Context, meter metric.Meter, r *Repo
 	// Signal readings and bitrates are left out when the modem does not report them,
 	// so a missing reading is not mistaken for 0 dBm.
 	for _, g := range []struct {
-		name, desc string
-		val        unifi.FlexInt
+		name, desc, txt string
+		val             float64
 	}{
-		{"unifi_device_umbb_rsrp_dbm", "Cellular RSRP of the serving cell in dBm. LTE anchor in 5G NSA mode", rad.Rsrp},
-		{"unifi_device_umbb_rsrq_db", "Cellular RSRQ of the serving cell in dB. LTE anchor in 5G NSA mode", rad.Rsrq},
-		{"unifi_device_umbb_snr_db", "Cellular signal-to-noise ratio of the serving cell in dB. LTE anchor in 5G NSA mode", rad.Snr},
-		{"unifi_device_umbb_nr_rsrp_dbm", "5G NR RSRP in dBm", rad.RsrpNr},
-		{"unifi_device_umbb_nr_rsrq_db", "5G NR RSRQ in dB", rad.RsrqNr},
-		{"unifi_device_umbb_nr_snr_db", "5G NR signal-to-noise ratio in dB", rad.SnrNr},
-		{"unifi_device_umbb_signal_bars", "Cellular signal strength in bars, as shown by the controller", rad.Signal},
-		{"unifi_device_umbb_signal_percent", "Cellular signal strength percentage (0-100)", rad.SignalPercent},
-		{"unifi_device_umbb_lte_max_bitrate_dl_bps", "Maximum LTE downlink bitrate in bits per second", rad.MaxBitrateDl},
-		{"unifi_device_umbb_lte_max_bitrate_ul_bps", "Maximum LTE uplink bitrate in bits per second", rad.MaxBitrateUl},
-		{"unifi_device_umbb_nr_max_bitrate_dl_bps", "Maximum 5G NR downlink bitrate in bits per second", rad.MaxBitrateDlNr},
-		{"unifi_device_umbb_nr_max_bitrate_ul_bps", "Maximum 5G NR uplink bitrate in bits per second", rad.MaxBitrateUlNr},
+		{"unifi_device_umbb_rsrp_dbm", "Cellular RSRP of the serving cell in dBm. LTE anchor in 5G NSA mode", rad.Rsrp.Txt, rad.Rsrp.Val},
+		{"unifi_device_umbb_rsrq_db", "Cellular RSRQ of the serving cell in dB. LTE anchor in 5G NSA mode", rad.Rsrq.Txt, rad.Rsrq.Val},
+		{"unifi_device_umbb_snr_db", "Cellular signal-to-noise ratio of the serving cell in dB. LTE anchor in 5G NSA mode", rad.Snr.Txt, rad.Snr.Val},
+		{"unifi_device_umbb_nr_rsrp_dbm", "5G NR RSRP in dBm", rad.RsrpNr.Txt, rad.RsrpNr.Val},
+		{"unifi_device_umbb_nr_rsrq_db", "5G NR RSRQ in dB", rad.RsrqNr.Txt, rad.RsrqNr.Val},
+		{"unifi_device_umbb_nr_snr_db", "5G NR signal-to-noise ratio in dB", rad.SnrNr.Txt, rad.SnrNr.Val},
+		{"unifi_device_umbb_signal_bars", "Cellular signal strength in bars, as shown by the controller", rad.Signal.Txt, rad.Signal.Val},
+		{"unifi_device_umbb_signal_percent", "Cellular signal strength percentage (0-100)", rad.SignalPercent.Txt, rad.SignalPercent.Val},
+		{"unifi_device_umbb_lte_max_bitrate_dl_bps", "Maximum LTE downlink bitrate in bits per second", rad.MaxBitrateDl.Txt, rad.MaxBitrateDl.Val},
+		{"unifi_device_umbb_lte_max_bitrate_ul_bps", "Maximum LTE uplink bitrate in bits per second", rad.MaxBitrateUl.Txt, rad.MaxBitrateUl.Val},
+		{"unifi_device_umbb_nr_max_bitrate_dl_bps", "Maximum 5G NR downlink bitrate in bits per second", rad.MaxBitrateDlNr.Txt, rad.MaxBitrateDlNr.Val},
+		{"unifi_device_umbb_nr_max_bitrate_ul_bps", "Maximum 5G NR uplink bitrate in bits per second", rad.MaxBitrateUlNr.Txt, rad.MaxBitrateUlNr.Val},
 	} {
-		if g.val.Txt != "" {
-			u.recordGauge(ctx, meter, r, g.name, g.desc, g.val.Val, attrs)
+		if g.txt != "" {
+			u.recordGauge(ctx, meter, r, g.name, g.desc, g.val, attrs)
 		}
 	}
 

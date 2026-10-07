@@ -114,16 +114,24 @@ func mbbOptional(rad unifi.MBBRadio) map[string]float64 {
 	for k, v := range map[string]unifi.FlexInt{
 		"rsrp":               rad.Rsrp,
 		"rsrq":               rad.Rsrq,
-		"snr":                rad.Snr,
 		"nr_rsrp":            rad.RsrpNr,
 		"nr_rsrq":            rad.RsrqNr,
-		"nr_snr":             rad.SnrNr,
 		"signal":             rad.Signal,
 		"signal_percent":     rad.SignalPercent,
 		"lte_max_bitrate_dl": rad.MaxBitrateDl,
 		"lte_max_bitrate_ul": rad.MaxBitrateUl,
 		"nr_max_bitrate_dl":  rad.MaxBitrateDlNr,
 		"nr_max_bitrate_ul":  rad.MaxBitrateUlNr,
+	} {
+		if v.Txt != "" {
+			out[k] = v.Val
+		}
+	}
+
+	// SNR is a fractional dB reading, so the library decodes it as FlexFloat.
+	for k, v := range map[string]unifi.FlexFloat{
+		"snr":    rad.Snr,
+		"nr_snr": rad.SnrNr,
 	} {
 		if v.Txt != "" {
 			out[k] = v.Val

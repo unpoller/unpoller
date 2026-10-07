@@ -142,7 +142,7 @@ func (u *InfluxUnifi) batchLTE(r report, s *unifi.UAP) {
 			"name":          s.Name,
 			"model":         s.Model,
 			"type":          s.Type,
-			"state":         s.LteState.Txt,
+			"state":         s.LteState,
 			"failover_mode": s.LteFailoverMode,
 			"signal":        s.LteSignal,
 			"rat":           s.LteRat,
@@ -166,7 +166,7 @@ func (u *InfluxUnifi) batchLTE(r report, s *unifi.UAP) {
 // hasLTEStatus reports whether this access point is a cellular backup module.
 // U-LTE and U-LTE-Pro are typed as UAPs; their live modem status arrives as lte_* fields.
 func hasLTEStatus(d *unifi.UAP) bool {
-	return d.LteState.Txt != "" || d.LteFailoverMode != "" || d.LteRat != "" ||
+	return d.LteState != "" || d.LteFailoverMode != "" || d.LteRat != "" ||
 		d.LteNetworkOperator != "" || d.LteSignal != "" || d.LteConnected.Txt != ""
 }
 

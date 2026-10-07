@@ -91,7 +91,7 @@ func (u *OtelOutput) exportUAP(ctx context.Context, meter metric.Meter, r *Repor
 // hasLTEStatus reports whether this access point is a cellular backup module.
 // U-LTE and U-LTE-Pro are typed as UAPs; their live modem status arrives as lte_* fields.
 func hasLTEStatus(d *unifi.UAP) bool {
-	return d.LteState.Txt != "" || d.LteFailoverMode != "" || d.LteRat != "" ||
+	return d.LteState != "" || d.LteFailoverMode != "" || d.LteRat != "" ||
 		d.LteNetworkOperator != "" || d.LteSignal != "" || d.LteConnected.Txt != ""
 }
 
@@ -108,7 +108,7 @@ func (u *OtelOutput) exportLTE(ctx context.Context, meter metric.Meter, r *Repor
 		attribute.String("name", s.Name),
 		attribute.String("model", s.Model),
 		attribute.String("type", s.Type),
-		attribute.String("lte_state", s.LteState.Txt),
+		attribute.String("lte_state", s.LteState),
 		attribute.String("lte_failover_mode", s.LteFailoverMode),
 		attribute.String("lte_signal", s.LteSignal),
 		attribute.String("lte_rat", s.LteRat),
