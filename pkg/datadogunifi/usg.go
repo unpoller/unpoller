@@ -57,11 +57,9 @@ func (u *DatadogUnifi) batchUSG(r report, s *unifi.USG) {
 }
 
 func (u *DatadogUnifi) batchUSGstats(ss unifi.SpeedtestStatus, gw *unifi.Gw, ul unifi.Uplink) map[string]float64 {
-	if gw == nil {
-		return map[string]float64{}
-	}
-
-	return map[string]float64{
+	// Uplink and speedtest live on the device, not in stat.gw. Network 11 omits
+	// stat entirely, so a missing gateway stat must not drop those fields.
+	stats := map[string]float64{
 		"uplink_latency":                 ul.Latency.Val,
 		"uplink_speed":                   ul.Speed.Val,
 		"uplink_max_speed":               ul.MaxSpeed.Val,
@@ -72,12 +70,19 @@ func (u *DatadogUnifi) batchUSGstats(ss unifi.SpeedtestStatus, gw *unifi.Gw, ul 
 		"speedtest_status_ping":          ss.StatusPing.Val,
 		"speedtest_status_xput_download": ss.XputDownload.Val,
 		"speedtest_status_xput_upload":   ss.XputUpload.Val,
-		"lan_rx_bytes":                   gw.LanRxBytes.Val,
-		"lan_rx_packets":                 gw.LanRxPackets.Val,
-		"lan_tx_bytes":                   gw.LanTxBytes.Val,
-		"lan_tx_packets":                 gw.LanTxPackets.Val,
-		"lan_rx_dropped":                 gw.LanRxDropped.Val,
 	}
+
+	if gw == nil {
+		return stats
+	}
+
+	return CombineFloat64(stats, map[string]float64{
+		"lan_rx_bytes":   gw.LanRxBytes.Val,
+		"lan_rx_packets": gw.LanRxPackets.Val,
+		"lan_tx_bytes":   gw.LanTxBytes.Val,
+		"lan_tx_packets": gw.LanTxPackets.Val,
+		"lan_rx_dropped": gw.LanRxDropped.Val,
+	})
 }
 
 func (u *DatadogUnifi) batchUSGwans(r report, tags map[string]string, wans ...unifi.Wan) {
