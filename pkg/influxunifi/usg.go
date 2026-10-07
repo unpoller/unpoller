@@ -54,11 +54,9 @@ func (u *InfluxUnifi) batchUSG(r report, s *unifi.USG) {
 }
 
 func (u *InfluxUnifi) batchUSGstats(ss unifi.SpeedtestStatus, gw *unifi.Gw, ul unifi.Uplink) map[string]any {
-	if gw == nil {
-		return map[string]any{}
-	}
-
-	return map[string]any{
+	// Uplink and speedtest live on the device, not in stat.gw. Network 11 omits
+	// stat entirely, so a missing gateway stat must not drop those fields.
+	stats := map[string]any{
 		"uplink_name":                    ul.Name,
 		"uplink_latency":                 ul.Latency.Val,
 		"uplink_speed":                   ul.Speed.Val,
@@ -71,12 +69,19 @@ func (u *InfluxUnifi) batchUSGstats(ss unifi.SpeedtestStatus, gw *unifi.Gw, ul u
 		"speedtest-status_ping":          ss.StatusPing.Val,
 		"speedtest-status_xput_download": ss.XputDownload.Val,
 		"speedtest-status_xput_upload":   ss.XputUpload.Val,
-		"lan-rx_bytes":                   gw.LanRxBytes.Val,
-		"lan-rx_packets":                 gw.LanRxPackets.Val,
-		"lan-tx_bytes":                   gw.LanTxBytes.Val,
-		"lan-tx_packets":                 gw.LanTxPackets.Val,
-		"lan-rx_dropped":                 gw.LanRxDropped.Val,
 	}
+
+	if gw == nil {
+		return stats
+	}
+
+	return Combine(stats, map[string]any{
+		"lan-rx_bytes":   gw.LanRxBytes.Val,
+		"lan-rx_packets": gw.LanRxPackets.Val,
+		"lan-tx_bytes":   gw.LanTxBytes.Val,
+		"lan-tx_packets": gw.LanTxPackets.Val,
+		"lan-rx_dropped": gw.LanRxDropped.Val,
+	})
 }
 
 func (u *InfluxUnifi) batchUSGwans(r report, tags map[string]string, wans ...unifi.Wan) {

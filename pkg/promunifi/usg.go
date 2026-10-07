@@ -146,12 +146,27 @@ func (u *promUnifi) exportUSGstats(r report, labels []string, gw *unifi.Gw, st u
 		sourceInterface = "all"
 	}
 
+	// Uplink and speedtest live on the device, not in stat.gw. Network 11 omits
+	// stat entirely, so a missing gateway stat must not drop those series.
+	labelWan := []string{sourceInterface, labels[1], labels[2], labels[3], labels[4]}
+
+	r.send([]*metric{
+		{u.USG.UplinkLatency, gauge, ul.Latency.Val / 1000, labelWan},
+		{u.USG.UplinkSpeed, gauge, ul.Speed, labelWan},
+		{u.USG.UplinkMaxSpeed, gauge, ul.MaxSpeed, labelWan},
+		{u.USG.UplinkUptime, gauge, ul.Uptime, labelWan},
+		{u.USG.Latency, gauge, st.Latency.Val / 1000, labelWan},
+		{u.USG.Runtime, gauge, st.Runtime, labelWan},
+		{u.USG.Rundate, gauge, st.Rundate, labelWan},
+		{u.USG.XputDownload, gauge, st.XputDownload, labelWan},
+		{u.USG.XputUpload, gauge, st.XputUpload, labelWan},
+	})
+
 	if gw == nil {
 		return
 	}
 
 	labelLan := []string{"lan", labels[1], labels[2], labels[3], labels[4]}
-	labelWan := []string{sourceInterface, labels[1], labels[2], labels[3], labels[4]}
 
 	r.send([]*metric{
 		{u.USG.LanRxPackets, counter, gw.LanRxPackets, labelLan},
@@ -159,16 +174,6 @@ func (u *promUnifi) exportUSGstats(r report, labels []string, gw *unifi.Gw, st u
 		{u.USG.LanTxPackets, counter, gw.LanTxPackets, labelLan},
 		{u.USG.LanTxBytes, counter, gw.LanTxBytes, labelLan},
 		{u.USG.LanRxDropped, counter, gw.LanRxDropped, labelLan},
-		{u.USG.UplinkLatency, gauge, ul.Latency.Val / 1000, labelWan},
-		{u.USG.UplinkSpeed, gauge, ul.Speed, labelWan},
-		{u.USG.UplinkMaxSpeed, gauge, ul.MaxSpeed, labelWan},
-		{u.USG.UplinkUptime, gauge, ul.Uptime, labelWan},
-		// Speed Test Stats
-		{u.USG.Latency, gauge, st.Latency.Val / 1000, labelWan},
-		{u.USG.Runtime, gauge, st.Runtime, labelWan},
-		{u.USG.Rundate, gauge, st.Rundate, labelWan},
-		{u.USG.XputDownload, gauge, st.XputDownload, labelWan},
-		{u.USG.XputUpload, gauge, st.XputUpload, labelWan},
 	})
 }
 
