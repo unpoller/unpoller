@@ -135,24 +135,25 @@ func (u *promUnifi) exportMBB(r report, labels []string, d *unifi.UMBB) {
 	// so a missing reading is not mistaken for 0 dBm.
 	for _, s := range []struct {
 		desc *prometheus.Desc
-		val  unifi.FlexInt
+		txt  string
+		val  float64
 		dims []string
 	}{
-		{u.UMBB.Rsrp, rad.Rsrp, nil},
-		{u.UMBB.Rsrq, rad.Rsrq, nil},
-		{u.UMBB.Snr, rad.Snr, nil},
-		{u.UMBB.RsrpNr, rad.RsrpNr, nil},
-		{u.UMBB.RsrqNr, rad.RsrqNr, nil},
-		{u.UMBB.SnrNr, rad.SnrNr, nil},
-		{u.UMBB.SignalBars, rad.Signal, nil},
-		{u.UMBB.SignalPercent, rad.SignalPercent, nil},
-		{u.UMBB.MaxBitrate, rad.MaxBitrateDl, []string{"lte", "dl"}},
-		{u.UMBB.MaxBitrate, rad.MaxBitrateUl, []string{"lte", "ul"}},
-		{u.UMBB.MaxBitrate, rad.MaxBitrateDlNr, []string{"nr", "dl"}},
-		{u.UMBB.MaxBitrate, rad.MaxBitrateUlNr, []string{"nr", "ul"}},
+		{u.UMBB.Rsrp, rad.Rsrp.Txt, rad.Rsrp.Val, nil},
+		{u.UMBB.Rsrq, rad.Rsrq.Txt, rad.Rsrq.Val, nil},
+		{u.UMBB.Snr, rad.Snr.Txt, rad.Snr.Val, nil},
+		{u.UMBB.RsrpNr, rad.RsrpNr.Txt, rad.RsrpNr.Val, nil},
+		{u.UMBB.RsrqNr, rad.RsrqNr.Txt, rad.RsrqNr.Val, nil},
+		{u.UMBB.SnrNr, rad.SnrNr.Txt, rad.SnrNr.Val, nil},
+		{u.UMBB.SignalBars, rad.Signal.Txt, rad.Signal.Val, nil},
+		{u.UMBB.SignalPercent, rad.SignalPercent.Txt, rad.SignalPercent.Val, nil},
+		{u.UMBB.MaxBitrate, rad.MaxBitrateDl.Txt, rad.MaxBitrateDl.Val, []string{"lte", "dl"}},
+		{u.UMBB.MaxBitrate, rad.MaxBitrateUl.Txt, rad.MaxBitrateUl.Val, []string{"lte", "ul"}},
+		{u.UMBB.MaxBitrate, rad.MaxBitrateDlNr.Txt, rad.MaxBitrateDlNr.Val, []string{"nr", "dl"}},
+		{u.UMBB.MaxBitrate, rad.MaxBitrateUlNr.Txt, rad.MaxBitrateUlNr.Val, []string{"nr", "ul"}},
 	} {
-		if s.val.Txt != "" {
-			r.send([]*metric{{s.desc, gauge, s.val.Val, append(append([]string{}, labels...), s.dims...)}})
+		if s.txt != "" {
+			r.send([]*metric{{s.desc, gauge, s.val, append(append([]string{}, labels...), s.dims...)}})
 		}
 	}
 

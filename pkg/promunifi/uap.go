@@ -429,7 +429,7 @@ func (u *promUnifi) exportRADtable(r report, labels []string, rt unifi.RadioTabl
 // U-LTE and U-LTE-Pro are typed as UAPs; their live modem status arrives as lte_* fields
 // on the device list, not on the gateway WAN ports.
 func hasLTEStatus(d *unifi.UAP) bool {
-	return d.LteState.Txt != "" || d.LteFailoverMode != "" || d.LteRat != "" ||
+	return d.LteState != "" || d.LteFailoverMode != "" || d.LteRat != "" ||
 		d.LteNetworkOperator != "" || d.LteSignal != "" || d.LteConnected.Txt != ""
 }
 
@@ -439,7 +439,7 @@ func (u *promUnifi) exportLTE(r report, d *unifi.UAP, labels []string) {
 	}
 
 	info := append(append([]string{}, labels...),
-		d.LteState.Txt,
+		d.LteState,
 		d.LteFailoverMode,
 		d.LteSignal,
 		d.LteRat,
