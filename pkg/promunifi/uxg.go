@@ -1,6 +1,8 @@
 package promunifi
 
 import (
+	"slices"
+
 	"github.com/unpoller/unifi/v6"
 )
 
@@ -25,7 +27,7 @@ func (u *promUnifi) exportUXG(r report, d *unifi.UXG) {
 
 	u.exportWithTags(r, d.Tags, func(tagLabels []string) {
 		tag := tagLabels[0]
-		labels := append(baseLabels, tag)
+		labels := slices.Clip(append(baseLabels, tag))
 		infoLabels := append(baseInfoLabels, tag)
 
 		// Shared data (all devices do this).

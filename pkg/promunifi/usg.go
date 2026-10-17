@@ -1,6 +1,7 @@
 package promunifi
 
 import (
+	"slices"
 	"strings"
 
 	"github.com/prometheus/client_golang/prometheus"
@@ -87,7 +88,7 @@ func (u *promUnifi) exportUSG(r report, d *unifi.USG) {
 
 	u.exportWithTags(r, d.Tags, func(tagLabels []string) {
 		tag := tagLabels[0]
-		labels := append(baseLabels, tag)
+		labels := slices.Clip(append(baseLabels, tag))
 		infoLabels := append(baseInfoLabels, tag)
 
 		for _, t := range d.Temperatures {
