@@ -46,9 +46,9 @@ func descDevice(ns string) *unifiDevice {
 		Info:   prometheus.NewDesc(ns+"info", "Device Information", append(labels, infoLabels...), nil),
 		Uptime: prometheus.NewDesc(ns+"uptime_seconds", "Device Uptime", append(labels, "tag"), nil),
 		Temperature: prometheus.NewDesc(ns+"temperature_celsius", "Temperature",
-			append(labels, "temp_area", "temp_type", "tag"), nil),
+			append(labels, "tag", "temp_area", "temp_type"), nil),
 		Storage: prometheus.NewDesc(ns+"storage", "Storage",
-			append(labels, "mountpoint", "storage_name", "storage_reading", "tag"), nil),
+			append(labels, "tag", "mountpoint", "storage_name", "storage_reading"), nil),
 		TotalMaxPower:            prometheus.NewDesc(ns+"max_power_total", "Total Max Power", append(labels, "tag"), nil),
 		OutletACPowerConsumption: prometheus.NewDesc(ns+"outlet_ac_power_consumption", "Outlet AC Power Consumption", append(labels, "tag"), nil),
 		PowerSource:              prometheus.NewDesc(ns+"power_source", "Power Source", append(labels, "tag"), nil),
@@ -114,14 +114,14 @@ func (u *promUnifi) exportUDM(r report, d *unifi.UDM) {
 
 		// UDM pro has special temp sensors. UDM non-pro may not have temp; not sure.
 		for _, t := range d.Temperatures {
-			r.send([]*metric{{u.Device.Temperature, gauge, t.Value, append(labels, t.Name, t.Type, tag)}})
+			r.send([]*metric{{u.Device.Temperature, gauge, t.Value, append(labels, tag, t.Name, t.Type)}})
 		}
 
 		// UDM pro and UXG have hard drives.
 		for _, t := range d.Storage {
 			r.send([]*metric{
-				{u.Device.Storage, gauge, t.Size.Val, append(labels, t.MountPoint, t.Name, "size", tag)},
-				{u.Device.Storage, gauge, t.Used.Val, append(labels, t.MountPoint, t.Name, "used", tag)},
+				{u.Device.Storage, gauge, t.Size.Val, append(labels, tag, t.MountPoint, t.Name, "size")},
+				{u.Device.Storage, gauge, t.Used.Val, append(labels, tag, t.MountPoint, t.Name, "used")},
 			})
 		}
 	})
