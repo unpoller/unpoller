@@ -114,38 +114,73 @@ func (u *InfluxUnifi) batchUNASStorage(r report, d *unifi.UNASDevice, s *unifi.U
 			},
 			Fields: fields,
 		})
+
+		if c := p.Cache; c != nil {
+			r.send(&metric{
+				Table: "unas_pool_cache",
+				Tags: map[string]string{
+					"source":  d.SourceName,
+					"name":    d.Name(),
+					"pool_id": p.ID,
+					"mode":    c.Mode,
+					"status":  c.Status,
+				},
+				Fields: map[string]any{
+					"size":           c.Size.Val,
+					"used":           c.Composition.Used.Val,
+					"dirty":          c.Composition.Dirty.Val,
+					"read_hit_rate":  c.Composition.ReadHitRate.Val,
+					"write_hit_rate": c.Composition.WriteHitRate.Val,
+				},
+			})
+		}
 	}
 
 	for _, disk := range s.Disks {
-		r.send(&metric{
-			Table: "unas_disk",
-			Tags: map[string]string{
-				"source":    d.SourceName,
-				"name":      d.Name(),
-				"slot_id":   disk.SlotID,
-				"location":  disk.Location,
-				"pool_id":   disk.PoolID,
-				"disk_type": disk.Type,
-				"state":     disk.State,
-				"model":     disk.Model,
-				"serial":    disk.Serial,
-				"firmware":  disk.Firmware,
-			},
-			Fields: map[string]any{
-				"size":                       disk.Size.Val,
-				"temperature":                disk.Temperature.Val,
-				"health_score":               disk.HealthScore.Val,
-				"power_on_hours":             disk.PowerOnHours.Val,
-				"rpm":                        disk.RPM.Val,
-				"bad_sector_count":           disk.BadSectorCount.Val,
-				"uncorrectable_sector_count": disk.UncorrectableSectorCount.Val,
-				"read_error_rate":            disk.ReadErrorRate.Val,
-				"smart_read_error_count":     disk.SmartReadErrorCount.Val,
-				"read_kbps":                  disk.ReadKBPS.Val,
-				"write_kbps":                 disk.WriteKBPS.Val,
-				"is_global_hot_spare":        disk.IsGlobalHotSpare.Val,
-				"is_local_hot_spare":         disk.IsLocalHotSpare.Val,
-			},
-		})
+		r.send(unasDiskMetric(d, disk))
+	}
+
+	// Cache bays hold SSDs with the same fields as pool disks; disk_type tells them apart.
+	for _, disk := range s.CacheSlots {
+		if disk.State == "empty" {
+			continue
+		}
+
+		m := unasDiskMetric(d, disk)
+		m.Fields["life_span"] = disk.LifeSpan.Val
+		r.send(m)
+	}
+}
+
+func unasDiskMetric(d *unifi.UNASDevice, disk unifi.UNASDisk) *metric {
+	return &metric{
+		Table: "unas_disk",
+		Tags: map[string]string{
+			"source":    d.SourceName,
+			"name":      d.Name(),
+			"slot_id":   disk.SlotID,
+			"location":  disk.Location,
+			"pool_id":   disk.PoolID,
+			"disk_type": disk.Type,
+			"state":     disk.State,
+			"model":     disk.Model,
+			"serial":    disk.Serial,
+			"firmware":  disk.Firmware,
+		},
+		Fields: map[string]any{
+			"size":                       disk.Size.Val,
+			"temperature":                disk.Temperature.Val,
+			"health_score":               disk.HealthScore.Val,
+			"power_on_hours":             disk.PowerOnHours.Val,
+			"rpm":                        disk.RPM.Val,
+			"bad_sector_count":           disk.BadSectorCount.Val,
+			"uncorrectable_sector_count": disk.UncorrectableSectorCount.Val,
+			"read_error_rate":            disk.ReadErrorRate.Val,
+			"smart_read_error_count":     disk.SmartReadErrorCount.Val,
+			"read_kbps":                  disk.ReadKBPS.Val,
+			"write_kbps":                 disk.WriteKBPS.Val,
+			"is_global_hot_spare":        disk.IsGlobalHotSpare.Val,
+			"is_local_hot_spare":         disk.IsLocalHotSpare.Val,
+		},
 	}
 }

@@ -77,37 +77,78 @@ func (u *DatadogUnifi) batchUNASPools(r report, d *unifi.UNASDevice, s *unifi.UN
 			_ = r.reportGauge(raidName("expected_protection"), rg.ExpectedProtection.Val, raidTags)
 			_ = r.reportGauge(raidName("progress"), rg.Progress.Val, raidTags)
 		}
+
+		if c := p.Cache; c != nil {
+			u.batchUNASPoolCache(r, d, p.ID, c)
+		}
 	}
+}
+
+func (u *DatadogUnifi) batchUNASPoolCache(r report, d *unifi.UNASDevice, poolID string, c *unifi.UNASPoolCache) {
+	metricName := metricNamespace("unas_pool_cache")
+
+	tags := tagMapToTags(cleanTags(map[string]string{
+		"source":  d.SourceName,
+		"name":    d.Name(),
+		"pool_id": poolID,
+		"mode":    c.Mode,
+		"status":  c.Status,
+	}))
+
+	_ = r.reportGauge(metricName("size"), c.Size.Val, tags)
+	_ = r.reportGauge(metricName("used"), c.Composition.Used.Val, tags)
+	_ = r.reportGauge(metricName("dirty"), c.Composition.Dirty.Val, tags)
+	_ = r.reportGauge(metricName("read_hit_rate"), c.Composition.ReadHitRate.Val, tags)
+	_ = r.reportGauge(metricName("write_hit_rate"), c.Composition.WriteHitRate.Val, tags)
 }
 
 func (u *DatadogUnifi) batchUNASDisks(r report, d *unifi.UNASDevice, s *unifi.UNASStorage) {
 	metricName := metricNamespace("unas_disk")
 
 	for _, disk := range s.Disks {
-		tags := tagMapToTags(cleanTags(map[string]string{
-			"source":    d.SourceName,
-			"name":      d.Name(),
-			"slot_id":   disk.SlotID,
-			"location":  disk.Location,
-			"pool_id":   disk.PoolID,
-			"disk_type": disk.Type,
-			"state":     disk.State,
-			"model":     disk.Model,
-			"serial":    disk.Serial,
-		}))
-
-		_ = r.reportGauge(metricName("size"), disk.Size.Val, tags)
-		_ = r.reportGauge(metricName("temperature"), disk.Temperature.Val, tags)
-		_ = r.reportGauge(metricName("health_score"), disk.HealthScore.Val, tags)
-		_ = r.reportGauge(metricName("power_on_hours"), disk.PowerOnHours.Val, tags)
-		_ = r.reportGauge(metricName("rpm"), disk.RPM.Val, tags)
-		_ = r.reportGauge(metricName("bad_sector_count"), disk.BadSectorCount.Val, tags)
-		_ = r.reportGauge(metricName("uncorrectable_sector_count"), disk.UncorrectableSectorCount.Val, tags)
-		_ = r.reportGauge(metricName("read_error_rate"), disk.ReadErrorRate.Val, tags)
-		_ = r.reportGauge(metricName("smart_read_error_count"), disk.SmartReadErrorCount.Val, tags)
-		_ = r.reportGauge(metricName("read_kbps"), disk.ReadKBPS.Val, tags)
-		_ = r.reportGauge(metricName("write_kbps"), disk.WriteKBPS.Val, tags)
+		u.batchUNASDisk(r, d, disk)
 	}
+
+	// Cache bays hold SSDs with the same fields as pool disks; disk_type tells them apart.
+	for _, disk := range s.CacheSlots {
+		if disk.State == "empty" {
+			continue
+		}
+
+		tags := u.batchUNASDisk(r, d, disk)
+		_ = r.reportGauge(metricName("life_span"), disk.LifeSpan.Val, tags)
+	}
+}
+
+// batchUNASDisk reports one disk's gauges and returns its tags.
+func (u *DatadogUnifi) batchUNASDisk(r report, d *unifi.UNASDevice, disk unifi.UNASDisk) []string {
+	metricName := metricNamespace("unas_disk")
+
+	tags := tagMapToTags(cleanTags(map[string]string{
+		"source":    d.SourceName,
+		"name":      d.Name(),
+		"slot_id":   disk.SlotID,
+		"location":  disk.Location,
+		"pool_id":   disk.PoolID,
+		"disk_type": disk.Type,
+		"state":     disk.State,
+		"model":     disk.Model,
+		"serial":    disk.Serial,
+	}))
+
+	_ = r.reportGauge(metricName("size"), disk.Size.Val, tags)
+	_ = r.reportGauge(metricName("temperature"), disk.Temperature.Val, tags)
+	_ = r.reportGauge(metricName("health_score"), disk.HealthScore.Val, tags)
+	_ = r.reportGauge(metricName("power_on_hours"), disk.PowerOnHours.Val, tags)
+	_ = r.reportGauge(metricName("rpm"), disk.RPM.Val, tags)
+	_ = r.reportGauge(metricName("bad_sector_count"), disk.BadSectorCount.Val, tags)
+	_ = r.reportGauge(metricName("uncorrectable_sector_count"), disk.UncorrectableSectorCount.Val, tags)
+	_ = r.reportGauge(metricName("read_error_rate"), disk.ReadErrorRate.Val, tags)
+	_ = r.reportGauge(metricName("smart_read_error_count"), disk.SmartReadErrorCount.Val, tags)
+	_ = r.reportGauge(metricName("read_kbps"), disk.ReadKBPS.Val, tags)
+	_ = r.reportGauge(metricName("write_kbps"), disk.WriteKBPS.Val, tags)
+
+	return tags
 }
 
 func (u *DatadogUnifi) batchUNASShares(r report, d *unifi.UNASDevice) {

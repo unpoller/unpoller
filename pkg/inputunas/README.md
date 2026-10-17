@@ -74,7 +74,7 @@ Data comes from the UniFi Drive API. Four endpoints are polled per cycle:
 | Endpoint | Yields |
 |---|---|
 | `/proxy/drive/api/v2/systems/device-info` | name, model, version, firmware, status, CPU load and temperature, memory |
-| `/proxy/drive/api/v2/storage` | pools (capacity, usage, status, RAID groups) and disks (health score, temperature, power-on hours, RPM, size, bad and uncorrectable sectors, read/write KB/s) |
+| `/proxy/drive/api/v2/storage` | pools (capacity, usage, status, RAID groups, SSD cache size, fill, dirty data, and hit rates), disks (health score, temperature, power-on hours, RPM, size, bad and uncorrectable sectors, read/write KB/s), and the SSDs in the cache bays (the same disk fields plus remaining endurance) |
 | `/proxy/users/drive/api/v2/drives` | per-share id, name, type, status, quota, usage, member count |
 | `/proxy/drive/api/v2/systems/network-io` | receive and transmit KB/s |
 
@@ -91,12 +91,18 @@ bare `unas_` prefix — the Grafana dashboard in
 [#785](https://github.com/unpoller/unpoller/issues/785) needs its queries adjusted
 accordingly. Consistency with every other unpoller metric wins here.
 
+The SSD cache in front of a pool reports as `unifi_unas_pool_cache_*`. Cache-bay SSDs report
+as `unifi_unas_disk_*` with `disk_type` set to the SSD's type, plus
+`unifi_unas_disk_life_span_percent`. A cache bay and a drive bay can share a `slot_id`, so
+filter on `disk_type` to tell them apart.
+
 ### InfluxDB and DataDog
 
-Four measurements / metric prefixes: `unas_device`, `unas_pool`, `unas_disk`, and
-`unas_share` (DataDog also emits `unas_raid_group`). They are kept separate because each has
-its own tag set; folding them together would give every point the union of those tags with
-most of them empty.
+Five measurements / metric prefixes: `unas_device`, `unas_pool`, `unas_pool_cache`,
+`unas_disk`, and `unas_share` (DataDog also emits `unas_raid_group`). Cache-bay SSDs report
+under `unas_disk` with `disk_type` set to the SSD's type and an extra `life_span` field. The
+measurements are kept separate because each has its own tag set; folding them together would
+give every point the union of those tags with most of them empty.
 
 Loki and OpenTelemetry are not wired up: Loki carries events only, and a UNAS console exposes
 no event endpoints in this version.
