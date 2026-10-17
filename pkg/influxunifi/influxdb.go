@@ -402,8 +402,9 @@ func (u *InfluxUnifi) ReportMetrics(m *poller.Metrics, e *poller.Events) (*Repor
 	switch u.Version {
 	case InfluxV3:
 		go u.collect(r, r.ch)
+		// Batch all the points.
 		u.loopPoints(r)
-		r.wg.Wait()
+		r.wg.Wait() // wait for all points to finish batching!
 
 		ctx, cancel := context.WithTimeout(context.Background(), time.Minute)
 		defer cancel()
