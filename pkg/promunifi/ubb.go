@@ -1,6 +1,8 @@
 package promunifi
 
 import (
+	"slices"
+
 	"github.com/unpoller/unifi/v6"
 )
 
@@ -18,7 +20,7 @@ func (u *promUnifi) exportUBB(r report, d *unifi.UBB) {
 
 	u.exportWithTags(r, d.Tags, func(tagLabels []string) {
 		tag := tagLabels[0]
-		labels := append(baseLabels, tag)
+		labels := slices.Clip(append(baseLabels, tag))
 		infoLabels := append(baseInfoLabels, tag)
 
 		// Export UBB-specific stats if available
