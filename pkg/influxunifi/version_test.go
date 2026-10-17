@@ -53,7 +53,7 @@ func TestInfluxVersionDefaults(t *testing.T) {
 			u := &influxunifi.InfluxUnifi{
 				InfluxDB: &influxunifi.InfluxDB{Config: &tc.config},
 			}
-			u.Config.URL = server.URL
+			u.URL = server.URL
 
 			ok, err := u.DebugOutput()
 			require.NoError(t, err)
