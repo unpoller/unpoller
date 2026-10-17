@@ -1,6 +1,8 @@
 package promunifi
 
 import (
+	"slices"
+
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/unpoller/unifi/v6"
 )
@@ -58,7 +60,7 @@ func descDevice(ns string) *unifiDevice {
 		BytesD:                   prometheus.NewDesc(ns+"d_bytes", "Total Bytes D???", append(labels, "tag"), nil),
 		TxBytesD:                 prometheus.NewDesc(ns+"d_tranmsit_bytes", "Transmit Bytes D???", append(labels, "tag"), nil),
 		RxBytesD:                 prometheus.NewDesc(ns+"d_receive_bytes", "Receive Bytes D???", append(labels, "tag"), nil),
-		Counter:                  prometheus.NewDesc(ns+"stations", "Number of Stations", append(labels, "station_type", "tag"), nil),
+		Counter:                  prometheus.NewDesc(ns+"stations", "Number of Stations", append(labels, "tag", "station_type"), nil),
 		Loadavg1:                 prometheus.NewDesc(ns+"load_average_1", "System Load Average 1 Minute", append(labels, "tag"), nil),
 		Loadavg5:                 prometheus.NewDesc(ns+"load_average_5", "System Load Average 5 Minutes", append(labels, "tag"), nil),
 		Loadavg15:                prometheus.NewDesc(ns+"load_average_15", "System Load Average 15 Minutes", append(labels, "tag"), nil),
@@ -162,6 +164,9 @@ func (u *promUnifi) exportBYTstats(r report, labels []string, tx, rx unifi.FlexI
 
 // Shared by all, pass 2 or 5 stats.
 func (u *promUnifi) exportSTAcount(r report, labels []string, stas ...unifi.FlexInt) {
+	// The labels may have spare capacity. Clip it, or every append below writes into the same array.
+	labels = slices.Clip(labels)
+
 	r.send([]*metric{
 		{u.Device.Counter, gauge, stas[0], append(labels, "user")},
 		{u.Device.Counter, gauge, stas[1], append(labels, "guest")},
