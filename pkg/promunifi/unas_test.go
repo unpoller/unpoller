@@ -101,3 +101,44 @@ func TestExportUNASDeviceTolerantOfNilSections(t *testing.T) {
 	u.exportUNASDevice(empty, nil)
 	assert.Empty(t, empty.sent)
 }
+
+// The SSD cache reports on its own label set, and an occupied cache bay reports as a disk
+// with disk_type SSD plus its remaining endurance. An empty bay reports nothing.
+func TestExportUNASSSDCache(t *testing.T) {
+	t.Parallel()
+
+	d := testUNASDevice()
+	d.Storage.Pools[0].Cache = &unifi.UNASPoolCache{
+		Status: "fullyOperational",
+		Mode:   "readOnly",
+		Size:   unifi.FlexInt{Val: 1000},
+	}
+	d.Storage.Pools[0].Cache.Composition.ReadHitRate = unifi.FlexInt{Val: 87}
+	d.Storage.CacheSlots = []unifi.UNASDisk{
+		{SlotID: "1", Type: "SSD", State: "healthy", Serial: "SSD-1", LifeSpan: unifi.FlexInt{Val: 97}},
+		{SlotID: "2", State: "empty"},
+	}
+
+	r := &fakeReport{}
+	u := &promUnifi{UNASDevice: descUNASDevice("unifi_")}
+	u.exportUNASDevice(r, d)
+
+	byDesc := map[*prometheus.Desc][]*metric{}
+	for _, m := range r.sent {
+		byDesc[m.Desc] = append(byDesc[m.Desc], m)
+	}
+
+	hit := byDesc[u.UNASDevice.PoolCacheReadHitRate]
+	require.Len(t, hit, 1)
+	assert.Equal(t, unifi.FlexInt{Val: 87}, hit[0].Value)
+	assert.Equal(t, []string{"https://unas.example", "UNAS-Pro", "pool-1", "readOnly", "fullyOperational"},
+		hit[0].Labels)
+
+	life := byDesc[u.UNASDevice.DiskLifeSpan]
+	require.Len(t, life, 1, "only the occupied bay reports endurance")
+	assert.Equal(t, unifi.FlexInt{Val: 97}, life[0].Value)
+	assert.Equal(t, "SSD", life[0].Labels[4])
+
+	// The pool's hard drive and the occupied bay each report temperature; the empty bay does not.
+	assert.Len(t, byDesc[u.UNASDevice.DiskTemperature], 2)
+}

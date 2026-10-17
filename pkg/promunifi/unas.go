@@ -27,6 +27,12 @@ type unasDevice struct {
 	RaidCurrentProtection  *prometheus.Desc
 	RaidExpectedProtection *prometheus.Desc
 	RaidProgress           *prometheus.Desc
+	// SSD caches in front of storage pools.
+	PoolCacheSize         *prometheus.Desc
+	PoolCacheUsed         *prometheus.Desc
+	PoolCacheDirty        *prometheus.Desc
+	PoolCacheReadHitRate  *prometheus.Desc
+	PoolCacheWriteHitRate *prometheus.Desc
 	// Physical disks.
 	DiskSize                     *prometheus.Desc
 	DiskTemperature              *prometheus.Desc
@@ -39,6 +45,7 @@ type unasDevice struct {
 	DiskSmartReadErrorCount      *prometheus.Desc
 	DiskReadKBPS                 *prometheus.Desc
 	DiskWriteKBPS                *prometheus.Desc
+	DiskLifeSpan                 *prometheus.Desc
 	// Shares ("drives").
 	ShareQuota       *prometheus.Desc
 	ShareUsage       *prometheus.Desc
@@ -51,6 +58,7 @@ func descUNASDevice(ns string) *unasDevice { // nolint: funlen
 	console := []string{"source", "name"}
 	pool := []string{"source", "name", "pool_id", "pool_type", "status"}
 	raid := []string{"source", "name", "pool_id", "raid_group_id", "current_level", "config_level"}
+	cache := []string{"source", "name", "pool_id", "mode", "status"}
 	disk := []string{"source", "name", "slot_id", "pool_id", "disk_type", "state", "model", "serial"}
 	share := []string{"source", "name", "share_id", "share_name", "share_type", "status"}
 
@@ -82,6 +90,16 @@ func descUNASDevice(ns string) *unasDevice { // nolint: funlen
 			"UNAS RAID group expected redundancy", raid, nil),
 		RaidProgress: prometheus.NewDesc(ns+"raid_group_progress_percent",
 			"UNAS RAID group rebuild or expansion progress", raid, nil),
+		PoolCacheSize: prometheus.NewDesc(ns+"pool_cache_size_bytes",
+			"UNAS storage pool SSD cache size", cache, nil),
+		PoolCacheUsed: prometheus.NewDesc(ns+"pool_cache_used_bytes",
+			"UNAS storage pool SSD cache bytes holding cached data", cache, nil),
+		PoolCacheDirty: prometheus.NewDesc(ns+"pool_cache_dirty_bytes",
+			"UNAS storage pool SSD cache bytes not yet written to the pool's disks", cache, nil),
+		PoolCacheReadHitRate: prometheus.NewDesc(ns+"pool_cache_read_hit_percent",
+			"UNAS storage pool SSD cache read hit rate as reported by the console", cache, nil),
+		PoolCacheWriteHitRate: prometheus.NewDesc(ns+"pool_cache_write_hit_percent",
+			"UNAS storage pool SSD cache write hit rate as reported by the console", cache, nil),
 		DiskSize: prometheus.NewDesc(ns+"disk_size_bytes",
 			"UNAS disk size", disk, nil),
 		DiskTemperature: prometheus.NewDesc(ns+"disk_temperature_celsius",
@@ -104,6 +122,8 @@ func descUNASDevice(ns string) *unasDevice { // nolint: funlen
 			"UNAS disk instantaneous read throughput in KB/s", disk, nil),
 		DiskWriteKBPS: prometheus.NewDesc(ns+"disk_write_kbps",
 			"UNAS disk instantaneous write throughput in KB/s", disk, nil),
+		DiskLifeSpan: prometheus.NewDesc(ns+"disk_life_span_percent",
+			"UNAS SSD rated endurance left", disk, nil),
 		ShareQuota: prometheus.NewDesc(ns+"share_quota_bytes",
 			"UNAS share quota (0 when unlimited)", share, nil),
 		ShareUsage: prometheus.NewDesc(ns+"share_usage_bytes",
@@ -184,26 +204,57 @@ func (u *promUnifi) exportUNASStorage(r report, d *unifi.UNASDevice, s *unifi.UN
 				{u.UNASDevice.RaidProgress, gauge, rg.Progress, raid},
 			})
 		}
+
+		if c := p.Cache; c != nil {
+			cache := []string{d.SourceName, name, p.ID, c.Mode, c.Status}
+
+			r.send([]*metric{
+				{u.UNASDevice.PoolCacheSize, gauge, c.Size, cache},
+				{u.UNASDevice.PoolCacheUsed, gauge, c.Composition.Used, cache},
+				{u.UNASDevice.PoolCacheDirty, gauge, c.Composition.Dirty, cache},
+				{u.UNASDevice.PoolCacheReadHitRate, gauge, c.Composition.ReadHitRate, cache},
+				{u.UNASDevice.PoolCacheWriteHitRate, gauge, c.Composition.WriteHitRate, cache},
+			})
+		}
 	}
 
 	for _, disk := range s.Disks {
-		labels := []string{
-			d.SourceName, name, disk.SlotID, disk.PoolID,
-			disk.Type, disk.State, disk.Model, disk.Serial,
+		u.exportUNASDisk(r, d, disk)
+	}
+
+	// Cache slots hold SSDs with the same fields as the pool's disks; the
+	// disk_type label tells them apart.
+	for _, disk := range s.CacheSlots {
+		if disk.State == "empty" {
+			continue
 		}
 
-		r.send([]*metric{
-			{u.UNASDevice.DiskSize, gauge, disk.Size, labels},
-			{u.UNASDevice.DiskTemperature, gauge, disk.Temperature, labels},
-			{u.UNASDevice.DiskHealthScore, gauge, disk.HealthScore, labels},
-			{u.UNASDevice.DiskPowerOnHours, gauge, disk.PowerOnHours, labels},
-			{u.UNASDevice.DiskRPM, gauge, disk.RPM, labels},
-			{u.UNASDevice.DiskBadSectorCount, gauge, disk.BadSectorCount, labels},
-			{u.UNASDevice.DiskUncorrectableSectorCount, gauge, disk.UncorrectableSectorCount, labels},
-			{u.UNASDevice.DiskReadErrorRate, gauge, disk.ReadErrorRate, labels},
-			{u.UNASDevice.DiskSmartReadErrorCount, gauge, disk.SmartReadErrorCount, labels},
-			{u.UNASDevice.DiskReadKBPS, gauge, disk.ReadKBPS, labels},
-			{u.UNASDevice.DiskWriteKBPS, gauge, disk.WriteKBPS, labels},
-		})
+		u.exportUNASDisk(r, d, disk)
+		r.send([]*metric{{u.UNASDevice.DiskLifeSpan, gauge, disk.LifeSpan, unasDiskLabels(d, disk)}})
 	}
+}
+
+func unasDiskLabels(d *unifi.UNASDevice, disk unifi.UNASDisk) []string {
+	return []string{
+		d.SourceName, d.Name(), disk.SlotID, disk.PoolID,
+		disk.Type, disk.State, disk.Model, disk.Serial,
+	}
+}
+
+func (u *promUnifi) exportUNASDisk(r report, d *unifi.UNASDevice, disk unifi.UNASDisk) {
+	labels := unasDiskLabels(d, disk)
+
+	r.send([]*metric{
+		{u.UNASDevice.DiskSize, gauge, disk.Size, labels},
+		{u.UNASDevice.DiskTemperature, gauge, disk.Temperature, labels},
+		{u.UNASDevice.DiskHealthScore, gauge, disk.HealthScore, labels},
+		{u.UNASDevice.DiskPowerOnHours, gauge, disk.PowerOnHours, labels},
+		{u.UNASDevice.DiskRPM, gauge, disk.RPM, labels},
+		{u.UNASDevice.DiskBadSectorCount, gauge, disk.BadSectorCount, labels},
+		{u.UNASDevice.DiskUncorrectableSectorCount, gauge, disk.UncorrectableSectorCount, labels},
+		{u.UNASDevice.DiskReadErrorRate, gauge, disk.ReadErrorRate, labels},
+		{u.UNASDevice.DiskSmartReadErrorCount, gauge, disk.SmartReadErrorCount, labels},
+		{u.UNASDevice.DiskReadKBPS, gauge, disk.ReadKBPS, labels},
+		{u.UNASDevice.DiskWriteKBPS, gauge, disk.WriteKBPS, labels},
+	})
 }
