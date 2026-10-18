@@ -68,3 +68,22 @@ func TestExportUBBLinkQualityKeepsItsLabels(t *testing.T) {
 		"p2p_rx_rate": "lobby", "p2p_tx_rate": "lobby", "p2p_throughput": "lobby",
 	}, stationTags(t, p, r.sent))
 }
+
+func TestExportUSGStationCountsUseTheirOwnFields(t *testing.T) {
+	t.Parallel()
+
+	p, r := testProm(), &fakeReport{}
+	p.exportUSG(r, decode[unifi.USG](t, `{"adopted": true, "user-num_sta": 41, "guest-num_sta": 1,
+		"num_desktop": 7, "num_mobile": 2, "num_handheld": 8}`))
+
+	got := make(map[string]float64)
+
+	for _, m := range r.sent {
+		if m.Desc == p.Device.Counter {
+			// exportSTAcount appends the station type last.
+			got[m.Labels[len(m.Labels)-1]] = metricFloat(t, m)
+		}
+	}
+
+	assert.Equal(t, map[string]float64{"user": 41, "guest": 1, "desktop": 7, "mobile": 2, "handheld": 8}, got)
+}
