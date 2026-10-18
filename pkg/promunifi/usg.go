@@ -30,6 +30,13 @@ type usg struct {
 	WanTxErrors    *prometheus.Desc
 	WanTxMulticast *prometheus.Desc
 	WanBytesR      *prometheus.Desc
+	WanLatency     *prometheus.Desc
+	WanAvailable   *prometheus.Desc
+	WanStatus      *prometheus.Desc
+	StatsUptime    *prometheus.Desc
+	StatsDowntime  *prometheus.Desc
+	MonAvailable   *prometheus.Desc
+	MonLatency     *prometheus.Desc
 	Latency        *prometheus.Desc
 	UplinkLatency  *prometheus.Desc
 	UplinkSpeed    *prometheus.Desc
@@ -43,6 +50,9 @@ type usg struct {
 
 func descUSG(ns string) *usg {
 	labels := []string{"port", "site_name", "name", "source", "tag"}
+	statsLabels := []string{"wan_networkgroup", "site_name", "name", "source", "tag"}
+	statusLabels := []string{"wan_networkgroup", "site_name", "name", "source", "tag", "status"}
+	monLabels := []string{"wan_networkgroup", "site_name", "name", "source", "tag", "target", "monitor_type", "alerting"}
 
 	return &usg{
 		WanRxPackets:   prometheus.NewDesc(ns+"wan_receive_packets_total", "WAN Receive Packets Total", labels, nil),
@@ -61,6 +71,13 @@ func descUSG(ns string) *usg {
 		WanTxErrors:    prometheus.NewDesc(ns+"wan_transmit_errors_total", "WAN Transmit Errors Total", labels, nil),
 		WanTxMulticast: prometheus.NewDesc(ns+"wan_transmit_multicast_total", "WAN Transmit Multicast Total", labels, nil),
 		WanBytesR:      prometheus.NewDesc(ns+"wan_rate_bytes", "WAN Transfer Rate", labels, nil),
+		WanLatency:     prometheus.NewDesc(ns+"wan_latency_seconds", "WAN Latency", labels, nil),
+		WanAvailable:   prometheus.NewDesc(ns+"wan_availability_percent", "WAN Availability", labels, nil),
+		StatsUptime:    prometheus.NewDesc(ns+"wan_uptime_stats_uptime_seconds", "WAN Uptime", statsLabels, nil),
+		StatsDowntime:  prometheus.NewDesc(ns+"wan_uptime_stats_downtime_seconds", "WAN Downtime", statsLabels, nil),
+		WanStatus:      prometheus.NewDesc(ns+"wan_status", "WAN Status: 1=online, 0=other", statusLabels, nil),
+		MonAvailable:   prometheus.NewDesc(ns+"wan_monitor_availability_percent", "WAN Monitor Availability", monLabels, nil),
+		MonLatency:     prometheus.NewDesc(ns+"wan_monitor_latency_average_seconds", "WAN Monitor Average Latency", monLabels, nil),
 		LanRxPackets:   prometheus.NewDesc(ns+"lan_receive_packets_total", "LAN Receive Packets Total", labels, nil),
 		LanRxBytes:     prometheus.NewDesc(ns+"lan_receive_bytes_total", "LAN Receive Bytes Total", labels, nil),
 		LanRxDropped:   prometheus.NewDesc(ns+"lan_receive_dropped_total", "LAN Receive Dropped Total", labels, nil),
@@ -205,5 +222,61 @@ func (u *promUnifi) exportWANPorts(r report, labels []string, wans ...unifi.Wan)
 			{u.USG.WanTxMulticast, counter, wan.TxMulticast, labelWan},
 			{u.USG.WanBytesR, gauge, wan.BytesR, labelWan},
 		})
+
+		// Older gateways do not measure WAN health; don't report them as 0% available.
+		// A WAN that is offline reports latency as 0; don't report that as perfect latency.
+		if wan.Latency.Val > 0 {
+			r.send([]*metric{{u.USG.WanLatency, gauge, wan.Latency.Val / 1000, labelWan}})
+		}
+
+		if wan.Availability.Txt != "" {
+			r.send([]*metric{{u.USG.WanAvailable, gauge, wan.Availability, labelWan}})
+		}
+	}
+}
+
+// exportWANHealth emits per-WAN health keyed by WAN network group (WAN, WAN2).
+// Unlike exportWANPorts, it does not skip a WAN whose port is down.
+// uptime_stats availability is left out: it is the same statistic as unpoller_wan_uptime_percentage.
+// uptime_stats latency_average is left out too: its averaging window varies in length.
+func (u *promUnifi) exportWANHealth(r report, labels []string, stats map[string]*unifi.UptimeStats, status map[string]string) {
+	for wan, s := range status {
+		labelStatus := []string{wan, labels[1], labels[2], labels[3], labels[4], s}
+		r.send([]*metric{{u.USG.WanStatus, gauge, s == "online", labelStatus}})
+	}
+
+	for wan, s := range stats {
+		if s == nil {
+			continue
+		}
+
+		labelWan := []string{wan, labels[1], labels[2], labels[3], labels[4]}
+
+		// While a WAN is offline the controller omits uptime and reports downtime instead.
+		if s.Uptime.Txt != "" {
+			r.send([]*metric{{u.USG.StatsUptime, gauge, s.Uptime, labelWan}})
+		}
+
+		if s.Downtime.Txt != "" {
+			r.send([]*metric{{u.USG.StatsDowntime, gauge, s.Downtime, labelWan}})
+		}
+
+		u.exportUptimeMonitors(r, labelWan, "false", s.Monitors)
+		u.exportUptimeMonitors(r, labelWan, "true", s.AlertingMonitors)
+	}
+}
+
+func (u *promUnifi) exportUptimeMonitors(r report, labelWan []string, alerting string, monitors []unifi.UptimeMonitor) {
+	for _, m := range monitors {
+		labelMon := slices.Concat(labelWan, []string{m.Target, m.Type, alerting})
+
+		if m.Availability.Txt != "" {
+			r.send([]*metric{{u.USG.MonAvailable, gauge, m.Availability, labelMon}})
+		}
+
+		// A failing monitor reports latency as 0 or omits it.
+		if m.LatencyAverage.Val > 0 {
+			r.send([]*metric{{u.USG.MonLatency, gauge, m.LatencyAverage.Val / 1000, labelMon}})
+		}
 	}
 }

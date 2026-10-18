@@ -39,6 +39,7 @@ func (u *promUnifi) exportUXG(r report, d *unifi.UXG) {
 		u.exportPRTtable(r, labels, d.PortTable)
 		// Gateway Data
 		u.exportWANPorts(r, labels, d.Wan1, d.Wan2)
+		u.exportWANHealth(r, labels, d.UptimeStats, d.LastWanStatus)
 		u.exportUSGstats(r, labels, gw, d.SpeedtestStatus, d.Uplink)
 		// Dream Machine System Data.
 		r.send([]*metric{

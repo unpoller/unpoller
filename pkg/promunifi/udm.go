@@ -104,6 +104,7 @@ func (u *promUnifi) exportUDM(r report, d *unifi.UDM) {
 		u.exportPRTtable(r, append(labels, tag), d.PortTable)
 		// Gateway Data
 		u.exportWANPorts(r, append(labels, tag), d.Wan1, d.Wan2)
+		u.exportWANHealth(r, append(labels, tag), d.UptimeStats, d.LastWanStatus)
 		u.exportUSGstats(r, append(labels, tag), d.Stat.Gw, d.SpeedtestStatus, d.Uplink)
 		// Dream Machine System Data.
 		r.send([]*metric{

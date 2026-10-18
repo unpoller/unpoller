@@ -61,6 +61,7 @@ func (u *InfluxUnifi) batchUXG(r report, s *unifi.UXG) { // nolint: funlen
 	r.send(&metric{Table: "usg", Tags: tags, Fields: fields})
 	u.batchNetTable(r, tags, s.NetworkTable)
 	u.batchUSGwans(r, tags, s.Wan1, s.Wan2)
+	u.batchWANHealth(r, tags, s.UptimeStats, s.LastWanStatus)
 
 	tags = map[string]string{
 		"mac":       s.Mac,
