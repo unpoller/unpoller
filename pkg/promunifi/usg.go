@@ -109,7 +109,7 @@ func (u *promUnifi) exportUSG(r report, d *unifi.USG) {
 		u.exportBYTstats(r, labels, d.TxBytes, d.RxBytes)
 		u.exportSYSstats(r, labels, d.SysStats, d.SystemStats)
 		u.exportUSGstats(r, labels, d.Stat.Gw, d.SpeedtestStatus, d.Uplink)
-		u.exportSTAcount(r, labels, d.UserNumSta, d.GuestNumSta, d.NumDesktop, d.UserNumSta, d.GuestNumSta)
+		u.exportSTAcount(r, labels, d.UserNumSta, d.GuestNumSta, d.NumDesktop, d.NumMobile, d.NumHandheld)
 		r.send([]*metric{
 			{u.Device.Info, gauge, 1.0, append(baseLabels, infoLabels...)},
 			{u.Device.Uptime, gauge, d.Uptime, labels},
