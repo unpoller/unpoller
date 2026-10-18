@@ -151,6 +151,7 @@ func (u *DatadogUnifi) batchUDM(r report, s *unifi.UDM) { // nolint: funlen
 
 	u.batchNetTable(r, tags, s.NetworkTable)
 	u.batchUSGwans(r, tags, s.Wan1, s.Wan2)
+	u.batchWANHealth(r, tags, s.UptimeStats, s.LastWanStatus)
 
 	tags = cleanTags(map[string]string{
 		"mac":       s.Mac,

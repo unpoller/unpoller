@@ -298,8 +298,12 @@ gauges:
   - unifi.usg.uplink_speed
   - unifi.usg.uptime
   - unifi.usg.user_num_sta
+  - unifi.usg.wan_monitors.availability
+  - unifi.usg.wan_monitors.latency_average
+  - unifi.usg.wan_ports.availability
   - unifi.usg.wan_ports.bytes_r
   - unifi.usg.wan_ports.full_duplex
+  - unifi.usg.wan_ports.latency
   - unifi.usg.wan_ports.max_speed
   - unifi.usg.wan_ports.rx_broadcast
   - unifi.usg.wan_ports.rx_bytes
@@ -316,6 +320,9 @@ gauges:
   - unifi.usg.wan_ports.tx_errors
   - unifi.usg.wan_ports.tx_multicast
   - unifi.usg.wan_ports.tx_packets
+  - unifi.usg.wan_status.online
+  - unifi.usg.wan_uptime_stats.downtime
+  - unifi.usg.wan_uptime_stats.uptime
   - unifi.usw.bytes
   - unifi.usw.guest_num_sta
   - unifi.usw.last_seen

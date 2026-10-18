@@ -1,6 +1,8 @@
 package influxunifi
 
 import (
+	"maps"
+
 	"github.com/unpoller/unifi/v6"
 )
 
@@ -125,7 +127,87 @@ func (u *InfluxUnifi) batchUSGwans(r report, tags map[string]string, wans ...uni
 			"tx_multicast": wan.TxMulticast.Val,
 		}
 
+		// Older gateways do not measure WAN health; don't report them as 0% available.
+		// A WAN that is offline reports latency as 0; don't report that as perfect latency.
+		if wan.Latency.Val > 0 {
+			fields["latency"] = wan.Latency.Val
+		}
+
+		if wan.Availability.Txt != "" {
+			fields["availability"] = wan.Availability.Val
+		}
+
 		r.send(&metric{Table: "usg_wan_ports", Tags: tags, Fields: fields})
+	}
+}
+
+// batchWANHealth records per-WAN health keyed by WAN network group (WAN, WAN2).
+// Unlike batchUSGwans, it does not skip a WAN whose port is down.
+// uptime_stats availability is left out: it is the same statistic as the wan uptime_percentage field.
+// uptime_stats latency_average is left out too: its averaging window varies in length.
+func (u *InfluxUnifi) batchWANHealth(
+	r report, tags map[string]string, stats map[string]*unifi.UptimeStats, status map[string]string,
+) {
+	for wan, s := range status {
+		r.send(&metric{Table: "usg_wan_status", Tags: wanHealthTags(tags, wan), Fields: map[string]any{"status": s}})
+	}
+
+	for wan, s := range stats {
+		if s == nil {
+			continue
+		}
+
+		tags := wanHealthTags(tags, wan)
+		fields := map[string]any{}
+
+		// While a WAN is offline the controller omits uptime and reports downtime instead.
+		if s.Uptime.Txt != "" {
+			fields["uptime"] = s.Uptime.Val
+		}
+
+		if s.Downtime.Txt != "" {
+			fields["downtime"] = s.Downtime.Val
+		}
+
+		if len(fields) > 0 {
+			r.send(&metric{Table: "usg_wan_uptime_stats", Tags: tags, Fields: fields})
+		}
+
+		u.batchUptimeMonitors(r, tags, "false", s.Monitors)
+		u.batchUptimeMonitors(r, tags, "true", s.AlertingMonitors)
+	}
+}
+
+func (u *InfluxUnifi) batchUptimeMonitors(r report, tags map[string]string, alerting string, monitors []unifi.UptimeMonitor) {
+	for _, m := range monitors {
+		tags := maps.Clone(tags)
+		tags["target"] = m.Target
+		tags["type"] = m.Type
+		tags["alerting"] = alerting
+
+		fields := map[string]any{}
+
+		if m.Availability.Txt != "" {
+			fields["availability"] = m.Availability.Val
+		}
+
+		// A failing monitor reports latency as 0 or omits it.
+		if m.LatencyAverage.Val > 0 {
+			fields["latency_average"] = m.LatencyAverage.Val
+		}
+
+		if len(fields) > 0 {
+			r.send(&metric{Table: "usg_wan_monitors", Tags: tags, Fields: fields})
+		}
+	}
+}
+
+func wanHealthTags(tags map[string]string, wan string) map[string]string {
+	return map[string]string{
+		"device_name":      tags["name"],
+		"site_name":        tags["site_name"],
+		"source":           tags["source"],
+		"wan_networkgroup": wan,
 	}
 }
 

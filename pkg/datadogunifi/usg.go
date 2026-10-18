@@ -1,6 +1,8 @@
 package datadogunifi
 
 import (
+	"maps"
+
 	"github.com/unpoller/unifi/v6"
 )
 
@@ -131,8 +133,91 @@ func (u *DatadogUnifi) batchUSGwans(r report, tags map[string]string, wans ...un
 			"tx_multicast": wan.TxMulticast.Val,
 		}
 
+		// Older gateways do not measure WAN health; don't report them as 0% available.
+		// A WAN that is offline reports latency as 0; don't report that as perfect latency.
+		if wan.Latency.Val > 0 {
+			data["latency"] = wan.Latency.Val
+		}
+
+		if wan.Availability.Txt != "" {
+			data["availability"] = wan.Availability.Val
+		}
+
 		metricName := metricNamespace("usg.wan_ports")
 		reportGaugeForFloat64Map(r, metricName, data, tags)
+	}
+}
+
+// batchWANHealth reports per-WAN health keyed by WAN network group (WAN, WAN2).
+// Unlike batchUSGwans, it does not skip a WAN whose port is down.
+// uptime_stats availability is left out: it is the same statistic as the wan uptime_percentage gauge.
+// uptime_stats latency_average is left out too: its averaging window varies in length.
+func (u *DatadogUnifi) batchWANHealth(
+	r report, tags map[string]string, stats map[string]*unifi.UptimeStats, status map[string]string,
+) {
+	for wan, s := range status {
+		tags := wanHealthTags(tags, wan)
+		tags["status"] = s
+
+		online := 0.0
+		if s == "online" {
+			online = 1.0
+		}
+
+		_ = r.reportGauge(metricNamespace("usg.wan_status")("online"), online, tagMapToTags(cleanTags(tags)))
+	}
+
+	for wan, s := range stats {
+		if s == nil {
+			continue
+		}
+
+		tags := cleanTags(wanHealthTags(tags, wan))
+		data := map[string]float64{}
+
+		// While a WAN is offline the controller omits uptime and reports downtime instead.
+		if s.Uptime.Txt != "" {
+			data["uptime"] = s.Uptime.Val
+		}
+
+		if s.Downtime.Txt != "" {
+			data["downtime"] = s.Downtime.Val
+		}
+
+		reportGaugeForFloat64Map(r, metricNamespace("usg.wan_uptime_stats"), data, tags)
+		u.batchUptimeMonitors(r, tags, "false", s.Monitors)
+		u.batchUptimeMonitors(r, tags, "true", s.AlertingMonitors)
+	}
+}
+
+func (u *DatadogUnifi) batchUptimeMonitors(r report, tags map[string]string, alerting string, monitors []unifi.UptimeMonitor) {
+	for _, m := range monitors {
+		tags := maps.Clone(tags)
+		tags["target"] = m.Target
+		tags["type"] = m.Type
+		tags["alerting"] = alerting
+
+		data := map[string]float64{}
+
+		if m.Availability.Txt != "" {
+			data["availability"] = m.Availability.Val
+		}
+
+		// A failing monitor reports latency as 0 or omits it.
+		if m.LatencyAverage.Val > 0 {
+			data["latency_average"] = m.LatencyAverage.Val
+		}
+
+		reportGaugeForFloat64Map(r, metricNamespace("usg.wan_monitors"), data, cleanTags(tags))
+	}
+}
+
+func wanHealthTags(tags map[string]string, wan string) map[string]string {
+	return map[string]string{
+		"device_name":      tags["name"],
+		"site_name":        tags["site_name"],
+		"source":           tags["source"],
+		"wan_networkgroup": wan,
 	}
 }
 

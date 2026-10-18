@@ -984,6 +984,18 @@ points:
       rx_packets: float
       tx_bytes: float
       tx_packets: float
+  usg_wan_monitors:
+    tags:
+      - alerting
+      - device_name
+      - site_name
+      - source
+      - target
+      - type
+      - wan_networkgroup
+    fields:
+      availability: float
+      latency_average: float
   usg_wan_ports:
     tags:
       - device_name
@@ -997,10 +1009,12 @@ points:
       - type
       - up
     fields:
+      availability: float
       bytes-r: float
       full_duplex: bool
       gateway: string
       is_uplink: bool
+      latency: float
       max_speed: float
       rx_broadcast: float
       rx_bytes: float
@@ -1017,6 +1031,23 @@ points:
       tx_errors: float
       tx_multicast: float
       tx_packets: float
+  usg_wan_status:
+    tags:
+      - device_name
+      - site_name
+      - source
+      - wan_networkgroup
+    fields:
+      status: string
+  usg_wan_uptime_stats:
+    tags:
+      - device_name
+      - site_name
+      - source
+      - wan_networkgroup
+    fields:
+      downtime: float
+      uptime: float
   usw:
     tags:
       - mac
