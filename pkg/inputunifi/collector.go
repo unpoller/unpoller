@@ -240,22 +240,38 @@ func (u *InputUnifi) pollNetwork(c *Controller, sites []*unifi.Site, m *Metrics)
 		}
 	}
 
-	// Get DHCP leases with associations.
+	// Get DHCP leases and associate them with the clients and devices fetched above.
+	// GetActiveDHCPLeasesWithAssociations would fetch stat/sta, stat/device and device-tags a
+	// second time in the same cycle; on UniFi OS consoles every device-tags call leaks an HTTP/2
+	// stream inside unifi-core, so the duplicate is not free.
 	// Wrapped in recover so a nil-pointer panic in the library (e.g. when a 401 causes nil devices)
 	// never crashes the poller. See https://github.com/unpoller/unpoller/issues/965
 	func() {
 		defer func() {
 			if r := recover(); r != nil {
-				u.LogErrorf("GetActiveDHCPLeasesWithAssociations panic recovered (see issue #965): %v", r)
+				u.LogErrorf("DHCP lease association panic recovered (see issue #965): %v", r)
 			}
 		}()
 
-		if m.DHCPLeases, err = c.Unifi.GetActiveDHCPLeasesWithAssociations(sites); err != nil {
+		leases, err := c.Unifi.GetActiveDHCPLeases(sites)
+		if err != nil {
 			// Don't fail collection if DHCP leases fail - older controllers may not have this endpoint
-			u.LogDebugf("unifi.GetActiveDHCPLeasesWithAssociations(%s): %v (continuing)", c.URL, err)
-		} else {
-			u.LogDebugf("Found %d DHCPLeases entries", len(m.DHCPLeases))
+			u.LogDebugf("unifi.GetActiveDHCPLeases(%s): %v (continuing)", c.URL, err)
+
+			return
 		}
+
+		networks, err := c.Unifi.GetNetworks(sites)
+		if err != nil {
+			u.LogDebugf("unifi.GetNetworks(%s): %v (continuing without network associations)", c.URL, err)
+		}
+
+		if err := c.Unifi.AssociateDHCPLeases(leases, m.Clients, m.Devices, networks); err != nil {
+			u.LogDebugf("unifi.AssociateDHCPLeases(%s): %v (continuing)", c.URL, err)
+		}
+
+		m.DHCPLeases = leases
+		u.LogDebugf("Found %d DHCPLeases entries", len(m.DHCPLeases))
 	}()
 
 	// Get WAN enriched configuration
