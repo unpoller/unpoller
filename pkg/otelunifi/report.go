@@ -167,9 +167,9 @@ func (u *OtelOutput) exportClients(ctx context.Context, meter metric.Meter, m *p
 			u.recordGauge(ctx, meter, r, "unifi_client_rssi_db",
 				"Client RSSI in dBm", c.Rssi.Val, wifiAttrs)
 			u.recordGauge(ctx, meter, r, "unifi_client_tx_rate_bps",
-				"Client transmit rate in bps", c.TxRate.Val, wifiAttrs)
+				"Client transmit rate in bps", c.TxRate.Val*1000, wifiAttrs)
 			u.recordGauge(ctx, meter, r, "unifi_client_rx_rate_bps",
-				"Client receive rate in bps", c.RxRate.Val, wifiAttrs)
+				"Client receive rate in bps", c.RxRate.Val*1000, wifiAttrs)
 		}
 	}
 }
