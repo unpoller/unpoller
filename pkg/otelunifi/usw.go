@@ -110,7 +110,7 @@ func (u *OtelOutput) exportUSWPort(
 	u.recordGauge(ctx, meter, r, "unifi_device_usw_port_tx_dropped",
 		"Switch port transmit dropped total", p.TxDropped.Val, portAttrs)
 	u.recordGauge(ctx, meter, r, "unifi_device_usw_port_poe_current_amps",
-		"Switch port PoE current in amps", p.PoeCurrent.Val, portAttrs)
+		"Switch port PoE current in amps", p.PoeCurrent.Val/1000, portAttrs)
 	u.recordGauge(ctx, meter, r, "unifi_device_usw_port_poe_power_watts",
 		"Switch port PoE power in watts", p.PoePower.Val, portAttrs)
 	u.recordGauge(ctx, meter, r, "unifi_device_usw_port_poe_voltage",
