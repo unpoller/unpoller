@@ -42,8 +42,6 @@ gauges:
   - unifi.pdu.mem_buffer 
   - unifi.pdu.mem_total 
   - unifi.pdu.mem_used 
-  - unifi.pdu.memory 
-  - unifi.pdu.network 
   - unifi.pdu.outlet_ac_power_budget 
   - unifi.pdu.outlet_ac_power_consumption 
   - unifi.pdu.outlet_enabled 
@@ -58,7 +56,6 @@ gauges:
   - unifi.pdu.outlet_table.relay_state 
   - unifi.pdu.overheating 
   - unifi.pdu.power_source 
-  - unifi.pdu.probe 
   - unifi.pdu.rx_bytes 
   - unifi.pdu.stat_bytes 
   - unifi.pdu.stat_rx_bytes 
@@ -73,8 +70,12 @@ gauges:
   - unifi.pdu.stat_tx_packets 
   - unifi.pdu.stat_tx_retries 
   - unifi.pdu.state 
-  - unifi.pdu.sys 
   - unifi.pdu.system_uptime 
+  - unifi.pdu.temp_cpu
+  - unifi.pdu.temp_memory
+  - unifi.pdu.temp_network
+  - unifi.pdu.temp_probe
+  - unifi.pdu.temp_sys
   - unifi.pdu.total_max_power 
   - unifi.pdu.tx_bytes 
   - unifi.pdu.upgradeable 
@@ -123,10 +124,7 @@ gauges:
   - unifi.uap.mem_buffer
   - unifi.uap.mem_total
   - unifi.uap.mem_used
-  - unifi.uap.memory
-  - unifi.uap.network
   - unifi.uap.num_sta
-  - unifi.uap.probe
   - unifi.uap.rx_bytes
   - unifi.uap.stat_guest-rx_bytes
   - unifi.uap.stat_guest-rx_crypts
@@ -161,8 +159,12 @@ gauges:
   - unifi.uap.stat_user-tx_packets
   - unifi.uap.stat_user-tx_retries
   - unifi.uap.state
-  - unifi.uap.sys
   - unifi.uap.system_uptime
+  - unifi.uap.temp_cpu
+  - unifi.uap.temp_memory
+  - unifi.uap.temp_network
+  - unifi.uap.temp_probe
+  - unifi.uap.temp_sys
   - unifi.uap.tx_bytes
   - unifi.uap.upgradeable
   - unifi.uap.uplink_full_duplex
@@ -263,8 +265,6 @@ gauges:
   - unifi.usg.mem_buffer
   - unifi.usg.mem_total
   - unifi.usg.mem_used
-  - unifi.usg.memory
-  - unifi.usg.network
   - unifi.usg.networks.num_sta
   - unifi.usg.networks.rx_bytes
   - unifi.usg.networks.rx_packets
@@ -273,7 +273,6 @@ gauges:
   - unifi.usg.num_desktop
   - unifi.usg.num_handheld
   - unifi.usg.num_mobile
-  - unifi.usg.probe
   - unifi.usg.rx_bytes
   - unifi.usg.speedtest_status_latency
   - unifi.usg.speedtest_status_ping
@@ -288,9 +287,11 @@ gauges:
   - unifi.usg.storage_foo_pct
   - unifi.usg.storage_foo_size
   - unifi.usg.storage_foo_used
-  - unifi.usg.sys
   - unifi.usg.system_uptime
   - unifi.usg.temp_cpu
+  - unifi.usg.temp_memory
+  - unifi.usg.temp_network
+  - unifi.usg.temp_probe
   - unifi.usg.temp_sys
   - unifi.usg.tx_bytes
   - unifi.usg.upgradeable
@@ -371,7 +372,7 @@ gauges:
   - unifi.ubb.mem_used
   - unifi.ubb.cpu
   - unifi.ubb.system_uptime
-  - unifi.ubb.probe
+  - unifi.ubb.temp_probe
   - unifi.ubb.mem_total
   - unifi.ubb.mem_buffer
   - unifi.ubb.bytes
@@ -380,13 +381,14 @@ gauges:
   - unifi.ubb.tx_bytes
   - unifi.ubb.loadavg_15
   - unifi.ubb.user_num_sta
-  - unifi.ubb.memory
+  - unifi.ubb.temp_memory
   - unifi.ubb.rx_bytes
   - unifi.ubb.last_seen
-  - unifi.ubb.sys
+  - unifi.ubb.temp_sys
+  - unifi.ubb.temp_cpu
   - unifi.ubb.uptime
   - unifi.ubb.mem
-  - unifi.ubb.network
+  - unifi.ubb.temp_network
   - unifi.ubb.uplink_speed
   - unifi.ubb.uplink_latency
   - unifi.ubb.uplink_max_speed
@@ -491,15 +493,16 @@ gauges:
   - unifi.ubb.stat_rx_errors
   - unifi.uci.mem_total
   - unifi.ubb.stat_rx_packets
-  - unifi.uci.sys
+  - unifi.uci.temp_sys
+  - unifi.uci.temp_cpu
   - unifi.uci.bytes
   - unifi.uci.stat_bytes
   - unifi.uci.stat_rx_errors
   - unifi.ubb.stat_tx_bytes
   - unifi.uci.rx_bytes
   - unifi.uci.mem_used
-  - unifi.uci.probe
-  - unifi.uci.memory
+  - unifi.uci.temp_probe
+  - unifi.uci.temp_memory
   - unifi.uci.mem_buffer
   - unifi.uci.uptime
   - unifi.ubb.stat_tx_packets
@@ -516,7 +519,7 @@ gauges:
   - unifi.uci.stat_rx_dropped
   - unifi.uci.system_uptime
   - unifi.uci.stat_tx_errors
-  - unifi.uci.network
+  - unifi.uci.temp_network
   - unifi.ubb.stat_tx_errors
   - unifi.uci.loadavg_1
   - unifi.uci.loadavg_5
@@ -542,10 +545,7 @@ gauges:
   - unifi.udb.mem_buffer
   - unifi.udb.mem_total
   - unifi.udb.mem_used
-  - unifi.udb.memory
-  - unifi.udb.network
   - unifi.udb.num_sta
-  - unifi.udb.probe
   - unifi.udb.rx_bytes
   - unifi.udb.satisfaction
   - unifi.udb.stat_bytes
@@ -561,8 +561,12 @@ gauges:
   - unifi.udb.stat_tx_packets
   - unifi.udb.stat_tx_retries
   - unifi.udb.state
-  - unifi.udb.sys
   - unifi.udb.system_uptime
+  - unifi.udb.temp_cpu
+  - unifi.udb.temp_memory
+  - unifi.udb.temp_network
+  - unifi.udb.temp_probe
+  - unifi.udb.temp_sys
   - unifi.udb.total_max_power
   - unifi.udb.tx_bytes
   - unifi.udb.upgradeable
@@ -597,8 +601,6 @@ gauges:
   - unifi.umbb.mem_buffer
   - unifi.umbb.mem_total
   - unifi.umbb.mem_used
-  - unifi.umbb.memory
-  - unifi.umbb.network
   - unifi.umbb.nr_carriers
   - unifi.umbb.nr_max_bitrate_dl
   - unifi.umbb.nr_max_bitrate_ul
@@ -606,7 +608,6 @@ gauges:
   - unifi.umbb.nr_rsrq
   - unifi.umbb.nr_snr
   - unifi.umbb.primary_slot
-  - unifi.umbb.probe
   - unifi.umbb.registration_state
   - unifi.umbb.roaming
   - unifi.umbb.rsrp
@@ -616,8 +617,12 @@ gauges:
   - unifi.umbb.signal_percent
   - unifi.umbb.snr
   - unifi.umbb.state
-  - unifi.umbb.sys
   - unifi.umbb.system_uptime
+  - unifi.umbb.temp_cpu
+  - unifi.umbb.temp_memory
+  - unifi.umbb.temp_network
+  - unifi.umbb.temp_probe
+  - unifi.umbb.temp_sys
   - unifi.umbb.ul_bandwidth_mhz
   - unifi.umbb.upgradeable
   - unifi.umbb.uplink_latency

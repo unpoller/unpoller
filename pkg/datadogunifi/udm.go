@@ -58,10 +58,9 @@ func (u *DatadogUnifi) batchSysStats(s unifi.SysStats, ss unifi.SystemStats) map
 
 	for k, v := range ss.Temps {
 		temp := v.Celsius()
-		k = safeStatsName(k)
 
 		if temp != 0 && k != "" {
-			m[k] = float64(temp)
+			m[safeStatsName("temp_"+k)] = float64(temp)
 		}
 	}
 
