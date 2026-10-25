@@ -59,10 +59,20 @@ func (u *OtelOutput) exportUAP(ctx context.Context, meter metric.Meter, r *Repor
 			attribute.String("radio_name", radio.Name),
 		)
 
-		u.recordGauge(ctx, meter, r, "unifi_device_uap_radio_channel",
-			"UAP radio channel", float64(radio.Channel.Val), radioAttrs)
-		u.recordGauge(ctx, meter, r, "unifi_device_uap_radio_tx_power_dbm",
-			"UAP radio transmit power in dBm", radio.TxPower.Val, radioAttrs)
+		// radio_table holds the configured channel and power ("auto" decodes to 0);
+		// radio_table_stats holds the ones in use, matched by radio name.
+		for _, stats := range s.RadioTableStats {
+			if stats.Name != radio.Name {
+				continue
+			}
+
+			u.recordGauge(ctx, meter, r, "unifi_device_uap_radio_channel",
+				"UAP radio channel", float64(stats.Channel.Val), radioAttrs)
+			u.recordGauge(ctx, meter, r, "unifi_device_uap_radio_tx_power_dbm",
+				"UAP radio transmit power in dBm", stats.TxPower.Val, radioAttrs)
+
+			break
+		}
 	}
 
 	for _, vap := range s.VapTable {
