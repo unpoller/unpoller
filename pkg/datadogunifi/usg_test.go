@@ -167,3 +167,24 @@ func TestBatchSysStatsPrefixesTemperatures(t *testing.T) {
 	assert.NotContains(t, stats, "board__cpu_")
 	assert.NotContains(t, stats, "board__phy_")
 }
+
+func TestBatchSysStatsSkipsNullTemperature(t *testing.T) {
+	t.Parallel()
+
+	// A sensor reported as null decodes to a nil *FlexTemp; the other sensors must still be written.
+	const raw = `{"CPU":null,"PHY":"77 C"}`
+
+	var temps unifi.TempStatusByName
+
+	require.NoError(t, json.Unmarshal([]byte(raw), &temps))
+
+	var stats map[string]float64
+
+	require.NotPanics(t, func() {
+		stats = (&DatadogUnifi{}).batchSysStats(unifi.SysStats{}, unifi.SystemStats{CPU: unifi.FlexInt{Val: 12}, Temps: temps})
+	})
+
+	assert.Equal(t, 12.0, stats["cpu"])
+	assert.Equal(t, 77.0, stats["temp_phy"])
+	assert.NotContains(t, stats, "temp_cpu")
+}

@@ -113,7 +113,7 @@ func (u *promUnifi) exportUSG(r report, d *unifi.USG) {
 		}
 
 		for k, v := range d.SystemStats.Temps {
-			temp := v.CelsiusInt64()
+			temp := int64(v.CelsiusSafe())
 			k = strings.ReplaceAll(strings.ReplaceAll(strings.ReplaceAll(k, " ", "_"), ")", ""), "(", "")
 
 			if k = strings.ToLower(k); temp != 0 && k != "" {

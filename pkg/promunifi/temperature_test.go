@@ -84,3 +84,16 @@ func TestExportTemperatureAndStorageKeepTheirLabels(t *testing.T) {
 		"udm,/data,nvme0,size,lobby", "udm,/data,nvme0,used,lobby", "udm,/boot,emmc,size,lobby", "udm,/boot,emmc,used,lobby",
 	}, series(t, r.sent, p.Device.Storage, "name", "mountpoint", "storage_name", "storage_reading", "tag"))
 }
+
+func TestExportUSGSkipsNullSystemTemperature(t *testing.T) {
+	t.Parallel()
+
+	// A sensor reported as null decodes to a nil *FlexTemp; the other sensors must still be exported.
+	usg := decode[unifi.USG](t, `{"name": "usg", "adopted": true, "system-stats": {"temps": {"CPU": null, "Board (CPU)": "51 C"}}}`)
+	p, r := testProm(), &fakeReport{}
+
+	require.NotPanics(t, func() { p.exportUSG(r, usg) })
+
+	assert.Equal(t, []string{"usg,board_cpu,board_cpu,"},
+		series(t, r.sent, p.Device.Temperature, "name", "temp_area", "temp_type", "tag"))
+}
