@@ -278,7 +278,6 @@ points:
       stat_user-tx_errors: float
       stat_user-tx_packets: float
       stat_user-tx_retries: float
-      state: string
       system_uptime: float
       temp_cpu: float
       temp_memory: float
