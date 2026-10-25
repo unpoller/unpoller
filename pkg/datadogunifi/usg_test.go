@@ -145,3 +145,25 @@ func TestBatchWANHealthDuringOutage(t *testing.T) {
 		"unifi.usg.wan_monitors.availability alerting:true,device_name:Gateway,target:ping.ui.com,type:icmp,wan_networkgroup:WAN": 0,
 	}, got, "0 and missing latencies are skipped")
 }
+
+func TestBatchSysStatsPrefixesTemperatures(t *testing.T) {
+	t.Parallel()
+
+	// The sensor map from the comment on unifi.SystemStats, decoded the way a controller sends it.
+	const raw = `{"Board (CPU)":"51 C","Board (PHY)":"51 C","CPU":"72 C","PHY":"77 C"}`
+
+	var temps unifi.TempStatusByName
+
+	require.NoError(t, json.Unmarshal([]byte(raw), &temps))
+
+	stats := (&DatadogUnifi{}).batchSysStats(unifi.SysStats{}, unifi.SystemStats{CPU: unifi.FlexInt{Val: 12}, Temps: temps})
+
+	require.Equal(t, 12.0, stats["cpu"], "the CPU sensor must not replace CPU utilization")
+	assert.Equal(t, 72.0, stats["temp_cpu"])
+	assert.Equal(t, 77.0, stats["temp_phy"])
+	assert.Equal(t, 51.0, stats["temp_board__cpu_"])
+	assert.Equal(t, 51.0, stats["temp_board__phy_"])
+	assert.NotContains(t, stats, "phy")
+	assert.NotContains(t, stats, "board__cpu_")
+	assert.NotContains(t, stats, "board__phy_")
+}
