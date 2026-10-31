@@ -69,8 +69,8 @@ github.com/influxdata/line-protocol/v2 v2.0.0-20210312151457-c52fdecb625a/go.mod
 github.com/influxdata/line-protocol/v2 v2.1.0/go.mod h1:QKw43hdUBg3GTk2iC3iyCxksNj7PX9aUSeYOYE/ceHY=
 github.com/influxdata/line-protocol/v2 v2.2.1 h1:EAPkqJ9Km4uAxtMRgUubJyqAr6zgWM0dznKMLRauQRE=
 github.com/influxdata/line-protocol/v2 v2.2.1/go.mod h1:DmB3Cnh+3oxmG6LOBIxce4oaL4CPj3OmMPgvauXh+tM=
-github.com/jtatum/unifi/v6 v6.5.1-0.20261031063231-5ba9f7311902 h1:iK1EwF3S0FZbD4l9voDnjaPOW8yn7xeJknbBZehcqxM=
-github.com/jtatum/unifi/v6 v6.5.1-0.20261031063231-5ba9f7311902/go.mod h1:5b8E4tvN0ONSpS/OqTdQPA7ZBElmpWPQOIbicwhxHc4=
+github.com/jtatum/unifi/v6 v6.5.1-0.20261031065917-165db205fb05 h1:cdm/jAiiP5INnZC5Gg+8gQ8e+pMwPzL6vZTwRXgV8YI=
+github.com/jtatum/unifi/v6 v6.5.1-0.20261031065917-165db205fb05/go.mod h1:5b8E4tvN0ONSpS/OqTdQPA7ZBElmpWPQOIbicwhxHc4=
 github.com/juju/gnuflag v0.0.0-20171113085948-2ce1bb71843d/go.mod h1:2PavIy+JPciBPrBUjwbNvtwB6RQlve+hkpll6QSNmOE=
 github.com/klauspost/compress v1.20.1 h1:T7kKElXUMXrUJ2E9QhQhxFtcK5rPyLdsGZvdbLMPdiQ=
 github.com/klauspost/compress v1.20.1/go.mod h1:LUdAzn7YLVvxLpc7y3V1m40wESHTgc1422pwwBSKYuI=

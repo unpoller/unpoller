@@ -146,6 +146,37 @@ func TestConsoleFailureDoesNotFailPollOrKeepOldReading(t *testing.T) {
 	}
 }
 
+func TestConsolePartialResponseDoesNotKeepOldReading(t *testing.T) {
+	t.Parallel()
+
+	var partial atomic.Bool
+
+	u := consoleInput(t, func(w http.ResponseWriter, _ *http.Request) {
+		body := consoleBody
+		if partial.Load() {
+			body = `{"name":"Console","hardware":{"shortname":"example"}}`
+		}
+
+		_, err := w.Write([]byte(body))
+		assert.NoError(t, err)
+	})
+	filter := &poller.Filter{Path: u.Controllers[0].URL}
+	first, err := u.Metrics(filter)
+	require.NoError(t, err)
+	require.Len(t, first.ConsoleSystems, 1)
+	require.Len(t, first.ConsoleSystems[0].(*unifi.ConsoleSystem).Devices.UniFiOS, 1)
+	partial.Store(true)
+
+	second, err := u.Metrics(filter)
+	require.NoError(t, err)
+	require.Len(t, second.ConsoleSystems, 1)
+	system, ok := second.ConsoleSystems[0].(*unifi.ConsoleSystem)
+	require.True(t, ok)
+	assert.Empty(t, system.Devices.UniFiOS, "a partial response must not reuse an earlier update reading")
+	assert.Len(t, second.Sysinfos, 2)
+	assert.True(t, second.ControllerStatuses[0].Up)
+}
+
 func TestConsoleUpdatesSkipUnvalidatedAuthentication(t *testing.T) {
 	t.Parallel()
 

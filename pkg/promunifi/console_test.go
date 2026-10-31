@@ -67,3 +67,19 @@ func TestConsoleUnknownStatusOmitsUpdateGauge(t *testing.T) {
 	count := testutil.CollectAndCount(promunifi.NewConsoleCollectorForTest(&poller.Metrics{}))
 	assert.Zero(t, count, "a failed or unsupported collection has no console metrics")
 }
+
+func TestConsolePartialResponseOmitsFirmwareMetrics(t *testing.T) {
+	t.Parallel()
+
+	for _, body := range []string{
+		`{}`,
+		`{"name":"Console","hardware":{"shortname":"example"}}`,
+		`{"devices":null}`,
+		`{"devices":{"unifiOS":[]}}`,
+		`{"devices":{"unifiOS":[null]}}`,
+	} {
+		m := &poller.Metrics{ConsoleSystems: []any{consoleSystem(t, "home", body)}}
+		count := testutil.CollectAndCount(promunifi.NewConsoleCollectorForTest(m))
+		assert.Zero(t, count, "a partial response without firmware entries has no console metrics")
+	}
+}
