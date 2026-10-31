@@ -94,6 +94,7 @@ type Metrics struct {
 	DHCPLeases       []*unifi.DHCPLease
 	WANConfigs       []*unifi.WANEnrichedConfiguration
 	Sysinfos         []*unifi.Sysinfo
+	ConsoleSystem    *unifi.ConsoleSystem
 	FirewallPolicies []*unifi.FirewallPolicy
 	Topologies       []*unifi.Topology
 	PortAnomalies    []*unifi.PortAnomaly

@@ -3,6 +3,33 @@
 This package provides the interface to turn UniFi measurements into prometheus
 exported metrics. Requires the poller package for actual UniFi data collection.
 
+## UniFi OS updates
+
+For supported local session-authenticated consoles, two additional gauges expose
+UniFi OS updates independently of the Network application:
+
+| Metric (default namespace) | Labels | Meaning |
+| --- | --- | --- |
+| `unpoller_console_update_available` | `source`, `name` | `1` when an OS update is offered; `0` when explicitly up to date |
+| `unpoller_console_info` | `source`, `name`, `version`, `available_version`, `firmware_status` | Firmware metadata; value always `1` |
+
+There is one set of console readings per controller, not per Network site. Version
+labels live on the info metric so version changes do not reset an alert's `for`
+timer on the update gauge. Existing `controller_update_available` and
+`device_upgradable` metrics retain their Network API meaning.
+
+An offered version or `firmwareStatus: "updateAvailable"` produces `1`.
+`firmwareStatus: "upToDate"` without an offered version produces `0`. Other states
+without an offered version omit the update gauge. A missing/null offered version
+alone does not prove the console is up to date. If the endpoint is unavailable,
+forbidden, or cannot be decoded, both metrics are absent for that poll; other
+controller metrics continue to be collected.
+
+For an update alert, use `unpoller_console_update_available == 1`. Treat an absent
+series separately from `0`, and check `unpoller_prometheus_cache_age_seconds`
+when using the scrape cache. API-key, remote, Protect-only, and application-update
+collection are outside this initial scope.
+
 ## Scrape cache
 
 By default, Prometheus scrapes are served from an in-memory cache refreshed by a

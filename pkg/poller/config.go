@@ -102,6 +102,7 @@ type Metrics struct {
 	DHCPLeases         []any
 	WANConfigs         []any
 	Sysinfos           []any
+	ConsoleSystems     []any
 	FirewallPolicies   []any
 	Topologies         []any
 	PortAnomalies      []any

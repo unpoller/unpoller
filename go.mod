@@ -40,6 +40,7 @@ require (
 	github.com/influxdata/line-protocol/v2 v2.2.1 // indirect
 	github.com/klauspost/compress v1.20.1 // indirect
 	github.com/klauspost/cpuid/v2 v2.3.0 // indirect
+	github.com/kylelemons/godebug v1.1.0 // indirect
 	github.com/pierrec/lz4/v4 v4.1.26 // indirect
 	github.com/zeebo/xxh3 v1.1.0 // indirect
 	go.opentelemetry.io/auto/sdk v1.2.1 // indirect
@@ -72,3 +73,7 @@ require (
 	golang.org/x/sys v0.49.0 // indirect
 	google.golang.org/protobuf v1.36.12 // indirect
 )
+
+// Draft dependency: https://github.com/unpoller/unifi/pull/262.
+// Replace with an upstream release before merging.
+replace github.com/unpoller/unifi/v6 => github.com/jtatum/unifi/v6 v6.5.1-0.20261031063231-5ba9f7311902

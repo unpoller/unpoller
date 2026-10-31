@@ -345,7 +345,8 @@ func (u *InputUnifi) Metrics(filter *poller.Filter) (*poller.Metrics, error) {
 	// If we collected data from at least one controller, return success. ProtectDevices counts:
 	// a Protect-only console contributes no devices and no clients, and without it a filtered
 	// scrape of one would fall through to the dynamic-controller path and fail.
-	if len(metrics.Devices) > 0 || len(metrics.Clients) > 0 || len(metrics.ProtectDevices) > 0 {
+	// ConsoleSystems likewise allows a console with no adopted devices or clients.
+	if len(metrics.Devices) > 0 || len(metrics.Clients) > 0 || len(metrics.ProtectDevices) > 0 || len(metrics.ConsoleSystems) > 0 {
 		return metrics, nil
 	}
 
