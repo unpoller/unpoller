@@ -61,6 +61,7 @@ type promUnifi struct {
 	DHCPLease           *dhcplease
 	WAN                 *wan
 	Controller          *controller
+	Console             *console
 	FirewallPolicy      *firewallpolicy
 	Topology            *topology
 	PortAnomaly         *portanomaly
@@ -316,6 +317,7 @@ func (u *promUnifi) Run(c poller.Collect) error {
 	u.DHCPLease = descDHCPLease(u.Namespace + "_")
 	u.WAN = descWAN(u.Namespace + "_")
 	u.Controller = descController(u.Namespace + "_")
+	u.Console = descConsole(u.Namespace + "_")
 	u.FirewallPolicy = descFirewallPolicy(u.Namespace + "_")
 	u.Topology = descTopology(u.Namespace + "_")
 	u.PortAnomaly = descPortAnomaly(u.Namespace + "_")
@@ -657,7 +659,7 @@ func (u *promUnifi) Describe(ch chan<- *prometheus.Desc) {
 		u.LAG, u.MCLAGDomain, u.SwitchStack, u.DNSPolicy, u.RADIUSProfile,
 		u.TrafficMatchingList, u.HotspotVoucher,
 		u.DPIApplication, u.DPICategory, u.PendingDevice, u.Country,
-		u.UNASDevice, u.ProtectDevices,
+		u.UNASDevice, u.ProtectDevices, u.Console,
 	} {
 		v := reflect.Indirect(reflect.ValueOf(f))
 
@@ -819,7 +821,14 @@ func (u *promUnifi) loopExports(r report) {
 		}
 	}
 
-	// Export controller sysinfo metrics
+	// Export console-wide firmware independently of per-site controller metrics.
+	for _, s := range m.ConsoleSystems {
+		if system, ok := s.(*unifi.ConsoleSystem); ok {
+			u.exportConsoleSystem(r, system)
+		}
+	}
+
+	// Export controller sysinfo metrics.
 	for _, s := range m.Sysinfos {
 		if sysinfo, ok := s.(*unifi.Sysinfo); ok {
 			u.exportSysinfo(r, sysinfo)
