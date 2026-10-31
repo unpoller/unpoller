@@ -76,4 +76,4 @@ require (
 
 // Draft dependency: https://github.com/unpoller/unifi/pull/262.
 // Replace with an upstream release before merging.
-replace github.com/unpoller/unifi/v6 => github.com/jtatum/unifi/v6 v6.5.1-0.20261031063231-5ba9f7311902
+replace github.com/unpoller/unifi/v6 => github.com/jtatum/unifi/v6 v6.5.1-0.20261031065917-165db205fb05

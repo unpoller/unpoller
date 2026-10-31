@@ -21,9 +21,10 @@ timer on the update gauge. Existing `controller_update_available` and
 An offered version or `firmwareStatus: "updateAvailable"` produces `1`.
 `firmwareStatus: "upToDate"` without an offered version produces `0`. Other states
 without an offered version omit the update gauge. A missing/null offered version
-alone does not prove the console is up to date. If the endpoint is unavailable,
-forbidden, or cannot be decoded, both metrics are absent for that poll; other
-controller metrics continue to be collected.
+alone does not prove the console is up to date. A valid partial response without
+firmware entries produces neither metric. If the endpoint is unavailable,
+forbidden, or cannot be decoded, both metrics are also absent for that poll;
+other controller metrics continue to be collected.
 
 For an update alert, use `unpoller_console_update_available == 1`. Treat an absent
 series separately from `0`, and check `unpoller_prometheus_cache_age_seconds`
