@@ -94,28 +94,56 @@ func TestConsoleUpdatesCollectedOncePerController(t *testing.T) {
 func TestConsoleFailureDoesNotFailPollOrKeepOldReading(t *testing.T) {
 	t.Parallel()
 
-	var forbidden atomic.Bool
+	for _, tc := range []struct {
+		name     string
+		filtered bool
+		dynamic  bool
+	}{
+		{name: "global"},
+		{name: "target", filtered: true},
+		{name: "target with dynamic enabled", filtered: true, dynamic: true},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
 
-	u := consoleInput(t, func(w http.ResponseWriter, _ *http.Request) {
-		if forbidden.Load() {
-			w.WriteHeader(http.StatusForbidden)
+			var (
+				forbidden atomic.Bool
+				requests  atomic.Int32
+			)
 
-			return
-		}
+			u := consoleInput(t, func(w http.ResponseWriter, _ *http.Request) {
+				requests.Add(1)
 
-		_, err := w.Write([]byte(consoleBody))
-		assert.NoError(t, err)
-	})
-	first, err := u.Metrics(nil)
-	require.NoError(t, err)
-	require.Len(t, first.ConsoleSystems, 1)
-	forbidden.Store(true)
+				if forbidden.Load() {
+					w.WriteHeader(http.StatusForbidden)
 
-	second, err := u.Metrics(nil)
-	require.NoError(t, err)
-	assert.Empty(t, second.ConsoleSystems, "failed collection must not reuse an earlier update reading")
-	assert.Len(t, second.Sysinfos, 2)
-	assert.True(t, second.ControllerStatuses[0].Up)
+					return
+				}
+
+				_, err := w.Write([]byte(consoleBody))
+				assert.NoError(t, err)
+			})
+			u.Dynamic = tc.dynamic
+
+			var filter *poller.Filter
+
+			if tc.filtered {
+				filter = &poller.Filter{Path: u.Controllers[0].URL}
+			}
+
+			first, err := u.Metrics(filter)
+			require.NoError(t, err)
+			require.Len(t, first.ConsoleSystems, 1)
+			forbidden.Store(true)
+
+			second, err := u.Metrics(filter)
+			require.NoError(t, err)
+			assert.Empty(t, second.ConsoleSystems, "failed collection must not reuse an earlier update reading")
+			assert.Len(t, second.Sysinfos, 2)
+			assert.True(t, second.ControllerStatuses[0].Up)
+			assert.EqualValues(t, 2, requests.Load(), "a configured target must not be polled again as a dynamic target")
+		})
+	}
 }
 
 func TestConsoleUpdatesSkipUnvalidatedAuthentication(t *testing.T) {
