@@ -128,6 +128,12 @@ func (u *InputUnifi) pollController(c *Controller) (*poller.Metrics, error) {
 		if err := u.pollNetwork(c, sites, m); err != nil {
 			return nil, err
 		}
+
+		// Console firmware is independent of Network sites. Only local session
+		// authentication has been validated for the UniFi OS system endpoint.
+		if c.APIKey == "" && !c.Remote {
+			u.collectConsoleSystem(c, m)
+		}
 	}
 
 	// Protect Integration API — opt-in, requires protect_api_key (or api_key as a fallback).
@@ -868,6 +874,16 @@ func (u *InputUnifi) augmentMetrics(c *Controller, metrics *Metrics) *poller.Met
 
 	for _, sysinfo := range metrics.Sysinfos {
 		m.Sysinfos = append(m.Sysinfos, sysinfo)
+	}
+
+	if system := metrics.ConsoleSystem; system != nil {
+		for _, firmware := range system.Devices.UniFiOS {
+			if firmware != nil {
+				firmware.Name = RedactNamePII(firmware.Name, c.HashPII, c.DropPII)
+			}
+		}
+
+		m.ConsoleSystems = append(m.ConsoleSystems, system)
 	}
 
 	for _, policy := range metrics.FirewallPolicies {

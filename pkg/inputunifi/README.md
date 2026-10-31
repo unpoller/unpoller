@@ -6,6 +6,22 @@ Polls UniFi controllers and hands their metrics and events to every configured o
 All configuration lives under `[unifi]` — see the commented `[[unifi.controller]]` block in
 [`examples/up.conf.example`](../../examples/up.conf.example) for every available option.
 
+## UniFi OS updates
+
+For local controllers using username/password authentication with Network enabled,
+UnPoller also reads the console's `/api/system` endpoint once per poll, regardless
+of the number of sites. This supplies UniFi OS firmware information separately from
+the Network controller and device update flags. Console names respect `hash_pii`
+and `drop_pii`.
+
+This endpoint is a private UniFi OS API. Older controllers, restricted accounts,
+and firmware versions may not expose it. Failures are logged at debug level and
+do not stop other metrics from being collected. API-key authentication, remote
+controllers, and Protect-only configurations are not polled for this data.
+Network application updates are not included in this initial support.
+
+See the [Prometheus console metrics](../promunifi/README.md#unifi-os-updates).
+
 ## Protect-only consoles (UNVR)
 
 A **UNVR** or **UNVR Pro** runs UniFi Protect with *no Network application installed*.
