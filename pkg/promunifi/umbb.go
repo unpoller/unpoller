@@ -2,7 +2,9 @@ package promunifi
 
 import (
 	"math"
+	"net"
 	"strconv"
+	"strings"
 
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/unpoller/unifi/v6"
@@ -35,6 +37,19 @@ type umbb struct {
 	SimTxBytes        *prometheus.Desc
 	SimStateSeconds   *prometheus.Desc
 	SimInfo           *prometheus.Desc
+	ApnInfo           *prometheus.Desc
+	InetState         *prometheus.Desc
+	CellularIPv4      *prometheus.Desc
+	CellularIPv4Info  *prometheus.Desc
+	CellularIPv6      *prometheus.Desc
+	CellularIPv6Info  *prometheus.Desc
+	CellularMTU       *prometheus.Desc
+	IPv6PrefixInfo    *prometheus.Desc
+	IPv6PrefixLength  *prometheus.Desc
+	DataLimitEnabled  *prometheus.Desc
+	DataSoftLimit     *prometheus.Desc
+	DataWarningPct    *prometheus.Desc
+	DataUsedRatio     *prometheus.Desc
 }
 
 func descUMBB(ns string) *umbb {
@@ -81,6 +96,32 @@ func descUMBB(ns string) *umbb {
 			labelS, nil),
 		SimInfo: nd(ns+"mbb_sim_info", "SIM state. Always 1; display state and last network reject are labels.",
 			append(labelS, "display_state", "has_carrier", "metered", "network_reject_type", "network_reject_text"), nil),
+		ApnInfo: nd(ns+"mbb_apn_info", "APN profile in use. Always 1; APN and PDP details are labels.",
+			append(labelS, "apn", "pdp_type", "auth", "clat_enabled", "roaming"), nil),
+		InetState: nd(ns+"mbb_inet_state", "Cellular data session state as reported by the controller.", labelS, nil),
+		CellularIPv4: nd(ns+"mbb_cellular_ipv4_present",
+			"Modem has a cellular IPv4 address (1) or not (0).", labels, nil),
+		CellularIPv4Info: nd(ns+"mbb_cellular_ipv4_info",
+			"Cellular IPv4 address. Always 1; address, netmask, gateway and DNS are labels.",
+			append(labels, "address", "netmask", "gateway", "dns"), nil),
+		CellularIPv6: nd(ns+"mbb_cellular_ipv6_present",
+			"Modem has a cellular IPv6 address (1) or not (0).", labels, nil),
+		CellularIPv6Info: nd(ns+"mbb_cellular_ipv6_info",
+			"Cellular IPv6 address. Always 1; address, gateway and DNS are labels.",
+			append(labels, "address", "gateway", "dns"), nil),
+		CellularMTU: nd(ns+"mbb_cellular_mtu", "Cellular IPv4 MTU in bytes.", labels, nil),
+		IPv6PrefixInfo: nd(ns+"mbb_ipv6_prefix_info",
+			"Cellular IPv6 prefix. Always 1; prefix is a label.", append(labels, "prefix"), nil),
+		IPv6PrefixLength: nd(ns+"mbb_ipv6_prefix_length",
+			"Cellular IPv6 prefix length in bits.", labels, nil),
+		DataLimitEnabled: nd(ns+"mbb_sim_data_limit_enabled",
+			"SIM has a configured data limit (1) or not (0).", labelS, nil),
+		DataSoftLimit: nd(ns+"mbb_sim_data_soft_limit_bytes",
+			"Configured data soft limit in bytes; 0 means no limit.", labelS, nil),
+		DataWarningPct: nd(ns+"mbb_sim_data_warning_threshold_percent",
+			"Configured data warning threshold in percent.", labelS, nil),
+		DataUsedRatio: nd(ns+"mbb_sim_data_used_ratio",
+			"Data used divided by the configured soft limit, if a limit is set.", labelS, nil),
 	}
 }
 
@@ -131,6 +172,34 @@ func (u *promUnifi) exportMBB(r report, labels []string, d *unifi.UMBB) {
 		{u.UMBB.Info, gauge, 1.0, info},
 	})
 
+	ip4 := m.IPSettings
+	ip6 := m.IPv6Settings
+	r.send([]*metric{
+		{u.UMBB.CellularIPv4, gauge, boolToFloat(ip4.IPv4Address != ""), labels},
+		{u.UMBB.CellularIPv6, gauge, boolToFloat(ip6.IPv6Address != ""), labels},
+	})
+
+	if ip4.IPv4Address != "" {
+		r.send([]*metric{{u.UMBB.CellularIPv4Info, gauge, 1.0, append(append([]string{}, labels...),
+			ip4.IPv4Address, ip4.IPv4Netmask, ip4.IPv4Gateway, ip4.IPv4DNS)}})
+	}
+
+	if ip4.MTU.Val > 0 {
+		r.send([]*metric{{u.UMBB.CellularMTU, gauge, ip4.MTU.Val, labels}})
+	}
+
+	if ip6.IPv6Address != "" {
+		r.send([]*metric{{u.UMBB.CellularIPv6Info, gauge, 1.0, append(append([]string{}, labels...),
+			ip6.IPv6Address, ip6.IPv6Gateway, ip6.IPv6DNS)}})
+
+		if prefix, length := mbbPrefix(ip6.IPv6Address); prefix != "" {
+			r.send([]*metric{
+				{u.UMBB.IPv6PrefixInfo, gauge, 1.0, append(append([]string{}, labels...), prefix)},
+				{u.UMBB.IPv6PrefixLength, gauge, length, labels},
+			})
+		}
+	}
+
 	// Signal readings and bitrates are left out when the modem does not report them,
 	// so a missing reading is not mistaken for 0 dBm.
 	for _, s := range []struct {
@@ -175,6 +244,29 @@ func (u *promUnifi) exportMBB(r report, labels []string, d *unifi.UMBB) {
 			{u.UMBB.SimStateSeconds, gauge, sim.DisplayStateElapsed, simLabels},
 			{u.UMBB.SimInfo, gauge, 1.0, simInfo},
 		})
+
+		apn := sim.CurrentApn
+		if apn.Apn != "" {
+			r.send([]*metric{{u.UMBB.ApnInfo, gauge, 1.0, append(append([]string{}, simLabels...),
+				apn.Apn, apn.PdpType, apn.AuthType, strconv.FormatBool(apn.ClatEnabled.Val),
+				strconv.FormatBool(apn.Roaming.Val))}})
+		}
+
+		if sim.ConnectionInfo.InetState.Txt != "" {
+			r.send([]*metric{{u.UMBB.InetState, gauge, sim.ConnectionInfo.InetState.Val, simLabels}})
+		}
+
+		if override, ok := findMBBOverride(d.MbbOverrides.Sim, sim.Slot.Val); ok {
+			r.send([]*metric{
+				{u.UMBB.DataLimitEnabled, gauge, override.DataLimitEnabled.Val, simLabels},
+				{u.UMBB.DataSoftLimit, gauge, override.DataSoftLimitBytes.Val, simLabels},
+				{u.UMBB.DataWarningPct, gauge, override.DataWarningThreshold.Val, simLabels},
+			})
+			if override.DataSoftLimitBytes.Val > 0 {
+				used := sim.RxBytes.Val + sim.TxBytes.Val
+				r.send([]*metric{{u.UMBB.DataUsedRatio, gauge, used / override.DataSoftLimitBytes.Val, simLabels}})
+			}
+		}
 	}
 }
 
@@ -201,4 +293,47 @@ func finiteOrZero(v float64) float64 {
 	}
 
 	return v
+}
+
+func boolToFloat(v bool) float64 {
+	if v {
+		return 1
+	}
+
+	return 0
+}
+
+// mbbPrefix returns the network and prefix length from an address such as
+// "2a01:598:ba0a:7710::1/64". The controller reports the cellular address with
+// the prefix length, so the prefix is available even on library versions that
+// do not yet decode ipv6_ui_prefix.
+func mbbPrefix(address string) (string, float64) {
+	_, network, err := net.ParseCIDR(address)
+	if err != nil {
+		return "", 0
+	}
+
+	ones, _ := network.Mask.Size()
+	if ones == 0 && !strings.Contains(address, "/0") {
+		return "", 0
+	}
+
+	return network.String(), float64(ones)
+}
+
+// findMBBOverride returns the data-plan override for a SIM slot. Some firmware
+// omits the slot when only one SIM is configured, so a single entry is used as
+// the fallback.
+func findMBBOverride(sims []unifi.MBBSimOverride, slot float64) (unifi.MBBSimOverride, bool) {
+	for _, sim := range sims {
+		if sim.Slot.Val == slot {
+			return sim, true
+		}
+	}
+
+	if len(sims) == 1 {
+		return sims[0], true
+	}
+
+	return unifi.MBBSimOverride{}, false
 }
