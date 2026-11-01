@@ -122,6 +122,12 @@ func TestExportUMBB(t *testing.T) {
 	a.InDelta(0, findMetric(t, r.sent, "unifi_mbb_sim_card_present", noSim).value, 0.001)
 	a.InDelta(1, findMetric(t, r.sent, "unifi_mbb_sim_info",
 		append(noSim, "no-sim", "false", "false", "", "")).value, 0.001)
+	for _, name := range []string{
+		"unifi_mbb_sim_data_limit_enabled", "unifi_mbb_sim_data_soft_limit_bytes",
+		"unifi_mbb_sim_data_warning_threshold_percent", "unifi_mbb_sim_data_used_ratio",
+	} {
+		a.False(hasMetric(t, r.sent, name, noSim), "%s must not apply the slot-2 plan to slot 1", name)
+	}
 
 	esim := append(labels, "2", "true", "EE")
 	a.InDelta(1, findMetric(t, r.sent, "unifi_mbb_sim_active", esim).value, 0.001)
@@ -194,4 +200,16 @@ func findMetric(t *testing.T, sent []*metric, name string, labels []string) reco
 	t.Fatalf("no %s series with labels %q", name, labels)
 
 	return recordedMetric{}
+}
+
+func hasMetric(t *testing.T, sent []*metric, name string, labels []string) bool {
+	t.Helper()
+
+	for _, m := range sent {
+		if prometheusDescName(t, m.Desc) == name && slices.Equal(m.Labels, labels) {
+			return true
+		}
+	}
+
+	return false
 }
