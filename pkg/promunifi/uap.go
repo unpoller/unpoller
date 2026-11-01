@@ -6,6 +6,12 @@ import (
 )
 
 type uap struct {
+	// Uplink (parent) details; RSSI/signal/rates only for wireless (mesh) uplinks.
+	UplinkInfo   *prometheus.Desc
+	UplinkRSSI   *prometheus.Desc
+	UplinkSignal *prometheus.Desc
+	UplinkTxRate *prometheus.Desc
+	UplinkRxRate *prometheus.Desc
 	// Ap Traffic Stats
 	ApWifiTxDropped     *prometheus.Desc
 	ApRxErrors          *prometheus.Desc
@@ -130,7 +136,18 @@ func descUAP(ns string) *uap { // nolint: funlen
 	}
 	nd := prometheus.NewDesc
 
+	labelUI := []string{
+		"type", "uplink_mac", "uplink_name", "uplink_source", "radio", "radio_name", "channel",
+		"site_name", "name", "source", "tag",
+	}
+
 	return &uap{
+		UplinkInfo: nd(ns+"uplink_info", "Uplink (parent device) of an access point; value is always 1",
+			labelUI, nil),
+		UplinkRSSI:   nd(ns+"uplink_rssi", "Wireless (mesh) uplink RSSI", labelL, nil),
+		UplinkSignal: nd(ns+"uplink_signal_dbm", "Wireless (mesh) uplink signal in dBm", labelL, nil),
+		UplinkTxRate: nd(ns+"uplink_transmit_rate_bps", "Wireless (mesh) uplink PHY transmit rate in bps", labelL, nil),
+		UplinkRxRate: nd(ns+"uplink_receive_rate_bps", "Wireless (mesh) uplink PHY receive rate in bps", labelL, nil),
 		// 3x each - stat table: total, guest, user
 		ApWifiTxDropped:     nd(ns+"stat_wifi_transmt_dropped_total", "Wifi Transmissions Dropped", labelA, nil),
 		ApRxErrors:          nd(ns+"stat_receive_errors_total", "Receive Errors", labelA, nil),
@@ -264,6 +281,7 @@ func (u *promUnifi) exportUAP(r report, d *unifi.UAP) {
 			{u.USG.UplinkSpeed, gauge, d.Uplink.Speed, labelUL},
 			{u.USG.UplinkMaxSpeed, gauge, d.Uplink.MaxSpeed, labelUL},
 		})
+		u.exportUAPuplink(r, labels, d)
 	})
 }
 
@@ -458,5 +476,44 @@ func (u *promUnifi) exportLTE(r report, d *unifi.UAP, labels []string) {
 		{u.UAP.LteRxChannel, gauge, d.LteRxChannel, labels},
 		{u.UAP.LteTxChannel, gauge, d.LteTxChannel, labels},
 		{u.UAP.LteInfo, gauge, 1.0, info},
+	})
+}
+
+// exportUAPuplink exports the parent device of an access point and, for
+// wireless (mesh) uplinks, the radio link quality. Speed/MaxSpeed are 0 on
+// wireless uplinks, so RSSI, signal and PHY rates are the useful values.
+func (u *promUnifi) exportUAPuplink(r report, labels []string, d *unifi.UAP) {
+	ul := d.Uplink
+	if ul.Type == "" && ul.UplinkMac == "" {
+		return
+	}
+
+	parent := ul.UplinkMac
+	if parent == "" {
+		parent = ul.ApMac
+	}
+
+	channel := ""
+	if ul.Channel.Val != 0 {
+		channel = ul.Channel.Txt
+	}
+
+	labelUI := append([]string{
+		ul.Type, parent, ul.UplinkDeviceName, ul.UplinkSource, ul.Radio, ul.RadioName, channel,
+	}, labels[1:]...)
+	r.send([]*metric{{u.UAP.UplinkInfo, gauge, 1.0, labelUI}})
+
+	// Right after a mesh (re)association the controller may report a wireless
+	// uplink without radio details; skip it instead of exporting zeros.
+	if ul.Type != "wireless" || ul.Signal.Val == 0 {
+		return
+	}
+
+	labelUL := append([]string{ul.Type}, labels[1:]...)
+	r.send([]*metric{
+		{u.UAP.UplinkRSSI, gauge, ul.Rssi, labelUL},
+		{u.UAP.UplinkSignal, gauge, ul.Signal, labelUL},
+		{u.UAP.UplinkTxRate, gauge, ul.TxRate.Val * 1000, labelUL}, // controller reports kbps
+		{u.UAP.UplinkRxRate, gauge, ul.RxRate.Val * 1000, labelUL},
 	})
 }
