@@ -322,16 +322,17 @@ func mbbPrefix(address string) (string, float64) {
 }
 
 // findMBBOverride returns the data-plan override for a SIM slot. Some firmware
-// omits the slot when only one SIM is configured, so a single entry is used as
-// the fallback.
+// omits the slot when only one SIM is configured, so a single entry without an
+// explicit slot is used as the fallback. An entry with an explicit slot must
+// match, otherwise a slot-2 plan would be emitted for slot 1.
 func findMBBOverride(sims []unifi.MBBSimOverride, slot float64) (unifi.MBBSimOverride, bool) {
 	for _, sim := range sims {
-		if sim.Slot.Val == slot {
+		if sim.Slot.Txt != "" && sim.Slot.Val == slot {
 			return sim, true
 		}
 	}
 
-	if len(sims) == 1 {
+	if len(sims) == 1 && sims[0].Slot.Txt == "" {
 		return sims[0], true
 	}
 
