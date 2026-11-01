@@ -17,6 +17,7 @@ type umbb struct {
 	RsrpNr            *prometheus.Desc
 	RsrqNr            *prometheus.Desc
 	SnrNr             *prometheus.Desc
+	Rssi              *prometheus.Desc
 	SignalBars        *prometheus.Desc
 	SignalPercent     *prometheus.Desc
 	Coverage          *prometheus.Desc
@@ -29,12 +30,16 @@ type umbb struct {
 	SimActive         *prometheus.Desc
 	SimCardPresent    *prometheus.Desc
 	SimPinBlocked     *prometheus.Desc
+	SimPinTries       *prometheus.Desc
+	SimPukTries       *prometheus.Desc
 	SimDataWarning    *prometheus.Desc
 	SimDataLimited    *prometheus.Desc
 	SimRxBytes        *prometheus.Desc
 	SimTxBytes        *prometheus.Desc
 	SimStateSeconds   *prometheus.Desc
 	SimInfo           *prometheus.Desc
+	DefaultApnInfo    *prometheus.Desc
+	DefaultApnValid   *prometheus.Desc
 }
 
 func descUMBB(ns string) *umbb {
@@ -50,6 +55,7 @@ func descUMBB(ns string) *umbb {
 		RsrpNr:   nd(ns+"mbb_nr_rsrp_dbm", "5G NR RSRP in dBm. Same as mbb_rsrp_dbm in 5G SA mode.", labels, nil),
 		RsrqNr:   nd(ns+"mbb_nr_rsrq_db", "5G NR RSRQ in dB. Same as mbb_rsrq_db in 5G SA mode.", labels, nil),
 		SnrNr:    nd(ns+"mbb_nr_snr_db", "5G NR signal-to-noise ratio in dB. Same as mbb_snr_db in 5G SA mode.", labels, nil),
+		Rssi:     nd(ns+"mbb_rssi_dbm", "Cellular RSSI of the serving cell in dBm.", labels, nil),
 		SignalBars: nd(ns+"mbb_signal_bars",
 			"Cellular signal strength in bars, as shown by the controller.", labels, nil),
 		SignalPercent: nd(ns+"mbb_signal_percent",
@@ -70,6 +76,8 @@ func descUMBB(ns string) *umbb {
 		SimActive:      nd(ns+"mbb_sim_active", "SIM slot is the active data SIM (1) or not (0).", labelS, nil),
 		SimCardPresent: nd(ns+"mbb_sim_card_present", "SIM card or eSIM profile is present (1) or not (0).", labelS, nil),
 		SimPinBlocked:  nd(ns+"mbb_sim_pin_blocked", "SIM is PIN blocked (1) or not (0).", labelS, nil),
+		SimPinTries:    nd(ns+"mbb_sim_pin_tries_remaining", "SIM PIN attempts remaining.", labelS, nil),
+		SimPukTries:    nd(ns+"mbb_sim_puk_tries_remaining", "SIM PUK attempts remaining.", labelS, nil),
 		SimDataWarning: nd(ns+"mbb_sim_data_warning", "SIM has passed its data usage warning threshold (1) or not (0).",
 			labelS, nil),
 		SimDataLimited: nd(ns+"mbb_sim_data_limited", "SIM has reached its data limit (1) or not (0).", labelS, nil),
@@ -81,6 +89,11 @@ func descUMBB(ns string) *umbb {
 			labelS, nil),
 		SimInfo: nd(ns+"mbb_sim_info", "SIM state. Always 1; display state and last network reject are labels.",
 			append(labelS, "display_state", "has_carrier", "metered", "network_reject_type", "network_reject_text"), nil),
+		DefaultApnInfo: nd(ns+"mbb_sim_default_apn_info",
+			"Default APN profile. Always 1; APN, PDP and validity details are labels.",
+			append(labelS, "apn", "pdp_type", "auth", "valid", "roaming"), nil),
+		DefaultApnValid: nd(ns+"mbb_sim_default_apn_valid",
+			"Default APN is valid (1) or not (0).", labelS, nil),
 	}
 }
 
@@ -145,6 +158,7 @@ func (u *promUnifi) exportMBB(r report, labels []string, d *unifi.UMBB) {
 		{u.UMBB.RsrpNr, rad.RsrpNr.Txt, rad.RsrpNr.Val, nil},
 		{u.UMBB.RsrqNr, rad.RsrqNr.Txt, rad.RsrqNr.Val, nil},
 		{u.UMBB.SnrNr, rad.SnrNr.Txt, rad.SnrNr.Val, nil},
+		{u.UMBB.Rssi, rad.Rssi.Txt, rad.Rssi.Val, nil},
 		{u.UMBB.SignalBars, rad.Signal.Txt, rad.Signal.Val, nil},
 		{u.UMBB.SignalPercent, rad.SignalPercent.Txt, rad.SignalPercent.Val, nil},
 		{u.UMBB.MaxBitrate, rad.MaxBitrateDl.Txt, rad.MaxBitrateDl.Val, []string{"lte", "dl"}},
@@ -175,6 +189,29 @@ func (u *promUnifi) exportMBB(r report, labels []string, d *unifi.UMBB) {
 			{u.UMBB.SimStateSeconds, gauge, sim.DisplayStateElapsed, simLabels},
 			{u.UMBB.SimInfo, gauge, 1.0, simInfo},
 		})
+
+		if sim.PinTriesRemaining.Txt != "" {
+			r.send([]*metric{{u.UMBB.SimPinTries, gauge, sim.PinTriesRemaining.Val, simLabels}})
+		}
+
+		if sim.PukTriesRemaining.Txt != "" {
+			r.send([]*metric{{u.UMBB.SimPukTries, gauge, sim.PukTriesRemaining.Val, simLabels}})
+		}
+
+		defaultApn := sim.DefaultApn
+		if defaultApn.Apn != "" {
+			valid := 0.0
+			if defaultApn.Valid.Val {
+				valid = 1.0
+			}
+
+			r.send([]*metric{
+				{u.UMBB.DefaultApnInfo, gauge, 1.0, append(append([]string{}, simLabels...),
+					defaultApn.Apn, defaultApn.PdpType, defaultApn.AuthType,
+					strconv.FormatBool(defaultApn.Valid.Val), strconv.FormatBool(defaultApn.Roaming.Val))},
+				{u.UMBB.DefaultApnValid, gauge, valid, simLabels},
+			})
+		}
 	}
 }
 

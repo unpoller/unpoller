@@ -32,6 +32,9 @@ const u5gMaxJSON = `{
 				"metered": false, "pin_blocked": false, "data_warning": true, "data_limited": false,
 				"display_state": "operational", "display_state_elapsed": 5230,
 				"network_reject_type": "wds", "network_reject_text": "Carrier rejected data", "network_reject_age": 45,
+				"default_apn": {"apn": "internet.telekom", "pdp_type": "IPv4v6", "auth_type": "PAP",
+					"valid": true, "roaming": false},
+				"pin_tries_remaining": 3, "puk_tries_remaining": 10,
 				"rxbytes": "3013150278176", "txbytes": "725650860811"
 			}
 		],
@@ -41,7 +44,7 @@ const u5gMaxJSON = `{
 			"mcc": 234, "mnc": 30, "cell_id": 2719245, "pci": 216, "channel": 646080,
 			"max_bitrate_dl": 0, "max_bitrate_ul": 0, "max_bitrate_dl_nr": 640000000, "max_bitrate_ul_nr": 224000000,
 			"rsrp_nr": -96, "rsrq_nr": -13, "snr_nr": 17.600000381469727,
-			"rsrp": -96, "rsrq": -13, "snr": 17.600000381469727, "signal": 3, "signal_percent": 95,
+			"rsrp": -96, "rsrq": -13, "snr": 17.600000381469727, "rssi": -64, "signal": 3, "signal_percent": 95,
 			"ca_lte": [],
 			"ca_nr": [
 				{"band": 78, "dl_arfcn": 637334, "dl_bw_mhz": 40.0, "primary": true, "ul_arfcn": 637334, "ul_bw_mhz": 40.0},
@@ -72,6 +75,7 @@ func TestExportUMBB(t *testing.T) {
 	a.InDelta(-96, findMetric(t, r.sent, "unifi_mbb_rsrp_dbm", labels).value, 0.001)
 	a.InDelta(-13, findMetric(t, r.sent, "unifi_mbb_rsrq_db", labels).value, 0.001)
 	a.InDelta(17.6, findMetric(t, r.sent, "unifi_mbb_snr_db", labels).value, 0.001)
+	a.InDelta(-64, findMetric(t, r.sent, "unifi_mbb_rssi_dbm", labels).value, 0.001)
 	a.InDelta(3, findMetric(t, r.sent, "unifi_mbb_signal_bars", labels).value, 0.001)
 	a.InDelta(95, findMetric(t, r.sent, "unifi_mbb_signal_percent", labels).value, 0.001)
 	a.InDelta(1, findMetric(t, r.sent, "unifi_mbb_coverage", labels).value, 0.001)
@@ -108,6 +112,11 @@ func TestExportUMBB(t *testing.T) {
 	a.InDelta(0, findMetric(t, r.sent, "unifi_mbb_sim_data_limited", esim).value, 0.001)
 	a.InDelta(1, findMetric(t, r.sent, "unifi_mbb_sim_info",
 		append(esim, "operational", "true", "false", "wds", "Carrier rejected data")).value, 0.001)
+	a.InDelta(3, findMetric(t, r.sent, "unifi_mbb_sim_pin_tries_remaining", esim).value, 0.001)
+	a.InDelta(10, findMetric(t, r.sent, "unifi_mbb_sim_puk_tries_remaining", esim).value, 0.001)
+	a.InDelta(1, findMetric(t, r.sent, "unifi_mbb_sim_default_apn_valid", esim).value, 0.001)
+	a.InDelta(1, findMetric(t, r.sent, "unifi_mbb_sim_default_apn_info",
+		append(esim, "internet.telekom", "IPv4v6", "PAP", "true", "false")).value, 0.001)
 }
 
 func TestExportUMBBMissingSignalIsSkipped(t *testing.T) {
