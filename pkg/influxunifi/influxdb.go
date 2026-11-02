@@ -275,6 +275,7 @@ func (u *InfluxUnifi) Run(c poller.Collect) error {
 
 	fake := *u.Config
 	fake.Pass = strconv.FormatBool(fake.Pass != "")
+	fake.AuthToken = strconv.FormatBool(fake.AuthToken != "")
 
 	webserver.UpdateOutput(&webserver.Output{Name: PluginName, Config: fake})
 	u.PollController()
