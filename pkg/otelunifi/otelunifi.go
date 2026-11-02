@@ -5,6 +5,7 @@ package otelunifi
 import (
 	"context"
 	"fmt"
+	"strconv"
 	"time"
 
 	"go.opentelemetry.io/otel"
@@ -146,7 +147,10 @@ func (u *OtelOutput) Run(c poller.Collect) error {
 		}
 	}()
 
-	webserver.UpdateOutput(&webserver.Output{Name: PluginName, Config: u.Config})
+	fake := *u.Config
+	fake.APIKey = strconv.FormatBool(fake.APIKey != "")
+
+	webserver.UpdateOutput(&webserver.Output{Name: PluginName, Config: fake})
 	u.pollController()
 
 	return nil
