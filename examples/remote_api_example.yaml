@@ -29,6 +29,7 @@ unifi:
     save_traffic: true
     save_rogue: true
     save_speedtest: true
+    skip_device_tags: false
     save_syslog: true
     save_protect_logs: false
     # Remote API requires SSL verification

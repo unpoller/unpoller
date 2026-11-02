@@ -258,6 +258,13 @@
   ## your controller misbehaves on it or you simply don't want the metrics.
   save_speedtest = true
 
+  ## Skip the device-tags request that fills in each device's tags (exported as
+  ## labels on the device metrics). Off by default. Turn it on if you don't use
+  ## tags: on UniFi OS consoles every call to that endpoint leaves an HTTP/2 stream
+  ## open inside unifi-core, which slowly exhausts the console's memory
+  ## (https://github.com/unpoller/unpoller/issues/1119).
+  skip_device_tags = false
+
   # If your UniFi controller has a valid SSL certificate (like lets encrypt),
   # you can enable this option to validate it. Otherwise, any SSL certificate is
   # valid. If you don't know if you have a valid SSL cert, then you don't have one.
@@ -297,6 +304,7 @@
 #  save_traffic = false
 #  save_rogue  = false
 #  save_speedtest = true
+#  skip_device_tags = false
 #  verify_ssl  = false
 #  ssl_cert_paths = []
 

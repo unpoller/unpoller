@@ -221,6 +221,7 @@ func (u *InputUnifi) logController(c *Controller) {
 	u.Logf("   => Save Rogue APs: %v", *c.SaveRogue)
 	u.Logf("   => Save Traffic %v", *c.SaveTraffic)
 	u.Logf("   => Save Speed Tests: %v", *c.SaveSpeedTest)
+	u.Logf("   => Skip Device Tags: %v", *c.SkipDeviceTags)
 }
 
 // warnProtectOnly reports a disable_network controller that can never collect anything.
