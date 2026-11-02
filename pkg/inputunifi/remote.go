@@ -160,6 +160,10 @@ func (u *InputUnifi) discoverRemoteControllers(apiKey string) ([]*Controller, er
 			controller.SaveSpeedTest = &t
 		}
 
+		if controller.SkipDeviceTags == nil {
+			controller.SkipDeviceTags = &f
+		}
+
 		if controller.SaveSyslog == nil {
 			controller.SaveSyslog = &f
 		}

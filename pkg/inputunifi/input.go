@@ -52,6 +52,7 @@ type Controller struct {
 	SaveTraffic             *bool         `json:"save_traffic"               toml:"save_traffic"               xml:"save_traffic"               yaml:"save_traffic"`
 	SaveRogue               *bool         `json:"save_rogue"                 toml:"save_rogue"                 xml:"save_rogue"                 yaml:"save_rogue"`
 	SaveSpeedTest           *bool         `json:"save_speedtest"             toml:"save_speedtest"             xml:"save_speedtest"             yaml:"save_speedtest"`
+	SkipDeviceTags          *bool         `json:"skip_device_tags"           toml:"skip_device_tags"           xml:"skip_device_tags"           yaml:"skip_device_tags"`
 	HashPII                 *bool         `json:"hash_pii"                   toml:"hash_pii"                   xml:"hash_pii"                   yaml:"hash_pii"`
 	DropPII                 *bool         `json:"drop_pii"                   toml:"drop_pii"                   xml:"drop_pii"                   yaml:"drop_pii"`
 	SaveSites               *bool         `json:"save_sites"                 toml:"save_sites"                 xml:"save_sites"                 yaml:"save_sites"`
@@ -186,6 +187,12 @@ func (u *InputUnifi) getUnifi(c *Controller) error {
 		ErrorLog:      u.LogErrorf,
 		DebugLog:      u.LogDebugf,
 	}
+
+	// Opt-in: leave each device's Tags empty instead of asking the controller for them.
+	// On UniFi OS consoles every device-tags request leaves an HTTP/2 stream open in
+	// unifi-core, so a poller that makes it on every cycle slowly exhausts the console's
+	// memory (unpoller/unpoller#1119). Nothing else is lost when the tags are not used.
+	cfg.SkipDeviceTags = *c.SkipDeviceTags
 
 	// Nothing on a Protect-only console uses a session unless Protect logs are wanted: the
 	// Integration API authenticates with the key alone. Withholding the credentials here
@@ -347,6 +354,13 @@ func (u *InputUnifi) setDefaults(c *Controller) { //nolint:cyclop
 		c.SaveSpeedTest = &t
 	}
 
+	// Defaults to false: device tags have always been fetched and the outputs use them
+	// as labels. Opt in to skip the device-tags request when the tags are not needed
+	// (unpoller/unpoller#1119).
+	if c.SkipDeviceTags == nil {
+		c.SkipDeviceTags = &f
+	}
+
 	if c.SaveIDs == nil {
 		c.SaveIDs = &f
 	}
@@ -479,6 +493,10 @@ func (u *InputUnifi) setControllerDefaults(c *Controller) *Controller { //nolint
 
 	if c.SaveSpeedTest == nil {
 		c.SaveSpeedTest = u.Default.SaveSpeedTest
+	}
+
+	if c.SkipDeviceTags == nil {
+		c.SkipDeviceTags = u.Default.SkipDeviceTags
 	}
 
 	if c.SaveEvents == nil {
