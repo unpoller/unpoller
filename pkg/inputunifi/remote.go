@@ -111,9 +111,10 @@ func (u *InputUnifi) discoverRemoteControllers(apiKey string) ([]*Controller, er
 		t := true
 		f := false
 
-		if controller.VerifySSL == nil {
-			controller.VerifySSL = &t // Remote API should verify SSL
-		}
+		// setControllerDefaults copied verify_ssl from the defaults, which is false
+		// unless set. api.ui.com has a public certificate, so always verify it.
+		controller.VerifySSL = &t
+
 		// Ensure all boolean pointers are set (safety check)
 		if controller.HashPII == nil {
 			controller.HashPII = &f
