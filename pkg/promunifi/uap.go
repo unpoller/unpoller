@@ -105,6 +105,7 @@ type rogueap struct {
 	RSSI       *prometheus.Desc
 	RSSIAge    *prometheus.Desc
 	Signal     *prometheus.Desc
+	LastSeen   *prometheus.Desc
 }
 
 func descRogueAP(ns string) *rogueap {
@@ -122,6 +123,7 @@ func descRogueAP(ns string) *rogueap {
 		RSSI:       prometheus.NewDesc(ns+"rssi", "RogueAP RSSI", label, nil),
 		RSSIAge:    prometheus.NewDesc(ns+"rssi_age", "RogueAP RSSI Age", label, nil),
 		Signal:     prometheus.NewDesc(ns+"signal", "RogueAP Signal", label, nil),
+		LastSeen:   prometheus.NewDesc(ns+"last_seen", "RogueAP Last Seen (Unix timestamp)", label, nil),
 	}
 }
 
@@ -246,6 +248,7 @@ func (u *promUnifi) exportRogueAP(r report, d *unifi.RogueAP) {
 		{u.RogueAP.RSSI, gauge, d.Rssi.Val, labels},
 		{u.RogueAP.RSSIAge, gauge, d.RssiAge.Val, labels},
 		{u.RogueAP.Signal, gauge, d.Signal.Val, labels},
+		{u.RogueAP.LastSeen, gauge, d.LastSeen.Val, labels},
 	})
 }
 
