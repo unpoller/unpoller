@@ -340,8 +340,8 @@ func (u *promUnifi) exportPDUOutletTable(r report, labels []string, ot []unifi.O
 		}
 
 		r.send([]*metric{
-			{u.PDU.CycleEnabled, counter, o.CycleEnabled, labelOutlet},
-			{u.PDU.RelayState, counter, o.RelayState, labelOutlet},
+			{u.PDU.CycleEnabled, gauge, o.CycleEnabled.Val, labelOutlet},
+			{u.PDU.RelayState, gauge, o.RelayState.Val, labelOutlet},
 			{u.PDU.OutletCaps, counter, o.OutletCaps, labelOutlet},
 			{u.PDU.OutletCurrent, gauge, o.OutletCurrent, labelOutlet},
 			{u.PDU.OutletPower, counter, o.OutletPower, labelOutlet},
@@ -359,8 +359,8 @@ func (u *promUnifi) exportPDUOutletTable(r report, labels []string, ot []unifi.O
 		}
 
 		r.send([]*metric{
-			{u.PDU.CycleEnabled, counter, o.CycleEnabled, labelOutlet},
-			{u.PDU.RelayState, counter, o.RelayState, labelOutlet},
+			{u.PDU.CycleEnabled, gauge, o.CycleEnabled.Val, labelOutlet},
+			{u.PDU.RelayState, gauge, o.RelayState.Val, labelOutlet},
 		})
 	}
 }
