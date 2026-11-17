@@ -75,7 +75,7 @@ func (u *UnifiPoller) Start() error {
 func (f *Flags) Parse(args []string) {
 	f.FlagSet = pflag.NewFlagSet(AppName, pflag.ExitOnError)
 	f.Usage = func() {
-		fmt.Printf("Usage: %s [--config=/path/to/up.conf] [--version]", AppName)
+		fmt.Printf("Usage: %s [--config=/path/to/up.conf] [--version]\n", AppName)
 		f.PrintDefaults()
 	}
 
