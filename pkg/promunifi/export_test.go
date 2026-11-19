@@ -23,4 +23,8 @@ func (c *consoleTestCollector) Describe(ch chan<- *prometheus.Desc) {
 	ch <- c.Console.Info
 
 	ch <- c.Console.UpdateAvailable
+
+	ch <- c.Console.ApplicationInfo
+
+	ch <- c.Console.ApplicationUpdateAvailable
 }

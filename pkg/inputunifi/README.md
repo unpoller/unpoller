@@ -18,7 +18,7 @@ This endpoint is a private UniFi OS API. Older controllers, restricted accounts,
 and firmware versions may not expose it. Failures are logged at debug level and
 do not stop other metrics from being collected. API-key authentication, remote
 controllers, and Protect-only configurations are not polled for this data.
-Network application updates are not included in this initial support.
+Application versions and update offers come from `apps.controllers[]` in the same response.
 
 See the [Prometheus console metrics](../promunifi/README.md#unifi-os-updates).
 

@@ -28,8 +28,20 @@ other controller metrics continue to be collected.
 
 For an update alert, use `unpoller_console_update_available == 1`. Treat an absent
 series separately from `0`, and check `unpoller_prometheus_cache_age_seconds`
-when using the scrape cache. API-key, remote, Protect-only, and application-update
-collection are outside this initial scope.
+when using the scrape cache. The console system request requires local session
+authentication and Network collection enabled.
+
+## Console application updates
+
+The same response lists console applications in `apps.controllers[]`.
+`unpoller_console_application_info` reports one series per named application with
+`source`, `application`, `version`, and `available_version` labels. An empty
+`available_version` means the console supplied no offered version.
+
+Use `unpoller_console_application_update_available{application="network"} == 1`
+to alert when the console offers a Network update. The gauge carries only
+`source` and `application` and is omitted when the offered version is empty or
+the application data is unavailable.
 
 ## Scrape cache
 

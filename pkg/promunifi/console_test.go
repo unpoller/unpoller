@@ -83,3 +83,32 @@ func TestConsolePartialResponseOmitsFirmwareMetrics(t *testing.T) {
 		assert.Zero(t, count, "a partial response without firmware entries has no console metrics")
 	}
 }
+
+func TestConsoleApplicationUpdateMetrics(t *testing.T) {
+	t.Parallel()
+
+	m := &poller.Metrics{ConsoleSystems: []any{
+		consoleSystem(t, "test", `{"devices":{"unifiOS":[{"name":"console","firmwareStatus":"upToDate"}]},
+            "apps":{"controllers":[null,{},{"name":"network","version":"1.0","updateAvailable":"1.1"},
+            {"name":"protect","version":"2.0","updateAvailable":null}]}}`),
+	}}
+	registry := prometheus.NewPedanticRegistry()
+	require.NoError(t, registry.Register(promunifi.NewConsoleCollectorForTest(m)))
+	require.NoError(t, testutil.GatherAndCompare(registry, strings.NewReader(`
+# HELP unpoller_console_application_info UniFi console application versions (always 1)
+# TYPE unpoller_console_application_info gauge
+unpoller_console_application_info{application="network",available_version="1.1",source="test",version="1.0"} 1
+unpoller_console_application_info{application="protect",available_version="",source="test",version="2.0"} 1
+# HELP unpoller_console_application_update_available UniFi console application update offered (1); omitted without an offered version
+# TYPE unpoller_console_application_update_available gauge
+unpoller_console_application_update_available{application="network",source="test"} 1
+# HELP unpoller_console_update_available UniFi OS update available (1/0); omitted when unknown
+# TYPE unpoller_console_update_available gauge
+unpoller_console_update_available{name="console",source="test"} 0
+`), "unpoller_console_application_info", "unpoller_console_application_update_available", "unpoller_console_update_available"))
+
+	m.ConsoleSystems = []any{consoleSystem(t, "test", `{"apps":{"controllers":[{"name":"network","version":"1.1"}]}}`)}
+	count, err := testutil.GatherAndCount(registry, "unpoller_console_application_update_available")
+	require.NoError(t, err)
+	assert.Zero(t, count, "a fresh scrape must clear the previous offer")
+}
