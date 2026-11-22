@@ -3,6 +3,7 @@ package promunifi
 
 import (
 	"fmt"
+	"log/slog"
 	"net"
 	"net/http"
 	"reflect"
@@ -16,6 +17,7 @@ import (
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	promver "github.com/prometheus/common/version"
+	"github.com/prometheus/exporter-toolkit/web"
 	"github.com/unpoller/unifi/v6"
 	"github.com/unpoller/unpoller/pkg/poller"
 	"github.com/unpoller/unpoller/pkg/webserver"
@@ -155,6 +157,11 @@ type Config struct {
 	// If these are provided, the app will attempt to listen with an SSL connection.
 	SSLCrtPath string `json:"ssl_cert_path" toml:"ssl_cert_path" xml:"ssl_cert_path" yaml:"ssl_cert_path"`
 	SSLKeyPath string `json:"ssl_key_path"  toml:"ssl_key_path"  xml:"ssl_key_path"  yaml:"ssl_key_path"`
+	// WebConfigFile is the path to a Prometheus exporter-toolkit web configuration file
+	// (https://github.com/prometheus/exporter-toolkit/blob/master/docs/web-configuration.md).
+	// It enables TLS, client certificate verification (mTLS) and basic auth on the
+	// listener. When set, ssl_cert_path and ssl_key_path are ignored.
+	WebConfigFile string `json:"web_config_file" toml:"web_config_file" xml:"web_config_file" yaml:"web_config_file"`
 	// Buffer is a channel buffer.
 	// Default is probably 50. Seems fast there; try 1 to see if CPU usage goes down?
 	Buffer int `json:"buffer" toml:"buffer" xml:"buffer" yaml:"buffer"`
@@ -386,6 +393,20 @@ func (u *promUnifi) Run(c poller.Collect) error {
 	))
 	mux.HandleFunc("/scrape", u.ScrapeHandler)
 	mux.HandleFunc("/", u.DefaultHandler)
+
+	if u.WebConfigFile != "" {
+		u.Logf("Prometheus exported at %s/ with web config %s - namespace: %s", u.HTTPListen, u.WebConfigFile, u.Namespace)
+
+		listenAddresses := []string{u.HTTPListen}
+		systemdSocket := false
+		server := &http.Server{Handler: mux, ReadHeaderTimeout: 10 * time.Second}
+
+		return web.ListenAndServe(server, &web.FlagConfig{
+			WebListenAddresses: &listenAddresses,
+			WebSystemdSocket:   &systemdSocket,
+			WebConfigFile:      &u.WebConfigFile,
+		}, slog.Default())
+	}
 
 	switch u.SSLKeyPath == "" && u.SSLCrtPath == "" {
 	case true:
