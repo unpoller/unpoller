@@ -19,6 +19,8 @@ prometheus:
   http_listen:   "0.0.0.0:9130"
   ssl_cert_path: ""
   ssl_key_path:  ""
+  # exporter-toolkit web config (TLS, client certificates, basic auth); overrides ssl_cert_path/ssl_key_path.
+  web_config_file: ""
   report_errors: false
   # Cache refresh. Omitted: 60s. 0 / "0s" disables the cache (live /metrics).
   # Values below 15s warn but are not clamped. Env: UP_PROMETHEUS_INTERVAL.

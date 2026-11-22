@@ -11,6 +11,7 @@
     "http_listen":   "0.0.0.0:9130",
     "ssl_cert_path": "",
     "ssl_key_path":  "",
+    "web_config_file": "",
     "report_errors": false,
     "interval":      "60s"
   },
