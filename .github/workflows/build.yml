@@ -12,6 +12,8 @@ concurrency:
 
 jobs:
   test:
+    # matrix.go only keeps the required check name "test (stable, <os>)".
+    # The compiler version comes from go.mod.
     strategy:
       matrix:
         go: ["stable"]
@@ -23,7 +25,7 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@v7
         with:
-          go-version: ${{ matrix.go }}
+          go-version-file: go.mod
 
       - name: Build
         run: go build -v ./...
@@ -31,6 +33,8 @@ jobs:
       - name: Test
         run: go test -v ./...
   lint:
+    # matrix.go only keeps the required check name "lint (stable, ubuntu-latest)".
+    # The compiler version comes from go.mod.
     strategy:
       matrix:
         go: ["stable"]
@@ -42,12 +46,12 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@v7
         with:
-          go-version: ${{ matrix.go }}
+          go-version-file: go.mod
           cache: false
       - name: golangci-lint
         uses: golangci/golangci-lint-action@v9
         with:
-          # Required: the version of golangci-lint is required and must be specified without patch version: we always use the latest patch version.
-          # v2.15 reads the export data of Go 1.27.2; v2.13 fails every typecheck on it.
+          # Pin the minor. The action installs the latest patch of that minor.
+          # v2.13 cannot type-check Go 1.27 export data, so stay on a current v2.
           version: v2.15
           skip-cache: true
