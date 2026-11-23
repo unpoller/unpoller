@@ -1,0 +1,79 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": [
+    "config:recommended",
+    "default:automergeDigest",
+    "helpers:pinGitHubActionDigestsToSemver"
+  ],
+  "minimumReleaseAge": "7 days",
+  "internalChecksFilter": "strict",
+  "customManagers": [
+    {
+      "customType": "regex",
+      "description": "golangci-lint is pinned to a minor so the action can float the patch",
+      "managerFilePatterns": ["/^\\.github/workflows/build\\.yml$/"],
+      "matchStrings": [
+        "golangci-lint-action@v\\d+\\n(?:.*\\n)*?[ \\t]+version:[ \\t]+v(?<currentValue>\\d+\\.\\d+)\\n"
+      ],
+      "depNameTemplate": "golangci-lint",
+      "packageNameTemplate": "golangci/golangci-lint",
+      "datasourceTemplate": "github-releases",
+      "extractVersionTemplate": "^v?(?<version>\\d+\\.\\d+)\\.\\d+$",
+      "versioningTemplate": "regex:^(?<major>\\d+)\\.(?<minor>\\d+)$"
+    }
+  ],
+  "packageRules": [
+    {
+      "description": "Example stacks and the endpoint-discovery helper are not shipped dependencies",
+      "matchFileNames": [
+        "init/docker/**",
+        "init/synology-docker-compose/**",
+        "examples/k8s_unifi_poller.yaml",
+        "examples/k8s_influx.yaml",
+        "tools/endpoint-discovery/requirements.txt"
+      ],
+      "enabled": false
+    },
+    {
+      "description": "Pin Dockerfile base image digests. Debian is part of the distroless image name (static-debian13), so a later Debian does not arrive as a version bump.",
+      "matchManagers": ["dockerfile"],
+      "pinDigests": true
+    },
+    {
+      "description": "Automerge Dockerfile digest and non-major updates when checks pass",
+      "matchManagers": ["dockerfile"],
+      "matchUpdateTypes": ["minor", "patch", "pin", "digest"],
+      "automerge": true
+    },
+    {
+      "description": "Automerge Go toolchain updates, including majors, when checks pass",
+      "matchManagers": ["gomod"],
+      "matchDepNames": ["go"],
+      "matchDepTypes": ["golang", "toolchain"],
+      "rangeStrategy": "bump",
+      "automerge": true
+    },
+    {
+      "description": "Automerge non-major Go module updates when checks pass",
+      "matchManagers": ["gomod"],
+      "matchUpdateTypes": ["minor", "patch", "pin", "digest"],
+      "automerge": true
+    },
+    {
+      "description": "Automerge GitHub Actions updates, including majors, when checks pass",
+      "matchManagers": ["github-actions"],
+      "automerge": true
+    },
+    {
+      "description": "Ignore golangci-lint pre-releases",
+      "matchPackageNames": ["golangci/golangci-lint", "golangci-lint"],
+      "ignoreUnstable": true
+    },
+    {
+      "description": "Automerge golangci-lint v2 minor bumps when lint passes. Leave a v3 PR open.",
+      "matchPackageNames": ["golangci/golangci-lint", "golangci-lint"],
+      "matchUpdateTypes": ["minor", "patch"],
+      "automerge": true
+    }
+  ]
+}

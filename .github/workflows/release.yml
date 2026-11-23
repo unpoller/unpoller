@@ -77,7 +77,7 @@ jobs:
         run: gem install package_cloud
       - uses: actions/setup-go@v7
         with:
-          go-version: 'stable'
+          go-version-file: go.mod
           cache: true
       # More assembly might be required: Docker logins, GPG, etc. It all depends
       # on your needs.
