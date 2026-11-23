@@ -7,21 +7,6 @@
   ],
   "minimumReleaseAge": "7 days",
   "internalChecksFilter": "strict",
-  "customManagers": [
-    {
-      "customType": "regex",
-      "description": "golangci-lint is pinned to a minor so the action can float the patch",
-      "managerFilePatterns": ["/^\\.github/workflows/build\\.yml$/"],
-      "matchStrings": [
-        "golangci-lint-action@v\\d+\\n(?:.*\\n)*?[ \\t]+version:[ \\t]+v(?<currentValue>\\d+\\.\\d+)\\n"
-      ],
-      "depNameTemplate": "golangci-lint",
-      "packageNameTemplate": "golangci/golangci-lint",
-      "datasourceTemplate": "github-releases",
-      "extractVersionTemplate": "^v?(?<version>\\d+\\.\\d+)\\.\\d+$",
-      "versioningTemplate": "regex:^(?<major>\\d+)\\.(?<minor>\\d+)$"
-    }
-  ],
   "packageRules": [
     {
       "description": "Example stacks and the endpoint-discovery helper are not shipped dependencies",
@@ -60,20 +45,30 @@
       "automerge": true
     },
     {
-      "description": "Automerge GitHub Actions updates, including majors, when checks pass",
+      "description": "Automerge GitHub Actions and reusable workflow references, including majors, when checks pass. Action inputs such as the golangci-lint version are separate dependencies.",
       "matchManagers": ["github-actions"],
+      "matchDepTypes": ["action", "workflow"],
       "automerge": true
     },
     {
-      "description": "Ignore golangci-lint pre-releases",
-      "matchPackageNames": ["golangci/golangci-lint", "golangci-lint"],
+      "description": "Ignore golangci-lint pre-releases. Renovate reads the action's version input itself.",
+      "matchManagers": ["github-actions"],
+      "matchPackageNames": ["golangci/golangci-lint"],
       "ignoreUnstable": true
     },
     {
       "description": "Automerge golangci-lint v2 minor bumps when lint passes. Leave a v3 PR open.",
-      "matchPackageNames": ["golangci/golangci-lint", "golangci-lint"],
-      "matchUpdateTypes": ["minor", "patch"],
+      "matchManagers": ["github-actions"],
+      "matchPackageNames": ["golangci/golangci-lint"],
+      "matchUpdateTypes": ["minor", "patch", "pin", "digest"],
       "automerge": true
+    },
+    {
+      "description": "package_cloud publishes on Ruby 4.0. The release workflow does not run on pull requests, so review Ruby version updates.",
+      "matchManagers": ["github-actions"],
+      "matchPackageNames": ["ruby"],
+      "matchDepTypes": ["uses-with"],
+      "automerge": false
     }
   ]
 }

@@ -71,7 +71,8 @@ jobs:
       - name: "Setup Ruby for packagecloud uploads"
         uses: ruby/setup-ruby@v1
         with:
-          ruby-version: '2.7'
+          # package_cloud 0.3.15 runs on current Ruby. 4.0 installs the latest 4.0 patch.
+          ruby-version: '4.0'
           bundler-cache: true # runs 'bundle install' and caches installed gems automatically
       - name: "Install packagecloud gem"
         run: gem install package_cloud
