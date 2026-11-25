@@ -127,12 +127,17 @@ func (u *promUnifi) exportUDM(r report, d *unifi.UDM) {
 		}
 	})
 
-	// Wireless Data - UDM (non-pro) only
-	if d.Stat.Ap != nil && d.VapTable != nil {
+	// Wireless Data - UDM with built-in WiFi (UDR7 and similar). On UniFi Network 11 the controller no longer sends
+	// stat.ap, but the radio and VAP tables are still top-level fields, so gate on those tables. stat.ap counters
+	// are exported only when present. Before, the whole block was skipped without stat.ap, so WiFi series stopped
+	// at the Network 11 upgrade (unpoller issue 1155).
+	if d.VapTable != nil && d.RadioTable != nil && d.RadioTableStats != nil {
 		u.exportWithTags(r, d.Tags, func(tagLabels []string) {
 			tag := tagLabels[0]
 			labels := append(baseLabels, tag)
-			u.exportUAPstats(r, labels, d.Stat.Ap, d.BytesD, d.TxBytesD, d.RxBytesD, d.BytesR)
+			if d.Stat.Ap != nil {
+				u.exportUAPstats(r, labels, d.Stat.Ap, d.BytesD, d.TxBytesD, d.RxBytesD, d.BytesR)
+			}
 			u.exportVAPtable(r, labels, *d.VapTable, d.Mac)
 			u.exportRADtable(r, labels, *d.RadioTable, *d.RadioTableStats, d.Mac)
 		})
